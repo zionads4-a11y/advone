@@ -275,6 +275,9 @@ export default function Kanban() {
                         setSelectedLead({ ...lead, status: "new", whatsapp: null, assigned_to: null });
                         setDrawerOpen(true);
                       }}
+                      onValueUpdate={(leadId, newValue) => {
+                        setLeads((prev) => prev.map((l) => l.id === leadId ? { ...l, value: newValue } : l));
+                      }}
                     />
                   ))}
                 </DroppableColumn>
