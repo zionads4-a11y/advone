@@ -9,6 +9,7 @@ import { Phone, Mail, DollarSign, Filter } from "lucide-react";
 import { toast } from "sonner";
 import { KanbanColumnSettings, type KanbanColumn } from "@/components/kanban/KanbanColumnSettings";
 import { SourceBadge } from "@/components/leads/SourceBadge";
+import { LeadDetailDrawer } from "@/components/leads/LeadDetailDrawer";
 
 interface Lead {
   id: string;
@@ -45,6 +46,8 @@ export default function Kanban() {
   const [kanbanColumns, setKanbanColumns] = useState<KanbanColumn[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [filterSource, setFilterSource] = useState<string>("all");
+  const [selectedLead, setSelectedLead] = useState<any>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
     if (!companiesLoading) {
@@ -218,7 +221,14 @@ export default function Kanban() {
 
                 <div className="space-y-2">
                   {allLeads.map((lead) => (
-                    <Card key={lead.id} className="glass-card cursor-pointer transition-all hover:border-primary/30 hover:shadow-md">
+                    <Card
+                      key={lead.id}
+                      className="glass-card cursor-pointer transition-all hover:border-primary/30 hover:shadow-md"
+                      onClick={() => {
+                        setSelectedLead({ ...lead, status: "new", whatsapp: null, assigned_to: null });
+                        setDrawerOpen(true);
+                      }}
+                    >
                       <CardContent className="p-3">
                         <div className="mb-2 flex items-start justify-between">
                           <p className="text-sm font-medium text-foreground">{lead.name}</p>
@@ -244,24 +254,26 @@ export default function Kanban() {
                           )}
                         </div>
 
-                        <Select
-                          value={lead.kanban_column_id || ""}
-                          onValueChange={(val) => moveLeadToColumn(lead.id, val)}
-                        >
-                          <SelectTrigger className="h-7 text-xs">
-                            <SelectValue placeholder="Mover para..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {activeColumns.sort((a, b) => a.position - b.position).map((c) => (
-                              <SelectItem key={c.id} value={c.id}>
-                                <div className="flex items-center gap-2">
-                                  <div className="h-2 w-2 rounded-full" style={{ backgroundColor: c.color }} />
-                                  {c.name}
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <Select
+                            value={lead.kanban_column_id || ""}
+                            onValueChange={(val) => moveLeadToColumn(lead.id, val)}
+                          >
+                            <SelectTrigger className="h-7 text-xs">
+                              <SelectValue placeholder="Mover para..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {activeColumns.sort((a, b) => a.position - b.position).map((c) => (
+                                <SelectItem key={c.id} value={c.id}>
+                                  <div className="flex items-center gap-2">
+                                    <div className="h-2 w-2 rounded-full" style={{ backgroundColor: c.color }} />
+                                    {c.name}
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </CardContent>
                     </Card>
                   ))}
@@ -277,6 +289,13 @@ export default function Kanban() {
           })}
         </div>
       )}
+
+      <LeadDetailDrawer
+        lead={selectedLead}
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        onLeadUpdate={fetchColumnsAndLeads}
+      />
     </div>
   );
 }
