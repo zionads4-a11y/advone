@@ -2,3 +2,6 @@ project_id = "oonteavjxzkovrzktnie"
 
 [functions.create-client-user]
 verify_jwt = false
+
+[functions.zapi-webhook]
+verify_jwt = false
