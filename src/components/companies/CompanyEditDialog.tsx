@@ -57,7 +57,7 @@ export function CompanyEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card text-foreground dark">
+      <DialogContent className="bg-card text-foreground">
         <DialogHeader>
           <DialogTitle className="font-display">Editar Empresa</DialogTitle>
         </DialogHeader>
@@ -90,7 +90,7 @@ export function CompanyEditDialog({
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent className="bg-card text-foreground dark">
+              <AlertDialogContent className="bg-card text-foreground">
                 <AlertDialogHeader>
                   <AlertDialogTitle>Excluir empresa?</AlertDialogTitle>
                   <AlertDialogDescription>

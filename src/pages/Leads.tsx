@@ -132,7 +132,7 @@ export default function Leads() {
               <Plus className="mr-2 h-4 w-4" /> Novo Lead
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-h-[90vh] overflow-y-auto bg-card text-foreground dark">
+          <DialogContent className="max-h-[90vh] overflow-y-auto bg-card text-foreground">
             <DialogHeader>
               <DialogTitle className="font-display">Adicionar Lead</DialogTitle>
             </DialogHeader>

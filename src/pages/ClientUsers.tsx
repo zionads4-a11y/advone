@@ -126,7 +126,7 @@ export default function ClientUsers() {
               <UserPlus className="mr-2 h-4 w-4" /> Novo Cliente
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-card text-foreground dark">
+          <DialogContent className="bg-card text-foreground">
             <DialogHeader>
               <DialogTitle className="font-display">Criar Acesso para Cliente</DialogTitle>
             </DialogHeader>

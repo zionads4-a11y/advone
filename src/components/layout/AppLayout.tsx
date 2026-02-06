@@ -18,7 +18,7 @@ export default function AppLayout() {
   if (!user) return <Navigate to="/auth" replace />;
 
   return (
-    <div className="dark">
+    <div>
       <SidebarProvider>
         <div className="flex min-h-screen w-full">
           <AppSidebar />

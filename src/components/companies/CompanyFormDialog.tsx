@@ -24,7 +24,7 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
           <Plus className="mr-2 h-4 w-4" /> Nova Empresa
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-card text-foreground dark">
+      <DialogContent className="bg-card text-foreground">
         <DialogHeader>
           <DialogTitle className="font-display">Adicionar Empresa</DialogTitle>
         </DialogHeader>
