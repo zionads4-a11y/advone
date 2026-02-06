@@ -2,8 +2,24 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 
+function getHomeRoute(role: string | null) {
+  switch (role) {
+    case "admin":
+    case "member":
+      return "/companies";
+    case "gerente":
+      return "/dashboard";
+    case "operador":
+      return "/kanban";
+    case "client":
+      return "/dashboard";
+    default:
+      return "/dashboard";
+  }
+}
+
 const Index = () => {
-  const { user, loading } = useAuth();
+  const { user, loading, userRole } = useAuth();
 
   if (loading) {
     return (
@@ -13,7 +29,7 @@ const Index = () => {
     );
   }
 
-  if (user) return <Navigate to="/dashboard" replace />;
+  if (user) return <Navigate to={getHomeRoute(userRole)} replace />;
   return <Navigate to="/auth" replace />;
 };
 
