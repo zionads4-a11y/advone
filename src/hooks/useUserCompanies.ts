@@ -11,7 +11,7 @@ export function useUserCompanies() {
   const [companyIds, setCompanyIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const isClient = userRole === "client";
+  const isClient = userRole === "client" || userRole === "gerente" || userRole === "operador";
 
   useEffect(() => {
     if (!user) {
