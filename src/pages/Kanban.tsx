@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Phone, Mail, DollarSign } from "lucide-react";
 import { toast } from "sonner";
 import { KanbanColumnSettings, type KanbanColumn } from "@/components/kanban/KanbanColumnSettings";
+import { SourceBadge } from "@/components/leads/SourceBadge";
 
 interface Lead {
   id: string;
@@ -203,11 +204,7 @@ export default function Kanban() {
                       <CardContent className="p-3">
                         <div className="mb-2 flex items-start justify-between">
                           <p className="text-sm font-medium text-foreground">{lead.name}</p>
-                          {lead.source && (
-                            <Badge variant="outline" className="text-[10px] border-border text-muted-foreground">
-                              {lead.source === "google" ? "Google" : "Meta"}
-                            </Badge>
-                          )}
+                          <SourceBadge source={lead.source} />
                         </div>
 
                         <div className="mb-3 space-y-1">
