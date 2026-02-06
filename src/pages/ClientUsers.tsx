@@ -7,9 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { UserPlus, Users, Building2, Shield, Headphones } from "lucide-react";
+import { UserPlus, Users, Building2, Shield, Headphones, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface ClientUser {
@@ -33,6 +34,8 @@ export default function ClientUsers() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedCompanyId, setSelectedCompanyId] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<ClientUser | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const isGerente = userRole === "gerente";
 
@@ -137,6 +140,25 @@ export default function ClientUsers() {
     }
 
     setLoading(false);
+  };
+
+  const handleDeleteUser = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+
+    const { data, error } = await supabase.functions.invoke("delete-client-user", {
+      body: { user_id: deleteTarget.user_id },
+    });
+
+    if (error || data?.error) {
+      toast.error(data?.error || error?.message || "Erro ao excluir usuário");
+    } else {
+      toast.success(`${deleteTarget.full_name} foi removido com sucesso`);
+      setDeleteTarget(null);
+      fetchData();
+    }
+
+    setDeleting(false);
   };
 
   const getRoleBadge = (role: string) => {
@@ -273,12 +295,13 @@ export default function ClientUsers() {
                 <TableHead className="text-muted-foreground">Nome</TableHead>
                 <TableHead className="text-muted-foreground">Tipo</TableHead>
                 {!isGerente && <TableHead className="text-muted-foreground">Empresa</TableHead>}
+                {isGerente && <TableHead className="text-muted-foreground w-[80px]">Ações</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
               {clients.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={isGerente ? 2 : 3} className="py-12 text-center text-muted-foreground">
+                  <TableCell colSpan={isGerente ? 3 : 3} className="py-12 text-center text-muted-foreground">
                     <Users className="mx-auto mb-2 h-8 w-8" />
                     <p>Nenhum usuário cadastrado</p>
                     <p className="text-xs">
@@ -301,6 +324,18 @@ export default function ClientUsers() {
                         </Badge>
                       </TableCell>
                     )}
+                    {isGerente && (
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          onClick={() => setDeleteTarget(client)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))
               )}
@@ -308,6 +343,30 @@ export default function ClientUsers() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Confirm delete dialog */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent className="bg-card text-foreground">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display">Excluir operador</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir <strong>{deleteTarget?.full_name}</strong>?
+              <br />
+              Esta ação não pode ser desfeita. O acesso desse usuário será removido permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteUser}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
