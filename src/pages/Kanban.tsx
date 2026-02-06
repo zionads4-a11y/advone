@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useUserCompanies } from "@/hooks/useUserCompanies";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Phone, Mail, DollarSign } from "lucide-react";
@@ -30,16 +31,22 @@ const columns: { status: LeadStatus; label: string; color: string }[] = [
 ];
 
 export default function Kanban() {
+  const { isClient, filterByCompany, loading: companiesLoading } = useUserCompanies();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [companies, setCompanies] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (!companiesLoading) {
+      fetchData();
+    }
+  }, [companiesLoading]);
 
   const fetchData = async () => {
+    let leadsQuery = supabase.from("leads").select("*").order("created_at", { ascending: false });
+    leadsQuery = filterByCompany(leadsQuery);
+
     const [leadsRes, companiesRes] = await Promise.all([
-      supabase.from("leads").select("*").order("created_at", { ascending: false }),
+      leadsQuery,
       supabase.from("companies").select("id, name"),
     ]);
     if (leadsRes.data) setLeads(leadsRes.data as Lead[]);
@@ -60,11 +67,14 @@ export default function Kanban() {
     }
   };
 
+  const title = isClient ? "Seus Leads" : "Kanban";
+  const subtitle = isClient ? "Acompanhe e atualize o status dos seus leads" : "Gerencie os leads por status";
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="font-display text-2xl font-bold text-foreground">Kanban</h1>
-        <p className="text-sm text-muted-foreground">Arraste os leads entre as colunas ou altere o status</p>
+        <h1 className="font-display text-2xl font-bold text-foreground">{title}</h1>
+        <p className="text-sm text-muted-foreground">{subtitle}</p>
       </div>
 
       <div className="flex gap-4 overflow-x-auto pb-4">
@@ -91,7 +101,9 @@ export default function Kanban() {
                         )}
                       </div>
 
-                      <p className="mb-2 text-xs text-muted-foreground">{companies[lead.company_id] || "—"}</p>
+                      {!isClient && (
+                        <p className="mb-2 text-xs text-muted-foreground">{companies[lead.company_id] || "—"}</p>
+                      )}
 
                       <div className="mb-3 space-y-1">
                         {lead.phone && (

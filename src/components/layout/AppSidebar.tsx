@@ -4,6 +4,7 @@ import {
   Kanban,
   Megaphone,
   Building2,
+  UserPlus,
   LogOut,
   Zap,
 } from "lucide-react";
@@ -21,17 +22,26 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
-const mainItems = [
+const adminItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Leads", url: "/leads", icon: Users },
   { title: "Kanban", url: "/kanban", icon: Kanban },
   { title: "Campanhas", url: "/campaigns", icon: Megaphone },
   { title: "Empresas", url: "/companies", icon: Building2 },
+  { title: "Clientes", url: "/client-users", icon: UserPlus },
+];
+
+const clientItems = [
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Kanban", url: "/kanban", icon: Kanban },
 ];
 
 export function AppSidebar() {
-  const { signOut, user } = useAuth();
+  const { signOut, user, userRole } = useAuth();
+  const isClient = userRole === "client";
+  const menuItems = isClient ? clientItems : adminItems;
 
   return (
     <Sidebar className="border-r border-sidebar-border bg-sidebar">
@@ -47,11 +57,11 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className="text-sidebar-foreground/50 text-xs uppercase tracking-wider">
-            Menu Principal
+            {isClient ? "Minha Empresa" : "Menu Principal"}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainItems.map((item) => (
+              {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink
@@ -72,6 +82,11 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border p-4">
+        <div className="mb-1 flex items-center gap-2">
+          <Badge variant="outline" className="text-[10px] border-sidebar-border text-sidebar-foreground/50">
+            {isClient ? "Cliente" : userRole === "admin" ? "Admin" : "Membro"}
+          </Badge>
+        </div>
         <div className="mb-3 truncate text-xs text-sidebar-foreground/50">
           {user?.email}
         </div>
