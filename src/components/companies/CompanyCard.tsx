@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +12,7 @@ import {
   Megaphone,
   Link2,
   Pencil,
+  Eye,
 } from "lucide-react";
 
 interface CompanyMetrics {
@@ -40,6 +42,8 @@ export function CompanyCard({
   onConfigureZapi,
   onEdit,
 }: CompanyCardProps) {
+  const navigate = useNavigate();
+
   return (
     <Card className="glass-card transition-all hover:border-primary/20 group">
       <CardHeader className="pb-3">
@@ -88,15 +92,25 @@ export function CompanyCard({
           )}
         </div>
 
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full text-xs"
-          onClick={onConfigureZapi}
-        >
-          <MessageSquare className="mr-2 h-3 w-3" />
-          {hasZapi ? "Editar Z-API" : "Configurar WhatsApp"}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1 text-xs"
+            onClick={() => navigate(`/companies/${company.id}`)}
+          >
+            <Eye className="mr-2 h-3 w-3" />
+            Ver detalhes
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-xs"
+            onClick={onConfigureZapi}
+          >
+            <MessageSquare className="h-3 w-3" />
+          </Button>
+        </div>
 
         <p className="text-[10px] text-muted-foreground/60">
           Cadastrada em {new Date(company.created_at).toLocaleDateString("pt-BR")}
