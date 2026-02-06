@@ -167,8 +167,117 @@ export type Database = {
           },
         ]
       }
+      lead_reminders: {
+        Row: {
+          company_id: string
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          due_at: string
+          id: string
+          lead_id: string
+          reminder_type: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          due_at: string
+          id?: string
+          lead_id: string
+          reminder_type?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          due_at?: string
+          id?: string
+          lead_id?: string
+          reminder_type?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_reminders_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_reminders_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_summaries: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string
+          generated_by_ai: boolean
+          id: string
+          lead_id: string
+          summary_text: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by: string
+          generated_by_ai?: boolean
+          id?: string
+          lead_id: string
+          summary_text: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          generated_by_ai?: boolean
+          id?: string
+          lead_id?: string
+          summary_text?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_summaries_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_summaries_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
+          assigned_to: string | null
           campaign_id: string | null
           company_id: string
           created_at: string
@@ -190,6 +299,7 @@ export type Database = {
           whatsapp: string | null
         }
         Insert: {
+          assigned_to?: string | null
           campaign_id?: string | null
           company_id: string
           created_at?: string
@@ -211,6 +321,7 @@ export type Database = {
           whatsapp?: string | null
         }
         Update: {
+          assigned_to?: string | null
           campaign_id?: string | null
           company_id?: string
           created_at?: string

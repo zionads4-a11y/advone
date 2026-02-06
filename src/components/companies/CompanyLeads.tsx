@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Search, Filter, Users } from "lucide-react";
 import { SourceBadge } from "@/components/leads/SourceBadge";
+import { LeadDetailDrawer } from "@/components/leads/LeadDetailDrawer";
 
 type LeadStatus = "new" | "contacted" | "qualified" | "negotiating" | "won" | "lost";
 type CampaignSource = "google" | "meta";
@@ -21,6 +22,8 @@ interface Lead {
   value: number;
   source: CampaignSource | null;
   created_at: string;
+  assigned_to: string | null;
+  company_id: string;
 }
 
 const statusConfig: Record<LeadStatus, { label: string; className: string }> = {
@@ -41,6 +44,8 @@ export function CompanyLeads({ companyId }: CompanyLeadsProps) {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [loading, setLoading] = useState(true);
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
     fetchLeads();
@@ -127,7 +132,14 @@ export function CompanyLeads({ companyId }: CompanyLeadsProps) {
                   </TableRow>
                 ) : (
                   filteredLeads.map((lead) => (
-                    <TableRow key={lead.id} className="border-border hover:bg-secondary/50">
+                    <TableRow
+                      key={lead.id}
+                      className="border-border hover:bg-secondary/50 cursor-pointer"
+                      onClick={() => {
+                        setSelectedLead(lead);
+                        setDrawerOpen(true);
+                      }}
+                    >
                       <TableCell className="font-medium text-foreground">{lead.name}</TableCell>
                       <TableCell className="text-muted-foreground">
                         {lead.email || lead.phone || lead.whatsapp || "—"}
@@ -156,6 +168,13 @@ export function CompanyLeads({ companyId }: CompanyLeadsProps) {
           </div>
         </CardContent>
       </Card>
+
+      <LeadDetailDrawer
+        lead={selectedLead}
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        onLeadUpdate={fetchLeads}
+      />
     </div>
   );
 }
