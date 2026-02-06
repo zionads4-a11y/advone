@@ -5,7 +5,7 @@ import { useUserCompanies } from "@/hooks/useUserCompanies";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Phone, Mail, DollarSign } from "lucide-react";
+import { Phone, Mail, DollarSign, Filter } from "lucide-react";
 import { toast } from "sonner";
 import { KanbanColumnSettings, type KanbanColumn } from "@/components/kanban/KanbanColumnSettings";
 import { SourceBadge } from "@/components/leads/SourceBadge";
@@ -44,6 +44,7 @@ export default function Kanban() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [kanbanColumns, setKanbanColumns] = useState<KanbanColumn[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
+  const [filterSource, setFilterSource] = useState<string>("all");
 
   useEffect(() => {
     if (!companiesLoading) {
@@ -116,6 +117,11 @@ export default function Kanban() {
   const activeColumns = kanbanColumns.length > 0 ? kanbanColumns : [];
   const selectedCompany = companies.find((c) => c.id === selectedCompanyId);
 
+  // Filter leads by source
+  const filteredLeads = filterSource === "all" 
+    ? leads 
+    : leads.filter((l) => l.source === filterSource);
+
   const title = isClient ? "Seus Leads" : "Kanban";
   const subtitle = isClient ? "Acompanhe e atualize o status dos seus leads" : "Gerencie os leads por etapa do funil";
 
@@ -128,6 +134,18 @@ export default function Kanban() {
         </div>
 
         <div className="flex items-center gap-2">
+          <Select value={filterSource} onValueChange={setFilterSource}>
+            <SelectTrigger className="w-[140px]">
+              <Filter className="mr-2 h-3 w-3" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas Origens</SelectItem>
+              <SelectItem value="google">Google Ads</SelectItem>
+              <SelectItem value="meta">Meta Ads</SelectItem>
+            </SelectContent>
+          </Select>
+
           {!isClient && companies.length > 1 && (
             <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
               <SelectTrigger className="w-[200px]">
@@ -183,9 +201,9 @@ export default function Kanban() {
       ) : (
         <div className="flex gap-4 overflow-x-auto pb-4">
           {activeColumns.sort((a, b) => a.position - b.position).map((col) => {
-            const colLeads = leads.filter((l) => l.kanban_column_id === col.id);
+            const colLeads = filteredLeads.filter((l) => l.kanban_column_id === col.id);
             // Also include leads without a column assigned (show in first column)
-            const unassigned = col.position === 0 ? leads.filter((l) => !l.kanban_column_id) : [];
+            const unassigned = col.position === 0 ? filteredLeads.filter((l) => !l.kanban_column_id) : [];
             const allLeads = [...colLeads, ...unassigned];
 
             return (
