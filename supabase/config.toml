@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.zapi-webhook]
 verify_jwt = false
+
+[functions.track-click]
+verify_jwt = false

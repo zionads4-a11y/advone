@@ -8,6 +8,7 @@ import {
   MessageSquare,
   LogOut,
   Zap,
+  Link2,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
@@ -30,6 +31,7 @@ const adminItems = [
   { title: "Leads", url: "/leads", icon: Users },
   { title: "Kanban", url: "/kanban", icon: Kanban },
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
+  { title: "Links Rastreáveis", url: "/tracking", icon: Link2 },
   { title: "Campanhas", url: "/campaigns", icon: Megaphone },
   { title: "Empresas", url: "/companies", icon: Building2 },
   { title: "Clientes", url: "/client-users", icon: UserPlus },

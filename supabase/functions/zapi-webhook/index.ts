@@ -80,6 +80,35 @@ serve(async (req) => {
       // Clean phone number (remove @c.us suffix if present)
       const cleanPhone = phone.replace("@c.us", "").replace("@s.whatsapp.net", "");
 
+      // Try to extract tracking code from message [XXXXXX]
+      let trackingCode: string | null = null;
+      let utmData: { utm_source?: string; utm_medium?: string; utm_campaign?: string; utm_content?: string; utm_term?: string } = {};
+
+      const codeMatch = messageText.match(/\[([A-Z0-9]{6})\]/);
+      if (codeMatch) {
+        trackingCode = codeMatch[1];
+        console.log("Tracking code found in message:", trackingCode);
+
+        // Look up the tracking click
+        const { data: click } = await supabase
+          .from("tracking_clicks")
+          .select("id, utm_source, utm_medium, utm_campaign, utm_content, utm_term, tracking_link_id")
+          .eq("tracking_code", trackingCode)
+          .is("lead_id", null)
+          .maybeSingle();
+
+        if (click) {
+          utmData = {
+            utm_source: click.utm_source || undefined,
+            utm_medium: click.utm_medium || undefined,
+            utm_campaign: click.utm_campaign || undefined,
+            utm_content: click.utm_content || undefined,
+            utm_term: click.utm_term || undefined,
+          };
+          console.log("UTM data from tracking click:", JSON.stringify(utmData));
+        }
+      }
+
       // Check if lead exists for this phone + company
       const { data: existingLead } = await supabase
         .from("leads")
@@ -110,6 +139,11 @@ serve(async (req) => {
             whatsapp: cleanPhone,
             status: "new",
             kanban_column_id: firstColumn?.id || null,
+            ...(utmData.utm_source && { utm_source: utmData.utm_source }),
+            ...(utmData.utm_medium && { utm_medium: utmData.utm_medium }),
+            ...(utmData.utm_campaign && { utm_campaign: utmData.utm_campaign }),
+            ...(utmData.utm_content && { utm_content: utmData.utm_content }),
+            ...(utmData.utm_term && { utm_term: utmData.utm_term }),
           })
           .select("id")
           .single();
@@ -118,8 +152,39 @@ serve(async (req) => {
           console.error("Error creating lead:", leadError);
         } else {
           leadId = newLead.id;
-          console.log("New lead created:", leadId, "for phone:", cleanPhone);
+          console.log("New lead created:", leadId, "for phone:", cleanPhone, "with UTMs:", JSON.stringify(utmData));
         }
+      } else if (Object.keys(utmData).length > 0) {
+        // Update existing lead with UTM data if it doesn't have any
+        const { data: existingLeadData } = await supabase
+          .from("leads")
+          .select("utm_source")
+          .eq("id", leadId)
+          .single();
+
+        if (existingLeadData && !existingLeadData.utm_source) {
+          await supabase
+            .from("leads")
+            .update({
+              ...(utmData.utm_source && { utm_source: utmData.utm_source }),
+              ...(utmData.utm_medium && { utm_medium: utmData.utm_medium }),
+              ...(utmData.utm_campaign && { utm_campaign: utmData.utm_campaign }),
+              ...(utmData.utm_content && { utm_content: utmData.utm_content }),
+              ...(utmData.utm_term && { utm_term: utmData.utm_term }),
+            })
+            .eq("id", leadId);
+          console.log("Updated existing lead with UTM data:", leadId);
+        }
+      }
+
+      // Match tracking click to lead
+      if (trackingCode && leadId) {
+        await supabase
+          .from("tracking_clicks")
+          .update({ lead_id: leadId, matched_at: new Date().toISOString() })
+          .eq("tracking_code", trackingCode)
+          .is("lead_id", null);
+        console.log("Tracking click matched to lead:", leadId, "code:", trackingCode);
       }
 
       // Store the message
@@ -141,7 +206,7 @@ serve(async (req) => {
       }
 
       return new Response(
-        JSON.stringify({ ok: true, lead_id: leadId, new_lead: !existingLead }),
+        JSON.stringify({ ok: true, lead_id: leadId, new_lead: !existingLead, tracking_code: trackingCode }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
