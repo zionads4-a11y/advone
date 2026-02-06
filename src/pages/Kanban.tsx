@@ -1,15 +1,27 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserCompanies } from "@/hooks/useUserCompanies";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Phone, Mail, DollarSign, Filter } from "lucide-react";
+import { Filter } from "lucide-react";
 import { toast } from "sonner";
 import { KanbanColumnSettings, type KanbanColumn } from "@/components/kanban/KanbanColumnSettings";
-import { SourceBadge } from "@/components/leads/SourceBadge";
 import { LeadDetailDrawer } from "@/components/leads/LeadDetailDrawer";
+import { DraggableLeadCard } from "@/components/kanban/DraggableLeadCard";
+import { DroppableColumn } from "@/components/kanban/DroppableColumn";
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  closestCorners,
+  type DragStartEvent,
+  type DragEndEvent,
+  type DragOverEvent,
+} from "@dnd-kit/core";
 
 interface Lead {
   id: string;
@@ -28,7 +40,6 @@ interface Company {
   name: string;
 }
 
-// Default columns used when a company has no custom columns
 const DEFAULT_COLUMNS = [
   { name: "Novo", color: "#f59e0b", position: 0, is_won: false, is_lost: false },
   { name: "Contatado", color: "#3b82f6", position: 1, is_won: false, is_lost: false },
@@ -40,7 +51,7 @@ const DEFAULT_COLUMNS = [
 
 export default function Kanban() {
   const { userRole } = useAuth();
-  const { isClient, filterByCompany, companyIds, loading: companiesLoading } = useUserCompanies();
+  const { isClient, companyIds, loading: companiesLoading } = useUserCompanies();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [kanbanColumns, setKanbanColumns] = useState<KanbanColumn[]>([]);
@@ -48,24 +59,26 @@ export default function Kanban() {
   const [filterSource, setFilterSource] = useState<string>("all");
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [activeDragLead, setActiveDragLead] = useState<Lead | null>(null);
+  const [overColumnId, setOverColumnId] = useState<string | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } })
+  );
 
   useEffect(() => {
-    if (!companiesLoading) {
-      fetchCompanies();
-    }
+    if (!companiesLoading) fetchCompanies();
   }, [companiesLoading]);
 
   useEffect(() => {
-    if (selectedCompanyId) {
-      fetchColumnsAndLeads();
-    }
+    if (selectedCompanyId) fetchColumnsAndLeads();
   }, [selectedCompanyId]);
 
   const fetchCompanies = async () => {
     const { data } = await supabase.from("companies").select("id, name").order("name");
     if (data && data.length > 0) {
       setCompanies(data);
-      // Auto-select: for clients, use their company; for admin, use first
       if (isClient && companyIds.length > 0) {
         setSelectedCompanyId(companyIds[0]);
       } else {
@@ -76,57 +89,103 @@ export default function Kanban() {
 
   const fetchColumnsAndLeads = async () => {
     const [columnsRes, leadsRes] = await Promise.all([
-      supabase
-        .from("kanban_columns")
-        .select("*")
-        .eq("company_id", selectedCompanyId)
-        .order("position"),
-      supabase
-        .from("leads")
-        .select("id, name, email, phone, value, source, company_id, kanban_column_id, created_at")
-        .eq("company_id", selectedCompanyId)
-        .order("created_at", { ascending: false }),
+      supabase.from("kanban_columns").select("*").eq("company_id", selectedCompanyId).order("position"),
+      supabase.from("leads").select("id, name, email, phone, value, source, company_id, kanban_column_id, created_at").eq("company_id", selectedCompanyId).order("created_at", { ascending: false }),
     ]);
-
-    if (columnsRes.data) {
-      setKanbanColumns(columnsRes.data as KanbanColumn[]);
-    }
-    if (leadsRes.data) {
-      setLeads(leadsRes.data as Lead[]);
-    }
+    if (columnsRes.data) setKanbanColumns(columnsRes.data as KanbanColumn[]);
+    if (leadsRes.data) setLeads(leadsRes.data as Lead[]);
   };
 
   const initDefaultColumns = async () => {
     for (const col of DEFAULT_COLUMNS) {
-      await supabase.from("kanban_columns").insert({
-        company_id: selectedCompanyId,
-        ...col,
-      });
+      await supabase.from("kanban_columns").insert({ company_id: selectedCompanyId, ...col });
     }
     toast.success("Funil padrão criado!");
     fetchColumnsAndLeads();
   };
 
-  const moveLeadToColumn = async (leadId: string, columnId: string) => {
+  const moveLeadToColumn = useCallback(async (leadId: string, columnId: string) => {
+    // Optimistic update
+    setLeads((prev) => prev.map((l) => (l.id === leadId ? { ...l, kanban_column_id: columnId } : l)));
     const { error } = await supabase.from("leads").update({ kanban_column_id: columnId }).eq("id", leadId);
     if (error) {
       toast.error("Erro ao mover lead");
-    } else {
-      setLeads((prev) => prev.map((l) => (l.id === leadId ? { ...l, kanban_column_id: columnId } : l)));
-      toast.success("Lead movido!");
+      fetchColumnsAndLeads(); // Revert
+    }
+  }, []);
+
+  const sortedColumns = useMemo(() => [...kanbanColumns].sort((a, b) => a.position - b.position), [kanbanColumns]);
+  const filteredLeads = useMemo(() => filterSource === "all" ? leads : leads.filter((l) => l.source === filterSource), [leads, filterSource]);
+
+  const getColumnIdForLead = (lead: Lead): string | null => {
+    if (lead.kanban_column_id) return lead.kanban_column_id;
+    return sortedColumns[0]?.id || null;
+  };
+
+  const getLeadsForColumn = (colId: string, colPosition: number) => {
+    const colLeads = filteredLeads.filter((l) => l.kanban_column_id === colId);
+    const unassigned = colPosition === 0 ? filteredLeads.filter((l) => !l.kanban_column_id) : [];
+    return [...colLeads, ...unassigned];
+  };
+
+  // --- Drag handlers ---
+  const handleDragStart = (event: DragStartEvent) => {
+    const lead = leads.find((l) => l.id === event.active.id);
+    if (lead) setActiveDragLead(lead);
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
+    const { over } = event;
+    if (!over) {
+      setOverColumnId(null);
+      return;
+    }
+    // Determine target column
+    const overData = over.data?.current;
+    if (overData?.type === "column") {
+      setOverColumnId(overData.columnId);
+    } else if (overData?.type === "lead") {
+      // Hovering over another lead card — find its column
+      const overLead = leads.find((l) => l.id === over.id);
+      if (overLead) {
+        setOverColumnId(getColumnIdForLead(overLead));
+      }
     }
   };
 
-  const activeColumns = kanbanColumns.length > 0 ? kanbanColumns : [];
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveDragLead(null);
+    setOverColumnId(null);
+
+    if (!over) return;
+
+    const leadId = active.id as string;
+    let targetColumnId: string | null = null;
+
+    const overData = over.data?.current;
+    if (overData?.type === "column") {
+      targetColumnId = overData.columnId;
+    } else if (overData?.type === "lead") {
+      const overLead = leads.find((l) => l.id === over.id);
+      if (overLead) {
+        targetColumnId = getColumnIdForLead(overLead);
+      }
+    }
+
+    if (!targetColumnId) return;
+
+    const currentLead = leads.find((l) => l.id === leadId);
+    const currentColumnId = currentLead ? getColumnIdForLead(currentLead) : null;
+
+    if (targetColumnId !== currentColumnId) {
+      moveLeadToColumn(leadId, targetColumnId);
+    }
+  };
+
   const selectedCompany = companies.find((c) => c.id === selectedCompanyId);
-
-  // Filter leads by source
-  const filteredLeads = filterSource === "all" 
-    ? leads 
-    : leads.filter((l) => l.source === filterSource);
-
   const title = isClient ? "Seus Leads" : "Kanban";
-  const subtitle = isClient ? "Acompanhe e atualize o status dos seus leads" : "Gerencie os leads por etapa do funil";
+  const subtitle = isClient ? "Acompanhe e atualize o status dos seus leads" : "Arraste os leads entre as etapas do funil";
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -135,7 +194,6 @@ export default function Kanban() {
           <h1 className="font-display text-2xl font-bold text-foreground">{title}</h1>
           <p className="text-sm text-muted-foreground">{subtitle}</p>
         </div>
-
         <div className="flex items-center gap-2">
           <Select value={filterSource} onValueChange={setFilterSource}>
             <SelectTrigger className="w-[140px]">
@@ -148,7 +206,6 @@ export default function Kanban() {
               <SelectItem value="meta">Meta Ads</SelectItem>
             </SelectContent>
           </Select>
-
           {!isClient && companies.length > 1 && (
             <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
               <SelectTrigger className="w-[200px]">
@@ -161,7 +218,6 @@ export default function Kanban() {
               </SelectContent>
             </Select>
           )}
-
           {!isClient && selectedCompanyId && (
             <KanbanColumnSettings
               companyId={selectedCompanyId}
@@ -179,115 +235,57 @@ export default function Kanban() {
             <p>Cadastre uma empresa para começar</p>
           </CardContent>
         </Card>
-      ) : activeColumns.length === 0 ? (
+      ) : sortedColumns.length === 0 ? (
         <Card className="glass-card">
           <CardContent className="flex flex-col items-center justify-center gap-4 py-16 text-muted-foreground">
             <p>Esta empresa ainda não tem um funil configurado</p>
             {!isClient && (
               <div className="flex gap-2">
-                <button
-                  onClick={initDefaultColumns}
-                  className="gradient-primary rounded-lg px-4 py-2 text-sm font-medium text-primary-foreground transition-all hover:opacity-90"
-                >
+                <button onClick={initDefaultColumns} className="gradient-primary rounded-lg px-4 py-2 text-sm font-medium text-primary-foreground transition-all hover:opacity-90">
                   Criar Funil Padrão
                 </button>
-                <KanbanColumnSettings
-                  companyId={selectedCompanyId}
-                  companyName={selectedCompany?.name || ""}
-                  columns={[]}
-                  onUpdate={fetchColumnsAndLeads}
-                />
+                <KanbanColumnSettings companyId={selectedCompanyId} companyName={selectedCompany?.name || ""} columns={[]} onUpdate={fetchColumnsAndLeads} />
               </div>
             )}
           </CardContent>
         </Card>
       ) : (
-        <div className="flex gap-4 overflow-x-auto pb-4">
-          {activeColumns.sort((a, b) => a.position - b.position).map((col) => {
-            const colLeads = filteredLeads.filter((l) => l.kanban_column_id === col.id);
-            // Also include leads without a column assigned (show in first column)
-            const unassigned = col.position === 0 ? filteredLeads.filter((l) => !l.kanban_column_id) : [];
-            const allLeads = [...colLeads, ...unassigned];
-
-            return (
-              <div key={col.id} className="min-w-[280px] flex-1">
-                <div className="mb-3 flex items-center gap-2">
-                  <div className="h-3 w-3 rounded-full" style={{ backgroundColor: col.color }} />
-                  <h3 className="font-display text-sm font-semibold text-foreground">{col.name}</h3>
-                  {col.is_won && <Badge variant="outline" className="text-[10px] border-success/30 text-success">Venda</Badge>}
-                  {col.is_lost && <Badge variant="outline" className="text-[10px] border-destructive/30 text-destructive">Perda</Badge>}
-                  <Badge variant="secondary" className="ml-auto text-xs">{allLeads.length}</Badge>
-                </div>
-
-                <div className="space-y-2">
-                  {allLeads.map((lead) => (
-                    <Card
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="flex gap-4 overflow-x-auto pb-4">
+            {sortedColumns.map((col) => {
+              const colLeads = getLeadsForColumn(col.id, col.position);
+              return (
+                <DroppableColumn
+                  key={col.id}
+                  column={col}
+                  leadIds={colLeads.map((l) => l.id)}
+                  isOver={overColumnId === col.id}
+                >
+                  {colLeads.map((lead) => (
+                    <DraggableLeadCard
                       key={lead.id}
-                      className="glass-card cursor-pointer transition-all hover:border-primary/30 hover:shadow-md"
+                      lead={lead}
                       onClick={() => {
                         setSelectedLead({ ...lead, status: "new", whatsapp: null, assigned_to: null });
                         setDrawerOpen(true);
                       }}
-                    >
-                      <CardContent className="p-3">
-                        <div className="mb-2 flex items-start justify-between">
-                          <p className="text-sm font-medium text-foreground">{lead.name}</p>
-                          <SourceBadge source={lead.source} />
-                        </div>
-
-                        <div className="mb-3 space-y-1">
-                          {lead.phone && (
-                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                              <Phone className="h-3 w-3" /> {lead.phone}
-                            </div>
-                          )}
-                          {lead.email && (
-                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                              <Mail className="h-3 w-3" /> {lead.email}
-                            </div>
-                          )}
-                          {lead.value > 0 && (
-                            <div className="flex items-center gap-1.5 text-xs font-medium text-success">
-                              <DollarSign className="h-3 w-3" />
-                              R$ {Number(lead.value).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                            </div>
-                          )}
-                        </div>
-
-                        <div onClick={(e) => e.stopPropagation()}>
-                          <Select
-                            value={lead.kanban_column_id || ""}
-                            onValueChange={(val) => moveLeadToColumn(lead.id, val)}
-                          >
-                            <SelectTrigger className="h-7 text-xs">
-                              <SelectValue placeholder="Mover para..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {activeColumns.sort((a, b) => a.position - b.position).map((c) => (
-                                <SelectItem key={c.id} value={c.id}>
-                                  <div className="flex items-center gap-2">
-                                    <div className="h-2 w-2 rounded-full" style={{ backgroundColor: c.color }} />
-                                    {c.name}
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    />
                   ))}
+                </DroppableColumn>
+              );
+            })}
+          </div>
 
-                  {allLeads.length === 0 && (
-                    <div className="flex h-24 items-center justify-center rounded-lg border border-dashed border-border text-xs text-muted-foreground">
-                      Nenhum lead
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+          <DragOverlay dropAnimation={{ duration: 200, easing: "ease" }}>
+            {activeDragLead ? <DraggableLeadCard lead={activeDragLead} isDragOverlay /> : null}
+          </DragOverlay>
+        </DndContext>
       )}
 
       <LeadDetailDrawer
