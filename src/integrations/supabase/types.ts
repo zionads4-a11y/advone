@@ -429,6 +429,9 @@ export type Database = {
       }
       whatsapp_configs: {
         Row: {
+          ai_auto_reply: boolean
+          ai_enabled: boolean
+          ai_prompt: string | null
           company_id: string
           created_at: string
           id: string
@@ -440,6 +443,9 @@ export type Database = {
           zapi_webhook_configured: boolean
         }
         Insert: {
+          ai_auto_reply?: boolean
+          ai_enabled?: boolean
+          ai_prompt?: string | null
           company_id: string
           created_at?: string
           id?: string
@@ -451,6 +457,9 @@ export type Database = {
           zapi_webhook_configured?: boolean
         }
         Update: {
+          ai_auto_reply?: boolean
+          ai_enabled?: boolean
+          ai_prompt?: string | null
           company_id?: string
           created_at?: string
           id?: string

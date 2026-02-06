@@ -31,7 +31,7 @@ serve(async (req) => {
     // Verify this company has a WhatsApp config
     const { data: config } = await supabase
       .from("whatsapp_configs")
-      .select("id, company_id")
+      .select("id, company_id, zapi_instance_id, zapi_token, ai_enabled, ai_prompt, ai_auto_reply")
       .eq("company_id", companyId)
       .maybeSingle();
 
@@ -217,6 +217,86 @@ serve(async (req) => {
 
       if (msgError) {
         console.error("Error storing message:", msgError);
+      }
+
+      // AI Auto-Reply if enabled
+      if (config.ai_enabled && config.ai_auto_reply) {
+        try {
+          const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+          if (LOVABLE_API_KEY) {
+            // Get recent conversation history for context
+            const { data: recentMsgs } = await supabase
+              .from("whatsapp_messages")
+              .select("message_text, direction")
+              .eq("company_id", companyId)
+              .eq("phone", cleanPhone)
+              .order("timestamp", { ascending: false })
+              .limit(10);
+
+            const history = (recentMsgs || [])
+              .reverse()
+              .map((m) => ({
+                role: m.direction === "incoming" ? "user" : "assistant",
+                content: m.message_text || "",
+              }));
+
+            const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${LOVABLE_API_KEY}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                model: "google/gemini-3-flash-preview",
+                messages: [
+                  {
+                    role: "system",
+                    content: config.ai_prompt || "Você é um atendente virtual. Seja cordial e objetivo.",
+                  },
+                  ...history,
+                ],
+              }),
+            });
+
+            if (aiResponse.ok) {
+              const aiData = await aiResponse.json();
+              const aiReply = aiData.choices?.[0]?.message?.content;
+
+              if (aiReply) {
+                // Send reply via Z-API
+                const sendUrl = `https://api.z-api.io/instances/${config.zapi_instance_id}/token/${config.zapi_token}/send-text`;
+                const sendResponse = await fetch(sendUrl, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ phone: cleanPhone, message: aiReply }),
+                });
+
+                if (sendResponse.ok) {
+                  const sendResult = await sendResponse.json();
+                  // Store outgoing AI message
+                  await supabase.from("whatsapp_messages").insert({
+                    company_id: companyId,
+                    lead_id: leadId || null,
+                    phone: cleanPhone,
+                    message_text: aiReply,
+                    direction: "outgoing",
+                    sender_name: "IA",
+                    message_id_external: sendResult.messageId || null,
+                    timestamp: new Date().toISOString(),
+                  });
+                  console.log("AI auto-reply sent to:", cleanPhone);
+                } else {
+                  console.error("Failed to send AI reply via Z-API:", await sendResponse.text());
+                }
+              }
+            } else {
+              console.error("AI gateway error:", aiResponse.status, await aiResponse.text());
+            }
+          }
+        } catch (aiError) {
+          console.error("AI auto-reply error:", aiError);
+          // Don't fail the webhook if AI fails
+        }
       }
 
       return new Response(

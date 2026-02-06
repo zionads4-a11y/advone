@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MessageSquare, Copy, QrCode, Link2, Loader2, RefreshCw } from "lucide-react";
+import { MessageSquare, Copy, QrCode, Link2, Loader2, RefreshCw, Bot } from "lucide-react";
 import { toast } from "sonner";
 
 interface WhatsAppConfig {
@@ -124,6 +126,9 @@ export function ZapiConfigDialog({
             </TabsTrigger>
             <TabsTrigger value="link" className="flex-1 gap-1.5 text-xs" disabled={!config}>
               <Link2 className="h-3.5 w-3.5" /> Link
+            </TabsTrigger>
+            <TabsTrigger value="ai" className="flex-1 gap-1.5 text-xs" disabled={!config}>
+              <Bot className="h-3.5 w-3.5" /> IA
             </TabsTrigger>
           </TabsList>
 
@@ -271,8 +276,126 @@ export function ZapiConfigDialog({
               )}
             </div>
           </TabsContent>
+
+          {/* AI Tab */}
+          <TabsContent value="ai">
+            <AIConfigTab companyId={companyId} />
+          </TabsContent>
         </Tabs>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function AIConfigTab({ companyId }: { companyId: string }) {
+  const [aiEnabled, setAiEnabled] = useState(false);
+  const [aiAutoReply, setAiAutoReply] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  // Load current AI config
+  useState(() => {
+    const load = async () => {
+      const { data } = await supabase
+        .from("whatsapp_configs")
+        .select("ai_enabled, ai_auto_reply, ai_prompt")
+        .eq("company_id", companyId)
+        .maybeSingle();
+
+      if (data) {
+        setAiEnabled(data.ai_enabled || false);
+        setAiAutoReply(data.ai_auto_reply || false);
+        setAiPrompt(
+          data.ai_prompt ||
+            "Você é um atendente virtual da empresa. Seja cordial, responda dúvidas dos clientes de forma clara e objetiva."
+        );
+      }
+      setLoading(false);
+    };
+    load();
+  });
+
+  const handleSave = async () => {
+    setSaving(true);
+    const { error } = await supabase
+      .from("whatsapp_configs")
+      .update({
+        ai_enabled: aiEnabled,
+        ai_auto_reply: aiAutoReply,
+        ai_prompt: aiPrompt,
+      })
+      .eq("company_id", companyId);
+
+    if (error) {
+      toast.error("Erro ao salvar: " + error.message);
+    } else {
+      toast.success("Configuração IA salva!");
+    }
+    setSaving(false);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-10">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-lg border border-border bg-secondary/30 p-3">
+        <p className="text-xs text-muted-foreground">
+          Configure o atendente virtual com IA. Quando ativado, a IA pode responder automaticamente
+          os leads pelo WhatsApp ou sugerir respostas na tela de Conversas.
+        </p>
+      </div>
+
+      <div className="flex items-center justify-between rounded-lg border border-border p-3">
+        <div>
+          <p className="text-sm font-medium text-foreground">Ativar IA</p>
+          <p className="text-xs text-muted-foreground">Habilita sugestões de resposta na tela de Conversas</p>
+        </div>
+        <Switch checked={aiEnabled} onCheckedChange={setAiEnabled} />
+      </div>
+
+      <div className="flex items-center justify-between rounded-lg border border-border p-3">
+        <div>
+          <p className="text-sm font-medium text-foreground">Resposta automática</p>
+          <p className="text-xs text-muted-foreground">
+            IA responde automaticamente quando chega uma mensagem
+          </p>
+        </div>
+        <Switch
+          checked={aiAutoReply}
+          onCheckedChange={setAiAutoReply}
+          disabled={!aiEnabled}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Prompt da IA</Label>
+        <Textarea
+          value={aiPrompt}
+          onChange={(e) => setAiPrompt(e.target.value)}
+          placeholder="Instruções para a IA..."
+          rows={4}
+          className="text-sm"
+          disabled={!aiEnabled}
+        />
+        <p className="text-[10px] text-muted-foreground">
+          Defina como a IA deve se comportar, o tom de voz, informações sobre a empresa, etc.
+        </p>
+      </div>
+
+      <Button
+        onClick={handleSave}
+        disabled={saving}
+        className="w-full gradient-primary text-primary-foreground"
+      >
+        {saving ? "Salvando..." : "Salvar Configuração IA"}
+      </Button>
+    </div>
   );
 }
