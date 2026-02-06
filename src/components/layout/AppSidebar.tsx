@@ -34,7 +34,6 @@ const adminItems = [
   { title: "Links Rastreáveis", url: "/tracking", icon: Link2 },
   { title: "Campanhas", url: "/campaigns", icon: Megaphone },
   { title: "Empresas", url: "/companies", icon: Building2 },
-  { title: "Clientes", url: "/client-users", icon: UserPlus },
 ];
 
 const clientItems = [
