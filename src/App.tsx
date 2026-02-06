@@ -13,6 +13,7 @@ import Conversations from "./pages/Conversations";
 import Campaigns from "./pages/Campaigns";
 import Companies from "./pages/Companies";
 import ClientUsers from "./pages/ClientUsers";
+import TrackingLinks from "./pages/TrackingLinks";
 import AppLayout from "./components/layout/AppLayout";
 import NotFound from "./pages/NotFound";
 
@@ -35,6 +36,7 @@ const App = () => (
               <Route path="/conversations" element={<Conversations />} />
               <Route path="/campaigns" element={<Campaigns />} />
               <Route path="/companies" element={<Companies />} />
+              <Route path="/tracking" element={<TrackingLinks />} />
               <Route path="/client-users" element={<ClientUsers />} />
             </Route>
             <Route path="*" element={<NotFound />} />

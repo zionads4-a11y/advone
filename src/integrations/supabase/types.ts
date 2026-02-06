@@ -285,6 +285,130 @@ export type Database = {
         }
         Relationships: []
       }
+      tracking_clicks: {
+        Row: {
+          clicked_at: string
+          company_id: string
+          id: string
+          ip_address: string | null
+          lead_id: string | null
+          matched_at: string | null
+          tracking_code: string
+          tracking_link_id: string
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+        }
+        Insert: {
+          clicked_at?: string
+          company_id: string
+          id?: string
+          ip_address?: string | null
+          lead_id?: string | null
+          matched_at?: string | null
+          tracking_code: string
+          tracking_link_id: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Update: {
+          clicked_at?: string
+          company_id?: string
+          id?: string
+          ip_address?: string | null
+          lead_id?: string | null
+          matched_at?: string | null
+          tracking_code?: string
+          tracking_link_id?: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracking_clicks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tracking_clicks_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tracking_clicks_tracking_link_id_fkey"
+            columns: ["tracking_link_id"]
+            isOneToOne: false
+            referencedRelation: "tracking_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tracking_links: {
+        Row: {
+          campaign_id: string | null
+          company_id: string
+          created_at: string
+          created_by: string
+          default_message: string | null
+          id: string
+          is_active: boolean | null
+          slug: string
+          whatsapp_number: string
+        }
+        Insert: {
+          campaign_id?: string | null
+          company_id: string
+          created_at?: string
+          created_by: string
+          default_message?: string | null
+          id?: string
+          is_active?: boolean | null
+          slug: string
+          whatsapp_number: string
+        }
+        Update: {
+          campaign_id?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          default_message?: string | null
+          id?: string
+          is_active?: boolean | null
+          slug?: string
+          whatsapp_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracking_links_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tracking_links_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
