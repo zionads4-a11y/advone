@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Link2, Copy, ExternalLink, MousePointerClick, Users, TrendingUp } from "lucide-react";
+import { Plus, Link2, Copy, ExternalLink, MousePointerClick, Users, TrendingUp, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { CreateTrackingLinkForm } from "@/components/tracking/CreateTrackingLinkForm";
 import { TrackingLinkUtmTemplates } from "@/components/tracking/TrackingLinkUtmTemplates";
@@ -100,6 +100,18 @@ export function CompanyTrackingLinks({ companyId, companyWhatsapp }: CompanyTrac
   const copyUrl = (slug: string) => {
     navigator.clipboard.writeText(getTrackingUrl(slug));
     toast.success("URL copiada!");
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Tem certeza que deseja excluir este link?")) return;
+
+    const { error } = await supabase.from("tracking_links").delete().eq("id", id);
+    if (error) {
+      toast.error("Erro ao excluir: " + error.message);
+    } else {
+      toast.success("Link excluído!");
+      fetchLinks();
+    }
   };
 
   const company = { id: companyId, name: "", whatsapp: companyWhatsapp };
@@ -247,6 +259,15 @@ export function CompanyTrackingLinks({ companyId, companyWhatsapp }: CompanyTrac
                               title="Abrir link"
                             >
                               <ExternalLink className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDelete(link.id)}
+                              title="Excluir link"
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            >
+                              <Trash2 className="h-3 w-3" />
                             </Button>
                           </div>
                         </TableCell>
