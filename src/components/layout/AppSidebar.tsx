@@ -97,7 +97,7 @@ export function AppSidebar() {
   return (
     <Sidebar className="border-r border-sidebar-border bg-sidebar">
       <div className="flex items-center justify-center px-4 py-5">
-        <img src={logoExitoDigital} alt="Êxito Digital" className="h-12 w-auto" />
+        <img src={logoExitoDigital} alt="Êxito Digital" className="h-20 w-auto" />
       </div>
 
       <SidebarContent>
