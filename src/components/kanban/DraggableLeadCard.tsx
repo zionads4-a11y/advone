@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Card, CardContent } from "@/components/ui/card";
@@ -70,6 +71,7 @@ export function DraggableLeadCard({ lead, onClick, isDragOverlay, onValueUpdate 
 }
 
 function LeadCardContent({ lead, onValueUpdate }: { lead: DraggableLeadCardProps["lead"]; onValueUpdate?: (leadId: string, newValue: number) => void }) {
+  const navigate = useNavigate();
   const [editingValue, setEditingValue] = useState(false);
   const [tempValue, setTempValue] = useState("");
   const [saving, setSaving] = useState(false);
@@ -111,8 +113,7 @@ function LeadCardContent({ lead, onValueUpdate }: { lead: DraggableLeadCardProps
     e.stopPropagation();
     e.preventDefault();
     if (!lead.phone) return;
-    const cleanPhone = lead.phone.replace(/\D/g, "");
-    window.open(`https://wa.me/${cleanPhone}`, "_blank");
+    navigate("/conversations");
   };
 
   return (
