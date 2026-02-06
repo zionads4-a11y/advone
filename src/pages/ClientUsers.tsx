@@ -130,8 +130,11 @@ export default function ClientUsers() {
       body: { email, password: "123456", full_name: fullName, company_id: companyId, role },
     });
 
-    if (error || data?.error) {
-      toast.error(data?.error || error?.message || "Erro ao criar usuário");
+    console.log("create-client-user response:", { data, error: error?.message });
+
+    const errorMsg = data?.error || (error ? error.message : null);
+    if (errorMsg) {
+      toast.error(errorMsg);
     } else {
       const roleLabel = role === "gerente" ? "Gerente" : "Operador";
       toast.success(`${roleLabel} criado com sucesso! Email: ${email} | Senha padrão: 123456`);

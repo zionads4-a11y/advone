@@ -88,6 +88,7 @@ serve(async (req) => {
     }
 
     // Create the user with admin client
+    console.log("Creating user with email:", email, "role:", assignedRole, "company:", company_id);
     const { data: userData, error: createError } = await adminClient.auth.admin.createUser({
       email,
       password,
@@ -96,7 +97,11 @@ serve(async (req) => {
     });
 
     if (createError) {
-      return new Response(JSON.stringify({ error: "Erro ao criar usuário: " + createError.message }), {
+      console.error("Error creating user:", createError.message);
+      const friendlyMsg = createError.message.includes("already been registered")
+        ? "Este email já está cadastrado no sistema"
+        : "Erro ao criar usuário: " + createError.message;
+      return new Response(JSON.stringify({ error: friendlyMsg }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
