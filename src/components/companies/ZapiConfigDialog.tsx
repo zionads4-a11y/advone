@@ -14,6 +14,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MessageSquare, Copy, QrCode, Link2, Loader2, RefreshCw, Bot } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 interface WhatsAppConfig {
   id: string;
@@ -45,11 +46,13 @@ export function ZapiConfigDialog({
   config,
   onSubmit,
 }: ZapiConfigDialogProps) {
+  const { userRole } = useAuth();
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [qrLoading, setQrLoading] = useState(false);
   const [shareableLink, setShareableLink] = useState<string | null>(null);
   const [linkExpiry, setLinkExpiry] = useState<string | null>(null);
   const [linkLoading, setLinkLoading] = useState(false);
+  const canConfigureAI = userRole === "admin" || userRole === "gerente";
 
   const copyWebhookUrl = () => {
     navigator.clipboard.writeText(getWebhookUrl(companyId));
@@ -127,9 +130,11 @@ export function ZapiConfigDialog({
             <TabsTrigger value="link" className="flex-1 gap-1.5 text-xs" disabled={!config}>
               <Link2 className="h-3.5 w-3.5" /> Link
             </TabsTrigger>
-            <TabsTrigger value="ai" className="flex-1 gap-1.5 text-xs" disabled={!config}>
-              <Bot className="h-3.5 w-3.5" /> IA
-            </TabsTrigger>
+            {canConfigureAI && (
+              <TabsTrigger value="ai" className="flex-1 gap-1.5 text-xs" disabled={!config}>
+                <Bot className="h-3.5 w-3.5" /> IA
+              </TabsTrigger>
+            )}
           </TabsList>
 
           {/* Config Tab */}
@@ -277,10 +282,12 @@ export function ZapiConfigDialog({
             </div>
           </TabsContent>
 
-          {/* AI Tab */}
-          <TabsContent value="ai">
-            <AIConfigTab companyId={companyId} />
-          </TabsContent>
+          {/* AI Tab - only for admin/gerente */}
+          {canConfigureAI && (
+            <TabsContent value="ai">
+              <AIConfigTab companyId={companyId} />
+            </TabsContent>
+          )}
         </Tabs>
       </DialogContent>
     </Dialog>
