@@ -9,6 +9,7 @@ import logoExitoDigital from "@/assets/logo-exito-digital.png";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import {
   Sidebar,
   SidebarContent,
@@ -22,6 +23,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useNewMessageNotifications } from "@/hooks/useNewMessageNotifications";
 
 import { LayoutDashboard, Kanban, MessageSquare } from "lucide-react";
@@ -100,6 +102,7 @@ export function AppSidebar() {
   const { signOut, user, userRole } = useAuth();
   const navigate = useNavigate();
   const { unreadCount } = useNewMessageNotifications();
+  const { profile, initials } = useUserProfile();
   const menuItems = getMenuItems(userRole);
 
   return (
@@ -144,12 +147,25 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border p-4">
-        <div className="mb-1 flex items-center gap-2">
-          <Badge variant="outline" className="text-[10px] border-sidebar-border text-sidebar-foreground/50">
-            {getRoleLabel(userRole)}
-          </Badge>
+        <div className="mb-2 flex items-center gap-3">
+          <Avatar className="h-9 w-9 border border-sidebar-border">
+            <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || "Avatar"} />
+            <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium text-sidebar-foreground">
+              {profile?.full_name || "Usuário"}
+            </p>
+            <div className="flex items-center gap-1.5">
+              <Badge variant="outline" className="text-[10px] border-sidebar-border text-sidebar-foreground/50">
+                {getRoleLabel(userRole)}
+              </Badge>
+            </div>
+          </div>
         </div>
-        <div className="mb-3 truncate text-xs text-sidebar-foreground/50">
+        <div className="mb-3 truncate text-xs text-sidebar-foreground/50 pl-12">
           {user?.email}
         </div>
         <div className="flex gap-2">
