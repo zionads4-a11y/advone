@@ -3,14 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Link2, Copy, ExternalLink, MousePointerClick, Users, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
+import { CreateTrackingLinkForm } from "@/components/tracking/CreateTrackingLinkForm";
 
 interface Company {
   id: string;
@@ -48,8 +46,7 @@ export default function TrackingLinks() {
   const [links, setLinks] = useState<TrackingLink[]>([]);
   const [clickStats, setClickStats] = useState<Record<string, ClickStats>>({});
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [formCompanyId, setFormCompanyId] = useState<string>("");
+  const [showCreateForm, setShowCreateForm] = useState(false);
 
   useEffect(() => {
     fetchCompanies();
@@ -112,52 +109,6 @@ export default function TrackingLinks() {
     }
   };
 
-  const generateSlug = () => {
-    const chars = "abcdefghjkmnpqrstuvwxyz23456789";
-    let slug = "";
-    for (let i = 0; i < 8; i++) {
-      slug += chars[Math.floor(Math.random() * chars.length)];
-    }
-    return slug;
-  };
-
-  const handleCreate = async (formData: FormData) => {
-    if (!user) return;
-
-    const companyId = formData.get("company_id") as string;
-    const whatsappNumber = (formData.get("whatsapp_number") as string).replace(/\D/g, "");
-    const defaultMessage = (formData.get("default_message") as string) || "Olá!";
-    const campaignId = (formData.get("campaign_id") as string) || null;
-    const customSlug = (formData.get("slug") as string) || generateSlug();
-
-    if (!whatsappNumber) {
-      toast.error("Informe o número do WhatsApp");
-      return;
-    }
-
-    const { error } = await supabase.from("tracking_links").insert({
-      company_id: companyId,
-      slug: customSlug,
-      whatsapp_number: whatsappNumber,
-      default_message: defaultMessage,
-      campaign_id: campaignId === "none" ? null : campaignId,
-      created_by: user.id,
-    });
-
-    if (error) {
-      if (error.message.includes("unique")) {
-        toast.error("Esse slug já existe. Tente outro.");
-      } else {
-        toast.error("Erro: " + error.message);
-      }
-      return;
-    }
-
-    toast.success("Link rastreável criado!");
-    setDialogOpen(false);
-    fetchLinks();
-  };
-
   const getTrackingUrl = (slug: string) => {
     const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID || "oonteavjxzkovrzktnie";
     return `https://${projectId}.supabase.co/functions/v1/track-click?s=${slug}`;
@@ -176,6 +127,36 @@ export default function TrackingLinks() {
   };
 
   const selectedCompany = companies.find((c) => c.id === selectedCompanyId);
+
+  // Show create form as full-page view
+  if (showCreateForm && selectedCompany) {
+    return (
+      <div className="animate-fade-in max-w-3xl mx-auto">
+        <Card className="glass-card">
+          <CardHeader>
+            <CardTitle className="font-display text-xl text-foreground flex items-center gap-2">
+              <Link2 className="h-5 w-5 text-primary" />
+              Criar Link Rastreável
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Configure um link para identificar a origem dos seus leads.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <CreateTrackingLinkForm
+              company={selectedCompany}
+              campaigns={campaigns}
+              onSuccess={() => {
+                setShowCreateForm(false);
+                fetchLinks();
+              }}
+              onCancel={() => setShowCreateForm(false)}
+            />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -199,72 +180,12 @@ export default function TrackingLinks() {
               </SelectContent>
             </Select>
           )}
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="gradient-primary text-primary-foreground">
-                <Plus className="mr-2 h-4 w-4" /> Novo Link
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-card text-foreground dark">
-              <DialogHeader>
-                <DialogTitle className="font-display flex items-center gap-2">
-                  <Link2 className="h-5 w-5 text-primary" />
-                  Criar Link Rastreável
-                </DialogTitle>
-              </DialogHeader>
-              <form onSubmit={(e) => { e.preventDefault(); handleCreate(new FormData(e.currentTarget)); }} className="space-y-4">
-                <input type="hidden" name="company_id" value={selectedCompanyId} />
-
-                <div className="space-y-2">
-                  <Label>Número WhatsApp *</Label>
-                  <Input
-                    name="whatsapp_number"
-                    required
-                    placeholder="5511999999999"
-                    defaultValue={selectedCompany?.whatsapp || ""}
-                  />
-                  <p className="text-[10px] text-muted-foreground">Número com código do país, sem espaços</p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Mensagem pré-definida</Label>
-                  <Input
-                    name="default_message"
-                    placeholder="Olá! Vi seu anúncio e gostaria de saber mais"
-                    defaultValue="Olá! Vi seu anúncio e gostaria de saber mais"
-                  />
-                  <p className="text-[10px] text-muted-foreground">O código de rastreamento será adicionado automaticamente</p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Campanha (opcional)</Label>
-                  <Select name="campaign_id" defaultValue="none">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sem campanha específica" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Sem campanha específica</SelectItem>
-                      {campaigns.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>
-                          {c.name} ({c.source})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Slug personalizado (opcional)</Label>
-                  <Input name="slug" placeholder="Deixe vazio para gerar automaticamente" />
-                  <p className="text-[10px] text-muted-foreground">Identificador único na URL. Ex: "promo-verao"</p>
-                </div>
-
-                <Button type="submit" className="w-full gradient-primary text-primary-foreground">
-                  Criar Link
-                </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
+          <Button
+            className="gradient-primary text-primary-foreground"
+            onClick={() => setShowCreateForm(true)}
+          >
+            <Plus className="mr-2 h-4 w-4" /> Novo Link
+          </Button>
         </div>
       </div>
 
@@ -326,7 +247,7 @@ export default function TrackingLinks() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Slug</TableHead>
+                    <TableHead>Nome</TableHead>
                     <TableHead>WhatsApp</TableHead>
                     <TableHead>Mensagem</TableHead>
                     <TableHead className="text-center">Cliques</TableHead>
@@ -340,7 +261,7 @@ export default function TrackingLinks() {
                     const stats = clickStats[link.id];
                     return (
                       <TableRow key={link.id}>
-                        <TableCell className="font-mono text-sm text-primary">{link.slug}</TableCell>
+                        <TableCell className="font-medium text-sm text-primary">{link.slug}</TableCell>
                         <TableCell className="text-sm">{link.whatsapp_number}</TableCell>
                         <TableCell className="text-sm text-muted-foreground max-w-[200px] truncate">
                           {link.default_message || "Olá!"}
