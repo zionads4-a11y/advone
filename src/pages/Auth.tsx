@@ -26,11 +26,8 @@ export default function Auth() {
   return (
     <div className="dark flex min-h-screen items-center justify-center bg-background p-4">
       <div className="w-full max-w-md space-y-8">
-        <div className="flex flex-col items-center gap-3">
-          <div className="flex items-center gap-3">
-            <img src={logoExitoDigital} alt="Êxito Digital" className="h-12 w-auto" />
-            <h1 className="font-display text-2xl font-bold text-foreground">Êxito Digital</h1>
-          </div>
+        <div className="flex flex-col items-center gap-4">
+          <img src={logoExitoDigital} alt="Êxito Digital" className="h-24 w-auto" />
           <p className="text-sm text-muted-foreground">
             CRM inteligente para gestão de leads
           </p>
