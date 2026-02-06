@@ -188,6 +188,7 @@ export default function Companies() {
                 setEditingCompany(company);
                 setEditDialogOpen(true);
               }}
+              onDelete={() => handleDelete(company.id)}
             />
           ))
         )}
