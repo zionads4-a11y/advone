@@ -11,6 +11,7 @@ import {
   MessageSquare, User, ArrowDownLeft, ArrowUpRight, Send, Sparkles, Loader2, Bot,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useNewMessageNotifications } from "@/hooks/useNewMessageNotifications";
 
 interface Message {
   id: string;
@@ -36,6 +37,7 @@ interface Company {
 
 export default function Conversations() {
   const { isClient, companyIds, loading: companiesLoading } = useUserCompanies();
+  const { clearUnread } = useNewMessageNotifications();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [conversations, setConversations] = useState<Record<string, Message[]>>({});
@@ -45,6 +47,11 @@ export default function Conversations() {
   const [sending, setSending] = useState(false);
   const [aiSuggesting, setAiSuggesting] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Clear unread notifications when entering conversations
+  useEffect(() => {
+    clearUnread();
+  }, [clearUnread]);
 
   useEffect(() => {
     if (!companiesLoading) fetchCompanies();
