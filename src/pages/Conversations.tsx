@@ -1,11 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserCompanies } from "@/hooks/useUserCompanies";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageSquare, User, ArrowDownLeft, ArrowUpRight } from "lucide-react";
+import {
+  MessageSquare, User, ArrowDownLeft, ArrowUpRight, Send, Sparkles, Loader2, Bot,
+} from "lucide-react";
+import { toast } from "sonner";
 
 interface Message {
   id: string;
@@ -36,6 +41,10 @@ export default function Conversations() {
   const [conversations, setConversations] = useState<Record<string, Message[]>>({});
   const [leads, setLeads] = useState<Record<string, Lead>>({});
   const [selectedPhone, setSelectedPhone] = useState<string>("");
+  const [messageText, setMessageText] = useState("");
+  const [sending, setSending] = useState(false);
+  const [aiSuggesting, setAiSuggesting] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!companiesLoading) fetchCompanies();
@@ -44,6 +53,45 @@ export default function Conversations() {
   useEffect(() => {
     if (selectedCompanyId) fetchMessages();
   }, [selectedCompanyId]);
+
+  // Realtime subscription
+  useEffect(() => {
+    if (!selectedCompanyId) return;
+
+    const channel = supabase
+      .channel(`whatsapp-${selectedCompanyId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "whatsapp_messages",
+          filter: `company_id=eq.${selectedCompanyId}`,
+        },
+        (payload) => {
+          const newMsg = payload.new as Message;
+          setConversations((prev) => {
+            const updated = { ...prev };
+            if (!updated[newMsg.phone]) updated[newMsg.phone] = [];
+            // Avoid duplicates
+            if (!updated[newMsg.phone].find((m) => m.id === newMsg.id)) {
+              updated[newMsg.phone] = [...updated[newMsg.phone], newMsg];
+            }
+            return updated;
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [selectedCompanyId]);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [conversations, selectedPhone]);
 
   const fetchCompanies = async () => {
     const { data } = await supabase.from("companies").select("id, name").order("name");
@@ -79,7 +127,6 @@ export default function Conversations() {
       });
       setConversations(grouped);
 
-      // Auto select first conversation
       const phones = Object.keys(grouped);
       if (phones.length > 0 && !selectedPhone) {
         setSelectedPhone(phones[0]);
@@ -93,6 +140,41 @@ export default function Conversations() {
       });
       setLeads(map);
     }
+  };
+
+  const handleSendMessage = async () => {
+    if (!messageText.trim() || !selectedPhone || !selectedCompanyId) return;
+
+    setSending(true);
+    const { data, error } = await supabase.functions.invoke("send-whatsapp", {
+      body: { company_id: selectedCompanyId, phone: selectedPhone, message: messageText },
+    });
+
+    if (error || data?.error) {
+      toast.error(data?.error || error?.message || "Erro ao enviar mensagem");
+    } else {
+      setMessageText("");
+      // Message will appear via realtime subscription, but also fetch to be safe
+      setTimeout(fetchMessages, 500);
+    }
+    setSending(false);
+  };
+
+  const handleAiSuggest = async () => {
+    if (!selectedPhone || !selectedCompanyId) return;
+
+    setAiSuggesting(true);
+    const { data, error } = await supabase.functions.invoke("send-whatsapp", {
+      body: { company_id: selectedCompanyId, phone: selectedPhone, action: "ai_suggest" },
+    });
+
+    if (error || data?.error) {
+      toast.error(data?.error || error?.message || "Erro ao gerar sugestão IA");
+    } else if (data?.suggestion) {
+      setMessageText(data.suggestion);
+      toast.success("Sugestão IA gerada! Edite se necessário e envie.");
+    }
+    setAiSuggesting(false);
   };
 
   const phones = Object.keys(conversations).sort((a, b) => {
@@ -170,7 +252,12 @@ export default function Conversations() {
                           <p className="text-[10px] text-muted-foreground">
                             {lastMsg ? new Date(lastMsg.timestamp).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : ""}
                           </p>
-                          <Badge variant="secondary" className="text-[9px] mt-1">{msgs.length}</Badge>
+                          <div className="flex items-center justify-end gap-1 mt-1">
+                            {lastMsg?.sender_name === "IA" && (
+                              <Bot className="h-3 w-3 text-primary" />
+                            )}
+                            <Badge variant="secondary" className="text-[9px]">{msgs.length}</Badge>
+                          </div>
                         </div>
                       </div>
                     </button>
@@ -182,10 +269,10 @@ export default function Conversations() {
         </Card>
 
         {/* Messages */}
-        <Card className="glass-card overflow-hidden">
+        <Card className="glass-card overflow-hidden flex flex-col">
           {selectedPhone ? (
             <>
-              <CardHeader className="border-b border-border pb-3">
+              <CardHeader className="border-b border-border pb-3 flex-shrink-0">
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
                     <User className="h-5 w-5 text-primary" />
@@ -203,8 +290,10 @@ export default function Conversations() {
                   )}
                 </div>
               </CardHeader>
-              <CardContent className="p-0">
-                <ScrollArea className="h-[calc(100vh-350px)] p-4">
+
+              {/* Messages area */}
+              <CardContent className="p-0 flex-1 overflow-hidden">
+                <ScrollArea className="h-[calc(100vh-420px)] p-4">
                   <div className="space-y-3">
                     {selectedMessages.map((msg) => (
                       <div
@@ -224,7 +313,11 @@ export default function Conversations() {
                             ) : (
                               <ArrowUpRight className="h-3 w-3 opacity-60" />
                             )}
+                            {msg.sender_name === "IA" && (
+                              <Bot className="h-3 w-3 opacity-60" />
+                            )}
                             <span className="text-[10px] opacity-60">
+                              {msg.sender_name === "IA" ? "IA • " : ""}
                               {new Date(msg.timestamp).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                             </span>
                           </div>
@@ -232,9 +325,54 @@ export default function Conversations() {
                         </div>
                       </div>
                     ))}
+                    <div ref={messagesEndRef} />
                   </div>
                 </ScrollArea>
               </CardContent>
+
+              {/* Send area */}
+              <div className="border-t border-border p-3 flex-shrink-0">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleAiSuggest}
+                    disabled={aiSuggesting}
+                    title="Sugestão IA"
+                    className="shrink-0"
+                  >
+                    {aiSuggesting ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-4 w-4 text-primary" />
+                    )}
+                  </Button>
+                  <Input
+                    value={messageText}
+                    onChange={(e) => setMessageText(e.target.value)}
+                    placeholder="Digite sua mensagem..."
+                    className="flex-1"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
+                  />
+                  <Button
+                    onClick={handleSendMessage}
+                    disabled={sending || !messageText.trim()}
+                    className="gradient-primary text-primary-foreground shrink-0"
+                    size="icon"
+                  >
+                    {sending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Send className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
             </>
           ) : (
             <CardContent className="flex flex-col items-center justify-center h-full text-muted-foreground">
