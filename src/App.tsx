@@ -15,6 +15,7 @@ import Companies from "./pages/Companies";
 import CompanyDetail from "./pages/CompanyDetail";
 import ClientUsers from "./pages/ClientUsers";
 import TrackingLinks from "./pages/TrackingLinks";
+import ConnectWhatsApp from "./pages/ConnectWhatsApp";
 import AppLayout from "./components/layout/AppLayout";
 import NotFound from "./pages/NotFound";
 
@@ -30,6 +31,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/connect/:token" element={<ConnectWhatsApp />} />
             <Route element={<AppLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/leads" element={<Leads />} />
