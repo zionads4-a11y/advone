@@ -5,6 +5,7 @@ import {
   Megaphone,
   Building2,
   UserPlus,
+  MessageSquare,
   LogOut,
   Zap,
 } from "lucide-react";
@@ -28,6 +29,7 @@ const adminItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Leads", url: "/leads", icon: Users },
   { title: "Kanban", url: "/kanban", icon: Kanban },
+  { title: "Conversas", url: "/conversations", icon: MessageSquare },
   { title: "Campanhas", url: "/campaigns", icon: Megaphone },
   { title: "Empresas", url: "/companies", icon: Building2 },
   { title: "Clientes", url: "/client-users", icon: UserPlus },
@@ -36,6 +38,7 @@ const adminItems = [
 const clientItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Kanban", url: "/kanban", icon: Kanban },
+  { title: "Conversas", url: "/conversations", icon: MessageSquare },
 ];
 
 export function AppSidebar() {

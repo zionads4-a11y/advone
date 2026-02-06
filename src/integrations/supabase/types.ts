@@ -303,6 +303,104 @@ export type Database = {
         }
         Relationships: []
       }
+      whatsapp_configs: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          phone_number: string | null
+          status: string
+          updated_at: string
+          zapi_instance_id: string
+          zapi_token: string
+          zapi_webhook_configured: boolean
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          phone_number?: string | null
+          status?: string
+          updated_at?: string
+          zapi_instance_id: string
+          zapi_token: string
+          zapi_webhook_configured?: boolean
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          phone_number?: string | null
+          status?: string
+          updated_at?: string
+          zapi_instance_id?: string
+          zapi_token?: string
+          zapi_webhook_configured?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_configs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_messages: {
+        Row: {
+          company_id: string
+          created_at: string
+          direction: string
+          id: string
+          lead_id: string | null
+          message_id_external: string | null
+          message_text: string | null
+          phone: string
+          sender_name: string | null
+          timestamp: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          direction?: string
+          id?: string
+          lead_id?: string | null
+          message_id_external?: string | null
+          message_text?: string | null
+          phone: string
+          sender_name?: string | null
+          timestamp?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          direction?: string
+          id?: string
+          lead_id?: string | null
+          message_id_external?: string | null
+          message_text?: string | null
+          phone?: string
+          sender_name?: string | null
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_messages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_messages_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

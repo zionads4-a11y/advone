@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Leads from "./pages/Leads";
 import Kanban from "./pages/Kanban";
+import Conversations from "./pages/Conversations";
 import Campaigns from "./pages/Campaigns";
 import Companies from "./pages/Companies";
 import ClientUsers from "./pages/ClientUsers";
@@ -31,6 +32,7 @@ const App = () => (
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/leads" element={<Leads />} />
               <Route path="/kanban" element={<Kanban />} />
+              <Route path="/conversations" element={<Conversations />} />
               <Route path="/campaigns" element={<Campaigns />} />
               <Route path="/companies" element={<Companies />} />
               <Route path="/client-users" element={<ClientUsers />} />
