@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Plus, Search, Filter } from "lucide-react";
 import { toast } from "sonner";
+import { SourceBadge } from "@/components/leads/SourceBadge";
 
 type LeadStatus = "new" | "contacted" | "qualified" | "negotiating" | "won" | "lost";
 type CampaignSource = "google" | "meta";
@@ -277,9 +278,7 @@ export default function Leads() {
                       <TableCell className="text-muted-foreground">{getCompanyName(lead.company_id)}</TableCell>
                       <TableCell>
                         {lead.source ? (
-                          <Badge variant="outline" className={lead.source === "google" ? "border-info/30 text-info" : "border-info/30 text-info"}>
-                            {lead.source === "google" ? "Google" : "Meta"}
-                          </Badge>
+                          <SourceBadge source={lead.source} size="md" />
                         ) : (
                           "—"
                         )}

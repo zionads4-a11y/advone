@@ -83,6 +83,7 @@ serve(async (req) => {
       // Try to extract tracking code from message [XXXXXX]
       let trackingCode: string | null = null;
       let utmData: { utm_source?: string; utm_medium?: string; utm_campaign?: string; utm_content?: string; utm_term?: string } = {};
+      let detectedSource: string | null = null;
 
       const codeMatch = messageText.match(/\[([A-Z0-9]{6})\]/);
       if (codeMatch) {
@@ -106,6 +107,14 @@ serve(async (req) => {
             utm_term: click.utm_term || undefined,
           };
           console.log("UTM data from tracking click:", JSON.stringify(utmData));
+
+          // Auto-detect source from utm_source
+          const src = (click.utm_source || "").toLowerCase();
+          if (src.includes("google") || src === "gads" || src === "googleads") {
+            detectedSource = "google";
+          } else if (src.includes("meta") || src.includes("facebook") || src.includes("instagram") || src === "fb" || src === "ig") {
+            detectedSource = "meta";
+          }
         }
       }
 
@@ -139,6 +148,7 @@ serve(async (req) => {
             whatsapp: cleanPhone,
             status: "new",
             kanban_column_id: firstColumn?.id || null,
+            ...(detectedSource && { source: detectedSource }),
             ...(utmData.utm_source && { utm_source: utmData.utm_source }),
             ...(utmData.utm_medium && { utm_medium: utmData.utm_medium }),
             ...(utmData.utm_campaign && { utm_campaign: utmData.utm_campaign }),
@@ -155,25 +165,29 @@ serve(async (req) => {
           console.log("New lead created:", leadId, "for phone:", cleanPhone, "with UTMs:", JSON.stringify(utmData));
         }
       } else if (Object.keys(utmData).length > 0) {
-        // Update existing lead with UTM data if it doesn't have any
+        // Update existing lead with UTM data and source if it doesn't have any
         const { data: existingLeadData } = await supabase
           .from("leads")
-          .select("utm_source")
+          .select("utm_source, source")
           .eq("id", leadId)
           .single();
 
-        if (existingLeadData && !existingLeadData.utm_source) {
-          await supabase
-            .from("leads")
-            .update({
-              ...(utmData.utm_source && { utm_source: utmData.utm_source }),
-              ...(utmData.utm_medium && { utm_medium: utmData.utm_medium }),
-              ...(utmData.utm_campaign && { utm_campaign: utmData.utm_campaign }),
-              ...(utmData.utm_content && { utm_content: utmData.utm_content }),
-              ...(utmData.utm_term && { utm_term: utmData.utm_term }),
-            })
-            .eq("id", leadId);
-          console.log("Updated existing lead with UTM data:", leadId);
+        if (existingLeadData) {
+          const updates: Record<string, string> = {};
+          if (!existingLeadData.utm_source) {
+            if (utmData.utm_source) updates.utm_source = utmData.utm_source;
+            if (utmData.utm_medium) updates.utm_medium = utmData.utm_medium;
+            if (utmData.utm_campaign) updates.utm_campaign = utmData.utm_campaign;
+            if (utmData.utm_content) updates.utm_content = utmData.utm_content;
+            if (utmData.utm_term) updates.utm_term = utmData.utm_term;
+          }
+          if (!existingLeadData.source && detectedSource) {
+            updates.source = detectedSource;
+          }
+          if (Object.keys(updates).length > 0) {
+            await supabase.from("leads").update(updates).eq("id", leadId);
+            console.log("Updated existing lead with UTM/source data:", leadId, JSON.stringify(updates));
+          }
         }
       }
 
