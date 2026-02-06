@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Zap, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import logoExitoDigital from "@/assets/logo-exito-digital.png";
 
 export default function Auth() {
   const { user, loading } = useAuth();
@@ -26,11 +27,9 @@ export default function Auth() {
     <div className="dark flex min-h-screen items-center justify-center bg-background p-4">
       <div className="w-full max-w-md space-y-8">
         <div className="flex flex-col items-center gap-3">
-          <div className="flex items-center gap-2">
-            <div className="gradient-primary rounded-lg p-2">
-              <Zap className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <h1 className="font-display text-2xl font-bold text-foreground">Lead Flux</h1>
+          <div className="flex items-center gap-3">
+            <img src={logoExitoDigital} alt="Êxito Digital" className="h-12 w-auto" />
+            <h1 className="font-display text-2xl font-bold text-foreground">Êxito Digital</h1>
           </div>
           <p className="text-sm text-muted-foreground">
             CRM inteligente para gestão de leads
