@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Card, CardContent } from "@/components/ui/card";
-import { Phone, Mail, DollarSign, Pencil, Check, X } from "lucide-react";
+import { Phone, Mail, DollarSign, Pencil, Check, X, MessageCircle } from "lucide-react";
 import { SourceBadge } from "@/components/leads/SourceBadge";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -107,11 +107,31 @@ function LeadCardContent({ lead, onValueUpdate }: { lead: DraggableLeadCardProps
     setEditingValue(false);
   };
 
+  const openWhatsApp = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (!lead.phone) return;
+    const cleanPhone = lead.phone.replace(/\D/g, "");
+    window.open(`https://wa.me/${cleanPhone}`, "_blank");
+  };
+
   return (
     <>
       <div className="mb-2 flex items-start justify-between">
         <p className="text-sm font-medium text-foreground">{lead.name}</p>
-        <SourceBadge source={lead.source} />
+        <div className="flex items-center gap-1.5">
+          {lead.phone && (
+            <button
+              onClick={openWhatsApp}
+              onPointerDown={(e) => e.stopPropagation()}
+              className="text-success hover:text-success/80 transition-colors shrink-0"
+              title="Enviar WhatsApp"
+            >
+              <MessageCircle className="h-4 w-4" />
+            </button>
+          )}
+          <SourceBadge source={lead.source} />
+        </div>
       </div>
       <div className="space-y-1">
         {lead.phone && (
