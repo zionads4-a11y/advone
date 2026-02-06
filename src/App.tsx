@@ -11,6 +11,7 @@ import Leads from "./pages/Leads";
 import Kanban from "./pages/Kanban";
 import Campaigns from "./pages/Campaigns";
 import Companies from "./pages/Companies";
+import ClientUsers from "./pages/ClientUsers";
 import AppLayout from "./components/layout/AppLayout";
 import NotFound from "./pages/NotFound";
 
@@ -32,6 +33,7 @@ const App = () => (
               <Route path="/kanban" element={<Kanban />} />
               <Route path="/campaigns" element={<Campaigns />} />
               <Route path="/companies" element={<Companies />} />
+              <Route path="/client-users" element={<ClientUsers />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

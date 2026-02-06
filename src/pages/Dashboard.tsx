@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserCompanies } from "@/hooks/useUserCompanies";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, DollarSign, TrendingUp, Target, BarChart3 } from "lucide-react";
@@ -23,16 +25,22 @@ const STATUS_COLORS = {
 };
 
 export default function Dashboard() {
+  const { userRole } = useAuth();
+  const { isClient, filterByCompany, loading: companiesLoading } = useUserCompanies();
   const [stats, setStats] = useState<LeadStats>({ total: 0, new: 0, won: 0, lost: 0, totalValue: 0 });
   const [statusData, setStatusData] = useState<{ name: string; value: number; color: string }[]>([]);
   const [sourceData, setSourceData] = useState<{ name: string; leads: number }[]>([]);
 
   useEffect(() => {
-    fetchStats();
-  }, []);
+    if (!companiesLoading) {
+      fetchStats();
+    }
+  }, [companiesLoading]);
 
   const fetchStats = async () => {
-    const { data: leads } = await supabase.from("leads").select("status, value, source");
+    let query = supabase.from("leads").select("status, value, source, company_id");
+    query = filterByCompany(query);
+    const { data: leads } = await query;
 
     if (leads) {
       const total = leads.length;
@@ -67,11 +75,14 @@ export default function Dashboard() {
     }
   };
 
+  const greeting = isClient ? "Portal do Cliente" : "Dashboard";
+  const subtitle = isClient ? "Acompanhe os leads da sua empresa" : "Visão geral dos seus leads e campanhas";
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="font-display text-2xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Visão geral dos seus leads e campanhas</p>
+        <h1 className="font-display text-2xl font-bold text-foreground">{greeting}</h1>
+        <p className="text-sm text-muted-foreground">{subtitle}</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
