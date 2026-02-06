@@ -1,12 +1,20 @@
+import { Navigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { Loader2 } from "lucide-react";
+
 const Index = () => {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-2xl font-semibold text-foreground">Projeto Pronto</h1>
-        <p className="mt-2 text-muted-foreground">Aguardando suas instruções.</p>
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
-    </div>
-  );
+    );
+  }
+
+  if (user) return <Navigate to="/dashboard" replace />;
+  return <Navigate to="/auth" replace />;
 };
 
 export default Index;
