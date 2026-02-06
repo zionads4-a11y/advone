@@ -6,13 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Building2, Link2, Megaphone, Users, Phone, MessageSquare } from "lucide-react";
+import { ArrowLeft, Building2, Link2, Megaphone, Users, Phone, MessageSquare, Kanban } from "lucide-react";
 import { toast } from "sonner";
 
 import { CompanyTrackingLinks } from "@/components/companies/CompanyTrackingLinks";
 import { CompanyCampaigns } from "@/components/companies/CompanyCampaigns";
 import { CompanyLeads } from "@/components/companies/CompanyLeads";
 import { ZapiConfigDialog } from "@/components/companies/ZapiConfigDialog";
+import { CompanyKanban } from "@/components/companies/CompanyKanban";
 
 interface Company {
   id: string;
@@ -157,8 +158,11 @@ export default function CompanyDetail() {
       />
 
       {/* Tabs */}
-      <Tabs defaultValue="tracking" className="space-y-4">
+      <Tabs defaultValue="kanban" className="space-y-4">
         <TabsList className="bg-secondary/50">
+          <TabsTrigger value="kanban" className="gap-2">
+            <Kanban className="h-4 w-4" /> Kanban
+          </TabsTrigger>
           <TabsTrigger value="tracking" className="gap-2">
             <Link2 className="h-4 w-4" /> Links
           </TabsTrigger>
@@ -169,6 +173,10 @@ export default function CompanyDetail() {
             <Users className="h-4 w-4" /> Leads
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="kanban">
+          <CompanyKanban companyId={company.id} companyName={company.name} />
+        </TabsContent>
 
         <TabsContent value="tracking">
           <CompanyTrackingLinks companyId={company.id} companyWhatsapp={company.whatsapp} />
