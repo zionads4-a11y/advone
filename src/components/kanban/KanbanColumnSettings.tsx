@@ -141,7 +141,7 @@ export function KanbanColumnSettings({ companyId, companyName, columns, onUpdate
           Personalizar Funil
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto bg-card text-foreground dark">
+      <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto bg-card text-foreground">
         <DialogHeader>
           <DialogTitle className="font-display">
             Funil — {companyName}
