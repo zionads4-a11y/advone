@@ -3,9 +3,11 @@ import {
   LogOut,
   Users,
   CalendarDays,
+  UserCircle,
 } from "lucide-react";
 import logoExitoDigital from "@/assets/logo-exito-digital.png";
 import { NavLink } from "@/components/NavLink";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Sidebar,
@@ -96,6 +98,7 @@ function getGroupLabel(role: string | null) {
 
 export function AppSidebar() {
   const { signOut, user, userRole } = useAuth();
+  const navigate = useNavigate();
   const { unreadCount } = useNewMessageNotifications();
   const menuItems = getMenuItems(userRole);
 
@@ -149,15 +152,25 @@ export function AppSidebar() {
         <div className="mb-3 truncate text-xs text-sidebar-foreground/50">
           {user?.email}
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={signOut}
-          className="w-full justify-start text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-destructive"
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          Sair
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/profile")}
+            className="flex-1 justify-start text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-primary"
+          >
+            <UserCircle className="mr-2 h-4 w-4" />
+            Perfil
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={signOut}
+            className="justify-start text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-destructive"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
+        </div>
       </SidebarFooter>
     </Sidebar>
   );
