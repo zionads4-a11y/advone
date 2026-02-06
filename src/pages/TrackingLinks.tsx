@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Link2, Copy, ExternalLink, MousePointerClick, Users, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 import { CreateTrackingLinkForm } from "@/components/tracking/CreateTrackingLinkForm";
+import { TrackingLinkUtmTemplates } from "@/components/tracking/TrackingLinkUtmTemplates";
 
 interface Company {
   id: string;
@@ -261,7 +262,12 @@ export default function TrackingLinks() {
                     const stats = clickStats[link.id];
                     return (
                       <TableRow key={link.id}>
-                        <TableCell className="font-medium text-sm text-primary">{link.slug}</TableCell>
+                        <TableCell>
+                          <div>
+                            <span className="font-medium text-sm text-primary">{link.slug}</span>
+                            <TrackingLinkUtmTemplates slug={link.slug} />
+                          </div>
+                        </TableCell>
                         <TableCell className="text-sm">{link.whatsapp_number}</TableCell>
                         <TableCell className="text-sm text-muted-foreground max-w-[200px] truncate">
                           {link.default_message || "Olá!"}
