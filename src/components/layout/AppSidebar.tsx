@@ -2,6 +2,7 @@ import {
   Building2,
   LogOut,
   Users,
+  CalendarDays,
 } from "lucide-react";
 import logoExitoDigital from "@/assets/logo-exito-digital.png";
 import { NavLink } from "@/components/NavLink";
@@ -25,24 +26,28 @@ import { LayoutDashboard, Kanban, MessageSquare } from "lucide-react";
 
 const adminItems = [
   { title: "Empresas", url: "/companies", icon: Building2 },
+  { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Usuários", url: "/client-users", icon: Users },
 ];
 
 const gerenteItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Kanban", url: "/kanban", icon: Kanban },
+  { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
   { title: "Equipe", url: "/client-users", icon: Users },
 ];
 
 const operadorItems = [
   { title: "Kanban", url: "/kanban", icon: Kanban },
+  { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
 ];
 
 const clientItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Kanban", url: "/kanban", icon: Kanban },
+  { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
 ];
 

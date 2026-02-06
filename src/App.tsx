@@ -16,6 +16,7 @@ import CompanyDetail from "./pages/CompanyDetail";
 import ClientUsers from "./pages/ClientUsers";
 import TrackingLinks from "./pages/TrackingLinks";
 import ConnectWhatsApp from "./pages/ConnectWhatsApp";
+import Agenda from "./pages/Agenda";
 import AppLayout from "./components/layout/AppLayout";
 import NotFound from "./pages/NotFound";
 
@@ -41,6 +42,7 @@ const App = () => (
               <Route path="/companies" element={<Companies />} />
               <Route path="/companies/:id" element={<CompanyDetail />} />
               <Route path="/tracking" element={<TrackingLinks />} />
+              <Route path="/agenda" element={<Agenda />} />
               <Route path="/client-users" element={<ClientUsers />} />
             </Route>
             <Route path="*" element={<NotFound />} />

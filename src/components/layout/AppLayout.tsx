@@ -4,6 +4,8 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { Loader2, MessageSquare } from "lucide-react";
 import { NewMessageNotificationProvider, useNewMessageNotifications } from "@/hooks/useNewMessageNotifications";
+import { ReminderAlertProvider } from "@/hooks/useReminderAlerts";
+import { ReminderAlertBell } from "./ReminderAlertBell";
 import { useNavigate } from "react-router-dom";
 
 function HeaderNotification() {
@@ -42,20 +44,25 @@ export default function AppLayout() {
 
   return (
     <NewMessageNotificationProvider>
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full">
-          <AppSidebar />
-          <main className="flex-1 overflow-auto">
-            <header className="sticky top-0 z-10 flex h-14 items-center border-b border-border bg-background/80 px-4 backdrop-blur-md">
-              <SidebarTrigger className="text-muted-foreground" />
-              <HeaderNotification />
-            </header>
-            <div className="p-6">
-              <Outlet />
-            </div>
-          </main>
-        </div>
-      </SidebarProvider>
+      <ReminderAlertProvider>
+        <SidebarProvider>
+          <div className="flex min-h-screen w-full">
+            <AppSidebar />
+            <main className="flex-1 overflow-auto">
+              <header className="sticky top-0 z-10 flex h-14 items-center border-b border-border bg-background/80 px-4 backdrop-blur-md">
+                <SidebarTrigger className="text-muted-foreground" />
+                <div className="ml-auto flex items-center gap-2">
+                  <ReminderAlertBell />
+                  <HeaderNotification />
+                </div>
+              </header>
+              <div className="p-6">
+                <Outlet />
+              </div>
+            </main>
+          </div>
+        </SidebarProvider>
+      </ReminderAlertProvider>
     </NewMessageNotificationProvider>
   );
 }
