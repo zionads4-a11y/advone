@@ -1,9 +1,9 @@
 import {
   Building2,
   LogOut,
-  Zap,
   Users,
 } from "lucide-react";
+import logoExitoDigital from "@/assets/logo-exito-digital.png";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -96,12 +96,10 @@ export function AppSidebar() {
 
   return (
     <Sidebar className="border-r border-sidebar-border bg-sidebar">
-      <div className="flex items-center gap-2 px-4 py-5">
-        <div className="gradient-primary rounded-lg p-1.5">
-          <Zap className="h-5 w-5 text-sidebar-primary-foreground" />
-        </div>
+      <div className="flex items-center gap-3 px-4 py-5">
+        <img src={logoExitoDigital} alt="Êxito Digital" className="h-8 w-auto" />
         <span className="font-display text-lg font-bold text-sidebar-accent-foreground">
-          Lead Flux
+          Êxito Digital
         </span>
       </div>
 
