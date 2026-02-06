@@ -126,6 +126,47 @@ export type Database = {
         }
         Relationships: []
       }
+      kanban_columns: {
+        Row: {
+          color: string
+          company_id: string
+          created_at: string
+          id: string
+          is_lost: boolean
+          is_won: boolean
+          name: string
+          position: number
+        }
+        Insert: {
+          color?: string
+          company_id: string
+          created_at?: string
+          id?: string
+          is_lost?: boolean
+          is_won?: boolean
+          name: string
+          position?: number
+        }
+        Update: {
+          color?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_lost?: boolean
+          is_won?: boolean
+          name?: string
+          position?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kanban_columns_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           campaign_id: string | null
@@ -133,6 +174,7 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          kanban_column_id: string | null
           name: string
           notes: string | null
           phone: string | null
@@ -153,6 +195,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          kanban_column_id?: string | null
           name: string
           notes?: string | null
           phone?: string | null
@@ -173,6 +216,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          kanban_column_id?: string | null
           name?: string
           notes?: string | null
           phone?: string | null
@@ -200,6 +244,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_kanban_column_id_fkey"
+            columns: ["kanban_column_id"]
+            isOneToOne: false
+            referencedRelation: "kanban_columns"
             referencedColumns: ["id"]
           },
         ]
