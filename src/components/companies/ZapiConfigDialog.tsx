@@ -325,18 +325,45 @@ function AIConfigTab({ companyId }: { companyId: string }) {
 
   const handleSave = async () => {
     setSaving(true);
+
+    // Capture old values before update
+    const { data: oldData } = await supabase
+      .from("whatsapp_configs")
+      .select("ai_enabled, ai_auto_reply, ai_prompt")
+      .eq("company_id", companyId)
+      .maybeSingle();
+
+    const newValues = {
+      ai_enabled: aiEnabled,
+      ai_auto_reply: aiAutoReply,
+      ai_prompt: aiPrompt,
+    };
+
     const { error } = await supabase
       .from("whatsapp_configs")
-      .update({
-        ai_enabled: aiEnabled,
-        ai_auto_reply: aiAutoReply,
-        ai_prompt: aiPrompt,
-      })
+      .update(newValues)
       .eq("company_id", companyId);
 
     if (error) {
       toast.error("Erro ao salvar: " + error.message);
     } else {
+      // Log audit entry
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from("audit_logs").insert({
+          company_id: companyId,
+          user_id: user.id,
+          action: "update",
+          entity_type: "whatsapp_ai_config",
+          entity_id: companyId,
+          old_values: oldData ? {
+            ai_enabled: oldData.ai_enabled,
+            ai_auto_reply: oldData.ai_auto_reply,
+            ai_prompt: oldData.ai_prompt,
+          } : null,
+          new_values: newValues,
+        });
+      }
       toast.success("Configuração IA salva!");
     }
     setSaving(false);
