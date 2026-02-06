@@ -13,6 +13,7 @@ import {
   Link2,
   Pencil,
   Eye,
+  Trash2,
 } from "lucide-react";
 
 interface CompanyMetrics {
@@ -33,6 +34,7 @@ interface CompanyCardProps {
   metrics: CompanyMetrics;
   onConfigureZapi: () => void;
   onEdit: () => void;
+  onDelete: () => void;
 }
 
 export function CompanyCard({
@@ -41,6 +43,7 @@ export function CompanyCard({
   metrics,
   onConfigureZapi,
   onEdit,
+  onDelete,
 }: CompanyCardProps) {
   const navigate = useNavigate();
 
@@ -61,6 +64,15 @@ export function CompanyCard({
               </p>
             )}
           </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
+            onClick={onDelete}
+            title="Excluir empresa"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
           <Button
             variant="ghost"
             size="icon"
