@@ -1,7 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Card, CardContent } from "@/components/ui/card";
-import { Phone, Mail, DollarSign, GripVertical } from "lucide-react";
+import { Phone, Mail, DollarSign } from "lucide-react";
 import { SourceBadge } from "@/components/leads/SourceBadge";
 
 interface DraggableLeadCardProps {
@@ -48,25 +48,16 @@ export function DraggableLeadCard({ lead, onClick, isDragOverlay }: DraggableLea
   }
 
   return (
-    <div ref={setNodeRef} style={style}>
-      <Card
-        className="glass-card cursor-grab transition-all hover:border-primary/30 hover:shadow-md active:cursor-grabbing"
-        onClick={onClick}
-      >
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      onClick={onClick}
+    >
+      <Card className="glass-card cursor-grab transition-all hover:border-primary/30 hover:shadow-md active:cursor-grabbing">
         <CardContent className="p-3">
-          <div className="flex items-start gap-1.5">
-            <div
-              {...attributes}
-              {...listeners}
-              className="mt-0.5 shrink-0 cursor-grab text-muted-foreground/40 hover:text-muted-foreground active:cursor-grabbing"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <GripVertical className="h-4 w-4" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <LeadCardContent lead={lead} />
-            </div>
-          </div>
+          <LeadCardContent lead={lead} />
         </CardContent>
       </Card>
     </div>
