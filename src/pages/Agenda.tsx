@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserCompanies } from "@/hooks/useUserCompanies";
 import { useAuth } from "@/hooks/useAuth";
@@ -6,7 +6,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, CalendarClock, Check, Clock, AlertTriangle } from "lucide-react";
-import { format, isSameDay, startOfMonth, endOfMonth, isAfter, isBefore } from "date-fns";
+import { toast } from "sonner";
+import { format, isSameDay, isAfter, isBefore } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 interface Reminder {
@@ -126,6 +127,28 @@ export default function Agenda() {
     return reminders.filter((r) => !r.completed && isBefore(new Date(r.due_at), now));
   }, [reminders]);
 
+  const handleToggleComplete = useCallback(async (id: string, newCompleted: boolean) => {
+    const { error } = await supabase
+      .from("lead_reminders")
+      .update({
+        completed: newCompleted,
+        completed_at: newCompleted ? new Date().toISOString() : null,
+      })
+      .eq("id", id);
+    if (error) {
+      toast.error("Erro ao atualizar");
+    } else {
+      setReminders((prev) =>
+        prev.map((r) =>
+          r.id === id
+            ? { ...r, completed: newCompleted, completed_at: newCompleted ? new Date().toISOString() : null }
+            : r
+        )
+      );
+      toast.success(newCompleted ? "Marcado como ocorrido!" : "Marcado como pendente!");
+    }
+  }, []);
+
   const isAdmin = userRole === "admin" || userRole === "member";
 
   if (loading || companiesLoading) {
@@ -198,7 +221,7 @@ export default function Agenda() {
             ) : (
               <div className="space-y-2">
                 {selectedDateReminders.map((r) => (
-                  <ReminderItem key={r.id} reminder={r} />
+                  <ReminderItem key={r.id} reminder={r} onToggle={handleToggleComplete} />
                 ))}
               </div>
             )}
@@ -213,7 +236,7 @@ export default function Agenda() {
               </h3>
               <div className="space-y-2">
                 {overdueReminders.map((r) => (
-                  <ReminderItem key={r.id} reminder={r} />
+                  <ReminderItem key={r.id} reminder={r} onToggle={handleToggleComplete} />
                 ))}
               </div>
             </div>
@@ -228,7 +251,7 @@ export default function Agenda() {
               </h3>
               <div className="space-y-2">
                 {upcomingReminders.map((r) => (
-                  <ReminderItem key={r.id} reminder={r} />
+                  <ReminderItem key={r.id} reminder={r} onToggle={handleToggleComplete} />
                 ))}
               </div>
             </div>
@@ -239,7 +262,7 @@ export default function Agenda() {
   );
 }
 
-function ReminderItem({ reminder }: { reminder: Reminder }) {
+function ReminderItem({ reminder, onToggle }: { reminder: Reminder; onToggle?: (id: string, completed: boolean) => void }) {
   const isOverdue = !reminder.completed && isBefore(new Date(reminder.due_at), new Date());
 
   return (
@@ -252,11 +275,15 @@ function ReminderItem({ reminder }: { reminder: Reminder }) {
           : "border-border bg-background"
       }`}
     >
-      <div className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
-        reminder.completed ? "bg-success text-success-foreground" : isOverdue ? "bg-destructive/20 text-destructive" : "bg-primary/20 text-primary"
-      }`}>
+      <button
+        onClick={() => onToggle?.(reminder.id, !reminder.completed)}
+        title={reminder.completed ? "Marcar como pendente" : "Marcar como ocorrido"}
+        className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full cursor-pointer transition-colors ${
+          reminder.completed ? "bg-success text-success-foreground hover:bg-success/80" : isOverdue ? "bg-destructive/20 text-destructive hover:bg-destructive/30" : "bg-primary/20 text-primary hover:bg-primary/30"
+        }`}
+      >
         {reminder.completed ? <Check className="h-3 w-3" /> : isOverdue ? <AlertTriangle className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
-      </div>
+      </button>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className={`text-sm font-medium ${reminder.completed ? "line-through text-muted-foreground" : "text-foreground"}`}>
