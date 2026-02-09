@@ -24,6 +24,9 @@ interface Lead {
   created_at: string;
   assigned_to: string | null;
   company_id: string;
+  processo_numero: string | null;
+  cpf: string | null;
+  processo_valor: number | null;
 }
 
 const statusConfig: Record<LeadStatus, { label: string; className: string }> = {

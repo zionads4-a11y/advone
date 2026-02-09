@@ -324,6 +324,7 @@ export type Database = {
           assigned_to: string | null
           campaign_id: string | null
           company_id: string
+          cpf: string | null
           created_at: string
           email: string | null
           id: string
@@ -331,6 +332,8 @@ export type Database = {
           name: string
           notes: string | null
           phone: string | null
+          processo_numero: string | null
+          processo_valor: number | null
           source: Database["public"]["Enums"]["campaign_source"] | null
           status: Database["public"]["Enums"]["lead_status"]
           updated_at: string
@@ -346,6 +349,7 @@ export type Database = {
           assigned_to?: string | null
           campaign_id?: string | null
           company_id: string
+          cpf?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -353,6 +357,8 @@ export type Database = {
           name: string
           notes?: string | null
           phone?: string | null
+          processo_numero?: string | null
+          processo_valor?: number | null
           source?: Database["public"]["Enums"]["campaign_source"] | null
           status?: Database["public"]["Enums"]["lead_status"]
           updated_at?: string
@@ -368,6 +374,7 @@ export type Database = {
           assigned_to?: string | null
           campaign_id?: string | null
           company_id?: string
+          cpf?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -375,6 +382,8 @@ export type Database = {
           name?: string
           notes?: string | null
           phone?: string | null
+          processo_numero?: string | null
+          processo_valor?: number | null
           source?: Database["public"]["Enums"]["campaign_source"] | null
           status?: Database["public"]["Enums"]["lead_status"]
           updated_at?: string
