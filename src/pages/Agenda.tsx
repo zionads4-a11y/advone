@@ -278,11 +278,16 @@ function ReminderItem({ reminder, onToggle }: { reminder: Reminder; onToggle?: (
       <button
         onClick={() => onToggle?.(reminder.id, !reminder.completed)}
         title={reminder.completed ? "Marcar como pendente" : "Marcar como ocorrido"}
-        className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full cursor-pointer transition-colors ${
-          reminder.completed ? "bg-success text-success-foreground hover:bg-success/80" : isOverdue ? "bg-destructive/20 text-destructive hover:bg-destructive/30" : "bg-primary/20 text-primary hover:bg-primary/30"
+        className={`mt-0.5 flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-medium cursor-pointer transition-colors ${
+          reminder.completed
+            ? "bg-success/20 text-success hover:bg-success/30 border border-success/30"
+            : isOverdue
+            ? "bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/30"
+            : "bg-primary/10 text-primary hover:bg-primary/20 border border-primary/30"
         }`}
       >
         {reminder.completed ? <Check className="h-3 w-3" /> : isOverdue ? <AlertTriangle className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
+        {reminder.completed ? "Concluído" : isOverdue ? "Atrasado" : "Pendente"}
       </button>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
