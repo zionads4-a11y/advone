@@ -43,17 +43,19 @@ export function LeadProcessData({ leadId, cpf, processoNumero, processoValor, on
     const cleanProcesso = formProcesso.trim().slice(0, 50);
     const parsedValor = parseFloat(formValor.replace(",", ".")) || 0;
 
-    const { error } = await supabase
+    const { error, data } = await supabase
       .from("leads")
       .update({
         cpf: cleanCpf || null,
         processo_numero: cleanProcesso || null,
         processo_valor: parsedValor,
-      })
-      .eq("id", leadId);
+      } as any)
+      .eq("id", leadId)
+      .select();
 
     if (error) {
-      toast.error("Erro ao salvar dados do processo");
+      console.error("Erro ao salvar dados do processo:", error);
+      toast.error("Erro ao salvar dados do processo: " + error.message);
     } else {
       toast.success("Dados do processo atualizados!");
       onUpdate?.();

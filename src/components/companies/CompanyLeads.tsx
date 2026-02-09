@@ -61,7 +61,14 @@ export function CompanyLeads({ companyId }: CompanyLeadsProps) {
       .select("*")
       .eq("company_id", companyId)
       .order("created_at", { ascending: false });
-    if (data) setLeads(data as Lead[]);
+    if (data) {
+      setLeads(data as Lead[]);
+      // Update selectedLead with fresh data if drawer is open
+      if (selectedLead) {
+        const updated = data.find((l: any) => l.id === selectedLead.id);
+        if (updated) setSelectedLead(updated as Lead);
+      }
+    }
     setLoading(false);
   };
 
