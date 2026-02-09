@@ -3,11 +3,12 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Phone, Mail, DollarSign, Calendar, FileText, User, Scale } from "lucide-react";
+import { Phone, Mail, DollarSign, Calendar } from "lucide-react";
 import { SourceBadge } from "@/components/leads/SourceBadge";
 import { LeadReminders } from "@/components/leads/LeadReminders";
 import { LeadSummary } from "@/components/leads/LeadSummary";
 import { LeadAssignment } from "@/components/leads/LeadAssignment";
+import { LeadProcessData } from "@/components/leads/LeadProcessData";
 
 type LeadStatus = "new" | "contacted" | "qualified" | "negotiating" | "won" | "lost";
 
@@ -117,34 +118,13 @@ export function LeadDetailDrawer({ lead, open, onOpenChange, onLeadUpdate }: Lea
             <Separator />
 
             {/* Dados do Processo */}
-            <div className="space-y-2">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Dados do Processo
-              </h4>
-              <div className="space-y-1.5">
-                {lead.cpf && (
-                  <div className="flex items-center gap-2 text-sm text-foreground">
-                    <User className="h-3.5 w-3.5 text-muted-foreground" />
-                    CPF: {lead.cpf}
-                  </div>
-                )}
-                {lead.processo_numero && (
-                  <div className="flex items-center gap-2 text-sm text-foreground">
-                    <FileText className="h-3.5 w-3.5 text-muted-foreground" />
-                    Processo: {lead.processo_numero}
-                  </div>
-                )}
-                {(lead.processo_valor ?? 0) > 0 && (
-                  <div className="flex items-center gap-2 text-sm font-medium text-success">
-                    <Scale className="h-3.5 w-3.5" />
-                    Valor do Processo: R$ {Number(lead.processo_valor).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                  </div>
-                )}
-                {!lead.cpf && !lead.processo_numero && !(lead.processo_valor ?? 0) && (
-                  <p className="text-xs text-muted-foreground">Nenhum dado de processo informado</p>
-                )}
-              </div>
-            </div>
+            <LeadProcessData
+              leadId={lead.id}
+              cpf={lead.cpf}
+              processoNumero={lead.processo_numero}
+              processoValor={lead.processo_valor}
+              onUpdate={onLeadUpdate}
+            />
 
             <Separator />
 
