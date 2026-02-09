@@ -120,9 +120,7 @@ export function LeadDetailDrawer({ lead, open, onOpenChange, onLeadUpdate }: Lea
             {/* Dados do Processo */}
             <LeadProcessData
               leadId={lead.id}
-              cpf={lead.cpf}
-              processoNumero={lead.processo_numero}
-              processoValor={lead.processo_valor}
+              companyId={lead.company_id}
               onUpdate={onLeadUpdate}
             />
 
