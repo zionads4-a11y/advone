@@ -3,14 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { FileText, User, Scale, Pencil, Check, X } from "lucide-react";
+import { FileText, User, Scale, Pencil, Check, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface LeadProcessDataProps {
   leadId: string;
-  cpf: string | null;
-  processoNumero: string | null;
-  processoValor: number | null;
+  companyId: string;
   onUpdate?: () => void;
 }
 
@@ -22,20 +20,48 @@ function formatCpf(value: string): string {
   return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
 }
 
-export function LeadProcessData({ leadId, cpf, processoNumero, processoValor, onUpdate }: LeadProcessDataProps) {
+export function LeadProcessData({ leadId, companyId, onUpdate }: LeadProcessDataProps) {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [formCpf, setFormCpf] = useState(cpf || "");
-  const [formProcesso, setFormProcesso] = useState(processoNumero || "");
-  const [formValor, setFormValor] = useState(processoValor ? String(processoValor) : "");
+  const [loading, setLoading] = useState(true);
+  
+  // Stored values (from DB)
+  const [cpf, setCpf] = useState<string | null>(null);
+  const [processoNumero, setProcessoNumero] = useState<string | null>(null);
+  const [processoValor, setProcessoValor] = useState<number | null>(null);
+  
+  // Form values (editing)
+  const [formCpf, setFormCpf] = useState("");
+  const [formProcesso, setFormProcesso] = useState("");
+  const [formValor, setFormValor] = useState("");
+
+  const fetchData = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("leads")
+      .select("cpf, processo_numero, processo_valor")
+      .eq("id", leadId)
+      .maybeSingle();
+    
+    if (data) {
+      const d = data as any;
+      setCpf(d.cpf || null);
+      setProcessoNumero(d.processo_numero || null);
+      setProcessoValor(d.processo_valor || null);
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    if (!editing) {
-      setFormCpf(cpf || "");
-      setFormProcesso(processoNumero || "");
-      setFormValor(processoValor ? String(processoValor) : "");
-    }
-  }, [cpf, processoNumero, processoValor, editing]);
+    fetchData();
+  }, [leadId]);
+
+  const startEditing = () => {
+    setFormCpf(cpf || "");
+    setFormProcesso(processoNumero || "");
+    setFormValor(processoValor ? String(processoValor) : "");
+    setEditing(true);
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -43,20 +69,23 @@ export function LeadProcessData({ leadId, cpf, processoNumero, processoValor, on
     const cleanProcesso = formProcesso.trim().slice(0, 50);
     const parsedValor = parseFloat(formValor.replace(",", ".")) || 0;
 
-    const { error, data } = await supabase
+    const { error } = await supabase
       .from("leads")
       .update({
         cpf: cleanCpf || null,
         processo_numero: cleanProcesso || null,
         processo_valor: parsedValor,
       } as any)
-      .eq("id", leadId)
-      .select();
+      .eq("id", leadId);
 
     if (error) {
       console.error("Erro ao salvar dados do processo:", error);
-      toast.error("Erro ao salvar dados do processo: " + error.message);
+      toast.error("Erro ao salvar: " + error.message);
     } else {
+      // Update local state immediately
+      setCpf(cleanCpf || null);
+      setProcessoNumero(cleanProcesso || null);
+      setProcessoValor(parsedValor);
       toast.success("Dados do processo atualizados!");
       onUpdate?.();
     }
@@ -65,11 +94,22 @@ export function LeadProcessData({ leadId, cpf, processoNumero, processoValor, on
   };
 
   const handleCancel = () => {
-    setFormCpf(cpf || "");
-    setFormProcesso(processoNumero || "");
-    setFormValor(processoValor ? String(processoValor) : "");
     setEditing(false);
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-2">
+        <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Dados do Processo
+        </h4>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Loader2 className="h-3 w-3 animate-spin" />
+          Carregando...
+        </div>
+      </div>
+    );
+  }
 
   if (!editing) {
     return (
@@ -79,7 +119,7 @@ export function LeadProcessData({ leadId, cpf, processoNumero, processoValor, on
             Dados do Processo
           </h4>
           <button
-            onClick={() => setEditing(true)}
+            onClick={startEditing}
             className="text-muted-foreground hover:text-foreground transition-colors"
             title="Editar dados do processo"
           >
@@ -107,7 +147,7 @@ export function LeadProcessData({ leadId, cpf, processoNumero, processoValor, on
           ) : null}
           {!cpf && !processoNumero && !(processoValor ?? 0) && (
             <button
-              onClick={() => setEditing(true)}
+              onClick={startEditing}
               className="text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
             >
               Clique para adicionar dados do processo
@@ -157,7 +197,7 @@ export function LeadProcessData({ leadId, cpf, processoNumero, processoValor, on
       </div>
       <div className="flex items-center gap-2">
         <Button size="sm" onClick={handleSave} disabled={saving} className="h-7 text-xs">
-          <Check className="h-3 w-3 mr-1" />
+          {saving ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Check className="h-3 w-3 mr-1" />}
           Salvar
         </Button>
         <Button size="sm" variant="ghost" onClick={handleCancel} className="h-7 text-xs">
