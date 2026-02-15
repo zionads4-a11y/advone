@@ -6,6 +6,204 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+async function qualifyLeadWithAI(
+  config: any,
+  conversationHistory: { role: string; content: string }[],
+  companyId: string,
+  leadId: string,
+  supabase: any
+) {
+  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+  if (!LOVABLE_API_KEY) return null;
+
+  const systemPrompt = `${config.ai_prompt || "Você é um atendente virtual. Seja cordial e objetivo."}
+
+INSTRUÇÕES IMPORTANTES DE QUALIFICAÇÃO:
+- Você é um agente de triagem. Seu objetivo é entender rapidamente se o lead é adequado para o escritório.
+- Faça perguntas objetivas para qualificar o lead (máximo 3-4 perguntas).
+- Quando tiver informação suficiente, use a ferramenta "qualify_lead" para registrar sua análise.
+- Se o lead for qualificado, use a ferramenta "transfer_to_human" para encaminhar ao atendente.
+- Se o lead NÃO for qualificado, explique educadamente que o caso não se encaixa no perfil do escritório e use "qualify_lead" com status "not_qualified".
+- Seja sempre cordial e profissional.
+- NÃO fique respondendo muitas perguntas do lead. Foque em qualificar rapidamente.
+- Responda SEMPRE em português do Brasil.`;
+
+  const tools = [
+    {
+      type: "function",
+      function: {
+        name: "qualify_lead",
+        description: "Registra a qualificação do lead após análise da conversa. Use quando tiver informações suficientes para decidir se o lead é adequado.",
+        parameters: {
+          type: "object",
+          properties: {
+            status: {
+              type: "string",
+              enum: ["qualified", "not_qualified", "needs_more_info"],
+              description: "qualified = lead adequado para o escritório, not_qualified = caso não se encaixa, needs_more_info = precisa de mais informações"
+            },
+            reason: {
+              type: "string",
+              description: "Motivo da qualificação em português (ex: 'Cliente com mais de 2 anos de vínculo, demitido sem justa causa')"
+            },
+            summary: {
+              type: "string",
+              description: "Resumo breve do caso do lead em português"
+            }
+          },
+          required: ["status", "reason"],
+          additionalProperties: false
+        }
+      }
+    },
+    {
+      type: "function",
+      function: {
+        name: "transfer_to_human",
+        description: "Transfere o atendimento para um atendente humano. Use quando o lead for qualificado e precisar de atendimento especializado.",
+        parameters: {
+          type: "object",
+          properties: {
+            message_to_lead: {
+              type: "string",
+              description: "Mensagem final para o lead informando que será atendido por um especialista"
+            }
+          },
+          required: ["message_to_lead"],
+          additionalProperties: false
+        }
+      }
+    }
+  ];
+
+  try {
+    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        messages: [
+          { role: "system", content: systemPrompt },
+          ...conversationHistory,
+        ],
+        tools,
+      }),
+    });
+
+    if (!aiResponse.ok) {
+      console.error("AI qualification error:", aiResponse.status, await aiResponse.text());
+      return null;
+    }
+
+    const aiData = await aiResponse.json();
+    const choice = aiData.choices?.[0];
+    const message = choice?.message;
+
+    if (!message) return null;
+
+    // Process tool calls if any
+    let qualificationResult: { status: string; reason: string; summary?: string } | null = null;
+    let transferMessage: string | null = null;
+    let replyText = message.content || "";
+
+    if (message.tool_calls && message.tool_calls.length > 0) {
+      for (const toolCall of message.tool_calls) {
+        const fnName = toolCall.function?.name;
+        let args: any = {};
+        try {
+          args = JSON.parse(toolCall.function?.arguments || "{}");
+        } catch { /* ignore parse errors */ }
+
+        if (fnName === "qualify_lead") {
+          qualificationResult = {
+            status: args.status || "needs_more_info",
+            reason: args.reason || "",
+            summary: args.summary || "",
+          };
+          console.log("Lead qualification result:", JSON.stringify(qualificationResult));
+        }
+
+        if (fnName === "transfer_to_human") {
+          transferMessage = args.message_to_lead || "Um especialista irá atendê-lo em breve!";
+        }
+      }
+
+      // Apply qualification to lead
+      if (qualificationResult && leadId) {
+        if (qualificationResult.status === "qualified") {
+          // Move to "contacted" status
+          await supabase.from("leads").update({
+            status: "contacted",
+            notes: `[IA] ${qualificationResult.reason}${qualificationResult.summary ? ` | ${qualificationResult.summary}` : ""}`,
+          }).eq("id", leadId);
+
+          // Create a summary
+          await supabase.from("lead_summaries").insert({
+            lead_id: leadId,
+            company_id: companyId,
+            summary_text: `🤖 Qualificação automática: ${qualificationResult.reason}${qualificationResult.summary ? `\n\nResumo: ${qualificationResult.summary}` : ""}`,
+            generated_by_ai: true,
+            created_by: "00000000-0000-0000-0000-000000000000",
+          });
+
+          // Move to second kanban column (typically "Contatado")
+          const { data: columns } = await supabase
+            .from("kanban_columns")
+            .select("id")
+            .eq("company_id", companyId)
+            .order("position", { ascending: true })
+            .limit(2);
+
+          if (columns && columns.length >= 2) {
+            await supabase.from("leads").update({
+              kanban_column_id: columns[1].id,
+            }).eq("id", leadId);
+          }
+
+          console.log("Lead qualified and moved:", leadId);
+        } else if (qualificationResult.status === "not_qualified") {
+          // Mark as lost
+          const { data: lostColumn } = await supabase
+            .from("kanban_columns")
+            .select("id")
+            .eq("company_id", companyId)
+            .eq("is_lost", true)
+            .maybeSingle();
+
+          await supabase.from("leads").update({
+            status: "lost",
+            notes: `[IA - Não qualificado] ${qualificationResult.reason}`,
+            ...(lostColumn ? { kanban_column_id: lostColumn.id } : {}),
+          }).eq("id", leadId);
+
+          await supabase.from("lead_summaries").insert({
+            lead_id: leadId,
+            company_id: companyId,
+            summary_text: `🤖 Lead não qualificado: ${qualificationResult.reason}`,
+            generated_by_ai: true,
+            created_by: "00000000-0000-0000-0000-000000000000",
+          });
+
+          console.log("Lead not qualified:", leadId);
+        }
+      }
+
+      // If transfer requested, use the transfer message as reply
+      if (transferMessage) {
+        replyText = transferMessage;
+      }
+    }
+
+    return replyText || null;
+  } catch (error) {
+    console.error("AI qualification error:", error);
+    return null;
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -47,7 +245,6 @@ serve(async (req) => {
     console.log("Z-API webhook payload:", JSON.stringify(body));
 
     // Z-API sends different event types
-    // For incoming messages: type === "ReceivedCallback"
     if (!body || !body.type) {
       return new Response(JSON.stringify({ ok: true }), {
         status: 200,
@@ -77,7 +274,7 @@ serve(async (req) => {
         });
       }
 
-      // Clean phone number (remove @c.us suffix if present)
+      // Clean phone number
       const cleanPhone = phone.replace("@c.us", "").replace("@s.whatsapp.net", "");
 
       // Try to extract tracking code from message [XXXXXX]
@@ -90,7 +287,6 @@ serve(async (req) => {
         trackingCode = codeMatch[1];
         console.log("Tracking code found in message:", trackingCode);
 
-        // Look up the tracking click
         const { data: click } = await supabase
           .from("tracking_clicks")
           .select("id, utm_source, utm_medium, utm_campaign, utm_content, utm_term, tracking_link_id")
@@ -108,7 +304,6 @@ serve(async (req) => {
           };
           console.log("UTM data from tracking click:", JSON.stringify(utmData));
 
-          // Auto-detect source from utm_source
           const src = (click.utm_source || "").toLowerCase();
           if (src.includes("google") || src === "gads" || src === "googleads") {
             detectedSource = "google";
@@ -121,7 +316,7 @@ serve(async (req) => {
       // Check if lead exists for this phone + company
       const { data: existingLead } = await supabase
         .from("leads")
-        .select("id")
+        .select("id, status")
         .eq("company_id", companyId)
         .or(`phone.eq.${cleanPhone},whatsapp.eq.${cleanPhone}`)
         .maybeSingle();
@@ -130,7 +325,6 @@ serve(async (req) => {
 
       // If no lead exists, create one automatically
       if (!leadId) {
-        // Get the first kanban column for this company (position 0)
         const { data: firstColumn } = await supabase
           .from("kanban_columns")
           .select("id")
@@ -162,10 +356,9 @@ serve(async (req) => {
           console.error("Error creating lead:", leadError);
         } else {
           leadId = newLead.id;
-          console.log("New lead created:", leadId, "for phone:", cleanPhone, "with UTMs:", JSON.stringify(utmData));
+          console.log("New lead created:", leadId, "for phone:", cleanPhone);
         }
       } else if (Object.keys(utmData).length > 0) {
-        // Update existing lead with UTM data and source if it doesn't have any
         const { data: existingLeadData } = await supabase
           .from("leads")
           .select("utm_source, source")
@@ -186,7 +379,6 @@ serve(async (req) => {
           }
           if (Object.keys(updates).length > 0) {
             await supabase.from("leads").update(updates).eq("id", leadId);
-            console.log("Updated existing lead with UTM/source data:", leadId, JSON.stringify(updates));
           }
         }
       }
@@ -198,10 +390,9 @@ serve(async (req) => {
           .update({ lead_id: leadId, matched_at: new Date().toISOString() })
           .eq("tracking_code", trackingCode)
           .is("lead_id", null);
-        console.log("Tracking click matched to lead:", leadId, "code:", trackingCode);
       }
 
-      // Store the message
+      // Store the incoming message
       const { error: msgError } = await supabase
         .from("whatsapp_messages")
         .insert({
@@ -219,11 +410,14 @@ serve(async (req) => {
         console.error("Error storing message:", msgError);
       }
 
-      // AI Auto-Reply if enabled
-      if (config.ai_enabled && config.ai_auto_reply) {
+      // AI Auto-Reply with Qualification
+      if (config.ai_enabled && config.ai_auto_reply && leadId) {
         try {
-          const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-          if (LOVABLE_API_KEY) {
+          // Check if lead is already qualified/contacted - if so, skip AI (human is handling)
+          const leadStatus = existingLead?.status;
+          const isAlreadyHandled = leadStatus && !["new"].includes(leadStatus);
+
+          if (!isAlreadyHandled) {
             // Get recent conversation history for context
             const { data: recentMsgs } = await supabase
               .from("whatsapp_messages")
@@ -231,71 +425,48 @@ serve(async (req) => {
               .eq("company_id", companyId)
               .eq("phone", cleanPhone)
               .order("timestamp", { ascending: false })
-              .limit(10);
+              .limit(15);
 
             const history = (recentMsgs || [])
               .reverse()
-              .map((m) => ({
+              .map((m: any) => ({
                 role: m.direction === "incoming" ? "user" : "assistant",
                 content: m.message_text || "",
               }));
 
-            const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${LOVABLE_API_KEY}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                model: "google/gemini-3-flash-preview",
-                messages: [
-                  {
-                    role: "system",
-                    content: config.ai_prompt || "Você é um atendente virtual. Seja cordial e objetivo.",
-                  },
-                  ...history,
-                ],
-              }),
-            });
+            const aiReply = await qualifyLeadWithAI(config, history, companyId, leadId, supabase);
 
-            if (aiResponse.ok) {
-              const aiData = await aiResponse.json();
-              const aiReply = aiData.choices?.[0]?.message?.content;
+            if (aiReply) {
+              // Send reply via Z-API
+              const sendUrl = `https://api.z-api.io/instances/${config.zapi_instance_id}/token/${config.zapi_token}/send-text`;
+              const sendResponse = await fetch(sendUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ phone: cleanPhone, message: aiReply }),
+              });
 
-              if (aiReply) {
-                // Send reply via Z-API
-                const sendUrl = `https://api.z-api.io/instances/${config.zapi_instance_id}/token/${config.zapi_token}/send-text`;
-                const sendResponse = await fetch(sendUrl, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ phone: cleanPhone, message: aiReply }),
+              if (sendResponse.ok) {
+                const sendResult = await sendResponse.json();
+                await supabase.from("whatsapp_messages").insert({
+                  company_id: companyId,
+                  lead_id: leadId || null,
+                  phone: cleanPhone,
+                  message_text: aiReply,
+                  direction: "outgoing",
+                  sender_name: "IA",
+                  message_id_external: sendResult.messageId || null,
+                  timestamp: new Date().toISOString(),
                 });
-
-                if (sendResponse.ok) {
-                  const sendResult = await sendResponse.json();
-                  // Store outgoing AI message
-                  await supabase.from("whatsapp_messages").insert({
-                    company_id: companyId,
-                    lead_id: leadId || null,
-                    phone: cleanPhone,
-                    message_text: aiReply,
-                    direction: "outgoing",
-                    sender_name: "IA",
-                    message_id_external: sendResult.messageId || null,
-                    timestamp: new Date().toISOString(),
-                  });
-                  console.log("AI auto-reply sent to:", cleanPhone);
-                } else {
-                  console.error("Failed to send AI reply via Z-API:", await sendResponse.text());
-                }
+                console.log("AI qualification reply sent to:", cleanPhone);
+              } else {
+                console.error("Failed to send AI reply via Z-API:", await sendResponse.text());
               }
-            } else {
-              console.error("AI gateway error:", aiResponse.status, await aiResponse.text());
             }
+          } else {
+            console.log("Lead already handled (status:", leadStatus, "), skipping AI auto-reply");
           }
         } catch (aiError) {
           console.error("AI auto-reply error:", aiError);
-          // Don't fail the webhook if AI fails
         }
       }
 
@@ -313,7 +484,7 @@ serve(async (req) => {
       });
     }
 
-    // Default response for other webhook types
+    // Default response
     return new Response(JSON.stringify({ ok: true }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
