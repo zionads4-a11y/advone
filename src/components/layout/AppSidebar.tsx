@@ -4,6 +4,7 @@ import {
   Users,
   CalendarDays,
   UserCircle,
+  Bot,
 } from "lucide-react";
 import logoExitoDigital from "@/assets/logo-exito-digital.png";
 import { NavLink } from "@/components/NavLink";
@@ -39,6 +40,7 @@ const gerenteItems = [
   { title: "Kanban", url: "/kanban", icon: Kanban },
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
+  { title: "Bot", url: "/bot-config", icon: Bot },
   { title: "Equipe", url: "/client-users", icon: Users },
 ];
 
@@ -46,6 +48,7 @@ const operadorItems = [
   { title: "Kanban", url: "/kanban", icon: Kanban },
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
+  { title: "Bot", url: "/bot-config", icon: Bot },
 ];
 
 const clientItems = [

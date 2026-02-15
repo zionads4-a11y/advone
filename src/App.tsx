@@ -18,6 +18,7 @@ import TrackingLinks from "./pages/TrackingLinks";
 import ConnectWhatsApp from "./pages/ConnectWhatsApp";
 import Agenda from "./pages/Agenda";
 import Profile from "./pages/Profile";
+import BotConfig from "./pages/BotConfig";
 import AppLayout from "./components/layout/AppLayout";
 import NotFound from "./pages/NotFound";
 
@@ -46,6 +47,7 @@ const App = () => (
               <Route path="/agenda" element={<Agenda />} />
               <Route path="/client-users" element={<ClientUsers />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/bot-config" element={<BotConfig />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
