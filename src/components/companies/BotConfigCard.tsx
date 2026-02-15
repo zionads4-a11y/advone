@@ -122,13 +122,32 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-center justify-between rounded-lg border border-border p-3">
-          <div>
-            <p className="text-sm font-medium text-foreground">Ativar Bot</p>
-            <p className="text-xs text-muted-foreground">Habilita o atendente virtual com IA</p>
+        {/* Big toggle button */}
+        <button
+          onClick={() => setAiEnabled(!aiEnabled)}
+          className={`w-full flex items-center justify-between rounded-xl p-4 transition-all cursor-pointer border-2 ${
+            aiEnabled
+              ? "border-primary bg-primary/10"
+              : "border-border bg-muted/30"
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <div className={`flex h-12 w-12 items-center justify-center rounded-full transition-colors ${
+              aiEnabled ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+            }`}>
+              <Bot className="h-6 w-6" />
+            </div>
+            <div className="text-left">
+              <p className="text-base font-semibold text-foreground">
+                {aiEnabled ? "Bot Ativado" : "Bot Desativado"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {aiEnabled ? "O robô está qualificando leads automaticamente" : "Clique para ativar o atendente virtual"}
+              </p>
+            </div>
           </div>
           <Switch checked={aiEnabled} onCheckedChange={setAiEnabled} />
-        </div>
+        </button>
 
         <div className="flex items-center justify-between rounded-lg border border-border p-3">
           <div>
