@@ -13,6 +13,7 @@ import { CompanyTrackingLinks } from "@/components/companies/CompanyTrackingLink
 import { CompanyLeads } from "@/components/companies/CompanyLeads";
 import { ZapiConfigDialog } from "@/components/companies/ZapiConfigDialog";
 import { CompanyKanban } from "@/components/companies/CompanyKanban";
+import { BotConfigCard } from "@/components/companies/BotConfigCard";
 
 interface Company {
   id: string;
@@ -155,6 +156,9 @@ export default function CompanyDetail() {
         config={whatsappConfig}
         onSubmit={handleSaveZapi}
       />
+
+      {/* Bot Config */}
+      <BotConfigCard companyId={company.id} hasWhatsappConfig={!!whatsappConfig} />
 
       {/* Tabs */}
       <Tabs defaultValue="kanban" className="space-y-4">
