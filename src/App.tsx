@@ -14,6 +14,7 @@ import Campaigns from "./pages/Campaigns";
 import Companies from "./pages/Companies";
 import CompanyDetail from "./pages/CompanyDetail";
 import ClientUsers from "./pages/ClientUsers";
+import AccessManagement from "./pages/AccessManagement";
 import TrackingLinks from "./pages/TrackingLinks";
 import ConnectWhatsApp from "./pages/ConnectWhatsApp";
 import Agenda from "./pages/Agenda";
@@ -46,6 +47,7 @@ const App = () => (
               <Route path="/tracking" element={<TrackingLinks />} />
               <Route path="/agenda" element={<Agenda />} />
               <Route path="/client-users" element={<ClientUsers />} />
+              <Route path="/access-management" element={<AccessManagement />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/bot-config" element={<BotConfig />} />
             </Route>

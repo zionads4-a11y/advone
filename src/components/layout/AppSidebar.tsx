@@ -5,6 +5,7 @@ import {
   CalendarDays,
   UserCircle,
   Bot,
+  KeyRound,
 } from "lucide-react";
 import logoZionDigital from "@/assets/logo-zion-digital.png";
 import { NavLink } from "@/components/NavLink";
@@ -33,6 +34,7 @@ const adminItems = [
   { title: "Empresas", url: "/companies", icon: Building2 },
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Usuários", url: "/client-users", icon: Users },
+  { title: "Acessos", url: "/access-management", icon: KeyRound },
 ];
 
 const gerenteItems = [
