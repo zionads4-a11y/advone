@@ -6,7 +6,7 @@ import {
   UserCircle,
   Bot,
 } from "lucide-react";
-import logoExitoDigital from "@/assets/logo-exito-digital.png";
+import logoZionDigital from "@/assets/logo-zion-digital.png";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -111,7 +111,7 @@ export function AppSidebar() {
   return (
     <Sidebar className="border-r border-sidebar-border bg-sidebar">
       <div className="flex items-center justify-center px-4 py-5">
-        <img src={logoExitoDigital} alt="Êxito Digital" className="h-20 w-auto" />
+        <img src={logoZionDigital} alt="Zion Digital" className="h-20 w-auto" />
       </div>
 
       <SidebarContent>
