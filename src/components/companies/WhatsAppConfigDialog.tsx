@@ -37,7 +37,7 @@ interface WhatsAppConfig {
   status: string;
 }
 
-interface ZapiConfigDialogProps {
+interface WhatsAppConfigDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   companyId: string;
