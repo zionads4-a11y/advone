@@ -34,7 +34,7 @@ interface WhatsAppConfig {
 export default function CompanyDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user: _user } = useAuth();
   const [company, setCompany] = useState<Company | null>(null);
   const [whatsappConfig, setWhatsappConfig] = useState<WhatsAppConfig | null>(null);
   const [configDialogOpen, setConfigDialogOpen] = useState(false);
