@@ -47,6 +47,8 @@ export default function Conversations() {
   const [messageText, setMessageText] = useState("");
   const [sending, setSending] = useState(false);
   const [aiSuggesting, setAiSuggesting] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Clear unread notifications when entering conversations
