@@ -58,8 +58,7 @@ export function ZapiConfigDialog({
   config,
   onSubmit,
 }: ZapiConfigDialogProps) {
-  const { userRole } = useAuth();
-  const canConfigureAI = userRole === "admin" || userRole === "gerente";
+  const { userRole: _userRole } = useAuth();
 
   const [activeTab, setActiveTab] = useState("whatsapp");
   const [saving, setSaving] = useState(false);
