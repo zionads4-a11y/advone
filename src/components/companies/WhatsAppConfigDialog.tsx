@@ -149,6 +149,12 @@ export function WhatsAppConfigDialog({
       toast.error("Salve a configuração primeiro antes de gerar o QR Code");
       return;
     }
+
+    if (!config.zapi_token) {
+      toast.error("Informe o token da instância e salve antes de gerar o QR Code");
+      return;
+    }
+
     setQrLoading(true);
     setQrCode(null);
     try {
@@ -156,16 +162,35 @@ export function WhatsAppConfigDialog({
         body: { company_id: companyId, action: "get_qrcode" },
       });
       if (error) throw error;
+
       if (data?.connected) {
         setQrStatus("connected");
         toast.success("WhatsApp já conectado!");
-      } else if (data?.qrcode) {
-        const qr = typeof data.qrcode === 'string' ? data.qrcode : String(data.qrcode);
-        setQrCode(qr.startsWith("data:image") ? qr : `data:image/png;base64,${qr}`);
-        setQrStatus("disconnected");
-      } else {
-        toast.error(data?.error || "QR Code indisponível. Tente novamente.");
+        return;
       }
+
+      const qrPayload = data?.qrcode;
+      const qr =
+        typeof qrPayload === "string"
+          ? qrPayload
+          : typeof qrPayload?.value === "string"
+            ? qrPayload.value
+            : typeof qrPayload?.qrcode === "string"
+              ? qrPayload.qrcode
+              : null;
+
+      if (!qr) {
+        const apiError =
+          data?.error ||
+          qrPayload?.error ||
+          qrPayload?.message ||
+          "QR Code inválido retornado pela API";
+        toast.error(apiError);
+        return;
+      }
+
+      setQrCode(qr.startsWith("data:image") ? qr : `data:image/png;base64,${qr}`);
+      setQrStatus("disconnected");
     } catch (err: any) {
       toast.error("Erro ao gerar QR Code: " + err.message);
     } finally {
@@ -174,87 +199,22 @@ export function WhatsAppConfigDialog({
   };
 
   const handleSaveWhatsApp = async () => {
-    if (!formInstanceId) {
-      toast.error("Nome da instância é obrigatório.");
+    if (!formInstanceId || !formToken) {
+      toast.error("Nome da instância e token são obrigatórios.");
       return;
     }
     setSaving(true);
     try {
       // Use the onSubmit callback with a synthetic FormData
       const fd = new FormData();
-      fd.set("zapi_instance_id", formInstanceId);
-      fd.set("zapi_token", formToken);
+      fd.set("zapi_instance_id", formInstanceId.trim());
+      fd.set("zapi_token", formToken.trim());
       onSubmit(fd);
     } finally {
       setSaving(false);
     }
   };
-
-  const handleSaveAI = async () => {
-    setSaving(true);
-    const newValues = {
-      ai_enabled: aiEnabled,
-      ai_auto_reply: aiAutoReply,
-      ai_prompt: aiPrompt,
-      ai_objective: aiObjective,
-      alert_whatsapp: alertWhatsapp || null,
-    };
-
-    const { error } = await supabase
-      .from("whatsapp_configs")
-      .update(newValues)
-      .eq("company_id", companyId);
-
-    if (error) {
-      toast.error("Erro ao salvar: " + error.message);
-    } else {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase.from("audit_logs").insert({
-          company_id: companyId,
-          user_id: user.id,
-          action: "update",
-          entity_type: "whatsapp_ai_config",
-          entity_id: companyId,
-          old_values: null,
-          new_values: newValues,
-        });
-      }
-      toast.success("Configuração IA salva!");
-    }
-    setSaving(false);
-  };
-
-  const copyToClipboard = (text: string, label: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success(`${label} copiada!`);
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{config ? "Editar Perfil" : "Novo Perfil"}</DialogTitle>
-          <DialogDescription>
-            Configure a instância UaZapi e chatbot de IA.
-          </DialogDescription>
-        </DialogHeader>
-
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full grid grid-cols-2">
-            <TabsTrigger value="whatsapp">Conexão WhatsApp</TabsTrigger>
-            <TabsTrigger value="ai">Chatbot IA (SDR)</TabsTrigger>
-          </TabsList>
-
-          {/* Tab: Conexão WhatsApp */}
-          <TabsContent value="whatsapp" className="space-y-4 pt-2">
-            {/* Server URL - read-only */}
-            <div className="space-y-2 p-3 bg-muted/50 rounded-lg">
-              <Label className="text-xs font-medium text-muted-foreground">Server URL (salvo nos padrões)</Label>
-              <Input readOnly value={SERVER_URL} className="text-xs font-mono bg-background text-muted-foreground" />
-              <p className="text-xs text-muted-foreground">Configurado em Padrões da Clínica. O Admin Token está salvo nos secrets.</p>
-            </div>
-
+...
             {/* Instance Name */}
             <div className="space-y-2">
               <Label>Nome da Instância (UaZapi) *</Label>
@@ -264,6 +224,17 @@ export function WhatsAppConfigDialog({
                 placeholder="Ex: 88fbac77-b070-48b2-872e-2db662cc800b"
               />
               <p className="text-xs text-muted-foreground">Nome exato da instância criada no painel do UaZapi.</p>
+            </div>
+
+            {/* Instance Token */}
+            <div className="space-y-2">
+              <Label>Token da Instância (UaZapi) *</Label>
+              <Input
+                value={formToken}
+                onChange={(e) => setFormToken(e.target.value)}
+                placeholder="Ex: 3A26D4F22..."
+              />
+              <p className="text-xs text-muted-foreground">Token da instância informado no painel da UaZapi.</p>
             </div>
 
             {/* Webhook URL */}
