@@ -58,6 +58,60 @@ export type Database = {
           },
         ]
       }
+      cadence_messages: {
+        Row: {
+          company_id: string
+          created_at: string
+          day_number: number
+          id: string
+          lead_id: string
+          message_text: string | null
+          phone: string
+          scheduled_at: string
+          sent_at: string | null
+          status: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          day_number: number
+          id?: string
+          lead_id: string
+          message_text?: string | null
+          phone: string
+          scheduled_at: string
+          sent_at?: string | null
+          status?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          day_number?: number
+          id?: string
+          lead_id?: string
+          message_text?: string | null
+          phone?: string
+          scheduled_at?: string
+          sent_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cadence_messages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cadence_messages_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaigns: {
         Row: {
           budget: number | null
@@ -329,6 +383,7 @@ export type Database = {
           email: string | null
           id: string
           kanban_column_id: string | null
+          lead_score: string | null
           name: string
           notes: string | null
           phone: string | null
@@ -354,6 +409,7 @@ export type Database = {
           email?: string | null
           id?: string
           kanban_column_id?: string | null
+          lead_score?: string | null
           name: string
           notes?: string | null
           phone?: string | null
@@ -379,6 +435,7 @@ export type Database = {
           email?: string | null
           id?: string
           kanban_column_id?: string | null
+          lead_score?: string | null
           name?: string
           notes?: string | null
           phone?: string | null
@@ -596,11 +653,17 @@ export type Database = {
           ai_auto_reply: boolean
           ai_enabled: boolean
           ai_prompt: string | null
+          communication_tone: string | null
           company_id: string
+          consultation_duration: string | null
           created_at: string
           id: string
+          office_name: string | null
           phone_number: string | null
+          practice_area: string | null
+          scheduling_link: string | null
           status: string
+          target_audience: string | null
           updated_at: string
           zapi_instance_id: string
           zapi_token: string
@@ -610,11 +673,17 @@ export type Database = {
           ai_auto_reply?: boolean
           ai_enabled?: boolean
           ai_prompt?: string | null
+          communication_tone?: string | null
           company_id: string
+          consultation_duration?: string | null
           created_at?: string
           id?: string
+          office_name?: string | null
           phone_number?: string | null
+          practice_area?: string | null
+          scheduling_link?: string | null
           status?: string
+          target_audience?: string | null
           updated_at?: string
           zapi_instance_id: string
           zapi_token: string
@@ -624,11 +693,17 @@ export type Database = {
           ai_auto_reply?: boolean
           ai_enabled?: boolean
           ai_prompt?: string | null
+          communication_tone?: string | null
           company_id?: string
+          consultation_duration?: string | null
           created_at?: string
           id?: string
+          office_name?: string | null
           phone_number?: string | null
+          practice_area?: string | null
+          scheduling_link?: string | null
           status?: string
+          target_audience?: string | null
           updated_at?: string
           zapi_instance_id?: string
           zapi_token?: string
