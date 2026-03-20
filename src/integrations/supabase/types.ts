@@ -652,7 +652,9 @@ export type Database = {
         Row: {
           ai_auto_reply: boolean
           ai_enabled: boolean
+          ai_objective: string | null
           ai_prompt: string | null
+          alert_whatsapp: string | null
           communication_tone: string | null
           company_id: string
           consultation_duration: string | null
@@ -672,7 +674,9 @@ export type Database = {
         Insert: {
           ai_auto_reply?: boolean
           ai_enabled?: boolean
+          ai_objective?: string | null
           ai_prompt?: string | null
+          alert_whatsapp?: string | null
           communication_tone?: string | null
           company_id: string
           consultation_duration?: string | null
@@ -692,7 +696,9 @@ export type Database = {
         Update: {
           ai_auto_reply?: boolean
           ai_enabled?: boolean
+          ai_objective?: string | null
           ai_prompt?: string | null
+          alert_whatsapp?: string | null
           communication_tone?: string | null
           company_id?: string
           consultation_duration?: string | null
