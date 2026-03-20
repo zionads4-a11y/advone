@@ -205,48 +205,53 @@ serve(async (req) => {
 
       const SERVER_URL = "https://ziondigital.uazapi.com";
 
-      // First check if already connected
-      try {
-        const statusRes = await fetch(`${SERVER_URL}/instance/status`, {
-          method: "GET",
-          headers: { "token": config.zapi_token },
-        });
-        const statusData = await statusRes.json();
-        if (statusData?.state === "open" || statusData?.connected === true) {
-          return new Response(
-            JSON.stringify({ connected: true }),
-            { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
-        }
-      } catch {
-        // Continue to QR generation
-      }
-
-      // Request QR code via /instance/connect
-      const qrResponse = await fetch(`${SERVER_URL}/instance/connect`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "token": config.zapi_token },
-        body: JSON.stringify({}),
+      // Use /instance/status which returns qrcode when status is "connecting"
+      const statusRes = await fetch(`${SERVER_URL}/instance/status`, {
+        method: "GET",
+        headers: { "token": config.zapi_token },
       });
 
-      if (!qrResponse.ok) {
-        const errorText = await qrResponse.text();
-        console.error("UaZapi connect error:", qrResponse.status, errorText);
+      if (!statusRes.ok) {
+        const errorText = await statusRes.text();
+        console.error("UaZapi status error:", statusRes.status, errorText);
         return new Response(
           JSON.stringify({ error: "Erro ao obter QR Code", details: errorText }),
           { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
-      const qrData = await qrResponse.json();
-      console.log("UaZapi connect response keys:", Object.keys(qrData));
+      const statusData = await statusRes.json();
+      console.log("UaZapi status response keys:", Object.keys(statusData));
 
-      // Extract QR code from response (could be in various fields)
-      const qrcode = qrData.qrcode || qrData.qr || qrData.base64 || qrData.value || qrData.data?.qrcode || null;
+      // Check if already connected
+      const isConnected = statusData?.status?.connected === true || statusData?.instance?.status === "open";
+      if (isConnected) {
+        return new Response(
+          JSON.stringify({ connected: true }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Extract QR code - UaZapi nests it inside instance.qrcode
+      const qrcode = statusData?.instance?.qrcode
+        || statusData?.qrcode
+        || statusData?.qr
+        || statusData?.base64
+        || statusData?.data?.qrcode
+        || null;
 
       if (!qrcode) {
+        // If no QR yet, try /instance/connect to trigger generation
+        try {
+          await fetch(`${SERVER_URL}/instance/connect`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "token": config.zapi_token },
+            body: JSON.stringify({}),
+          });
+        } catch { /* ignore */ }
+
         return new Response(
-          JSON.stringify({ error: "QR Code não disponível", raw: qrData }),
+          JSON.stringify({ error: "QR Code ainda não disponível. Tente novamente em alguns segundos." }),
           { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
