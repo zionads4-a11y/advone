@@ -106,7 +106,7 @@ export function WhatsAppConfigDialog({
       setAiLoading(true);
       const { data } = await supabase
         .from("whatsapp_configs")
-        .select("ai_enabled, ai_auto_reply, ai_prompt")
+        .select("ai_enabled, ai_auto_reply, ai_prompt, ai_objective, alert_whatsapp")
         .eq("company_id", companyId)
         .maybeSingle();
 
@@ -115,8 +115,10 @@ export function WhatsAppConfigDialog({
         setAiAutoReply(data.ai_auto_reply || false);
         setAiPrompt(
           data.ai_prompt ||
-          "Você é um atendente virtual da empresa. Seja cordial, responda dúvidas dos clientes de forma clara e objetiva."
+          "Você é um SDR especializado em [seu nicho].\n\nSeu objetivo é:\n1. Qualificar o interesse do lead\n2. Descobrir as necessidades\n3. Agendar uma reunião"
         );
+        setAiObjective(data.ai_objective || "Entrar em contato com os Leads e agendar uma reunião");
+        setAlertWhatsapp(data.alert_whatsapp || "");
       }
       setAiLoading(false);
     };
