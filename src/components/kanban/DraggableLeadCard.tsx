@@ -134,6 +134,7 @@ function LeadCardContent({ lead, onValueUpdate }: { lead: DraggableLeadCardProps
             </button>
           )}
           <SourceBadge source={lead.source} />
+          {lead.lead_score && <LeadScoreBadge score={lead.lead_score} />}
         </div>
       </div>
       <div className="space-y-1">
