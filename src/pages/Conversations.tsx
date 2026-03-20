@@ -6,9 +6,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  MessageSquare, User, ArrowDownLeft, ArrowUpRight, Send, Sparkles, Loader2, Bot,
+  MessageSquare, User, ArrowDownLeft, ArrowUpRight, Send, Sparkles, Loader2, Bot, Paperclip, Video, Image, FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useNewMessageNotifications } from "@/hooks/useNewMessageNotifications";
@@ -46,6 +47,8 @@ export default function Conversations() {
   const [messageText, setMessageText] = useState("");
   const [sending, setSending] = useState(false);
   const [aiSuggesting, setAiSuggesting] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Clear unread notifications when entering conversations
@@ -182,6 +185,56 @@ export default function Conversations() {
       toast.success("Sugestão IA gerada! Edite se necessário e envie.");
     }
     setAiSuggesting(false);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedPhone || !selectedCompanyId) return;
+
+    const maxSize = 20 * 1024 * 1024; // 20MB
+    if (file.size > maxSize) {
+      toast.error("Arquivo muito grande. Máximo: 20MB");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "bin";
+      const path = `${selectedCompanyId}/${Date.now()}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("whatsapp-media")
+        .upload(path, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("whatsapp-media")
+        .getPublicUrl(path);
+
+      const { data, error } = await supabase.functions.invoke("send-whatsapp", {
+        body: {
+          company_id: selectedCompanyId,
+          phone: selectedPhone,
+          message: messageText.trim() || undefined,
+          media_url: publicUrl,
+          media_type: file.type.startsWith("video") ? "video" : file.type.startsWith("image") ? "image" : "document",
+        },
+      });
+
+      if (error || data?.error) {
+        toast.error(data?.error || error?.message || "Erro ao enviar arquivo");
+      } else {
+        setMessageText("");
+        toast.success("Arquivo enviado!");
+        setTimeout(fetchMessages, 500);
+      }
+    } catch (err: any) {
+      toast.error("Erro no upload: " + err.message);
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   };
 
   const phones = Object.keys(conversations).sort((a, b) => {
@@ -339,21 +392,56 @@ export default function Conversations() {
 
               {/* Send area */}
               <div className="border-t border-border p-3 flex-shrink-0">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileUpload}
+                  accept="video/*,image/*,application/pdf,.doc,.docx"
+                  className="hidden"
+                />
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={handleAiSuggest}
-                    disabled={aiSuggesting}
-                    title="Sugestão IA"
-                    className="shrink-0"
-                  >
-                    {aiSuggesting ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Sparkles className="h-4 w-4 text-primary" />
-                    )}
-                  </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={handleAiSuggest}
+                          disabled={aiSuggesting}
+                          className="shrink-0"
+                        >
+                          {aiSuggesting ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Sparkles className="h-4 w-4 text-primary" />
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Sugestão IA</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={uploading}
+                          className="shrink-0"
+                        >
+                          {uploading ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Paperclip className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Enviar vídeo, imagem ou arquivo</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
                   <Input
                     value={messageText}
                     onChange={(e) => setMessageText(e.target.value)}
