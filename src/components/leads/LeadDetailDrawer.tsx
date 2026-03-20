@@ -37,6 +37,7 @@ interface LeadData {
   processo_numero: string | null;
   cpf: string | null;
   processo_valor: number | null;
+  lead_score?: string | null;
 }
 
 interface LeadDetailDrawerProps {
