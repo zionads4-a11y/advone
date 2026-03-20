@@ -160,7 +160,7 @@ export function WhatsAppConfigDialog({
         setQrStatus("connected");
         toast.success("WhatsApp já conectado!");
       } else if (data?.qrcode) {
-        const qr = data.qrcode;
+        const qr = typeof data.qrcode === 'string' ? data.qrcode : String(data.qrcode);
         setQrCode(qr.startsWith("data:image") ? qr : `data:image/png;base64,${qr}`);
         setQrStatus("disconnected");
       } else {
