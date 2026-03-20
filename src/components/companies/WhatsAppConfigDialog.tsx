@@ -196,6 +196,8 @@ export function WhatsAppConfigDialog({
       ai_enabled: aiEnabled,
       ai_auto_reply: aiAutoReply,
       ai_prompt: aiPrompt,
+      ai_objective: aiObjective,
+      alert_whatsapp: alertWhatsapp || null,
     };
 
     const { error } = await supabase
