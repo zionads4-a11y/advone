@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Phone, Mail, DollarSign, Calendar } from "lucide-react";
+import { LeadScoreBadge } from "@/components/leads/LeadScoreBadge";
 import { SourceBadge } from "@/components/leads/SourceBadge";
 import { LeadReminders } from "@/components/leads/LeadReminders";
 import { LeadSummary } from "@/components/leads/LeadSummary";

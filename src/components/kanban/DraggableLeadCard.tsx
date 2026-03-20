@@ -4,6 +4,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Card, CardContent } from "@/components/ui/card";
 import { Phone, Mail, DollarSign, Pencil, Check, X, MessageCircle } from "lucide-react";
+import { LeadScoreBadge } from "@/components/leads/LeadScoreBadge";
 import { SourceBadge } from "@/components/leads/SourceBadge";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
