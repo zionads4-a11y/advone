@@ -76,6 +76,8 @@ export function WhatsAppConfigDialog({
   const [aiEnabled, setAiEnabled] = useState(false);
   const [aiAutoReply, setAiAutoReply] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
+  const [aiObjective, setAiObjective] = useState("Entrar em contato com os Leads e agendar uma reunião");
+  const [alertWhatsapp, setAlertWhatsapp] = useState("");
   const [aiLoading, setAiLoading] = useState(true);
 
   const webhookUrl = getWebhookUrl();
