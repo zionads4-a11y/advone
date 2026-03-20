@@ -214,7 +214,72 @@ export function WhatsAppConfigDialog({
       setSaving(false);
     }
   };
-...
+
+  const handleSaveAI = async () => {
+    setSaving(true);
+    const newValues = {
+      ai_enabled: aiEnabled,
+      ai_auto_reply: aiAutoReply,
+      ai_prompt: aiPrompt,
+      ai_objective: aiObjective,
+      alert_whatsapp: alertWhatsapp || null,
+    };
+
+    const { error } = await supabase
+      .from("whatsapp_configs")
+      .update(newValues)
+      .eq("company_id", companyId);
+
+    if (error) {
+      toast.error("Erro ao salvar: " + error.message);
+    } else {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from("audit_logs").insert({
+          company_id: companyId,
+          user_id: user.id,
+          action: "update",
+          entity_type: "whatsapp_ai_config",
+          entity_id: companyId,
+          old_values: null,
+          new_values: newValues,
+        });
+      }
+      toast.success("Configuração IA salva!");
+    }
+    setSaving(false);
+  };
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success(`${label} copiada!`);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{config ? "Editar Perfil" : "Novo Perfil"}</DialogTitle>
+          <DialogDescription>
+            Configure a instância UaZapi e chatbot de IA.
+          </DialogDescription>
+        </DialogHeader>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="w-full grid grid-cols-2">
+            <TabsTrigger value="whatsapp">Conexão WhatsApp</TabsTrigger>
+            <TabsTrigger value="ai">Chatbot IA (SDR)</TabsTrigger>
+          </TabsList>
+
+          {/* Tab: Conexão WhatsApp */}
+          <TabsContent value="whatsapp" className="space-y-4 pt-2">
+            {/* Server URL - read-only */}
+            <div className="space-y-2 p-3 bg-muted/50 rounded-lg">
+              <Label className="text-xs font-medium text-muted-foreground">Server URL (salvo nos padrões)</Label>
+              <Input readOnly value={SERVER_URL} className="text-xs font-mono bg-background text-muted-foreground" />
+              <p className="text-xs text-muted-foreground">Configurado em Padrões da Clínica. O Admin Token está salvo nos secrets.</p>
+            </div>
+
             {/* Instance Name */}
             <div className="space-y-2">
               <Label>Nome da Instância (UaZapi) *</Label>
