@@ -174,7 +174,7 @@ serve(async (req) => {
           headers: { "token": config.zapi_token },
         });
         const statusData = await statusResponse.json();
-        const connected = statusData?.state === "open" || statusData?.connected === true;
+        const connected = statusData?.status?.connected === true || statusData?.instance?.status === "open";
 
         return new Response(
           JSON.stringify({ connected, status: statusData }),
