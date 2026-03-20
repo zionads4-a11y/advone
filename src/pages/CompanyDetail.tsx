@@ -11,7 +11,7 @@ import { toast } from "sonner";
 
 import { CompanyTrackingLinks } from "@/components/companies/CompanyTrackingLinks";
 import { CompanyLeads } from "@/components/companies/CompanyLeads";
-import { ZapiConfigDialog } from "@/components/companies/ZapiConfigDialog";
+import { WhatsAppConfigDialog } from "@/components/companies/WhatsAppConfigDialog";
 import { CompanyKanban } from "@/components/companies/CompanyKanban";
 import { BotConfigCard } from "@/components/companies/BotConfigCard";
 
@@ -39,7 +39,7 @@ export default function CompanyDetail() {
   const { user } = useAuth();
   const [company, setCompany] = useState<Company | null>(null);
   const [whatsappConfig, setWhatsappConfig] = useState<WhatsAppConfig | null>(null);
-  const [zapiDialogOpen, setZapiDialogOpen] = useState(false);
+  const [configDialogOpen, setConfigDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -58,11 +58,11 @@ export default function CompanyDetail() {
     setLoading(false);
   };
 
-  const handleSaveZapi = async (formData: FormData) => {
-    const zapiInstance = formData.get("zapi_instance_id") as string;
-    const zapiToken = formData.get("zapi_token") as string;
+  const handleSaveWhatsApp = async (formData: FormData) => {
+    const instanceId = formData.get("zapi_instance_id") as string;
+    const token = formData.get("zapi_token") as string;
 
-    if (!zapiInstance || !zapiToken) {
+    if (!instanceId || !token) {
       toast.error("Preencha o ID da instância e o token");
       return;
     }
@@ -70,18 +70,18 @@ export default function CompanyDetail() {
     if (whatsappConfig) {
       await supabase
         .from("whatsapp_configs")
-        .update({ zapi_instance_id: zapiInstance, zapi_token: zapiToken })
+        .update({ zapi_instance_id: instanceId, zapi_token: token })
         .eq("id", whatsappConfig.id);
     } else {
       await supabase.from("whatsapp_configs").insert({
         company_id: id!,
-        zapi_instance_id: zapiInstance,
-        zapi_token: zapiToken,
+        zapi_instance_id: instanceId,
+        zapi_token: token,
       });
     }
 
-    toast.success("Configuração Z-API salva!");
-    setZapiDialogOpen(false);
+    toast.success("Configuração WhatsApp salva!");
+    setConfigDialogOpen(false);
     fetchCompany();
   };
 
@@ -127,11 +127,11 @@ export default function CompanyDetail() {
                 )}
                 {whatsappConfig ? (
                   <Badge variant="outline" className="border-success/30 text-success text-[10px]">
-                    Z-API Conectada
+                    WhatsApp Conectado
                   </Badge>
                 ) : (
                   <Badge variant="outline" className="border-warning/30 text-warning text-[10px]">
-                    Sem Z-API
+                    Sem WhatsApp
                   </Badge>
                 )}
               </div>
@@ -141,20 +141,20 @@ export default function CompanyDetail() {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => setZapiDialogOpen(true)}
+          onClick={() => setConfigDialogOpen(true)}
         >
           <MessageSquare className="mr-2 h-4 w-4" />
-          {whatsappConfig ? "Editar Z-API" : "Configurar Z-API"}
+          {whatsappConfig ? "Editar WhatsApp" : "Configurar WhatsApp"}
         </Button>
       </div>
 
-      {/* Z-API Config Dialog */}
-      <ZapiConfigDialog
-        open={zapiDialogOpen}
-        onOpenChange={setZapiDialogOpen}
+      {/* WhatsApp Config Dialog */}
+      <WhatsAppConfigDialog
+        open={configDialogOpen}
+        onOpenChange={setConfigDialogOpen}
         companyId={company.id}
         config={whatsappConfig}
-        onSubmit={handleSaveZapi}
+        onSubmit={handleSaveWhatsApp}
       />
 
       {/* Bot Config */}

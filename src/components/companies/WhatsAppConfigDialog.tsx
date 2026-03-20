@@ -51,13 +51,13 @@ function getWebhookUrl() {
   return `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/zapi-webhook`;
 }
 
-export function ZapiConfigDialog({
+export function WhatsAppConfigDialog({
   open,
   onOpenChange,
   companyId,
   config,
   onSubmit,
-}: ZapiConfigDialogProps) {
+}: WhatsAppConfigDialogProps) {
   const { userRole: _userRole } = useAuth();
 
   const [activeTab, setActiveTab] = useState("whatsapp");
