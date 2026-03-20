@@ -13,7 +13,19 @@ import {
   CheckCircle2,
   XCircle,
 } from "lucide-react";
+import { Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 
 interface Company {
   id: string;
@@ -50,6 +62,8 @@ export default function AccessManagement() {
   const [accessMap, setAccessMap] = useState<AccessMap>({});
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState<string | null>(null); // "userId-companyId"
+  const [deleteTarget, setDeleteTarget] = useState<UserInfo | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchAll();
@@ -143,6 +157,25 @@ export default function AccessManagement() {
   };
 
   const getUserCompanyCount = (userId: string) => accessMap[userId]?.size || 0;
+
+  const handleDeleteUser = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-client-user", {
+        body: { user_id: deleteTarget.user_id },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(`Usuário "${deleteTarget.full_name}" excluído com sucesso`);
+      setDeleteTarget(null);
+      fetchAll();
+    } catch (err: any) {
+      toast.error(err.message || "Erro ao excluir usuário");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -249,6 +282,8 @@ export default function AccessManagement() {
                   <th className="p-3 text-center text-xs font-semibold text-muted-foreground min-w-[80px]">
                     Total
                   </th>
+                  <th className="p-3 text-center text-xs font-semibold text-muted-foreground min-w-[60px]">
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -329,6 +364,17 @@ export default function AccessManagement() {
                           <XCircle className="h-4 w-4 text-muted-foreground/40 mx-auto" />
                         )}
                       </td>
+                      <td className="p-3 text-center">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                          onClick={() => setDeleteTarget(user)}
+                          title={`Excluir ${user.full_name}`}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </td>
                     </tr>
                   );
                 })}
@@ -339,6 +385,28 @@ export default function AccessManagement() {
       )}
 
       {/* Legend */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir usuário</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir <strong>{deleteTarget?.full_name}</strong>? Esta ação é irreversível e removerá todos os acessos e dados do usuário.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteUser}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
         <span className="font-medium">Legenda:</span>
         {Object.entries(ROLE_CONFIG).map(([role, conf]) => {
