@@ -73,6 +73,7 @@ export function LeadDetailDrawer({ lead, open, onOpenChange, onLeadUpdate }: Lea
                   {statusInfo.label}
                 </Badge>
                 {lead.source && <SourceBadge source={lead.source} size="md" />}
+                {lead.lead_score && <LeadScoreBadge score={lead.lead_score} size="md" />}
               </div>
             </div>
           </div>
