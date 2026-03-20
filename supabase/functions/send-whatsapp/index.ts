@@ -38,7 +38,7 @@ serve(async (req) => {
       });
     }
 
-    const { company_id, phone, message, action } = await req.json();
+    const { company_id, phone, message, action, media_url, media_type } = await req.json();
 
     if (!company_id) {
       return new Response(JSON.stringify({ error: "company_id é obrigatório" }), {
