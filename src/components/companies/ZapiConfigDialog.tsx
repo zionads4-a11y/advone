@@ -1,18 +1,29 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MessageSquare, Copy, QrCode, Link2, Loader2, RefreshCw, Bot } from "lucide-react";
+import {
+  Wifi,
+  Copy,
+  Loader2,
+  RefreshCw,
+  CheckCircle,
+  XCircle,
+  Bot,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -34,9 +45,10 @@ interface ZapiConfigDialogProps {
   onSubmit: (formData: FormData) => void;
 }
 
-function getWebhookUrl(companyId: string) {
-  const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID || "oonteavjxzkovrzktnie";
-  return `https://${projectId}.supabase.co/functions/v1/zapi-webhook?company_id=${companyId}`;
+const SERVER_URL = "https://ziondigital.uazapi.com";
+
+function getWebhookUrl() {
+  return `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/zapi-webhook`;
 }
 
 export function ZapiConfigDialog({
@@ -47,263 +59,50 @@ export function ZapiConfigDialog({
   onSubmit,
 }: ZapiConfigDialogProps) {
   const { userRole } = useAuth();
-  const [qrCode, setQrCode] = useState<string | null>(null);
-  const [qrLoading, setQrLoading] = useState(false);
-  const [shareableLink, setShareableLink] = useState<string | null>(null);
-  const [linkExpiry, setLinkExpiry] = useState<string | null>(null);
-  const [linkLoading, setLinkLoading] = useState(false);
   const canConfigureAI = userRole === "admin" || userRole === "gerente";
 
-  const copyWebhookUrl = () => {
-    navigator.clipboard.writeText(getWebhookUrl(companyId));
-    toast.success("URL do webhook copiada!");
-  };
+  const [activeTab, setActiveTab] = useState("whatsapp");
+  const [saving, setSaving] = useState(false);
 
-  const fetchQrCode = async () => {
-    if (!config) {
-      toast.error("Configure a Z-API primeiro antes de gerar o QR Code");
-      return;
-    }
-    setQrLoading(true);
-    setQrCode(null);
+  // WhatsApp form
+  const [formInstanceId, setFormInstanceId] = useState("");
+  const [formToken, setFormToken] = useState("");
 
-    const { data, error } = await supabase.functions.invoke("zapi-qrcode", {
-      body: { company_id: companyId, action: "get_qrcode" },
-    });
+  // QR Code state
+  const [qrCode, setQrCode] = useState<string | null>(null);
+  const [qrLoading, setQrLoading] = useState(false);
+  const [qrStatus, setQrStatus] = useState<"connected" | "disconnected">("disconnected");
 
-    if (error || data?.error) {
-      toast.error(data?.error || error?.message || "Erro ao obter QR Code");
-    } else if (data?.qrcode) {
-      setQrCode(typeof data.qrcode === "string" ? data.qrcode : JSON.stringify(data.qrcode));
-    }
-    setQrLoading(false);
-  };
-
-  const generateShareableLink = async () => {
-    if (!config) {
-      toast.error("Configure a Z-API primeiro antes de gerar o link");
-      return;
-    }
-    setLinkLoading(true);
-
-    const { data, error } = await supabase.functions.invoke("zapi-qrcode", {
-      body: { company_id: companyId, action: "generate_link" },
-    });
-
-    if (error || data?.error) {
-      toast.error(data?.error || error?.message || "Erro ao gerar link");
-    } else if (data?.token) {
-      const baseUrl = window.location.origin;
-      const link = `${baseUrl}/connect/${data.token}`;
-      setShareableLink(link);
-      setLinkExpiry(data.expires_at);
-      toast.success("Link gerado com sucesso!");
-    }
-    setLinkLoading(false);
-  };
-
-  const copyShareableLink = () => {
-    if (shareableLink) {
-      navigator.clipboard.writeText(shareableLink);
-      toast.success("Link copiado!");
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card text-foreground max-w-lg">
-        <DialogHeader>
-          <DialogTitle className="font-display flex items-center gap-2">
-            <MessageSquare className="h-5 w-5 text-primary" />
-            Configurar WhatsApp (Z-API)
-          </DialogTitle>
-        </DialogHeader>
-
-        <Tabs defaultValue="config" className="space-y-4">
-          <TabsList className="w-full bg-secondary/50">
-            <TabsTrigger value="config" className="flex-1 gap-1.5 text-xs">
-              <MessageSquare className="h-3.5 w-3.5" /> Configuração
-            </TabsTrigger>
-            <TabsTrigger value="qrcode" className="flex-1 gap-1.5 text-xs" disabled={!config}>
-              <QrCode className="h-3.5 w-3.5" /> QR Code
-            </TabsTrigger>
-            <TabsTrigger value="link" className="flex-1 gap-1.5 text-xs" disabled={!config}>
-              <Link2 className="h-3.5 w-3.5" /> Link
-            </TabsTrigger>
-            {canConfigureAI && (
-              <TabsTrigger value="ai" className="flex-1 gap-1.5 text-xs" disabled={!config}>
-                <Bot className="h-3.5 w-3.5" /> IA
-              </TabsTrigger>
-            )}
-          </TabsList>
-
-          {/* Config Tab */}
-          <TabsContent value="config">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                onSubmit(new FormData(e.currentTarget));
-              }}
-              className="space-y-4"
-            >
-              <div className="space-y-2">
-                <Label>ID da Instância *</Label>
-                <Input
-                  name="zapi_instance_id"
-                  required
-                  placeholder="Ex: 3C1A2B3D4E5F..."
-                  defaultValue={config?.zapi_instance_id || ""}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Token *</Label>
-                <Input
-                  name="zapi_token"
-                  type="password"
-                  required
-                  placeholder="Token da Z-API"
-                  defaultValue={config?.zapi_token || ""}
-                />
-              </div>
-
-              {companyId && (
-                <div className="rounded-lg border border-border bg-secondary/30 p-3 space-y-2">
-                  <p className="text-xs font-medium text-foreground">URL do Webhook</p>
-                  <p className="text-xs text-muted-foreground">
-                    Configure esta URL no painel da Z-API como webhook de recebimento:
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <code className="flex-1 rounded bg-background p-2 text-[10px] text-foreground break-all">
-                      {getWebhookUrl(companyId)}
-                    </code>
-                    <Button type="button" variant="outline" size="sm" onClick={copyWebhookUrl}>
-                      <Copy className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              <Button type="submit" className="w-full gradient-primary text-primary-foreground">
-                Salvar Configuração
-              </Button>
-            </form>
-          </TabsContent>
-
-          {/* QR Code Tab */}
-          <TabsContent value="qrcode">
-            <div className="space-y-4">
-              <div className="rounded-lg border border-border bg-secondary/30 p-3">
-                <p className="text-xs text-muted-foreground">
-                  Escaneie o QR Code abaixo com o WhatsApp da empresa para conectar à Z-API.
-                </p>
-              </div>
-
-              <div className="flex flex-col items-center gap-4">
-                {qrLoading ? (
-                  <div className="flex h-64 w-64 items-center justify-center rounded-lg border border-border bg-background">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  </div>
-                ) : qrCode ? (
-                  <div className="rounded-lg border border-border bg-white p-4">
-                    <img
-                      src={qrCode.startsWith("data:") ? qrCode : `data:image/png;base64,${qrCode}`}
-                      alt="QR Code WhatsApp"
-                      className="h-64 w-64 object-contain"
-                    />
-                  </div>
-                ) : (
-                  <div className="flex h-64 w-64 flex-col items-center justify-center rounded-lg border border-dashed border-border bg-background text-muted-foreground">
-                    <QrCode className="mb-2 h-10 w-10" />
-                    <p className="text-xs">Clique para gerar o QR Code</p>
-                  </div>
-                )}
-
-                <Button onClick={fetchQrCode} disabled={qrLoading} variant="outline" className="gap-2">
-                  <RefreshCw className={`h-4 w-4 ${qrLoading ? "animate-spin" : ""}`} />
-                  {qrCode ? "Atualizar QR Code" : "Gerar QR Code"}
-                </Button>
-              </div>
-            </div>
-          </TabsContent>
-
-          {/* Shareable Link Tab */}
-          <TabsContent value="link">
-            <div className="space-y-4">
-              <div className="rounded-lg border border-border bg-secondary/30 p-3">
-                <p className="text-xs text-muted-foreground">
-                  Gere um link temporário (válido por <strong className="text-foreground">3 horas</strong>) para
-                  enviar à empresa. Ao acessar o link, a empresa poderá escanear o QR Code diretamente.
-                </p>
-              </div>
-
-              {shareableLink ? (
-                <div className="space-y-3">
-                  <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-2">
-                    <p className="text-xs font-medium text-foreground">Link gerado:</p>
-                    <div className="flex items-center gap-2">
-                      <code className="flex-1 rounded bg-background p-2 text-[10px] text-foreground break-all">
-                        {shareableLink}
-                      </code>
-                      <Button type="button" variant="outline" size="sm" onClick={copyShareableLink}>
-                        <Copy className="h-3 w-3" />
-                      </Button>
-                    </div>
-                    {linkExpiry && (
-                      <p className="text-[10px] text-muted-foreground">
-                        Expira em: {new Date(linkExpiry).toLocaleString("pt-BR")}
-                      </p>
-                    )}
-                  </div>
-
-                  <Button onClick={generateShareableLink} disabled={linkLoading} variant="outline" className="w-full gap-2">
-                    <RefreshCw className={`h-4 w-4 ${linkLoading ? "animate-spin" : ""}`} />
-                    Gerar novo link
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-4 py-6">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                    <Link2 className="h-8 w-8 text-primary" />
-                  </div>
-                  <Button
-                    onClick={generateShareableLink}
-                    disabled={linkLoading}
-                    className="gradient-primary text-primary-foreground gap-2"
-                  >
-                    {linkLoading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Link2 className="h-4 w-4" />
-                    )}
-                    Gerar Link Compartilhável
-                  </Button>
-                </div>
-              )}
-            </div>
-          </TabsContent>
-
-          {/* AI Tab - only for admin/gerente */}
-          {canConfigureAI && (
-            <TabsContent value="ai">
-              <AIConfigTab companyId={companyId} />
-            </TabsContent>
-          )}
-        </Tabs>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function AIConfigTab({ companyId }: { companyId: string }) {
+  // AI form
   const [aiEnabled, setAiEnabled] = useState(false);
   const [aiAutoReply, setAiAutoReply] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [aiLoading, setAiLoading] = useState(true);
 
-  // Load current AI config
-  useState(() => {
+  const webhookUrl = getWebhookUrl();
+
+  // Populate form when config changes
+  useEffect(() => {
+    if (config) {
+      setFormInstanceId(config.zapi_instance_id || "");
+      setFormToken(config.zapi_token || "");
+      setQrStatus("disconnected");
+      setQrCode(null);
+      // Check connection status
+      checkStatus();
+    } else {
+      setFormInstanceId("");
+      setFormToken("");
+      setQrCode(null);
+      setQrStatus("disconnected");
+    }
+  }, [config, open]);
+
+  // Load AI config
+  useEffect(() => {
+    if (!open || !companyId) return;
     const load = async () => {
+      setAiLoading(true);
       const { data } = await supabase
         .from("whatsapp_configs")
         .select("ai_enabled, ai_auto_reply, ai_prompt")
@@ -315,24 +114,81 @@ function AIConfigTab({ companyId }: { companyId: string }) {
         setAiAutoReply(data.ai_auto_reply || false);
         setAiPrompt(
           data.ai_prompt ||
-            "Você é um atendente virtual da empresa. Seja cordial, responda dúvidas dos clientes de forma clara e objetiva."
+          "Você é um atendente virtual da empresa. Seja cordial, responda dúvidas dos clientes de forma clara e objetiva."
         );
       }
-      setLoading(false);
+      setAiLoading(false);
     };
     load();
-  });
+  }, [companyId, open]);
 
-  const handleSave = async () => {
+  const checkStatus = async () => {
+    if (!config) return;
+    setQrLoading(true);
+    try {
+      const { data } = await supabase.functions.invoke("zapi-qrcode", {
+        body: { company_id: companyId, action: "get-status" },
+      });
+      const connected = data?.connected === true;
+      setQrStatus(connected ? "connected" : "disconnected");
+      if (connected) {
+        setQrCode(null);
+      }
+    } catch {
+      setQrStatus("disconnected");
+    } finally {
+      setQrLoading(false);
+    }
+  };
+
+  const fetchQrCode = async () => {
+    if (!config) {
+      toast.error("Salve a configuração primeiro antes de gerar o QR Code");
+      return;
+    }
+    setQrLoading(true);
+    setQrCode(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("zapi-qrcode", {
+        body: { company_id: companyId, action: "get_qrcode" },
+      });
+      if (error) throw error;
+      if (data?.connected) {
+        setQrStatus("connected");
+        toast.success("WhatsApp já conectado!");
+      } else if (data?.qrcode) {
+        const qr = data.qrcode;
+        setQrCode(qr.startsWith("data:image") ? qr : `data:image/png;base64,${qr}`);
+        setQrStatus("disconnected");
+      } else {
+        toast.error(data?.error || "QR Code indisponível. Tente novamente.");
+      }
+    } catch (err: any) {
+      toast.error("Erro ao gerar QR Code: " + err.message);
+    } finally {
+      setQrLoading(false);
+    }
+  };
+
+  const handleSaveWhatsApp = async () => {
+    if (!formInstanceId) {
+      toast.error("Nome da instância é obrigatório.");
+      return;
+    }
     setSaving(true);
+    try {
+      // Use the onSubmit callback with a synthetic FormData
+      const fd = new FormData();
+      fd.set("zapi_instance_id", formInstanceId);
+      fd.set("zapi_token", formToken);
+      onSubmit(fd);
+    } finally {
+      setSaving(false);
+    }
+  };
 
-    // Capture old values before update
-    const { data: oldData } = await supabase
-      .from("whatsapp_configs")
-      .select("ai_enabled, ai_auto_reply, ai_prompt")
-      .eq("company_id", companyId)
-      .maybeSingle();
-
+  const handleSaveAI = async () => {
+    setSaving(true);
     const newValues = {
       ai_enabled: aiEnabled,
       ai_auto_reply: aiAutoReply,
@@ -347,7 +203,6 @@ function AIConfigTab({ companyId }: { companyId: string }) {
     if (error) {
       toast.error("Erro ao salvar: " + error.message);
     } else {
-      // Log audit entry
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         await supabase.from("audit_logs").insert({
@@ -356,11 +211,7 @@ function AIConfigTab({ companyId }: { companyId: string }) {
           action: "update",
           entity_type: "whatsapp_ai_config",
           entity_id: companyId,
-          old_values: oldData ? {
-            ai_enabled: oldData.ai_enabled,
-            ai_auto_reply: oldData.ai_auto_reply,
-            ai_prompt: oldData.ai_prompt,
-          } : null,
+          old_values: null,
           new_values: newValues,
         });
       }
@@ -369,67 +220,206 @@ function AIConfigTab({ companyId }: { companyId: string }) {
     setSaving(false);
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-10">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-      </div>
-    );
-  }
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success(`${label} copiada!`);
+  };
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-lg border border-border bg-secondary/30 p-3">
-        <p className="text-xs text-muted-foreground">
-          Configure o atendente virtual com IA. Quando ativado, a IA pode responder automaticamente
-          os leads pelo WhatsApp ou sugerir respostas na tela de Conversas.
-        </p>
-      </div>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{config ? "Editar Perfil" : "Novo Perfil"}</DialogTitle>
+          <DialogDescription>
+            Configure a instância UaZapi e chatbot de IA.
+          </DialogDescription>
+        </DialogHeader>
 
-      <div className="flex items-center justify-between rounded-lg border border-border p-3">
-        <div>
-          <p className="text-sm font-medium text-foreground">Ativar IA</p>
-          <p className="text-xs text-muted-foreground">Habilita sugestões de resposta na tela de Conversas</p>
-        </div>
-        <Switch checked={aiEnabled} onCheckedChange={setAiEnabled} />
-      </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="w-full grid grid-cols-2">
+            <TabsTrigger value="whatsapp">Conexão WhatsApp</TabsTrigger>
+            <TabsTrigger value="ai">Chatbot IA (SDR)</TabsTrigger>
+          </TabsList>
 
-      <div className="flex items-center justify-between rounded-lg border border-border p-3">
-        <div>
-          <p className="text-sm font-medium text-foreground">Resposta automática</p>
-          <p className="text-xs text-muted-foreground">
-            IA responde automaticamente quando chega uma mensagem
-          </p>
-        </div>
-        <Switch
-          checked={aiAutoReply}
-          onCheckedChange={setAiAutoReply}
-          disabled={!aiEnabled}
-        />
-      </div>
+          {/* Tab: Conexão WhatsApp */}
+          <TabsContent value="whatsapp" className="space-y-4 pt-2">
+            {/* Server URL - read-only */}
+            <div className="space-y-2 p-3 bg-muted/50 rounded-lg">
+              <Label className="text-xs font-medium text-muted-foreground">Server URL (salvo nos padrões)</Label>
+              <Input readOnly value={SERVER_URL} className="text-xs font-mono bg-background text-muted-foreground" />
+              <p className="text-xs text-muted-foreground">Configurado em Padrões da Clínica. O Admin Token está salvo nos secrets.</p>
+            </div>
 
-      <div className="space-y-2">
-        <Label>Prompt da IA</Label>
-        <Textarea
-          value={aiPrompt}
-          onChange={(e) => setAiPrompt(e.target.value)}
-          placeholder="Instruções para a IA..."
-          rows={4}
-          className="text-sm"
-          disabled={!aiEnabled}
-        />
-        <p className="text-[10px] text-muted-foreground">
-          Defina como a IA deve se comportar, o tom de voz, informações sobre a empresa, etc.
-        </p>
-      </div>
+            {/* Instance Name */}
+            <div className="space-y-2">
+              <Label>Nome da Instância (UaZapi) *</Label>
+              <Input
+                value={formInstanceId}
+                onChange={(e) => setFormInstanceId(e.target.value)}
+                placeholder="Ex: 88fbac77-b070-48b2-872e-2db662cc800b"
+              />
+              <p className="text-xs text-muted-foreground">Nome exato da instância criada no painel do UaZapi.</p>
+            </div>
 
-      <Button
-        onClick={handleSave}
-        disabled={saving}
-        className="w-full gradient-primary text-primary-foreground"
-      >
-        {saving ? "Salvando..." : "Salvar Configuração IA"}
-      </Button>
-    </div>
+            {/* Webhook URL */}
+            <div className="space-y-2 p-3 bg-muted rounded-lg">
+              <Label className="text-xs font-medium">Webhook URL</Label>
+              <div className="flex items-center gap-2">
+                <Input readOnly value={webhookUrl} className="text-xs font-mono bg-background" />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => copyToClipboard(webhookUrl, "URL do webhook")}
+                >
+                  <Copy className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* QR Code Section */}
+            <div className="space-y-3 pt-2 border-t">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-sm">Conectar WhatsApp</p>
+                  <p className="text-xs text-muted-foreground">Escaneie o QR Code para conectar</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {qrStatus === "connected" ? (
+                    <Badge className="gap-1 bg-emerald-600 hover:bg-emerald-700">
+                      <CheckCircle className="w-3 h-3" /> Conectado
+                    </Badge>
+                  ) : (
+                    <Badge variant="destructive" className="gap-1">
+                      <XCircle className="w-3 h-3" /> Desconectado
+                    </Badge>
+                  )}
+                  <Button variant="ghost" size="icon" onClick={checkStatus} disabled={qrLoading}>
+                    <RefreshCw className={`w-4 h-4 ${qrLoading ? "animate-spin" : ""}`} />
+                  </Button>
+                </div>
+              </div>
+
+              {qrStatus !== "connected" && (
+                <div className="space-y-3">
+                  {!qrCode && (
+                    <Button onClick={fetchQrCode} disabled={qrLoading || !config} variant="outline" className="w-full gap-2">
+                      {qrLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wifi className="w-4 h-4" />}
+                      {qrLoading ? "Gerando QR Code..." : "Gerar QR Code"}
+                    </Button>
+                  )}
+                  {qrCode && (
+                    <div className="flex flex-col items-center gap-3 p-4 bg-background border border-dashed rounded-lg">
+                      <img src={qrCode} alt="QR Code WhatsApp" className="w-48 h-48 object-contain" />
+                      <p className="text-xs text-muted-foreground text-center">
+                        Escaneie com o WhatsApp da empresa
+                      </p>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={fetchQrCode} disabled={qrLoading}>
+                          <RefreshCw className="w-3.5 h-3.5 mr-1" /> Atualizar
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={checkStatus} disabled={qrLoading}>
+                          Verificar Conexão
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {qrStatus === "connected" && (
+                <div className="flex items-center gap-2 p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-lg">
+                  <CheckCircle className="w-4 h-4 text-emerald-600" />
+                  <p className="text-sm text-emerald-800 dark:text-emerald-300">WhatsApp conectado e pronto para uso!</p>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* Tab: Chatbot IA (SDR) */}
+          <TabsContent value="ai" className="space-y-4 pt-2">
+            {aiLoading ? (
+              <div className="flex items-center justify-center py-10">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium text-sm">Chatbot IA (SDR)</p>
+                    <p className="text-xs text-muted-foreground">Respostas automáticas inteligentes via WhatsApp</p>
+                  </div>
+                  <Switch checked={aiEnabled} onCheckedChange={setAiEnabled} />
+                </div>
+
+                {aiEnabled && (
+                  <>
+                    <div className="flex items-center justify-between rounded-lg border border-border p-3">
+                      <div>
+                        <p className="text-sm font-medium text-foreground">Resposta automática</p>
+                        <p className="text-xs text-muted-foreground">
+                          Bot responde e qualifica leads automaticamente
+                        </p>
+                      </div>
+                      <Switch
+                        checked={aiAutoReply}
+                        onCheckedChange={setAiAutoReply}
+                        disabled={!aiEnabled}
+                      />
+                    </div>
+
+                    <div className="space-y-3 p-3 bg-muted/50 rounded-lg">
+                      <div className="flex items-start gap-2 text-sm">
+                        <Bot className="w-4 h-4 mt-0.5 text-primary shrink-0" />
+                        <div>
+                          <p className="font-medium">Atendente IA ativado</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            O chatbot irá atender automaticamente as mensagens recebidas,
+                            qualificar leads e agendar consultas. Configure a personalização
+                            completa no painel do Bot (menu lateral).
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Prompt da IA</Label>
+                      <Textarea
+                        value={aiPrompt}
+                        onChange={(e) => setAiPrompt(e.target.value)}
+                        placeholder="Instruções para a IA..."
+                        rows={4}
+                        className="text-sm"
+                      />
+                      <p className="text-[10px] text-muted-foreground">
+                        Defina como a IA deve se comportar, o tom de voz, informações sobre a empresa, etc.
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {!aiEnabled && (
+                  <div className="text-center py-6 text-muted-foreground">
+                    <Bot className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                    <p className="text-sm">Ative o Chatbot IA para atendimento automático</p>
+                  </div>
+                )}
+              </>
+            )}
+          </TabsContent>
+        </Tabs>
+
+        <DialogFooter className="pt-2">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+          <Button
+            onClick={activeTab === "whatsapp" ? handleSaveWhatsApp : handleSaveAI}
+            disabled={saving}
+            className="gap-2"
+          >
+            {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+            Salvar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
