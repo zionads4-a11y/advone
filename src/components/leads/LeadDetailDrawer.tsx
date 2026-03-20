@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Phone, Mail, DollarSign, Calendar } from "lucide-react";
+import { LeadScoreBadge } from "@/components/leads/LeadScoreBadge";
 import { SourceBadge } from "@/components/leads/SourceBadge";
 import { LeadReminders } from "@/components/leads/LeadReminders";
 import { LeadSummary } from "@/components/leads/LeadSummary";
@@ -36,6 +37,7 @@ interface LeadData {
   processo_numero: string | null;
   cpf: string | null;
   processo_valor: number | null;
+  lead_score?: string | null;
 }
 
 interface LeadDetailDrawerProps {
@@ -71,6 +73,7 @@ export function LeadDetailDrawer({ lead, open, onOpenChange, onLeadUpdate }: Lea
                   {statusInfo.label}
                 </Badge>
                 {lead.source && <SourceBadge source={lead.source} size="md" />}
+                {lead.lead_score && <LeadScoreBadge score={lead.lead_score} size="md" />}
               </div>
             </div>
           </div>

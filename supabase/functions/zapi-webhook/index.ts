@@ -6,6 +6,62 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+function buildSDRPrompt(config: any) {
+  const officeName = config.office_name || "o escritório";
+  const practiceArea = config.practice_area || "";
+  const tone = config.communication_tone || "moderado";
+  const schedulingLink = config.scheduling_link || "";
+  const consultationDuration = config.consultation_duration || "30 minutos";
+  const targetAudience = config.target_audience || "";
+  const customPrompt = config.ai_prompt || "";
+
+  const toneInstructions = tone === "formal"
+    ? "Use linguagem formal e tratamento respeitoso (Sr./Sra.)."
+    : tone === "informal"
+    ? "Use linguagem leve e amigável, com emojis moderados."
+    : "Seja educado e profissional, mas acessível.";
+
+  return `Você é um SDR virtual especializado em atendimento para ${officeName}${practiceArea ? `, atuando em ${practiceArea}` : ""}.
+
+Seu ÚNICO objetivo é qualificar rapidamente o lead e levá-lo a agendar uma conversa com um advogado.
+
+REGRAS IMPORTANTES:
+- Você NÃO responde dúvidas jurídicas
+- Você NÃO dá orientação legal
+- Você NÃO entra em explicações técnicas
+- Você sempre conduz para o agendamento
+- ${toneInstructions}
+
+COMPORTAMENTO:
+- Mensagens curtas (máximo 2-3 linhas)
+- Sempre faça perguntas que avancem a conversa
+- Nunca deixe a conversa morrer
+
+${targetAudience ? `PÚBLICO-ALVO: ${targetAudience}` : ""}
+
+${customPrompt ? `INSTRUÇÕES ADICIONAIS DO ESCRITÓRIO:\n${customPrompt}` : ""}
+
+FLUXO DE ATENDIMENTO:
+1. Cumprimente o lead e se apresente como assistente de ${officeName}
+2. Faça uma qualificação rápida: "Seu caso é sobre qual situação?"
+3. Após a resposta, conduza para agendamento: "Perfeito, o advogado pode te orientar melhor sobre isso."
+4. ${schedulingLink ? `Envie o link de agendamento: ${schedulingLink}` : "Informe que vai encaminhar para um atendente humano."}
+${consultationDuration ? `5. A consulta dura aproximadamente ${consultationDuration}.` : ""}
+
+SE O LEAD FIZER PERGUNTAS JURÍDICAS:
+"Essa parte o advogado vai conseguir te orientar com mais precisão. Vamos agendar um horário para você falar direto com ele?"
+
+SE O LEAD RESISTIR:
+"Entendo! Mas uma conversa rápida já pode te dar clareza do que fazer. Leva menos de ${consultationDuration} 👇"
+
+QUALIFICAÇÃO:
+- Use a ferramenta "qualify_lead" quando tiver informações suficientes
+- Use "schedule_appointment" quando o lead aceitar agendar
+- Se o lead NÃO for qualificado, oriente educadamente para o recurso correto (INSS, Procon, Defensoria Pública, etc.)
+
+Responda SEMPRE em português do Brasil.`;
+}
+
 async function qualifyLeadWithAI(
   config: any,
   conversationHistory: { role: string; content: string }[],
@@ -16,49 +72,55 @@ async function qualifyLeadWithAI(
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!LOVABLE_API_KEY) return null;
 
-  const systemPrompt = `${config.ai_prompt || "Você é um atendente virtual. Seja cordial e objetivo."}
-
-INSTRUÇÕES IMPORTANTES DE QUALIFICAÇÃO:
-- Você é um agente de triagem. Seu objetivo é entender rapidamente se o lead é adequado para o escritório.
-- Faça perguntas objetivas para qualificar o lead (máximo 3-4 perguntas).
-- Quando tiver informação suficiente, use a ferramenta "qualify_lead" para registrar sua análise.
-- Se o lead for qualificado, use a ferramenta "transfer_to_human" para encaminhar ao atendente.
-- Se o lead NÃO for qualificado:
-  1. Explique educadamente que o caso não se encaixa no perfil do escritório.
-  2. SEMPRE oriente o lead para o recurso ou órgão correto onde ele pode buscar ajuda. Exemplos:
-     - Direito trabalhista: oriente a procurar o Ministério do Trabalho, sindicato da categoria ou Defensoria Pública.
-     - Direito do consumidor: oriente a procurar o Procon ou Juizado Especial.
-     - Direito previdenciário: oriente a procurar o INSS ou Defensoria Pública.
-     - Outros casos: oriente a procurar a Defensoria Pública ou OAB local.
-  3. Use "qualify_lead" com status "not_qualified".
-- Seja sempre cordial e profissional. Mesmo quando não qualificado, deixe uma boa impressão.
-- NÃO fique respondendo muitas perguntas do lead. Foque em qualificar rapidamente.
-- Responda SEMPRE em português do Brasil.`;
+  const systemPrompt = buildSDRPrompt(config);
 
   const tools = [
     {
       type: "function",
       function: {
         name: "qualify_lead",
-        description: "Registra a qualificação do lead após análise da conversa. Use quando tiver informações suficientes para decidir se o lead é adequado.",
+        description: "Registra a qualificação do lead. Use quando tiver informações suficientes.",
         parameters: {
           type: "object",
           properties: {
             status: {
               type: "string",
               enum: ["qualified", "not_qualified", "needs_more_info"],
-              description: "qualified = lead adequado para o escritório, not_qualified = caso não se encaixa, needs_more_info = precisa de mais informações"
+              description: "qualified = lead adequado, not_qualified = caso não se encaixa, needs_more_info = precisa de mais informações"
             },
             reason: {
               type: "string",
-              description: "Motivo da qualificação em português (ex: 'Cliente com mais de 2 anos de vínculo, demitido sem justa causa')"
+              description: "Motivo da qualificação em português"
             },
             summary: {
               type: "string",
-              description: "Resumo breve do caso do lead em português"
+              description: "Resumo breve do caso do lead"
+            },
+            lead_score: {
+              type: "string",
+              enum: ["quente", "morno", "frio"],
+              description: "quente = muito interessado/engajado, morno = interesse moderado, frio = pouco engajamento"
             }
           },
-          required: ["status", "reason"],
+          required: ["status", "reason", "lead_score"],
+          additionalProperties: false
+        }
+      }
+    },
+    {
+      type: "function",
+      function: {
+        name: "schedule_appointment",
+        description: "Registra que o lead aceitou agendar. Use quando o lead demonstrar interesse em agendar.",
+        parameters: {
+          type: "object",
+          properties: {
+            message_to_lead: {
+              type: "string",
+              description: "Mensagem final com o link de agendamento"
+            }
+          },
+          required: ["message_to_lead"],
           additionalProperties: false
         }
       }
@@ -67,13 +129,13 @@ INSTRUÇÕES IMPORTANTES DE QUALIFICAÇÃO:
       type: "function",
       function: {
         name: "transfer_to_human",
-        description: "Transfere o atendimento para um atendente humano. Use quando o lead for qualificado e precisar de atendimento especializado.",
+        description: "Transfere para atendente humano quando o lead for qualificado.",
         parameters: {
           type: "object",
           properties: {
             message_to_lead: {
               type: "string",
-              description: "Mensagem final para o lead informando que será atendido por um especialista"
+              description: "Mensagem informando que será atendido por um especialista"
             }
           },
           required: ["message_to_lead"],
@@ -101,78 +163,86 @@ INSTRUÇÕES IMPORTANTES DE QUALIFICAÇÃO:
     });
 
     if (!aiResponse.ok) {
-      console.error("AI qualification error:", aiResponse.status, await aiResponse.text());
+      console.error("AI error:", aiResponse.status, await aiResponse.text());
       return null;
     }
 
     const aiData = await aiResponse.json();
-    const choice = aiData.choices?.[0];
-    const message = choice?.message;
-
+    const message = aiData.choices?.[0]?.message;
     if (!message) return null;
 
-    // Process tool calls if any
-    let qualificationResult: { status: string; reason: string; summary?: string } | null = null;
-    let transferMessage: string | null = null;
+    let qualificationResult: { status: string; reason: string; summary?: string; lead_score?: string } | null = null;
     let replyText = message.content || "";
+    let shouldSchedule = false;
 
     if (message.tool_calls && message.tool_calls.length > 0) {
       for (const toolCall of message.tool_calls) {
         const fnName = toolCall.function?.name;
         let args: any = {};
-        try {
-          args = JSON.parse(toolCall.function?.arguments || "{}");
-        } catch { /* ignore parse errors */ }
+        try { args = JSON.parse(toolCall.function?.arguments || "{}"); } catch { /* ignore */ }
 
         if (fnName === "qualify_lead") {
           qualificationResult = {
             status: args.status || "needs_more_info",
             reason: args.reason || "",
             summary: args.summary || "",
+            lead_score: args.lead_score || "morno",
           };
-          console.log("Lead qualification result:", JSON.stringify(qualificationResult));
+        }
+
+        if (fnName === "schedule_appointment") {
+          shouldSchedule = true;
+          replyText = args.message_to_lead || replyText;
+          // Append scheduling link if available
+          if (config.scheduling_link && !replyText.includes(config.scheduling_link)) {
+            replyText += `\n\n${config.scheduling_link}`;
+          }
         }
 
         if (fnName === "transfer_to_human") {
-          transferMessage = args.message_to_lead || "Um especialista irá atendê-lo em breve!";
+          replyText = args.message_to_lead || "Um especialista irá atendê-lo em breve!";
         }
       }
 
-      // Apply qualification to lead
+      // Apply qualification
       if (qualificationResult && leadId) {
-        if (qualificationResult.status === "qualified") {
-          // Move to "contacted" status
+        // Update lead score
+        const scoreUpdate: any = {};
+        if (qualificationResult.lead_score) {
+          scoreUpdate.lead_score = qualificationResult.lead_score;
+        }
+
+        if (qualificationResult.status === "qualified" || shouldSchedule) {
+          const newStatus = shouldSchedule ? "qualified" : "contacted";
           await supabase.from("leads").update({
-            status: "contacted",
+            status: newStatus,
             notes: `[IA] ${qualificationResult.reason}${qualificationResult.summary ? ` | ${qualificationResult.summary}` : ""}`,
+            ...scoreUpdate,
           }).eq("id", leadId);
 
-          // Create a summary
           await supabase.from("lead_summaries").insert({
             lead_id: leadId,
             company_id: companyId,
-            summary_text: `🤖 Qualificação automática: ${qualificationResult.reason}${qualificationResult.summary ? `\n\nResumo: ${qualificationResult.summary}` : ""}`,
+            summary_text: `🤖 ${shouldSchedule ? "Agendamento" : "Qualificação"}: ${qualificationResult.reason}${qualificationResult.summary ? `\n\nResumo: ${qualificationResult.summary}` : ""}`,
             generated_by_ai: true,
             created_by: "00000000-0000-0000-0000-000000000000",
           });
 
-          // Move to second kanban column (typically "Contatado")
+          // Move in kanban
+          const targetPosition = shouldSchedule ? 3 : 1; // "Agendado" or "Contatado"
           const { data: columns } = await supabase
             .from("kanban_columns")
             .select("id")
             .eq("company_id", companyId)
             .order("position", { ascending: true })
-            .limit(2);
+            .limit(targetPosition + 1);
 
-          if (columns && columns.length >= 2) {
+          if (columns && columns.length > targetPosition) {
             await supabase.from("leads").update({
-              kanban_column_id: columns[1].id,
+              kanban_column_id: columns[targetPosition].id,
             }).eq("id", leadId);
           }
-
-          console.log("Lead qualified and moved:", leadId);
         } else if (qualificationResult.status === "not_qualified") {
-          // Mark as lost
           const { data: lostColumn } = await supabase
             .from("kanban_columns")
             .select("id")
@@ -183,6 +253,7 @@ INSTRUÇÕES IMPORTANTES DE QUALIFICAÇÃO:
           await supabase.from("leads").update({
             status: "lost",
             notes: `[IA - Não qualificado] ${qualificationResult.reason}`,
+            ...scoreUpdate,
             ...(lostColumn ? { kanban_column_id: lostColumn.id } : {}),
           }).eq("id", leadId);
 
@@ -193,14 +264,12 @@ INSTRUÇÕES IMPORTANTES DE QUALIFICAÇÃO:
             generated_by_ai: true,
             created_by: "00000000-0000-0000-0000-000000000000",
           });
-
-          console.log("Lead not qualified:", leadId);
+        } else {
+          // needs_more_info — just update score
+          if (Object.keys(scoreUpdate).length > 0) {
+            await supabase.from("leads").update(scoreUpdate).eq("id", leadId);
+          }
         }
-      }
-
-      // If transfer requested, use the transfer message as reply
-      if (transferMessage) {
-        replyText = transferMessage;
       }
     }
 
@@ -208,6 +277,37 @@ INSTRUÇÕES IMPORTANTES DE QUALIFICAÇÃO:
   } catch (error) {
     console.error("AI qualification error:", error);
     return null;
+  }
+}
+
+async function enrollInCadence(supabase: any, companyId: string, leadId: string, phone: string) {
+  // Check if already enrolled
+  const { data: existing } = await supabase
+    .from("cadence_messages")
+    .select("id")
+    .eq("lead_id", leadId)
+    .eq("status", "pending")
+    .limit(1);
+
+  if (existing && existing.length > 0) return; // Already enrolled
+
+  const now = new Date();
+  const cadenceDays = [1, 2, 3, 5];
+
+  const messages = cadenceDays.map((day) => ({
+    company_id: companyId,
+    lead_id: leadId,
+    phone,
+    day_number: day,
+    scheduled_at: new Date(now.getTime() + day * 24 * 60 * 60 * 1000).toISOString(),
+    status: "pending",
+  }));
+
+  const { error } = await supabase.from("cadence_messages").insert(messages);
+  if (error) {
+    console.error("Error enrolling in cadence:", error);
+  } else {
+    console.log(`Lead ${leadId} enrolled in cadence (${cadenceDays.length} messages)`);
   }
 }
 
@@ -221,27 +321,23 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get company_id from URL path: /zapi-webhook?company_id=xxx
     const url = new URL(req.url);
     const companyId = url.searchParams.get("company_id");
 
     if (!companyId) {
-      console.error("Missing company_id parameter");
       return new Response(JSON.stringify({ error: "Missing company_id" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Verify this company has a WhatsApp config
     const { data: config } = await supabase
       .from("whatsapp_configs")
-      .select("id, company_id, zapi_instance_id, zapi_token, ai_enabled, ai_prompt, ai_auto_reply")
+      .select("id, company_id, zapi_instance_id, zapi_token, ai_enabled, ai_prompt, ai_auto_reply, office_name, practice_area, communication_tone, scheduling_link, consultation_duration, target_audience")
       .eq("company_id", companyId)
       .maybeSingle();
 
     if (!config) {
-      console.error("No WhatsApp config found for company:", companyId);
       return new Response(JSON.stringify({ error: "Company not configured" }), {
         status: 404,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -251,11 +347,9 @@ serve(async (req) => {
     const body = await req.json();
     console.log("Z-API webhook payload:", JSON.stringify(body));
 
-    // Z-API sends different event types
     if (!body || !body.type) {
       return new Response(JSON.stringify({ ok: true }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -266,37 +360,25 @@ serve(async (req) => {
       const messageIdExternal = body.messageId || "";
       const isGroup = body.isGroup || false;
 
-      // Skip group messages
-      if (isGroup) {
-        return new Response(JSON.stringify({ ok: true, skipped: "group_message" }), {
-          status: 200,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+      if (isGroup || !phone) {
+        return new Response(JSON.stringify({ ok: true, skipped: isGroup ? "group_message" : "no_phone" }), {
+          status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
-      if (!phone) {
-        return new Response(JSON.stringify({ ok: true, skipped: "no_phone" }), {
-          status: 200,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      // Clean phone number
       const cleanPhone = phone.replace("@c.us", "").replace("@s.whatsapp.net", "");
 
-      // Try to extract tracking code from message [XXXXXX]
+      // Extract tracking code
       let trackingCode: string | null = null;
-      let utmData: { utm_source?: string; utm_medium?: string; utm_campaign?: string; utm_content?: string; utm_term?: string } = {};
+      let utmData: any = {};
       let detectedSource: string | null = null;
 
       const codeMatch = messageText.match(/\[([A-Z0-9]{6})\]/);
       if (codeMatch) {
         trackingCode = codeMatch[1];
-        console.log("Tracking code found in message:", trackingCode);
-
         const { data: click } = await supabase
           .from("tracking_clicks")
-          .select("id, utm_source, utm_medium, utm_campaign, utm_content, utm_term, tracking_link_id")
+          .select("id, utm_source, utm_medium, utm_campaign, utm_content, utm_term")
           .eq("tracking_code", trackingCode)
           .is("lead_id", null)
           .maybeSingle();
@@ -309,18 +391,13 @@ serve(async (req) => {
             utm_content: click.utm_content || undefined,
             utm_term: click.utm_term || undefined,
           };
-          console.log("UTM data from tracking click:", JSON.stringify(utmData));
-
           const src = (click.utm_source || "").toLowerCase();
-          if (src.includes("google") || src === "gads" || src === "googleads") {
-            detectedSource = "google";
-          } else if (src.includes("meta") || src.includes("facebook") || src.includes("instagram") || src === "fb" || src === "ig") {
-            detectedSource = "meta";
-          }
+          if (src.includes("google") || src === "gads") detectedSource = "google";
+          else if (src.includes("meta") || src.includes("facebook") || src.includes("instagram")) detectedSource = "meta";
         }
       }
 
-      // Check if lead exists for this phone + company
+      // Find or create lead
       const { data: existingLead } = await supabase
         .from("leads")
         .select("id, status")
@@ -330,7 +407,6 @@ serve(async (req) => {
 
       let leadId = existingLead?.id;
 
-      // If no lead exists, create one automatically
       if (!leadId) {
         const { data: firstColumn } = await supabase
           .from("kanban_columns")
@@ -348,13 +424,10 @@ serve(async (req) => {
             phone: cleanPhone,
             whatsapp: cleanPhone,
             status: "new",
+            lead_score: "morno",
             kanban_column_id: firstColumn?.id || null,
             ...(detectedSource && { source: detectedSource }),
-            ...(utmData.utm_source && { utm_source: utmData.utm_source }),
-            ...(utmData.utm_medium && { utm_medium: utmData.utm_medium }),
-            ...(utmData.utm_campaign && { utm_campaign: utmData.utm_campaign }),
-            ...(utmData.utm_content && { utm_content: utmData.utm_content }),
-            ...(utmData.utm_term && { utm_term: utmData.utm_term }),
+            ...utmData,
           })
           .select("id")
           .single();
@@ -363,34 +436,39 @@ serve(async (req) => {
           console.error("Error creating lead:", leadError);
         } else {
           leadId = newLead.id;
-          console.log("New lead created:", leadId, "for phone:", cleanPhone);
-        }
-      } else if (Object.keys(utmData).length > 0) {
-        const { data: existingLeadData } = await supabase
-          .from("leads")
-          .select("utm_source, source")
-          .eq("id", leadId)
-          .single();
+          console.log("New lead created:", leadId);
 
-        if (existingLeadData) {
-          const updates: Record<string, string> = {};
-          if (!existingLeadData.utm_source) {
-            if (utmData.utm_source) updates.utm_source = utmData.utm_source;
-            if (utmData.utm_medium) updates.utm_medium = utmData.utm_medium;
-            if (utmData.utm_campaign) updates.utm_campaign = utmData.utm_campaign;
-            if (utmData.utm_content) updates.utm_content = utmData.utm_content;
-            if (utmData.utm_term) updates.utm_term = utmData.utm_term;
-          }
-          if (!existingLeadData.source && detectedSource) {
-            updates.source = detectedSource;
-          }
-          if (Object.keys(updates).length > 0) {
-            await supabase.from("leads").update(updates).eq("id", leadId);
+          // Enroll new lead in cadence (will send follow-ups if they don't respond)
+          await enrollInCadence(supabase, companyId, leadId, cleanPhone);
+        }
+      } else {
+        // Lead responded — cancel any pending cadence
+        await supabase
+          .from("cadence_messages")
+          .update({ status: "cancelled" })
+          .eq("lead_id", leadId)
+          .eq("status", "pending");
+
+        // Update UTM if missing
+        if (Object.keys(utmData).length > 0) {
+          const { data: existingLeadData } = await supabase
+            .from("leads")
+            .select("utm_source, source")
+            .eq("id", leadId)
+            .single();
+
+          if (existingLeadData) {
+            const updates: Record<string, string> = {};
+            if (!existingLeadData.utm_source) Object.assign(updates, utmData);
+            if (!existingLeadData.source && detectedSource) updates.source = detectedSource;
+            if (Object.keys(updates).length > 0) {
+              await supabase.from("leads").update(updates).eq("id", leadId);
+            }
           }
         }
       }
 
-      // Match tracking click to lead
+      // Match tracking click
       if (trackingCode && leadId) {
         await supabase
           .from("tracking_clicks")
@@ -399,33 +477,25 @@ serve(async (req) => {
           .is("lead_id", null);
       }
 
-      // Store the incoming message
-      const { error: msgError } = await supabase
-        .from("whatsapp_messages")
-        .insert({
-          company_id: companyId,
-          lead_id: leadId || null,
-          phone: cleanPhone,
-          message_text: messageText,
-          direction: "incoming",
-          sender_name: senderName,
-          message_id_external: messageIdExternal,
-          timestamp: body.mompiont ? new Date(body.mompiont * 1000).toISOString() : new Date().toISOString(),
-        });
+      // Store incoming message
+      await supabase.from("whatsapp_messages").insert({
+        company_id: companyId,
+        lead_id: leadId || null,
+        phone: cleanPhone,
+        message_text: messageText,
+        direction: "incoming",
+        sender_name: senderName,
+        message_id_external: messageIdExternal,
+        timestamp: body.mompiont ? new Date(body.mompiont * 1000).toISOString() : new Date().toISOString(),
+      });
 
-      if (msgError) {
-        console.error("Error storing message:", msgError);
-      }
-
-      // AI Auto-Reply with Qualification
+      // AI Auto-Reply with SDR qualification
       if (config.ai_enabled && config.ai_auto_reply && leadId) {
         try {
-          // Check if lead is already qualified/contacted - if so, skip AI (human is handling)
           const leadStatus = existingLead?.status;
           const isAlreadyHandled = leadStatus && !["new"].includes(leadStatus);
 
           if (!isAlreadyHandled) {
-            // Get recent conversation history for context
             const { data: recentMsgs } = await supabase
               .from("whatsapp_messages")
               .select("message_text, direction")
@@ -444,7 +514,6 @@ serve(async (req) => {
             const aiReply = await qualifyLeadWithAI(config, history, companyId, leadId, supabase);
 
             if (aiReply) {
-              // Send reply via Z-API
               const sendUrl = `https://api.z-api.io/instances/${config.zapi_instance_id}/token/${config.zapi_token}/send-text`;
               const sendResponse = await fetch(sendUrl, {
                 method: "POST",
@@ -456,7 +525,7 @@ serve(async (req) => {
                 const sendResult = await sendResponse.json();
                 await supabase.from("whatsapp_messages").insert({
                   company_id: companyId,
-                  lead_id: leadId || null,
+                  lead_id: leadId,
                   phone: cleanPhone,
                   message_text: aiReply,
                   direction: "outgoing",
@@ -464,13 +533,10 @@ serve(async (req) => {
                   message_id_external: sendResult.messageId || null,
                   timestamp: new Date().toISOString(),
                 });
-                console.log("AI qualification reply sent to:", cleanPhone);
               } else {
-                console.error("Failed to send AI reply via Z-API:", await sendResponse.text());
+                console.error("Failed to send AI reply:", await sendResponse.text());
               }
             }
-          } else {
-            console.log("Lead already handled (status:", leadStatus, "), skipping AI auto-reply");
           }
         } catch (aiError) {
           console.error("AI auto-reply error:", aiError);
@@ -483,18 +549,14 @@ serve(async (req) => {
       );
     }
 
-    // For sent messages (outgoing)
     if (body.type === "SentCallback" || body.type === "MessageStatusCallback") {
       return new Response(JSON.stringify({ ok: true, type: body.type }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Default response
     return new Response(JSON.stringify({ ok: true }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error: unknown) {
     console.error("Webhook error:", error);

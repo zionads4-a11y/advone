@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.track-click]
 verify_jwt = false
+
+[functions.process-cadence]
+verify_jwt = false

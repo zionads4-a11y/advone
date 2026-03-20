@@ -4,6 +4,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Card, CardContent } from "@/components/ui/card";
 import { Phone, Mail, DollarSign, Pencil, Check, X, MessageCircle } from "lucide-react";
+import { LeadScoreBadge } from "@/components/leads/LeadScoreBadge";
 import { SourceBadge } from "@/components/leads/SourceBadge";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,6 +18,7 @@ interface DraggableLeadCardProps {
     phone: string | null;
     value: number;
     source: string | null;
+    lead_score?: string | null;
   };
   onClick?: () => void;
   isDragOverlay?: boolean;
@@ -132,6 +134,7 @@ function LeadCardContent({ lead, onValueUpdate }: { lead: DraggableLeadCardProps
             </button>
           )}
           <SourceBadge source={lead.source} />
+          {lead.lead_score && <LeadScoreBadge score={lead.lead_score} />}
         </div>
       </div>
       <div className="space-y-1">
