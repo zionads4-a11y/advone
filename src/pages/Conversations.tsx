@@ -187,6 +187,56 @@ export default function Conversations() {
     setAiSuggesting(false);
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedPhone || !selectedCompanyId) return;
+
+    const maxSize = 20 * 1024 * 1024; // 20MB
+    if (file.size > maxSize) {
+      toast.error("Arquivo muito grande. Máximo: 20MB");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "bin";
+      const path = `${selectedCompanyId}/${Date.now()}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("whatsapp-media")
+        .upload(path, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("whatsapp-media")
+        .getPublicUrl(path);
+
+      const { data, error } = await supabase.functions.invoke("send-whatsapp", {
+        body: {
+          company_id: selectedCompanyId,
+          phone: selectedPhone,
+          message: messageText.trim() || undefined,
+          media_url: publicUrl,
+          media_type: file.type.startsWith("video") ? "video" : file.type.startsWith("image") ? "image" : "document",
+        },
+      });
+
+      if (error || data?.error) {
+        toast.error(data?.error || error?.message || "Erro ao enviar arquivo");
+      } else {
+        setMessageText("");
+        toast.success("Arquivo enviado!");
+        setTimeout(fetchMessages, 500);
+      }
+    } catch (err: any) {
+      toast.error("Erro no upload: " + err.message);
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
   const phones = Object.keys(conversations).sort((a, b) => {
     const lastA = conversations[a][conversations[a].length - 1]?.timestamp || "";
     const lastB = conversations[b][conversations[b].length - 1]?.timestamp || "";
