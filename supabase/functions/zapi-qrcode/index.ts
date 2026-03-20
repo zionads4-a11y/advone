@@ -53,26 +53,29 @@ serve(async (req) => {
         );
       }
 
-      // Fetch QR code from Z-API
-      const qrResponse = await fetch(
-        `https://api.z-api.io/instances/${config.zapi_instance_id}/token/${config.zapi_token}/qr-code`,
-        { method: "GET" }
-      );
+      // Fetch QR code from UaZapi via /instance/connect
+      const SERVER_URL = "https://ziondigital.uazapi.com";
+      const qrResponse = await fetch(`${SERVER_URL}/instance/connect`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "token": config.zapi_token },
+        body: JSON.stringify({}),
+      });
 
       if (!qrResponse.ok) {
         const errorText = await qrResponse.text();
-        console.error("Z-API QR code error:", errorText);
+        console.error("UaZapi QR code error:", errorText);
         return new Response(
-          JSON.stringify({ error: "Erro ao obter QR Code da Z-API", details: errorText }),
+          JSON.stringify({ error: "Erro ao obter QR Code da UaZapi", details: errorText }),
           { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
       const qrData = await qrResponse.json();
+      const qrcode = qrData.qrcode || qrData.qr || qrData.base64 || qrData.value || qrData.data?.qrcode || null;
 
       return new Response(
         JSON.stringify({
-          qrcode: qrData.value || qrData,
+          qrcode: qrcode || qrData,
           company_name: tokenData.companies?.name || "Empresa",
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -156,21 +159,20 @@ serve(async (req) => {
         .eq("company_id", company_id)
         .maybeSingle();
 
-      if (!config) {
+      if (!config || !config.zapi_token) {
         return new Response(
           JSON.stringify({ error: "Z-API não configurada", connected: false }),
           { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
-      const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN") || "";
       const SERVER_URL = "https://ziondigital.uazapi.com";
 
       try {
-        const statusResponse = await fetch(
-          `${SERVER_URL}/instance/${config.zapi_instance_id}/status`,
-          { method: "GET", headers: { "AdminToken": ADMIN_TOKEN } }
-        );
+        const statusResponse = await fetch(`${SERVER_URL}/instance/status`, {
+          method: "GET",
+          headers: { "token": config.zapi_token },
+        });
         const statusData = await statusResponse.json();
         const connected = statusData?.state === "open" || statusData?.connected === true;
 
@@ -194,21 +196,42 @@ serve(async (req) => {
         .eq("company_id", company_id)
         .maybeSingle();
 
-      if (!config) {
+      if (!config || !config.zapi_token) {
         return new Response(
-          JSON.stringify({ error: "Z-API não configurada" }),
+          JSON.stringify({ error: "Token da instância não configurado" }),
           { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
-      const qrResponse = await fetch(
-        `https://api.z-api.io/instances/${config.zapi_instance_id}/token/${config.zapi_token}/qr-code`,
-        { method: "GET" }
-      );
+      const SERVER_URL = "https://ziondigital.uazapi.com";
+
+      // First check if already connected
+      try {
+        const statusRes = await fetch(`${SERVER_URL}/instance/status`, {
+          method: "GET",
+          headers: { "token": config.zapi_token },
+        });
+        const statusData = await statusRes.json();
+        if (statusData?.state === "open" || statusData?.connected === true) {
+          return new Response(
+            JSON.stringify({ connected: true }),
+            { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      } catch {
+        // Continue to QR generation
+      }
+
+      // Request QR code via /instance/connect
+      const qrResponse = await fetch(`${SERVER_URL}/instance/connect`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "token": config.zapi_token },
+        body: JSON.stringify({}),
+      });
 
       if (!qrResponse.ok) {
         const errorText = await qrResponse.text();
-        console.error("Z-API QR code error:", errorText);
+        console.error("UaZapi connect error:", qrResponse.status, errorText);
         return new Response(
           JSON.stringify({ error: "Erro ao obter QR Code", details: errorText }),
           { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -216,9 +239,20 @@ serve(async (req) => {
       }
 
       const qrData = await qrResponse.json();
+      console.log("UaZapi connect response keys:", Object.keys(qrData));
+
+      // Extract QR code from response (could be in various fields)
+      const qrcode = qrData.qrcode || qrData.qr || qrData.base64 || qrData.value || qrData.data?.qrcode || null;
+
+      if (!qrcode) {
+        return new Response(
+          JSON.stringify({ error: "QR Code não disponível", raw: qrData }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
 
       return new Response(
-        JSON.stringify({ qrcode: qrData.value || qrData }),
+        JSON.stringify({ qrcode }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
