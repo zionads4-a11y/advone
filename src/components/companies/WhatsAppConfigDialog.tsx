@@ -76,6 +76,8 @@ export function WhatsAppConfigDialog({
   const [aiEnabled, setAiEnabled] = useState(false);
   const [aiAutoReply, setAiAutoReply] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
+  const [aiObjective, setAiObjective] = useState("Entrar em contato com os Leads e agendar uma reunião");
+  const [alertWhatsapp, setAlertWhatsapp] = useState("");
   const [aiLoading, setAiLoading] = useState(true);
 
   const webhookUrl = getWebhookUrl();
@@ -104,7 +106,7 @@ export function WhatsAppConfigDialog({
       setAiLoading(true);
       const { data } = await supabase
         .from("whatsapp_configs")
-        .select("ai_enabled, ai_auto_reply, ai_prompt")
+        .select("ai_enabled, ai_auto_reply, ai_prompt, ai_objective, alert_whatsapp")
         .eq("company_id", companyId)
         .maybeSingle();
 
@@ -113,8 +115,10 @@ export function WhatsAppConfigDialog({
         setAiAutoReply(data.ai_auto_reply || false);
         setAiPrompt(
           data.ai_prompt ||
-          "Você é um atendente virtual da empresa. Seja cordial, responda dúvidas dos clientes de forma clara e objetiva."
+          "Você é um SDR especializado em [seu nicho].\n\nSeu objetivo é:\n1. Qualificar o interesse do lead\n2. Descobrir as necessidades\n3. Agendar uma reunião"
         );
+        setAiObjective(data.ai_objective || "Entrar em contato com os Leads e agendar uma reunião");
+        setAlertWhatsapp(data.alert_whatsapp || "");
       }
       setAiLoading(false);
     };
@@ -192,6 +196,8 @@ export function WhatsAppConfigDialog({
       ai_enabled: aiEnabled,
       ai_auto_reply: aiAutoReply,
       ai_prompt: aiPrompt,
+      ai_objective: aiObjective,
+      alert_whatsapp: alertWhatsapp || null,
     };
 
     const { error } = await supabase
@@ -334,7 +340,6 @@ export function WhatsAppConfigDialog({
             </div>
           </TabsContent>
 
-          {/* Tab: Chatbot IA (SDR) */}
           <TabsContent value="ai" className="space-y-4 pt-2">
             {aiLoading ? (
               <div className="flex items-center justify-center py-10">
@@ -342,55 +347,56 @@ export function WhatsAppConfigDialog({
               </div>
             ) : (
               <>
+                {/* Toggle Ativar Chatbot IA */}
                 <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="font-medium text-sm">Chatbot IA (SDR)</p>
-                    <p className="text-xs text-muted-foreground">Respostas automáticas inteligentes via WhatsApp</p>
+                  <div className="flex items-center gap-3">
+                    <Bot className="w-5 h-5 text-primary" />
+                    <div>
+                      <p className="font-medium text-sm">Ativar Chatbot IA</p>
+                      <p className="text-xs text-muted-foreground">IA responderá automaticamente as mensagens</p>
+                    </div>
                   </div>
                   <Switch checked={aiEnabled} onCheckedChange={setAiEnabled} />
                 </div>
 
                 {aiEnabled && (
                   <>
-                    <div className="flex items-center justify-between rounded-lg border border-border p-3">
-                      <div>
-                        <p className="text-sm font-medium text-foreground">Resposta automática</p>
-                        <p className="text-xs text-muted-foreground">
-                          Bot responde e qualifica leads automaticamente
-                        </p>
-                      </div>
-                      <Switch
-                        checked={aiAutoReply}
-                        onCheckedChange={setAiAutoReply}
-                        disabled={!aiEnabled}
-                      />
-                    </div>
-
-                    <div className="space-y-3 p-3 bg-muted/50 rounded-lg">
-                      <div className="flex items-start gap-2 text-sm">
-                        <Bot className="w-4 h-4 mt-0.5 text-primary shrink-0" />
-                        <div>
-                          <p className="font-medium">Atendente IA ativado</p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            O chatbot irá atender automaticamente as mensagens recebidas,
-                            qualificar leads e agendar consultas. Configure a personalização
-                            completa no painel do Bot (menu lateral).
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
+                    {/* Objetivo da IA */}
                     <div className="space-y-2">
-                      <Label>Prompt da IA</Label>
+                      <Label className="font-medium">Objetivo da IA</Label>
+                      <Input
+                        value={aiObjective}
+                        onChange={(e) => setAiObjective(e.target.value)}
+                        placeholder="Ex: Entrar em contatos com os Leads e agendar uma reunião"
+                      />
+                      <p className="text-xs text-muted-foreground">Define o objetivo principal do chatbot</p>
+                    </div>
+
+                    {/* Script/Prompt da IA */}
+                    <div className="space-y-2">
+                      <Label className="font-medium">Script/Prompt da IA</Label>
                       <Textarea
                         value={aiPrompt}
                         onChange={(e) => setAiPrompt(e.target.value)}
                         placeholder="Instruções para a IA..."
-                        rows={4}
+                        rows={8}
                         className="text-sm"
                       />
-                      <p className="text-[10px] text-muted-foreground">
-                        Defina como a IA deve se comportar, o tom de voz, informações sobre a empresa, etc.
+                      <p className="text-xs text-muted-foreground">
+                        Este script guia o comportamento da IA. Seja específico sobre seu negócio e objetivo.
+                      </p>
+                    </div>
+
+                    {/* WhatsApp para Alertas */}
+                    <div className="space-y-2">
+                      <Label className="font-medium">Seu WhatsApp para Alertas</Label>
+                      <Input
+                        value={alertWhatsapp}
+                        onChange={(e) => setAlertWhatsapp(e.target.value)}
+                        placeholder="Ex: 5511999999999"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Receba uma mensagem no seu WhatsApp quando um lead demonstrar interesse.
                       </p>
                     </div>
                   </>
