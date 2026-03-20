@@ -392,21 +392,56 @@ export default function Conversations() {
 
               {/* Send area */}
               <div className="border-t border-border p-3 flex-shrink-0">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileUpload}
+                  accept="video/*,image/*,application/pdf,.doc,.docx"
+                  className="hidden"
+                />
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={handleAiSuggest}
-                    disabled={aiSuggesting}
-                    title="Sugestão IA"
-                    className="shrink-0"
-                  >
-                    {aiSuggesting ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Sparkles className="h-4 w-4 text-primary" />
-                    )}
-                  </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={handleAiSuggest}
+                          disabled={aiSuggesting}
+                          className="shrink-0"
+                        >
+                          {aiSuggesting ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Sparkles className="h-4 w-4 text-primary" />
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Sugestão IA</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={uploading}
+                          className="shrink-0"
+                        >
+                          {uploading ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Paperclip className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Enviar vídeo, imagem ou arquivo</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
                   <Input
                     value={messageText}
                     onChange={(e) => setMessageText(e.target.value)}
