@@ -18,6 +18,7 @@ interface DraggableLeadCardProps {
     phone: string | null;
     value: number;
     source: string | null;
+    lead_score?: string | null;
   };
   onClick?: () => void;
   isDragOverlay?: boolean;
