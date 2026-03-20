@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { CompanyCard } from "@/components/companies/CompanyCard";
 import { CompanyFormDialog } from "@/components/companies/CompanyFormDialog";
 import { CompanyEditDialog } from "@/components/companies/CompanyEditDialog";
-import { ZapiConfigDialog } from "@/components/companies/ZapiConfigDialog";
+import { WhatsAppConfigDialog } from "@/components/companies/WhatsAppConfigDialog";
 
 interface Company {
   id: string;
@@ -34,7 +34,7 @@ export default function Companies() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [whatsappConfigs, setWhatsappConfigs] = useState<Record<string, WhatsAppConfig>>({});
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [zapiDialogOpen, setZapiDialogOpen] = useState(false);
+  const [whatsappDialogOpen, setWhatsappDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedCompanyId, setSelectedCompanyId] = useState("");
   const [editingCompany, setEditingCompany] = useState<Company | null>(null);
@@ -105,11 +105,11 @@ export default function Companies() {
     fetchData();
   };
 
-  const handleSaveZapi = async (formData: FormData) => {
-    const zapiInstance = formData.get("zapi_instance_id") as string;
-    const zapiToken = formData.get("zapi_token") as string;
+  const handleSaveWhatsApp = async (formData: FormData) => {
+    const instanceId = formData.get("zapi_instance_id") as string;
+    const token = formData.get("zapi_token") as string;
 
-    if (!zapiInstance || !zapiToken) {
+    if (!instanceId || !token) {
       toast.error("Preencha o ID da instância e o token");
       return;
     }
@@ -119,18 +119,18 @@ export default function Companies() {
     if (existing) {
       await supabase
         .from("whatsapp_configs")
-        .update({ zapi_instance_id: zapiInstance, zapi_token: zapiToken })
+        .update({ zapi_instance_id: instanceId, zapi_token: token })
         .eq("id", existing.id);
     } else {
       await supabase.from("whatsapp_configs").insert({
         company_id: selectedCompanyId,
-        zapi_instance_id: zapiInstance,
-        zapi_token: zapiToken,
+        zapi_instance_id: instanceId,
+        zapi_token: token,
       });
     }
 
-    toast.success("Configuração Z-API salva!");
-    setZapiDialogOpen(false);
+    toast.success("Configuração WhatsApp salva!");
+    setWhatsappDialogOpen(false);
     fetchData();
   };
 
@@ -155,13 +155,13 @@ export default function Companies() {
         onDelete={handleDelete}
       />
 
-      {/* Z-API Config Dialog */}
-      <ZapiConfigDialog
-        open={zapiDialogOpen}
-        onOpenChange={setZapiDialogOpen}
+      {/* WhatsApp Config Dialog */}
+      <WhatsAppConfigDialog
+        open={whatsappDialogOpen}
+        onOpenChange={setWhatsappDialogOpen}
         companyId={selectedCompanyId}
         config={whatsappConfigs[selectedCompanyId] || null}
-        onSubmit={handleSaveZapi}
+        onSubmit={handleSaveWhatsApp}
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -178,11 +178,11 @@ export default function Companies() {
             <CompanyCard
               key={company.id}
               company={company}
-              hasZapi={!!whatsappConfigs[company.id]}
+              hasWhatsApp={!!whatsappConfigs[company.id]}
               metrics={metrics[company.id] || { leads: 0, campaigns: 0, trackingLinks: 0 }}
-              onConfigureZapi={() => {
+              onConfigureWhatsApp={() => {
                 setSelectedCompanyId(company.id);
-                setZapiDialogOpen(true);
+                setWhatsappDialogOpen(true);
               }}
               onEdit={() => {
                 setEditingCompany(company);

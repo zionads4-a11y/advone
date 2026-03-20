@@ -116,7 +116,7 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
         </CardHeader>
         <CardContent>
           <p className="text-xs text-muted-foreground">
-            Configure o WhatsApp (Z-API) primeiro para habilitar o bot de atendimento.
+            Configure o WhatsApp primeiro para habilitar o bot de atendimento.
           </p>
         </CardContent>
       </Card>

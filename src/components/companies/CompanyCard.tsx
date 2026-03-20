@@ -30,18 +30,18 @@ interface CompanyCardProps {
     whatsapp: string | null;
     created_at: string;
   };
-  hasZapi: boolean;
+  hasWhatsApp: boolean;
   metrics: CompanyMetrics;
-  onConfigureZapi: () => void;
+  onConfigureWhatsApp: () => void;
   onEdit: () => void;
   onDelete: () => void;
 }
 
 export function CompanyCard({
   company,
-  hasZapi,
+  hasWhatsApp,
   metrics,
-  onConfigureZapi,
+  onConfigureWhatsApp,
   onEdit,
   onDelete,
 }: CompanyCardProps) {
@@ -91,11 +91,11 @@ export function CompanyCard({
           <MetricPill icon={Link2} label="Links" value={metrics.trackingLinks} />
         </div>
 
-        {/* Z-API Status */}
+        {/* WhatsApp Status */}
         <div className="flex items-center gap-2">
-          {hasZapi ? (
+          {hasWhatsApp ? (
             <Badge variant="outline" className="border-success/30 text-success text-[10px]">
-              <CheckCircle className="mr-1 h-3 w-3" /> Z-API Conectada
+              <CheckCircle className="mr-1 h-3 w-3" /> WhatsApp Conectado
             </Badge>
           ) : (
             <Badge variant="outline" className="border-warning/30 text-warning text-[10px]">
@@ -118,7 +118,7 @@ export function CompanyCard({
             variant="outline"
             size="sm"
             className="text-xs"
-            onClick={onConfigureZapi}
+            onClick={onConfigureWhatsApp}
           >
             <MessageSquare className="h-3 w-3" />
           </Button>

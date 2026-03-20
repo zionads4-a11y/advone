@@ -226,7 +226,7 @@ export default function Conversations() {
                 <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                   <MessageSquare className="mb-2 h-8 w-8" />
                   <p className="text-xs">Nenhuma conversa ainda</p>
-                  <p className="text-[10px]">As mensagens aparecerão aqui quando chegarem via Z-API</p>
+                  <p className="text-[10px]">As mensagens aparecerão aqui quando chegarem via WhatsApp</p>
                 </div>
               ) : (
                 phones.map((phone) => {
