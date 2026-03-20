@@ -148,6 +148,44 @@ serve(async (req) => {
       );
     }
 
+    // Action: check connection status
+    if (action === "get-status") {
+      const { data: config } = await adminClient
+        .from("whatsapp_configs")
+        .select("zapi_instance_id, zapi_token")
+        .eq("company_id", company_id)
+        .maybeSingle();
+
+      if (!config) {
+        return new Response(
+          JSON.stringify({ error: "Z-API não configurada", connected: false }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN") || "";
+      const SERVER_URL = "https://ziondigital.uazapi.com";
+
+      try {
+        const statusResponse = await fetch(
+          `${SERVER_URL}/instance/${config.zapi_instance_id}/status`,
+          { method: "GET", headers: { "AdminToken": ADMIN_TOKEN } }
+        );
+        const statusData = await statusResponse.json();
+        const connected = statusData?.state === "open" || statusData?.connected === true;
+
+        return new Response(
+          JSON.stringify({ connected, status: statusData }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      } catch {
+        return new Response(
+          JSON.stringify({ connected: false }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
     // Action: get QR code directly
     if (action === "get_qrcode") {
       const { data: config } = await adminClient
