@@ -47,8 +47,9 @@ interface WhatsAppConfigDialogProps {
 
 const SERVER_URL = "https://ziondigital.uazapi.com";
 
-function getWebhookUrl() {
-  return `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/zapi-webhook`;
+function getWebhookUrl(companyId: string) {
+  const baseUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/zapi-webhook`;
+  return companyId ? `${baseUrl}?company_id=${companyId}` : baseUrl;
 }
 
 export function WhatsAppConfigDialog({
@@ -80,7 +81,7 @@ export function WhatsAppConfigDialog({
   const [alertWhatsapp, setAlertWhatsapp] = useState("");
   const [aiLoading, setAiLoading] = useState(true);
 
-  const webhookUrl = getWebhookUrl();
+  const webhookUrl = getWebhookUrl(companyId);
 
   // Populate form when config changes
   useEffect(() => {
