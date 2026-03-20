@@ -134,36 +134,82 @@ serve(async (req) => {
       });
     }
 
-    // Action: send message
-    if (!phone || !message) {
-      return new Response(JSON.stringify({ error: "phone e message são obrigatórios" }), {
+    // Action: send message (text or media)
+    if (!phone) {
+      return new Response(JSON.stringify({ error: "phone é obrigatório" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Send via Z-API
-    const zapiUrl = `https://api.z-api.io/instances/${config.zapi_instance_id}/token/${config.zapi_token}/send-text`;
-
-    const zapiResponse = await fetch(zapiUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        phone: phone,
-        message: message,
-      }),
-    });
-
-    if (!zapiResponse.ok) {
-      const errorText = await zapiResponse.text();
-      console.error("Z-API send error:", zapiResponse.status, errorText);
-      return new Response(JSON.stringify({ error: "Erro ao enviar mensagem via Z-API", details: errorText }), {
-        status: 502,
+    if (!message && !media_url) {
+      return new Response(JSON.stringify({ error: "message ou media_url é obrigatório" }), {
+        status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const zapiResult = await zapiResponse.json();
+    const SERVER_URL = "https://ziondigital.uazapi.com";
+    const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+
+    let zapiResult: any;
+
+    if (media_url) {
+      // Send file/video/image via UaZapi
+      const sendFileUrl = `${SERVER_URL}/instance/${config.zapi_instance_id}/send-media`;
+      
+      const mediaBody: any = {
+        phone: phone,
+        mediaUrl: media_url,
+      };
+      if (message) mediaBody.caption = message;
+
+      const zapiResponse = await fetch(sendFileUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(ADMIN_TOKEN ? { "AdminToken": ADMIN_TOKEN } : {}),
+        },
+        body: JSON.stringify(mediaBody),
+      });
+
+      if (!zapiResponse.ok) {
+        const errorText = await zapiResponse.text();
+        console.error("UaZapi send-media error:", zapiResponse.status, errorText);
+        return new Response(JSON.stringify({ error: "Erro ao enviar mídia via WhatsApp", details: errorText }), {
+          status: 502,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      zapiResult = await zapiResponse.json();
+    } else {
+      // Send text via UaZapi
+      const sendTextUrl = `${SERVER_URL}/instance/${config.zapi_instance_id}/send-text`;
+
+      const zapiResponse = await fetch(sendTextUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(ADMIN_TOKEN ? { "AdminToken": ADMIN_TOKEN } : {}),
+        },
+        body: JSON.stringify({
+          phone: phone,
+          message: message,
+        }),
+      });
+
+      if (!zapiResponse.ok) {
+        const errorText = await zapiResponse.text();
+        console.error("UaZapi send-text error:", zapiResponse.status, errorText);
+        return new Response(JSON.stringify({ error: "Erro ao enviar mensagem via WhatsApp", details: errorText }), {
+          status: 502,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      zapiResult = await zapiResponse.json();
+    }
 
     // Store outgoing message in database
     const { error: msgError } = await adminClient
