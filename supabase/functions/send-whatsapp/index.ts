@@ -217,10 +217,10 @@ serve(async (req) => {
       .insert({
         company_id,
         phone,
-        message_text: message,
+        message_text: media_url ? (message ? `${message}\n📎 ${media_url}` : `📎 ${media_url}`) : message,
         direction: "outgoing",
         sender_name: "Atendente",
-        message_id_external: zapiResult.messageId || null,
+        message_id_external: zapiResult.messageId || zapiResult.key?.id || null,
         timestamp: new Date().toISOString(),
       });
 
