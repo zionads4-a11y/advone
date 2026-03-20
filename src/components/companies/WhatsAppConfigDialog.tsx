@@ -149,6 +149,12 @@ export function WhatsAppConfigDialog({
       toast.error("Salve a configuração primeiro antes de gerar o QR Code");
       return;
     }
+
+    if (!config.zapi_token) {
+      toast.error("Informe o token da instância e salve antes de gerar o QR Code");
+      return;
+    }
+
     setQrLoading(true);
     setQrCode(null);
     try {
@@ -156,16 +162,35 @@ export function WhatsAppConfigDialog({
         body: { company_id: companyId, action: "get_qrcode" },
       });
       if (error) throw error;
+
       if (data?.connected) {
         setQrStatus("connected");
         toast.success("WhatsApp já conectado!");
-      } else if (data?.qrcode) {
-        const qr = typeof data.qrcode === 'string' ? data.qrcode : String(data.qrcode);
-        setQrCode(qr.startsWith("data:image") ? qr : `data:image/png;base64,${qr}`);
-        setQrStatus("disconnected");
-      } else {
-        toast.error(data?.error || "QR Code indisponível. Tente novamente.");
+        return;
       }
+
+      const qrPayload = data?.qrcode;
+      const qr =
+        typeof qrPayload === "string"
+          ? qrPayload
+          : typeof qrPayload?.value === "string"
+            ? qrPayload.value
+            : typeof qrPayload?.qrcode === "string"
+              ? qrPayload.qrcode
+              : null;
+
+      if (!qr) {
+        const apiError =
+          data?.error ||
+          qrPayload?.error ||
+          qrPayload?.message ||
+          "QR Code inválido retornado pela API";
+        toast.error(apiError);
+        return;
+      }
+
+      setQrCode(qr.startsWith("data:image") ? qr : `data:image/png;base64,${qr}`);
+      setQrStatus("disconnected");
     } catch (err: any) {
       toast.error("Erro ao gerar QR Code: " + err.message);
     } finally {
@@ -174,16 +199,16 @@ export function WhatsAppConfigDialog({
   };
 
   const handleSaveWhatsApp = async () => {
-    if (!formInstanceId) {
-      toast.error("Nome da instância é obrigatório.");
+    if (!formInstanceId || !formToken) {
+      toast.error("Nome da instância e token são obrigatórios.");
       return;
     }
     setSaving(true);
     try {
       // Use the onSubmit callback with a synthetic FormData
       const fd = new FormData();
-      fd.set("zapi_instance_id", formInstanceId);
-      fd.set("zapi_token", formToken);
+      fd.set("zapi_instance_id", formInstanceId.trim());
+      fd.set("zapi_token", formToken.trim());
       onSubmit(fd);
     } finally {
       setSaving(false);
@@ -264,6 +289,17 @@ export function WhatsAppConfigDialog({
                 placeholder="Ex: 88fbac77-b070-48b2-872e-2db662cc800b"
               />
               <p className="text-xs text-muted-foreground">Nome exato da instância criada no painel do UaZapi.</p>
+            </div>
+
+            {/* Instance Token */}
+            <div className="space-y-2">
+              <Label>Token da Instância (UaZapi) *</Label>
+              <Input
+                value={formToken}
+                onChange={(e) => setFormToken(e.target.value)}
+                placeholder="Ex: 3A26D4F22..."
+              />
+              <p className="text-xs text-muted-foreground">Token da instância informado no painel da UaZapi.</p>
             </div>
 
             {/* Webhook URL */}

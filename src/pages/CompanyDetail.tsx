@@ -59,10 +59,10 @@ export default function CompanyDetail() {
 
   const handleSaveWhatsApp = async (formData: FormData) => {
     const instanceId = formData.get("zapi_instance_id") as string;
-    const token = (formData.get("zapi_token") as string) || "";
+    const token = formData.get("zapi_token") as string;
 
-    if (!instanceId) {
-      toast.error("Preencha o nome da instância");
+    if (!instanceId || !token) {
+      toast.error("Preencha o nome da instância e o token");
       return;
     }
 
