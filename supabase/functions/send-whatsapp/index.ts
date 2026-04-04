@@ -187,12 +187,12 @@ serve(async (req) => {
       zapiResult = await zapiResponse.json();
     } else {
       // Send text via UaZapi
-      const zapiResponse = await fetch(`${SERVER_URL}/send/text?${buildParams()}`, {
+      const zapiResponse = await fetch(`${SERVER_URL}/send/text`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: buildHeaders(),
         body: JSON.stringify({
-          phone: phone,
-          message: message,
+          chatId: `${phone}@c.us`,
+          body: message,
         }),
       });
 

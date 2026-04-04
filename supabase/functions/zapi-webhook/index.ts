@@ -239,14 +239,14 @@ async function qualifyLeadWithAI(
               const alertPhone = config.alert_whatsapp.replace(/\D/g, "");
               const alertMessage = `🔔 *Novo Agendamento Automático*\n\n👤 Lead: ${leadName}\n📅 Data: ${appointmentDate}\n⏰ Horário: ${appointmentTime}\n${args.summary ? `📋 Assunto: ${args.summary}\n` : ""}\n_Agendado automaticamente pelo bot SDR_`;
 
-              const alertParams = new URLSearchParams({ instance: config.zapi_instance_id });
-              if (ADMIN_TOKEN) alertParams.set("admintoken", ADMIN_TOKEN);
-              if (config.zapi_token) alertParams.set("token", config.zapi_token);
+              const alertHeaders: Record<string, string> = { "Content-Type": "application/json" };
+              if (config.zapi_token) alertHeaders["token"] = config.zapi_token;
+              if (ADMIN_TOKEN) alertHeaders["admintoken"] = ADMIN_TOKEN;
 
-              await fetch(`${SERVER_URL}/send/text?${alertParams.toString()}`, {
+              await fetch(`${SERVER_URL}/send/text`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ phone: alertPhone, message: alertMessage }),
+                headers: alertHeaders,
+                body: JSON.stringify({ chatId: `${alertPhone}@c.us`, body: alertMessage }),
               });
             }
           }
