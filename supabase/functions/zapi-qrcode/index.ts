@@ -13,83 +13,17 @@ function buildUaZapiHeaders() {
   return { "Content-Type": "application/json" };
 }
 
-function buildQueryParams(config: { zapi_instance_id: string; zapi_token?: string | null }) {
+function buildQueryParams(
+  config: { zapi_instance_id: string; zapi_token?: string | null },
+  options?: { includeInstanceToken?: boolean },
+) {
   const adminToken = Deno.env.get("UAZAPI_ADMIN_TOKEN");
   const params = new URLSearchParams({ instance: config.zapi_instance_id });
   if (adminToken) params.set("admintoken", adminToken);
-  if (config.zapi_token) params.set("token", config.zapi_token);
+  if ((options?.includeInstanceToken ?? true) && config.zapi_token) params.set("token", config.zapi_token);
   return params;
 }
-
-function buildUaZapiStatusUrl(config: { zapi_instance_id: string; zapi_token?: string | null }) {
-  return `${SERVER_URL}/status?${buildQueryParams(config).toString()}`;
-}
-
-async function readResponsePayload(response: Response) {
-  const text = await response.text();
-
-  try {
-    return JSON.parse(text);
-  } catch {
-    return { raw: text };
-  }
-}
-
-function isInstanceConnected(payload: any) {
-  return payload?.connected === true
-    || payload?.status === "open"
-    || payload?.instance?.status === "open"
-    || payload?.status?.checked_instance?.connection_status === "connected"
-    || payload?.status?.checked_instance?.status === "open";
-}
-
-function extractQrCode(payload: any) {
-  return payload?.qrcode
-    || payload?.qr
-    || payload?.base64
-    || payload?.value
-    || payload?.data?.qrcode
-    || payload?.instance?.qrcode
-    || payload?.status?.qrcode
-    || payload?.status?.checked_instance?.qrcode
-    || null;
-}
-
-async function fetchUaZapiStatus(config: { zapi_instance_id: string; zapi_token?: string | null }) {
-  const response = await fetch(buildUaZapiStatusUrl(config), {
-    method: "GET",
-    headers: buildUaZapiHeaders(),
-  });
-  const payload = await readResponsePayload(response);
-  return { ok: response.ok, status: response.status, payload };
-}
-
-async function fetchUaZapiQrCode(config: { zapi_instance_id: string; zapi_token?: string | null }) {
-  const headers = buildUaZapiHeaders();
-  const query = buildQueryParams(config).toString();
-
-  const candidates = [
-    `${SERVER_URL}/qr?${query}`,
-    `${SERVER_URL}/instance/qr?${query}`,
-    `${SERVER_URL}/connect?${query}`,
-    `${SERVER_URL}/instance/connect?${query}`,
-  ];
-
-  const failures: Array<{ url: string; status: number; payload: any }> = [];
-
-  for (const url of candidates) {
-    const response = await fetch(url, { method: "GET", headers });
-    const payload = await readResponsePayload(response);
-    const qrcode = extractQrCode(payload);
-
-    if (response.ok && qrcode) return { ok: true, payload, qrcode };
-    if (response.ok && isInstanceConnected(payload)) return { ok: true, payload, connected: true };
-    failures.push({ url, status: response.status, payload });
-  }
-
-  return { ok: false, failures };
-}
-
+...
 async function disconnectUaZapiInstance(config: { zapi_instance_id: string; zapi_token?: string | null }) {
   const adminToken = Deno.env.get("UAZAPI_ADMIN_TOKEN");
   if (!adminToken) {
@@ -97,13 +31,15 @@ async function disconnectUaZapiInstance(config: { zapi_instance_id: string; zapi
   }
 
   const headers = buildUaZapiHeaders();
-  const query = buildQueryParams(config).toString();
+  const adminOnlyQuery = buildQueryParams(config, { includeInstanceToken: false }).toString();
+  const fullQuery = buildQueryParams(config, { includeInstanceToken: true }).toString();
 
   const candidates: Array<{ url: string; method: "POST" | "DELETE" }> = [
-    { url: `${SERVER_URL}/instance/disconnect?${query}`, method: "POST" },
-    { url: `${SERVER_URL}/instance/disconnect?${query}`, method: "DELETE" },
-    { url: `${SERVER_URL}/instance/logout?${query}`, method: "DELETE" },
-    { url: `${SERVER_URL}/instance/logout?${query}`, method: "POST" },
+    { url: `${SERVER_URL}/instance/disconnect?${adminOnlyQuery}`, method: "POST" },
+    { url: `${SERVER_URL}/instance/disconnect?${fullQuery}`, method: "POST" },
+    { url: `${SERVER_URL}/instance/disconnect?${adminOnlyQuery}`, method: "DELETE" },
+    { url: `${SERVER_URL}/instance/logout?${adminOnlyQuery}`, method: "POST" },
+    { url: `${SERVER_URL}/instance/logout?${fullQuery}`, method: "POST" },
   ];
 
   const failures: Array<{ url: string; method: string; status: number; payload: any }> = [];
