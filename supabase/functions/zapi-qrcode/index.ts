@@ -351,7 +351,7 @@ serve(async (req) => {
       const trimmedInstanceId = instanceId.trim();
       const configData = {
         zapi_instance_id: trimmedInstanceId,
-        zapi_token: instanceToken?.trim() || "",
+        zapi_token: instanceToken?.trim() || trimmedInstanceId,
       };
 
       const { data: existing } = await adminClient
@@ -388,7 +388,7 @@ serve(async (req) => {
           token_found: !!instanceToken,
           message: instanceToken
             ? "Configuração salva com token da instância detectado automaticamente!"
-            : "Configuração salva. O token da instância não foi encontrado automaticamente, então o sistema não vai mais marcar a conexão como ativa por engano.",
+            : "Configuração salva! O ID da instância será usado como token.",
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
