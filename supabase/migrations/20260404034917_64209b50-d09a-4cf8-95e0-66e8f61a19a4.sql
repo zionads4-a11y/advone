@@ -1,0 +1,1 @@
+UPDATE whatsapp_configs SET ai_auto_reply = true WHERE company_id = '9a479d89-aa72-49ea-b58c-7a9b3b82660f';
