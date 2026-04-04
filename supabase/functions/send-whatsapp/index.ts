@@ -191,8 +191,8 @@ serve(async (req) => {
         method: "POST",
         headers: buildHeaders(),
         body: JSON.stringify({
-          chatId: `${phone}@c.us`,
-          body: message,
+          number: phone,
+          text: message,
         }),
       });
 
