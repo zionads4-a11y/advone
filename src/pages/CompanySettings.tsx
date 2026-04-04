@@ -1,0 +1,116 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserCompanies } from "@/hooks/useUserCompanies";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Building2, Save } from "lucide-react";
+import { toast } from "sonner";
+import { BusinessHoursConfig, type BusinessHours, parseBusinessHours, getDefaultBusinessHours } from "@/components/companies/BusinessHoursConfig";
+
+interface Company {
+  id: string;
+  name: string;
+  whatsapp: string | null;
+  business_hours: unknown;
+}
+
+export default function CompanySettings() {
+  const { user } = useAuth();
+  const { companyIds, loading: companiesLoading } = useUserCompanies();
+  const [company, setCompany] = useState<Company | null>(null);
+  const [name, setName] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
+  const [businessHours, setBusinessHours] = useState<BusinessHours>(getDefaultBusinessHours());
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (companyIds.length > 0) {
+      fetchCompany(companyIds[0]);
+    } else if (!companiesLoading) {
+      setLoading(false);
+    }
+  }, [companyIds, companiesLoading]);
+
+  const fetchCompany = async (id: string) => {
+    const { data } = await supabase.from("companies").select("id, name, whatsapp, business_hours").eq("id", id).maybeSingle();
+    if (data) {
+      setCompany(data);
+      setName(data.name);
+      setWhatsapp(data.whatsapp || "");
+      setBusinessHours(parseBusinessHours(data.business_hours));
+    }
+    setLoading(false);
+  };
+
+  const handleSave = async () => {
+    if (!company) return;
+    setSaving(true);
+    const { error } = await supabase
+      .from("companies")
+      .update({ name, whatsapp: whatsapp || null, business_hours: businessHours as any })
+      .eq("id", company.id);
+
+    if (error) {
+      toast.error("Erro ao salvar: " + error.message);
+    } else {
+      toast.success("Configurações salvas!");
+    }
+    setSaving(false);
+  };
+
+  if (loading || companiesLoading) {
+    return <div className="flex items-center justify-center py-16 text-muted-foreground">Carregando...</div>;
+  }
+
+  if (!company) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+        <Building2 className="mb-3 h-10 w-10" />
+        <p>Nenhuma empresa vinculada</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 animate-fade-in">
+      <div>
+        <h1 className="font-display text-2xl font-bold text-foreground">Configurações da Empresa</h1>
+        <p className="text-sm text-muted-foreground">{company.name}</p>
+      </div>
+
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="font-display text-lg">Dados da Empresa</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Nome da Empresa</Label>
+            <Input value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label>Telefone / WhatsApp</Label>
+            <Input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="5511999999999" />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="font-display text-lg">Horário de Atendimento</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <BusinessHoursConfig value={businessHours} onChange={setBusinessHours} />
+        </CardContent>
+      </Card>
+
+      <Button onClick={handleSave} disabled={saving} className="gradient-primary text-primary-foreground">
+        <Save className="mr-2 h-4 w-4" />
+        {saving ? "Salvando..." : "Salvar Configurações"}
+      </Button>
+    </div>
+  );
+}

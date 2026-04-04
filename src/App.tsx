@@ -51,6 +51,7 @@ const App = () => (
               <Route path="/access-management" element={<AccessManagement />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/bot-config" element={<BotConfig />} />
+              <Route path="/company-settings" element={<CompanySettings />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
