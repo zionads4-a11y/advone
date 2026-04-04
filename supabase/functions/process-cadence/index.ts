@@ -113,16 +113,14 @@ serve(async (req) => {
 
         // Send via UaZapi
         const SERVER_URL = "https://ziondigital.uazapi.com";
-        const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
-        const sendUrl = `${SERVER_URL}/instance/${config.zapi_instance_id}/send-text`;
+        const sendUrl = `${SERVER_URL}/send/text`;
         const sendResponse = await fetch(sendUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            ...(ADMIN_TOKEN ? { "AdminToken": ADMIN_TOKEN } : {}),
-            ...(config.zapi_token ? { "token": config.zapi_token } : {}),
+            "token": config.zapi_token || config.zapi_instance_id,
           },
-          body: JSON.stringify({ phone: msg.phone, message: messageText }),
+          body: JSON.stringify({ number: msg.phone, body: messageText }),
         });
 
         if (sendResponse.ok) {
