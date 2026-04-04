@@ -170,17 +170,23 @@ export default function Agenda() {
           <h1 className="text-2xl font-display font-bold text-foreground">Agenda</h1>
           <p className="text-sm text-muted-foreground">Lembretes e reuniões agendadas</p>
         </div>
-        <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-          <SelectTrigger className="w-[220px]">
-            <SelectValue placeholder="Filtrar por empresa" />
-          </SelectTrigger>
-          <SelectContent>
-            {(isAdmin || companies.length > 1) && <SelectItem value="all">Todas as empresas</SelectItem>}
-            {companies.map((c) => (
-              <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-3">
+          <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+            <SelectTrigger className="w-[220px]">
+              <SelectValue placeholder="Filtrar por empresa" />
+            </SelectTrigger>
+            <SelectContent>
+              {(isAdmin || companies.length > 1) && <SelectItem value="all">Todas as empresas</SelectItem>}
+              {companies.map((c) => (
+                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button onClick={() => setCreateDialogOpen(true)} className="gap-2">
+            <Plus className="h-4 w-4" />
+            Novo Evento
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[auto_1fr]">
