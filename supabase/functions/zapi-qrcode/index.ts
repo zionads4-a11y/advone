@@ -499,7 +499,7 @@ serve(async (req) => {
     if (action === "get-status") {
       const { data: config } = await adminClient
         .from("whatsapp_configs")
-        .select("zapi_instance_id, zapi_token")
+        .select("zapi_instance_id, zapi_token, zapi_webhook_configured")
         .eq("company_id", company_id)
         .maybeSingle();
 
@@ -513,6 +513,17 @@ serve(async (req) => {
       try {
         const statusResult = await fetchUaZapiStatus(config);
         const connected = statusResult.ok && isInstanceConnected(statusResult.payload);
+
+        // Auto-configure webhook if connected but not yet configured
+        if (connected && !config.zapi_webhook_configured) {
+          const webhookResult = await configureWebhook(config, company_id, supabaseUrl);
+          if (webhookResult.ok) {
+            await adminClient.from("whatsapp_configs").update({ zapi_webhook_configured: true, status: "connected" }).eq("company_id", company_id);
+          }
+          console.log("Auto webhook config on status check:", JSON.stringify(webhookResult));
+        } else if (connected) {
+          await adminClient.from("whatsapp_configs").update({ status: "connected" }).eq("company_id", company_id);
+        }
 
         return new Response(
           JSON.stringify({ connected, status: statusResult.payload }),
