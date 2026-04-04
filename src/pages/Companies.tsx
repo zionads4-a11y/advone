@@ -16,6 +16,7 @@ interface Company {
   name: string;
   website: string | null;
   whatsapp: string | null;
+  business_hours: unknown;
   created_at: string;
 }
 

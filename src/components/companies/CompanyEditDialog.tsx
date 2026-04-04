@@ -84,6 +84,7 @@ export function CompanyEditDialog({
               placeholder="5511999999999"
             />
           </div>
+          <BusinessHoursConfig value={businessHours} onChange={setBusinessHours} />
           <div className="flex gap-2">
             <Button type="submit" className="flex-1 gradient-primary text-primary-foreground">
               Salvar
