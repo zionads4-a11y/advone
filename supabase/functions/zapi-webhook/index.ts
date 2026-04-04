@@ -246,7 +246,7 @@ async function qualifyLeadWithAI(
               await fetch(`${SERVER_URL}/send/text?${alertParams.toString()}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ number: alertPhone, body: alertMessage }),
+                body: JSON.stringify({ phone: alertPhone, message: alertMessage }),
               });
             }
           }
