@@ -150,25 +150,22 @@ serve(async (req) => {
     }
 
     const SERVER_URL = "https://ziondigital.uazapi.com";
-    const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
 
     let zapiResult: any;
 
     if (media_url) {
       // Send file/video/image via UaZapi
-      const sendFileUrl = `${SERVER_URL}/instance/${config.zapi_instance_id}/send-media`;
-      
       const mediaBody: any = {
-        phone: phone,
+        number: phone,
         mediaUrl: media_url,
       };
       if (message) mediaBody.caption = message;
 
-      const zapiResponse = await fetch(sendFileUrl, {
+      const zapiResponse = await fetch(`${SERVER_URL}/send/media`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(ADMIN_TOKEN ? { "AdminToken": ADMIN_TOKEN } : {}),
+          "token": config.zapi_token || config.zapi_instance_id,
         },
         body: JSON.stringify(mediaBody),
       });
@@ -185,17 +182,15 @@ serve(async (req) => {
       zapiResult = await zapiResponse.json();
     } else {
       // Send text via UaZapi
-      const sendTextUrl = `${SERVER_URL}/instance/${config.zapi_instance_id}/send-text`;
-
-      const zapiResponse = await fetch(sendTextUrl, {
+      const zapiResponse = await fetch(`${SERVER_URL}/send/text`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(ADMIN_TOKEN ? { "AdminToken": ADMIN_TOKEN } : {}),
+          "token": config.zapi_token || config.zapi_instance_id,
         },
         body: JSON.stringify({
-          phone: phone,
-          message: message,
+          number: phone,
+          body: message,
         }),
       });
 
