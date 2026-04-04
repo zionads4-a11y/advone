@@ -105,31 +105,8 @@ export default function Companies() {
     fetchData();
   };
 
-  const handleSaveWhatsApp = async (formData: FormData) => {
-    const instanceId = formData.get("zapi_instance_id") as string;
-    const token = formData.get("zapi_token") as string;
-
-    if (!instanceId || !token) {
-      toast.error("Preencha o ID da instância e o token");
-      return;
-    }
-
-    const existing = whatsappConfigs[selectedCompanyId];
-
-    if (existing) {
-      await supabase
-        .from("whatsapp_configs")
-        .update({ zapi_instance_id: instanceId, zapi_token: token })
-        .eq("id", existing.id);
-    } else {
-      await supabase.from("whatsapp_configs").insert({
-        company_id: selectedCompanyId,
-        zapi_instance_id: instanceId,
-        zapi_token: token,
-      });
-    }
-
-    toast.success("Configuração WhatsApp salva!");
+  const handleSaveWhatsApp = async () => {
+    // Refresh data after save (actual save is handled by the dialog via edge function)
     setWhatsappDialogOpen(false);
     fetchData();
   };
