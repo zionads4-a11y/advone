@@ -159,22 +159,26 @@ serve(async (req) => {
         .eq("company_id", company_id)
         .maybeSingle();
 
-      if (!config || !config.zapi_token) {
+      if (!config || !config.zapi_instance_id) {
         return new Response(
-          JSON.stringify({ error: "Z-API não configurada", connected: false }),
+          JSON.stringify({ error: "WhatsApp não configurado", connected: false }),
           { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
       const SERVER_URL = "https://ziondigital.uazapi.com";
+      const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
 
       try {
-        const statusResponse = await fetch(`${SERVER_URL}/instance/status`, {
+        const statusResponse = await fetch(`${SERVER_URL}/instance/${config.zapi_instance_id}/status`, {
           method: "GET",
-          headers: { "token": config.zapi_token },
+          headers: {
+            ...(ADMIN_TOKEN ? { "AdminToken": ADMIN_TOKEN } : {}),
+            ...(config.zapi_token ? { "token": config.zapi_token } : {}),
+          },
         });
         const statusData = await statusResponse.json();
-        const connected = statusData?.status?.connected === true || statusData?.instance?.status === "open";
+        const connected = statusData?.connected === true || statusData?.status === "open" || statusData?.instance?.status === "open";
 
         return new Response(
           JSON.stringify({ connected, status: statusData }),
