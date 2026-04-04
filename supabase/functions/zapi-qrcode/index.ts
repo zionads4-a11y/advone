@@ -13,6 +13,10 @@ function buildUaZapiHeaders() {
   return { "Content-Type": "application/json" };
 }
 
+function normalizeUaZapiValue(value: unknown) {
+  return typeof value === "string" ? value.trim().toLowerCase() : "";
+}
+
 function isInstanceTokenMisconfigured(config: { zapi_token?: string | null }) {
   const adminToken = Deno.env.get("UAZAPI_ADMIN_TOKEN");
   return Boolean(adminToken && config.zapi_token && config.zapi_token.trim() === adminToken.trim());
@@ -43,12 +47,40 @@ async function readResponsePayload(response: Response) {
   }
 }
 
+function isGenericHealthCheckPayload(payload: any) {
+  const info = normalizeUaZapiValue(payload?.info);
+  const checkedInstanceMessage = normalizeUaZapiValue(payload?.status?.checked_instance?.message);
+
+  return info.includes("server health check")
+    || (
+      checkedInstanceMessage.includes("instance is healthy")
+      && Boolean(payload?.status?.server_status)
+      && typeof payload?.status?.total_instances !== "undefined"
+      && !payload?.qrcode
+      && !payload?.instance?.qrcode
+    );
+}
+
 function isInstanceConnected(payload: any) {
+  if (!payload || isGenericHealthCheckPayload(payload)) return false;
+
+  const rootStatus = normalizeUaZapiValue(payload?.status);
+  const instanceStatus = normalizeUaZapiValue(payload?.instance?.status);
+  const dataStatus = normalizeUaZapiValue(payload?.data?.status);
+  const checkedConnectionStatus = normalizeUaZapiValue(payload?.status?.checked_instance?.connection_status);
+  const checkedInstanceStatus = normalizeUaZapiValue(payload?.status?.checked_instance?.status);
+
   return payload?.connected === true
-    || payload?.status === "open"
-    || payload?.instance?.status === "open"
-    || payload?.status?.checked_instance?.connection_status === "connected"
-    || payload?.status?.checked_instance?.status === "open";
+    || payload?.instance?.connected === true
+    || payload?.data?.connected === true
+    || rootStatus === "open"
+    || rootStatus === "connected"
+    || instanceStatus === "open"
+    || instanceStatus === "connected"
+    || dataStatus === "open"
+    || dataStatus === "connected"
+    || checkedConnectionStatus === "open"
+    || checkedInstanceStatus === "open";
 }
 
 function extractQrCode(payload: any) {
@@ -316,9 +348,10 @@ serve(async (req) => {
       }
 
       // Save config (with or without auto-fetched token)
+      const trimmedInstanceId = instanceId.trim();
       const configData = {
-        zapi_instance_id: instanceId.trim(),
-        zapi_token: instanceToken || instanceId.trim(), // fallback to instance ID if no token found
+        zapi_instance_id: trimmedInstanceId,
+        zapi_token: instanceToken?.trim() || "",
       };
 
       const { data: existing } = await adminClient
@@ -355,7 +388,7 @@ serve(async (req) => {
           token_found: !!instanceToken,
           message: instanceToken
             ? "Configuração salva com token da instância detectado automaticamente!"
-            : "Configuração salva. Token da instância não encontrado automaticamente — usando o ID da instância como fallback.",
+            : "Configuração salva. O token da instância não foi encontrado automaticamente, então o sistema não vai mais marcar a conexão como ativa por engano.",
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
