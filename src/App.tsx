@@ -20,6 +20,7 @@ import ConnectWhatsApp from "./pages/ConnectWhatsApp";
 import Agenda from "./pages/Agenda";
 import Profile from "./pages/Profile";
 import BotConfig from "./pages/BotConfig";
+import CompanySettings from "./pages/CompanySettings";
 import AppLayout from "./components/layout/AppLayout";
 import NotFound from "./pages/NotFound";
 
@@ -50,6 +51,7 @@ const App = () => (
               <Route path="/access-management" element={<AccessManagement />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/bot-config" element={<BotConfig />} />
+              <Route path="/company-settings" element={<CompanySettings />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
