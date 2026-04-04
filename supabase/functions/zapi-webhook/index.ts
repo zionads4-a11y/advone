@@ -33,9 +33,13 @@ REGRAS IMPORTANTES:
 - ${toneInstructions}
 
 COMPORTAMENTO:
-- Mensagens curtas (máximo 2-3 linhas)
+- Envie mensagens CURTAS e SEPARADAS, como uma pessoa real no WhatsApp
+- Cada mensagem deve ter NO MÁXIMO 1-2 linhas
+- Use parágrafos separados (linha em branco) para cada ideia — o sistema vai enviar cada parte como mensagem individual
+- NUNCA envie um textão. Quebre em pequenas mensagens naturais
 - Sempre faça perguntas que avancem a conversa
 - Nunca deixe a conversa morrer
+- Use emojis com moderação para parecer amigável
 
 ${targetAudience ? `PÚBLICO-ALVO: ${targetAudience}` : ""}
 
@@ -365,6 +369,66 @@ async function enrollInCadence(supabase: any, companyId: string, leadId: string,
   }
 }
 
+/**
+ * Splits an AI response into multiple natural WhatsApp messages.
+ * Rules:
+ * - Split on double newlines (paragraphs)
+ * - If a paragraph is still long (>150 chars), split on sentences
+ * - Keep emojis and short phrases together
+ * - Never split mid-sentence
+ */
+function splitIntoNaturalMessages(text: string): string[] {
+  if (!text || text.length <= 120) return [text];
+
+  // First split by double newlines (paragraphs)
+  const paragraphs = text.split(/\n\n+/).map((p) => p.trim()).filter(Boolean);
+
+  const messages: string[] = [];
+
+  for (const para of paragraphs) {
+    if (para.length <= 150) {
+      messages.push(para);
+      continue;
+    }
+
+    // Split long paragraphs by single newlines first
+    const lines = para.split(/\n/).map((l) => l.trim()).filter(Boolean);
+    if (lines.length > 1 && lines.every((l) => l.length <= 150)) {
+      // Each line becomes a message
+      messages.push(...lines);
+      continue;
+    }
+
+    // Split by sentence boundaries (. ! ?)
+    const sentences = para.match(/[^.!?]+[.!?]+[\s]*/g) || [para];
+    let currentChunk = "";
+
+    for (const sentence of sentences) {
+      if ((currentChunk + sentence).length > 150 && currentChunk) {
+        messages.push(currentChunk.trim());
+        currentChunk = sentence;
+      } else {
+        currentChunk += sentence;
+      }
+    }
+    if (currentChunk.trim()) {
+      messages.push(currentChunk.trim());
+    }
+  }
+
+  // Ensure we don't have too many tiny messages — merge very short consecutive ones
+  const merged: string[] = [];
+  for (const msg of messages) {
+    if (merged.length > 0 && merged[merged.length - 1].length < 40 && msg.length < 40) {
+      merged[merged.length - 1] += "\n" + msg;
+    } else {
+      merged.push(msg);
+    }
+  }
+
+  return merged.length > 0 ? merged : [text];
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -611,27 +675,42 @@ serve(async (req) => {
               const instanceParam = encodeURIComponent(config.zapi_instance_id);
               const tokenParam = encodeURIComponent(config.zapi_token || config.zapi_instance_id);
               const sendUrl = `${SERVER_URL}/send/text?instance=${instanceParam}&token=${tokenParam}`;
-              console.log("Sending AI reply to:", cleanPhone, "via:", sendUrl);
-              const sendResponse = await fetch(sendUrl, {
-                method: "POST",
-                headers: sendHeaders,
-                body: JSON.stringify({ number: cleanPhone, text: aiReply }),
-              });
 
-              if (sendResponse.ok) {
-                const sendResult = await sendResponse.json();
-                await supabase.from("whatsapp_messages").insert({
-                  company_id: companyId,
-                  lead_id: leadId,
-                  phone: cleanPhone,
-                  message_text: aiReply,
-                  direction: "outgoing",
-                  sender_name: "IA",
-                  message_id_external: sendResult.messageId || sendResult.key?.id || null,
-                  timestamp: new Date().toISOString(),
+              // Split AI reply into multiple natural messages
+              const splitMessages = splitIntoNaturalMessages(aiReply);
+              console.log(`Sending ${splitMessages.length} message(s) to:`, cleanPhone);
+
+              for (let i = 0; i < splitMessages.length; i++) {
+                const chunk = splitMessages[i].trim();
+                if (!chunk) continue;
+
+                // Simulate typing delay (1-3s based on message length)
+                if (i > 0) {
+                  const delayMs = Math.min(1000 + chunk.length * 30, 3500);
+                  await new Promise((r) => setTimeout(r, delayMs));
+                }
+
+                const sendResponse = await fetch(sendUrl, {
+                  method: "POST",
+                  headers: sendHeaders,
+                  body: JSON.stringify({ number: cleanPhone, text: chunk }),
                 });
-              } else {
-                console.error("Failed to send AI reply:", sendResponse.status, await sendResponse.text());
+
+                if (sendResponse.ok) {
+                  const sendResult = await sendResponse.json();
+                  await supabase.from("whatsapp_messages").insert({
+                    company_id: companyId,
+                    lead_id: leadId,
+                    phone: cleanPhone,
+                    message_text: chunk,
+                    direction: "outgoing",
+                    sender_name: "IA",
+                    message_id_external: sendResult.messageId || sendResult.key?.id || null,
+                    timestamp: new Date().toISOString(),
+                  });
+                } else {
+                  console.error("Failed to send AI reply chunk:", sendResponse.status, await sendResponse.text());
+                }
               }
             }
           }
