@@ -6,11 +6,21 @@ import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, CalendarClock, Check, Clock, AlertTriangle, Plus } from "lucide-react";
+import { Loader2, CalendarClock, Check, Clock, AlertTriangle, Plus, Repeat, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { format, isSameDay, isAfter, isBefore } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CreateEventDialog } from "@/components/agenda/CreateEventDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Reminder {
   id: string;
@@ -25,6 +35,9 @@ interface Reminder {
   company_id: string;
   lead_name?: string;
   company_name?: string;
+  recurrence_rule?: string | null;
+  recurrence_end?: string | null;
+  parent_event_id?: string | null;
 }
 
 export default function Agenda() {
@@ -37,9 +50,10 @@ export default function Agenda() {
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [loading, setLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [editEvent, setEditEvent] = useState<any>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Reminder | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // Fetch companies for filter
   useEffect(() => {
     const fetchCompanies = async () => {
       if (!user) return;
@@ -50,20 +64,16 @@ export default function Agenda() {
       const { data } = await query;
       if (data) {
         setCompanies(data);
-        if (data.length === 1) {
-          setSelectedCompany(data[0].id);
-        }
+        if (data.length === 1) setSelectedCompany(data[0].id);
       }
     };
     if (!companiesLoading) fetchCompanies();
   }, [user, isClient, companyIds, companiesLoading]);
 
-  // Fetch reminders
   useEffect(() => {
     const fetchReminders = async () => {
       if (!user) return;
       setLoading(true);
-
       let query = supabase
         .from("lead_reminders")
         .select("*, leads!lead_reminders_lead_id_fkey(name, company_id), companies:company_id(name)")
@@ -90,32 +100,25 @@ export default function Agenda() {
     if (!companiesLoading) fetchReminders();
   }, [user, selectedCompany, isClient, companyIds, companiesLoading, refreshKey]);
 
-  // Days with events for calendar styling
   const eventDays = useMemo(() => {
     const days = new Map<string, { hasOverdue: boolean; hasPending: boolean; hasCompleted: boolean }>();
     const now = new Date();
     reminders.forEach((r) => {
       const dayKey = format(new Date(r.due_at), "yyyy-MM-dd");
       const existing = days.get(dayKey) || { hasOverdue: false, hasPending: false, hasCompleted: false };
-      if (r.completed) {
-        existing.hasCompleted = true;
-      } else if (isBefore(new Date(r.due_at), now)) {
-        existing.hasOverdue = true;
-      } else {
-        existing.hasPending = true;
-      }
+      if (r.completed) existing.hasCompleted = true;
+      else if (isBefore(new Date(r.due_at), now)) existing.hasOverdue = true;
+      else existing.hasPending = true;
       days.set(dayKey, existing);
     });
     return days;
   }, [reminders]);
 
-  // Reminders for the selected date
   const selectedDateReminders = useMemo(() => {
     if (!selectedDate) return [];
     return reminders.filter((r) => isSameDay(new Date(r.due_at), selectedDate));
   }, [reminders, selectedDate]);
 
-  // Upcoming reminders (next 7 days, not completed)
   const upcomingReminders = useMemo(() => {
     const now = new Date();
     const weekLater = new Date();
@@ -125,7 +128,6 @@ export default function Agenda() {
       .slice(0, 10);
   }, [reminders]);
 
-  // Overdue reminders
   const overdueReminders = useMemo(() => {
     const now = new Date();
     return reminders.filter((r) => !r.completed && isBefore(new Date(r.due_at), now));
@@ -134,24 +136,51 @@ export default function Agenda() {
   const handleToggleComplete = useCallback(async (id: string, newCompleted: boolean) => {
     const { error } = await supabase
       .from("lead_reminders")
-      .update({
-        completed: newCompleted,
-        completed_at: newCompleted ? new Date().toISOString() : null,
-      })
+      .update({ completed: newCompleted, completed_at: newCompleted ? new Date().toISOString() : null })
       .eq("id", id);
     if (error) {
       toast.error("Erro ao atualizar");
     } else {
       setReminders((prev) =>
         prev.map((r) =>
-          r.id === id
-            ? { ...r, completed: newCompleted, completed_at: newCompleted ? new Date().toISOString() : null }
-            : r
+          r.id === id ? { ...r, completed: newCompleted, completed_at: newCompleted ? new Date().toISOString() : null } : r
         )
       );
       toast.success(newCompleted ? "Marcado como ocorrido!" : "Marcado como pendente!");
     }
   }, []);
+
+  const handleEdit = (reminder: Reminder) => {
+    setEditEvent({
+      id: reminder.id,
+      title: reminder.title,
+      description: reminder.description,
+      reminder_type: reminder.reminder_type,
+      due_at: reminder.due_at,
+      company_id: reminder.company_id,
+      lead_id: reminder.lead_id,
+      recurrence_rule: reminder.recurrence_rule,
+      recurrence_end: reminder.recurrence_end,
+    });
+    setCreateDialogOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    // Delete children too if it's a parent
+    const { error } = await supabase.from("lead_reminders").delete().eq("id", deleteTarget.id);
+    if (!error && !deleteTarget.parent_event_id) {
+      // Also delete child instances
+      await supabase.from("lead_reminders").delete().eq("parent_event_id", deleteTarget.id);
+    }
+    if (error) {
+      toast.error("Erro ao excluir: " + error.message);
+    } else {
+      toast.success("Evento excluído!");
+      setRefreshKey((k) => k + 1);
+    }
+    setDeleteTarget(null);
+  };
 
   const isAdmin = userRole === "admin" || userRole === "member";
 
@@ -182,7 +211,7 @@ export default function Agenda() {
               ))}
             </SelectContent>
           </Select>
-          <Button onClick={() => setCreateDialogOpen(true)} className="gap-2">
+          <Button onClick={() => { setEditEvent(null); setCreateDialogOpen(true); }} className="gap-2">
             <Plus className="h-4 w-4" />
             Novo Evento
           </Button>
@@ -227,12 +256,8 @@ export default function Agenda() {
                 <CalendarClock className="h-4 w-4 text-primary" />
                 {selectedDate ? format(selectedDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : "Selecione uma data"}
               </h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="gap-1 text-xs"
-                onClick={() => setCreateDialogOpen(true)}
-              >
+              <Button variant="ghost" size="sm" className="gap-1 text-xs"
+                onClick={() => { setEditEvent(null); setCreateDialogOpen(true); }}>
                 <Plus className="h-3.5 w-3.5" /> Adicionar
               </Button>
             </div>
@@ -240,19 +265,16 @@ export default function Agenda() {
               <div className="flex flex-col items-center py-6 text-muted-foreground">
                 <CalendarClock className="h-8 w-8 mb-2 opacity-30" />
                 <p className="text-xs">Nenhum evento nesta data</p>
-                <Button
-                  variant="link"
-                  size="sm"
-                  className="mt-1 text-xs"
-                  onClick={() => setCreateDialogOpen(true)}
-                >
+                <Button variant="link" size="sm" className="mt-1 text-xs"
+                  onClick={() => { setEditEvent(null); setCreateDialogOpen(true); }}>
                   Criar evento
                 </Button>
               </div>
             ) : (
               <div className="space-y-2">
                 {selectedDateReminders.map((r) => (
-                  <ReminderItem key={r.id} reminder={r} onToggle={handleToggleComplete} />
+                  <ReminderItem key={r.id} reminder={r} onToggle={handleToggleComplete}
+                    onEdit={handleEdit} onDelete={(r) => setDeleteTarget(r)} />
                 ))}
               </div>
             )}
@@ -267,7 +289,8 @@ export default function Agenda() {
               </h3>
               <div className="space-y-2">
                 {overdueReminders.map((r) => (
-                  <ReminderItem key={r.id} reminder={r} onToggle={handleToggleComplete} />
+                  <ReminderItem key={r.id} reminder={r} onToggle={handleToggleComplete}
+                    onEdit={handleEdit} onDelete={(r) => setDeleteTarget(r)} />
                 ))}
               </div>
             </div>
@@ -282,7 +305,8 @@ export default function Agenda() {
               </h3>
               <div className="space-y-2">
                 {upcomingReminders.map((r) => (
-                  <ReminderItem key={r.id} reminder={r} onToggle={handleToggleComplete} />
+                  <ReminderItem key={r.id} reminder={r} onToggle={handleToggleComplete}
+                    onEdit={handleEdit} onDelete={(r) => setDeleteTarget(r)} />
                 ))}
               </div>
             </div>
@@ -290,25 +314,72 @@ export default function Agenda() {
         </div>
       </div>
 
-      {/* Create Event Dialog */}
       <CreateEventDialog
         open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
+        onOpenChange={(open) => { setCreateDialogOpen(open); if (!open) setEditEvent(null); }}
         onCreated={() => setRefreshKey((k) => k + 1)}
         defaultDate={selectedDate}
         companies={companies}
         preselectedCompanyId={selectedCompany !== "all" ? selectedCompany : undefined}
+        editEvent={editEvent}
       />
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir evento?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteTarget?.recurrence_rule || deleteTarget?.parent_event_id
+                ? "Este evento e todas as suas ocorrências serão excluídos permanentemente."
+                : "Este evento será excluído permanentemente."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
 
-function ReminderItem({ reminder, onToggle }: { reminder: Reminder; onToggle?: (id: string, completed: boolean) => void }) {
+function getRecurrenceLabel(rule: string): string {
+  const labels: Record<string, string> = {
+    daily: "Diário",
+    weekly: "Semanal",
+    biweekly: "Quinzenal",
+    monthly: "Mensal",
+    yearly: "Anual",
+    weekdays: "Dias úteis",
+  };
+  if (rule.startsWith("custom:")) {
+    const parts = rule.split(":");
+    const interval = parts[1];
+    const unitMap: Record<string, string> = { days: "dia(s)", weeks: "sem.", months: "mês(es)" };
+    return `A cada ${interval} ${unitMap[parts[2]] || parts[2]}`;
+  }
+  return labels[rule] || rule;
+}
+
+function ReminderItem({
+  reminder,
+  onToggle,
+  onEdit,
+  onDelete,
+}: {
+  reminder: Reminder;
+  onToggle?: (id: string, completed: boolean) => void;
+  onEdit?: (r: Reminder) => void;
+  onDelete?: (r: Reminder) => void;
+}) {
   const isOverdue = !reminder.completed && isBefore(new Date(reminder.due_at), new Date());
 
   return (
     <div
-      className={`flex items-start gap-3 rounded-lg border p-3 transition-colors ${
+      className={`flex items-start gap-3 rounded-lg border p-3 transition-colors group ${
         reminder.completed
           ? "border-border/50 bg-muted/20 opacity-60"
           : isOverdue
@@ -338,21 +409,29 @@ function ReminderItem({ reminder, onToggle }: { reminder: Reminder; onToggle?: (
           <Badge variant="outline" className="text-[9px] px-1.5 py-0">
             {reminder.reminder_type === "meeting" ? "📅 Reunião" : "🔔 Lembrete"}
           </Badge>
+          {reminder.recurrence_rule && (
+            <Badge variant="secondary" className="text-[9px] px-1.5 py-0 gap-1">
+              <Repeat className="h-2.5 w-2.5" />
+              {getRecurrenceLabel(reminder.recurrence_rule)}
+            </Badge>
+          )}
         </div>
         {reminder.description && (
           <p className="text-xs text-muted-foreground mt-0.5">{reminder.description}</p>
         )}
         <div className="flex items-center gap-3 mt-1 text-[11px] text-muted-foreground">
-          <span>
-            {format(new Date(reminder.due_at), "dd/MM/yy HH:mm", { locale: ptBR })}
-          </span>
-          {reminder.lead_name && (
-            <span className="text-primary/70">• {reminder.lead_name}</span>
-          )}
-          {reminder.company_name && (
-            <span className="text-muted-foreground/70">• {reminder.company_name}</span>
-          )}
+          <span>{format(new Date(reminder.due_at), "dd/MM/yy HH:mm", { locale: ptBR })}</span>
+          {reminder.lead_name && <span className="text-primary/70">• {reminder.lead_name}</span>}
+          {reminder.company_name && <span className="text-muted-foreground/70">• {reminder.company_name}</span>}
         </div>
+      </div>
+      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <button onClick={() => onEdit?.(reminder)} className="p-1 rounded hover:bg-muted" title="Editar">
+          <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+        </button>
+        <button onClick={() => onDelete?.(reminder)} className="p-1 rounded hover:bg-destructive/10" title="Excluir">
+          <Trash2 className="h-3.5 w-3.5 text-destructive" />
+        </button>
       </div>
     </div>
   );
