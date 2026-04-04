@@ -9,14 +9,16 @@ const corsHeaders = {
 
 const SERVER_URL = "https://ziondigital.uazapi.com";
 
-function buildUaZapiHeaders(config: { zapi_token?: string | null }) {
-  const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+function buildUaZapiHeaders() {
+  return { "Content-Type": "application/json" };
+}
 
-  return {
-    "Content-Type": "application/json",
-    ...(ADMIN_TOKEN ? { "AdminToken": ADMIN_TOKEN } : {}),
-    ...(config.zapi_token ? { "token": config.zapi_token } : {}),
-  };
+function buildQueryParams(config: { zapi_instance_id: string; zapi_token?: string | null }) {
+  const adminToken = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+  const params = new URLSearchParams({ instance: config.zapi_instance_id });
+  if (adminToken) params.set("admintoken", adminToken);
+  if (config.zapi_token) params.set("token", config.zapi_token);
+  return params;
 }
 
 function buildUaZapiStatusUrl(config: { zapi_instance_id: string; zapi_token?: string | null }) {
