@@ -165,7 +165,7 @@ serve(async (req) => {
     if (media_url) {
       // Send file/video/image via UaZapi
       const mediaBody: any = {
-        number: phone,
+        phone: phone,
         mediaUrl: media_url,
       };
       if (message) mediaBody.caption = message;
