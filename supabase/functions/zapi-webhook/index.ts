@@ -568,13 +568,15 @@ serve(async (req) => {
 
             if (aiReply) {
               const SERVER_URL = "https://ziondigital.uazapi.com";
-              const sendUrl = `${SERVER_URL}/send/text`;
+              const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+              const sendParams = new URLSearchParams({ instance: config.zapi_instance_id });
+              if (ADMIN_TOKEN) sendParams.set("admintoken", ADMIN_TOKEN);
+              if (config.zapi_token) sendParams.set("token", config.zapi_token);
+
+              const sendUrl = `${SERVER_URL}/send/text?${sendParams.toString()}`;
               const sendResponse = await fetch(sendUrl, {
                 method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  "token": config.zapi_token || config.zapi_instance_id,
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ number: cleanPhone, body: aiReply }),
               });
 
