@@ -4,11 +4,13 @@ import { useUserCompanies } from "@/hooks/useUserCompanies";
 import { useAuth } from "@/hooks/useAuth";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, CalendarClock, Check, Clock, AlertTriangle } from "lucide-react";
+import { Loader2, CalendarClock, Check, Clock, AlertTriangle, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { format, isSameDay, isAfter, isBefore } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { CreateEventDialog } from "@/components/agenda/CreateEventDialog";
 
 interface Reminder {
   id: string;
@@ -34,6 +36,8 @@ export default function Agenda() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [loading, setLoading] = useState(true);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Fetch companies for filter
   useEffect(() => {
@@ -84,7 +88,7 @@ export default function Agenda() {
       setLoading(false);
     };
     if (!companiesLoading) fetchReminders();
-  }, [user, selectedCompany, isClient, companyIds, companiesLoading]);
+  }, [user, selectedCompany, isClient, companyIds, companiesLoading, refreshKey]);
 
   // Days with events for calendar styling
   const eventDays = useMemo(() => {
@@ -166,17 +170,23 @@ export default function Agenda() {
           <h1 className="text-2xl font-display font-bold text-foreground">Agenda</h1>
           <p className="text-sm text-muted-foreground">Lembretes e reuniões agendadas</p>
         </div>
-        <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-          <SelectTrigger className="w-[220px]">
-            <SelectValue placeholder="Filtrar por empresa" />
-          </SelectTrigger>
-          <SelectContent>
-            {(isAdmin || companies.length > 1) && <SelectItem value="all">Todas as empresas</SelectItem>}
-            {companies.map((c) => (
-              <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-3">
+          <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+            <SelectTrigger className="w-[220px]">
+              <SelectValue placeholder="Filtrar por empresa" />
+            </SelectTrigger>
+            <SelectContent>
+              {(isAdmin || companies.length > 1) && <SelectItem value="all">Todas as empresas</SelectItem>}
+              {companies.map((c) => (
+                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button onClick={() => setCreateDialogOpen(true)} className="gap-2">
+            <Plus className="h-4 w-4" />
+            Novo Evento
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[auto_1fr]">
@@ -212,12 +222,33 @@ export default function Agenda() {
         <div className="space-y-6">
           {/* Selected date events */}
           <div className="rounded-xl border border-border bg-card p-5">
-            <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
-              <CalendarClock className="h-4 w-4 text-primary" />
-              {selectedDate ? format(selectedDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : "Selecione uma data"}
-            </h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                <CalendarClock className="h-4 w-4 text-primary" />
+                {selectedDate ? format(selectedDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : "Selecione uma data"}
+              </h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-1 text-xs"
+                onClick={() => setCreateDialogOpen(true)}
+              >
+                <Plus className="h-3.5 w-3.5" /> Adicionar
+              </Button>
+            </div>
             {selectedDateReminders.length === 0 ? (
-              <p className="text-xs text-muted-foreground">Nenhum evento nesta data</p>
+              <div className="flex flex-col items-center py-6 text-muted-foreground">
+                <CalendarClock className="h-8 w-8 mb-2 opacity-30" />
+                <p className="text-xs">Nenhum evento nesta data</p>
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="mt-1 text-xs"
+                  onClick={() => setCreateDialogOpen(true)}
+                >
+                  Criar evento
+                </Button>
+              </div>
             ) : (
               <div className="space-y-2">
                 {selectedDateReminders.map((r) => (
@@ -258,6 +289,16 @@ export default function Agenda() {
           )}
         </div>
       </div>
+
+      {/* Create Event Dialog */}
+      <CreateEventDialog
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+        onCreated={() => setRefreshKey((k) => k + 1)}
+        defaultDate={selectedDate}
+        companies={companies}
+        preselectedCompanyId={selectedCompany !== "all" ? selectedCompany : undefined}
+      />
     </div>
   );
 }
