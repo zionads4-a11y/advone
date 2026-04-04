@@ -605,10 +605,12 @@ serve(async (req) => {
               const SERVER_URL = "https://ziondigital.uazapi.com";
               const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
               const sendHeaders: Record<string, string> = { "Content-Type": "application/json" };
-              if (config.zapi_token) sendHeaders["token"] = config.zapi_token;
               if (ADMIN_TOKEN) sendHeaders["admintoken"] = ADMIN_TOKEN;
 
-              const sendUrl = `${SERVER_URL}/send/text`;
+              const instanceParam = encodeURIComponent(config.zapi_instance_id);
+              const tokenParam = encodeURIComponent(config.zapi_token || config.zapi_instance_id);
+              const sendUrl = `${SERVER_URL}/send/text?instance=${instanceParam}&token=${tokenParam}`;
+              console.log("Sending AI reply to:", cleanPhone, "via:", sendUrl);
               const sendResponse = await fetch(sendUrl, {
                 method: "POST",
                 headers: sendHeaders,
