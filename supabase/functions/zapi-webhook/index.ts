@@ -240,10 +240,11 @@ async function qualifyLeadWithAI(
               const alertMessage = `🔔 *Novo Agendamento Automático*\n\n👤 Lead: ${leadName}\n📅 Data: ${appointmentDate}\n⏰ Horário: ${appointmentTime}\n${args.summary ? `📋 Assunto: ${args.summary}\n` : ""}\n_Agendado automaticamente pelo bot SDR_`;
 
               const alertHeaders: Record<string, string> = { "Content-Type": "application/json" };
-              if (config.zapi_token) alertHeaders["token"] = config.zapi_token;
               if (ADMIN_TOKEN) alertHeaders["admintoken"] = ADMIN_TOKEN;
 
-              await fetch(`${SERVER_URL}/send/text`, {
+              const instanceParam = encodeURIComponent(config.zapi_instance_id || "");
+              const tokenParam = encodeURIComponent(config.zapi_token || config.zapi_instance_id || "");
+              await fetch(`${SERVER_URL}/send/text?instance=${instanceParam}&token=${tokenParam}`, {
                 method: "POST",
                 headers: alertHeaders,
                 body: JSON.stringify({ number: alertPhone, text: alertMessage }),
