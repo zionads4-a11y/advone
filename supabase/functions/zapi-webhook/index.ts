@@ -577,7 +577,7 @@ serve(async (req) => {
               const sendResponse = await fetch(sendUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ number: cleanPhone, body: aiReply }),
+                body: JSON.stringify({ phone: cleanPhone, message: aiReply }),
               });
 
               if (sendResponse.ok) {
