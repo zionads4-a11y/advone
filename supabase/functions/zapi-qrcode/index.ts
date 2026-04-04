@@ -519,12 +519,11 @@ serve(async (req) => {
         const statusResult = await fetchUaZapiStatus(config);
         const connected = statusResult.ok && isInstanceConnected(statusResult.payload);
 
-        // Auto-configure webhook if connected but not yet configured
+        // Update status and webhook config
         if (connected && !config.zapi_webhook_configured) {
           const webhookResult = await configureWebhook(config, company_id, supabaseUrl);
-          if (webhookResult.ok) {
-            await adminClient.from("whatsapp_configs").update({ zapi_webhook_configured: true, status: "connected" }).eq("company_id", company_id);
-          }
+          // Mark as configured regardless - user sets webhook URL manually in UaZapi panel
+          await adminClient.from("whatsapp_configs").update({ zapi_webhook_configured: true, status: "connected" }).eq("company_id", company_id);
           console.log("Auto webhook config on status check:", JSON.stringify(webhookResult));
         } else if (connected) {
           await adminClient.from("whatsapp_configs").update({ status: "connected" }).eq("company_id", company_id);
