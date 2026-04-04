@@ -261,6 +261,106 @@ serve(async (req) => {
       );
     }
 
+    // Action: save instance (auto-fetch token from UaZapi)
+    if (action === "save_instance") {
+      const { instance_id: instanceId } = body;
+      if (!instanceId) {
+        return new Response(
+          JSON.stringify({ error: "instance_id é obrigatório" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const adminToken = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+      if (!adminToken) {
+        return new Response(
+          JSON.stringify({ error: "Admin Token não configurado no servidor" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Try to get instance token from UaZapi using admin token
+      let instanceToken = "";
+      try {
+        // Try GET /instances with admintoken header
+        const listRes = await fetch(`${SERVER_URL}/instances`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json", "admintoken": adminToken },
+        });
+        const listPayload = await readResponsePayload(listRes);
+        console.log("UaZapi /instances response:", listRes.status, JSON.stringify(listPayload));
+
+        if (listRes.ok && Array.isArray(listPayload)) {
+          const found = listPayload.find((inst: any) =>
+            inst.id === instanceId || inst.name === instanceId || inst.instance === instanceId
+          );
+          if (found) {
+            instanceToken = found.token || found.apiToken || found.apiTokenInstance || "";
+          }
+        }
+
+        // If not found, try GET /instance/info with admintoken
+        if (!instanceToken) {
+          const infoRes = await fetch(`${SERVER_URL}/instance/info?instance=${encodeURIComponent(instanceId)}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json", "admintoken": adminToken },
+          });
+          const infoPayload = await readResponsePayload(infoRes);
+          console.log("UaZapi /instance/info response:", infoRes.status, JSON.stringify(infoPayload));
+          if (infoRes.ok) {
+            instanceToken = infoPayload?.token || infoPayload?.instance?.token || "";
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching instance token:", err);
+      }
+
+      // Save config (with or without auto-fetched token)
+      const configData = {
+        zapi_instance_id: instanceId.trim(),
+        zapi_token: instanceToken || instanceId.trim(), // fallback to instance ID if no token found
+      };
+
+      const { data: existing } = await adminClient
+        .from("whatsapp_configs")
+        .select("id")
+        .eq("company_id", company_id)
+        .maybeSingle();
+
+      let saveError;
+      if (existing) {
+        const { error } = await adminClient
+          .from("whatsapp_configs")
+          .update(configData)
+          .eq("id", existing.id);
+        saveError = error;
+      } else {
+        const { error } = await adminClient
+          .from("whatsapp_configs")
+          .insert({ company_id, ...configData });
+        saveError = error;
+      }
+
+      if (saveError) {
+        return new Response(
+          JSON.stringify({ error: "Erro ao salvar: " + saveError.message }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({
+          saved: true,
+          instance_id: instanceId,
+          token_found: !!instanceToken,
+          message: instanceToken
+            ? "Configuração salva com token da instância detectado automaticamente!"
+            : "Configuração salva. Token da instância não encontrado automaticamente — usando o ID da instância como fallback.",
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Action: generate shareable link
     if (action === "generate_link") {
       const { data: tokenData, error: insertError } = await adminClient
