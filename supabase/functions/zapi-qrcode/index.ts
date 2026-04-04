@@ -58,16 +58,10 @@ function extractQrCode(payload: any) {
 async function fetchUaZapiStatus(config: { zapi_instance_id: string; zapi_token?: string | null }) {
   const response = await fetch(buildUaZapiStatusUrl(config), {
     method: "GET",
-    headers: buildUaZapiHeaders(config),
+    headers: buildUaZapiHeaders(),
   });
-
   const payload = await readResponsePayload(response);
-
-  return {
-    ok: response.ok,
-    status: response.status,
-    payload,
-  };
+  return { ok: response.ok, status: response.status, payload };
 }
 
 async function fetchUaZapiQrCode(config: { zapi_instance_id: string; zapi_token?: string | null }) {
