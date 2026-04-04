@@ -200,6 +200,42 @@ async function disconnectUaZapiInstance(config: { zapi_instance_id: string; zapi
   return { ok: false, failures };
 }
 
+async function configureWebhook(
+  config: { zapi_instance_id: string; zapi_token?: string | null },
+  companyId: string,
+  supabaseUrl: string,
+) {
+  const adminToken = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+  if (!adminToken) return { ok: false, error: "UAZAPI_ADMIN_TOKEN not set" };
+
+  const webhookUrl = `${supabaseUrl}/functions/v1/zapi-webhook?company_id=${companyId}`;
+  const params = buildQueryParams(config).toString();
+
+  // Try multiple endpoints for setting webhook
+  const candidates = [
+    { url: `${SERVER_URL}/webhook/set?${params}`, method: "POST" as const },
+    { url: `${SERVER_URL}/instance/webhook?${params}`, method: "POST" as const },
+    { url: `${SERVER_URL}/setWebhook?${params}`, method: "POST" as const },
+  ];
+
+  for (const { url, method } of candidates) {
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json", "admintoken": adminToken },
+        body: JSON.stringify({ url: webhookUrl, webhook: webhookUrl }),
+      });
+      const payload = await readResponsePayload(res);
+      console.log(`Webhook config ${method} ${url} => ${res.status}:`, JSON.stringify(payload).substring(0, 300));
+      if (res.ok) return { ok: true, payload };
+    } catch (err) {
+      console.error(`Webhook config error for ${url}:`, err);
+    }
+  }
+
+  return { ok: false, error: "All webhook config endpoints failed" };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
