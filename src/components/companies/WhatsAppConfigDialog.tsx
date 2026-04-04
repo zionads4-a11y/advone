@@ -290,20 +290,9 @@ export function WhatsAppConfigDialog({
               <Input
                 value={formInstanceId}
                 onChange={(e) => setFormInstanceId(e.target.value)}
-                placeholder="Ex: 88fbac77-b070-48b2-872e-2db662cc800b"
+                placeholder="Ex: f2749759-f67f-477a-b5d6-cfe75984f029"
               />
-              <p className="text-xs text-muted-foreground">Nome exato da instância criada no painel do UaZapi.</p>
-            </div>
-
-            {/* Instance Token */}
-            <div className="space-y-2">
-              <Label>Token da Instância (UaZapi) *</Label>
-              <Input
-                value={formToken}
-                onChange={(e) => setFormToken(e.target.value)}
-                placeholder="Ex: 3A26D4F22..."
-              />
-              <p className="text-xs text-muted-foreground">Use somente o token da instância criado na UaZapi. Não cole aqui o Admin Token do servidor.</p>
+              <p className="text-xs text-muted-foreground">UUID da instância criada no painel do UaZapi. O token será buscado automaticamente.</p>
             </div>
 
             {/* Webhook URL */}
