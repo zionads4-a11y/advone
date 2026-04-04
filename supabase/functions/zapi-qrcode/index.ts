@@ -53,12 +53,16 @@ serve(async (req) => {
         );
       }
 
-      // Fetch QR code from UaZapi via /instance/connect
+      // Fetch QR code from UaZapi
       const SERVER_URL = "https://ziondigital.uazapi.com";
-      const qrResponse = await fetch(`${SERVER_URL}/instance/connect`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "token": config.zapi_token },
-        body: JSON.stringify({}),
+      const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+      const qrResponse = await fetch(`${SERVER_URL}/instance/${config.zapi_instance_id}/connect`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...(ADMIN_TOKEN ? { "AdminToken": ADMIN_TOKEN } : {}),
+          ...(config.zapi_token ? { "token": config.zapi_token } : {}),
+        },
       });
 
       if (!qrResponse.ok) {
@@ -159,22 +163,26 @@ serve(async (req) => {
         .eq("company_id", company_id)
         .maybeSingle();
 
-      if (!config || !config.zapi_token) {
+      if (!config || !config.zapi_instance_id) {
         return new Response(
-          JSON.stringify({ error: "Z-API não configurada", connected: false }),
+          JSON.stringify({ error: "WhatsApp não configurado", connected: false }),
           { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
       const SERVER_URL = "https://ziondigital.uazapi.com";
+      const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
 
       try {
-        const statusResponse = await fetch(`${SERVER_URL}/instance/status`, {
+        const statusResponse = await fetch(`${SERVER_URL}/instance/${config.zapi_instance_id}/status`, {
           method: "GET",
-          headers: { "token": config.zapi_token },
+          headers: {
+            ...(ADMIN_TOKEN ? { "AdminToken": ADMIN_TOKEN } : {}),
+            ...(config.zapi_token ? { "token": config.zapi_token } : {}),
+          },
         });
         const statusData = await statusResponse.json();
-        const connected = statusData?.status?.connected === true || statusData?.instance?.status === "open";
+        const connected = statusData?.connected === true || statusData?.status === "open" || statusData?.instance?.status === "open";
 
         return new Response(
           JSON.stringify({ connected, status: statusData }),
@@ -196,35 +204,40 @@ serve(async (req) => {
         .eq("company_id", company_id)
         .maybeSingle();
 
-      if (!config || !config.zapi_token) {
+      if (!config || !config.zapi_instance_id) {
         return new Response(
-          JSON.stringify({ error: "Token da instância não configurado" }),
+          JSON.stringify({ error: "Nome da instância não configurado" }),
           { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
       const SERVER_URL = "https://ziondigital.uazapi.com";
+      const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (ADMIN_TOKEN) headers["AdminToken"] = ADMIN_TOKEN;
+      if (config.zapi_token) headers["token"] = config.zapi_token;
 
-      // Use /instance/status which returns qrcode when status is "connecting"
-      const statusRes = await fetch(`${SERVER_URL}/instance/status`, {
+      // First check status
+      const statusRes = await fetch(`${SERVER_URL}/instance/${config.zapi_instance_id}/status`, {
         method: "GET",
-        headers: { "token": config.zapi_token },
+        headers,
       });
 
       if (!statusRes.ok) {
         const errorText = await statusRes.text();
         console.error("UaZapi status error:", statusRes.status, errorText);
         return new Response(
-          JSON.stringify({ error: "Erro ao obter QR Code", details: errorText }),
+          JSON.stringify({ error: "Erro ao verificar status", details: errorText }),
           { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
       const statusData = await statusRes.json();
-      console.log("UaZapi status response keys:", Object.keys(statusData));
+      console.log("UaZapi status response:", JSON.stringify(statusData));
 
-      // Check if already connected
-      const isConnected = statusData?.status?.connected === true || statusData?.instance?.status === "open";
+      const isConnected = statusData?.connected === true || statusData?.status === "open";
       if (isConnected) {
         return new Response(
           JSON.stringify({ connected: true }),
@@ -232,26 +245,34 @@ serve(async (req) => {
         );
       }
 
-      // Extract QR code - UaZapi nests it inside instance.qrcode
-      const qrcode = statusData?.instance?.qrcode
-        || statusData?.qrcode
-        || statusData?.qr
-        || statusData?.base64
-        || statusData?.data?.qrcode
+      // Try to get QR code via connect endpoint
+      const connectRes = await fetch(`${SERVER_URL}/instance/${config.zapi_instance_id}/connect`, {
+        method: "GET",
+        headers,
+      });
+
+      if (!connectRes.ok) {
+        const errorText = await connectRes.text();
+        console.error("UaZapi connect error:", connectRes.status, errorText);
+        return new Response(
+          JSON.stringify({ error: "Erro ao obter QR Code", details: errorText }),
+          { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const connectData = await connectRes.json();
+      console.log("UaZapi connect response keys:", Object.keys(connectData));
+
+      const qrcode = connectData?.qrcode
+        || connectData?.qr
+        || connectData?.base64
+        || connectData?.data?.qrcode
+        || connectData?.instance?.qrcode
         || null;
 
       if (!qrcode) {
-        // If no QR yet, try /instance/connect to trigger generation
-        try {
-          await fetch(`${SERVER_URL}/instance/connect`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "token": config.zapi_token },
-            body: JSON.stringify({}),
-          });
-        } catch { /* ignore */ }
-
         return new Response(
-          JSON.stringify({ error: "QR Code ainda não disponível. Tente novamente em alguns segundos." }),
+          JSON.stringify({ error: "QR Code ainda não disponível. Tente novamente em alguns segundos.", raw: connectData }),
           { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
