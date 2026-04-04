@@ -13,6 +13,11 @@ function buildUaZapiHeaders() {
   return { "Content-Type": "application/json" };
 }
 
+function isInstanceTokenMisconfigured(config: { zapi_token?: string | null }) {
+  const adminToken = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+  return Boolean(adminToken && config.zapi_token && config.zapi_token.trim() === adminToken.trim());
+}
+
 function buildQueryParams(
   config: { zapi_instance_id: string; zapi_token?: string | null },
   options?: { includeInstanceToken?: boolean },
@@ -363,6 +368,28 @@ serve(async (req) => {
         return new Response(
           JSON.stringify({ error: "WhatsApp não configurado" }),
           { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      if (!config.zapi_token) {
+        return new Response(
+          JSON.stringify({
+            disconnected: false,
+            code: "INSTANCE_TOKEN_MISSING",
+            error: "O Token da Instância não foi preenchido. Salve o token real da instância UaZapi antes de desconectar.",
+          }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      if (isInstanceTokenMisconfigured(config)) {
+        return new Response(
+          JSON.stringify({
+            disconnected: false,
+            code: "INSTANCE_TOKEN_MISCONFIGURED",
+            error: "O campo 'Token da Instância' está com o Admin Token da UaZapi. Substitua esse valor pelo token real da instância para conseguir desconectar.",
+          }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
