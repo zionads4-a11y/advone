@@ -45,8 +45,9 @@ FLUXO DE ATENDIMENTO:
 1. Cumprimente o lead e se apresente como assistente de ${officeName}
 2. Faça uma qualificação rápida: "Seu caso é sobre qual situação?"
 3. Após a resposta, conduza para agendamento: "Perfeito, o advogado pode te orientar melhor sobre isso."
-4. ${schedulingLink ? `Envie o link de agendamento: ${schedulingLink}` : "Informe que vai encaminhar para um atendente humano."}
-${consultationDuration ? `5. A consulta dura aproximadamente ${consultationDuration}.` : ""}
+4. Pergunte qual o melhor dia e horário para a consulta
+5. Use a ferramenta "schedule_appointment" para criar o agendamento na agenda do sistema
+${consultationDuration ? `6. A consulta dura aproximadamente ${consultationDuration}.` : ""}
 
 SE O LEAD FIZER PERGUNTAS JURÍDICAS:
 "Essa parte o advogado vai conseguir te orientar com mais precisão. Vamos agendar um horário para você falar direto com ele?"
@@ -56,7 +57,7 @@ SE O LEAD RESISTIR:
 
 QUALIFICAÇÃO:
 - Use a ferramenta "qualify_lead" quando tiver informações suficientes
-- Use "schedule_appointment" quando o lead aceitar agendar
+- Use "schedule_appointment" quando o lead aceitar agendar — SEMPRE pergunte data e horário antes de agendar
 - Se o lead NÃO for qualificado, oriente educadamente para o recurso correto (INSS, Procon, Defensoria Pública, etc.)
 
 Responda SEMPRE em português do Brasil.`;
@@ -111,16 +112,28 @@ async function qualifyLeadWithAI(
       type: "function",
       function: {
         name: "schedule_appointment",
-        description: "Registra que o lead aceitou agendar. Use quando o lead demonstrar interesse em agendar.",
+        description: "Agenda uma consulta/reunião para o lead na agenda do sistema. Use quando o lead aceitar agendar ou demonstrar interesse claro.",
         parameters: {
           type: "object",
           properties: {
             message_to_lead: {
               type: "string",
-              description: "Mensagem final com o link de agendamento"
+              description: "Mensagem confirmando o agendamento para o lead"
+            },
+            date: {
+              type: "string",
+              description: "Data sugerida para o agendamento no formato YYYY-MM-DD. Se o lead não especificou, sugira o próximo dia útil."
+            },
+            time: {
+              type: "string",
+              description: "Horário sugerido no formato HH:MM. Se não especificado, use 10:00."
+            },
+            summary: {
+              type: "string",
+              description: "Breve descrição do assunto da reunião"
             }
           },
-          required: ["message_to_lead"],
+          required: ["message_to_lead", "date", "time"],
           additionalProperties: false
         }
       }
@@ -193,9 +206,49 @@ async function qualifyLeadWithAI(
         if (fnName === "schedule_appointment") {
           shouldSchedule = true;
           replyText = args.message_to_lead || replyText;
-          // Append scheduling link if available
-          if (config.scheduling_link && !replyText.includes(config.scheduling_link)) {
-            replyText += `\n\n${config.scheduling_link}`;
+
+          // Create appointment in the system agenda
+          if (leadId) {
+            const appointmentDate = args.date || new Date(Date.now() + 86400000).toISOString().split("T")[0];
+            const appointmentTime = args.time || "10:00";
+            const dueAt = `${appointmentDate}T${appointmentTime}:00`;
+
+            // Get lead name
+            const { data: leadData } = await supabase
+              .from("leads")
+              .select("name")
+              .eq("id", leadId)
+              .single();
+
+            const leadName = leadData?.name || "Lead";
+
+            await supabase.from("lead_reminders").insert({
+              lead_id: leadId,
+              company_id: companyId,
+              created_by: "00000000-0000-0000-0000-000000000000",
+              title: `📅 Consulta: ${leadName}`,
+              description: args.summary || `Agendamento automático via bot IA`,
+              reminder_type: "meeting",
+              due_at: dueAt,
+            });
+
+            // Send WhatsApp notification to lawyer's alert number
+            if (config.alert_whatsapp) {
+              const SERVER_URL = "https://ziondigital.uazapi.com";
+              const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+              const alertPhone = config.alert_whatsapp.replace(/\D/g, "");
+              const alertMessage = `🔔 *Novo Agendamento Automático*\n\n👤 Lead: ${leadName}\n📅 Data: ${appointmentDate}\n⏰ Horário: ${appointmentTime}\n${args.summary ? `📋 Assunto: ${args.summary}\n` : ""}\n_Agendado automaticamente pelo bot SDR_`;
+
+              await fetch(`${SERVER_URL}/instance/${config.zapi_instance_id}/send-text`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  ...(ADMIN_TOKEN ? { "AdminToken": ADMIN_TOKEN } : {}),
+                  ...(config.zapi_token ? { "token": config.zapi_token } : {}),
+                },
+                body: JSON.stringify({ phone: alertPhone, message: alertMessage }),
+              });
+            }
           }
         }
 
@@ -333,7 +386,7 @@ serve(async (req) => {
 
     const { data: config } = await supabase
       .from("whatsapp_configs")
-      .select("id, company_id, zapi_instance_id, zapi_token, ai_enabled, ai_prompt, ai_auto_reply, office_name, practice_area, communication_tone, scheduling_link, consultation_duration, target_audience")
+      .select("id, company_id, zapi_instance_id, zapi_token, ai_enabled, ai_prompt, ai_auto_reply, office_name, practice_area, communication_tone, scheduling_link, consultation_duration, target_audience, alert_whatsapp")
       .eq("company_id", companyId)
       .maybeSingle();
 

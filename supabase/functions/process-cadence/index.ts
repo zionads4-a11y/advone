@@ -111,11 +111,17 @@ serve(async (req) => {
           messageText += `\n\n${(config as any).scheduling_link}`;
         }
 
-        // Send via Z-API
-        const zapiUrl = `https://api.z-api.io/instances/${config.zapi_instance_id}/token/${config.zapi_token}/send-text`;
-        const sendResponse = await fetch(zapiUrl, {
+        // Send via UaZapi
+        const SERVER_URL = "https://ziondigital.uazapi.com";
+        const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+        const sendUrl = `${SERVER_URL}/instance/${config.zapi_instance_id}/send-text`;
+        const sendResponse = await fetch(sendUrl, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            ...(ADMIN_TOKEN ? { "AdminToken": ADMIN_TOKEN } : {}),
+            ...(config.zapi_token ? { "token": config.zapi_token } : {}),
+          },
           body: JSON.stringify({ phone: msg.phone, message: messageText }),
         });
 
