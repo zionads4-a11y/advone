@@ -164,14 +164,14 @@ serve(async (req) => {
     if (media_url) {
       // Send file/video/image via UaZapi
       const mediaBody: any = {
-        phone: phone,
+        chatId: `${phone}@c.us`,
         mediaUrl: media_url,
       };
       if (message) mediaBody.caption = message;
 
-      const zapiResponse = await fetch(`${SERVER_URL}/send/media?${buildParams()}`, {
+      const zapiResponse = await fetch(`${SERVER_URL}/send/media`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: buildHeaders(),
         body: JSON.stringify(mediaBody),
       });
 
