@@ -208,7 +208,7 @@ export function WhatsAppConfigDialog({
       if (error) throw error;
       if (data?.saved) {
         toast.success(data.message || "Configuração salva!");
-        onSubmit(new FormData()); // trigger parent refresh
+        onSubmit(); // trigger parent refresh
       } else {
         toast.error(data?.error || "Erro ao salvar");
       }
