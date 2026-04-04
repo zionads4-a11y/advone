@@ -86,14 +86,11 @@ export function WhatsAppConfigDialog({
   useEffect(() => {
     if (config) {
       setFormInstanceId(config.zapi_instance_id || "");
-      setFormToken(config.zapi_token || "");
       setQrStatus("disconnected");
       setQrCode(null);
-      // Check connection status
       checkStatus();
     } else {
       setFormInstanceId("");
-      setFormToken("");
       setQrCode(null);
       setQrStatus("disconnected");
     }
