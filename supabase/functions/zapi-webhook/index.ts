@@ -235,18 +235,16 @@ async function qualifyLeadWithAI(
             // Send WhatsApp notification to lawyer's alert number
             if (config.alert_whatsapp) {
               const SERVER_URL = "https://ziondigital.uazapi.com";
-              const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
               const alertPhone = config.alert_whatsapp.replace(/\D/g, "");
               const alertMessage = `🔔 *Novo Agendamento Automático*\n\n👤 Lead: ${leadName}\n📅 Data: ${appointmentDate}\n⏰ Horário: ${appointmentTime}\n${args.summary ? `📋 Assunto: ${args.summary}\n` : ""}\n_Agendado automaticamente pelo bot SDR_`;
 
-              await fetch(`${SERVER_URL}/instance/${config.zapi_instance_id}/send-text`, {
+              await fetch(`${SERVER_URL}/send/text`, {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
-                  ...(ADMIN_TOKEN ? { "AdminToken": ADMIN_TOKEN } : {}),
-                  ...(config.zapi_token ? { "token": config.zapi_token } : {}),
+                  "token": config.zapi_token || config.zapi_instance_id,
                 },
-                body: JSON.stringify({ phone: alertPhone, message: alertMessage }),
+                body: JSON.stringify({ number: alertPhone, body: alertMessage }),
               });
             }
           }
