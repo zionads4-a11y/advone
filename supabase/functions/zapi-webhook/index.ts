@@ -205,9 +205,49 @@ async function qualifyLeadWithAI(
         if (fnName === "schedule_appointment") {
           shouldSchedule = true;
           replyText = args.message_to_lead || replyText;
-          // Append scheduling link if available
-          if (config.scheduling_link && !replyText.includes(config.scheduling_link)) {
-            replyText += `\n\n${config.scheduling_link}`;
+
+          // Create appointment in the system agenda
+          if (leadId) {
+            const appointmentDate = args.date || new Date(Date.now() + 86400000).toISOString().split("T")[0];
+            const appointmentTime = args.time || "10:00";
+            const dueAt = `${appointmentDate}T${appointmentTime}:00`;
+
+            // Get lead name
+            const { data: leadData } = await supabase
+              .from("leads")
+              .select("name")
+              .eq("id", leadId)
+              .single();
+
+            const leadName = leadData?.name || "Lead";
+
+            await supabase.from("lead_reminders").insert({
+              lead_id: leadId,
+              company_id: companyId,
+              created_by: "00000000-0000-0000-0000-000000000000",
+              title: `📅 Consulta: ${leadName}`,
+              description: args.summary || `Agendamento automático via bot IA`,
+              reminder_type: "meeting",
+              due_at: dueAt,
+            });
+
+            // Send WhatsApp notification to lawyer's alert number
+            if (config.alert_whatsapp) {
+              const SERVER_URL = "https://ziondigital.uazapi.com";
+              const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+              const alertPhone = config.alert_whatsapp.replace(/\D/g, "");
+              const alertMessage = `🔔 *Novo Agendamento Automático*\n\n👤 Lead: ${leadName}\n📅 Data: ${appointmentDate}\n⏰ Horário: ${appointmentTime}\n${args.summary ? `📋 Assunto: ${args.summary}\n` : ""}\n_Agendado automaticamente pelo bot SDR_`;
+
+              await fetch(`${SERVER_URL}/instance/${config.zapi_instance_id}/send-text`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  ...(ADMIN_TOKEN ? { "AdminToken": ADMIN_TOKEN } : {}),
+                  ...(config.zapi_token ? { "token": config.zapi_token } : {}),
+                },
+                body: JSON.stringify({ phone: alertPhone, message: alertMessage }),
+              });
+            }
           }
         }
 
