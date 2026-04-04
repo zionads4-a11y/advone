@@ -47,11 +47,13 @@ export function CompanyEditDialog({
 }: CompanyEditDialogProps) {
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
+  const [businessHours, setBusinessHours] = useState<BusinessHours>(getDefaultBusinessHours());
 
   useEffect(() => {
     if (company) {
       setName(company.name);
       setWhatsapp(company.whatsapp || "");
+      setBusinessHours(parseBusinessHours(company.business_hours));
     }
   }, [company]);
 
@@ -59,14 +61,14 @@ export function CompanyEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card text-foreground">
+      <DialogContent className="bg-card text-foreground max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-display">Editar Empresa</DialogTitle>
         </DialogHeader>
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            onUpdate(company.id, { name, whatsapp: whatsapp || null });
+            onUpdate(company.id, { name, whatsapp: whatsapp || null, business_hours: businessHours });
           }}
           className="space-y-4"
         >
