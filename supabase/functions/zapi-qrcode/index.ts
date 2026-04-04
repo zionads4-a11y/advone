@@ -336,8 +336,54 @@ serve(async (req) => {
       );
     }
 
+    // Action: disconnect instance
+    if (action === "disconnect") {
+      const { data: config } = await adminClient
+        .from("whatsapp_configs")
+        .select("zapi_instance_id, zapi_token")
+        .eq("company_id", company_id)
+        .maybeSingle();
+
+      if (!config || !config.zapi_instance_id) {
+        return new Response(
+          JSON.stringify({ error: "WhatsApp não configurado" }),
+          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const headers = buildUaZapiHeaders(config);
+      const query = new URLSearchParams({ instance: config.zapi_instance_id });
+      if (config.zapi_token) query.set("token", config.zapi_token);
+
+      // Try multiple disconnect endpoints
+      const candidates = [
+        `${SERVER_URL}/disconnect?${query.toString()}`,
+        `${SERVER_URL}/instance/disconnect?${query.toString()}`,
+        `${SERVER_URL}/logout?${query.toString()}`,
+        `${SERVER_URL}/instance/logout?${query.toString()}`,
+      ];
+
+      for (const url of candidates) {
+        try {
+          const res = await fetch(url, { method: "POST", headers });
+          const payload = await readResponsePayload(res);
+          if (res.ok) {
+            return new Response(
+              JSON.stringify({ disconnected: true, details: payload }),
+              { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+        } catch {}
+      }
+
+      return new Response(
+        JSON.stringify({ disconnected: false, error: "Não foi possível desconectar a instância" }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     return new Response(
-      JSON.stringify({ error: "Ação inválida. Use 'get-status', 'get_qrcode' ou 'generate_link'" }),
+      JSON.stringify({ error: "Ação inválida" }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {

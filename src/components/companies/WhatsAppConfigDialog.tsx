@@ -369,9 +369,40 @@ export function WhatsAppConfigDialog({
               )}
 
               {qrStatus === "connected" && (
-                <div className="flex items-center gap-2 p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-lg">
-                  <CheckCircle className="w-4 h-4 text-emerald-600" />
-                  <p className="text-sm text-emerald-800 dark:text-emerald-300">WhatsApp conectado e pronto para uso!</p>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-lg">
+                    <CheckCircle className="w-4 h-4 text-emerald-600" />
+                    <p className="text-sm text-emerald-800 dark:text-emerald-300">WhatsApp conectado e pronto para uso!</p>
+                  </div>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="w-full gap-2"
+                    disabled={qrLoading}
+                    onClick={async () => {
+                      setQrLoading(true);
+                      try {
+                        const { data, error } = await supabase.functions.invoke("zapi-qrcode", {
+                          body: { company_id: companyId, action: "disconnect" },
+                        });
+                        if (error) throw error;
+                        if (data?.disconnected) {
+                          toast.success("WhatsApp desconectado com sucesso!");
+                          setQrStatus("disconnected");
+                          setQrCode(null);
+                        } else {
+                          toast.error(data?.error || "Erro ao desconectar");
+                        }
+                      } catch (err: any) {
+                        toast.error("Erro ao desconectar: " + err.message);
+                      } finally {
+                        setQrLoading(false);
+                      }
+                    }}
+                  >
+                    {qrLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+                    Desconectar WhatsApp
+                  </Button>
                 </div>
               )}
             </div>
