@@ -22,15 +22,7 @@ function buildQueryParams(config: { zapi_instance_id: string; zapi_token?: strin
 }
 
 function buildUaZapiStatusUrl(config: { zapi_instance_id: string; zapi_token?: string | null }) {
-  const params = new URLSearchParams({
-    instance: config.zapi_instance_id,
-  });
-
-  if (config.zapi_token) {
-    params.set("token", config.zapi_token);
-  }
-
-  return `${SERVER_URL}/status?${params.toString()}`;
+  return `${SERVER_URL}/status?${buildQueryParams(config).toString()}`;
 }
 
 async function readResponsePayload(response: Response) {
