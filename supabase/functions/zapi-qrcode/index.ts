@@ -351,35 +351,40 @@ serve(async (req) => {
         );
       }
 
-      const headers = buildUaZapiHeaders(config);
-      const instanceQuery = new URLSearchParams({ instance: config.zapi_instance_id });
+      const adminToken = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+      const headers = {
+        ...buildUaZapiHeaders(config),
+        ...(adminToken ? { admintoken: adminToken } : {}),
+      };
 
-      // Try multiple disconnect endpoints and methods
+      const baseQuery = new URLSearchParams({ instance: config.zapi_instance_id });
+      if (config.zapi_token) baseQuery.set("token", config.zapi_token);
+      if (adminToken) baseQuery.set("admintoken", adminToken);
+
       const candidates = [
-        { url: `${SERVER_URL}/instance/disconnect?${instanceQuery.toString()}`, method: "POST" },
-        { url: `${SERVER_URL}/disconnect?${instanceQuery.toString()}`, method: "POST" },
-        { url: `${SERVER_URL}/instance/${config.zapi_instance_id}/disconnect`, method: "POST" },
-        { url: `${SERVER_URL}/instance/logout?${instanceQuery.toString()}`, method: "POST" },
-        { url: `${SERVER_URL}/logout?${instanceQuery.toString()}`, method: "POST" },
-        { url: `${SERVER_URL}/instance/${config.zapi_instance_id}/logout`, method: "POST" },
+        { url: `${SERVER_URL}/instance/disconnect?${baseQuery.toString()}`, method: "POST" },
+        { url: `${SERVER_URL}/instance/disconnect?${baseQuery.toString()}`, method: "GET" },
+        { url: `${SERVER_URL}/instance/logout?${baseQuery.toString()}`, method: "POST" },
+        { url: `${SERVER_URL}/instance/logout?${baseQuery.toString()}`, method: "GET" },
+        { url: `${SERVER_URL}/disconnect?${baseQuery.toString()}`, method: "GET" },
       ];
 
-      const failures: Array<{ url: string; status: number; payload: any }> = [];
+      const failures: Array<{ url: string; method: string; status: number; payload: any }> = [];
 
       for (const { url, method } of candidates) {
         try {
           const res = await fetch(url, { method, headers });
           const payload = await readResponsePayload(res);
-          console.log(`Disconnect attempt ${url} => ${res.status}:`, JSON.stringify(payload));
+          console.log(`Disconnect attempt ${method} ${url} => ${res.status}:`, JSON.stringify(payload));
           if (res.ok) {
             return new Response(
               JSON.stringify({ disconnected: true, details: payload }),
               { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
             );
           }
-          failures.push({ url, status: res.status, payload });
+          failures.push({ url, method, status: res.status, payload });
         } catch (err) {
-          console.error(`Disconnect fetch error for ${url}:`, err);
+          console.error(`Disconnect fetch error for ${method} ${url}:`, err);
         }
       }
 
