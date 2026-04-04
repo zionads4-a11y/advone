@@ -577,7 +577,7 @@ serve(async (req) => {
               const sendResponse = await fetch(sendUrl, {
                 method: "POST",
                 headers: sendHeaders,
-                body: JSON.stringify({ chatId: `${cleanPhone}@c.us`, body: aiReply }),
+                body: JSON.stringify({ number: cleanPhone, text: aiReply }),
               });
 
               if (sendResponse.ok) {
