@@ -65,19 +65,14 @@ async function fetchUaZapiStatus(config: { zapi_instance_id: string; zapi_token?
 }
 
 async function fetchUaZapiQrCode(config: { zapi_instance_id: string; zapi_token?: string | null }) {
-  const headers = buildUaZapiHeaders(config);
-  const query = new URLSearchParams({ instance: config.zapi_instance_id });
-
-  if (config.zapi_token) {
-    query.set("token", config.zapi_token);
-  }
+  const headers = buildUaZapiHeaders();
+  const query = buildQueryParams(config).toString();
 
   const candidates = [
-    `${SERVER_URL}/qr?${query.toString()}`,
-    `${SERVER_URL}/instance/qr?${query.toString()}`,
-    `${SERVER_URL}/connect?${query.toString()}`,
-    `${SERVER_URL}/instance/connect?${query.toString()}`,
-    `${SERVER_URL}/instance/${config.zapi_instance_id}/connect`,
+    `${SERVER_URL}/qr?${query}`,
+    `${SERVER_URL}/instance/qr?${query}`,
+    `${SERVER_URL}/connect?${query}`,
+    `${SERVER_URL}/instance/connect?${query}`,
   ];
 
   const failures: Array<{ url: string; status: number; payload: any }> = [];
@@ -87,14 +82,8 @@ async function fetchUaZapiQrCode(config: { zapi_instance_id: string; zapi_token?
     const payload = await readResponsePayload(response);
     const qrcode = extractQrCode(payload);
 
-    if (response.ok && qrcode) {
-      return { ok: true, payload, qrcode };
-    }
-
-    if (response.ok && isInstanceConnected(payload)) {
-      return { ok: true, payload, connected: true };
-    }
-
+    if (response.ok && qrcode) return { ok: true, payload, qrcode };
+    if (response.ok && isInstanceConnected(payload)) return { ok: true, payload, connected: true };
     failures.push({ url, status: response.status, payload });
   }
 
