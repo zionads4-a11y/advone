@@ -66,7 +66,6 @@ export function WhatsAppConfigDialog({
 
   // WhatsApp form
   const [formInstanceId, setFormInstanceId] = useState("");
-  const [formToken, setFormToken] = useState("");
 
   // QR Code state
   const [qrCode, setQrCode] = useState<string | null>(null);
