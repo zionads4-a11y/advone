@@ -193,6 +193,7 @@ export type Database = {
       }
       companies: {
         Row: {
+          business_hours: Json | null
           created_at: string
           created_by: string
           id: string
@@ -203,6 +204,7 @@ export type Database = {
           whatsapp: string | null
         }
         Insert: {
+          business_hours?: Json | null
           created_at?: string
           created_by: string
           id?: string
@@ -213,6 +215,7 @@ export type Database = {
           whatsapp?: string | null
         }
         Update: {
+          business_hours?: Json | null
           created_at?: string
           created_by?: string
           id?: string
