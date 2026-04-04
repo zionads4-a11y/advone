@@ -611,27 +611,42 @@ serve(async (req) => {
               const instanceParam = encodeURIComponent(config.zapi_instance_id);
               const tokenParam = encodeURIComponent(config.zapi_token || config.zapi_instance_id);
               const sendUrl = `${SERVER_URL}/send/text?instance=${instanceParam}&token=${tokenParam}`;
-              console.log("Sending AI reply to:", cleanPhone, "via:", sendUrl);
-              const sendResponse = await fetch(sendUrl, {
-                method: "POST",
-                headers: sendHeaders,
-                body: JSON.stringify({ number: cleanPhone, text: aiReply }),
-              });
 
-              if (sendResponse.ok) {
-                const sendResult = await sendResponse.json();
-                await supabase.from("whatsapp_messages").insert({
-                  company_id: companyId,
-                  lead_id: leadId,
-                  phone: cleanPhone,
-                  message_text: aiReply,
-                  direction: "outgoing",
-                  sender_name: "IA",
-                  message_id_external: sendResult.messageId || sendResult.key?.id || null,
-                  timestamp: new Date().toISOString(),
+              // Split AI reply into multiple natural messages
+              const splitMessages = splitIntoNaturalMessages(aiReply);
+              console.log(`Sending ${splitMessages.length} message(s) to:`, cleanPhone);
+
+              for (let i = 0; i < splitMessages.length; i++) {
+                const chunk = splitMessages[i].trim();
+                if (!chunk) continue;
+
+                // Simulate typing delay (1-3s based on message length)
+                if (i > 0) {
+                  const delayMs = Math.min(1000 + chunk.length * 30, 3500);
+                  await new Promise((r) => setTimeout(r, delayMs));
+                }
+
+                const sendResponse = await fetch(sendUrl, {
+                  method: "POST",
+                  headers: sendHeaders,
+                  body: JSON.stringify({ number: cleanPhone, text: chunk }),
                 });
-              } else {
-                console.error("Failed to send AI reply:", sendResponse.status, await sendResponse.text());
+
+                if (sendResponse.ok) {
+                  const sendResult = await sendResponse.json();
+                  await supabase.from("whatsapp_messages").insert({
+                    company_id: companyId,
+                    lead_id: leadId,
+                    phone: cleanPhone,
+                    message_text: chunk,
+                    direction: "outgoing",
+                    sender_name: "IA",
+                    message_id_external: sendResult.messageId || sendResult.key?.id || null,
+                    timestamp: new Date().toISOString(),
+                  });
+                } else {
+                  console.error("Failed to send AI reply chunk:", sendResponse.status, await sendResponse.text());
+                }
               }
             }
           }
