@@ -152,9 +152,12 @@ serve(async (req) => {
     const SERVER_URL = "https://ziondigital.uazapi.com";
     const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
 
+    const instanceParam = encodeURIComponent(config.zapi_instance_id);
+    const tokenParam = encodeURIComponent(config.zapi_token || config.zapi_instance_id);
+    const baseQueryString = `instance=${instanceParam}&token=${tokenParam}`;
+
     const buildHeaders = () => {
       const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (config.zapi_token) headers["token"] = config.zapi_token;
       if (ADMIN_TOKEN) headers["admintoken"] = ADMIN_TOKEN;
       return headers;
     };
