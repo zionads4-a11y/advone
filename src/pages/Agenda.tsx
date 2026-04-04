@@ -88,7 +88,7 @@ export default function Agenda() {
       setLoading(false);
     };
     if (!companiesLoading) fetchReminders();
-  }, [user, selectedCompany, isClient, companyIds, companiesLoading]);
+  }, [user, selectedCompany, isClient, companyIds, companiesLoading, refreshKey]);
 
   // Days with events for calendar styling
   const eventDays = useMemo(() => {
