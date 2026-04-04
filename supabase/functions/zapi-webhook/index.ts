@@ -398,26 +398,61 @@ serve(async (req) => {
     }
 
     const body = await req.json();
-    console.log("Z-API webhook payload:", JSON.stringify(body));
+    console.log("Z-API webhook payload:", JSON.stringify(body).substring(0, 500));
 
-    if (!body || !body.type) {
+    if (!body) {
       return new Response(JSON.stringify({ ok: true }), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    if (body.type === "ReceivedCallback") {
-      const phone = body.phone || "";
-      const senderName = body.senderName || body.chatName || "";
-      const messageText = body.text?.message || body.image?.caption || body.video?.caption || "[mídia]";
-      const messageIdExternal = body.messageId || "";
-      const isGroup = body.isGroup || false;
+    // Detect message type: UaZapi sends EventType="messages" with message object
+    // Legacy format used body.type === "ReceivedCallback"
+    const isUaZapiMessage = body.EventType === "messages" && body.message && !body.message.fromMe;
+    const isLegacyMessage = body.type === "ReceivedCallback";
 
-      if (isGroup || !phone) {
-        return new Response(JSON.stringify({ ok: true, skipped: isGroup ? "group_message" : "no_phone" }), {
+    // Skip non-message events (read receipts, status updates, sent messages, etc.)
+    if (!isUaZapiMessage && !isLegacyMessage) {
+      // Handle status/read receipt events silently
+      if (body.type === "ReadReceipt" || body.type === "SentCallback" || body.type === "MessageStatusCallback" || body.EventType === "messages_update") {
+        return new Response(JSON.stringify({ ok: true, type: body.type || body.EventType }), {
           status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+      return new Response(JSON.stringify({ ok: true }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Extract fields from UaZapi or legacy format
+    let phone: string;
+    let senderName: string;
+    let messageText: string;
+    let messageIdExternal: string;
+    let isGroup: boolean;
+
+    if (isUaZapiMessage) {
+      // UaZapi format: message.sender_pn = "553184796456@s.whatsapp.net"
+      const msg = body.message;
+      phone = msg.sender_pn || msg.chatid || "";
+      senderName = msg.senderName || body.chat?.name || body.chat?.wa_contactName || "";
+      messageText = msg.text || msg.content || msg.caption || "[mídia]";
+      messageIdExternal = msg.messageid || msg.id || "";
+      isGroup = msg.isGroup || false;
+    } else {
+      // Legacy ReceivedCallback format
+      phone = body.phone || "";
+      senderName = body.senderName || body.chatName || "";
+      messageText = body.text?.message || body.image?.caption || body.video?.caption || "[mídia]";
+      messageIdExternal = body.messageId || "";
+      isGroup = body.isGroup || false;
+    }
+
+    if (isGroup || !phone) {
+      return new Response(JSON.stringify({ ok: true, skipped: isGroup ? "group_message" : "no_phone" }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
       const cleanPhone = phone.replace("@c.us", "").replace("@s.whatsapp.net", "");
 
