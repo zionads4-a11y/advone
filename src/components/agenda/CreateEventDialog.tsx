@@ -14,9 +14,10 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Loader2, CalendarPlus } from "lucide-react";
+import { Loader2, CalendarPlus, Repeat } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, addDays, addWeeks, addMonths, addYears } from "date-fns";
+import { RecurrenceSelector, type RecurrenceConfig } from "./RecurrenceSelector";
 
 interface CreateEventDialogProps {
   open: boolean;
@@ -26,6 +27,17 @@ interface CreateEventDialogProps {
   companies: { id: string; name: string }[];
   leads?: { id: string; name: string; company_id: string }[];
   preselectedCompanyId?: string;
+  editEvent?: {
+    id: string;
+    title: string;
+    description: string | null;
+    reminder_type: string;
+    due_at: string;
+    company_id: string;
+    lead_id: string;
+    recurrence_rule: string | null;
+    recurrence_end: string | null;
+  } | null;
 }
 
 export function CreateEventDialog({
@@ -36,6 +48,7 @@ export function CreateEventDialog({
   companies,
   leads,
   preselectedCompanyId,
+  editEvent,
 }: CreateEventDialogProps) {
   const { user } = useAuth();
   const [saving, setSaving] = useState(false);
@@ -48,21 +61,37 @@ export function CreateEventDialog({
   const [leadId, setLeadId] = useState("none");
   const [availableLeads, setAvailableLeads] = useState<{ id: string; name: string }[]>([]);
   const [loadingLeads, setLoadingLeads] = useState(false);
+  const [recurrence, setRecurrence] = useState<RecurrenceConfig>({ type: "none" });
 
-  // Reset form when dialog opens
   useEffect(() => {
     if (open) {
-      setTitle("");
-      setDescription("");
-      setEventType("reminder");
-      setDueDate(defaultDate ? format(defaultDate, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"));
-      setDueTime("10:00");
-      setCompanyId(preselectedCompanyId || (companies.length === 1 ? companies[0].id : ""));
-      setLeadId("none");
+      if (editEvent) {
+        const cleanTitle = editEvent.title.replace(/^(📅|🔔)\s*/, "");
+        setTitle(cleanTitle);
+        setDescription(editEvent.description || "");
+        setEventType(editEvent.reminder_type === "meeting" ? "meeting" : "reminder");
+        setDueDate(format(new Date(editEvent.due_at), "yyyy-MM-dd"));
+        setDueTime(format(new Date(editEvent.due_at), "HH:mm"));
+        setCompanyId(editEvent.company_id);
+        setLeadId(editEvent.lead_id || "none");
+        if (editEvent.recurrence_rule) {
+          setRecurrence(parseRecurrenceRule(editEvent.recurrence_rule, editEvent.recurrence_end));
+        } else {
+          setRecurrence({ type: "none" });
+        }
+      } else {
+        setTitle("");
+        setDescription("");
+        setEventType("reminder");
+        setDueDate(defaultDate ? format(defaultDate, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"));
+        setDueTime("10:00");
+        setCompanyId(preselectedCompanyId || (companies.length === 1 ? companies[0].id : ""));
+        setLeadId("none");
+        setRecurrence({ type: "none" });
+      }
     }
-  }, [open, defaultDate, companies, preselectedCompanyId]);
+  }, [open, defaultDate, companies, preselectedCompanyId, editEvent]);
 
-  // Fetch leads when company changes
   useEffect(() => {
     if (!companyId || leads) return;
     const fetchLeads = async () => {
@@ -84,58 +113,32 @@ export function CreateEventDialog({
     : availableLeads;
 
   const handleSave = async () => {
-    if (!title.trim()) {
-      toast.error("Título é obrigatório");
-      return;
-    }
-    if (!companyId) {
-      toast.error("Selecione uma empresa");
-      return;
-    }
-    if (!dueDate) {
-      toast.error("Selecione uma data");
-      return;
-    }
+    if (!title.trim()) { toast.error("Título é obrigatório"); return; }
+    if (!companyId) { toast.error("Selecione uma empresa"); return; }
+    if (!dueDate) { toast.error("Selecione uma data"); return; }
 
     setSaving(true);
     const dueAt = `${dueDate}T${dueTime}:00`;
 
-    // If no lead selected, we need a lead_id. Create a placeholder or use the first lead.
     let finalLeadId = leadId !== "none" ? leadId : null;
-
     if (!finalLeadId) {
-      // Get or create a generic lead for this company
       const { data: existingLead } = await supabase
-        .from("leads")
-        .select("id")
-        .eq("company_id", companyId)
-        .eq("name", "Agenda Geral")
-        .maybeSingle();
-
+        .from("leads").select("id").eq("company_id", companyId).eq("name", "Agenda Geral").maybeSingle();
       if (existingLead) {
         finalLeadId = existingLead.id;
       } else {
         const { data: newLead, error: leadError } = await supabase
-          .from("leads")
-          .insert({
-            company_id: companyId,
-            name: "Agenda Geral",
-            status: "new",
-            phone: "",
-          })
-          .select("id")
-          .single();
-
-        if (leadError) {
-          toast.error("Erro ao criar evento: " + leadError.message);
-          setSaving(false);
-          return;
-        }
+          .from("leads").insert({ company_id: companyId, name: "Agenda Geral", status: "new", phone: "" }).select("id").single();
+        if (leadError) { toast.error("Erro ao criar evento: " + leadError.message); setSaving(false); return; }
         finalLeadId = newLead.id;
       }
     }
 
-    const { error } = await supabase.from("lead_reminders").insert({
+    const recurrenceRule = buildRecurrenceRule(recurrence);
+    const recurrenceEnd = recurrence.type !== "none" && recurrence.endDate
+      ? `${recurrence.endDate}T23:59:59` : null;
+
+    const eventData = {
       lead_id: finalLeadId,
       company_id: companyId,
       created_by: user?.id || "00000000-0000-0000-0000-000000000000",
@@ -143,50 +146,58 @@ export function CreateEventDialog({
       description: description || null,
       reminder_type: eventType,
       due_at: dueAt,
-    });
+      recurrence_rule: recurrenceRule,
+      recurrence_end: recurrenceEnd,
+    };
 
-    if (error) {
-      toast.error("Erro ao criar: " + error.message);
+    if (editEvent) {
+      const { error } = await supabase.from("lead_reminders").update(eventData).eq("id", editEvent.id);
+      if (error) { toast.error("Erro ao atualizar: " + error.message); }
+      else { toast.success("Evento atualizado!"); onCreated(); onOpenChange(false); }
     } else {
-      toast.success(eventType === "meeting" ? "Reunião criada!" : "Tarefa criada!");
-      onCreated();
-      onOpenChange(false);
+      // Create the main event
+      const { data: mainEvent, error } = await supabase
+        .from("lead_reminders").insert(eventData).select("id").single();
+
+      if (error) {
+        toast.error("Erro ao criar: " + error.message);
+      } else if (recurrence.type !== "none") {
+        // Generate recurring instances
+        await generateRecurringInstances(mainEvent.id, eventData, recurrence);
+        toast.success("Evento recorrente criado!");
+        onCreated();
+        onOpenChange(false);
+      } else {
+        toast.success(eventType === "meeting" ? "Reunião criada!" : "Tarefa criada!");
+        onCreated();
+        onOpenChange(false);
+      }
     }
     setSaving(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CalendarPlus className="h-5 w-5 text-primary" />
-            Novo Evento
+            {editEvent ? "Editar Evento" : "Novo Evento"}
           </DialogTitle>
           <DialogDescription>
-            Crie uma tarefa ou agende uma reunião
+            {editEvent ? "Edite as informações do evento" : "Crie uma tarefa ou agende uma reunião"}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 pt-2">
           {/* Event Type */}
           <div className="grid grid-cols-2 gap-2">
-            <Button
-              type="button"
-              variant={eventType === "reminder" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setEventType("reminder")}
-              className="gap-2"
-            >
+            <Button type="button" variant={eventType === "reminder" ? "default" : "outline"} size="sm"
+              onClick={() => setEventType("reminder")} className="gap-2">
               🔔 Tarefa
             </Button>
-            <Button
-              type="button"
-              variant={eventType === "meeting" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setEventType("meeting")}
-              className="gap-2"
-            >
+            <Button type="button" variant={eventType === "meeting" ? "default" : "outline"} size="sm"
+              onClick={() => setEventType("meeting")} className="gap-2">
               📅 Reunião
             </Button>
           </div>
@@ -194,40 +205,30 @@ export function CreateEventDialog({
           {/* Title */}
           <div className="space-y-1.5">
             <Label>Título *</Label>
-            <Input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder={eventType === "meeting" ? "Reunião com cliente" : "Ligar para lead"}
-            />
+            <Input value={title} onChange={(e) => setTitle(e.target.value)}
+              placeholder={eventType === "meeting" ? "Reunião com cliente" : "Ligar para lead"} />
           </div>
 
           {/* Date & Time */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>Data *</Label>
-              <Input
-                type="date"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-              />
+              <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
             </div>
             <div className="space-y-1.5">
               <Label>Horário</Label>
-              <Input
-                type="time"
-                value={dueTime}
-                onChange={(e) => setDueTime(e.target.value)}
-              />
+              <Input type="time" value={dueTime} onChange={(e) => setDueTime(e.target.value)} />
             </div>
           </div>
+
+          {/* Recurrence */}
+          <RecurrenceSelector value={recurrence} onChange={setRecurrence} />
 
           {/* Company */}
           <div className="space-y-1.5">
             <Label>Empresa *</Label>
             <Select value={companyId} onValueChange={(v) => { setCompanyId(v); setLeadId("none"); }}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione a empresa" />
-              </SelectTrigger>
+              <SelectTrigger><SelectValue placeholder="Selecione a empresa" /></SelectTrigger>
               <SelectContent>
                 {companies.map((c) => (
                   <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
@@ -236,14 +237,12 @@ export function CreateEventDialog({
             </Select>
           </div>
 
-          {/* Lead (optional) */}
+          {/* Lead */}
           {companyId && (
             <div className="space-y-1.5">
               <Label>Lead (opcional)</Label>
               <Select value={leadId} onValueChange={setLeadId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sem lead específico" />
-                </SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="Sem lead específico" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">Sem lead específico</SelectItem>
                   {loadingLeads ? (
@@ -261,12 +260,8 @@ export function CreateEventDialog({
           {/* Description */}
           <div className="space-y-1.5">
             <Label>Descrição</Label>
-            <Textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Detalhes do evento..."
-              rows={3}
-            />
+            <Textarea value={description} onChange={(e) => setDescription(e.target.value)}
+              placeholder="Detalhes do evento..." rows={3} />
           </div>
         </div>
 
@@ -274,10 +269,93 @@ export function CreateEventDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
           <Button onClick={handleSave} disabled={saving} className="gap-2">
             {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-            Criar
+            {editEvent ? "Salvar" : "Criar"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
+}
+
+function buildRecurrenceRule(config: RecurrenceConfig): string | null {
+  if (config.type === "none") return null;
+  if (config.type === "custom" && config.customInterval && config.customUnit) {
+    return `custom:${config.customInterval}:${config.customUnit}`;
+  }
+  return config.type;
+}
+
+function parseRecurrenceRule(rule: string, endDate: string | null): RecurrenceConfig {
+  if (rule.startsWith("custom:")) {
+    const parts = rule.split(":");
+    return {
+      type: "custom",
+      customInterval: parseInt(parts[1]) || 1,
+      customUnit: (parts[2] as "days" | "weeks" | "months") || "days",
+      endDate: endDate ? format(new Date(endDate), "yyyy-MM-dd") : undefined,
+    };
+  }
+  return {
+    type: rule as RecurrenceConfig["type"],
+    endDate: endDate ? format(new Date(endDate), "yyyy-MM-dd") : undefined,
+  };
+}
+
+async function generateRecurringInstances(
+  parentId: string,
+  baseData: any,
+  config: RecurrenceConfig
+) {
+  const instances: any[] = [];
+  const startDate = new Date(baseData.due_at);
+  const maxInstances = 52; // max 1 year of weekly or 52 instances
+  const endLimit = config.endDate
+    ? new Date(`${config.endDate}T23:59:59`)
+    : addMonths(startDate, 3); // default 3 months
+
+  let currentDate = startDate;
+
+  for (let i = 0; i < maxInstances; i++) {
+    currentDate = getNextDate(currentDate, config);
+    if (currentDate > endLimit) break;
+
+    instances.push({
+      ...baseData,
+      due_at: currentDate.toISOString(),
+      parent_event_id: parentId,
+    });
+  }
+
+  if (instances.length > 0) {
+    // Insert in batches of 20
+    for (let i = 0; i < instances.length; i += 20) {
+      const batch = instances.slice(i, i + 20);
+      await supabase.from("lead_reminders").insert(batch);
+    }
+  }
+}
+
+function getNextDate(current: Date, config: RecurrenceConfig): Date {
+  switch (config.type) {
+    case "daily": return addDays(current, 1);
+    case "weekly": return addWeeks(current, 1);
+    case "biweekly": return addWeeks(current, 2);
+    case "monthly": return addMonths(current, 1);
+    case "yearly": return addYears(current, 1);
+    case "weekdays": {
+      let next = addDays(current, 1);
+      while (next.getDay() === 0 || next.getDay() === 6) {
+        next = addDays(next, 1);
+      }
+      return next;
+    }
+    case "custom": {
+      const interval = config.customInterval || 1;
+      const unit = config.customUnit || "days";
+      if (unit === "days") return addDays(current, interval);
+      if (unit === "weeks") return addWeeks(current, interval);
+      return addMonths(current, interval);
+    }
+    default: return addDays(current, 1);
+  }
 }
