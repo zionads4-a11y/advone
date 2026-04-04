@@ -7,6 +7,112 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const SERVER_URL = "https://ziondigital.uazapi.com";
+
+function buildUaZapiHeaders(config: { zapi_token?: string | null }) {
+  const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+
+  return {
+    "Content-Type": "application/json",
+    ...(ADMIN_TOKEN ? { "AdminToken": ADMIN_TOKEN } : {}),
+    ...(config.zapi_token ? { "token": config.zapi_token } : {}),
+  };
+}
+
+function buildUaZapiStatusUrl(config: { zapi_instance_id: string; zapi_token?: string | null }) {
+  const params = new URLSearchParams({
+    instance: config.zapi_instance_id,
+  });
+
+  if (config.zapi_token) {
+    params.set("token", config.zapi_token);
+  }
+
+  return `${SERVER_URL}/status?${params.toString()}`;
+}
+
+async function readResponsePayload(response: Response) {
+  const text = await response.text();
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { raw: text };
+  }
+}
+
+function isInstanceConnected(payload: any) {
+  return payload?.connected === true
+    || payload?.status === "open"
+    || payload?.instance?.status === "open"
+    || payload?.status?.checked_instance?.connection_status === "connected"
+    || payload?.status?.checked_instance?.status === "open";
+}
+
+function extractQrCode(payload: any) {
+  return payload?.qrcode
+    || payload?.qr
+    || payload?.base64
+    || payload?.value
+    || payload?.data?.qrcode
+    || payload?.instance?.qrcode
+    || payload?.status?.qrcode
+    || payload?.status?.checked_instance?.qrcode
+    || null;
+}
+
+async function fetchUaZapiStatus(config: { zapi_instance_id: string; zapi_token?: string | null }) {
+  const response = await fetch(buildUaZapiStatusUrl(config), {
+    method: "GET",
+    headers: buildUaZapiHeaders(config),
+  });
+
+  const payload = await readResponsePayload(response);
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    payload,
+  };
+}
+
+async function fetchUaZapiQrCode(config: { zapi_instance_id: string; zapi_token?: string | null }) {
+  const headers = buildUaZapiHeaders(config);
+  const query = new URLSearchParams({ instance: config.zapi_instance_id });
+
+  if (config.zapi_token) {
+    query.set("token", config.zapi_token);
+  }
+
+  const candidates = [
+    `${SERVER_URL}/qr?${query.toString()}`,
+    `${SERVER_URL}/instance/qr?${query.toString()}`,
+    `${SERVER_URL}/connect?${query.toString()}`,
+    `${SERVER_URL}/instance/connect?${query.toString()}`,
+    `${SERVER_URL}/instance/${config.zapi_instance_id}/connect`,
+  ];
+
+  const failures: Array<{ url: string; status: number; payload: any }> = [];
+
+  for (const url of candidates) {
+    const response = await fetch(url, { method: "GET", headers });
+    const payload = await readResponsePayload(response);
+    const qrcode = extractQrCode(payload);
+
+    if (response.ok && qrcode) {
+      return { ok: true, payload, qrcode };
+    }
+
+    if (response.ok && isInstanceConnected(payload)) {
+      return { ok: true, payload, connected: true };
+    }
+
+    failures.push({ url, status: response.status, payload });
+  }
+
+  return { ok: false, failures };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -53,33 +159,34 @@ serve(async (req) => {
         );
       }
 
-      // Fetch QR code from UaZapi
-      const SERVER_URL = "https://ziondigital.uazapi.com";
-      const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
-      const qrResponse = await fetch(`${SERVER_URL}/instance/${config.zapi_instance_id}/connect`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          ...(ADMIN_TOKEN ? { "AdminToken": ADMIN_TOKEN } : {}),
-          ...(config.zapi_token ? { "token": config.zapi_token } : {}),
-        },
-      });
-
-      if (!qrResponse.ok) {
-        const errorText = await qrResponse.text();
-        console.error("UaZapi QR code error:", errorText);
+      const statusResult = await fetchUaZapiStatus(config);
+      if (statusResult.ok && isInstanceConnected(statusResult.payload)) {
         return new Response(
-          JSON.stringify({ error: "Erro ao obter QR Code da UaZapi", details: errorText }),
-          { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          JSON.stringify({
+            connected: true,
+            company_name: tokenData.companies?.name || "Empresa",
+            status: statusResult.payload,
+          }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
-      const qrData = await qrResponse.json();
-      const qrcode = qrData.qrcode || qrData.qr || qrData.base64 || qrData.value || qrData.data?.qrcode || null;
+      const qrResult = await fetchUaZapiQrCode(config);
+      if (!qrResult.ok || !qrResult.qrcode) {
+        console.error("UaZapi public QR code unavailable:", JSON.stringify(qrResult));
+        return new Response(
+          JSON.stringify({
+            error: "Não foi possível obter o QR Code automaticamente para esta instância.",
+            details: statusResult.payload,
+            company_name: tokenData.companies?.name || "Empresa",
+          }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
 
       return new Response(
         JSON.stringify({
-          qrcode: qrcode || qrData,
+          qrcode: qrResult.qrcode,
           company_name: tokenData.companies?.name || "Empresa",
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -170,22 +277,12 @@ serve(async (req) => {
         );
       }
 
-      const SERVER_URL = "https://ziondigital.uazapi.com";
-      const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
-
       try {
-        const statusResponse = await fetch(`${SERVER_URL}/instance/${config.zapi_instance_id}/status`, {
-          method: "GET",
-          headers: {
-            ...(ADMIN_TOKEN ? { "AdminToken": ADMIN_TOKEN } : {}),
-            ...(config.zapi_token ? { "token": config.zapi_token } : {}),
-          },
-        });
-        const statusData = await statusResponse.json();
-        const connected = statusData?.connected === true || statusData?.status === "open" || statusData?.instance?.status === "open";
+        const statusResult = await fetchUaZapiStatus(config);
+        const connected = statusResult.ok && isInstanceConnected(statusResult.payload);
 
         return new Response(
-          JSON.stringify({ connected, status: statusData }),
+          JSON.stringify({ connected, status: statusResult.payload }),
           { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       } catch {
@@ -211,80 +308,36 @@ serve(async (req) => {
         );
       }
 
-      const SERVER_URL = "https://ziondigital.uazapi.com";
-      const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-      };
-      if (ADMIN_TOKEN) headers["AdminToken"] = ADMIN_TOKEN;
-      if (config.zapi_token) headers["token"] = config.zapi_token;
+      const statusResult = await fetchUaZapiStatus(config);
+      console.log("UaZapi status response:", JSON.stringify(statusResult.payload));
 
-      // First check status
-      const statusRes = await fetch(`${SERVER_URL}/instance/${config.zapi_instance_id}/status`, {
-        method: "GET",
-        headers,
-      });
-
-      if (!statusRes.ok) {
-        const errorText = await statusRes.text();
-        console.error("UaZapi status error:", statusRes.status, errorText);
-        return new Response(
-          JSON.stringify({ error: "Erro ao verificar status", details: errorText }),
-          { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-
-      const statusData = await statusRes.json();
-      console.log("UaZapi status response:", JSON.stringify(statusData));
-
-      const isConnected = statusData?.connected === true || statusData?.status === "open";
-      if (isConnected) {
+      if (statusResult.ok && isInstanceConnected(statusResult.payload)) {
         return new Response(
           JSON.stringify({ connected: true }),
           { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
-      // Try to get QR code via connect endpoint
-      const connectRes = await fetch(`${SERVER_URL}/instance/${config.zapi_instance_id}/connect`, {
-        method: "GET",
-        headers,
-      });
-
-      if (!connectRes.ok) {
-        const errorText = await connectRes.text();
-        console.error("UaZapi connect error:", connectRes.status, errorText);
+      const qrResult = await fetchUaZapiQrCode(config);
+      if (!qrResult.ok || !qrResult.qrcode) {
+        console.error("UaZapi QR fetch failed:", JSON.stringify(qrResult));
         return new Response(
-          JSON.stringify({ error: "Erro ao obter QR Code", details: errorText }),
-          { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-
-      const connectData = await connectRes.json();
-      console.log("UaZapi connect response keys:", Object.keys(connectData));
-
-      const qrcode = connectData?.qrcode
-        || connectData?.qr
-        || connectData?.base64
-        || connectData?.data?.qrcode
-        || connectData?.instance?.qrcode
-        || null;
-
-      if (!qrcode) {
-        return new Response(
-          JSON.stringify({ error: "QR Code ainda não disponível. Tente novamente em alguns segundos.", raw: connectData }),
+          JSON.stringify({
+            error: "Instância desconectada, mas o servidor UaZapi não retornou QR Code.",
+            details: statusResult.payload,
+          }),
           { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
       return new Response(
-        JSON.stringify({ qrcode }),
+        JSON.stringify({ qrcode: qrResult.qrcode }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     return new Response(
-      JSON.stringify({ error: "Ação inválida. Use 'get_qrcode' ou 'generate_link'" }),
+      JSON.stringify({ error: "Ação inválida. Use 'get-status', 'get_qrcode' ou 'generate_link'" }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {
