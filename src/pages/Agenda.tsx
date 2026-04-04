@@ -4,11 +4,13 @@ import { useUserCompanies } from "@/hooks/useUserCompanies";
 import { useAuth } from "@/hooks/useAuth";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, CalendarClock, Check, Clock, AlertTriangle } from "lucide-react";
+import { Loader2, CalendarClock, Check, Clock, AlertTriangle, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { format, isSameDay, isAfter, isBefore } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { CreateEventDialog } from "@/components/agenda/CreateEventDialog";
 
 interface Reminder {
   id: string;
