@@ -113,6 +113,79 @@ async function fetchUaZapiQrCode(config: { zapi_instance_id: string; zapi_token?
   return { ok: false, failures };
 }
 
+async function disconnectUaZapiInstance(config: { zapi_instance_id: string; zapi_token?: string | null }) {
+  const adminToken = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+
+  if (!adminToken) {
+    return {
+      ok: false,
+      failures: [{
+        url: `${SERVER_URL}/instance/disconnect?instance=${encodeURIComponent(config.zapi_instance_id)}`,
+        method: "POST",
+        status: 500,
+        payload: { message: "UAZAPI_ADMIN_TOKEN não configurado" },
+      }],
+    };
+  }
+
+  const headers = {
+    "Content-Type": "application/json",
+    "AdminToken": adminToken,
+    "admintoken": adminToken,
+    ...(config.zapi_token ? { "token": config.zapi_token } : {}),
+  };
+
+  const candidates: Array<{ url: string; method: "POST" | "GET"; body?: string }> = [
+    {
+      url: `${SERVER_URL}/instance/disconnect?instance=${encodeURIComponent(config.zapi_instance_id)}`,
+      method: "POST",
+    },
+    {
+      url: `${SERVER_URL}/instance/disconnect`,
+      method: "POST",
+      body: JSON.stringify({ instance: config.zapi_instance_id }),
+    },
+    {
+      url: `${SERVER_URL}/instance/${encodeURIComponent(config.zapi_instance_id)}/disconnect`,
+      method: "POST",
+    },
+    {
+      url: `${SERVER_URL}/instance/logout?instance=${encodeURIComponent(config.zapi_instance_id)}`,
+      method: "POST",
+    },
+  ];
+
+  const failures: Array<{ url: string; method: string; status: number; payload: any }> = [];
+
+  for (const { url, method, body } of candidates) {
+    try {
+      const res = await fetch(url, {
+        method,
+        headers,
+        ...(body ? { body } : {}),
+      });
+      const payload = await readResponsePayload(res);
+      console.log(`Disconnect attempt ${method} ${url} => ${res.status}:`, JSON.stringify(payload));
+
+      if (res.ok) {
+        return { ok: true, payload, failures: [] };
+      }
+
+      failures.push({ url, method, status: res.status, payload });
+    } catch (err) {
+      console.error(`Disconnect fetch error for ${method} ${url}:`, err);
+      failures.push({
+        url,
+        method,
+        status: 0,
+        payload: { message: err instanceof Error ? err.message : "Erro desconhecido" },
+      });
+    }
+  }
+
+  return { ok: false, failures };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -351,47 +424,31 @@ serve(async (req) => {
         );
       }
 
-      const adminToken = Deno.env.get("UAZAPI_ADMIN_TOKEN");
-      const headers = {
-        ...buildUaZapiHeaders(config),
-        ...(adminToken ? { admintoken: adminToken } : {}),
-      };
+      const disconnectResult = await disconnectUaZapiInstance(config);
 
-      const baseQuery = new URLSearchParams({ instance: config.zapi_instance_id });
-      if (config.zapi_token) baseQuery.set("token", config.zapi_token);
-      if (adminToken) baseQuery.set("admintoken", adminToken);
-
-      const candidates = [
-        { url: `${SERVER_URL}/instance/disconnect?${baseQuery.toString()}`, method: "POST" },
-        { url: `${SERVER_URL}/instance/disconnect?${baseQuery.toString()}`, method: "GET" },
-        { url: `${SERVER_URL}/instance/logout?${baseQuery.toString()}`, method: "POST" },
-        { url: `${SERVER_URL}/instance/logout?${baseQuery.toString()}`, method: "GET" },
-        { url: `${SERVER_URL}/disconnect?${baseQuery.toString()}`, method: "GET" },
-      ];
-
-      const failures: Array<{ url: string; method: string; status: number; payload: any }> = [];
-
-      for (const { url, method } of candidates) {
-        try {
-          const res = await fetch(url, { method, headers });
-          const payload = await readResponsePayload(res);
-          console.log(`Disconnect attempt ${method} ${url} => ${res.status}:`, JSON.stringify(payload));
-          if (res.ok) {
-            return new Response(
-              JSON.stringify({ disconnected: true, details: payload }),
-              { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-            );
-          }
-          failures.push({ url, method, status: res.status, payload });
-        } catch (err) {
-          console.error(`Disconnect fetch error for ${method} ${url}:`, err);
-        }
+      if (disconnectResult.ok) {
+        return new Response(
+          JSON.stringify({ disconnected: true, details: disconnectResult.payload }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
 
-      console.error("All disconnect attempts failed:", JSON.stringify(failures));
+      console.error("All disconnect attempts failed:", JSON.stringify(disconnectResult.failures));
+
+      const invalidAdminToken = disconnectResult.failures.some((attempt) => {
+        const message = String(attempt.payload?.message ?? "").toLowerCase();
+        return attempt.status === 401 && message.includes("invalid token");
+      });
+
       return new Response(
-        JSON.stringify({ disconnected: false, error: "Não foi possível desconectar a instância", attempts: failures }),
-        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({
+          disconnected: false,
+          error: invalidAdminToken
+            ? "Admin Token da UaZapi inválido ou rejeitado pelo endpoint de desconexão"
+            : "Não foi possível desconectar a instância",
+          attempts: disconnectResult.failures,
+        }),
+        { status: invalidAdminToken ? 400 : 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
