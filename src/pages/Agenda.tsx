@@ -289,6 +289,16 @@ export default function Agenda() {
           )}
         </div>
       </div>
+
+      {/* Create Event Dialog */}
+      <CreateEventDialog
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+        onCreated={() => setRefreshKey((k) => k + 1)}
+        defaultDate={selectedDate}
+        companies={companies}
+        preselectedCompanyId={selectedCompany !== "all" ? selectedCompany : undefined}
+      />
     </div>
   );
 }
