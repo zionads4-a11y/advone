@@ -13,11 +13,14 @@ function buildUaZapiHeaders() {
   return { "Content-Type": "application/json" };
 }
 
-function buildQueryParams(config: { zapi_instance_id: string; zapi_token?: string | null }) {
+function buildQueryParams(
+  config: { zapi_instance_id: string; zapi_token?: string | null },
+  options?: { includeInstanceToken?: boolean },
+) {
   const adminToken = Deno.env.get("UAZAPI_ADMIN_TOKEN");
   const params = new URLSearchParams({ instance: config.zapi_instance_id });
   if (adminToken) params.set("admintoken", adminToken);
-  if (config.zapi_token) params.set("token", config.zapi_token);
+  if ((options?.includeInstanceToken ?? true) && config.zapi_token) params.set("token", config.zapi_token);
   return params;
 }
 
@@ -97,13 +100,15 @@ async function disconnectUaZapiInstance(config: { zapi_instance_id: string; zapi
   }
 
   const headers = buildUaZapiHeaders();
-  const query = buildQueryParams(config).toString();
+  const adminOnlyQuery = buildQueryParams(config, { includeInstanceToken: false }).toString();
+  const fullQuery = buildQueryParams(config, { includeInstanceToken: true }).toString();
 
   const candidates: Array<{ url: string; method: "POST" | "DELETE" }> = [
-    { url: `${SERVER_URL}/instance/disconnect?${query}`, method: "POST" },
-    { url: `${SERVER_URL}/instance/disconnect?${query}`, method: "DELETE" },
-    { url: `${SERVER_URL}/instance/logout?${query}`, method: "DELETE" },
-    { url: `${SERVER_URL}/instance/logout?${query}`, method: "POST" },
+    { url: `${SERVER_URL}/instance/disconnect?${adminOnlyQuery}`, method: "POST" },
+    { url: `${SERVER_URL}/instance/disconnect?${fullQuery}`, method: "POST" },
+    { url: `${SERVER_URL}/instance/disconnect?${adminOnlyQuery}`, method: "DELETE" },
+    { url: `${SERVER_URL}/instance/logout?${adminOnlyQuery}`, method: "POST" },
+    { url: `${SERVER_URL}/instance/logout?${fullQuery}`, method: "POST" },
   ];
 
   const failures: Array<{ url: string; method: string; status: number; payload: any }> = [];
