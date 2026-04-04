@@ -211,10 +211,13 @@ async function configureWebhook(
   const webhookUrl = `${supabaseUrl}/functions/v1/zapi-webhook?company_id=${companyId}`;
   const params = buildQueryParams(config).toString();
 
-  // Try multiple endpoints for setting webhook
+  // Try multiple endpoints and methods (PUT is the correct method for UaZapi)
   const candidates = [
-    { url: `${SERVER_URL}/webhook/set?${params}`, method: "POST" as const },
+    { url: `${SERVER_URL}/instance/webhook?${params}`, method: "PUT" as const },
+    { url: `${SERVER_URL}/webhook/set?${params}`, method: "PUT" as const },
+    { url: `${SERVER_URL}/setWebhook?${params}`, method: "PUT" as const },
     { url: `${SERVER_URL}/instance/webhook?${params}`, method: "POST" as const },
+    { url: `${SERVER_URL}/webhook/set?${params}`, method: "POST" as const },
     { url: `${SERVER_URL}/setWebhook?${params}`, method: "POST" as const },
   ];
 
