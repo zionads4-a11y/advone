@@ -378,7 +378,7 @@ serve(async (req) => {
             code: "INSTANCE_TOKEN_MISSING",
             error: "O Token da Instância não foi preenchido. Salve o token real da instância UaZapi antes de desconectar.",
           }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
@@ -389,7 +389,7 @@ serve(async (req) => {
             code: "INSTANCE_TOKEN_MISCONFIGURED",
             error: "O campo 'Token da Instância' está com o Admin Token da UaZapi. Substitua esse valor pelo token real da instância para conseguir desconectar.",
           }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
