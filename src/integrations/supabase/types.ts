@@ -276,6 +276,9 @@ export type Database = {
           due_at: string
           id: string
           lead_id: string
+          parent_event_id: string | null
+          recurrence_end: string | null
+          recurrence_rule: string | null
           reminder_type: string
           title: string
           updated_at: string
@@ -290,6 +293,9 @@ export type Database = {
           due_at: string
           id?: string
           lead_id: string
+          parent_event_id?: string | null
+          recurrence_end?: string | null
+          recurrence_rule?: string | null
           reminder_type?: string
           title: string
           updated_at?: string
@@ -304,6 +310,9 @@ export type Database = {
           due_at?: string
           id?: string
           lead_id?: string
+          parent_event_id?: string | null
+          recurrence_end?: string | null
+          recurrence_rule?: string | null
           reminder_type?: string
           title?: string
           updated_at?: string
@@ -321,6 +330,13 @@ export type Database = {
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_reminders_parent_event_id_fkey"
+            columns: ["parent_event_id"]
+            isOneToOne: false
+            referencedRelation: "lead_reminders"
             referencedColumns: ["id"]
           },
         ]
