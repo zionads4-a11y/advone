@@ -6,11 +6,14 @@ import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, CalendarClock, Check, Clock, AlertTriangle, Plus, Repeat, Pencil, Trash2 } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Loader2, CalendarClock, Check, Clock, AlertTriangle, Plus, Repeat, Pencil, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
-import { format, isSameDay, isAfter, isBefore } from "date-fns";
+import { format, isSameDay, isAfter, isBefore, addDays, addWeeks, addMonths, subDays, subWeeks, subMonths, startOfWeek, endOfWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CreateEventDialog } from "@/components/agenda/CreateEventDialog";
+import { WeeklyView } from "@/components/agenda/WeeklyView";
+import { DailyView } from "@/components/agenda/DailyView";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,13 +49,14 @@ export default function Agenda() {
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>("all");
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [loading, setLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editEvent, setEditEvent] = useState<any>(null);
   const [deleteTarget, setDeleteTarget] = useState<Reminder | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [viewMode, setViewMode] = useState<"month" | "week" | "day">("month");
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -167,10 +171,8 @@ export default function Agenda() {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
-    // Delete children too if it's a parent
     const { error } = await supabase.from("lead_reminders").delete().eq("id", deleteTarget.id);
     if (!error && !deleteTarget.parent_event_id) {
-      // Also delete child instances
       await supabase.from("lead_reminders").delete().eq("parent_event_id", deleteTarget.id);
     }
     if (error) {
@@ -180,6 +182,32 @@ export default function Agenda() {
       setRefreshKey((k) => k + 1);
     }
     setDeleteTarget(null);
+  };
+
+  const navigateDate = (direction: "prev" | "next") => {
+    setSelectedDate((prev) => {
+      if (viewMode === "day") return direction === "next" ? addDays(prev, 1) : subDays(prev, 1);
+      if (viewMode === "week") return direction === "next" ? addWeeks(prev, 1) : subWeeks(prev, 1);
+      const newMonth = direction === "next" ? addMonths(currentMonth, 1) : subMonths(currentMonth, 1);
+      setCurrentMonth(newMonth);
+      return prev;
+    });
+  };
+
+  const goToToday = () => {
+    const today = new Date();
+    setSelectedDate(today);
+    setCurrentMonth(today);
+  };
+
+  const getNavigationLabel = () => {
+    if (viewMode === "day") return format(selectedDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+    if (viewMode === "week") {
+      const ws = startOfWeek(selectedDate, { weekStartsOn: 1 });
+      const we = endOfWeek(selectedDate, { weekStartsOn: 1 });
+      return `${format(ws, "dd MMM", { locale: ptBR })} – ${format(we, "dd MMM yyyy", { locale: ptBR })}`;
+    }
+    return format(currentMonth, "MMMM yyyy", { locale: ptBR });
   };
 
   const isAdmin = userRole === "admin" || userRole === "member";
@@ -193,15 +221,16 @@ export default function Agenda() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-display font-bold text-foreground">Agenda</h1>
           <p className="text-sm text-muted-foreground">Lembretes e reuniões agendadas</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 flex-wrap">
           <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-            <SelectTrigger className="w-[220px]">
+            <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filtrar por empresa" />
             </SelectTrigger>
             <SelectContent>
@@ -218,101 +247,120 @@ export default function Agenda() {
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[auto_1fr]">
-        {/* Calendar */}
-        <div className="rounded-xl border border-border bg-card p-4">
-          <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={setSelectedDate}
-            month={currentMonth}
-            onMonthChange={setCurrentMonth}
-            locale={ptBR}
-            modifiers={{
-              hasOverdue: (date) => eventDays.get(format(date, "yyyy-MM-dd"))?.hasOverdue || false,
-              hasPending: (date) => eventDays.get(format(date, "yyyy-MM-dd"))?.hasPending || false,
-              hasCompleted: (date) => eventDays.get(format(date, "yyyy-MM-dd"))?.hasCompleted || false,
-            }}
-            modifiersClassNames={{
-              hasOverdue: "bg-destructive/20 text-destructive font-bold",
-              hasPending: "bg-primary/20 text-primary font-semibold",
-              hasCompleted: "bg-success/20 text-success",
-            }}
-            className="pointer-events-auto"
-          />
-          <div className="mt-3 flex flex-wrap gap-3 text-[10px] text-muted-foreground px-1">
-            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-destructive/40" /> Atrasado</span>
-            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-primary/40" /> Pendente</span>
-            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-success/40" /> Concluído</span>
-          </div>
+      {/* Navigation bar */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={goToToday}>Hoje</Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigateDate("prev")}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigateDate("next")}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+          <span className="text-sm font-semibold text-foreground capitalize ml-1">
+            {getNavigationLabel()}
+          </span>
         </div>
+        <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as any)}>
+          <TabsList>
+            <TabsTrigger value="day">Dia</TabsTrigger>
+            <TabsTrigger value="week">Semana</TabsTrigger>
+            <TabsTrigger value="month">Mês</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
 
-        {/* Details */}
-        <div className="space-y-6">
-          {/* Selected date events */}
-          <div className="rounded-xl border border-border bg-card p-5">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <CalendarClock className="h-4 w-4 text-primary" />
-                {selectedDate ? format(selectedDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : "Selecione uma data"}
-              </h3>
-              <Button variant="ghost" size="sm" className="gap-1 text-xs"
-                onClick={() => { setEditEvent(null); setCreateDialogOpen(true); }}>
-                <Plus className="h-3.5 w-3.5" /> Adicionar
-              </Button>
+      {/* Views */}
+      {viewMode === "month" && (
+        <div className="grid gap-6 lg:grid-cols-[auto_1fr]">
+          <div className="rounded-xl border border-border bg-card p-4">
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={(d) => d && setSelectedDate(d)}
+              month={currentMonth}
+              onMonthChange={setCurrentMonth}
+              locale={ptBR}
+              modifiers={{
+                hasOverdue: (date) => eventDays.get(format(date, "yyyy-MM-dd"))?.hasOverdue || false,
+                hasPending: (date) => eventDays.get(format(date, "yyyy-MM-dd"))?.hasPending || false,
+                hasCompleted: (date) => eventDays.get(format(date, "yyyy-MM-dd"))?.hasCompleted || false,
+              }}
+              modifiersClassNames={{
+                hasOverdue: "bg-destructive/20 text-destructive font-bold",
+                hasPending: "bg-primary/20 text-primary font-semibold",
+                hasCompleted: "bg-success/20 text-success",
+              }}
+              className="pointer-events-auto"
+            />
+            <div className="mt-3 flex flex-wrap gap-3 text-[10px] text-muted-foreground px-1">
+              <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-destructive/40" /> Atrasado</span>
+              <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-primary/40" /> Pendente</span>
+              <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-success/40" /> Concluído</span>
             </div>
-            {selectedDateReminders.length === 0 ? (
-              <div className="flex flex-col items-center py-6 text-muted-foreground">
-                <CalendarClock className="h-8 w-8 mb-2 opacity-30" />
-                <p className="text-xs">Nenhum evento nesta data</p>
-                <Button variant="link" size="sm" className="mt-1 text-xs"
-                  onClick={() => { setEditEvent(null); setCreateDialogOpen(true); }}>
-                  Criar evento
-                </Button>
+          </div>
+
+          <div className="space-y-6">
+            <MonthDayDetail
+              selectedDate={selectedDate}
+              reminders={selectedDateReminders}
+              onToggle={handleToggleComplete}
+              onEdit={handleEdit}
+              onDelete={(r) => setDeleteTarget(r)}
+              onCreateNew={() => { setEditEvent(null); setCreateDialogOpen(true); }}
+            />
+            {overdueReminders.length > 0 && (
+              <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-5">
+                <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  Atrasados ({overdueReminders.length})
+                </h3>
+                <div className="space-y-2">
+                  {overdueReminders.map((r) => (
+                    <ReminderItem key={r.id} reminder={r} onToggle={handleToggleComplete}
+                      onEdit={handleEdit} onDelete={(r) => setDeleteTarget(r)} />
+                  ))}
+                </div>
               </div>
-            ) : (
-              <div className="space-y-2">
-                {selectedDateReminders.map((r) => (
-                  <ReminderItem key={r.id} reminder={r} onToggle={handleToggleComplete}
-                    onEdit={handleEdit} onDelete={(r) => setDeleteTarget(r)} />
-                ))}
+            )}
+            {upcomingReminders.length > 0 && (
+              <div className="rounded-xl border border-border bg-card p-5">
+                <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
+                  <Clock className="h-4 w-4 text-primary" />
+                  Próximos 7 dias
+                </h3>
+                <div className="space-y-2">
+                  {upcomingReminders.map((r) => (
+                    <ReminderItem key={r.id} reminder={r} onToggle={handleToggleComplete}
+                      onEdit={handleEdit} onDelete={(r) => setDeleteTarget(r)} />
+                  ))}
+                </div>
               </div>
             )}
           </div>
-
-          {/* Overdue */}
-          {overdueReminders.length > 0 && (
-            <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-5">
-              <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-destructive">
-                <AlertTriangle className="h-4 w-4" />
-                Atrasados ({overdueReminders.length})
-              </h3>
-              <div className="space-y-2">
-                {overdueReminders.map((r) => (
-                  <ReminderItem key={r.id} reminder={r} onToggle={handleToggleComplete}
-                    onEdit={handleEdit} onDelete={(r) => setDeleteTarget(r)} />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Upcoming */}
-          {upcomingReminders.length > 0 && (
-            <div className="rounded-xl border border-border bg-card p-5">
-              <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
-                <Clock className="h-4 w-4 text-primary" />
-                Próximos 7 dias
-              </h3>
-              <div className="space-y-2">
-                {upcomingReminders.map((r) => (
-                  <ReminderItem key={r.id} reminder={r} onToggle={handleToggleComplete}
-                    onEdit={handleEdit} onDelete={(r) => setDeleteTarget(r)} />
-                ))}
-              </div>
-            </div>
-          )}
         </div>
-      </div>
+      )}
+
+      {viewMode === "week" && (
+        <WeeklyView
+          currentDate={selectedDate}
+          reminders={reminders}
+          onToggle={handleToggleComplete}
+          onEdit={handleEdit}
+          onDelete={(r) => setDeleteTarget(r)}
+          onSelectDate={(d) => { setSelectedDate(d); setViewMode("day"); }}
+        />
+      )}
+
+      {viewMode === "day" && (
+        <DailyView
+          currentDate={selectedDate}
+          reminders={reminders}
+          onToggle={handleToggleComplete}
+          onEdit={handleEdit}
+          onDelete={(r) => setDeleteTarget(r)}
+        />
+      )}
 
       <CreateEventDialog
         open={createDialogOpen}
@@ -346,20 +394,62 @@ export default function Agenda() {
   );
 }
 
+// --- Sub-components ---
+
+function MonthDayDetail({
+  selectedDate,
+  reminders,
+  onToggle,
+  onEdit,
+  onDelete,
+  onCreateNew,
+}: {
+  selectedDate: Date;
+  reminders: Reminder[];
+  onToggle: (id: string, completed: boolean) => void;
+  onEdit: (r: Reminder) => void;
+  onDelete: (r: Reminder) => void;
+  onCreateNew: () => void;
+}) {
+  return (
+    <div className="rounded-xl border border-border bg-card p-5">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <CalendarClock className="h-4 w-4 text-primary" />
+          {format(selectedDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+        </h3>
+        <Button variant="ghost" size="sm" className="gap-1 text-xs" onClick={onCreateNew}>
+          <Plus className="h-3.5 w-3.5" /> Adicionar
+        </Button>
+      </div>
+      {reminders.length === 0 ? (
+        <div className="flex flex-col items-center py-6 text-muted-foreground">
+          <CalendarClock className="h-8 w-8 mb-2 opacity-30" />
+          <p className="text-xs">Nenhum evento nesta data</p>
+          <Button variant="link" size="sm" className="mt-1 text-xs" onClick={onCreateNew}>
+            Criar evento
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {reminders.map((r) => (
+            <ReminderItem key={r.id} reminder={r} onToggle={onToggle} onEdit={onEdit} onDelete={onDelete} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function getRecurrenceLabel(rule: string): string {
   const labels: Record<string, string> = {
-    daily: "Diário",
-    weekly: "Semanal",
-    biweekly: "Quinzenal",
-    monthly: "Mensal",
-    yearly: "Anual",
-    weekdays: "Dias úteis",
+    daily: "Diário", weekly: "Semanal", biweekly: "Quinzenal",
+    monthly: "Mensal", yearly: "Anual", weekdays: "Dias úteis",
   };
   if (rule.startsWith("custom:")) {
     const parts = rule.split(":");
-    const interval = parts[1];
     const unitMap: Record<string, string> = { days: "dia(s)", weeks: "sem.", months: "mês(es)" };
-    return `A cada ${interval} ${unitMap[parts[2]] || parts[2]}`;
+    return `A cada ${parts[1]} ${unitMap[parts[2]] || parts[2]}`;
   }
   return labels[rule] || rule;
 }
