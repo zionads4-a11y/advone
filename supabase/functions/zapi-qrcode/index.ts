@@ -64,6 +64,10 @@ function isGenericHealthCheckPayload(payload: any) {
 function isInstanceConnected(payload: any) {
   if (!payload || isGenericHealthCheckPayload(payload)) return false;
 
+  // UaZapi /instance/connect returns { connected, status: { connected }, instance: { status } }
+  if (payload?.status?.connected === true) return true;
+  if (payload?.status?.connected === false) return false;
+
   const rootStatus = normalizeUaZapiValue(payload?.status);
   const instanceStatus = normalizeUaZapiValue(payload?.instance?.status);
   const dataStatus = normalizeUaZapiValue(payload?.data?.status);
