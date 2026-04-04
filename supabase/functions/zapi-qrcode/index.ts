@@ -106,13 +106,33 @@ async function fetchUaZapiStatus(config: { zapi_instance_id: string; zapi_token?
 
 async function fetchUaZapiQrCode(config: { zapi_instance_id: string; zapi_token?: string | null }) {
   const headers = buildUaZapiHeaders();
+  const adminToken = Deno.env.get("UAZAPI_ADMIN_TOKEN");
   const query = buildQueryParams(config).toString();
 
+  // Primary: POST /instance/connect with admintoken header (confirmed working endpoint)
+  const primaryUrl = `${SERVER_URL}/instance/connect?instance=${encodeURIComponent(config.zapi_instance_id)}&token=${encodeURIComponent(config.zapi_token || config.zapi_instance_id)}`;
+  const primaryHeaders = { ...headers };
+  if (adminToken) primaryHeaders["admintoken"] = adminToken;
+
+  try {
+    console.log("Trying primary QR endpoint:", primaryUrl);
+    const primaryRes = await fetch(primaryUrl, { method: "POST", headers: primaryHeaders });
+    const primaryPayload = await readResponsePayload(primaryRes);
+    console.log("Primary QR response:", primaryRes.status, JSON.stringify(primaryPayload).substring(0, 200));
+
+    if (primaryRes.ok) {
+      const qrcode = extractQrCode(primaryPayload);
+      if (qrcode) return { ok: true, payload: primaryPayload, qrcode };
+      if (isInstanceConnected(primaryPayload)) return { ok: true, payload: primaryPayload, connected: true };
+    }
+  } catch (err) {
+    console.error("Primary QR endpoint error:", err);
+  }
+
+  // Fallback candidates (GET)
   const candidates = [
     `${SERVER_URL}/qr?${query}`,
     `${SERVER_URL}/instance/qr?${query}`,
-    `${SERVER_URL}/connect?${query}`,
-    `${SERVER_URL}/instance/connect?${query}`,
   ];
 
   const failures: Array<{ url: string; status: number; payload: any }> = [];
