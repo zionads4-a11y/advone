@@ -111,16 +111,28 @@ async function qualifyLeadWithAI(
       type: "function",
       function: {
         name: "schedule_appointment",
-        description: "Registra que o lead aceitou agendar. Use quando o lead demonstrar interesse em agendar.",
+        description: "Agenda uma consulta/reunião para o lead na agenda do sistema. Use quando o lead aceitar agendar ou demonstrar interesse claro.",
         parameters: {
           type: "object",
           properties: {
             message_to_lead: {
               type: "string",
-              description: "Mensagem final com o link de agendamento"
+              description: "Mensagem confirmando o agendamento para o lead"
+            },
+            date: {
+              type: "string",
+              description: "Data sugerida para o agendamento no formato YYYY-MM-DD. Se o lead não especificou, sugira o próximo dia útil."
+            },
+            time: {
+              type: "string",
+              description: "Horário sugerido no formato HH:MM. Se não especificado, use 10:00."
+            },
+            summary: {
+              type: "string",
+              description: "Breve descrição do assunto da reunião"
             }
           },
-          required: ["message_to_lead"],
+          required: ["message_to_lead", "date", "time"],
           additionalProperties: false
         }
       }
