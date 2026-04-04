@@ -13,6 +13,11 @@ function buildUaZapiHeaders() {
   return { "Content-Type": "application/json" };
 }
 
+function isInstanceTokenMisconfigured(config: { zapi_token?: string | null }) {
+  const adminToken = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+  return Boolean(adminToken && config.zapi_token && config.zapi_token.trim() === adminToken.trim());
+}
+
 function buildQueryParams(
   config: { zapi_instance_id: string; zapi_token?: string | null },
   options?: { includeInstanceToken?: boolean },
