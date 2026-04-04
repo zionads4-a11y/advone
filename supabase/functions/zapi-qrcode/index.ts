@@ -92,71 +92,31 @@ async function fetchUaZapiQrCode(config: { zapi_instance_id: string; zapi_token?
 
 async function disconnectUaZapiInstance(config: { zapi_instance_id: string; zapi_token?: string | null }) {
   const adminToken = Deno.env.get("UAZAPI_ADMIN_TOKEN");
-
   if (!adminToken) {
-    return {
-      ok: false,
-      failures: [{
-        url: `${SERVER_URL}/instance/disconnect?instance=${encodeURIComponent(config.zapi_instance_id)}`,
-        method: "POST",
-        status: 500,
-        payload: { message: "UAZAPI_ADMIN_TOKEN não configurado" },
-      }],
-    };
+    return { ok: false, failures: [{ url: "", method: "N/A", status: 500, payload: { message: "UAZAPI_ADMIN_TOKEN não configurado" } }] };
   }
 
-  const headers = {
-    "Content-Type": "application/json",
-    "AdminToken": adminToken,
-    "admintoken": adminToken,
-    ...(config.zapi_token ? { "token": config.zapi_token } : {}),
-  };
+  const headers = buildUaZapiHeaders();
+  const query = buildQueryParams(config).toString();
 
-  const candidates: Array<{ url: string; method: "POST" | "GET"; body?: string }> = [
-    {
-      url: `${SERVER_URL}/instance/disconnect?instance=${encodeURIComponent(config.zapi_instance_id)}`,
-      method: "POST",
-    },
-    {
-      url: `${SERVER_URL}/instance/disconnect`,
-      method: "POST",
-      body: JSON.stringify({ instance: config.zapi_instance_id }),
-    },
-    {
-      url: `${SERVER_URL}/instance/${encodeURIComponent(config.zapi_instance_id)}/disconnect`,
-      method: "POST",
-    },
-    {
-      url: `${SERVER_URL}/instance/logout?instance=${encodeURIComponent(config.zapi_instance_id)}`,
-      method: "POST",
-    },
+  const candidates: Array<{ url: string; method: "POST" | "DELETE" }> = [
+    { url: `${SERVER_URL}/instance/disconnect?${query}`, method: "POST" },
+    { url: `${SERVER_URL}/instance/disconnect?${query}`, method: "DELETE" },
+    { url: `${SERVER_URL}/instance/logout?${query}`, method: "DELETE" },
+    { url: `${SERVER_URL}/instance/logout?${query}`, method: "POST" },
   ];
 
   const failures: Array<{ url: string; method: string; status: number; payload: any }> = [];
 
-  for (const { url, method, body } of candidates) {
+  for (const { url, method } of candidates) {
     try {
-      const res = await fetch(url, {
-        method,
-        headers,
-        ...(body ? { body } : {}),
-      });
+      const res = await fetch(url, { method, headers });
       const payload = await readResponsePayload(res);
-      console.log(`Disconnect attempt ${method} ${url} => ${res.status}:`, JSON.stringify(payload));
-
-      if (res.ok) {
-        return { ok: true, payload, failures: [] };
-      }
-
+      console.log(`Disconnect ${method} ${url} => ${res.status}:`, JSON.stringify(payload));
+      if (res.ok) return { ok: true, payload, failures: [] };
       failures.push({ url, method, status: res.status, payload });
     } catch (err) {
-      console.error(`Disconnect fetch error for ${method} ${url}:`, err);
-      failures.push({
-        url,
-        method,
-        status: 0,
-        payload: { message: err instanceof Error ? err.message : "Erro desconhecido" },
-      });
+      failures.push({ url, method, status: 0, payload: { message: err instanceof Error ? err.message : "Erro" } });
     }
   }
 
