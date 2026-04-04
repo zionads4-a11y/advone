@@ -235,15 +235,17 @@ async function qualifyLeadWithAI(
             // Send WhatsApp notification to lawyer's alert number
             if (config.alert_whatsapp) {
               const SERVER_URL = "https://ziondigital.uazapi.com";
+              const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
               const alertPhone = config.alert_whatsapp.replace(/\D/g, "");
               const alertMessage = `🔔 *Novo Agendamento Automático*\n\n👤 Lead: ${leadName}\n📅 Data: ${appointmentDate}\n⏰ Horário: ${appointmentTime}\n${args.summary ? `📋 Assunto: ${args.summary}\n` : ""}\n_Agendado automaticamente pelo bot SDR_`;
 
-              await fetch(`${SERVER_URL}/send/text`, {
+              const alertParams = new URLSearchParams({ instance: config.zapi_instance_id });
+              if (ADMIN_TOKEN) alertParams.set("admintoken", ADMIN_TOKEN);
+              if (config.zapi_token) alertParams.set("token", config.zapi_token);
+
+              await fetch(`${SERVER_URL}/send/text?${alertParams.toString()}`, {
                 method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  "token": config.zapi_token || config.zapi_instance_id,
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ number: alertPhone, body: alertMessage }),
               });
             }
@@ -566,13 +568,15 @@ serve(async (req) => {
 
             if (aiReply) {
               const SERVER_URL = "https://ziondigital.uazapi.com";
-              const sendUrl = `${SERVER_URL}/send/text`;
+              const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+              const sendParams = new URLSearchParams({ instance: config.zapi_instance_id });
+              if (ADMIN_TOKEN) sendParams.set("admintoken", ADMIN_TOKEN);
+              if (config.zapi_token) sendParams.set("token", config.zapi_token);
+
+              const sendUrl = `${SERVER_URL}/send/text?${sendParams.toString()}`;
               const sendResponse = await fetch(sendUrl, {
                 method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  "token": config.zapi_token || config.zapi_instance_id,
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ number: cleanPhone, body: aiReply }),
               });
 
