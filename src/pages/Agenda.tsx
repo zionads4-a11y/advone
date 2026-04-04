@@ -222,12 +222,33 @@ export default function Agenda() {
         <div className="space-y-6">
           {/* Selected date events */}
           <div className="rounded-xl border border-border bg-card p-5">
-            <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
-              <CalendarClock className="h-4 w-4 text-primary" />
-              {selectedDate ? format(selectedDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : "Selecione uma data"}
-            </h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                <CalendarClock className="h-4 w-4 text-primary" />
+                {selectedDate ? format(selectedDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : "Selecione uma data"}
+              </h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-1 text-xs"
+                onClick={() => setCreateDialogOpen(true)}
+              >
+                <Plus className="h-3.5 w-3.5" /> Adicionar
+              </Button>
+            </div>
             {selectedDateReminders.length === 0 ? (
-              <p className="text-xs text-muted-foreground">Nenhum evento nesta data</p>
+              <div className="flex flex-col items-center py-6 text-muted-foreground">
+                <CalendarClock className="h-8 w-8 mb-2 opacity-30" />
+                <p className="text-xs">Nenhum evento nesta data</p>
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="mt-1 text-xs"
+                  onClick={() => setCreateDialogOpen(true)}
+                >
+                  Criar evento
+                </Button>
+              </div>
             ) : (
               <div className="space-y-2">
                 {selectedDateReminders.map((r) => (
