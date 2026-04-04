@@ -36,6 +36,8 @@ export default function Agenda() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [loading, setLoading] = useState(true);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Fetch companies for filter
   useEffect(() => {
