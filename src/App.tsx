@@ -20,6 +20,7 @@ import ConnectWhatsApp from "./pages/ConnectWhatsApp";
 import Agenda from "./pages/Agenda";
 import Profile from "./pages/Profile";
 import BotConfig from "./pages/BotConfig";
+import CompanySettings from "./pages/CompanySettings";
 import AppLayout from "./components/layout/AppLayout";
 import NotFound from "./pages/NotFound";
 
