@@ -352,32 +352,40 @@ serve(async (req) => {
       }
 
       const headers = buildUaZapiHeaders(config);
-      const query = new URLSearchParams({ instance: config.zapi_instance_id });
-      if (config.zapi_token) query.set("token", config.zapi_token);
+      const instanceQuery = new URLSearchParams({ instance: config.zapi_instance_id });
 
-      // Try multiple disconnect endpoints
+      // Try multiple disconnect endpoints and methods
       const candidates = [
-        `${SERVER_URL}/disconnect?${query.toString()}`,
-        `${SERVER_URL}/instance/disconnect?${query.toString()}`,
-        `${SERVER_URL}/logout?${query.toString()}`,
-        `${SERVER_URL}/instance/logout?${query.toString()}`,
+        { url: `${SERVER_URL}/instance/disconnect?${instanceQuery.toString()}`, method: "POST" },
+        { url: `${SERVER_URL}/disconnect?${instanceQuery.toString()}`, method: "POST" },
+        { url: `${SERVER_URL}/instance/${config.zapi_instance_id}/disconnect`, method: "POST" },
+        { url: `${SERVER_URL}/instance/logout?${instanceQuery.toString()}`, method: "POST" },
+        { url: `${SERVER_URL}/logout?${instanceQuery.toString()}`, method: "POST" },
+        { url: `${SERVER_URL}/instance/${config.zapi_instance_id}/logout`, method: "POST" },
       ];
 
-      for (const url of candidates) {
+      const failures: Array<{ url: string; status: number; payload: any }> = [];
+
+      for (const { url, method } of candidates) {
         try {
-          const res = await fetch(url, { method: "POST", headers });
+          const res = await fetch(url, { method, headers });
           const payload = await readResponsePayload(res);
+          console.log(`Disconnect attempt ${url} => ${res.status}:`, JSON.stringify(payload));
           if (res.ok) {
             return new Response(
               JSON.stringify({ disconnected: true, details: payload }),
               { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
             );
           }
-        } catch {}
+          failures.push({ url, status: res.status, payload });
+        } catch (err) {
+          console.error(`Disconnect fetch error for ${url}:`, err);
+        }
       }
 
+      console.error("All disconnect attempts failed:", JSON.stringify(failures));
       return new Response(
-        JSON.stringify({ disconnected: false, error: "Não foi possível desconectar a instância" }),
+        JSON.stringify({ disconnected: false, error: "Não foi possível desconectar a instância", attempts: failures }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
