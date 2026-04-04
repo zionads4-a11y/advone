@@ -78,8 +78,8 @@ export default function Companies() {
     fetchData();
   };
 
-  const handleUpdate = async (id: string, data: { name: string; whatsapp: string | null; business_hours?: unknown }) => {
-    const { error } = await supabase.from("companies").update(data).eq("id", id);
+  const handleUpdate = async (id: string, data: { name: string; whatsapp: string | null; business_hours?: Record<string, unknown[]> }) => {
+    const { error } = await supabase.from("companies").update(data as any).eq("id", id);
 
     if (error) {
       toast.error("Erro: " + error.message);
