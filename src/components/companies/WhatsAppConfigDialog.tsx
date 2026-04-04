@@ -42,7 +42,7 @@ interface WhatsAppConfigDialogProps {
   onOpenChange: (open: boolean) => void;
   companyId: string;
   config: WhatsAppConfig | null;
-  onSubmit: (formData: FormData) => void;
+  onSubmit: () => void;
 }
 
 const SERVER_URL = "https://ziondigital.uazapi.com";
