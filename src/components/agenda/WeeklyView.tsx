@@ -13,9 +13,13 @@ interface Reminder {
   due_at: string;
   completed: boolean;
   completed_at: string | null;
+  created_at: string;
+  lead_id: string;
+  company_id: string;
   lead_name?: string;
   company_name?: string;
   recurrence_rule?: string | null;
+  recurrence_end?: string | null;
   parent_event_id?: string | null;
 }
 
