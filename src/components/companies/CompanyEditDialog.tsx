@@ -20,8 +20,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Trash2 } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { BusinessHoursConfig, BusinessHours, parseBusinessHours, getDefaultBusinessHours } from "./BusinessHoursConfig";
+import { BusinessHoursConfig, type BusinessHours, parseBusinessHours, getDefaultBusinessHours } from "./BusinessHoursConfig";
 
 interface Company {
   id: string;
