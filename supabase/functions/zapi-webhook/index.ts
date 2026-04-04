@@ -365,6 +365,66 @@ async function enrollInCadence(supabase: any, companyId: string, leadId: string,
   }
 }
 
+/**
+ * Splits an AI response into multiple natural WhatsApp messages.
+ * Rules:
+ * - Split on double newlines (paragraphs)
+ * - If a paragraph is still long (>150 chars), split on sentences
+ * - Keep emojis and short phrases together
+ * - Never split mid-sentence
+ */
+function splitIntoNaturalMessages(text: string): string[] {
+  if (!text || text.length <= 120) return [text];
+
+  // First split by double newlines (paragraphs)
+  const paragraphs = text.split(/\n\n+/).map((p) => p.trim()).filter(Boolean);
+
+  const messages: string[] = [];
+
+  for (const para of paragraphs) {
+    if (para.length <= 150) {
+      messages.push(para);
+      continue;
+    }
+
+    // Split long paragraphs by single newlines first
+    const lines = para.split(/\n/).map((l) => l.trim()).filter(Boolean);
+    if (lines.length > 1 && lines.every((l) => l.length <= 150)) {
+      // Each line becomes a message
+      messages.push(...lines);
+      continue;
+    }
+
+    // Split by sentence boundaries (. ! ?)
+    const sentences = para.match(/[^.!?]+[.!?]+[\s]*/g) || [para];
+    let currentChunk = "";
+
+    for (const sentence of sentences) {
+      if ((currentChunk + sentence).length > 150 && currentChunk) {
+        messages.push(currentChunk.trim());
+        currentChunk = sentence;
+      } else {
+        currentChunk += sentence;
+      }
+    }
+    if (currentChunk.trim()) {
+      messages.push(currentChunk.trim());
+    }
+  }
+
+  // Ensure we don't have too many tiny messages — merge very short consecutive ones
+  const merged: string[] = [];
+  for (const msg of messages) {
+    if (merged.length > 0 && merged[merged.length - 1].length < 40 && msg.length < 40) {
+      merged[merged.length - 1] += "\n" + msg;
+    } else {
+      merged.push(msg);
+    }
+  }
+
+  return merged.length > 0 ? merged : [text];
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
