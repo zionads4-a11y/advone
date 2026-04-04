@@ -300,7 +300,7 @@ export function WhatsAppConfigDialog({
                 onChange={(e) => setFormToken(e.target.value)}
                 placeholder="Ex: 3A26D4F22..."
               />
-              <p className="text-xs text-muted-foreground">Token da instância informado no painel da UaZapi.</p>
+              <p className="text-xs text-muted-foreground">Use somente o token da instância criado na UaZapi. Não cole aqui o Admin Token do servidor.</p>
             </div>
 
             {/* Webhook URL */}

@@ -371,6 +371,28 @@ serve(async (req) => {
         );
       }
 
+      if (!config.zapi_token) {
+        return new Response(
+          JSON.stringify({
+            disconnected: false,
+            code: "INSTANCE_TOKEN_MISSING",
+            error: "O Token da Instância não foi preenchido. Salve o token real da instância UaZapi antes de desconectar.",
+          }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      if (isInstanceTokenMisconfigured(config)) {
+        return new Response(
+          JSON.stringify({
+            disconnected: false,
+            code: "INSTANCE_TOKEN_MISCONFIGURED",
+            error: "O campo 'Token da Instância' está com o Admin Token da UaZapi. Substitua esse valor pelo token real da instância para conseguir desconectar.",
+          }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
       const disconnectResult = await disconnectUaZapiInstance(config);
 
       if (disconnectResult.ok) {
