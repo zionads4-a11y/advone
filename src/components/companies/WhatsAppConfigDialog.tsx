@@ -147,11 +147,6 @@ export function WhatsAppConfigDialog({
       return;
     }
 
-    if (!config.zapi_token) {
-      toast.error("Informe o token da instância e salve antes de gerar o QR Code");
-      return;
-    }
-
     setQrLoading(true);
     setQrCode(null);
     try {
