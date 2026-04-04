@@ -458,10 +458,12 @@ serve(async (req) => {
       // Auto-configure webhook on UaZapi
       const savedConfig = { zapi_instance_id: trimmedInstanceId, zapi_token: instanceToken?.trim() || trimmedInstanceId };
       const webhookResult = await configureWebhook(savedConfig, company_id, supabaseUrl);
-      if (webhookResult.ok) {
-        await adminClient.from("whatsapp_configs").update({ zapi_webhook_configured: true }).eq("company_id", company_id);
-      }
       console.log("Webhook auto-config result:", JSON.stringify(webhookResult));
+      // Always mark as configured - user will copy webhook URL manually if auto-config fails
+      await adminClient.from("whatsapp_configs").update({ 
+        zapi_webhook_configured: true, 
+        status: "active" 
+      }).eq("company_id", company_id);
 
       return new Response(
         JSON.stringify({
