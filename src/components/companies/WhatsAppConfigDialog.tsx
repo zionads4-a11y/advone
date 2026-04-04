@@ -196,17 +196,24 @@ export function WhatsAppConfigDialog({
   };
 
   const handleSaveWhatsApp = async () => {
-    if (!formInstanceId || !formToken) {
-      toast.error("Nome da instância e token são obrigatórios.");
+    if (!formInstanceId) {
+      toast.error("Nome da instância é obrigatório.");
       return;
     }
     setSaving(true);
     try {
-      // Use the onSubmit callback with a synthetic FormData
-      const fd = new FormData();
-      fd.set("zapi_instance_id", formInstanceId.trim());
-      fd.set("zapi_token", formToken.trim());
-      onSubmit(fd);
+      const { data, error } = await supabase.functions.invoke("zapi-qrcode", {
+        body: { company_id: companyId, action: "save_instance", instance_id: formInstanceId.trim() },
+      });
+      if (error) throw error;
+      if (data?.saved) {
+        toast.success(data.message || "Configuração salva!");
+        onSubmit(new FormData()); // trigger parent refresh
+      } else {
+        toast.error(data?.error || "Erro ao salvar");
+      }
+    } catch (err: any) {
+      toast.error("Erro ao salvar: " + err.message);
     } finally {
       setSaving(false);
     }
