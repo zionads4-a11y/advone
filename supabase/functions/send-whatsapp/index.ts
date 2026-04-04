@@ -172,7 +172,7 @@ serve(async (req) => {
       };
       if (message) mediaBody.caption = message;
 
-      const zapiResponse = await fetch(`${SERVER_URL}/send/media`, {
+      const zapiResponse = await fetch(`${SERVER_URL}/send/media?${baseQueryString}`, {
         method: "POST",
         headers: buildHeaders(),
         body: JSON.stringify(mediaBody),
