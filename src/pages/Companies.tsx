@@ -78,7 +78,7 @@ export default function Companies() {
     fetchData();
   };
 
-  const handleUpdate = async (id: string, data: { name: string; whatsapp: string | null }) => {
+  const handleUpdate = async (id: string, data: { name: string; whatsapp: string | null; business_hours?: unknown }) => {
     const { error } = await supabase.from("companies").update(data).eq("id", id);
 
     if (error) {
