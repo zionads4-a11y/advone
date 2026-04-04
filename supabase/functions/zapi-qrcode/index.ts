@@ -452,11 +452,20 @@ serve(async (req) => {
         );
       }
 
+      // Auto-configure webhook on UaZapi
+      const savedConfig = { zapi_instance_id: trimmedInstanceId, zapi_token: instanceToken?.trim() || trimmedInstanceId };
+      const webhookResult = await configureWebhook(savedConfig, company_id, supabaseUrl);
+      if (webhookResult.ok) {
+        await adminClient.from("whatsapp_configs").update({ zapi_webhook_configured: true }).eq("company_id", company_id);
+      }
+      console.log("Webhook auto-config result:", JSON.stringify(webhookResult));
+
       return new Response(
         JSON.stringify({
           saved: true,
           instance_id: instanceId,
           token_found: !!instanceToken,
+          webhook_configured: webhookResult.ok,
           message: instanceToken
             ? "Configuração salva com token da instância detectado automaticamente!"
             : "Configuração salva! O ID da instância será usado como token.",
