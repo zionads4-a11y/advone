@@ -42,7 +42,7 @@ interface WhatsAppConfigDialogProps {
   onOpenChange: (open: boolean) => void;
   companyId: string;
   config: WhatsAppConfig | null;
-  onSubmit: (formData: FormData) => void;
+  onSubmit: () => void;
 }
 
 const SERVER_URL = "https://ziondigital.uazapi.com";
@@ -66,7 +66,6 @@ export function WhatsAppConfigDialog({
 
   // WhatsApp form
   const [formInstanceId, setFormInstanceId] = useState("");
-  const [formToken, setFormToken] = useState("");
 
   // QR Code state
   const [qrCode, setQrCode] = useState<string | null>(null);
@@ -87,14 +86,11 @@ export function WhatsAppConfigDialog({
   useEffect(() => {
     if (config) {
       setFormInstanceId(config.zapi_instance_id || "");
-      setFormToken(config.zapi_token || "");
       setQrStatus("disconnected");
       setQrCode(null);
-      // Check connection status
       checkStatus();
     } else {
       setFormInstanceId("");
-      setFormToken("");
       setQrCode(null);
       setQrStatus("disconnected");
     }
@@ -200,17 +196,24 @@ export function WhatsAppConfigDialog({
   };
 
   const handleSaveWhatsApp = async () => {
-    if (!formInstanceId || !formToken) {
-      toast.error("Nome da instância e token são obrigatórios.");
+    if (!formInstanceId) {
+      toast.error("Nome da instância é obrigatório.");
       return;
     }
     setSaving(true);
     try {
-      // Use the onSubmit callback with a synthetic FormData
-      const fd = new FormData();
-      fd.set("zapi_instance_id", formInstanceId.trim());
-      fd.set("zapi_token", formToken.trim());
-      onSubmit(fd);
+      const { data, error } = await supabase.functions.invoke("zapi-qrcode", {
+        body: { company_id: companyId, action: "save_instance", instance_id: formInstanceId.trim() },
+      });
+      if (error) throw error;
+      if (data?.saved) {
+        toast.success(data.message || "Configuração salva!");
+        onSubmit(); // trigger parent refresh
+      } else {
+        toast.error(data?.error || "Erro ao salvar");
+      }
+    } catch (err: any) {
+      toast.error("Erro ao salvar: " + err.message);
     } finally {
       setSaving(false);
     }
@@ -287,20 +290,9 @@ export function WhatsAppConfigDialog({
               <Input
                 value={formInstanceId}
                 onChange={(e) => setFormInstanceId(e.target.value)}
-                placeholder="Ex: 88fbac77-b070-48b2-872e-2db662cc800b"
+                placeholder="Ex: f2749759-f67f-477a-b5d6-cfe75984f029"
               />
-              <p className="text-xs text-muted-foreground">Nome exato da instância criada no painel do UaZapi.</p>
-            </div>
-
-            {/* Instance Token */}
-            <div className="space-y-2">
-              <Label>Token da Instância (UaZapi) *</Label>
-              <Input
-                value={formToken}
-                onChange={(e) => setFormToken(e.target.value)}
-                placeholder="Ex: 3A26D4F22..."
-              />
-              <p className="text-xs text-muted-foreground">Use somente o token da instância criado na UaZapi. Não cole aqui o Admin Token do servidor.</p>
+              <p className="text-xs text-muted-foreground">UUID da instância criada no painel do UaZapi. O token será buscado automaticamente.</p>
             </div>
 
             {/* Webhook URL */}

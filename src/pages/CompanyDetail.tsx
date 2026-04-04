@@ -57,29 +57,9 @@ export default function CompanyDetail() {
     setLoading(false);
   };
 
-  const handleSaveWhatsApp = async (formData: FormData) => {
-    const instanceId = formData.get("zapi_instance_id") as string;
-    const token = formData.get("zapi_token") as string;
-
-    if (!instanceId || !token) {
-      toast.error("Preencha o nome da instância e o token");
-      return;
-    }
-
-    if (whatsappConfig) {
-      await supabase
-        .from("whatsapp_configs")
-        .update({ zapi_instance_id: instanceId, zapi_token: token })
-        .eq("id", whatsappConfig.id);
-    } else {
-      await supabase.from("whatsapp_configs").insert({
-        company_id: id!,
-        zapi_instance_id: instanceId,
-        zapi_token: token,
-      });
-    }
-
-    toast.success("Configuração WhatsApp salva!");
+  const handleSaveWhatsApp = async () => {
+    // Refresh data after save (actual save is handled by the dialog via edge function)
+    toast.success("Configuração atualizada!");
     setConfigDialogOpen(false);
     fetchCompany();
   };
