@@ -96,12 +96,23 @@ function extractQrCode(payload: any) {
 }
 
 async function fetchUaZapiStatus(config: { zapi_instance_id: string; zapi_token?: string | null }) {
-  const response = await fetch(buildUaZapiStatusUrl(config), {
-    method: "GET",
-    headers: buildUaZapiHeaders(),
-  });
-  const payload = await readResponsePayload(response);
-  return { ok: response.ok, status: response.status, payload };
+  const adminToken = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+  const headers = buildUaZapiHeaders();
+  if (adminToken) headers["admintoken"] = adminToken;
+
+  // Use POST /instance/connect which returns full status including connected field
+  const connectUrl = `${SERVER_URL}/instance/connect?instance=${encodeURIComponent(config.zapi_instance_id)}&token=${encodeURIComponent(config.zapi_token || config.zapi_instance_id)}`;
+  try {
+    const res = await fetch(connectUrl, { method: "POST", headers });
+    const payload = await readResponsePayload(res);
+    console.log("UaZapi status check via /instance/connect:", res.status, JSON.stringify(payload).substring(0, 300));
+    return { ok: res.ok, status: res.status, payload };
+  } catch {
+    // Fallback to GET /status
+    const response = await fetch(buildUaZapiStatusUrl(config), { method: "GET", headers: buildUaZapiHeaders() });
+    const payload = await readResponsePayload(response);
+    return { ok: response.ok, status: response.status, payload };
+  }
 }
 
 async function fetchUaZapiQrCode(config: { zapi_instance_id: string; zapi_token?: string | null }) {
