@@ -53,12 +53,16 @@ serve(async (req) => {
         );
       }
 
-      // Fetch QR code from UaZapi via /instance/connect
+      // Fetch QR code from UaZapi
       const SERVER_URL = "https://ziondigital.uazapi.com";
-      const qrResponse = await fetch(`${SERVER_URL}/instance/connect`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "token": config.zapi_token },
-        body: JSON.stringify({}),
+      const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+      const qrResponse = await fetch(`${SERVER_URL}/instance/${config.zapi_instance_id}/connect`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...(ADMIN_TOKEN ? { "AdminToken": ADMIN_TOKEN } : {}),
+          ...(config.zapi_token ? { "token": config.zapi_token } : {}),
+        },
       });
 
       if (!qrResponse.ok) {
