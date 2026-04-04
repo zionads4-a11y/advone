@@ -168,7 +168,7 @@ async function disconnectUaZapiInstance(config: { zapi_instance_id: string; zapi
       console.log(`Disconnect attempt ${method} ${url} => ${res.status}:`, JSON.stringify(payload));
 
       if (res.ok) {
-        return { ok: true, payload };
+        return { ok: true, payload, failures: [] };
       }
 
       failures.push({ url, method, status: res.status, payload });
