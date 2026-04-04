@@ -240,10 +240,11 @@ async function qualifyLeadWithAI(
               const alertMessage = `🔔 *Novo Agendamento Automático*\n\n👤 Lead: ${leadName}\n📅 Data: ${appointmentDate}\n⏰ Horário: ${appointmentTime}\n${args.summary ? `📋 Assunto: ${args.summary}\n` : ""}\n_Agendado automaticamente pelo bot SDR_`;
 
               const alertHeaders: Record<string, string> = { "Content-Type": "application/json" };
-              if (config.zapi_token) alertHeaders["token"] = config.zapi_token;
               if (ADMIN_TOKEN) alertHeaders["admintoken"] = ADMIN_TOKEN;
 
-              await fetch(`${SERVER_URL}/send/text`, {
+              const instanceParam = encodeURIComponent(config.zapi_instance_id || "");
+              const tokenParam = encodeURIComponent(config.zapi_token || config.zapi_instance_id || "");
+              await fetch(`${SERVER_URL}/send/text?instance=${instanceParam}&token=${tokenParam}`, {
                 method: "POST",
                 headers: alertHeaders,
                 body: JSON.stringify({ number: alertPhone, text: alertMessage }),
@@ -398,26 +399,61 @@ serve(async (req) => {
     }
 
     const body = await req.json();
-    console.log("Z-API webhook payload:", JSON.stringify(body));
+    console.log("Z-API webhook payload:", JSON.stringify(body).substring(0, 500));
 
-    if (!body || !body.type) {
+    if (!body) {
       return new Response(JSON.stringify({ ok: true }), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    if (body.type === "ReceivedCallback") {
-      const phone = body.phone || "";
-      const senderName = body.senderName || body.chatName || "";
-      const messageText = body.text?.message || body.image?.caption || body.video?.caption || "[mídia]";
-      const messageIdExternal = body.messageId || "";
-      const isGroup = body.isGroup || false;
+    // Detect message type: UaZapi sends EventType="messages" with message object
+    // Legacy format used body.type === "ReceivedCallback"
+    const isUaZapiMessage = body.EventType === "messages" && body.message && !body.message.fromMe;
+    const isLegacyMessage = body.type === "ReceivedCallback";
 
-      if (isGroup || !phone) {
-        return new Response(JSON.stringify({ ok: true, skipped: isGroup ? "group_message" : "no_phone" }), {
+    // Skip non-message events (read receipts, status updates, sent messages, etc.)
+    if (!isUaZapiMessage && !isLegacyMessage) {
+      // Handle status/read receipt events silently
+      if (body.type === "ReadReceipt" || body.type === "SentCallback" || body.type === "MessageStatusCallback" || body.EventType === "messages_update") {
+        return new Response(JSON.stringify({ ok: true, type: body.type || body.EventType }), {
           status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+      return new Response(JSON.stringify({ ok: true }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Extract fields from UaZapi or legacy format
+    let phone: string;
+    let senderName: string;
+    let messageText: string;
+    let messageIdExternal: string;
+    let isGroup: boolean;
+
+    if (isUaZapiMessage) {
+      // UaZapi format: message.sender_pn = "553184796456@s.whatsapp.net"
+      const msg = body.message;
+      phone = msg.sender_pn || msg.chatid || "";
+      senderName = msg.senderName || body.chat?.name || body.chat?.wa_contactName || "";
+      messageText = msg.text || msg.content || msg.caption || "[mídia]";
+      messageIdExternal = msg.messageid || msg.id || "";
+      isGroup = msg.isGroup || false;
+    } else {
+      // Legacy ReceivedCallback format
+      phone = body.phone || "";
+      senderName = body.senderName || body.chatName || "";
+      messageText = body.text?.message || body.image?.caption || body.video?.caption || "[mídia]";
+      messageIdExternal = body.messageId || "";
+      isGroup = body.isGroup || false;
+    }
+
+    if (isGroup || !phone) {
+      return new Response(JSON.stringify({ ok: true, skipped: isGroup ? "group_message" : "no_phone" }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
       const cleanPhone = phone.replace("@c.us", "").replace("@s.whatsapp.net", "");
 
@@ -570,10 +606,12 @@ serve(async (req) => {
               const SERVER_URL = "https://ziondigital.uazapi.com";
               const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
               const sendHeaders: Record<string, string> = { "Content-Type": "application/json" };
-              if (config.zapi_token) sendHeaders["token"] = config.zapi_token;
               if (ADMIN_TOKEN) sendHeaders["admintoken"] = ADMIN_TOKEN;
 
-              const sendUrl = `${SERVER_URL}/send/text`;
+              const instanceParam = encodeURIComponent(config.zapi_instance_id);
+              const tokenParam = encodeURIComponent(config.zapi_token || config.zapi_instance_id);
+              const sendUrl = `${SERVER_URL}/send/text?instance=${instanceParam}&token=${tokenParam}`;
+              console.log("Sending AI reply to:", cleanPhone, "via:", sendUrl);
               const sendResponse = await fetch(sendUrl, {
                 method: "POST",
                 headers: sendHeaders,
@@ -606,17 +644,6 @@ serve(async (req) => {
         JSON.stringify({ ok: true, lead_id: leadId, new_lead: !existingLead, tracking_code: trackingCode }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
-    }
-
-    if (body.type === "SentCallback" || body.type === "MessageStatusCallback") {
-      return new Response(JSON.stringify({ ok: true, type: body.type }), {
-        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    return new Response(JSON.stringify({ ok: true }), {
-      status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
   } catch (error: unknown) {
     console.error("Webhook error:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
