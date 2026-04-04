@@ -190,7 +190,7 @@ serve(async (req) => {
       zapiResult = await zapiResponse.json();
     } else {
       // Send text via UaZapi
-      const zapiResponse = await fetch(`${SERVER_URL}/send/text`, {
+      const zapiResponse = await fetch(`${SERVER_URL}/send/text?${baseQueryString}`, {
         method: "POST",
         headers: buildHeaders(),
         body: JSON.stringify({
