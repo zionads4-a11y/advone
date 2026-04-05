@@ -51,6 +51,7 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
         setSchedulingLink((data as any).scheduling_link || "");
         setConsultationDuration((data as any).consultation_duration || "30 minutos");
         setTargetAudience((data as any).target_audience || "");
+        setTriageOptions(Array.isArray((data as any).triage_options) ? (data as any).triage_options : []);
       }
       setLoading(false);
     };
