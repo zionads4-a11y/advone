@@ -14,6 +14,7 @@ function buildSDRPrompt(config: any) {
   const consultationDuration = config.consultation_duration || "30 minutos";
   const targetAudience = config.target_audience || "";
   const customPrompt = config.ai_prompt || "";
+  const triageOptions: any[] = Array.isArray(config.triage_options) ? config.triage_options : [];
 
   const toneInstructions = tone === "formal"
     ? "Use linguagem formal e tratamento respeitoso (Sr./Sra.)."
@@ -21,52 +22,46 @@ function buildSDRPrompt(config: any) {
     ? "Use linguagem leve e amigável, com emojis moderados."
     : "Seja educado e profissional, mas acessível.";
 
-  // Detect if practice area is previdenciário/INSS related
-  const isPrevid = /previd|inss|bpc|loas|aposentad|benefício/i.test(practiceArea + " " + targetAudience + " " + customPrompt);
+  let triagemBlock = "";
 
-  const triagemPrevidenciaria = isPrevid ? `
+  if (triageOptions.length > 0) {
+    // Dynamic triage from company config
+    const menuItems = triageOptions.map((opt: any, i: number) => {
+      const emoji = opt.emoji || `${i + 1}️⃣`;
+      return `"${emoji} ${opt.label}"`;
+    }).join("\n");
+
+    const scripts = triageOptions.map((opt: any, i: number) => {
+      const emoji = opt.emoji || `${i + 1}️⃣`;
+      const questions = (opt.questions || []).filter((q: string) => q.trim()).map((q: string) => `- Pergunte: "${q}"`).join("\n");
+      const closing = opt.closing_message ? `- Conduza: "${opt.closing_message}"` : `- Conduza para agendamento: "Vamos agendar uma análise do seu caso? Leva uns ${consultationDuration}."`;
+      const keywords = (opt.keyword_triggers || []).join(", ");
+      return `📌 ASSUNTO ${i + 1} - ${opt.label}${keywords ? ` (palavras-chave: ${keywords})` : ""}:\n${questions}\n${closing}`;
+    }).join("\n\n");
+
+    triagemBlock = `
 TRIAGEM INICIAL OBRIGATÓRIA:
 Na PRIMEIRA interação com o lead, após se apresentar, envie o menu de assuntos. Envie assim (cada número em mensagem separada se possível):
 
 "Para eu entender melhor como posso te ajudar, me diz qual desses assuntos tem a ver com o seu caso:"
 
-"1️⃣ BPC/LOAS - Benefício assistencial"
-"2️⃣ Desconto indevido (RMC/RCC) no benefício"
-"3️⃣ Demora do INSS para responder meu benefício"
-"4️⃣ Benefício negado pelo INSS"
+${menuItems}
 
-Aguarde a resposta do lead. Ele pode responder com o número (1, 2, 3 ou 4) ou descrever o problema. Identifique o assunto e siga o script correspondente.
+Aguarde a resposta do lead. Ele pode responder com o número ou descrever o problema. Identifique o assunto e siga o script correspondente.
 
 SCRIPT POR ASSUNTO:
 
-📌 ASSUNTO 1 - BPC/LOAS:
-- Pergunte: "Você ou a pessoa que precisa do benefício tem alguma deficiência ou tem mais de 65 anos?"
-- Se sim: "A renda da família é de até 1/4 do salário mínimo por pessoa?"
-- Se enquadra: "Entendi! Esse é exatamente o tipo de caso que ${officeName} atua. O advogado pode analisar se você tem direito e te orientar nos próximos passos."
-- Conduza para agendamento: "Vamos agendar uma análise gratuita do seu caso? É rapidinho, leva uns ${consultationDuration}."
-
-📌 ASSUNTO 2 - DESCONTO INDEVIDO RMC/RCC:
-- Pergunte: "Você percebeu algum desconto no seu benefício que não reconhece?"
-- Se sim: "Sabe me dizer mais ou menos qual o valor que está sendo descontado?"
-- Confirme: "Isso acontece bastante, infelizmente. Muitas vezes são empréstimos consignados que a pessoa não autorizou."
-- Conduza: "${officeName} tem ajudado muitas pessoas a recuperar esses valores. Vamos agendar uma análise do seu caso?"
-
-📌 ASSUNTO 3 - DEMORA DO INSS:
-- Pergunte: "Há quanto tempo você está esperando uma resposta do INSS?"
-- Se mais de 45 dias: "Quando o INSS demora mais de 45 dias, você pode ter direito a entrar com uma ação para obrigar uma resposta."
-- Conduza: "O advogado de ${officeName} pode analisar sua situação e ver a melhor forma de agilizar isso. Quer agendar uma consulta rápida?"
-
-📌 ASSUNTO 4 - BENEFÍCIO NEGADO:
-- Pergunte: "Qual benefício foi negado? Aposentadoria, auxílio-doença, BPC...?"
-- Depois: "Você sabe o motivo da negativa? Tem a carta de indeferimento?"
-- Conduza: "Em muitos casos é possível reverter a negativa. ${officeName} pode analisar se vale a pena recorrer. Vamos agendar?"
+${scripts}
 
 SE O LEAD NÃO SE ENCAIXAR EM NENHUM ASSUNTO:
 - Pergunte mais detalhes sobre o problema
-- Se realmente não for da área: "Entendo! Esse assunto foge um pouco da nossa especialidade, mas posso te indicar buscar [órgão competente]. Boa sorte! 🤞"
+- Se realmente não for da área: "Entendo! Esse assunto foge um pouco da nossa especialidade, mas posso te indicar buscar o recurso adequado. Boa sorte! 🤞"
 
-IMPORTANTE: Sempre registre no qualify_lead o assunto identificado (1-BPC, 2-RMC/RCC, 3-Demora INSS, 4-Negado) no campo "summary".
-` : "";
+IMPORTANTE: Sempre registre no qualify_lead o assunto identificado no campo "summary".
+`;
+  }
+
+  const hasTriagem = triageOptions.length > 0;
 
   return `Você é um SDR virtual especializado em atendimento para ${officeName}${practiceArea ? `, atuando em ${practiceArea}` : ""}.
 
@@ -91,10 +86,10 @@ COMPORTAMENTO:
 ${targetAudience ? `PÚBLICO-ALVO: ${targetAudience}` : ""}
 
 ${customPrompt ? `INSTRUÇÕES ADICIONAIS DO ESCRITÓRIO:\n${customPrompt}` : ""}
-${triagemPrevidenciaria}
+${triagemBlock}
 FLUXO DE ATENDIMENTO:
 1. Cumprimente o lead e se apresente como assistente de ${officeName}
-${isPrevid ? "2. Envie o MENU DE TRIAGEM (obrigatório para área previdenciária)" : "2. Faça uma qualificação rápida: \"Seu caso é sobre qual situação?\""}
+${hasTriagem ? "2. Envie o MENU DE TRIAGEM (obrigatório)" : "2. Faça uma qualificação rápida: \"Seu caso é sobre qual situação?\""}
 3. Após identificar o assunto, siga o script correspondente
 4. Conduza para agendamento: "Perfeito, o advogado pode te orientar melhor sobre isso."
 5. Pergunte qual o melhor dia e horário para a consulta
@@ -499,7 +494,7 @@ serve(async (req) => {
 
     const { data: config } = await supabase
       .from("whatsapp_configs")
-      .select("id, company_id, zapi_instance_id, zapi_token, ai_enabled, ai_prompt, ai_auto_reply, office_name, practice_area, communication_tone, scheduling_link, consultation_duration, target_audience, alert_whatsapp")
+      .select("id, company_id, zapi_instance_id, zapi_token, ai_enabled, ai_prompt, ai_auto_reply, office_name, practice_area, communication_tone, scheduling_link, consultation_duration, target_audience, alert_whatsapp, triage_options")
       .eq("company_id", companyId)
       .maybeSingle();
 

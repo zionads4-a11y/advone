@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Bot, Loader2, Save, ShieldCheck, Building2, Link2, Users, Clock } from "lucide-react";
+import { Bot, Loader2, Save, ShieldCheck, Building2, Link2, Users, Clock, ListChecks } from "lucide-react";
 import { toast } from "sonner";
+import { TriageOptionsEditor, type TriageOption } from "./TriageOptionsEditor";
 
 interface BotConfigCardProps {
   companyId: string;
@@ -25,6 +26,7 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
   const [schedulingLink, setSchedulingLink] = useState("");
   const [consultationDuration, setConsultationDuration] = useState("30 minutos");
   const [targetAudience, setTargetAudience] = useState("");
+  const [triageOptions, setTriageOptions] = useState<TriageOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -32,7 +34,7 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
     const load = async () => {
       const { data } = await supabase
         .from("whatsapp_configs")
-        .select("ai_enabled, ai_auto_reply, ai_prompt, office_name, practice_area, communication_tone, scheduling_link, consultation_duration, target_audience")
+        .select("ai_enabled, ai_auto_reply, ai_prompt, office_name, practice_area, communication_tone, scheduling_link, consultation_duration, target_audience, triage_options")
         .eq("company_id", companyId)
         .maybeSingle();
 
@@ -49,6 +51,7 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
         setSchedulingLink((data as any).scheduling_link || "");
         setConsultationDuration((data as any).consultation_duration || "30 minutos");
         setTargetAudience((data as any).target_audience || "");
+        setTriageOptions(Array.isArray((data as any).triage_options) ? (data as any).triage_options : []);
       }
       setLoading(false);
     };
@@ -74,6 +77,7 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
       scheduling_link: schedulingLink || null,
       consultation_duration: consultationDuration,
       target_audience: targetAudience || null,
+      triage_options: triageOptions.length > 0 ? JSON.parse(JSON.stringify(triageOptions)) : null,
     };
 
     const { error } = await supabase
@@ -280,6 +284,26 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
               disabled={!aiEnabled}
             />
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Triage options card */}
+      <Card className="border-border/50">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <ListChecks className="h-5 w-5 text-primary" />
+            Menu de Triagem do Bot
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">
+            Configure as opções que o bot apresentará ao lead para identificar o assunto. Cada empresa pode ter suas próprias opções.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <TriageOptionsEditor
+            options={triageOptions}
+            onChange={setTriageOptions}
+            disabled={!aiEnabled}
+          />
         </CardContent>
       </Card>
 

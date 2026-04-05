@@ -685,6 +685,7 @@ export type Database = {
           scheduling_link: string | null
           status: string
           target_audience: string | null
+          triage_options: Json | null
           updated_at: string
           zapi_instance_id: string
           zapi_token: string
@@ -707,6 +708,7 @@ export type Database = {
           scheduling_link?: string | null
           status?: string
           target_audience?: string | null
+          triage_options?: Json | null
           updated_at?: string
           zapi_instance_id: string
           zapi_token: string
@@ -729,6 +731,7 @@ export type Database = {
           scheduling_link?: string | null
           status?: string
           target_audience?: string | null
+          triage_options?: Json | null
           updated_at?: string
           zapi_instance_id?: string
           zapi_token?: string
