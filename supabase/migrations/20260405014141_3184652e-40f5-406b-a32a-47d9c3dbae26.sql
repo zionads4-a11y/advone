@@ -1,0 +1,1 @@
+ALTER TABLE public.whatsapp_configs ADD COLUMN triage_options jsonb DEFAULT NULL;
