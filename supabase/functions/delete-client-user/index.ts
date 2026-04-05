@@ -25,17 +25,20 @@ serve(async (req) => {
 
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: { user: callerUser }, error: userError } = await adminClient.auth.getUser(token);
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const callerClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const accessToken = authHeader.replace("Bearer ", "").trim();
+    const { data: claimsData, error: claimsError } = await callerClient.auth.getClaims(accessToken);
+    const callerId = claimsData?.claims?.sub;
 
-    if (userError || !callerUser) {
+    if (claimsError || !callerId || typeof callerId !== "string") {
       return new Response(JSON.stringify({ error: "Token inválido" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    const callerId = callerUser.id;
 
     // Check caller's role
     const { data: roleData } = await adminClient
