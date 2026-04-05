@@ -34,7 +34,7 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
     const load = async () => {
       const { data } = await supabase
         .from("whatsapp_configs")
-        .select("ai_enabled, ai_auto_reply, ai_prompt, office_name, practice_area, communication_tone, scheduling_link, consultation_duration, target_audience")
+        .select("ai_enabled, ai_auto_reply, ai_prompt, office_name, practice_area, communication_tone, scheduling_link, consultation_duration, target_audience, triage_options")
         .eq("company_id", companyId)
         .maybeSingle();
 
