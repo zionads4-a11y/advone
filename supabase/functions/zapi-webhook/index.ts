@@ -494,7 +494,7 @@ serve(async (req) => {
 
     const { data: config } = await supabase
       .from("whatsapp_configs")
-      .select("id, company_id, zapi_instance_id, zapi_token, ai_enabled, ai_prompt, ai_auto_reply, office_name, practice_area, communication_tone, scheduling_link, consultation_duration, target_audience, alert_whatsapp")
+      .select("id, company_id, zapi_instance_id, zapi_token, ai_enabled, ai_prompt, ai_auto_reply, office_name, practice_area, communication_tone, scheduling_link, consultation_duration, target_audience, alert_whatsapp, triage_options")
       .eq("company_id", companyId)
       .maybeSingle();
 
