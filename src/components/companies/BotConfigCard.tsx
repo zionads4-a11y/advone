@@ -77,7 +77,7 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
       scheduling_link: schedulingLink || null,
       consultation_duration: consultationDuration,
       target_audience: targetAudience || null,
-      triage_options: triageOptions.length > 0 ? triageOptions : null,
+      triage_options: triageOptions.length > 0 ? JSON.parse(JSON.stringify(triageOptions)) : null,
     };
 
     const { error } = await supabase
