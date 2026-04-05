@@ -61,6 +61,8 @@ IMPORTANTE: Sempre registre no qualify_lead o assunto identificado no campo "sum
 `;
   }
 
+  const hasTriagem = triageOptions.length > 0;
+
   return `Você é um SDR virtual especializado em atendimento para ${officeName}${practiceArea ? `, atuando em ${practiceArea}` : ""}.
 
 Seu ÚNICO objetivo é qualificar rapidamente o lead e levá-lo a agendar uma conversa com um advogado.
@@ -84,10 +86,10 @@ COMPORTAMENTO:
 ${targetAudience ? `PÚBLICO-ALVO: ${targetAudience}` : ""}
 
 ${customPrompt ? `INSTRUÇÕES ADICIONAIS DO ESCRITÓRIO:\n${customPrompt}` : ""}
-${triagemPrevidenciaria}
+${triagemBlock}
 FLUXO DE ATENDIMENTO:
 1. Cumprimente o lead e se apresente como assistente de ${officeName}
-${isPrevid ? "2. Envie o MENU DE TRIAGEM (obrigatório para área previdenciária)" : "2. Faça uma qualificação rápida: \"Seu caso é sobre qual situação?\""}
+${hasTriagem ? "2. Envie o MENU DE TRIAGEM (obrigatório)" : "2. Faça uma qualificação rápida: \"Seu caso é sobre qual situação?\""}
 3. Após identificar o assunto, siga o script correspondente
 4. Conduza para agendamento: "Perfeito, o advogado pode te orientar melhor sobre isso."
 5. Pergunte qual o melhor dia e horário para a consulta
