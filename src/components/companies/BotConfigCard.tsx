@@ -26,6 +26,7 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
   const [schedulingLink, setSchedulingLink] = useState("");
   const [consultationDuration, setConsultationDuration] = useState("30 minutos");
   const [targetAudience, setTargetAudience] = useState("");
+  const [triageOptions, setTriageOptions] = useState<TriageOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
