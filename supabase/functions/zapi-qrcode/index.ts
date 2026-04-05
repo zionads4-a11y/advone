@@ -332,8 +332,12 @@ serve(async (req) => {
       global: { headers: { Authorization: authHeader } },
     });
 
-    const { data: { user }, error: userError } = await callerClient.auth.getUser();
-    if (userError || !user) {
+    const accessToken = authHeader.replace("Bearer ", "").trim();
+    const { data: claimsData, error: claimsError } = await callerClient.auth.getClaims(accessToken);
+    const userId = claimsData?.claims?.sub;
+
+    if (claimsError || !userId || typeof userId !== "string") {
+      console.error("JWT validation failed:", claimsError);
       return new Response(
         JSON.stringify({ error: "Token inválido" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -356,7 +360,7 @@ serve(async (req) => {
     const { data: roleData } = await adminClient
       .from("user_roles")
       .select("role")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .in("role", ["admin", "member"])
       .maybeSingle();
 
@@ -483,7 +487,7 @@ serve(async (req) => {
     if (action === "generate_link") {
       const { data: tokenData, error: insertError } = await adminClient
         .from("zapi_connect_tokens")
-        .insert({ company_id, created_by: user.id })
+        .insert({ company_id, created_by: userId })
         .select("token, expires_at")
         .single();
 
