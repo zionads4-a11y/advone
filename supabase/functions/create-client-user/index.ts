@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -27,18 +27,21 @@ serve(async (req) => {
 
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get caller ID from token
-    const token = authHeader.replace("Bearer ", "");
-    const { data: { user: callerUser }, error: userError } = await adminClient.auth.getUser(token);
-    
-    if (userError || !callerUser) {
+    // Get caller ID from token using getClaims
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const callerClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const accessToken = authHeader.replace("Bearer ", "").trim();
+    const { data: claimsData, error: claimsError } = await callerClient.auth.getClaims(accessToken);
+    const callerId = claimsData?.claims?.sub;
+
+    if (claimsError || !callerId || typeof callerId !== "string") {
       return new Response(JSON.stringify({ error: "Token inválido" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    const callerId = callerUser.id;
 
     // Check caller's role
     const { data: roleData } = await adminClient

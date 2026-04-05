@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -30,8 +30,11 @@ serve(async (req) => {
       global: { headers: { Authorization: authHeader } },
     });
 
-    const { data: { user }, error: userError } = await callerClient.auth.getUser();
-    if (userError || !user) {
+    const accessToken = authHeader.replace("Bearer ", "").trim();
+    const { data: claimsData, error: claimsError } = await callerClient.auth.getClaims(accessToken);
+    const userId = claimsData?.claims?.sub;
+
+    if (claimsError || !userId || typeof userId !== "string") {
       return new Response(JSON.stringify({ error: "Token inválido" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
