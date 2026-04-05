@@ -105,9 +105,15 @@ export default function CompanyDetail() {
                   </span>
                 )}
                 {whatsappConfig ? (
-                  <Badge variant="outline" className="border-success/30 text-success text-[10px]">
-                    WhatsApp Conectado
-                  </Badge>
+                  whatsappConfig.status === "connected" ? (
+                    <Badge variant="outline" className="border-success/30 text-success text-[10px]">
+                      WhatsApp Conectado
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="border-warning/30 text-warning text-[10px]">
+                      WhatsApp Desconectado
+                    </Badge>
+                  )
                 ) : (
                   <Badge variant="outline" className="border-warning/30 text-warning text-[10px]">
                     Sem WhatsApp

@@ -134,8 +134,17 @@ export function WhatsAppConfigDialog({
       if (connected) {
         setQrCode(null);
       }
+      // Update status in DB to keep it in sync
+      await supabase
+        .from("whatsapp_configs")
+        .update({ status: connected ? "connected" : "disconnected" })
+        .eq("company_id", companyId);
     } catch {
       setQrStatus("disconnected");
+      await supabase
+        .from("whatsapp_configs")
+        .update({ status: "disconnected" })
+        .eq("company_id", companyId);
     } finally {
       setQrLoading(false);
     }
