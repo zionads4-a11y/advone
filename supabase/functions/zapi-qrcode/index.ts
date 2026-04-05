@@ -487,7 +487,7 @@ serve(async (req) => {
     if (action === "generate_link") {
       const { data: tokenData, error: insertError } = await adminClient
         .from("zapi_connect_tokens")
-        .insert({ company_id, created_by: user.id })
+        .insert({ company_id, created_by: userId })
         .select("token, expires_at")
         .single();
 
