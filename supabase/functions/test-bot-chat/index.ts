@@ -118,12 +118,15 @@ MODALIDADE DO ATENDIMENTO:
 
 AGENDAMENTO INTELIGENTE (OBRIGATÓRIO):
 - Quando o lead aceitar agendar, SEMPRE use a ferramenta "check_availability" PRIMEIRO
-- Use a data que o lead sugeriu, ou o próximo dia útil se não especificou
+- PRIORIDADE: Tente agendar para HOJE MESMO se houver horários disponíveis (mínimo 2h de antecedência)
+- Se não houver horário hoje, ofereça o PRÓXIMO DIA ÚTIL mais cedo possível
+- Use a data que o lead sugeriu, ou hoje/próximo dia útil se não especificou
 - Após receber os horários, ofereça EXATAMENTE 2 opções ao lead
 - Formato: "Tenho esses horários disponíveis pra você:\\n\\n📅 Opção 1: [dia], dia [DD/MM] às [HH:MM]\\n📅 Opção 2: [dia], dia [DD/MM] às [HH:MM]\\n\\nQual fica melhor pra você? 😊"
 - Quando o lead escolher, use "schedule_appointment" para confirmar
 - Após confirmar, envie: "Pronto, agendado! ✅ [detalhes]"
 - NUNCA invente horários sem antes consultar a disponibilidade
+- FUSO HORÁRIO: Todos os horários são no horário de Brasília (BRT)
 
 QUANDO O LEAD RESISTIR:
 "Entendo! Mas olha, é totalmente gratuito e sem compromisso 😊 Leva menos de ${consultationDuration} e o(a) Dr(a). vai analisar pessoalmente se você tem direito."
@@ -137,6 +140,16 @@ QUALIFICAÇÃO (ferramentas disponíveis):
 IMPORTANTE: Este é um MODO DE TESTE. As ferramentas retornam dados reais da agenda, mas agendamentos NÃO são criados de verdade.
 
 Responda SEMPRE em português do Brasil.`;
+}
+
+function getNowBrasilia(): Date {
+  const now = new Date();
+  return new Date(now.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
+}
+
+function getTodayBrasilia(): string {
+  const b = getNowBrasilia();
+  return `${b.getFullYear()}-${String(b.getMonth() + 1).padStart(2, "0")}-${String(b.getDate()).padStart(2, "0")}`;
 }
 
 async function getAvailableSlots(supabase: any, companyId: string, dateStr: string) {
@@ -179,32 +192,44 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
     for (let h = 14; h < 18; h++) { slots.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`); }
   }
 
+  // Filter out past slots + 2h minimum advance for today (Brasilia time)
+  const todayBR = getTodayBrasilia();
+  if (dateStr === todayBR) {
+    const nowBR = getNowBrasilia();
+    const minMinutes = (nowBR.getHours() * 60 + nowBR.getMinutes()) + 120; // +2 hours
+    slots = slots.filter(s => {
+      const [h, m] = s.split(":").map(Number);
+      return h * 60 + m >= minMinutes;
+    });
+  }
+
   const { data: existing } = await supabase
     .from("lead_reminders")
     .select("due_at")
     .eq("company_id", companyId)
-    .gte("due_at", dateStr + "T00:00:00")
-    .lte("due_at", dateStr + "T23:59:59")
+    .gte("due_at", dateStr + "T03:00:00Z")
+    .lte("due_at", dateStr + "T26:59:59Z")
     .eq("completed", false);
 
   const bookedTimes = new Set(
     (existing || []).map((r: any) => {
       const d = new Date(r.due_at);
-      return `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}`;
+      const brTime = new Date(d.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
+      return `${String(brTime.getHours()).padStart(2, "0")}:${String(brTime.getMinutes()).padStart(2, "0")}`;
     })
   );
 
   return { date: dateStr, dayName, slots: slots.filter(s => !bookedTimes.has(s)) };
 }
 
-function getNextBusinessDays(count: number): string[] {
+function getNextAvailableDays(count: number, includeToday: boolean = true): string[] {
   const days: string[] = [];
-  const now = new Date();
-  let d = new Date(now.getTime() + 86400000);
+  const nowBR = getNowBrasilia();
+  let d = includeToday ? new Date(nowBR) : new Date(nowBR.getTime() + 86400000);
   while (days.length < count) {
-    const dow = d.getUTCDay();
+    const dow = d.getDay();
     if (dow >= 1 && dow <= 5) {
-      days.push(d.toISOString().split("T")[0]);
+      days.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`);
     }
     d = new Date(d.getTime() + 86400000);
   }
@@ -404,11 +429,11 @@ serve(async (req) => {
         let toolResult: any = {};
 
         if (fnName === "check_availability") {
-          let dateToCheck = args.date || getNextBusinessDays(1)[0];
+          let dateToCheck = args.date || getNextAvailableDays(1)[0];
           const availability = await getAvailableSlots(adminClient, company_id, dateToCheck);
 
           if (availability.slots.length === 0) {
-            const nextDays = getNextBusinessDays(3);
+            const nextDays = getNextAvailableDays(3);
             const alternatives: any[] = [];
             for (const nd of nextDays) {
               if (nd === dateToCheck) continue;

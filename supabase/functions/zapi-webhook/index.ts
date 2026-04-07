@@ -122,12 +122,15 @@ MODALIDADE DO ATENDIMENTO:
 
 AGENDAMENTO INTELIGENTE (OBRIGATÓRIO):
 - Quando o lead aceitar agendar, SEMPRE use a ferramenta "check_availability" PRIMEIRO para ver os horários disponíveis
-- Use a data que o lead sugeriu, ou o próximo dia útil se não especificou
+- PRIORIDADE: Tente agendar para HOJE MESMO se houver horários disponíveis (mínimo 2h de antecedência)
+- Se não houver horário hoje, ofereça o PRÓXIMO DIA ÚTIL mais cedo possível
+- Use a data que o lead sugeriu, ou hoje/próximo dia útil se não especificou
 - Após receber os horários, ofereça EXATAMENTE 2 opções ao lead
 - Formato da oferta: "Tenho esses horários disponíveis pra você:\\n\\n📅 Opção 1: [dia da semana], dia [DD/MM] às [HH:MM]\\n📅 Opção 2: [dia da semana], dia [DD/MM] às [HH:MM]\\n\\nQual fica melhor pra você? 😊"
 - Quando o lead escolher uma opção, use "schedule_appointment" para confirmar
 - Após confirmar, envie uma mensagem simpática: "Pronto, agendado! ✅ [detalhes]"
 - NUNCA invente horários sem antes consultar a disponibilidade
+- FUSO HORÁRIO: Todos os horários são no horário de Brasília (BRT)
 
 QUANDO O LEAD RESISTIR:
 "Entendo! Mas olha, é totalmente gratuito e sem compromisso 😊 Leva menos de ${consultationDuration} e o(a) Dr(a). vai analisar pessoalmente se você tem direito. Vale muito a pena!"
@@ -144,6 +147,16 @@ QUALIFICAÇÃO (ferramentas disponíveis):
 Responda SEMPRE em português do Brasil.`;
 }
 
+function getNowBrasilia(): Date {
+  const now = new Date();
+  return new Date(now.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
+}
+
+function getTodayBrasilia(): string {
+  const b = getNowBrasilia();
+  return `${b.getFullYear()}-${String(b.getMonth() + 1).padStart(2, "0")}-${String(b.getDate()).padStart(2, "0")}`;
+}
+
 async function getAvailableSlots(supabase: any, companyId: string, dateStr: string): Promise<{ date: string; dayName: string; slots: string[] }> {
   const dayNames = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
   const dayKeys = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
@@ -153,7 +166,6 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
   const dayKey = dayKeys[dayOfWeek];
   const dayName = dayNames[dayOfWeek];
 
-  // Get company business hours
   const { data: company } = await supabase
     .from("companies")
     .select("business_hours")
@@ -180,40 +192,49 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
     }
   }
 
-  // Fallback: if no business hours configured, default 9-12 + 14-18
   if (slots.length === 0 && dayOfWeek >= 1 && dayOfWeek <= 5) {
     for (let h = 9; h < 12; h++) { slots.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`); }
     for (let h = 14; h < 18; h++) { slots.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`); }
   }
 
-  // Remove booked slots
+  // Filter out past slots + 2h minimum advance for today (Brasilia time)
+  const todayBR = getTodayBrasilia();
+  if (dateStr === todayBR) {
+    const nowBR = getNowBrasilia();
+    const minMinutes = (nowBR.getHours() * 60 + nowBR.getMinutes()) + 120;
+    slots = slots.filter(s => {
+      const [h, m] = s.split(":").map(Number);
+      return h * 60 + m >= minMinutes;
+    });
+  }
+
   const { data: existing } = await supabase
     .from("lead_reminders")
     .select("due_at")
     .eq("company_id", companyId)
-    .gte("due_at", dateStr + "T00:00:00")
-    .lte("due_at", dateStr + "T23:59:59")
+    .gte("due_at", dateStr + "T03:00:00Z")
+    .lte("due_at", dateStr + "T26:59:59Z")
     .eq("completed", false);
 
   const bookedTimes = new Set(
     (existing || []).map((r: any) => {
       const d = new Date(r.due_at);
-      return `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}`;
+      const brTime = new Date(d.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
+      return `${String(brTime.getHours()).padStart(2, "0")}:${String(brTime.getMinutes()).padStart(2, "0")}`;
     })
   );
 
-  const available = slots.filter(s => !bookedTimes.has(s));
-  return { date: dateStr, dayName, slots: available };
+  return { date: dateStr, dayName, slots: slots.filter(s => !bookedTimes.has(s)) };
 }
 
-function getNextBusinessDays(count: number): string[] {
+function getNextAvailableDays(count: number, includeToday: boolean = true): string[] {
   const days: string[] = [];
-  const now = new Date();
-  let d = new Date(now.getTime() + 86400000);
+  const nowBR = getNowBrasilia();
+  let d = includeToday ? new Date(nowBR) : new Date(nowBR.getTime() + 86400000);
   while (days.length < count) {
-    const dow = d.getUTCDay();
+    const dow = d.getDay();
     if (dow >= 1 && dow <= 5) {
-      days.push(d.toISOString().split("T")[0]);
+      days.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`);
     }
     d = new Date(d.getTime() + 86400000);
   }
@@ -366,13 +387,13 @@ async function qualifyLeadWithAI(
           hasCheckAvailability = true;
           let dateToCheck = args.date;
           if (!dateToCheck) {
-            dateToCheck = getNextBusinessDays(1)[0];
+            dateToCheck = getNextAvailableDays(1)[0];
           }
           const availability = await getAvailableSlots(supabase, companyId, dateToCheck);
 
           // If no slots on requested day, also check next 2 business days
           if (availability.slots.length === 0) {
-            const nextDays = getNextBusinessDays(3);
+            const nextDays = getNextAvailableDays(3);
             const alternatives: any[] = [];
             for (const nd of nextDays) {
               if (nd === dateToCheck) continue;
@@ -414,9 +435,9 @@ async function qualifyLeadWithAI(
           replyText = args.message_to_lead || "";
 
           if (leadId) {
-            const appointmentDate = args.date || getNextBusinessDays(1)[0];
+            const appointmentDate = args.date || getNextAvailableDays(1)[0];
             const appointmentTime = args.time || "10:00";
-            const dueAt = `${appointmentDate}T${appointmentTime}:00`;
+            const dueAt = `${appointmentDate}T${appointmentTime}:00-03:00`;
             const modality = args.modality || "online";
 
             const { data: leadData } = await supabase
