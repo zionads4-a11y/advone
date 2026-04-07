@@ -871,6 +871,24 @@ serve(async (req) => {
           .eq("lead_id", leadId)
           .eq("status", "pending");
 
+        // Auto-move lead to "Em Atendimento" (position 1) if still in first column
+        if (existingLead?.status === "new") {
+          const { data: columns } = await supabase
+            .from("kanban_columns")
+            .select("id")
+            .eq("company_id", companyId)
+            .order("position", { ascending: true })
+            .limit(2);
+
+          if (columns && columns.length > 1) {
+            await supabase.from("leads").update({
+              kanban_column_id: columns[1].id,
+              status: "contacted",
+            }).eq("id", leadId);
+            console.log(`Lead ${leadId} auto-moved to Em Atendimento`);
+          }
+        }
+
         // Update UTM if missing
         if (Object.keys(utmData).length > 0) {
           const { data: existingLeadData } = await supabase
