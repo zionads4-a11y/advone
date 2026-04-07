@@ -347,6 +347,12 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
           </Button>
         </CardContent>
       </Card>
+      </div>
+
+      {/* Test Chat Panel */}
+      <div className="lg:sticky lg:top-4 self-start">
+        <BotTestChat companyId={companyId} />
+      </div>
     </div>
   );
 }
