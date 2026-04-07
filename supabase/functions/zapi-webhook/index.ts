@@ -208,12 +208,14 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
     });
   }
 
+  // Query existing appointments for this Brasilia day (UTC-3: 03:00Z to next day 02:59Z)
+  const nextDay = new Date(new Date(dateStr + "T12:00:00Z").getTime() + 86400000).toISOString().split("T")[0];
   const { data: existing } = await supabase
     .from("lead_reminders")
     .select("due_at")
     .eq("company_id", companyId)
     .gte("due_at", dateStr + "T03:00:00Z")
-    .lte("due_at", dateStr + "T26:59:59Z")
+    .lt("due_at", nextDay + "T03:00:00Z")
     .eq("completed", false);
 
   const bookedTimes = new Set(
