@@ -144,6 +144,16 @@ QUALIFICAÇÃO (ferramentas disponíveis):
 Responda SEMPRE em português do Brasil.`;
 }
 
+function getNowBrasilia(): Date {
+  const now = new Date();
+  return new Date(now.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
+}
+
+function getTodayBrasilia(): string {
+  const b = getNowBrasilia();
+  return `${b.getFullYear()}-${String(b.getMonth() + 1).padStart(2, "0")}-${String(b.getDate()).padStart(2, "0")}`;
+}
+
 async function getAvailableSlots(supabase: any, companyId: string, dateStr: string): Promise<{ date: string; dayName: string; slots: string[] }> {
   const dayNames = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
   const dayKeys = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
@@ -153,7 +163,6 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
   const dayKey = dayKeys[dayOfWeek];
   const dayName = dayNames[dayOfWeek];
 
-  // Get company business hours
   const { data: company } = await supabase
     .from("companies")
     .select("business_hours")
@@ -180,40 +189,49 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
     }
   }
 
-  // Fallback: if no business hours configured, default 9-12 + 14-18
   if (slots.length === 0 && dayOfWeek >= 1 && dayOfWeek <= 5) {
     for (let h = 9; h < 12; h++) { slots.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`); }
     for (let h = 14; h < 18; h++) { slots.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`); }
   }
 
-  // Remove booked slots
+  // Filter out past slots + 2h minimum advance for today (Brasilia time)
+  const todayBR = getTodayBrasilia();
+  if (dateStr === todayBR) {
+    const nowBR = getNowBrasilia();
+    const minMinutes = (nowBR.getHours() * 60 + nowBR.getMinutes()) + 120;
+    slots = slots.filter(s => {
+      const [h, m] = s.split(":").map(Number);
+      return h * 60 + m >= minMinutes;
+    });
+  }
+
   const { data: existing } = await supabase
     .from("lead_reminders")
     .select("due_at")
     .eq("company_id", companyId)
-    .gte("due_at", dateStr + "T00:00:00")
-    .lte("due_at", dateStr + "T23:59:59")
+    .gte("due_at", dateStr + "T03:00:00Z")
+    .lte("due_at", dateStr + "T26:59:59Z")
     .eq("completed", false);
 
   const bookedTimes = new Set(
     (existing || []).map((r: any) => {
       const d = new Date(r.due_at);
-      return `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}`;
+      const brTime = new Date(d.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
+      return `${String(brTime.getHours()).padStart(2, "0")}:${String(brTime.getMinutes()).padStart(2, "0")}`;
     })
   );
 
-  const available = slots.filter(s => !bookedTimes.has(s));
-  return { date: dateStr, dayName, slots: available };
+  return { date: dateStr, dayName, slots: slots.filter(s => !bookedTimes.has(s)) };
 }
 
-function getNextBusinessDays(count: number): string[] {
+function getNextAvailableDays(count: number, includeToday: boolean = true): string[] {
   const days: string[] = [];
-  const now = new Date();
-  let d = new Date(now.getTime() + 86400000);
+  const nowBR = getNowBrasilia();
+  let d = includeToday ? new Date(nowBR) : new Date(nowBR.getTime() + 86400000);
   while (days.length < count) {
-    const dow = d.getUTCDay();
+    const dow = d.getDay();
     if (dow >= 1 && dow <= 5) {
-      days.push(d.toISOString().split("T")[0]);
+      days.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`);
     }
     d = new Date(d.getTime() + 86400000);
   }
