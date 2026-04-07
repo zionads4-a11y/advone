@@ -10,7 +10,6 @@ function buildSDRPrompt(config: any) {
   const officeName = config.office_name || "o escritório";
   const practiceArea = config.practice_area || "";
   const tone = config.communication_tone || "moderado";
-  const schedulingLink = config.scheduling_link || "";
   const consultationDuration = config.consultation_duration || "30 minutos";
   const targetAudience = config.target_audience || "";
   const customPrompt = config.ai_prompt || "";
@@ -32,7 +31,7 @@ function buildSDRPrompt(config: any) {
 
     const scripts = triageOptions.map((opt: any, i: number) => {
       const emoji = opt.emoji || `${i + 1}️⃣`;
-      const questions = (opt.questions || []).filter((q: string) => q.trim()).map((q: string, qi: number) => 
+      const questions = (opt.questions || []).filter((q: string) => q.trim()).map((q: string, qi: number) =>
         `  Pergunta ${qi + 1}: "${q}" — ESPERE a resposta antes de fazer a próxima pergunta`
       ).join("\n");
       const closing = opt.closing_message ? `  Encerramento: "${opt.closing_message}"` : `  Encerramento: "Vamos agendar uma análise do seu caso? Leva uns ${consultationDuration} 😊"`;
@@ -112,171 +111,116 @@ ARGUMENTOS DE AGENDAMENTO (use com naturalidade, não tudo de uma vez):
 - O(a) advogado(a) vai pessoalmente analisar o seu caso
 - Se tiver direito a uma indenização ou benefício, vai te dar todas as orientações
 - É uma conversa rápida de ${consultationDuration}, mas que pode mudar sua situação
-- Exemplo: "E olha, essa análise é totalmente gratuita, viu? 😊 O(a) Dr(a). vai ver seu caso pessoalmente e, se tiver direito, já te orienta sobre tudo!"
 
 MODALIDADE DO ATENDIMENTO:
 - O agendamento pode ser presencial OU online — o lead escolhe
-- Se o lead preferir presencial: agende normalmente e confirme que será presencial no escritório
-- Se o lead preferir online: agende e informe que receberá o link por aqui mesmo
-- NUNCA recuse o agendamento por causa da modalidade. Sempre agende independente de ser presencial ou online
-- Exemplo presencial: "Perfeito! Vamos marcar presencial no escritório então 😊 Qual o melhor dia e horário pra você?"
-- Exemplo online: "Ótimo! Podemos fazer por vídeo mesmo, bem prático! Qual dia fica bom?"
+- NUNCA recuse o agendamento por causa da modalidade
+
+AGENDAMENTO INTELIGENTE (OBRIGATÓRIO):
+- Quando o lead aceitar agendar, SEMPRE use a ferramenta "check_availability" PRIMEIRO
+- Use a data que o lead sugeriu, ou o próximo dia útil se não especificou
+- Após receber os horários, ofereça EXATAMENTE 2 opções ao lead
+- Formato: "Tenho esses horários disponíveis pra você:\\n\\n📅 Opção 1: [dia], dia [DD/MM] às [HH:MM]\\n📅 Opção 2: [dia], dia [DD/MM] às [HH:MM]\\n\\nQual fica melhor pra você? 😊"
+- Quando o lead escolher, use "schedule_appointment" para confirmar
+- Após confirmar, envie: "Pronto, agendado! ✅ [detalhes]"
+- NUNCA invente horários sem antes consultar a disponibilidade
 
 QUANDO O LEAD RESISTIR:
-"Entendo! Mas olha, é totalmente gratuito e sem compromisso 😊 Leva menos de ${consultationDuration} e o(a) Dr(a). vai analisar pessoalmente se você tem direito. Vale muito a pena!"
+"Entendo! Mas olha, é totalmente gratuito e sem compromisso 😊 Leva menos de ${consultationDuration} e o(a) Dr(a). vai analisar pessoalmente se você tem direito."
 
-QUANDO O LEAD PERGUNTAR ALGO JURÍDICO:
-"Essa parte é mais técnica, o(a) advogado(a) vai te explicar pessoalmente com muito mais precisão! E o melhor: a consulta é gratuita 😊 Vamos marcar?"
+QUALIFICAÇÃO (ferramentas disponíveis):
+- "check_availability": SEMPRE use antes de sugerir horários
+- "schedule_appointment": Use APÓS o lead escolher um horário
+- "qualify_lead": Use quando souber o suficiente sobre o caso
+- "transfer_to_human": Quando necessário
 
-IMPORTANTE: Este é um MODO DE TESTE. Responda normalmente como faria com um lead real, mas não execute ações reais.
+IMPORTANTE: Este é um MODO DE TESTE. As ferramentas retornam dados reais da agenda, mas agendamentos NÃO são criados de verdade.
 
 Responda SEMPRE em português do Brasil.`;
 }
 
-serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+async function getAvailableSlots(supabase: any, companyId: string, dateStr: string) {
+  const dayNames = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
+  const dayKeys = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
 
-  try {
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Não autorizado" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+  const date = new Date(dateStr + "T12:00:00Z");
+  const dayOfWeek = date.getUTCDay();
+  const dayKey = dayKeys[dayOfWeek];
+  const dayName = dayNames[dayOfWeek];
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { auth: { persistSession: false } }
-    );
+  const { data: company } = await supabase
+    .from("companies")
+    .select("business_hours")
+    .eq("id", companyId)
+    .single();
 
-    // Validate user
-    const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: "Token inválido" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+  const businessHours: any = company?.business_hours || {};
+  let slots: string[] = [];
 
-    const { company_id, messages } = await req.json();
-    if (!company_id || !messages) {
-      return new Response(JSON.stringify({ error: "company_id e messages são obrigatórios" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Use service role to bypass RLS for config lookup
-    const adminClient = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-      { auth: { persistSession: false } }
-    );
-
-    // Get company config
-    const { data: config } = await adminClient
-      .from("whatsapp_configs")
-      .select("*")
-      .eq("company_id", company_id)
-      .maybeSingle();
-
-    if (!config) {
-      return new Response(JSON.stringify({ error: "Configuração do bot não encontrada" }), {
-        status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      return new Response(JSON.stringify({ error: "API key não configurada" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const systemPrompt = buildSDRPrompt(config);
-
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...messages,
-        ],
-      }),
-    });
-
-    if (!aiResponse.ok) {
-      const errText = await aiResponse.text();
-      console.error("AI error:", aiResponse.status, errText);
-
-      if (aiResponse.status === 429) {
-        return new Response(JSON.stringify({ error: "Limite de requisições excedido. Tente novamente em instantes." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+  const dayConfig = businessHours[dayKey];
+  if (dayConfig && dayConfig.enabled !== false) {
+    const shifts = dayConfig.shifts || [];
+    for (const shift of shifts) {
+      if (!shift.start || !shift.end) continue;
+      const [startH, startM] = shift.start.split(":").map(Number);
+      const [endH, endM] = shift.end.split(":").map(Number);
+      const startMin = startH * 60 + startM;
+      const endMin = endH * 60 + endM;
+      for (let m = startMin; m < endMin; m += 30) {
+        const h = Math.floor(m / 60);
+        const min = m % 60;
+        slots.push(`${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`);
       }
-      if (aiResponse.status === 402) {
-        return new Response(JSON.stringify({ error: "Créditos insuficientes." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      return new Response(JSON.stringify({ error: "Erro ao processar resposta da IA" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
     }
-
-    const aiData = await aiResponse.json();
-    const reply = aiData.choices?.[0]?.message?.content || "Sem resposta da IA";
-
-    // Split into natural messages like the real bot does
-    const parts = splitIntoNaturalMessages(reply);
-
-    return new Response(JSON.stringify({ reply, parts }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  } catch (error) {
-    console.error("test-bot-chat error:", error);
-    return new Response(JSON.stringify({ error: "Erro interno" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
   }
-});
+
+  if (slots.length === 0 && dayOfWeek >= 1 && dayOfWeek <= 5) {
+    for (let h = 9; h < 12; h++) { slots.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`); }
+    for (let h = 14; h < 18; h++) { slots.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`); }
+  }
+
+  const { data: existing } = await supabase
+    .from("lead_reminders")
+    .select("due_at")
+    .eq("company_id", companyId)
+    .gte("due_at", dateStr + "T00:00:00")
+    .lte("due_at", dateStr + "T23:59:59")
+    .eq("completed", false);
+
+  const bookedTimes = new Set(
+    (existing || []).map((r: any) => {
+      const d = new Date(r.due_at);
+      return `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}`;
+    })
+  );
+
+  return { date: dateStr, dayName, slots: slots.filter(s => !bookedTimes.has(s)) };
+}
+
+function getNextBusinessDays(count: number): string[] {
+  const days: string[] = [];
+  const now = new Date();
+  let d = new Date(now.getTime() + 86400000);
+  while (days.length < count) {
+    const dow = d.getUTCDay();
+    if (dow >= 1 && dow <= 5) {
+      days.push(d.toISOString().split("T")[0]);
+    }
+    d = new Date(d.getTime() + 86400000);
+  }
+  return days;
+}
 
 function splitIntoNaturalMessages(text: string): string[] {
   if (!text || text.length <= 120) return [text];
-
   const paragraphs = text.split(/\n\n+/).map((p) => p.trim()).filter(Boolean);
   const messages: string[] = [];
-
   for (const para of paragraphs) {
-    if (para.length <= 150) {
-      messages.push(para);
-      continue;
-    }
-
+    if (para.length <= 150) { messages.push(para); continue; }
     const lines = para.split(/\n/).map((l) => l.trim()).filter(Boolean);
-    if (lines.length > 1 && lines.every((l) => l.length <= 150)) {
-      messages.push(...lines);
-      continue;
-    }
-
+    if (lines.length > 1 && lines.every((l) => l.length <= 150)) { messages.push(...lines); continue; }
     const sentences = para.match(/[^.!?]+[.!?]+[\s]*/g) || [para];
     let currentChunk = "";
-
     for (const sentence of sentences) {
       if ((currentChunk + sentence).length > 150 && currentChunk) {
         messages.push(currentChunk.trim());
@@ -287,6 +231,225 @@ function splitIntoNaturalMessages(text: string): string[] {
     }
     if (currentChunk.trim()) messages.push(currentChunk.trim());
   }
-
   return messages.filter(Boolean);
 }
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  try {
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Não autorizado" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { auth: { persistSession: false } }
+    );
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: "Token inválido" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { company_id, messages } = await req.json();
+    if (!company_id || !messages) {
+      return new Response(JSON.stringify({ error: "company_id e messages são obrigatórios" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const adminClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      { auth: { persistSession: false } }
+    );
+
+    const { data: config } = await adminClient
+      .from("whatsapp_configs")
+      .select("*")
+      .eq("company_id", company_id)
+      .maybeSingle();
+
+    if (!config) {
+      return new Response(JSON.stringify({ error: "Configuração do bot não encontrada" }), {
+        status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      return new Response(JSON.stringify({ error: "API key não configurada" }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const systemPrompt = buildSDRPrompt(config);
+
+    const tools = [
+      {
+        type: "function",
+        function: {
+          name: "check_availability",
+          description: "Verifica horários disponíveis na agenda para uma data específica. SEMPRE use antes de sugerir horários.",
+          parameters: {
+            type: "object",
+            properties: {
+              date: { type: "string", description: "Data no formato YYYY-MM-DD" }
+            },
+            required: ["date"],
+            additionalProperties: false
+          }
+        }
+      },
+      {
+        type: "function",
+        function: {
+          name: "schedule_appointment",
+          description: "Agenda uma consulta. Use SOMENTE APÓS o lead escolher um horário.",
+          parameters: {
+            type: "object",
+            properties: {
+              message_to_lead: { type: "string", description: "Mensagem de confirmação" },
+              date: { type: "string", description: "Data YYYY-MM-DD" },
+              time: { type: "string", description: "Horário HH:MM" },
+              summary: { type: "string", description: "Assunto da reunião" },
+              modality: { type: "string", enum: ["presencial", "online"] }
+            },
+            required: ["message_to_lead", "date", "time"],
+            additionalProperties: false
+          }
+        }
+      },
+      {
+        type: "function",
+        function: {
+          name: "qualify_lead",
+          description: "Registra qualificação do lead.",
+          parameters: {
+            type: "object",
+            properties: {
+              status: { type: "string", enum: ["qualified", "not_qualified", "needs_more_info"] },
+              reason: { type: "string" },
+              lead_score: { type: "string", enum: ["quente", "morno", "frio"] }
+            },
+            required: ["status", "reason", "lead_score"],
+            additionalProperties: false
+          }
+        }
+      }
+    ];
+
+    let aiMessages: any[] = [
+      { role: "system", content: systemPrompt },
+      ...messages,
+    ];
+
+    let reply = "";
+    let toolActions: any[] = [];
+    let maxIterations = 3;
+
+    while (maxIterations > 0) {
+      maxIterations--;
+
+      const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-3-flash-preview",
+          messages: aiMessages,
+          tools,
+        }),
+      });
+
+      if (!aiResponse.ok) {
+        const errText = await aiResponse.text();
+        console.error("AI error:", aiResponse.status, errText);
+        if (aiResponse.status === 429) {
+          return new Response(JSON.stringify({ error: "Limite de requisições excedido." }), {
+            status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        return new Response(JSON.stringify({ error: "Erro ao processar resposta da IA" }), {
+          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const aiData = await aiResponse.json();
+      const message = aiData.choices?.[0]?.message;
+      if (!message) break;
+
+      if (!message.tool_calls || message.tool_calls.length === 0) {
+        reply = message.content || "Sem resposta da IA";
+        break;
+      }
+
+      aiMessages.push(message);
+
+      for (const toolCall of message.tool_calls) {
+        const fnName = toolCall.function?.name;
+        let args: any = {};
+        try { args = JSON.parse(toolCall.function?.arguments || "{}"); } catch { /* */ }
+
+        let toolResult: any = {};
+
+        if (fnName === "check_availability") {
+          let dateToCheck = args.date || getNextBusinessDays(1)[0];
+          const availability = await getAvailableSlots(adminClient, company_id, dateToCheck);
+
+          if (availability.slots.length === 0) {
+            const nextDays = getNextBusinessDays(3);
+            const alternatives: any[] = [];
+            for (const nd of nextDays) {
+              if (nd === dateToCheck) continue;
+              const alt = await getAvailableSlots(adminClient, company_id, nd);
+              if (alt.slots.length > 0) { alternatives.push(alt); if (alternatives.length >= 2) break; }
+            }
+            toolResult = { requested_date: dateToCheck, available_slots: [], message: `Sem horários em ${availability.dayName}`, alternatives };
+          } else {
+            toolResult = { date: dateToCheck, day_name: availability.dayName, available_slots: availability.slots, total_available: availability.slots.length };
+          }
+          toolActions.push({ tool: "check_availability", result: toolResult });
+        }
+
+        if (fnName === "schedule_appointment") {
+          reply = args.message_to_lead || reply;
+          toolResult = { success: true, message: "[TESTE] Agendamento simulado com sucesso", date: args.date, time: args.time, modality: args.modality || "online" };
+          toolActions.push({ tool: "schedule_appointment", result: toolResult });
+        }
+
+        if (fnName === "qualify_lead") {
+          toolResult = { success: true, status: args.status };
+          toolActions.push({ tool: "qualify_lead", result: toolResult });
+        }
+
+        aiMessages.push({
+          role: "tool",
+          tool_call_id: toolCall.id,
+          content: JSON.stringify(toolResult),
+        });
+      }
+    }
+
+    const parts = splitIntoNaturalMessages(reply);
+
+    return new Response(JSON.stringify({ reply, parts, tool_actions: toolActions }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    console.error("test-bot-chat error:", error);
+    return new Response(JSON.stringify({ error: "Erro interno" }), {
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+});

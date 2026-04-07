@@ -119,8 +119,15 @@ MODALIDADE DO ATENDIMENTO:
 - Se o lead preferir presencial: agende normalmente e confirme que será presencial no escritório
 - Se o lead preferir online: agende e informe que receberá o link por aqui mesmo
 - NUNCA recuse o agendamento por causa da modalidade. Sempre agende independente de ser presencial ou online
-- Exemplo presencial: "Perfeito! Vamos marcar presencial no escritório então 😊 Qual o melhor dia e horário pra você?"
-- Exemplo online: "Ótimo! Podemos fazer por vídeo mesmo, bem prático! Qual dia fica bom?"
+
+AGENDAMENTO INTELIGENTE (OBRIGATÓRIO):
+- Quando o lead aceitar agendar, SEMPRE use a ferramenta "check_availability" PRIMEIRO para ver os horários disponíveis
+- Use a data que o lead sugeriu, ou o próximo dia útil se não especificou
+- Após receber os horários, ofereça EXATAMENTE 2 opções ao lead
+- Formato da oferta: "Tenho esses horários disponíveis pra você:\\n\\n📅 Opção 1: [dia da semana], dia [DD/MM] às [HH:MM]\\n📅 Opção 2: [dia da semana], dia [DD/MM] às [HH:MM]\\n\\nQual fica melhor pra você? 😊"
+- Quando o lead escolher uma opção, use "schedule_appointment" para confirmar
+- Após confirmar, envie uma mensagem simpática: "Pronto, agendado! ✅ [detalhes]"
+- NUNCA invente horários sem antes consultar a disponibilidade
 
 QUANDO O LEAD RESISTIR:
 "Entendo! Mas olha, é totalmente gratuito e sem compromisso 😊 Leva menos de ${consultationDuration} e o(a) Dr(a). vai analisar pessoalmente se você tem direito. Vale muito a pena!"
@@ -129,11 +136,88 @@ QUANDO O LEAD PERGUNTAR ALGO JURÍDICO:
 "Essa parte é mais técnica, o(a) advogado(a) vai te explicar pessoalmente com muito mais precisão! E o melhor: a consulta é gratuita 😊 Vamos marcar?"
 
 QUALIFICAÇÃO (ferramentas disponíveis):
+- "check_availability": SEMPRE use antes de sugerir horários. Informe a data desejada.
+- "schedule_appointment": Use APÓS o lead escolher um horário das opções oferecidas
 - "qualify_lead": Use quando souber o suficiente sobre o caso
-- "schedule_appointment": Use quando o lead aceitar agendar (presencial OU online) — pergunte dia e horário ANTES
 - "transfer_to_human": Quando necessário transferir para atendente humano
 
 Responda SEMPRE em português do Brasil.`;
+}
+
+async function getAvailableSlots(supabase: any, companyId: string, dateStr: string): Promise<{ date: string; dayName: string; slots: string[] }> {
+  const dayNames = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
+  const dayKeys = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+
+  const date = new Date(dateStr + "T12:00:00Z");
+  const dayOfWeek = date.getUTCDay();
+  const dayKey = dayKeys[dayOfWeek];
+  const dayName = dayNames[dayOfWeek];
+
+  // Get company business hours
+  const { data: company } = await supabase
+    .from("companies")
+    .select("business_hours")
+    .eq("id", companyId)
+    .single();
+
+  const businessHours: any = company?.business_hours || {};
+  let slots: string[] = [];
+
+  const dayConfig = businessHours[dayKey];
+  if (dayConfig && dayConfig.enabled !== false) {
+    const shifts = dayConfig.shifts || [];
+    for (const shift of shifts) {
+      if (!shift.start || !shift.end) continue;
+      const [startH, startM] = shift.start.split(":").map(Number);
+      const [endH, endM] = shift.end.split(":").map(Number);
+      const startMin = startH * 60 + startM;
+      const endMin = endH * 60 + endM;
+      for (let m = startMin; m < endMin; m += 30) {
+        const h = Math.floor(m / 60);
+        const min = m % 60;
+        slots.push(`${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`);
+      }
+    }
+  }
+
+  // Fallback: if no business hours configured, default 9-12 + 14-18
+  if (slots.length === 0 && dayOfWeek >= 1 && dayOfWeek <= 5) {
+    for (let h = 9; h < 12; h++) { slots.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`); }
+    for (let h = 14; h < 18; h++) { slots.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`); }
+  }
+
+  // Remove booked slots
+  const { data: existing } = await supabase
+    .from("lead_reminders")
+    .select("due_at")
+    .eq("company_id", companyId)
+    .gte("due_at", dateStr + "T00:00:00")
+    .lte("due_at", dateStr + "T23:59:59")
+    .eq("completed", false);
+
+  const bookedTimes = new Set(
+    (existing || []).map((r: any) => {
+      const d = new Date(r.due_at);
+      return `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}`;
+    })
+  );
+
+  const available = slots.filter(s => !bookedTimes.has(s));
+  return { date: dateStr, dayName, slots: available };
+}
+
+function getNextBusinessDays(count: number): string[] {
+  const days: string[] = [];
+  const now = new Date();
+  let d = new Date(now.getTime() + 86400000);
+  while (days.length < count) {
+    const dow = d.getUTCDay();
+    if (dow >= 1 && dow <= 5) {
+      days.push(d.toISOString().split("T")[0]);
+    }
+    d = new Date(d.getTime() + 86400000);
+  }
+  return days;
 }
 
 async function qualifyLeadWithAI(
@@ -152,6 +236,24 @@ async function qualifyLeadWithAI(
     {
       type: "function",
       function: {
+        name: "check_availability",
+        description: "Verifica horários disponíveis na agenda para uma data específica. SEMPRE use antes de sugerir horários ao lead.",
+        parameters: {
+          type: "object",
+          properties: {
+            date: {
+              type: "string",
+              description: "Data para verificar disponibilidade no formato YYYY-MM-DD. Se o lead não especificou, use o próximo dia útil."
+            }
+          },
+          required: ["date"],
+          additionalProperties: false
+        }
+      }
+    },
+    {
+      type: "function",
+      function: {
         name: "qualify_lead",
         description: "Registra a qualificação do lead. Use quando tiver informações suficientes.",
         parameters: {
@@ -162,19 +264,9 @@ async function qualifyLeadWithAI(
               enum: ["qualified", "not_qualified", "needs_more_info"],
               description: "qualified = lead adequado, not_qualified = caso não se encaixa, needs_more_info = precisa de mais informações"
             },
-            reason: {
-              type: "string",
-              description: "Motivo da qualificação em português"
-            },
-            summary: {
-              type: "string",
-              description: "Resumo breve do caso do lead"
-            },
-            lead_score: {
-              type: "string",
-              enum: ["quente", "morno", "frio"],
-              description: "quente = muito interessado/engajado, morno = interesse moderado, frio = pouco engajamento"
-            }
+            reason: { type: "string", description: "Motivo da qualificação em português" },
+            summary: { type: "string", description: "Resumo breve do caso do lead" },
+            lead_score: { type: "string", enum: ["quente", "morno", "frio"], description: "quente = muito interessado, morno = moderado, frio = pouco engajamento" }
           },
           required: ["status", "reason", "lead_score"],
           additionalProperties: false
@@ -185,26 +277,15 @@ async function qualifyLeadWithAI(
       type: "function",
       function: {
         name: "schedule_appointment",
-        description: "Agenda uma consulta/reunião para o lead na agenda do sistema. Use quando o lead aceitar agendar ou demonstrar interesse claro.",
+        description: "Agenda uma consulta/reunião para o lead. Use SOMENTE APÓS o lead escolher um horário das opções apresentadas.",
         parameters: {
           type: "object",
           properties: {
-            message_to_lead: {
-              type: "string",
-              description: "Mensagem confirmando o agendamento para o lead"
-            },
-            date: {
-              type: "string",
-              description: "Data sugerida para o agendamento no formato YYYY-MM-DD. Se o lead não especificou, sugira o próximo dia útil."
-            },
-            time: {
-              type: "string",
-              description: "Horário sugerido no formato HH:MM. Se não especificado, use 10:00."
-            },
-            summary: {
-              type: "string",
-              description: "Breve descrição do assunto da reunião"
-            }
+            message_to_lead: { type: "string", description: "Mensagem confirmando o agendamento para o lead" },
+            date: { type: "string", description: "Data escolhida pelo lead no formato YYYY-MM-DD" },
+            time: { type: "string", description: "Horário escolhido pelo lead no formato HH:MM" },
+            summary: { type: "string", description: "Breve descrição do assunto da reunião" },
+            modality: { type: "string", enum: ["presencial", "online"], description: "Modalidade escolhida pelo lead" }
           },
           required: ["message_to_lead", "date", "time"],
           additionalProperties: false
@@ -215,14 +296,11 @@ async function qualifyLeadWithAI(
       type: "function",
       function: {
         name: "transfer_to_human",
-        description: "Transfere para atendente humano quando o lead for qualificado.",
+        description: "Transfere para atendente humano quando necessário.",
         parameters: {
           type: "object",
           properties: {
-            message_to_lead: {
-              type: "string",
-              description: "Mensagem informando que será atendido por um especialista"
-            }
+            message_to_lead: { type: "string", description: "Mensagem informando que será atendido por um especialista" }
           },
           required: ["message_to_lead"],
           additionalProperties: false
@@ -232,40 +310,94 @@ async function qualifyLeadWithAI(
   ];
 
   try {
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...conversationHistory,
-        ],
-        tools,
-      }),
-    });
+    let aiMessages: any[] = [
+      { role: "system", content: systemPrompt },
+      ...conversationHistory,
+    ];
 
-    if (!aiResponse.ok) {
-      console.error("AI error:", aiResponse.status, await aiResponse.text());
-      return null;
-    }
-
-    const aiData = await aiResponse.json();
-    const message = aiData.choices?.[0]?.message;
-    if (!message) return null;
-
+    let replyText = "";
     let qualificationResult: { status: string; reason: string; summary?: string; lead_score?: string } | null = null;
-    let replyText = message.content || "";
     let shouldSchedule = false;
+    let maxIterations = 3;
 
-    if (message.tool_calls && message.tool_calls.length > 0) {
+    while (maxIterations > 0) {
+      maxIterations--;
+
+      const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-3-flash-preview",
+          messages: aiMessages,
+          tools,
+        }),
+      });
+
+      if (!aiResponse.ok) {
+        console.error("AI error:", aiResponse.status, await aiResponse.text());
+        return null;
+      }
+
+      const aiData = await aiResponse.json();
+      const message = aiData.choices?.[0]?.message;
+      if (!message) return null;
+
+      // If no tool calls, we have the final text response
+      if (!message.tool_calls || message.tool_calls.length === 0) {
+        replyText = message.content || "";
+        break;
+      }
+
+      // Process tool calls
+      aiMessages.push(message);
+      let hasCheckAvailability = false;
+
       for (const toolCall of message.tool_calls) {
         const fnName = toolCall.function?.name;
         let args: any = {};
         try { args = JSON.parse(toolCall.function?.arguments || "{}"); } catch { /* ignore */ }
+
+        let toolResult: any = {};
+
+        if (fnName === "check_availability") {
+          hasCheckAvailability = true;
+          let dateToCheck = args.date;
+          if (!dateToCheck) {
+            dateToCheck = getNextBusinessDays(1)[0];
+          }
+          const availability = await getAvailableSlots(supabase, companyId, dateToCheck);
+
+          // If no slots on requested day, also check next 2 business days
+          if (availability.slots.length === 0) {
+            const nextDays = getNextBusinessDays(3);
+            const alternatives: any[] = [];
+            for (const nd of nextDays) {
+              if (nd === dateToCheck) continue;
+              const alt = await getAvailableSlots(supabase, companyId, nd);
+              if (alt.slots.length > 0) {
+                alternatives.push(alt);
+                if (alternatives.length >= 2) break;
+              }
+            }
+            toolResult = {
+              requested_date: dateToCheck,
+              requested_day: availability.dayName,
+              available_slots: [],
+              message: `Não há horários disponíveis em ${availability.dayName} (${dateToCheck}).`,
+              alternatives
+            };
+          } else {
+            toolResult = {
+              date: dateToCheck,
+              day_name: availability.dayName,
+              available_slots: availability.slots,
+              total_available: availability.slots.length
+            };
+          }
+        }
 
         if (fnName === "qualify_lead") {
           qualificationResult = {
@@ -274,19 +406,19 @@ async function qualifyLeadWithAI(
             summary: args.summary || "",
             lead_score: args.lead_score || "morno",
           };
+          toolResult = { success: true, status: args.status };
         }
 
         if (fnName === "schedule_appointment") {
           shouldSchedule = true;
-          replyText = args.message_to_lead || replyText;
+          replyText = args.message_to_lead || "";
 
-          // Create appointment in the system agenda
           if (leadId) {
-            const appointmentDate = args.date || new Date(Date.now() + 86400000).toISOString().split("T")[0];
+            const appointmentDate = args.date || getNextBusinessDays(1)[0];
             const appointmentTime = args.time || "10:00";
             const dueAt = `${appointmentDate}T${appointmentTime}:00`;
+            const modality = args.modality || "online";
 
-            // Get lead name
             const { data: leadData } = await supabase
               .from("leads")
               .select("name")
@@ -299,18 +431,19 @@ async function qualifyLeadWithAI(
               lead_id: leadId,
               company_id: companyId,
               created_by: "00000000-0000-0000-0000-000000000000",
-              title: `📅 Consulta: ${leadName}`,
-              description: args.summary || `Agendamento automático via bot IA`,
+              title: `📅 Consulta ${modality === "presencial" ? "presencial" : "online"}: ${leadName}`,
+              description: args.summary || `Agendamento automático via bot IA (${modality})`,
               reminder_type: "meeting",
               due_at: dueAt,
             });
 
-            // Send WhatsApp notification to lawyer's alert number
+            // Notify lawyer
             if (config.alert_whatsapp) {
               const SERVER_URL = "https://ziondigital.uazapi.com";
               const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
               const alertPhone = config.alert_whatsapp.replace(/\D/g, "");
-              const alertMessage = `🔔 *Novo Agendamento Automático*\n\n👤 Lead: ${leadName}\n📅 Data: ${appointmentDate}\n⏰ Horário: ${appointmentTime}\n${args.summary ? `📋 Assunto: ${args.summary}\n` : ""}\n_Agendado automaticamente pelo bot SDR_`;
+              const modalityLabel = modality === "presencial" ? "🏢 Presencial no escritório" : "💻 Online (vídeo)";
+              const alertMessage = `🔔 *Novo Agendamento Automático*\n\n👤 Lead: ${leadName}\n📅 Data: ${appointmentDate}\n⏰ Horário: ${appointmentTime}\n📍 Modalidade: ${modalityLabel}\n${args.summary ? `📋 Assunto: ${args.summary}\n` : ""}\n_Agendado automaticamente pelo bot SDR_`;
 
               const alertHeaders: Record<string, string> = { "Content-Type": "application/json" };
               if (ADMIN_TOKEN) alertHeaders["admintoken"] = ADMIN_TOKEN;
@@ -324,78 +457,90 @@ async function qualifyLeadWithAI(
               });
             }
           }
+          toolResult = { success: true, message: "Agendamento criado com sucesso" };
         }
 
         if (fnName === "transfer_to_human") {
           replyText = args.message_to_lead || "Um especialista irá atendê-lo em breve!";
+          toolResult = { success: true };
         }
+
+        // Add tool result to messages for next iteration
+        aiMessages.push({
+          role: "tool",
+          tool_call_id: toolCall.id,
+          content: JSON.stringify(toolResult),
+        });
       }
 
-      // Apply qualification
-      if (qualificationResult && leadId) {
-        // Update lead score
-        const scoreUpdate: any = {};
-        if (qualificationResult.lead_score) {
-          scoreUpdate.lead_score = qualificationResult.lead_score;
+      // If we got a schedule or transfer (action tools), and there's a reply, break
+      if ((shouldSchedule || replyText) && !hasCheckAvailability) {
+        break;
+      }
+      // Otherwise loop — the AI needs to generate text after seeing tool results
+    }
+
+    // Apply qualification results
+    if (qualificationResult && leadId) {
+      const scoreUpdate: any = {};
+      if (qualificationResult.lead_score) {
+        scoreUpdate.lead_score = qualificationResult.lead_score;
+      }
+
+      if (qualificationResult.status === "qualified" || shouldSchedule) {
+        const newStatus = shouldSchedule ? "qualified" : "contacted";
+        await supabase.from("leads").update({
+          status: newStatus,
+          notes: `[IA] ${qualificationResult.reason}${qualificationResult.summary ? ` | ${qualificationResult.summary}` : ""}`,
+          ...scoreUpdate,
+        }).eq("id", leadId);
+
+        await supabase.from("lead_summaries").insert({
+          lead_id: leadId,
+          company_id: companyId,
+          summary_text: `🤖 ${shouldSchedule ? "Agendamento" : "Qualificação"}: ${qualificationResult.reason}${qualificationResult.summary ? `\n\nResumo: ${qualificationResult.summary}` : ""}`,
+          generated_by_ai: true,
+          created_by: "00000000-0000-0000-0000-000000000000",
+        });
+
+        const targetPosition = shouldSchedule ? 3 : 1;
+        const { data: columns } = await supabase
+          .from("kanban_columns")
+          .select("id")
+          .eq("company_id", companyId)
+          .order("position", { ascending: true })
+          .limit(targetPosition + 1);
+
+        if (columns && columns.length > targetPosition) {
+          await supabase.from("leads").update({
+            kanban_column_id: columns[targetPosition].id,
+          }).eq("id", leadId);
         }
+      } else if (qualificationResult.status === "not_qualified") {
+        const { data: lostColumn } = await supabase
+          .from("kanban_columns")
+          .select("id")
+          .eq("company_id", companyId)
+          .eq("is_lost", true)
+          .maybeSingle();
 
-        if (qualificationResult.status === "qualified" || shouldSchedule) {
-          const newStatus = shouldSchedule ? "qualified" : "contacted";
-          await supabase.from("leads").update({
-            status: newStatus,
-            notes: `[IA] ${qualificationResult.reason}${qualificationResult.summary ? ` | ${qualificationResult.summary}` : ""}`,
-            ...scoreUpdate,
-          }).eq("id", leadId);
+        await supabase.from("leads").update({
+          status: "lost",
+          notes: `[IA - Não qualificado] ${qualificationResult.reason}`,
+          ...scoreUpdate,
+          ...(lostColumn ? { kanban_column_id: lostColumn.id } : {}),
+        }).eq("id", leadId);
 
-          await supabase.from("lead_summaries").insert({
-            lead_id: leadId,
-            company_id: companyId,
-            summary_text: `🤖 ${shouldSchedule ? "Agendamento" : "Qualificação"}: ${qualificationResult.reason}${qualificationResult.summary ? `\n\nResumo: ${qualificationResult.summary}` : ""}`,
-            generated_by_ai: true,
-            created_by: "00000000-0000-0000-0000-000000000000",
-          });
-
-          // Move in kanban
-          const targetPosition = shouldSchedule ? 3 : 1; // "Agendado" or "Contatado"
-          const { data: columns } = await supabase
-            .from("kanban_columns")
-            .select("id")
-            .eq("company_id", companyId)
-            .order("position", { ascending: true })
-            .limit(targetPosition + 1);
-
-          if (columns && columns.length > targetPosition) {
-            await supabase.from("leads").update({
-              kanban_column_id: columns[targetPosition].id,
-            }).eq("id", leadId);
-          }
-        } else if (qualificationResult.status === "not_qualified") {
-          const { data: lostColumn } = await supabase
-            .from("kanban_columns")
-            .select("id")
-            .eq("company_id", companyId)
-            .eq("is_lost", true)
-            .maybeSingle();
-
-          await supabase.from("leads").update({
-            status: "lost",
-            notes: `[IA - Não qualificado] ${qualificationResult.reason}`,
-            ...scoreUpdate,
-            ...(lostColumn ? { kanban_column_id: lostColumn.id } : {}),
-          }).eq("id", leadId);
-
-          await supabase.from("lead_summaries").insert({
-            lead_id: leadId,
-            company_id: companyId,
-            summary_text: `🤖 Lead não qualificado: ${qualificationResult.reason}`,
-            generated_by_ai: true,
-            created_by: "00000000-0000-0000-0000-000000000000",
-          });
-        } else {
-          // needs_more_info — just update score
-          if (Object.keys(scoreUpdate).length > 0) {
-            await supabase.from("leads").update(scoreUpdate).eq("id", leadId);
-          }
+        await supabase.from("lead_summaries").insert({
+          lead_id: leadId,
+          company_id: companyId,
+          summary_text: `🤖 Lead não qualificado: ${qualificationResult.reason}`,
+          generated_by_ai: true,
+          created_by: "00000000-0000-0000-0000-000000000000",
+        });
+      } else {
+        if (Object.keys(scoreUpdate).length > 0) {
+          await supabase.from("leads").update(scoreUpdate).eq("id", leadId);
         }
       }
     }
