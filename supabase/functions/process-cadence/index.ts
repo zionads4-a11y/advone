@@ -147,6 +147,23 @@ serve(async (req) => {
             timestamp: new Date().toISOString(),
           });
 
+          // Move lead to the corresponding contact column (positions 0-4 = 1º-5º Contato)
+          // day_number 1 = already in 1º Contato (pos 0), so move to pos = day_number
+          const targetPosition = Math.min(msg.day_number, 4); // max position 4 (5º Contato)
+          const { data: targetColumn } = await supabase
+            .from("kanban_columns")
+            .select("id")
+            .eq("company_id", msg.company_id)
+            .eq("position", targetPosition)
+            .maybeSingle();
+
+          if (targetColumn) {
+            await supabase.from("leads").update({
+              kanban_column_id: targetColumn.id,
+            }).eq("id", msg.lead_id);
+            console.log(`Lead ${msg.lead_id} moved to column position ${targetPosition}`);
+          }
+
           // After the last attempt (5th), auto-move lead to "Perdido"
           if (msg.day_number >= MAX_CADENCE_ATTEMPTS) {
             const { data: lostColumn } = await supabase
