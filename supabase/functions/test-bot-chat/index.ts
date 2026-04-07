@@ -473,7 +473,7 @@ serve(async (req) => {
 
         if (fnName === "schedule_appointment") {
           reply = args.message_to_lead || reply;
-          toolResult = { success: true, message: "[TESTE] Agendamento simulado com sucesso", date: args.date, time: args.time, modality: args.modality || "online" };
+          toolResult = { success: true, message: "[TESTE] Agendamento simulado com sucesso", date: args.date, time: args.time, modality: args.modality || "online", unit: args.unit || "" };
           toolActions.push({ tool: "schedule_appointment", result: toolResult });
         }
 

@@ -465,18 +465,20 @@ async function qualifyLeadWithAI(
 
             const { data: leadData } = await supabase
               .from("leads")
-              .select("name")
+              .select("name, phone, whatsapp")
               .eq("id", leadId)
               .single();
 
             const leadName = leadData?.name || "Lead";
+            const leadPhone = leadData?.whatsapp || leadData?.phone || senderPhone || "Não informado";
+            const unitName = args.unit || "";
 
             await supabase.from("lead_reminders").insert({
               lead_id: leadId,
               company_id: companyId,
               created_by: "00000000-0000-0000-0000-000000000000",
               title: `📅 Consulta ${modality === "presencial" ? "presencial" : "online"}: ${leadName}`,
-              description: args.summary || `Agendamento automático via bot IA (${modality})`,
+              description: args.summary || `Agendamento automático via bot IA (${modality})${unitName ? ` - Unidade: ${unitName}` : ""}`,
               reminder_type: "meeting",
               due_at: dueAt,
             });
@@ -486,8 +488,9 @@ async function qualifyLeadWithAI(
               const SERVER_URL = "https://ziondigital.uazapi.com";
               const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
               const alertPhone = config.alert_whatsapp.replace(/\D/g, "");
-              const modalityLabel = modality === "presencial" ? "🏢 Presencial no escritório" : "💻 Online (vídeo)";
-              const alertMessage = `🔔 *Novo Agendamento Automático*\n\n👤 Lead: ${leadName}\n📅 Data: ${appointmentDate}\n⏰ Horário: ${appointmentTime}\n📍 Modalidade: ${modalityLabel}\n${args.summary ? `📋 Assunto: ${args.summary}\n` : ""}\n_Agendado automaticamente pelo bot SDR_`;
+              const modalityLabel = modality === "presencial" ? "🏢 Presencial" : "💻 Online (vídeo)";
+              const unitLine = modality === "presencial" && unitName ? `🏢 Unidade: ${unitName}\n` : "";
+              const alertMessage = `🔔 *Novo Agendamento Automático*\n\n👤 Nome: ${leadName}\n📱 Telefone: ${leadPhone}\n📅 Data: ${appointmentDate}\n⏰ Horário: ${appointmentTime}\n📍 Modalidade: ${modalityLabel}\n${unitLine}${args.summary ? `📋 Assunto: ${args.summary}\n` : ""}\n_Agendado automaticamente pelo bot SDR_`;
 
               const alertHeaders: Record<string, string> = { "Content-Type": "application/json" };
               if (ADMIN_TOKEN) alertHeaders["admintoken"] = ADMIN_TOKEN;
