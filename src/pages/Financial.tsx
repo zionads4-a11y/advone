@@ -106,7 +106,7 @@ export default function Financial() {
 
   // Asaas form
   const [asaasApiKey, setAsaasApiKey] = useState("");
-  const [asaasEnv, setAsaasEnv] = useState("sandbox");
+  const [asaasEnv, setAsaasEnv] = useState("production");
 
   useEffect(() => {
     if (companyId) fetchData();
@@ -417,15 +417,7 @@ export default function Financial() {
                 </div>
                 <div>
                   <Label>Ambiente</Label>
-                  <Select value={asaasEnv} onValueChange={setAsaasEnv}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="sandbox">Sandbox (teste)</SelectItem>
-                      <SelectItem value="production">Produção</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Input value="Produção" disabled className="bg-muted" />
                 </div>
                 {asaasConfig?.last_sync_at && (
                   <p className="text-xs text-muted-foreground">
