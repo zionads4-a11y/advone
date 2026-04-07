@@ -21,6 +21,7 @@ import Agenda from "./pages/Agenda";
 import Profile from "./pages/Profile";
 import BotConfig from "./pages/BotConfig";
 import CompanySettings from "./pages/CompanySettings";
+import Financial from "./pages/Financial";
 import AppLayout from "./components/layout/AppLayout";
 import NotFound from "./pages/NotFound";
 
