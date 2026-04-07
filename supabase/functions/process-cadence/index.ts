@@ -8,11 +8,14 @@ const corsHeaders = {
 };
 
 const CADENCE_MESSAGES: Record<number, string> = {
-  1: "Oi! Vi que você ainda não conseguiu agendar com o advogado.\nQuer que eu te envie o link novamente?",
+  1: "Oi! Vi que você ainda não conseguiu responder 😊\nPosso te ajudar com alguma coisa?",
   2: "Passando para te ajudar 😊\nAinda faz sentido falar com um advogado sobre seu caso?",
   3: "Dependendo do seu caso, pode ser importante agir rápido.\nPosso te encaixar na agenda 👇",
-  5: "Última mensagem, prometo 😅\nSe ainda precisar de ajuda jurídica, o advogado está disponível.",
+  4: "Oi! Só passando mais uma vez. A consulta é gratuita e sem compromisso 😊\nQuer que eu agende pra você?",
+  5: "Última mensagem, prometo 😅\nSe ainda precisar de ajuda jurídica, o advogado está disponível. É só responder!",
 };
+
+const MAX_CADENCE_ATTEMPTS = 5;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -143,6 +146,25 @@ serve(async (req) => {
             message_id_external: sendResult.messageId || null,
             timestamp: new Date().toISOString(),
           });
+
+          // After the last attempt (5th), auto-move lead to "Perdido"
+          if (msg.day_number >= MAX_CADENCE_ATTEMPTS) {
+            const { data: lostColumn } = await supabase
+              .from("kanban_columns")
+              .select("id")
+              .eq("company_id", msg.company_id)
+              .eq("is_lost", true)
+              .maybeSingle();
+
+            if (lostColumn) {
+              await supabase.from("leads").update({
+                kanban_column_id: lostColumn.id,
+                status: "lost",
+                notes: "[Cadência] Lead não respondeu após 5 tentativas de contato",
+              }).eq("id", msg.lead_id);
+              console.log(`Lead ${msg.lead_id} auto-moved to Perdido after ${MAX_CADENCE_ATTEMPTS} attempts`);
+            }
+          }
 
           sent++;
         } else {
