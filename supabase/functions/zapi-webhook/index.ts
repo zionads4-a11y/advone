@@ -550,7 +550,7 @@ async function qualifyLeadWithAI(
           created_by: "00000000-0000-0000-0000-000000000000",
         });
 
-        const targetPosition = shouldSchedule ? 3 : 1;
+        const targetPosition = shouldSchedule ? 6 : 5;
         const { data: columns } = await supabase
           .from("kanban_columns")
           .select("id")
@@ -871,18 +871,18 @@ serve(async (req) => {
           .eq("lead_id", leadId)
           .eq("status", "pending");
 
-        // Auto-move lead to "Em Atendimento" (position 1) if still in first column
+        // Auto-move lead to "Em Atendimento" (position 5) when lead responds
         if (existingLead?.status === "new") {
-          const { data: columns } = await supabase
+          const { data: emAtendimentoCol } = await supabase
             .from("kanban_columns")
             .select("id")
             .eq("company_id", companyId)
-            .order("position", { ascending: true })
-            .limit(2);
+            .eq("position", 5)
+            .maybeSingle();
 
-          if (columns && columns.length > 1) {
+          if (emAtendimentoCol) {
             await supabase.from("leads").update({
-              kanban_column_id: columns[1].id,
+              kanban_column_id: emAtendimentoCol.id,
               status: "contacted",
             }).eq("id", leadId);
             console.log(`Lead ${leadId} auto-moved to Em Atendimento`);

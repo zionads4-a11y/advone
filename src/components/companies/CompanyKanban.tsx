@@ -33,12 +33,15 @@ interface Lead {
 }
 
 const DEFAULT_COLUMNS = [
-  { name: "Novo", color: "#f59e0b", position: 0, is_won: false, is_lost: false },
-  { name: "Contatado", color: "#3b82f6", position: 1, is_won: false, is_lost: false },
-  { name: "Qualificado", color: "#8b5cf6", position: 2, is_won: false, is_lost: false },
-  { name: "Negociando", color: "#06b6d4", position: 3, is_won: false, is_lost: false },
-  { name: "Vendido", color: "#22c55e", position: 4, is_won: true, is_lost: false },
-  { name: "Perdido", color: "#ef4444", position: 5, is_won: false, is_lost: true },
+  { name: "1º Contato", color: "#3b82f6", position: 0, is_won: false, is_lost: false },
+  { name: "2º Contato", color: "#60a5fa", position: 1, is_won: false, is_lost: false },
+  { name: "3º Contato", color: "#93c5fd", position: 2, is_won: false, is_lost: false },
+  { name: "4º Contato", color: "#a78bfa", position: 3, is_won: false, is_lost: false },
+  { name: "5º Contato", color: "#c084fc", position: 4, is_won: false, is_lost: false },
+  { name: "Em Atendimento", color: "#f59e0b", position: 5, is_won: false, is_lost: false },
+  { name: "Agendado", color: "#10b981", position: 6, is_won: true, is_lost: false },
+  { name: "Ganho", color: "#22c55e", position: 7, is_won: true, is_lost: false },
+  { name: "Perdido", color: "#ef4444", position: 8, is_won: false, is_lost: true },
 ];
 
 interface CompanyKanbanProps {
