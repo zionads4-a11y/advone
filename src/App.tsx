@@ -53,6 +53,7 @@ const App = () => (
               <Route path="/profile" element={<Profile />} />
               <Route path="/bot-config" element={<BotConfig />} />
               <Route path="/company-settings" element={<CompanySettings />} />
+              <Route path="/financeiro" element={<Financial />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
