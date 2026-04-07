@@ -139,8 +139,15 @@ serve(async (req) => {
       });
     }
 
+    // Use service role to bypass RLS for config lookup
+    const adminClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      { auth: { persistSession: false } }
+    );
+
     // Get company config
-    const { data: config } = await supabase
+    const { data: config } = await adminClient
       .from("whatsapp_configs")
       .select("*")
       .eq("company_id", company_id)
