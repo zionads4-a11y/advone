@@ -139,7 +139,8 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
   }
 
   return (
-    <div className="space-y-6">
+    <div className="grid gap-6 lg:grid-cols-[1fr,400px]">
+      <div className="space-y-6">
       {/* Main toggle card */}
       <Card className="border-border/50">
         <CardHeader className="pb-3">
