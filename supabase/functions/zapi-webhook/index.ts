@@ -328,7 +328,8 @@ async function qualifyLeadWithAI(
             date: { type: "string", description: "Data escolhida pelo lead no formato YYYY-MM-DD" },
             time: { type: "string", description: "Horário escolhido pelo lead no formato HH:MM" },
             summary: { type: "string", description: "Breve descrição do assunto da reunião" },
-            modality: { type: "string", enum: ["presencial", "online"], description: "Modalidade escolhida pelo lead" }
+            modality: { type: "string", enum: ["presencial", "online"], description: "Modalidade escolhida pelo lead" },
+            unit: { type: "string", description: "Nome da unidade/escritório escolhida pelo lead (se presencial)" }
           },
           required: ["message_to_lead", "date", "time"],
           additionalProperties: false
