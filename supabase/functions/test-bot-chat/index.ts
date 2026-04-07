@@ -426,11 +426,11 @@ serve(async (req) => {
         let toolResult: any = {};
 
         if (fnName === "check_availability") {
-          let dateToCheck = args.date || getNextBusinessDays(1)[0];
+          let dateToCheck = args.date || getNextAvailableDays(1)[0];
           const availability = await getAvailableSlots(adminClient, company_id, dateToCheck);
 
           if (availability.slots.length === 0) {
-            const nextDays = getNextBusinessDays(3);
+            const nextDays = getNextAvailableDays(3);
             const alternatives: any[] = [];
             for (const nd of nextDays) {
               if (nd === dateToCheck) continue;

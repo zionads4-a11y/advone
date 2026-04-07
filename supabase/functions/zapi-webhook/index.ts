@@ -384,13 +384,13 @@ async function qualifyLeadWithAI(
           hasCheckAvailability = true;
           let dateToCheck = args.date;
           if (!dateToCheck) {
-            dateToCheck = getNextBusinessDays(1)[0];
+            dateToCheck = getNextAvailableDays(1)[0];
           }
           const availability = await getAvailableSlots(supabase, companyId, dateToCheck);
 
           // If no slots on requested day, also check next 2 business days
           if (availability.slots.length === 0) {
-            const nextDays = getNextBusinessDays(3);
+            const nextDays = getNextAvailableDays(3);
             const alternatives: any[] = [];
             for (const nd of nextDays) {
               if (nd === dateToCheck) continue;
@@ -432,7 +432,7 @@ async function qualifyLeadWithAI(
           replyText = args.message_to_lead || "";
 
           if (leadId) {
-            const appointmentDate = args.date || getNextBusinessDays(1)[0];
+            const appointmentDate = args.date || getNextAvailableDays(1)[0];
             const appointmentTime = args.time || "10:00";
             const dueAt = `${appointmentDate}T${appointmentTime}:00`;
             const modality = args.modality || "online";
