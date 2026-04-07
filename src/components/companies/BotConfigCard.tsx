@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Bot, Loader2, Save, ShieldCheck, Building2, Link2, Users, Clock, ListChecks } from "lucide-react";
 import { toast } from "sonner";
 import { TriageOptionsEditor, type TriageOption } from "./TriageOptionsEditor";
+import { BotTestChat } from "./BotTestChat";
 
 interface BotConfigCardProps {
   companyId: string;
