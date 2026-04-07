@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX idx_financial_transactions_asaas_payment_id ON public.financial_transactions (asaas_payment_id) WHERE asaas_payment_id IS NOT NULL;
