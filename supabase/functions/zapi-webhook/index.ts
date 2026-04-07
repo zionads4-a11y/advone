@@ -211,7 +211,8 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
     }
   }
 
-  if (slots.length === 0 && dayOfWeek >= 1 && dayOfWeek <= 5) {
+  const hasAnyConfig = Object.keys(businessHours).length > 0;
+  if (slots.length === 0 && !hasAnyConfig && dayOfWeek >= 1 && dayOfWeek <= 5) {
     for (let h = 9; h < 12; h++) { slots.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`); }
     for (let h = 14; h < 18; h++) { slots.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`); }
   }
