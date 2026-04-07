@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      asaas_configs: {
+        Row: {
+          api_key: string
+          company_id: string
+          created_at: string
+          environment: string
+          id: string
+          last_sync_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          api_key: string
+          company_id: string
+          created_at?: string
+          environment?: string
+          id?: string
+          last_sync_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          api_key?: string
+          company_id?: string
+          created_at?: string
+          environment?: string
+          id?: string
+          last_sync_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asaas_configs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -226,6 +264,75 @@ export type Database = {
           whatsapp?: string | null
         }
         Relationships: []
+      }
+      financial_transactions: {
+        Row: {
+          amount: number
+          asaas_payment_id: string | null
+          category: string | null
+          company_id: string
+          created_at: string
+          created_by: string
+          description: string
+          due_date: string
+          id: string
+          lead_id: string | null
+          notes: string | null
+          paid_date: string | null
+          status: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          asaas_payment_id?: string | null
+          category?: string | null
+          company_id: string
+          created_at?: string
+          created_by: string
+          description: string
+          due_date: string
+          id?: string
+          lead_id?: string | null
+          notes?: string | null
+          paid_date?: string | null
+          status?: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          asaas_payment_id?: string | null
+          category?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string
+          due_date?: string
+          id?: string
+          lead_id?: string | null
+          notes?: string | null
+          paid_date?: string | null
+          status?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_transactions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       kanban_columns: {
         Row: {
