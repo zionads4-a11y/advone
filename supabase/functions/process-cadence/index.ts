@@ -147,6 +147,25 @@ serve(async (req) => {
             timestamp: new Date().toISOString(),
           });
 
+          // After the last attempt (5th), auto-move lead to "Perdido"
+          if (msg.day_number >= MAX_CADENCE_ATTEMPTS) {
+            const { data: lostColumn } = await supabase
+              .from("kanban_columns")
+              .select("id")
+              .eq("company_id", msg.company_id)
+              .eq("is_lost", true)
+              .maybeSingle();
+
+            if (lostColumn) {
+              await supabase.from("leads").update({
+                kanban_column_id: lostColumn.id,
+                status: "lost",
+                notes: "[Cadência] Lead não respondeu após 5 tentativas de contato",
+              }).eq("id", msg.lead_id);
+              console.log(`Lead ${msg.lead_id} auto-moved to Perdido after ${MAX_CADENCE_ATTEMPTS} attempts`);
+            }
+          }
+
           sent++;
         } else {
           console.error("Z-API send failed for cadence:", msg.id, await sendResponse.text());
