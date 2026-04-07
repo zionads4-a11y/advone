@@ -106,7 +106,7 @@ export default function Financial() {
 
   // Asaas form
   const [asaasApiKey, setAsaasApiKey] = useState("");
-  const [asaasEnv, setAsaasEnv] = useState("sandbox");
+  const [asaasEnv, setAsaasEnv] = useState("production");
 
   useEffect(() => {
     if (companyId) fetchData();
