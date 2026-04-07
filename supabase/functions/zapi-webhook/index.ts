@@ -176,12 +176,31 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
   let slots: string[] = [];
 
   const dayConfig = businessHours[dayKey];
-  if (dayConfig && dayConfig.enabled !== false) {
+  
+  // Support both formats: array of {open,close} or {enabled, shifts:[{start,end}]}
+  if (Array.isArray(dayConfig) && dayConfig.length > 0) {
+    for (const shift of dayConfig) {
+      const start = shift.open || shift.start;
+      const end = shift.close || shift.end;
+      if (!start || !end) continue;
+      const [startH, startM] = start.split(":").map(Number);
+      const [endH, endM] = end.split(":").map(Number);
+      const startMin = startH * 60 + startM;
+      const endMin = endH * 60 + endM;
+      for (let m = startMin; m < endMin; m += 30) {
+        const h = Math.floor(m / 60);
+        const min = m % 60;
+        slots.push(`${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`);
+      }
+    }
+  } else if (dayConfig && typeof dayConfig === "object" && dayConfig.enabled !== false) {
     const shifts = dayConfig.shifts || [];
     for (const shift of shifts) {
-      if (!shift.start || !shift.end) continue;
-      const [startH, startM] = shift.start.split(":").map(Number);
-      const [endH, endM] = shift.end.split(":").map(Number);
+      const start = shift.open || shift.start;
+      const end = shift.close || shift.end;
+      if (!start || !end) continue;
+      const [startH, startM] = start.split(":").map(Number);
+      const [endH, endM] = end.split(":").map(Number);
       const startMin = startH * 60 + startM;
       const endMin = endH * 60 + endM;
       for (let m = startMin; m < endMin; m += 30) {
@@ -192,7 +211,8 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
     }
   }
 
-  if (slots.length === 0 && dayOfWeek >= 1 && dayOfWeek <= 5) {
+  const hasAnyConfig = Object.keys(businessHours).length > 0;
+  if (slots.length === 0 && !hasAnyConfig && dayOfWeek >= 1 && dayOfWeek <= 5) {
     for (let h = 9; h < 12; h++) { slots.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`); }
     for (let h = 14; h < 18; h++) { slots.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`); }
   }
