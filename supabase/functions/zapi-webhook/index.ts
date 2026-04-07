@@ -550,7 +550,7 @@ async function qualifyLeadWithAI(
           created_by: "00000000-0000-0000-0000-000000000000",
         });
 
-        const targetPosition = shouldSchedule ? 3 : 1;
+        const targetPosition = shouldSchedule ? 6 : 5;
         const { data: columns } = await supabase
           .from("kanban_columns")
           .select("id")
