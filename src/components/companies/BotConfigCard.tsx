@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Bot, Loader2, Save, ShieldCheck, Building2, Link2, Users, Clock, ListChecks } from "lucide-react";
 import { toast } from "sonner";
 import { TriageOptionsEditor, type TriageOption } from "./TriageOptionsEditor";
+import { BotTestChat } from "./BotTestChat";
 
 interface BotConfigCardProps {
   companyId: string;
@@ -138,7 +139,8 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
   }
 
   return (
-    <div className="space-y-6">
+    <div className="grid gap-6 lg:grid-cols-[1fr,400px]">
+      <div className="space-y-6">
       {/* Main toggle card */}
       <Card className="border-border/50">
         <CardHeader className="pb-3">
@@ -345,6 +347,12 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
           </Button>
         </CardContent>
       </Card>
+      </div>
+
+      {/* Test Chat Panel */}
+      <div className="lg:sticky lg:top-4 self-start">
+        <BotTestChat companyId={companyId} />
+      </div>
     </div>
   );
 }
