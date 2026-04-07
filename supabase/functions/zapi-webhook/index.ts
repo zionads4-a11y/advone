@@ -470,7 +470,7 @@ async function qualifyLeadWithAI(
               .single();
 
             const leadName = leadData?.name || "Lead";
-            const leadPhone = leadData?.whatsapp || leadData?.phone || senderPhone || "Não informado";
+            const leadPhone = leadData?.whatsapp || leadData?.phone || cleanPhone || "Não informado";
             const unitName = args.unit || "";
 
             await supabase.from("lead_reminders").insert({
