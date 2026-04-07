@@ -369,7 +369,8 @@ serve(async (req) => {
               date: { type: "string", description: "Data YYYY-MM-DD" },
               time: { type: "string", description: "Horário HH:MM" },
               summary: { type: "string", description: "Assunto da reunião" },
-              modality: { type: "string", enum: ["presencial", "online"] }
+              modality: { type: "string", enum: ["presencial", "online"] },
+              unit: { type: "string", description: "Nome da unidade/escritório (se presencial)" }
             },
             required: ["message_to_lead", "date", "time"],
             additionalProperties: false
@@ -472,7 +473,7 @@ serve(async (req) => {
 
         if (fnName === "schedule_appointment") {
           reply = args.message_to_lead || reply;
-          toolResult = { success: true, message: "[TESTE] Agendamento simulado com sucesso", date: args.date, time: args.time, modality: args.modality || "online" };
+          toolResult = { success: true, message: "[TESTE] Agendamento simulado com sucesso", date: args.date, time: args.time, modality: args.modality || "online", unit: args.unit || "" };
           toolActions.push({ tool: "schedule_appointment", result: toolResult });
         }
 
