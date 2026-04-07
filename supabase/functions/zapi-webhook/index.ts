@@ -611,14 +611,22 @@ async function enrollInCadence(supabase: any, companyId: string, leadId: string,
   if (existing && existing.length > 0) return; // Already enrolled
 
   const now = new Date();
-  const cadenceDays = [1, 2, 3, 5];
+  // Attempt 1: 30 minutes after first contact
+  // Attempts 2-5: every 24 hours after the previous
+  const delaysMs = [
+    30 * 60 * 1000,           // 30 min
+    24 * 60 * 60 * 1000,      // +24h (day 1)
+    2 * 24 * 60 * 60 * 1000,  // +48h (day 2)
+    3 * 24 * 60 * 60 * 1000,  // +72h (day 3)
+    4 * 24 * 60 * 60 * 1000,  // +96h (day 4)
+  ];
 
-  const messages = cadenceDays.map((day) => ({
+  const messages = delaysMs.map((delayMs, i) => ({
     company_id: companyId,
     lead_id: leadId,
     phone,
-    day_number: day,
-    scheduled_at: new Date(now.getTime() + day * 24 * 60 * 60 * 1000).toISOString(),
+    day_number: i + 1,
+    scheduled_at: new Date(now.getTime() + delayMs).toISOString(),
     status: "pending",
   }));
 
@@ -626,7 +634,7 @@ async function enrollInCadence(supabase: any, companyId: string, leadId: string,
   if (error) {
     console.error("Error enrolling in cadence:", error);
   } else {
-    console.log(`Lead ${leadId} enrolled in cadence (${cadenceDays.length} messages)`);
+    console.log(`Lead ${leadId} enrolled in cadence (${messages.length} messages, first in 30min)`);
   }
 }
 
