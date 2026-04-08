@@ -165,7 +165,7 @@ export default function LandingPage() {
         <div className="overflow-hidden rounded-2xl border border-[hsl(220,20%,16%)] shadow-2xl shadow-[hsl(153,60%,45%)]/5">
           <img
             src={dashboardMockup}
-            alt="Dashboard do CRM Zion Digital"
+            alt="Dashboard do CRM AdvOne"
             className="w-full"
             loading="lazy"
             width={1200}
