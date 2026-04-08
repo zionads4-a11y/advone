@@ -26,7 +26,7 @@ export default function Auth() {
     <div className="dark flex min-h-screen items-center justify-center bg-background p-4">
       <div className="w-full max-w-md space-y-4">
         <div className="flex flex-col items-center gap-1">
-          <img src={logoZionDigital} alt="Zion Digital" className="h-64 w-auto" />
+          <img src={logoAdvOne} alt="AdvOne" className="h-64 w-auto" />
           <p className="text-sm text-muted-foreground">
             CRM inteligente para gestão de leads
           </p>

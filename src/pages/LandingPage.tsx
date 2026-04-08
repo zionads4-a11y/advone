@@ -419,9 +419,9 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-[hsl(220,20%,16%)] bg-[hsl(220,28%,5%)]">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-8 md:flex-row">
-          <img src={logoZionDigital} alt="Zion Digital" className="h-10 w-auto" />
+          <img src={logoAdvOne} alt="AdvOne" className="h-10 w-auto" />
           <p className="text-sm text-[hsl(220,10%,45%)]">
-            © {new Date().getFullYear()} Zion Digital. Todos os direitos reservados.
+            © {new Date().getFullYear()} AdvOne. Todos os direitos reservados.
           </p>
           <div className="flex gap-6">
             <a href="#funcionalidades" className="text-sm text-[hsl(220,10%,55%)] hover:text-[hsl(153,60%,45%)]">Funcionalidades</a>
