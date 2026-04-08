@@ -274,6 +274,7 @@ export default function Cases() {
     setFormCaseNumber(c.case_number || "");
     setFormNotes(c.notes || "");
     setFormStatus(c.status);
+    setFormLeadId(c.lead_id || "none");
     setCreateOpen(true);
   };
 
