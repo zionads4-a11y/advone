@@ -975,6 +975,22 @@ serve(async (req) => {
           .is("lead_id", null);
       }
 
+      // Deduplicate: skip if this message was already processed
+      if (messageIdExternal) {
+        const { data: existingMsg } = await supabase
+          .from("whatsapp_messages")
+          .select("id")
+          .eq("message_id_external", messageIdExternal)
+          .maybeSingle();
+
+        if (existingMsg) {
+          console.log("Duplicate message skipped:", messageIdExternal);
+          return new Response(JSON.stringify({ ok: true, skipped: "duplicate" }), {
+            status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      }
+
       // Store incoming message
       await supabase.from("whatsapp_messages").insert({
         company_id: companyId,
@@ -991,7 +1007,8 @@ serve(async (req) => {
       if (config.ai_enabled && config.ai_auto_reply && leadId && !existingLead?.bot_disabled) {
         try {
           const leadStatus = existingLead?.status;
-          const isAlreadyHandled = leadStatus && !["new"].includes(leadStatus);
+          // Bot continues for new and contacted leads — stops only for qualified/won/lost/negotiating
+          const isAlreadyHandled = leadStatus && !["new", "contacted"].includes(leadStatus);
 
           if (!isAlreadyHandled) {
             const { data: recentMsgs } = await supabase
