@@ -59,6 +59,7 @@ const operadorItems = [
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
   { title: "Documentos", url: "/documentos", icon: FileText },
+  { title: "Processos", url: "/processos", icon: Briefcase },
   { title: "Bot", url: "/bot-config", icon: Bot },
 ];
 
