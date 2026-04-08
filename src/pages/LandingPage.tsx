@@ -112,7 +112,7 @@ export default function LandingPage() {
         <div className="relative mx-auto max-w-5xl px-6 pb-24 pt-20 text-center md:pb-32 md:pt-28">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[hsl(153,60%,45%)]/30 bg-[hsl(153,60%,45%)]/10 px-4 py-1.5 text-sm text-[hsl(153,60%,45%)]">
             <Zap className="h-4 w-4" />
-            CRM com Inteligência Artificial para Advogados
+            CRM com Inteligência Artificial — Seu escritório em um só lugar
           </div>
           <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tight md:text-6xl lg:text-7xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             <span className="gradient-text">CRM completo</span> para a gestão{" "}
