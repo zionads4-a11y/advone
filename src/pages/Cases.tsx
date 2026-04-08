@@ -136,6 +136,16 @@ export default function Cases() {
   const canDelete = userRole === "admin" || userRole === "gerente";
   const canEdit = userRole === "admin" || userRole === "gerente";
 
+  const fetchLeads = useCallback(async () => {
+    if (!companyId) return;
+    const { data } = await supabase
+      .from("leads")
+      .select("id, name")
+      .eq("company_id", companyId)
+      .order("name");
+    setCompanyLeads((data || []) as LeadOption[]);
+  }, [companyId]);
+
   const fetchCases = useCallback(async () => {
     if (!companyId) return;
     setLoading(true);
@@ -169,10 +179,24 @@ export default function Cases() {
       }
     }
 
+    // Get lead names for linked leads
+    const leadIds = (data || []).map((c: any) => c.lead_id).filter(Boolean);
+    let leadNames: Record<string, string> = {};
+    if (leadIds.length > 0) {
+      const { data: leads } = await supabase
+        .from("leads")
+        .select("id, name")
+        .in("id", leadIds);
+      if (leads) {
+        leads.forEach((l: any) => { leadNames[l.id] = l.name; });
+      }
+    }
+
     setCases(
       (data || []).map((c: any) => ({
         ...c,
         doc_count: docCounts[c.id] || 0,
+        lead_name: c.lead_id ? leadNames[c.lead_id] || null : null,
       }))
     );
     setLoading(false);
