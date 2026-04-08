@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
 
       // Add process to monitoring
       case "add_process": {
-        const { company_id, numero_cnj, client_name } = body;
+        const { company_id, numero_cnj, client_name, tribunal } = body;
         if (!company_id || !numero_cnj || !client_name) {
           throw new Error("company_id, numero_cnj e client_name obrigatórios");
         }
@@ -114,12 +114,29 @@ Deno.serve(async (req) => {
           throw new Error(`Limite de ${plan.max_processes} processos atingido`);
         }
 
+        // Register monitoring on Escavador API (SEMANAL frequency)
+        const monitoringBody: any = {
+          numero: numero_cnj.trim(),
+          frequencia: "SEMANAL",
+        };
+        if (tribunal) {
+          monitoringBody.tribunal = tribunal;
+        }
+
+        let escavadorMonitoring: any = null;
+        try {
+          escavadorMonitoring = await escavadorFetch("/processos/monitorar", "POST", monitoringBody);
+          console.log("Escavador monitoring registered:", JSON.stringify(escavadorMonitoring));
+        } catch (e) {
+          console.error("Error registering monitoring on Escavador:", e.message);
+          // Continue - save locally even if Escavador registration fails
+        }
+
         // Fetch process data from Escavador
         let processData: any = null;
         try {
           processData = await escavadorFetch(`/processos/numero_cnj/${encodeURIComponent(numero_cnj)}`);
         } catch (e) {
-          // Process may not exist yet in Escavador, continue with basic data
           console.log("Process not found in Escavador, saving with basic data:", e.message);
         }
 
@@ -130,7 +147,7 @@ Deno.serve(async (req) => {
           company_id,
           numero_cnj: numero_cnj.trim(),
           client_name,
-          tribunal_sigla: fonte?.sigla || null,
+          tribunal_sigla: tribunal || fonte?.sigla || null,
           classe: capa?.classe || null,
           assunto: capa?.assunto || null,
           area: capa?.area || null,
