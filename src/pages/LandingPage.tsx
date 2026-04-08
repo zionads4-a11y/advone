@@ -126,12 +126,12 @@ export default function LandingPage() {
               onClick={() => navigate("/auth")}
               className="gradient-primary glow-primary px-8 py-6 text-lg font-semibold text-[hsl(0,0%,100%)]"
             >
-              Começar gratuitamente
+              Começar agora
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </div>
           <p className="mt-4 text-sm text-[hsl(220,10%,45%)]">
-            Sem cartão de crédito. Configure em minutos.
+            Planos a partir de R$ 297/mês. Configure em minutos.
           </p>
         </div>
       </section>
