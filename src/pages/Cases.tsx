@@ -19,6 +19,7 @@ import {
   Briefcase,
   Hash,
   User,
+  Link2,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -55,11 +56,18 @@ interface CaseRecord {
   company_id: string;
   client_name: string;
   case_number: string | null;
+  lead_id: string | null;
   status: string;
   notes: string | null;
   created_by: string;
   created_at: string;
   doc_count?: number;
+  lead_name?: string;
+}
+
+interface LeadOption {
+  id: string;
+  name: string;
 }
 
 interface CaseDocument {
@@ -114,6 +122,10 @@ export default function Cases() {
   const [formCaseNumber, setFormCaseNumber] = useState("");
   const [formNotes, setFormNotes] = useState("");
   const [formStatus, setFormStatus] = useState("ativo");
+  const [formLeadId, setFormLeadId] = useState<string>("none");
+
+  // Leads for linking
+  const [companyLeads, setCompanyLeads] = useState<LeadOption[]>([]);
 
   // Upload dialog
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -124,6 +136,16 @@ export default function Cases() {
 
   const canDelete = userRole === "admin" || userRole === "gerente";
   const canEdit = userRole === "admin" || userRole === "gerente";
+
+  const fetchLeads = useCallback(async () => {
+    if (!companyId) return;
+    const { data } = await supabase
+      .from("leads")
+      .select("id, name")
+      .eq("company_id", companyId)
+      .order("name");
+    setCompanyLeads((data || []) as LeadOption[]);
+  }, [companyId]);
 
   const fetchCases = useCallback(async () => {
     if (!companyId) return;
@@ -158,10 +180,24 @@ export default function Cases() {
       }
     }
 
+    // Get lead names for linked leads
+    const leadIds = (data || []).map((c: any) => c.lead_id).filter(Boolean);
+    let leadNames: Record<string, string> = {};
+    if (leadIds.length > 0) {
+      const { data: leads } = await supabase
+        .from("leads")
+        .select("id, name")
+        .in("id", leadIds);
+      if (leads) {
+        leads.forEach((l: any) => { leadNames[l.id] = l.name; });
+      }
+    }
+
     setCases(
       (data || []).map((c: any) => ({
         ...c,
         doc_count: docCounts[c.id] || 0,
+        lead_name: c.lead_id ? leadNames[c.lead_id] || null : null,
       }))
     );
     setLoading(false);
@@ -180,8 +216,11 @@ export default function Cases() {
   }, []);
 
   useEffect(() => {
-    if (companyId) fetchCases();
-  }, [companyId, fetchCases]);
+    if (companyId) {
+      fetchCases();
+      fetchLeads();
+    }
+  }, [companyId, fetchCases, fetchLeads]);
 
   useEffect(() => {
     if (selectedCase) fetchCaseDocuments(selectedCase.id);
@@ -194,6 +233,7 @@ export default function Cases() {
       company_id: companyId,
       client_name: formClientName.trim(),
       case_number: formCaseNumber.trim() || null,
+      lead_id: formLeadId === "none" ? null : formLeadId,
       notes: formNotes.trim() || null,
       status: formStatus,
       created_by: user.id,
@@ -226,6 +266,7 @@ export default function Cases() {
     setFormCaseNumber("");
     setFormNotes("");
     setFormStatus("ativo");
+    setFormLeadId("none");
   };
 
   const openEditCase = (c: CaseRecord) => {
@@ -234,6 +275,7 @@ export default function Cases() {
     setFormCaseNumber(c.case_number || "");
     setFormNotes(c.notes || "");
     setFormStatus(c.status);
+    setFormLeadId(c.lead_id || "none");
     setCreateOpen(true);
   };
 
@@ -371,6 +413,12 @@ export default function Cases() {
               )}
               {selectedCase.notes && (
                 <p className="text-xs text-muted-foreground mt-1">{selectedCase.notes}</p>
+              )}
+              {selectedCase.lead_name && (
+                <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                  <Link2 className="h-3 w-3" />
+                  Lead vinculado: <span className="font-medium text-foreground">{selectedCase.lead_name}</span>
+                </p>
               )}
             </div>
           </div>
@@ -537,6 +585,18 @@ export default function Cases() {
                 <Input value={formCaseNumber} onChange={(e) => setFormCaseNumber(e.target.value)} placeholder="0000000-00.0000.0.00.0000" />
               </div>
               <div>
+                <Label>Vincular a um Lead</Label>
+                <Select value={formLeadId} onValueChange={setFormLeadId}>
+                  <SelectTrigger><SelectValue placeholder="Nenhum" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Nenhum</SelectItem>
+                    {companyLeads.map((l) => (
+                      <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
                 <Label>Status</Label>
                 <Select value={formStatus} onValueChange={setFormStatus}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
@@ -594,6 +654,18 @@ export default function Cases() {
               <div>
                 <Label>Número do processo</Label>
                 <Input value={formCaseNumber} onChange={(e) => setFormCaseNumber(e.target.value)} placeholder="0000000-00.0000.0.00.0000" />
+              </div>
+              <div>
+                <Label>Vincular a um Lead</Label>
+                <Select value={formLeadId} onValueChange={setFormLeadId}>
+                  <SelectTrigger><SelectValue placeholder="Nenhum" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Nenhum</SelectItem>
+                    {companyLeads.map((l) => (
+                      <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label>Status</Label>
@@ -668,6 +740,12 @@ export default function Cases() {
                       <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                         <Hash className="h-3 w-3" />
                         {c.case_number}
+                      </p>
+                    )}
+                    {c.lead_name && (
+                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                        <Link2 className="h-3 w-3" />
+                        {c.lead_name}
                       </p>
                     )}
                     <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
