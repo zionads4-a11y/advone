@@ -156,7 +156,7 @@ export default function LandingPage() {
         <div className="text-center mb-12">
           <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Nós temos o</p>
           <h2 className="text-3xl font-bold md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            CRM completo para escritórios de advocacia.
+            CRM completo para seu escritório de advocacia.
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-[hsl(220,10%,55%)]">
             Da captação do lead ao agendamento final, centralize toda a operação do seu escritório em uma única plataforma. Leads, WhatsApp, agenda, finanças e processos — tudo conectado.
