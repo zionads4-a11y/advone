@@ -9,11 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  MessageSquare, User, ArrowDownLeft, ArrowUpRight, Send, Sparkles, Loader2, Bot, Paperclip, Video, Image, FileText,
+  MessageSquare, User, ArrowDownLeft, ArrowUpRight, Send, Sparkles, Loader2, Bot, Paperclip, Video, Image, FileText, ArrowLeft,
 } from "lucide-react";
 import { LeadBotToggle } from "@/components/leads/LeadBotToggle";
 import { toast } from "sonner";
 import { useNewMessageNotifications } from "@/hooks/useNewMessageNotifications";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Message {
   id: string;
