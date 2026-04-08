@@ -822,7 +822,7 @@ serve(async (req) => {
       // Find or create lead
       const { data: existingLead } = await supabase
         .from("leads")
-        .select("id, status")
+        .select("id, status, bot_disabled")
         .eq("company_id", companyId)
         .or(`phone.eq.${cleanPhone},whatsapp.eq.${cleanPhone}`)
         .maybeSingle();
