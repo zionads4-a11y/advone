@@ -48,6 +48,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { CaseTimeline } from "@/components/cases/CaseTimeline";
 
 interface CaseRecord {
   id: string;
