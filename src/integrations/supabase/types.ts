@@ -367,6 +367,44 @@ export type Database = {
         }
         Relationships: []
       }
+      company_monitoring_plans: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          max_processes: number
+          plan_type: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_processes?: number
+          plan_type?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_processes?: number
+          plan_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_monitoring_plans_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
           case_id: string | null
@@ -779,6 +817,150 @@ export type Database = {
             columns: ["kanban_column_id"]
             isOneToOne: false
             referencedRelation: "kanban_columns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      monitored_processes: {
+        Row: {
+          area: string | null
+          assunto: string | null
+          case_id: string | null
+          classe: string | null
+          client_name: string
+          company_id: string
+          created_at: string
+          data_inicio: string | null
+          data_ultima_movimentacao: string | null
+          escavador_data: Json | null
+          id: string
+          is_active: boolean
+          last_checked_at: string | null
+          numero_cnj: string
+          polo_ativo: string | null
+          polo_passivo: string | null
+          quantidade_movimentacoes: number | null
+          status_predito: string | null
+          tribunal_sigla: string | null
+          updated_at: string
+        }
+        Insert: {
+          area?: string | null
+          assunto?: string | null
+          case_id?: string | null
+          classe?: string | null
+          client_name: string
+          company_id: string
+          created_at?: string
+          data_inicio?: string | null
+          data_ultima_movimentacao?: string | null
+          escavador_data?: Json | null
+          id?: string
+          is_active?: boolean
+          last_checked_at?: string | null
+          numero_cnj: string
+          polo_ativo?: string | null
+          polo_passivo?: string | null
+          quantidade_movimentacoes?: number | null
+          status_predito?: string | null
+          tribunal_sigla?: string | null
+          updated_at?: string
+        }
+        Update: {
+          area?: string | null
+          assunto?: string | null
+          case_id?: string | null
+          classe?: string | null
+          client_name?: string
+          company_id?: string
+          created_at?: string
+          data_inicio?: string | null
+          data_ultima_movimentacao?: string | null
+          escavador_data?: Json | null
+          id?: string
+          is_active?: boolean
+          last_checked_at?: string | null
+          numero_cnj?: string
+          polo_ativo?: string | null
+          polo_passivo?: string | null
+          quantidade_movimentacoes?: number | null
+          status_predito?: string | null
+          tribunal_sigla?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monitored_processes_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "monitored_processes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      process_movements: {
+        Row: {
+          company_id: string
+          content: string
+          created_at: string
+          escavador_movement_id: number | null
+          id: string
+          is_new: boolean
+          monitored_process_id: string
+          movement_date: string
+          movement_type: string | null
+          source_grau: number | null
+          source_name: string | null
+          source_sigla: string | null
+        }
+        Insert: {
+          company_id: string
+          content: string
+          created_at?: string
+          escavador_movement_id?: number | null
+          id?: string
+          is_new?: boolean
+          monitored_process_id: string
+          movement_date: string
+          movement_type?: string | null
+          source_grau?: number | null
+          source_name?: string | null
+          source_sigla?: string | null
+        }
+        Update: {
+          company_id?: string
+          content?: string
+          created_at?: string
+          escavador_movement_id?: number | null
+          id?: string
+          is_new?: boolean
+          monitored_process_id?: string
+          movement_date?: string
+          movement_type?: string | null
+          source_grau?: number | null
+          source_name?: string | null
+          source_sigla?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "process_movements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_movements_monitored_process_id_fkey"
+            columns: ["monitored_process_id"]
+            isOneToOne: false
+            referencedRelation: "monitored_processes"
             referencedColumns: ["id"]
           },
         ]
