@@ -41,6 +41,7 @@ interface LeadData {
   cpf: string | null;
   processo_valor: number | null;
   lead_score?: string | null;
+  bot_disabled?: boolean;
 }
 
 interface LeadDetailDrawerProps {
