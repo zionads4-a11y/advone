@@ -56,6 +56,7 @@ const operadorItems = [
   { title: "Kanban", url: "/kanban", icon: Kanban },
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
+  { title: "Documentos", url: "/documentos", icon: FileText },
   { title: "Bot", url: "/bot-config", icon: Bot },
 ];
 
