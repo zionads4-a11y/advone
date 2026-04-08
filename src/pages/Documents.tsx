@@ -235,7 +235,7 @@ export default function Documents() {
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label>Arquivo (PDF, DOC, DOCX — máx. 20MB)</Label>
+                <Label>Arquivo (PDF, DOC, DOCX — máx. 600MB)</Label>
                 <Input
                   type="file"
                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
