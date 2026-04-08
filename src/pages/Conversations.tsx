@@ -11,6 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   MessageSquare, User, ArrowDownLeft, ArrowUpRight, Send, Sparkles, Loader2, Bot, Paperclip, Video, Image, FileText,
 } from "lucide-react";
+import { LeadBotToggle } from "@/components/leads/LeadBotToggle";
 import { toast } from "sonner";
 import { useNewMessageNotifications } from "@/hooks/useNewMessageNotifications";
 
