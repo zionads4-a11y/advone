@@ -484,9 +484,10 @@ export default function Cases() {
         </div>
 
         {/* Documents table */}
-        <Card className="glass-card">
-          <CardContent className="pt-6">
-            <Table>
+        <Card className="glass-card overflow-hidden">
+          <CardContent className="p-0 sm:p-6 sm:pt-6">
+            <div className="overflow-x-auto">
+            <Table className="min-w-[600px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>Documento</TableHead>
@@ -553,6 +554,7 @@ export default function Cases() {
                 )}
               </TableBody>
             </Table>
+            </div>
           </CardContent>
         </Card>
 

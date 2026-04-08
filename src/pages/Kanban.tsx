@@ -197,9 +197,9 @@ export default function Kanban() {
           <h1 className="font-display text-2xl font-bold text-foreground">{title}</h1>
           <p className="text-sm text-muted-foreground">{subtitle}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Select value={filterSource} onValueChange={setFilterSource}>
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-full sm:w-[140px]">
               <Filter className="mr-2 h-3 w-3" />
               <SelectValue />
             </SelectTrigger>
@@ -211,7 +211,7 @@ export default function Kanban() {
           </Select>
           {!isClient && companies.length > 1 && (
             <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="w-full sm:w-[200px]">
                 <SelectValue placeholder="Selecione a empresa" />
               </SelectTrigger>
               <SelectContent>

@@ -9,11 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  MessageSquare, User, ArrowDownLeft, ArrowUpRight, Send, Sparkles, Loader2, Bot, Paperclip, Video, Image, FileText,
+  MessageSquare, User, ArrowDownLeft, ArrowUpRight, Send, Sparkles, Loader2, Bot, Paperclip, Video, Image, FileText, ArrowLeft,
 } from "lucide-react";
 import { LeadBotToggle } from "@/components/leads/LeadBotToggle";
 import { toast } from "sonner";
 import { useNewMessageNotifications } from "@/hooks/useNewMessageNotifications";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Message {
   id: string;
@@ -41,6 +42,7 @@ interface Company {
 export default function Conversations() {
   const { isClient, companyIds, loading: companiesLoading } = useUserCompanies();
   const { clearUnread } = useNewMessageNotifications();
+  const isMobile = useIsMobile();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [conversations, setConversations] = useState<Record<string, Message[]>>({});
@@ -52,6 +54,7 @@ export default function Conversations() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [showChat, setShowChat] = useState(false);
 
   // Clear unread notifications when entering conversations
   useEffect(() => {
@@ -248,94 +251,107 @@ export default function Conversations() {
   const selectedMessages = selectedPhone ? conversations[selectedPhone] || [] : [];
   const selectedLead = selectedPhone ? leads[selectedPhone] : null;
 
+  const showContactList = !isMobile || !showChat;
+  const showChatPanel = !isMobile || showChat;
+
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold text-foreground">Conversas</h1>
-          <p className="text-sm text-muted-foreground">Mensagens do WhatsApp dos seus leads</p>
+    <div className="space-y-4 sm:space-y-6 animate-fade-in">
+      {(!isMobile || !showChat) && (
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="font-display text-xl sm:text-2xl font-bold text-foreground">Conversas</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground">Mensagens do WhatsApp dos seus leads</p>
+          </div>
+          {!isClient && companies.length > 1 && (
+            <Select value={selectedCompanyId} onValueChange={(v) => { setSelectedCompanyId(v); setSelectedPhone(""); }}>
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectValue placeholder="Selecione a empresa" />
+              </SelectTrigger>
+              <SelectContent>
+                {companies.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
-        {!isClient && companies.length > 1 && (
-          <Select value={selectedCompanyId} onValueChange={(v) => { setSelectedCompanyId(v); setSelectedPhone(""); }}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Selecione a empresa" />
-            </SelectTrigger>
-            <SelectContent>
-              {companies.map((c) => (
-                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-      </div>
+      )}
 
-      <div className="grid gap-4 lg:grid-cols-[320px_1fr] h-[calc(100vh-220px)]">
+      <div className={`grid gap-4 h-[calc(100vh-200px)] sm:h-[calc(100vh-220px)] ${isMobile ? '' : 'lg:grid-cols-[320px_1fr]'}`}>
         {/* Contact list */}
-        <Card className="glass-card overflow-hidden">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-display text-foreground">Contatos</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <ScrollArea className="h-[calc(100vh-310px)]">
-              {phones.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                  <MessageSquare className="mb-2 h-8 w-8" />
-                  <p className="text-xs">Nenhuma conversa ainda</p>
-                  <p className="text-[10px]">As mensagens aparecerão aqui quando chegarem via WhatsApp</p>
-                </div>
-              ) : (
-                phones.map((phone) => {
-                  const msgs = conversations[phone];
-                  const lastMsg = msgs[msgs.length - 1];
-                  const lead = leads[phone];
-                  const isActive = selectedPhone === phone;
+        {showContactList && (
+          <Card className="glass-card overflow-hidden">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-display text-foreground">Contatos</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <ScrollArea className="h-[calc(100vh-310px)]">
+                {phones.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                    <MessageSquare className="mb-2 h-8 w-8" />
+                    <p className="text-xs">Nenhuma conversa ainda</p>
+                    <p className="text-[10px]">As mensagens aparecerão aqui quando chegarem via WhatsApp</p>
+                  </div>
+                ) : (
+                  phones.map((phone) => {
+                    const msgs = conversations[phone];
+                    const lastMsg = msgs[msgs.length - 1];
+                    const lead = leads[phone];
+                    const isActive = selectedPhone === phone;
 
-                  return (
-                    <button
-                      key={phone}
-                      onClick={() => setSelectedPhone(phone)}
-                      className={`w-full border-b border-border p-3 text-left transition-colors hover:bg-secondary/50 ${
-                        isActive ? "bg-secondary" : ""
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                          <User className="h-4 w-4 text-primary" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-foreground truncate">
-                            {lead?.name || lastMsg?.sender_name || phone}
-                          </p>
-                          <p className="text-[10px] text-muted-foreground truncate">
-                            {lastMsg?.message_text || "..."}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-[10px] text-muted-foreground">
-                            {lastMsg ? new Date(lastMsg.timestamp).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : ""}
-                          </p>
-                          <div className="flex items-center justify-end gap-1 mt-1">
-                            {lastMsg?.sender_name === "IA" && (
-                              <Bot className="h-3 w-3 text-primary" />
-                            )}
-                            <Badge variant="secondary" className="text-[9px]">{msgs.length}</Badge>
+                    return (
+                      <button
+                        key={phone}
+                        onClick={() => { setSelectedPhone(phone); if (isMobile) setShowChat(true); }}
+                        className={`w-full border-b border-border p-3 text-left transition-colors hover:bg-secondary/50 ${
+                          isActive ? "bg-secondary" : ""
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                            <User className="h-4 w-4 text-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-foreground truncate">
+                              {lead?.name || lastMsg?.sender_name || phone}
+                            </p>
+                            <p className="text-[10px] text-muted-foreground truncate">
+                              {lastMsg?.message_text || "..."}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-[10px] text-muted-foreground">
+                              {lastMsg ? new Date(lastMsg.timestamp).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : ""}
+                            </p>
+                            <div className="flex items-center justify-end gap-1 mt-1">
+                              {lastMsg?.sender_name === "IA" && (
+                                <Bot className="h-3 w-3 text-primary" />
+                              )}
+                              <Badge variant="secondary" className="text-[9px]">{msgs.length}</Badge>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </button>
-                  );
-                })
-              )}
-            </ScrollArea>
-          </CardContent>
-        </Card>
+                      </button>
+                    );
+                  })
+                )}
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Messages */}
+        {showChatPanel && (
         <Card className="glass-card overflow-hidden flex flex-col">
           {selectedPhone ? (
             <>
               <CardHeader className="border-b border-border pb-3 flex-shrink-0">
                 <div className="flex items-center gap-3">
+                  {isMobile && (
+                    <Button variant="ghost" size="icon" className="shrink-0 -ml-1" onClick={() => setShowChat(false)}>
+                      <ArrowLeft className="h-5 w-5" />
+                    </Button>
+                  )}
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
                     <User className="h-5 w-5 text-primary" />
                   </div>
@@ -486,6 +502,7 @@ export default function Conversations() {
             </CardContent>
           )}
         </Card>
+        )}
       </div>
     </div>
   );

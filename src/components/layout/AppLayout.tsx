@@ -56,7 +56,7 @@ export default function AppLayout() {
                   <HeaderNotification />
                 </div>
               </header>
-              <div className="p-6">
+              <div className="p-3 sm:p-4 md:p-6">
                 <Outlet />
               </div>
             </main>
