@@ -218,7 +218,13 @@ export default function Subscription() {
         </Card>
       </div>
 
-      {/* Status Alert */}
+      {/* Plan Change */}
+      <PlanChangeSection
+        currentPlan={subscription.plan}
+        subscriptionStatus={subscription.status}
+        onPlanChanged={fetchSubscription}
+      />
+
       {subscription.status === "overdue" && (
         <Card className="border-destructive/50 bg-destructive/5">
           <CardContent className="flex items-start gap-3 py-4">
