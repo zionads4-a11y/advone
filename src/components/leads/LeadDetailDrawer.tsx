@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Phone, Mail, DollarSign, Calendar } from "lucide-react";
+import { LeadBotToggle } from "@/components/leads/LeadBotToggle";
 import { LeadScoreBadge } from "@/components/leads/LeadScoreBadge";
 import { SourceBadge } from "@/components/leads/SourceBadge";
 import { LeadReminders } from "@/components/leads/LeadReminders";
@@ -40,6 +41,7 @@ interface LeadData {
   cpf: string | null;
   processo_valor: number | null;
   lead_score?: string | null;
+  bot_disabled?: boolean;
 }
 
 interface LeadDetailDrawerProps {
@@ -119,6 +121,15 @@ export function LeadDetailDrawer({ lead, open, onOpenChange, onLeadUpdate }: Lea
                 </div>
               </div>
             </div>
+
+            <Separator />
+
+            {/* Bot Toggle */}
+            <LeadBotToggle
+              leadId={lead.id}
+              initialDisabled={!!lead.bot_disabled}
+              onUpdate={onLeadUpdate}
+            />
 
             <Separator />
 

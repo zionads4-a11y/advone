@@ -671,6 +671,7 @@ export type Database = {
       leads: {
         Row: {
           assigned_to: string | null
+          bot_disabled: boolean
           campaign_id: string | null
           company_id: string
           cpf: string | null
@@ -697,6 +698,7 @@ export type Database = {
         }
         Insert: {
           assigned_to?: string | null
+          bot_disabled?: boolean
           campaign_id?: string | null
           company_id: string
           cpf?: string | null
@@ -723,6 +725,7 @@ export type Database = {
         }
         Update: {
           assigned_to?: string | null
+          bot_disabled?: boolean
           campaign_id?: string | null
           company_id?: string
           cpf?: string | null

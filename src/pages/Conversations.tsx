@@ -11,6 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   MessageSquare, User, ArrowDownLeft, ArrowUpRight, Send, Sparkles, Loader2, Bot, Paperclip, Video, Image, FileText,
 } from "lucide-react";
+import { LeadBotToggle } from "@/components/leads/LeadBotToggle";
 import { toast } from "sonner";
 import { useNewMessageNotifications } from "@/hooks/useNewMessageNotifications";
 
@@ -29,6 +30,7 @@ interface Lead {
   id: string;
   name: string;
   phone: string | null;
+  bot_disabled: boolean;
 }
 
 interface Company {
@@ -124,7 +126,7 @@ export default function Conversations() {
         .order("timestamp", { ascending: true }),
       supabase
         .from("leads")
-        .select("id, name, phone")
+        .select("id, name, phone, bot_disabled")
         .eq("company_id", selectedCompanyId),
     ]);
 
@@ -344,9 +346,17 @@ export default function Conversations() {
                     <p className="text-xs text-muted-foreground">{selectedPhone}</p>
                   </div>
                   {selectedLead && (
-                    <Badge variant="outline" className="ml-auto border-primary/30 text-primary text-[10px]">
-                      Lead cadastrado
-                    </Badge>
+                    <div className="ml-auto flex items-center gap-2">
+                      <LeadBotToggle
+                        leadId={selectedLead.id}
+                        initialDisabled={!!selectedLead.bot_disabled}
+                        compact
+                        onUpdate={() => fetchMessages()}
+                      />
+                      <Badge variant="outline" className="border-primary/30 text-primary text-[10px]">
+                        Lead cadastrado
+                      </Badge>
+                    </div>
                   )}
                 </div>
               </CardHeader>

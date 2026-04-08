@@ -1,0 +1,1 @@
+ALTER TABLE public.leads ADD COLUMN bot_disabled boolean NOT NULL DEFAULT false;
