@@ -251,11 +251,16 @@ export default function Conversations() {
   const selectedMessages = selectedPhone ? conversations[selectedPhone] || [] : [];
   const selectedLead = selectedPhone ? leads[selectedPhone] : null;
 
+  const showContactList = !isMobile || !showChat;
+  const showChatPanel = !isMobile || showChat;
+
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 sm:space-y-6 animate-fade-in">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-display text-2xl font-bold text-foreground">Conversas</h1>
+          <h1 className="font-display text-xl sm:text-2xl font-bold text-foreground">Conversas</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">Mensagens do WhatsApp dos seus leads</p>
+        </div>
           <p className="text-sm text-muted-foreground">Mensagens do WhatsApp dos seus leads</p>
         </div>
         {!isClient && companies.length > 1 && (
