@@ -22,21 +22,21 @@ const REMINDER_WINDOWS: ReminderWindow[] = [
     hoursBeforeMin: 5,
     hoursBeforeMax: 7,
     getMessage: (name, dateStr, timeStr) =>
-      `Oi, ${name}! 😊\n\nPassando pra te lembrar que amanhã você tem um atendimento agendado.\n\n📅 ${dateStr} às ${timeStr}\n\nSe puder, já separa seus documentos, isso ajuda bastante no atendimento!\n\nTe esperamos! 🙂`,
+      `Oi, ${name}! 😊 Passando para lembrar que amanhã você tem um atendimento agendado.\n📅 ${dateStr} às ${timeStr}.\nSe puder, já deixe seus documentos separados para facilitar nossa análise.`,
   },
   {
     column: "reminder_2h_sent",
     hoursBeforeMin: 1.5,
     hoursBeforeMax: 3,
-    getMessage: (name, dateStr, timeStr) =>
-      `Oi, ${name}! 😊\n\nSeu atendimento é daqui a pouco, às ${timeStr}!\n\nDeixa seus documentos por perto, tá? Isso facilita bastante.\n\nTe esperamos! ✅`,
+    getMessage: (name, _dateStr, timeStr) =>
+      `Oi, ${name}! 😊\nSeu atendimento é daqui a pouco, às ${timeStr}.\nSe possível, deixe seus documentos por perto.`,
   },
   {
     column: "reminder_30m_sent",
     hoursBeforeMin: 0.25,
     hoursBeforeMax: 0.75,
-    getMessage: (name, dateStr, timeStr) =>
-      `${name}, faltam poucos minutos pro seu atendimento! ⏰\n\nHorário: ${timeStr}\n\nEstamos te aguardando! 😊`,
+    getMessage: (name, _dateStr, timeStr) =>
+      `${name}, faltam poucos minutos para o seu atendimento! ⏰\nHorário: ${timeStr}. Estamos te aguardando.`,
   },
 ];
 
