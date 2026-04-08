@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import logoZionDigital from "@/assets/logo-zion-digital.png";
+import logoAdvOne from "@/assets/logo-advone.png";
 
 export default function Auth() {
   const { user, loading } = useAuth();
