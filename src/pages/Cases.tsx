@@ -121,6 +121,10 @@ export default function Cases() {
   const [formCaseNumber, setFormCaseNumber] = useState("");
   const [formNotes, setFormNotes] = useState("");
   const [formStatus, setFormStatus] = useState("ativo");
+  const [formLeadId, setFormLeadId] = useState<string>("none");
+
+  // Leads for linking
+  const [companyLeads, setCompanyLeads] = useState<LeadOption[]>([]);
 
   // Upload dialog
   const [uploadOpen, setUploadOpen] = useState(false);
