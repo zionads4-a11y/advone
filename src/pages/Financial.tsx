@@ -706,14 +706,14 @@ export default function Financial() {
         </TabsList>
 
         <TabsContent value="receivable">
-          <Card className="glass-card">
-            <CardContent className="pt-6">{renderTable("receivable")}</CardContent>
+          <Card className="glass-card overflow-hidden">
+            <CardContent className="p-0 sm:p-6 sm:pt-6">{renderTable("receivable")}</CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="payable">
-          <Card className="glass-card">
-            <CardContent className="pt-6">{renderTable("payable")}</CardContent>
+          <Card className="glass-card overflow-hidden">
+            <CardContent className="p-0 sm:p-6 sm:pt-6">{renderTable("payable")}</CardContent>
           </Card>
         </TabsContent>
       </Tabs>
