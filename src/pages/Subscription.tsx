@@ -76,19 +76,21 @@ export default function Subscription() {
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
 
+  const fetchSubscription = async () => {
+    setLoading(true);
+    const { data } = await supabase
+      .from("subscriptions")
+      .select("*")
+      .eq("user_id", user!.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    setSubscription(data);
+    setLoading(false);
+  };
+
   useEffect(() => {
     if (!user) return;
-    const fetchSubscription = async () => {
-      const { data } = await supabase
-        .from("subscriptions")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      setSubscription(data);
-      setLoading(false);
-    };
     fetchSubscription();
   }, [user]);
 
