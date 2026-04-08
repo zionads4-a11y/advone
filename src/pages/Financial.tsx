@@ -405,6 +405,7 @@ export default function Financial() {
           )}
         </TableBody>
       </Table>
+      </div>
     );
   };
 
