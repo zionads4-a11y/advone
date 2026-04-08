@@ -42,6 +42,7 @@ interface Company {
 export default function Conversations() {
   const { isClient, companyIds, loading: companiesLoading } = useUserCompanies();
   const { clearUnread } = useNewMessageNotifications();
+  const isMobile = useIsMobile();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [conversations, setConversations] = useState<Record<string, Message[]>>({});
@@ -53,6 +54,7 @@ export default function Conversations() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [showChat, setShowChat] = useState(false);
 
   // Clear unread notifications when entering conversations
   useEffect(() => {
