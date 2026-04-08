@@ -232,6 +232,7 @@ export default function Cases() {
       company_id: companyId,
       client_name: formClientName.trim(),
       case_number: formCaseNumber.trim() || null,
+      lead_id: formLeadId === "none" ? null : formLeadId,
       notes: formNotes.trim() || null,
       status: formStatus,
       created_by: user.id,
