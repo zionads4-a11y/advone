@@ -193,7 +193,7 @@ export default function Financial() {
   const formatCurrency = (v: number) =>
     v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-
+  const handleAddTransaction = async () => {
     if (!user || !companyId) return;
     const data = {
       company_id: companyId,
