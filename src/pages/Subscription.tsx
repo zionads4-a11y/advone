@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { CreditCard, Calendar, CheckCircle2, AlertTriangle, XCircle, Clock, Crown } from "lucide-react";
+import PlanChangeSection from "@/components/subscription/PlanChangeSection";
 
 interface Subscription {
   id: string;
