@@ -96,7 +96,7 @@ export default function LandingPage() {
             <Button variant="ghost" onClick={() => navigate("/auth")} className="text-[hsl(220,10%,70%)] hover:text-[hsl(153,60%,45%)]">
               Login
             </Button>
-            <Button onClick={() => navigate("/auth")} className="gradient-primary text-[hsl(0,0%,100%)] font-semibold">
+            <Button onClick={() => navigate("/signup?plan=essencial")} className="gradient-primary text-[hsl(0,0%,100%)] font-semibold">
               Começar agora
             </Button>
           </div>
