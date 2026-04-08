@@ -22,6 +22,7 @@ import Profile from "./pages/Profile";
 import BotConfig from "./pages/BotConfig";
 import CompanySettings from "./pages/CompanySettings";
 import Financial from "./pages/Financial";
+import Documents from "./pages/Documents";
 import AppLayout from "./components/layout/AppLayout";
 import NotFound from "./pages/NotFound";
 
@@ -54,6 +55,7 @@ const App = () => (
               <Route path="/bot-config" element={<BotConfig />} />
               <Route path="/company-settings" element={<CompanySettings />} />
               <Route path="/financeiro" element={<Financial />} />
+              <Route path="/documentos" element={<Documents />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
