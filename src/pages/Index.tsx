@@ -1,6 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
+import LandingPage from "./LandingPage";
 
 function getHomeRoute(role: string | null) {
   switch (role) {
@@ -30,7 +31,7 @@ const Index = () => {
   }
 
   if (user) return <Navigate to={getHomeRoute(userRole)} replace />;
-  return <Navigate to="/auth" replace />;
+  return <LandingPage />;
 };
 
 export default Index;
