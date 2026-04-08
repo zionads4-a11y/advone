@@ -33,8 +33,9 @@ function HeaderNotification() {
 
 export default function AppLayout() {
   const { user, loading } = useAuth();
+  const subscription = useSubscriptionGuard();
 
-  if (loading) {
+  if (loading || subscription.loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -43,6 +44,10 @@ export default function AppLayout() {
   }
 
   if (!user) return <Navigate to="/auth" replace />;
+
+  if (subscription.blocked) {
+    return <SubscriptionBlockScreen status={subscription.status} />;
+  }
 
   return (
     <NewMessageNotificationProvider>
