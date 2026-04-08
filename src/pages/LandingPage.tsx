@@ -384,7 +384,7 @@ export default function LandingPage() {
                 </li>
               ))}
             </ul>
-            <Button onClick={() => navigate("/auth")} className="w-full gradient-primary text-[hsl(0,0%,100%)] font-semibold">
+            <Button onClick={() => navigate("/signup?plan=elite")} className="w-full gradient-primary text-[hsl(0,0%,100%)] font-semibold">
               Começar agora
             </Button>
           </div>
