@@ -8,11 +8,11 @@ const corsHeaders = {
 };
 
 const CADENCE_MESSAGES: Record<number, string> = {
-  1: "Oi! Vi que você ainda não conseguiu responder 😊\nPosso te ajudar com alguma coisa?",
-  2: "Passando para te ajudar 😊\nAinda faz sentido falar com um advogado sobre seu caso?",
-  3: "Dependendo do seu caso, pode ser importante agir rápido.\nPosso te encaixar na agenda 👇",
-  4: "Oi! Só passando mais uma vez. A consulta é gratuita e sem compromisso 😊\nQuer que eu agende pra você?",
-  5: "Última mensagem, prometo 😅\nSe ainda precisar de ajuda jurídica, o advogado está disponível. É só responder!",
+  1: "Oi! Vi que você ainda não conseguiu responder 😊\nPosso esclarecer alguma dúvida sobre o seu caso?",
+  2: "Passando por aqui novamente 😊\nAinda faz sentido conversar com um advogado sobre sua situação?",
+  3: "Dependendo do seu caso, pode ser importante agir rápido.\nPosso te encaixar na agenda para uma análise 👇",
+  4: "Oi! Só passando mais uma vez 😊\nA consulta é gratuita e sem compromisso. Quer que eu agende para você?",
+  5: "Última mensagem, prometo 😅\nSe ainda precisar falar com um advogado sobre seu caso, é só me responder.",
 };
 
 // Inactivity nudge messages during active conversation
