@@ -742,6 +742,12 @@ export default function Cases() {
                         {c.case_number}
                       </p>
                     )}
+                    {c.lead_name && (
+                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                        <Link2 className="h-3 w-3" />
+                        {c.lead_name}
+                      </p>
+                    )}
                     <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <FileText className="h-3 w-3" />
