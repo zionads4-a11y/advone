@@ -203,6 +203,60 @@ export type Database = {
           },
         ]
       }
+      cases: {
+        Row: {
+          case_number: string | null
+          client_name: string
+          company_id: string
+          created_at: string
+          created_by: string
+          id: string
+          lead_id: string | null
+          notes: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          case_number?: string | null
+          client_name: string
+          company_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          lead_id?: string | null
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          case_number?: string | null
+          client_name?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          lead_id?: string | null
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cases_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cases_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_companies: {
         Row: {
           company_id: string
@@ -267,6 +321,7 @@ export type Database = {
       }
       documents: {
         Row: {
+          case_id: string | null
           category: string
           company_id: string
           created_at: string
@@ -280,6 +335,7 @@ export type Database = {
           uploaded_by: string
         }
         Insert: {
+          case_id?: string | null
           category?: string
           company_id: string
           created_at?: string
@@ -293,6 +349,7 @@ export type Database = {
           uploaded_by: string
         }
         Update: {
+          case_id?: string | null
           category?: string
           company_id?: string
           created_at?: string
@@ -306,6 +363,13 @@ export type Database = {
           uploaded_by?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "documents_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "documents_company_id_fkey"
             columns: ["company_id"]

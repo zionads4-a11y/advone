@@ -9,6 +9,7 @@ import {
   Settings,
   Wallet,
   FileText,
+  Briefcase,
 } from "lucide-react";
 import logoZionDigital from "@/assets/logo-zion-digital.png";
 import { NavLink } from "@/components/NavLink";
@@ -47,6 +48,7 @@ const gerenteItems = [
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
   { title: "Financeiro", url: "/financeiro", icon: Wallet },
   { title: "Documentos", url: "/documentos", icon: FileText },
+  { title: "Processos", url: "/processos", icon: Briefcase },
   { title: "Bot", url: "/bot-config", icon: Bot },
   { title: "Equipe", url: "/client-users", icon: Users },
   { title: "Configurações", url: "/company-settings", icon: Settings },
@@ -57,6 +59,7 @@ const operadorItems = [
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
   { title: "Documentos", url: "/documentos", icon: FileText },
+  { title: "Processos", url: "/processos", icon: Briefcase },
   { title: "Bot", url: "/bot-config", icon: Bot },
 ];
 
