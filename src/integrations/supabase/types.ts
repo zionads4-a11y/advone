@@ -1308,7 +1308,33 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      profiles_public: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
@@ -1317,6 +1343,18 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      insert_audit_log: {
+        Args: {
+          _action: string
+          _company_id: string
+          _entity_id: string
+          _entity_type: string
+          _new_values?: Json
+          _old_values?: Json
+          _user_id: string
+        }
+        Returns: undefined
       }
       user_belongs_to_company: {
         Args: { _company_id: string; _user_id: string }
