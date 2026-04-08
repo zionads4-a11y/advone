@@ -48,6 +48,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { CaseTimeline } from "@/components/cases/CaseTimeline";
 
 interface CaseRecord {
   id: string;
@@ -504,6 +505,13 @@ export default function Cases() {
                 )}
               </TableBody>
             </Table>
+          </CardContent>
+        </Card>
+
+        {/* Timeline */}
+        <Card className="glass-card">
+          <CardContent className="pt-6">
+            <CaseTimeline caseId={selectedCase.id} companyId={companyId} />
           </CardContent>
         </Card>
 
