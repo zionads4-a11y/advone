@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import logoZionDigital from "@/assets/logo-zion-digital.png";
+import logoAdvOne from "@/assets/logo-advone-light.png";
 import heroBg from "@/assets/hero-bg-lp.jpg";
 import dashboardMockup from "@/assets/dashboard-mockup.jpg";
 import {
@@ -61,7 +61,7 @@ const valueProps = [
 
 const testimonials = [
   {
-    text: "O bot da Zion Digital transformou nosso atendimento. Agendamentos automáticos pelo WhatsApp 24 horas por dia, sem perder nenhum lead.",
+    text: "O AdvOne transformou nosso atendimento. Agendamentos automáticos pelo WhatsApp 24 horas por dia, sem perder nenhum lead.",
     name: "Dra. Maria Silva",
     role: "Advogada Trabalhista",
   },
@@ -85,7 +85,7 @@ export default function LandingPage() {
       {/* Navbar */}
       <nav className="sticky top-0 z-50 border-b border-[hsl(220,20%,16%)] bg-[hsl(220,25%,6%)]/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <img src={logoZionDigital} alt="Zion Digital" className="h-12 w-auto" />
+          <img src={logoAdvOne} alt="AdvOne" className="h-12 w-auto" />
           <div className="hidden items-center gap-8 md:flex">
             <a href="#funcionalidades" className="text-sm text-[hsl(220,10%,70%)] transition-colors hover:text-[hsl(153,60%,45%)]">Funcionalidades</a>
             <a href="#vantagens" className="text-sm text-[hsl(220,10%,70%)] transition-colors hover:text-[hsl(153,60%,45%)]">Vantagens</a>
@@ -112,7 +112,7 @@ export default function LandingPage() {
         <div className="relative mx-auto max-w-5xl px-6 pb-24 pt-20 text-center md:pb-32 md:pt-28">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[hsl(153,60%,45%)]/30 bg-[hsl(153,60%,45%)]/10 px-4 py-1.5 text-sm text-[hsl(153,60%,45%)]">
             <Zap className="h-4 w-4" />
-            CRM com Inteligência Artificial para Advogados
+            CRM com Inteligência Artificial — Seu escritório em um só lugar
           </div>
           <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tight md:text-6xl lg:text-7xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             <span className="gradient-text">CRM completo</span> para a gestão{" "}
@@ -156,7 +156,7 @@ export default function LandingPage() {
         <div className="text-center mb-12">
           <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Nós temos o</p>
           <h2 className="text-3xl font-bold md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            CRM completo para escritórios de advocacia.
+            CRM completo para seu escritório de advocacia.
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-[hsl(220,10%,55%)]">
             Da captação do lead ao agendamento final, centralize toda a operação do seu escritório em uma única plataforma. Leads, WhatsApp, agenda, finanças e processos — tudo conectado.
@@ -165,7 +165,7 @@ export default function LandingPage() {
         <div className="overflow-hidden rounded-2xl border border-[hsl(220,20%,16%)] shadow-2xl shadow-[hsl(153,60%,45%)]/5">
           <img
             src={dashboardMockup}
-            alt="Dashboard do CRM Zion Digital"
+            alt="Dashboard do CRM AdvOne"
             className="w-full"
             loading="lazy"
             width={1200}
@@ -399,7 +399,7 @@ export default function LandingPage() {
         </div>
         <div className="relative mx-auto max-w-4xl px-6 py-24 text-center md:py-32">
           <h2 className="mb-6 text-3xl font-bold md:text-5xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            O Zion Digital é uma plataforma completa de{" "}
+             O AdvOne é uma plataforma completa de{" "}
             <span className="gradient-text">gestão e inteligência</span> para escritórios de advocacia.
           </h2>
           <p className="mx-auto mb-10 max-w-2xl text-lg text-[hsl(220,10%,55%)]">
@@ -419,9 +419,9 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-[hsl(220,20%,16%)] bg-[hsl(220,28%,5%)]">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-8 md:flex-row">
-          <img src={logoZionDigital} alt="Zion Digital" className="h-10 w-auto" />
+          <img src={logoAdvOne} alt="AdvOne" className="h-10 w-auto" />
           <p className="text-sm text-[hsl(220,10%,45%)]">
-            © {new Date().getFullYear()} Zion Digital. Todos os direitos reservados.
+            © {new Date().getFullYear()} AdvOne. Todos os direitos reservados.
           </p>
           <div className="flex gap-6">
             <a href="#funcionalidades" className="text-sm text-[hsl(220,10%,55%)] hover:text-[hsl(153,60%,45%)]">Funcionalidades</a>

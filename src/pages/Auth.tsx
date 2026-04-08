@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import logoZionDigital from "@/assets/logo-zion-digital.png";
+import logoAdvOne from "@/assets/logo-advone.png";
 
 export default function Auth() {
   const { user, loading } = useAuth();
@@ -26,7 +26,7 @@ export default function Auth() {
     <div className="dark flex min-h-screen items-center justify-center bg-background p-4">
       <div className="w-full max-w-md space-y-4">
         <div className="flex flex-col items-center gap-1">
-          <img src={logoZionDigital} alt="Zion Digital" className="h-64 w-auto" />
+          <img src={logoAdvOne} alt="AdvOne" className="h-64 w-auto" />
           <p className="text-sm text-muted-foreground">
             CRM inteligente para gestão de leads
           </p>
