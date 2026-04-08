@@ -508,6 +508,13 @@ export default function Cases() {
           </CardContent>
         </Card>
 
+        {/* Timeline */}
+        <Card className="glass-card">
+          <CardContent className="pt-6">
+            <CaseTimeline caseId={selectedCase.id} companyId={companyId} />
+          </CardContent>
+        </Card>
+
         {/* Edit case dialog (reused) */}
         <Dialog
           open={createOpen}
