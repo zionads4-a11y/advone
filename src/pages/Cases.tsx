@@ -259,8 +259,8 @@ export default function Cases() {
 
   const handleUploadDoc = async () => {
     if (!selectedFile || !user || !companyId || !selectedCase) return;
-    if (selectedFile.size > 20 * 1024 * 1024) {
-      return toast.error("Arquivo muito grande. Máximo: 20MB");
+    if (selectedFile.size > 600 * 1024 * 1024) {
+      return toast.error("Arquivo muito grande. Máximo: 600MB");
     }
 
     setUploading(true);
