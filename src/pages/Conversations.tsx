@@ -125,7 +125,7 @@ export default function Conversations() {
         .order("timestamp", { ascending: true }),
       supabase
         .from("leads")
-        .select("id, name, phone")
+        .select("id, name, phone, bot_disabled")
         .eq("company_id", selectedCompanyId),
     ]);
 
