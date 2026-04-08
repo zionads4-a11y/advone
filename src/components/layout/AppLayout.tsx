@@ -7,6 +7,8 @@ import { NewMessageNotificationProvider, useNewMessageNotifications } from "@/ho
 import { ReminderAlertProvider } from "@/hooks/useReminderAlerts";
 import { ReminderAlertBell } from "./ReminderAlertBell";
 import { useNavigate } from "react-router-dom";
+import { useSubscriptionGuard } from "@/hooks/useSubscriptionGuard";
+import SubscriptionBlockScreen from "./SubscriptionBlockScreen";
 
 function HeaderNotification() {
   const { unreadCount } = useNewMessageNotifications();
