@@ -203,6 +203,54 @@ export type Database = {
           },
         ]
       }
+      case_movements: {
+        Row: {
+          case_id: string
+          company_id: string
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          movement_type: string
+          title: string
+        }
+        Insert: {
+          case_id: string
+          company_id: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          movement_type?: string
+          title: string
+        }
+        Update: {
+          case_id?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          movement_type?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "case_movements_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "case_movements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cases: {
         Row: {
           case_number: string | null
