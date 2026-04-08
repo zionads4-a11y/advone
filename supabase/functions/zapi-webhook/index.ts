@@ -1007,7 +1007,8 @@ serve(async (req) => {
       if (config.ai_enabled && config.ai_auto_reply && leadId && !existingLead?.bot_disabled) {
         try {
           const leadStatus = existingLead?.status;
-          const isAlreadyHandled = leadStatus && !["new"].includes(leadStatus);
+          // Bot continues for new and contacted leads — stops only for qualified/won/lost/negotiating
+          const isAlreadyHandled = leadStatus && !["new", "contacted"].includes(leadStatus);
 
           if (!isAlreadyHandled) {
             const { data: recentMsgs } = await supabase
