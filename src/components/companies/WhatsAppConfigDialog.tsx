@@ -243,14 +243,14 @@ export function WhatsAppConfigDialog({
     } else {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        await supabase.from("audit_logs").insert({
-          company_id: companyId,
-          user_id: user.id,
-          action: "update",
-          entity_type: "whatsapp_ai_config",
-          entity_id: companyId,
-          old_values: null,
-          new_values: newValues,
+        await supabase.rpc("insert_audit_log", {
+          _company_id: companyId,
+          _user_id: user.id,
+          _action: "update",
+          _entity_type: "whatsapp_ai_config",
+          _entity_id: companyId,
+          _old_values: null,
+          _new_values: newValues,
         });
       }
       toast.success("Configuração IA salva!");
