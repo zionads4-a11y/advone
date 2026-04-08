@@ -190,7 +190,10 @@ export default function Financial() {
     liquido: { label: "Líquido", color: "hsl(var(--primary))" },
   };
 
-  const handleAddTransaction = async () => {
+  const formatCurrency = (v: number) =>
+    v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+
     if (!user || !companyId) return;
     const data = {
       company_id: companyId,
