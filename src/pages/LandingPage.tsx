@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import logoZionDigital from "@/assets/logo-zion-digital.png";
+import logoAdvOne from "@/assets/logo-advone-light.png";
 import heroBg from "@/assets/hero-bg-lp.jpg";
 import dashboardMockup from "@/assets/dashboard-mockup.jpg";
 import {
