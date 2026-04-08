@@ -41,6 +41,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/signup" element={<Signup />} />
             <Route path="/connect/:token" element={<ConnectWhatsApp />} />
             <Route element={<AppLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
