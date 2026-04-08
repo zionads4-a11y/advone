@@ -554,6 +554,7 @@ export default function Cases() {
                 )}
               </TableBody>
             </Table>
+            </div>
           </CardContent>
         </Card>
 
