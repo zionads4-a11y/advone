@@ -24,6 +24,7 @@ import CompanySettings from "./pages/CompanySettings";
 import Financial from "./pages/Financial";
 import Documents from "./pages/Documents";
 import Cases from "./pages/Cases";
+import ProcessMonitoring from "./pages/ProcessMonitoring";
 import AppLayout from "./components/layout/AppLayout";
 import NotFound from "./pages/NotFound";
 
