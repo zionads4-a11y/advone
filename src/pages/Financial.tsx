@@ -159,8 +159,36 @@ export default function Financial() {
     };
   }, [transactions]);
 
-  const formatCurrency = (v: number) =>
-    v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  // Chart data: monthly aggregation
+  const monthlyData = useMemo(() => {
+    const months: Record<string, { receita: number; despesa: number }> = {};
+    transactions.forEach((t) => {
+      const dateStr = t.paid_date || t.due_date;
+      if (!dateStr) return;
+      const key = dateStr.substring(0, 7); // YYYY-MM
+      if (!months[key]) months[key] = { receita: 0, despesa: 0 };
+      if (t.type === "receivable" && t.status === "paid") {
+        months[key].receita += Number(t.amount);
+      } else if (t.type === "payable" && t.status === "paid") {
+        months[key].despesa += Number(t.amount);
+      }
+    });
+    return Object.entries(months)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .slice(-12)
+      .map(([month, vals]) => ({
+        month: format(new Date(month + "-15"), "MMM/yy", { locale: ptBR }),
+        receita: vals.receita,
+        despesa: vals.despesa,
+        liquido: vals.receita - vals.despesa,
+      }));
+  }, [transactions]);
+
+  const chartConfig: ChartConfig = {
+    receita: { label: "Receita", color: "hsl(var(--success))" },
+    despesa: { label: "Despesa", color: "hsl(var(--destructive))" },
+    liquido: { label: "Líquido", color: "hsl(var(--primary))" },
+  };
 
   const handleAddTransaction = async () => {
     if (!user || !companyId) return;
