@@ -124,7 +124,7 @@ export default function LandingPage() {
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Button
               size="lg"
-              onClick={() => navigate("/auth")}
+              onClick={() => navigate("/signup?plan=essencial")}
               className="gradient-primary glow-primary px-8 py-6 text-lg font-semibold text-[hsl(0,0%,100%)]"
             >
               Começar agora
