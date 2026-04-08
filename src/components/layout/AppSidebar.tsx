@@ -11,7 +11,7 @@ import {
   FileText,
   Briefcase,
 } from "lucide-react";
-import logoZionDigital from "@/assets/logo-zion-digital.png";
+import logoAdvOne from "@/assets/logo-advone-light.png";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
