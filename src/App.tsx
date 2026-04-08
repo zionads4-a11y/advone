@@ -26,6 +26,7 @@ import Financial from "./pages/Financial";
 import Documents from "./pages/Documents";
 import Cases from "./pages/Cases";
 import ProcessMonitoring from "./pages/ProcessMonitoring";
+import Subscription from "./pages/Subscription";
 import AppLayout from "./components/layout/AppLayout";
 import NotFound from "./pages/NotFound";
 
