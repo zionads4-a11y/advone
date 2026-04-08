@@ -9,6 +9,7 @@ import {
   Settings,
   Wallet,
   FileText,
+  Briefcase,
 } from "lucide-react";
 import logoZionDigital from "@/assets/logo-zion-digital.png";
 import { NavLink } from "@/components/NavLink";
