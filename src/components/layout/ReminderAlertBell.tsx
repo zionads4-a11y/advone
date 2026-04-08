@@ -1,4 +1,4 @@
-import { Bell, AlertTriangle, Clock, CalendarClock } from "lucide-react";
+import { Bell, AlertTriangle, Clock, CalendarClock, DollarSign } from "lucide-react";
 import { useReminderAlerts } from "@/hooks/useReminderAlerts";
 import { useNavigate } from "react-router-dom";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -9,7 +9,7 @@ import { format, isBefore } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 export function ReminderAlertBell() {
-  const { alerts, alertCount, dismissAlert } = useReminderAlerts();
+  const { alerts, financialAlerts, alertCount, dismissAlert, dismissFinancialAlert } = useReminderAlerts();
   const navigate = useNavigate();
 
   return (
@@ -33,14 +33,61 @@ export function ReminderAlertBell() {
             </Badge>
           )}
         </div>
-        <ScrollArea className="max-h-[320px]">
-          {alerts.length === 0 ? (
+        <ScrollArea className="max-h-[400px]">
+          {alerts.length === 0 && financialAlerts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
               <Bell className="h-8 w-8 mb-2 opacity-30" />
               <p className="text-xs">Nenhum alerta pendente</p>
             </div>
           ) : (
             <div className="divide-y divide-border">
+              {/* Financial alerts */}
+              {financialAlerts.map((alert) => {
+                const isOverdue = alert.days_until < 0;
+                const isToday = alert.days_until === 0;
+                const amount = Number(alert.amount).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+                return (
+                  <div
+                    key={`fin-${alert.id}`}
+                    className={`flex items-start gap-3 px-4 py-3 transition-colors hover:bg-accent/50 cursor-pointer ${
+                      isOverdue ? "bg-destructive/5" : isToday ? "bg-warning/5" : ""
+                    }`}
+                    onClick={() => navigate("/financeiro")}
+                  >
+                    <div className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
+                      isOverdue ? "bg-destructive/15 text-destructive" : isToday ? "bg-warning/15 text-warning" : "bg-primary/15 text-primary"
+                    }`}>
+                      <DollarSign className="h-3 w-3" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-foreground truncate">{alert.description}</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {amount} • {format(new Date(alert.due_date + "T12:00:00"), "dd/MM/yyyy", { locale: ptBR })}
+                      </p>
+                      {isOverdue && (
+                        <span className="text-[10px] font-medium text-destructive">⚠️ Vencida</span>
+                      )}
+                      {isToday && (
+                        <span className="text-[10px] font-medium text-warning">💰 Vence hoje</span>
+                      )}
+                      {!isOverdue && !isToday && (
+                        <span className="text-[10px] font-medium text-primary">📋 Vence em {alert.days_until} dia{alert.days_until > 1 ? "s" : ""}</span>
+                      )}
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        dismissFinancialAlert(alert.id);
+                      }}
+                      className="shrink-0 text-muted-foreground/50 hover:text-foreground text-[10px]"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                );
+              })}
+
+              {/* Reminder alerts */}
               {alerts.map((alert) => {
                 const isOverdue = isBefore(new Date(alert.due_at), new Date());
                 return (
@@ -80,7 +127,7 @@ export function ReminderAlertBell() {
             </div>
           )}
         </ScrollArea>
-        {alerts.length > 0 && (
+        {alertCount > 0 && (
           <div className="border-t border-border p-2">
             <Button
               variant="ghost"
