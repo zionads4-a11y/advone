@@ -38,6 +38,7 @@ import { LayoutDashboard, Kanban, MessageSquare } from "lucide-react";
 const adminItems = [
   { title: "Empresas", url: "/companies", icon: Building2 },
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
+  { title: "Monitoramento", url: "/monitoramento", icon: Radar },
   { title: "Usuários", url: "/client-users", icon: Users },
   { title: "Acessos", url: "/access-management", icon: KeyRound },
 ];
