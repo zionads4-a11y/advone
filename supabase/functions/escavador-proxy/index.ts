@@ -241,9 +241,10 @@ Deno.serve(async (req) => {
           `/processos/numero_cnj/${encodeURIComponent(proc.numero_cnj)}/movimentacoes?limit=50`
         );
 
+        let newMovementsCount = 0;
         if (movements?.items?.length) {
           for (const m of movements.items) {
-            await admin.from("process_movements").upsert(
+            const { data: upserted } = await admin.from("process_movements").upsert(
               {
                 monitored_process_id: process_id,
                 company_id: proc.company_id,
@@ -257,11 +258,45 @@ Deno.serve(async (req) => {
                 is_new: true,
               },
               { onConflict: "monitored_process_id,escavador_movement_id", ignoreDuplicates: true }
-            );
+            ).select("id");
+            if (upserted?.length) newMovementsCount++;
           }
         }
 
-        return jsonResponse({ success: true });
+        // Send WhatsApp alert if new movements found
+        if (newMovementsCount > 0) {
+          try {
+            const { data: whatsappConfig } = await admin
+              .from("whatsapp_configs")
+              .select("zapi_instance_id, zapi_token, alert_whatsapp")
+              .eq("company_id", proc.company_id)
+              .maybeSingle();
+
+            if (whatsappConfig?.alert_whatsapp && whatsappConfig.zapi_instance_id) {
+              const alertPhone = whatsappConfig.alert_whatsapp.replace(/\D/g, "");
+              const alertMsg = `⚖️ *Alerta de Movimentação Processual*\n\n` +
+                `📋 *Processo:* ${proc.numero_cnj}\n` +
+                `👤 *Cliente:* ${proc.client_name}\n` +
+                `📌 *${newMovementsCount} nova(s) movimentação(ões)* detectada(s)\n\n` +
+                `Acesse o sistema para visualizar os detalhes.`;
+
+              const serverUrl = "https://ziondigital.uazapi.com";
+              await fetch(
+                `${serverUrl}/instance/send-text/${whatsappConfig.zapi_instance_id}?token=${whatsappConfig.zapi_token}`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ phone: alertPhone, message: alertMsg }),
+                }
+              );
+              console.log(`WhatsApp alert sent to ${alertPhone} for process ${proc.numero_cnj}`);
+            }
+          } catch (e) {
+            console.error("Error sending WhatsApp movement alert:", e.message);
+          }
+        }
+
+        return jsonResponse({ success: true, newMovements: newMovementsCount });
       }
 
       // Remove from monitoring

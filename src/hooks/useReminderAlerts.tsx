@@ -27,12 +27,25 @@ interface FinancialAlert {
   days_until: number;
 }
 
+interface ProcessMovementAlert {
+  id: string;
+  content: string;
+  movement_date: string;
+  movement_type: string | null;
+  source_name: string | null;
+  numero_cnj: string;
+  client_name: string;
+  company_id: string;
+}
+
 interface ReminderAlertContextType {
   alerts: ReminderAlert[];
   financialAlerts: FinancialAlert[];
+  processAlerts: ProcessMovementAlert[];
   alertCount: number;
   dismissAlert: (id: string) => void;
   dismissFinancialAlert: (id: string) => void;
+  dismissProcessAlert: (id: string) => void;
   clearAlerts: () => void;
 }
 
@@ -43,8 +56,10 @@ export function ReminderAlertProvider({ children }: { children: ReactNode }) {
   const { companyIds, isClient, loading } = useUserCompanies();
   const [alerts, setAlerts] = useState<ReminderAlert[]>([]);
   const [financialAlerts, setFinancialAlerts] = useState<FinancialAlert[]>([]);
+  const [processAlerts, setProcessAlerts] = useState<ProcessMovementAlert[]>([]);
   const toastedIdsRef = useRef<Set<string>>(new Set());
   const financialToastedRef = useRef<Set<string>>(new Set());
+  const processToastedRef = useRef<Set<string>>(new Set());
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const isGerente = userRole === "gerente";
@@ -101,7 +116,6 @@ export function ReminderAlertProvider({ children }: { children: ReactNode }) {
 
     const now = new Date();
     const threeDaysFromNow = addDays(now, 3);
-    const todayStr = format(now, "yyyy-MM-dd");
     const futureStr = format(threeDaysFromNow, "yyyy-MM-dd");
 
     const { data } = await supabase
@@ -114,9 +128,10 @@ export function ReminderAlertProvider({ children }: { children: ReactNode }) {
       .order("due_date", { ascending: true });
 
     if (data) {
+      const now2 = new Date();
       const mapped = data.map((tx: any) => {
         const dueDate = new Date(tx.due_date + "T23:59:59");
-        const daysUntil = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        const daysUntil = Math.ceil((dueDate.getTime() - now2.getTime()) / (1000 * 60 * 60 * 24));
         return { ...tx, days_until: daysUntil };
       });
 
@@ -150,20 +165,55 @@ export function ReminderAlertProvider({ children }: { children: ReactNode }) {
     }
   }, [user, isGerente, companyIds]);
 
+  const fetchProcessAlerts = useCallback(async () => {
+    if (!user || companyIds.length === 0) return;
+
+    const { data } = await supabase
+      .from("process_movements")
+      .select("id, content, movement_date, movement_type, source_name, company_id, monitored_processes!process_movements_monitored_process_id_fkey(numero_cnj, client_name)")
+      .eq("is_new", true)
+      .in("company_id", companyIds)
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    if (data) {
+      const mapped = data.map((m: any) => ({
+        ...m,
+        numero_cnj: m.monitored_processes?.numero_cnj || "",
+        client_name: m.monitored_processes?.client_name || "",
+      }));
+
+      setProcessAlerts(mapped);
+
+      mapped.forEach((alert) => {
+        if (!processToastedRef.current.has(alert.id)) {
+          processToastedRef.current.add(alert.id);
+          const shortContent = alert.content.length > 80 ? alert.content.substring(0, 80) + "..." : alert.content;
+          toast.info(`⚖️ Nova movimentação: ${alert.client_name}`, {
+            description: `${shortContent}`,
+            duration: 8000,
+          });
+        }
+      });
+    }
+  }, [user, companyIds]);
+
   useEffect(() => {
     if (!user || loading) return;
 
     fetchAlerts();
     fetchFinancialAlerts();
+    fetchProcessAlerts();
     intervalRef.current = setInterval(() => {
       fetchAlerts();
       fetchFinancialAlerts();
+      fetchProcessAlerts();
     }, 60000);
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [user, loading, fetchAlerts, fetchFinancialAlerts]);
+  }, [user, loading, fetchAlerts, fetchFinancialAlerts, fetchProcessAlerts]);
 
   useEffect(() => {
     if (!user || loading) return;
@@ -173,23 +223,24 @@ export function ReminderAlertProvider({ children }: { children: ReactNode }) {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "lead_reminders" },
-        () => {
-          fetchAlerts();
-        }
+        () => fetchAlerts()
       )
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "financial_transactions" },
-        () => {
-          fetchFinancialAlerts();
-        }
+        () => fetchFinancialAlerts()
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "process_movements" },
+        () => fetchProcessAlerts()
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, loading, fetchAlerts, fetchFinancialAlerts]);
+  }, [user, loading, fetchAlerts, fetchFinancialAlerts, fetchProcessAlerts]);
 
   const dismissAlert = useCallback((id: string) => {
     setAlerts((prev) => prev.filter((a) => a.id !== id));
@@ -199,15 +250,21 @@ export function ReminderAlertProvider({ children }: { children: ReactNode }) {
     setFinancialAlerts((prev) => prev.filter((a) => a.id !== id));
   }, []);
 
+  const dismissProcessAlert = useCallback(async (id: string) => {
+    setProcessAlerts((prev) => prev.filter((a) => a.id !== id));
+    await supabase.from("process_movements").update({ is_new: false }).eq("id", id);
+  }, []);
+
   const clearAlerts = useCallback(() => {
     setAlerts([]);
     setFinancialAlerts([]);
+    setProcessAlerts([]);
   }, []);
 
-  const totalCount = alerts.length + financialAlerts.length;
+  const totalCount = alerts.length + financialAlerts.length + processAlerts.length;
 
   return (
-    <ReminderAlertContext.Provider value={{ alerts, financialAlerts, alertCount: totalCount, dismissAlert, dismissFinancialAlert, clearAlerts }}>
+    <ReminderAlertContext.Provider value={{ alerts, financialAlerts, processAlerts, alertCount: totalCount, dismissAlert, dismissFinancialAlert, dismissProcessAlert, clearAlerts }}>
       {children}
     </ReminderAlertContext.Provider>
   );

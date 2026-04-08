@@ -1,4 +1,4 @@
-import { Bell, AlertTriangle, Clock, CalendarClock, DollarSign } from "lucide-react";
+import { Bell, AlertTriangle, Clock, CalendarClock, DollarSign, Scale } from "lucide-react";
 import { useReminderAlerts } from "@/hooks/useReminderAlerts";
 import { useNavigate } from "react-router-dom";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -9,7 +9,7 @@ import { format, isBefore } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 export function ReminderAlertBell() {
-  const { alerts, financialAlerts, alertCount, dismissAlert, dismissFinancialAlert } = useReminderAlerts();
+  const { alerts, financialAlerts, processAlerts, alertCount, dismissAlert, dismissFinancialAlert, dismissProcessAlert } = useReminderAlerts();
   const navigate = useNavigate();
 
   return (
@@ -34,13 +34,47 @@ export function ReminderAlertBell() {
           )}
         </div>
         <ScrollArea className="max-h-[400px]">
-          {alerts.length === 0 && financialAlerts.length === 0 ? (
+          {alerts.length === 0 && financialAlerts.length === 0 && processAlerts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
               <Bell className="h-8 w-8 mb-2 opacity-30" />
               <p className="text-xs">Nenhum alerta pendente</p>
             </div>
           ) : (
             <div className="divide-y divide-border">
+              {/* Process movement alerts */}
+              {processAlerts.map((alert) => (
+                <div
+                  key={`proc-${alert.id}`}
+                  className="flex items-start gap-3 px-4 py-3 transition-colors hover:bg-accent/50 cursor-pointer bg-primary/5"
+                  onClick={() => navigate("/monitoramento")}
+                >
+                  <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
+                    <Scale className="h-3 w-3" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-foreground truncate">
+                      ⚖️ {alert.client_name}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground truncate">
+                      {alert.content.substring(0, 60)}{alert.content.length > 60 ? "..." : ""}
+                    </p>
+                    <p className="text-[10px] text-primary font-medium">
+                      {format(new Date(alert.movement_date + "T12:00:00"), "dd/MM/yyyy", { locale: ptBR })}
+                      {alert.source_name ? ` • ${alert.source_name}` : ""}
+                    </p>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      dismissProcessAlert(alert.id);
+                    }}
+                    className="shrink-0 text-muted-foreground/50 hover:text-foreground text-[10px]"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+
               {/* Financial alerts */}
               {financialAlerts.map((alert) => {
                 const isOverdue = alert.days_until < 0;
@@ -133,9 +167,9 @@ export function ReminderAlertBell() {
               variant="ghost"
               size="sm"
               className="w-full text-xs text-primary"
-              onClick={() => navigate("/agenda")}
+              onClick={() => navigate("/monitoramento")}
             >
-              Ver agenda completa
+              Ver monitoramento de processos
             </Button>
           </div>
         )}
