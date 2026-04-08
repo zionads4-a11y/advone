@@ -337,7 +337,8 @@ export default function Financial() {
   const renderTable = (type: "payable" | "receivable") => {
     const filtered = transactions.filter((t) => t.type === type);
     return (
-      <Table>
+      <div className="overflow-x-auto -mx-2 sm:mx-0">
+      <Table className="min-w-[700px]">
         <TableHeader>
           <TableRow>
             <TableHead>Descrição</TableHead>
