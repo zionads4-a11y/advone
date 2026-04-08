@@ -15,7 +15,164 @@ const CADENCE_MESSAGES: Record<number, string> = {
   5: "Última mensagem, prometo 😅\nSe ainda precisar de ajuda jurídica, o advogado está disponível. É só responder!",
 };
 
+// Inactivity nudge messages during active conversation
+const INACTIVITY_NUDGES: { minutesAfter: number; message: string }[] = [
+  {
+    minutesAfter: 30,
+    message: "Oi! Ainda estou por aqui 😊\n\nSe tiver qualquer dúvida, pode me perguntar. Estou aqui pra te ajudar!",
+  },
+  {
+    minutesAfter: 90,
+    message: "Ei, tudo bem? 🙂\n\nVi que a gente estava conversando… se quiser continuar, é só me responder!\n\nPosso te ajudar a agendar uma análise gratuita do seu caso.",
+  },
+  {
+    minutesAfter: 150,
+    message: "Oi! Passando aqui de novo 😊\n\nSeu caso pode ter solução, sabia? Muita gente na mesma situação já conseguiu resolver.\n\nQuer que eu te encaixe na agenda? É rápido e sem compromisso!",
+  },
+  {
+    minutesAfter: 180,
+    message: "Última mensagem por hoje, prometo 😅\n\nSe mudar de ideia, é só me chamar aqui. A consulta é gratuita e o advogado analisa seu caso pessoalmente.\n\nEstou por aqui! 🙂",
+  },
+];
+
 const MAX_CADENCE_ATTEMPTS = 5;
+
+async function sendWhatsAppMessage(
+  config: any,
+  phone: string,
+  text: string
+): Promise<any> {
+  const SERVER_URL = "https://ziondigital.uazapi.com";
+  const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (ADMIN_TOKEN) headers["admintoken"] = ADMIN_TOKEN;
+
+  const instanceParam = encodeURIComponent(config.zapi_instance_id);
+  const tokenParam = encodeURIComponent(config.zapi_token || config.zapi_instance_id);
+  const sendUrl = `${SERVER_URL}/send/text?instance=${instanceParam}&token=${tokenParam}`;
+
+  const response = await fetch(sendUrl, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ number: phone, text }),
+  });
+
+  if (response.ok) {
+    return await response.json();
+  }
+  console.error("Send failed:", response.status, await response.text());
+  return null;
+}
+
+async function processInactivityNudges(supabase: any) {
+  let nudgesSent = 0;
+
+  // Get all companies with AI enabled
+  const { data: configs } = await supabase
+    .from("whatsapp_configs")
+    .select("company_id, zapi_instance_id, zapi_token, ai_enabled, ai_auto_reply")
+    .eq("ai_enabled", true)
+    .eq("ai_auto_reply", true);
+
+  if (!configs || configs.length === 0) return nudgesSent;
+
+  for (const config of configs) {
+    try {
+      // Find leads in active conversation (status = contacted, bot not disabled)
+      const { data: activeLeads } = await supabase
+        .from("leads")
+        .select("id, phone, whatsapp, name, bot_disabled")
+        .eq("company_id", config.company_id)
+        .eq("status", "contacted")
+        .eq("bot_disabled", false);
+
+      if (!activeLeads || activeLeads.length === 0) continue;
+
+      for (const lead of activeLeads) {
+        const phone = lead.whatsapp || lead.phone;
+        if (!phone) continue;
+
+        // Get the last 2 messages for this conversation
+        const { data: lastMessages } = await supabase
+          .from("whatsapp_messages")
+          .select("direction, timestamp, sender_name")
+          .eq("company_id", config.company_id)
+          .eq("phone", phone)
+          .order("timestamp", { ascending: false })
+          .limit(2);
+
+        if (!lastMessages || lastMessages.length === 0) continue;
+
+        const lastMsg = lastMessages[0];
+
+        // Only nudge if last message was OUTGOING (bot/IA sent, lead didn't reply)
+        if (lastMsg.direction !== "outgoing") continue;
+
+        // Don't nudge if last message was already a nudge
+        if (lastMsg.sender_name === "Nudge") continue;
+
+        const lastMsgTime = new Date(lastMsg.timestamp).getTime();
+        const now = Date.now();
+        const minutesSinceLastMsg = (now - lastMsgTime) / (1000 * 60);
+
+        // Count how many nudges were already sent for this conversation today
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+
+        const { data: nudgesSentToday } = await supabase
+          .from("whatsapp_messages")
+          .select("id, timestamp")
+          .eq("company_id", config.company_id)
+          .eq("phone", phone)
+          .eq("sender_name", "Nudge")
+          .gte("timestamp", todayStart.toISOString())
+          .order("timestamp", { ascending: false });
+
+        const nudgeCount = nudgesSentToday?.length || 0;
+
+        // Already sent all 4 nudges today — stop
+        if (nudgeCount >= INACTIVITY_NUDGES.length) continue;
+
+        // Find the next nudge to send based on time elapsed
+        const nextNudge = INACTIVITY_NUDGES[nudgeCount];
+        if (!nextNudge) continue;
+
+        // Check if enough time has passed for this nudge level
+        if (minutesSinceLastMsg < nextNudge.minutesAfter) continue;
+
+        // Also check that we haven't sent a nudge in the last 25 minutes (avoid spam)
+        if (nudgesSentToday && nudgesSentToday.length > 0) {
+          const lastNudgeTime = new Date(nudgesSentToday[0].timestamp).getTime();
+          const minutesSinceLastNudge = (now - lastNudgeTime) / (1000 * 60);
+          if (minutesSinceLastNudge < 25) continue;
+        }
+
+        // Send the nudge
+        const result = await sendWhatsAppMessage(config, phone, nextNudge.message);
+
+        if (result) {
+          await supabase.from("whatsapp_messages").insert({
+            company_id: config.company_id,
+            lead_id: lead.id,
+            phone,
+            message_text: nextNudge.message,
+            direction: "outgoing",
+            sender_name: "Nudge",
+            message_id_external: result.messageId || result.key?.id || null,
+            timestamp: new Date().toISOString(),
+          });
+
+          console.log(`Nudge ${nudgeCount + 1}/4 sent to ${phone} (${minutesSinceLastMsg.toFixed(0)}min inactive)`);
+          nudgesSent++;
+        }
+      }
+    } catch (err) {
+      console.error("Inactivity nudge error for company:", config.company_id, err);
+    }
+  }
+
+  return nudgesSent;
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -27,7 +184,7 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get pending cadence messages that are due
+    // ========== PART 1: Process scheduled cadence messages ==========
     const { data: pendingMessages, error: fetchError } = await supabase
       .from("cadence_messages")
       .select("id, company_id, lead_id, phone, day_number, message_text")
@@ -43,19 +200,12 @@ serve(async (req) => {
       });
     }
 
-    if (!pendingMessages || pendingMessages.length === 0) {
-      return new Response(JSON.stringify({ processed: 0 }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     let sent = 0;
     let skipped = 0;
 
-    for (const msg of pendingMessages) {
+    for (const msg of (pendingMessages || [])) {
       try {
-        // Check if lead has responded since cadence was created (skip if so)
+        // Check if lead has responded since cadence was created
         const { data: recentIncoming } = await supabase
           .from("whatsapp_messages")
           .select("id")
@@ -66,7 +216,6 @@ serve(async (req) => {
           .limit(1);
 
         if (recentIncoming && recentIncoming.length > 0) {
-          // Lead responded — cancel remaining cadence
           await supabase
             .from("cadence_messages")
             .update({ status: "cancelled" })
@@ -76,14 +225,14 @@ serve(async (req) => {
           continue;
         }
 
-        // Check if lead status changed (no longer "new")
+        // Check if lead status changed
         const { data: lead } = await supabase
           .from("leads")
-          .select("status")
+          .select("status, bot_disabled")
           .eq("id", msg.lead_id)
           .single();
 
-        if (lead && lead.status !== "new") {
+        if (lead && (lead.status !== "new" || lead.bot_disabled)) {
           await supabase
             .from("cadence_messages")
             .update({ status: "cancelled" })
@@ -93,7 +242,6 @@ serve(async (req) => {
           continue;
         }
 
-        // Get Z-API config
         const { data: config } = await supabase
           .from("whatsapp_configs")
           .select("zapi_instance_id, zapi_token, scheduling_link")
@@ -108,34 +256,19 @@ serve(async (req) => {
           continue;
         }
 
-        // Build message with scheduling link
         let messageText = msg.message_text || CADENCE_MESSAGES[msg.day_number] || CADENCE_MESSAGES[1];
         if ((config as any).scheduling_link) {
           messageText += `\n\n${(config as any).scheduling_link}`;
         }
 
-        // Send via UaZapi
-        const SERVER_URL = "https://ziondigital.uazapi.com";
-        const sendUrl = `${SERVER_URL}/send/text`;
-        const sendResponse = await fetch(sendUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "token": config.zapi_token || config.zapi_instance_id,
-          },
-          body: JSON.stringify({ number: msg.phone, body: messageText }),
-        });
+        const result = await sendWhatsAppMessage(config, msg.phone, messageText);
 
-        if (sendResponse.ok) {
-          const sendResult = await sendResponse.json();
-
-          // Mark as sent
+        if (result) {
           await supabase
             .from("cadence_messages")
             .update({ status: "sent", sent_at: new Date().toISOString() })
             .eq("id", msg.id);
 
-          // Store outgoing message
           await supabase.from("whatsapp_messages").insert({
             company_id: msg.company_id,
             lead_id: msg.lead_id,
@@ -143,13 +276,11 @@ serve(async (req) => {
             message_text: messageText,
             direction: "outgoing",
             sender_name: "Cadência",
-            message_id_external: sendResult.messageId || null,
+            message_id_external: result.messageId || null,
             timestamp: new Date().toISOString(),
           });
 
-          // Move lead to the corresponding contact column (positions 0-4 = 1º-5º Contato)
-          // day_number 1 = already in 1º Contato (pos 0), so move to pos = day_number
-          const targetPosition = Math.min(msg.day_number, 4); // max position 4 (5º Contato)
+          const targetPosition = Math.min(msg.day_number, 4);
           const { data: targetColumn } = await supabase
             .from("kanban_columns")
             .select("id")
@@ -161,10 +292,8 @@ serve(async (req) => {
             await supabase.from("leads").update({
               kanban_column_id: targetColumn.id,
             }).eq("id", msg.lead_id);
-            console.log(`Lead ${msg.lead_id} moved to column position ${targetPosition}`);
           }
 
-          // After the last attempt (5th), auto-move lead to "Perdido"
           if (msg.day_number >= MAX_CADENCE_ATTEMPTS) {
             const { data: lostColumn } = await supabase
               .from("kanban_columns")
@@ -179,13 +308,11 @@ serve(async (req) => {
                 status: "lost",
                 notes: "[Cadência] Lead não respondeu após 5 tentativas de contato",
               }).eq("id", msg.lead_id);
-              console.log(`Lead ${msg.lead_id} auto-moved to Perdido after ${MAX_CADENCE_ATTEMPTS} attempts`);
             }
           }
 
           sent++;
         } else {
-          console.error("Z-API send failed for cadence:", msg.id, await sendResponse.text());
           await supabase
             .from("cadence_messages")
             .update({ status: "failed" })
@@ -200,10 +327,16 @@ serve(async (req) => {
       }
     }
 
-    console.log(`Cadence processed: ${sent} sent, ${skipped} skipped`);
+    // ========== PART 2: Process inactivity nudges ==========
+    const nudgesSent = await processInactivityNudges(supabase);
+
+    console.log(`Cadence: ${sent} sent, ${skipped} skipped | Nudges: ${nudgesSent} sent`);
 
     return new Response(
-      JSON.stringify({ processed: pendingMessages.length, sent, skipped }),
+      JSON.stringify({
+        cadence: { processed: (pendingMessages || []).length, sent, skipped },
+        nudges: { sent: nudgesSent },
+      }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {
