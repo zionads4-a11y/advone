@@ -650,6 +650,52 @@ export default function Financial() {
         </Card>
       </div>
 
+      {/* Charts */}
+      {monthlyData.length > 0 && (
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Faturamento Mensal
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer config={chartConfig} className="h-[280px] w-full">
+                <BarChart data={monthlyData}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" />
+                  <XAxis dataKey="month" className="text-[10px]" tickLine={false} axisLine={false} />
+                  <YAxis className="text-[10px]" tickLine={false} axisLine={false} tickFormatter={(v) => `R$${(v / 1000).toFixed(0)}k`} />
+                  <ChartTooltip content={<ChartTooltipContent formatter={(value) => formatCurrency(Number(value))} />} />
+                  <Bar dataKey="receita" fill="var(--color-receita)" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="despesa" fill="var(--color-despesa)" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Evolução do Faturamento Líquido
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer config={chartConfig} className="h-[280px] w-full">
+                <LineChart data={monthlyData}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" />
+                  <XAxis dataKey="month" className="text-[10px]" tickLine={false} axisLine={false} />
+                  <YAxis className="text-[10px]" tickLine={false} axisLine={false} tickFormatter={(v) => `R$${(v / 1000).toFixed(0)}k`} />
+                  <ChartTooltip content={<ChartTooltipContent formatter={(value) => formatCurrency(Number(value))} />} />
+                  <Line type="monotone" dataKey="receita" stroke="var(--color-receita)" strokeWidth={2} dot={{ r: 3 }} />
+                  <Line type="monotone" dataKey="despesa" stroke="var(--color-despesa)" strokeWidth={2} dot={{ r: 3 }} />
+                  <Line type="monotone" dataKey="liquido" stroke="var(--color-liquido)" strokeWidth={2.5} dot={{ r: 4 }} />
+                </LineChart>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Tabs */}
       <Tabs defaultValue="receivable" className="space-y-4">
         <TabsList>
