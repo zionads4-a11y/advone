@@ -399,7 +399,7 @@ export default function LandingPage() {
         </div>
         <div className="relative mx-auto max-w-4xl px-6 py-24 text-center md:py-32">
           <h2 className="mb-6 text-3xl font-bold md:text-5xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            O Zion Digital é uma plataforma completa de{" "}
+             O AdvOne é uma plataforma completa de{" "}
             <span className="gradient-text">gestão e inteligência</span> para escritórios de advocacia.
           </h2>
           <p className="mx-auto mb-10 max-w-2xl text-lg text-[hsl(220,10%,55%)]">
