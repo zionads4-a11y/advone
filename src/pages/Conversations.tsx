@@ -29,6 +29,7 @@ interface Lead {
   id: string;
   name: string;
   phone: string | null;
+  bot_disabled: boolean;
 }
 
 interface Company {
