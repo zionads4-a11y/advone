@@ -310,6 +310,86 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Pricing */}
+      <section id="planos" className="mx-auto max-w-6xl px-6 py-24">
+        <div className="mb-16 text-center">
+          <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Planos</p>
+          <h2 className="text-3xl font-bold md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Escolha o plano ideal para o seu escritório.
+          </h2>
+        </div>
+        <div className="grid gap-8 md:grid-cols-3">
+          {/* Essencial */}
+          <div className="rounded-2xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col">
+            <div className="mb-6">
+              <span className="inline-block rounded-full bg-[hsl(153,60%,45%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(153,60%,45%)]">Essencial</span>
+            </div>
+            <p className="mb-1 text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              R$ 297<span className="text-base font-normal text-[hsl(220,10%,55%)]">/mês</span>
+            </p>
+            <p className="mt-2 mb-8 text-sm text-[hsl(220,10%,55%)]">CRM + IA + automação completa</p>
+            <ul className="mb-8 flex-1 space-y-3">
+              {["CRM completo com Kanban", "Bot com IA no WhatsApp", "Cadência automática de 5 tentativas", "Agenda integrada", "Gestão de documentos até 600MB", "Equipe e permissões"].map((item) => (
+                <li key={item} className="flex items-start gap-2 text-sm text-[hsl(220,10%,75%)]">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(153,60%,45%)]" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <Button onClick={() => navigate("/auth")} className="w-full gradient-primary text-[hsl(0,0%,100%)] font-semibold">
+              Começar agora
+            </Button>
+          </div>
+
+          {/* Profissional */}
+          <div className="relative rounded-2xl border-2 border-[hsl(153,60%,45%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col shadow-lg shadow-[hsl(153,60%,45%)]/10">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[hsl(153,60%,45%)] px-4 py-1 text-xs font-bold text-[hsl(220,25%,6%)]">
+              MAIS POPULAR
+            </div>
+            <div className="mb-6">
+              <span className="inline-block rounded-full bg-[hsl(210,80%,55%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(210,80%,55%)]">Profissional</span>
+            </div>
+            <p className="mb-1 text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              R$ 497<span className="text-base font-normal text-[hsl(220,10%,55%)]">/mês</span>
+            </p>
+            <p className="mt-2 mb-8 text-sm text-[hsl(220,10%,55%)]">Tudo do Essencial + monitoramento</p>
+            <ul className="mb-8 flex-1 space-y-3">
+              {["Tudo do plano Essencial", "Monitoramento de até 50 processos", "Alertas automáticos de movimentação", "Financeiro integrado com Asaas", "Relatórios avançados", "Suporte prioritário"].map((item) => (
+                <li key={item} className="flex items-start gap-2 text-sm text-[hsl(220,10%,75%)]">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(153,60%,45%)]" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <Button onClick={() => navigate("/auth")} className="w-full gradient-primary text-[hsl(0,0%,100%)] font-semibold">
+              Começar agora
+            </Button>
+          </div>
+
+          {/* Elite */}
+          <div className="rounded-2xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col">
+            <div className="mb-6">
+              <span className="inline-block rounded-full bg-[hsl(0,70%,55%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(0,70%,60%)]">Elite</span>
+            </div>
+            <p className="mb-1 text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              R$ 697<span className="text-base font-normal text-[hsl(220,10%,55%)]">/mês</span>
+            </p>
+            <p className="mt-2 mb-8 text-sm text-[hsl(220,10%,55%)]">Tudo do Profissional + prioridade total</p>
+            <ul className="mb-8 flex-1 space-y-3">
+              {["Tudo do plano Profissional", "Monitoramento de até 100 processos", "Prioridade máxima nos alertas", "Onboarding personalizado", "Consultoria de automação", "Gerente de conta dedicado"].map((item) => (
+                <li key={item} className="flex items-start gap-2 text-sm text-[hsl(220,10%,75%)]">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(153,60%,45%)]" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <Button onClick={() => navigate("/auth")} className="w-full gradient-primary text-[hsl(0,0%,100%)] font-semibold">
+              Começar agora
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Final */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0">
