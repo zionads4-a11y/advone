@@ -265,6 +265,7 @@ export default function Cases() {
     setFormCaseNumber("");
     setFormNotes("");
     setFormStatus("ativo");
+    setFormLeadId("none");
   };
 
   const openEditCase = (c: CaseRecord) => {
