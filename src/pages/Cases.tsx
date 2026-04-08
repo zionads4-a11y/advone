@@ -414,6 +414,12 @@ export default function Cases() {
               {selectedCase.notes && (
                 <p className="text-xs text-muted-foreground mt-1">{selectedCase.notes}</p>
               )}
+              {selectedCase.lead_name && (
+                <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                  <Link2 className="h-3 w-3" />
+                  Lead vinculado: <span className="font-medium text-foreground">{selectedCase.lead_name}</span>
+                </p>
+              )}
             </div>
           </div>
           <div className="flex gap-2">
