@@ -11,6 +11,7 @@ import {
   FileText,
   Briefcase,
   Radar,
+  CreditCard,
 } from "lucide-react";
 import logoAdvOne from "@/assets/logo-advone-light.png";
 import { NavLink } from "@/components/NavLink";
@@ -54,6 +55,7 @@ const gerenteItems = [
   { title: "Monitoramento", url: "/monitoramento", icon: Radar },
   { title: "Bot", url: "/bot-config", icon: Bot },
   { title: "Equipe", url: "/client-users", icon: Users },
+  { title: "Assinatura", url: "/assinatura", icon: CreditCard },
   { title: "Configurações", url: "/company-settings", icon: Settings },
 ];
 
