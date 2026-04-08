@@ -656,6 +656,18 @@ export default function Cases() {
                 <Input value={formCaseNumber} onChange={(e) => setFormCaseNumber(e.target.value)} placeholder="0000000-00.0000.0.00.0000" />
               </div>
               <div>
+                <Label>Vincular a um Lead</Label>
+                <Select value={formLeadId} onValueChange={setFormLeadId}>
+                  <SelectTrigger><SelectValue placeholder="Nenhum" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Nenhum</SelectItem>
+                    {companyLeads.map((l) => (
+                      <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
                 <Label>Status</Label>
                 <Select value={formStatus} onValueChange={setFormStatus}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
