@@ -50,6 +50,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line } from "recharts";
 
 interface Transaction {
   id: string;
@@ -151,6 +158,37 @@ export default function Financial() {
       pendingReceivable: receivable.filter((t) => t.status === "pending").length,
     };
   }, [transactions]);
+
+  // Chart data: monthly aggregation
+  const monthlyData = useMemo(() => {
+    const months: Record<string, { receita: number; despesa: number }> = {};
+    transactions.forEach((t) => {
+      const dateStr = t.paid_date || t.due_date;
+      if (!dateStr) return;
+      const key = dateStr.substring(0, 7); // YYYY-MM
+      if (!months[key]) months[key] = { receita: 0, despesa: 0 };
+      if (t.type === "receivable" && t.status === "paid") {
+        months[key].receita += Number(t.amount);
+      } else if (t.type === "payable" && t.status === "paid") {
+        months[key].despesa += Number(t.amount);
+      }
+    });
+    return Object.entries(months)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .slice(-12)
+      .map(([month, vals]) => ({
+        month: format(new Date(month + "-15"), "MMM/yy", { locale: ptBR }),
+        receita: vals.receita,
+        despesa: vals.despesa,
+        liquido: vals.receita - vals.despesa,
+      }));
+  }, [transactions]);
+
+  const chartConfig: ChartConfig = {
+    receita: { label: "Receita", color: "hsl(var(--success))" },
+    despesa: { label: "Despesa", color: "hsl(var(--destructive))" },
+    liquido: { label: "Líquido", color: "hsl(var(--primary))" },
+  };
 
   const formatCurrency = (v: number) =>
     v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -611,6 +649,52 @@ export default function Financial() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Charts */}
+      {monthlyData.length > 0 && (
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Faturamento Mensal
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer config={chartConfig} className="h-[280px] w-full">
+                <BarChart data={monthlyData}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" />
+                  <XAxis dataKey="month" className="text-[10px]" tickLine={false} axisLine={false} />
+                  <YAxis className="text-[10px]" tickLine={false} axisLine={false} tickFormatter={(v) => `R$${(v / 1000).toFixed(0)}k`} />
+                  <ChartTooltip content={<ChartTooltipContent formatter={(value) => formatCurrency(Number(value))} />} />
+                  <Bar dataKey="receita" fill="var(--color-receita)" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="despesa" fill="var(--color-despesa)" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Evolução do Faturamento Líquido
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer config={chartConfig} className="h-[280px] w-full">
+                <LineChart data={monthlyData}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" />
+                  <XAxis dataKey="month" className="text-[10px]" tickLine={false} axisLine={false} />
+                  <YAxis className="text-[10px]" tickLine={false} axisLine={false} tickFormatter={(v) => `R$${(v / 1000).toFixed(0)}k`} />
+                  <ChartTooltip content={<ChartTooltipContent formatter={(value) => formatCurrency(Number(value))} />} />
+                  <Line type="monotone" dataKey="receita" stroke="var(--color-receita)" strokeWidth={2} dot={{ r: 3 }} />
+                  <Line type="monotone" dataKey="despesa" stroke="var(--color-despesa)" strokeWidth={2} dot={{ r: 3 }} />
+                  <Line type="monotone" dataKey="liquido" stroke="var(--color-liquido)" strokeWidth={2.5} dot={{ r: 4 }} />
+                </LineChart>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Tabs */}
       <Tabs defaultValue="receivable" className="space-y-4">
