@@ -154,6 +154,11 @@ export function LeadDetailDrawer({ lead, open, onOpenChange, onLeadUpdate }: Lea
 
             <Separator />
 
+            {/* Linked Cases */}
+            <LeadCases leadId={lead.id} companyId={lead.company_id} />
+
+            <Separator />
+
             {/* Reminders */}
             <LeadReminders leadId={lead.id} companyId={lead.company_id} />
           </div>
