@@ -96,7 +96,7 @@ export default function LandingPage() {
             <Button variant="ghost" onClick={() => navigate("/auth")} className="text-[hsl(220,10%,70%)] hover:text-[hsl(153,60%,45%)]">
               Login
             </Button>
-            <Button onClick={() => navigate("/auth")} className="gradient-primary text-[hsl(0,0%,100%)] font-semibold">
+            <Button onClick={() => navigate("/signup?plan=essencial")} className="gradient-primary text-[hsl(0,0%,100%)] font-semibold">
               Começar agora
             </Button>
           </div>
@@ -124,7 +124,7 @@ export default function LandingPage() {
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Button
               size="lg"
-              onClick={() => navigate("/auth")}
+              onClick={() => navigate("/signup?plan=essencial")}
               className="gradient-primary glow-primary px-8 py-6 text-lg font-semibold text-[hsl(0,0%,100%)]"
             >
               Começar agora
@@ -337,7 +337,7 @@ export default function LandingPage() {
                 </li>
               ))}
             </ul>
-            <Button onClick={() => navigate("/auth")} className="w-full gradient-primary text-[hsl(0,0%,100%)] font-semibold">
+            <Button onClick={() => navigate("/signup?plan=essencial")} className="w-full gradient-primary text-[hsl(0,0%,100%)] font-semibold">
               Começar agora
             </Button>
           </div>
@@ -362,7 +362,7 @@ export default function LandingPage() {
                 </li>
               ))}
             </ul>
-            <Button onClick={() => navigate("/auth")} className="w-full gradient-primary text-[hsl(0,0%,100%)] font-semibold">
+            <Button onClick={() => navigate("/signup?plan=profissional")} className="w-full gradient-primary text-[hsl(0,0%,100%)] font-semibold">
               Começar agora
             </Button>
           </div>
@@ -384,7 +384,7 @@ export default function LandingPage() {
                 </li>
               ))}
             </ul>
-            <Button onClick={() => navigate("/auth")} className="w-full gradient-primary text-[hsl(0,0%,100%)] font-semibold">
+            <Button onClick={() => navigate("/signup?plan=elite")} className="w-full gradient-primary text-[hsl(0,0%,100%)] font-semibold">
               Começar agora
             </Button>
           </div>
@@ -407,7 +407,7 @@ export default function LandingPage() {
           </p>
           <Button
             size="lg"
-            onClick={() => navigate("/auth")}
+            onClick={() => navigate("/signup?plan=essencial")}
             className="gradient-primary glow-primary px-10 py-6 text-lg font-semibold text-[hsl(0,0%,100%)]"
           >
             Começar agora
