@@ -61,7 +61,7 @@ const valueProps = [
 
 const testimonials = [
   {
-    text: "O bot da Zion Digital transformou nosso atendimento. Agendamentos automáticos pelo WhatsApp 24 horas por dia, sem perder nenhum lead.",
+    text: "O AdvOne transformou nosso atendimento. Agendamentos automáticos pelo WhatsApp 24 horas por dia, sem perder nenhum lead.",
     name: "Dra. Maria Silva",
     role: "Advogada Trabalhista",
   },
