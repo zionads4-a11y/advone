@@ -10,6 +10,7 @@ import {
   Wallet,
   FileText,
   Briefcase,
+  Radar,
 } from "lucide-react";
 import logoAdvOne from "@/assets/logo-advone-light.png";
 import { NavLink } from "@/components/NavLink";
