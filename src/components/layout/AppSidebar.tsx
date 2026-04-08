@@ -10,6 +10,7 @@ import {
   Wallet,
   FileText,
   Briefcase,
+  Radar,
 } from "lucide-react";
 import logoAdvOne from "@/assets/logo-advone-light.png";
 import { NavLink } from "@/components/NavLink";
@@ -37,6 +38,7 @@ import { LayoutDashboard, Kanban, MessageSquare } from "lucide-react";
 const adminItems = [
   { title: "Empresas", url: "/companies", icon: Building2 },
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
+  { title: "Monitoramento", url: "/monitoramento", icon: Radar },
   { title: "Usuários", url: "/client-users", icon: Users },
   { title: "Acessos", url: "/access-management", icon: KeyRound },
 ];
@@ -49,6 +51,7 @@ const gerenteItems = [
   { title: "Financeiro", url: "/financeiro", icon: Wallet },
   { title: "Documentos", url: "/documentos", icon: FileText },
   { title: "Processos", url: "/processos", icon: Briefcase },
+  { title: "Monitoramento", url: "/monitoramento", icon: Radar },
   { title: "Bot", url: "/bot-config", icon: Bot },
   { title: "Equipe", url: "/client-users", icon: Users },
   { title: "Configurações", url: "/company-settings", icon: Settings },

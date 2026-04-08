@@ -24,6 +24,7 @@ import CompanySettings from "./pages/CompanySettings";
 import Financial from "./pages/Financial";
 import Documents from "./pages/Documents";
 import Cases from "./pages/Cases";
+import ProcessMonitoring from "./pages/ProcessMonitoring";
 import AppLayout from "./components/layout/AppLayout";
 import NotFound from "./pages/NotFound";
 
@@ -58,6 +59,7 @@ const App = () => (
               <Route path="/financeiro" element={<Financial />} />
               <Route path="/documentos" element={<Documents />} />
               <Route path="/processos" element={<Cases />} />
+              <Route path="/monitoramento" element={<ProcessMonitoring />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
