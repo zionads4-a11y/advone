@@ -124,6 +124,15 @@ export function LeadDetailDrawer({ lead, open, onOpenChange, onLeadUpdate }: Lea
 
             <Separator />
 
+            {/* Bot Toggle */}
+            <LeadBotToggle
+              leadId={lead.id}
+              initialDisabled={!!lead.bot_disabled}
+              onUpdate={onLeadUpdate}
+            />
+
+            <Separator />
+
             {/* Dados do Processo */}
             <LeadProcessData
               leadId={lead.id}
