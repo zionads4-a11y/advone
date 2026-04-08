@@ -215,8 +215,11 @@ export default function Cases() {
   }, []);
 
   useEffect(() => {
-    if (companyId) fetchCases();
-  }, [companyId, fetchCases]);
+    if (companyId) {
+      fetchCases();
+      fetchLeads();
+    }
+  }, [companyId, fetchCases, fetchLeads]);
 
   useEffect(() => {
     if (selectedCase) fetchCaseDocuments(selectedCase.id);
