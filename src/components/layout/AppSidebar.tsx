@@ -50,6 +50,7 @@ const gerenteItems = [
   { title: "Financeiro", url: "/financeiro", icon: Wallet },
   { title: "Documentos", url: "/documentos", icon: FileText },
   { title: "Processos", url: "/processos", icon: Briefcase },
+  { title: "Monitoramento", url: "/monitoramento", icon: Radar },
   { title: "Bot", url: "/bot-config", icon: Bot },
   { title: "Equipe", url: "/client-users", icon: Users },
   { title: "Configurações", url: "/company-settings", icon: Settings },
