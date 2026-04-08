@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { CreditCard, Calendar, CheckCircle2, AlertTriangle, XCircle, Clock, Crown } from "lucide-react";
+import PlanChangeSection from "@/components/subscription/PlanChangeSection";
 
 interface Subscription {
   id: string;
@@ -73,20 +74,23 @@ export default function Subscription() {
   const { user } = useAuth();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
+  
+
+  const fetchSubscription = async () => {
+    setLoading(true);
+    const { data } = await supabase
+      .from("subscriptions")
+      .select("*")
+      .eq("user_id", user!.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    setSubscription(data);
+    setLoading(false);
+  };
 
   useEffect(() => {
     if (!user) return;
-    const fetchSubscription = async () => {
-      const { data } = await supabase
-        .from("subscriptions")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      setSubscription(data);
-      setLoading(false);
-    };
     fetchSubscription();
   }, [user]);
 
@@ -214,7 +218,13 @@ export default function Subscription() {
         </Card>
       </div>
 
-      {/* Status Alert */}
+      {/* Plan Change */}
+      <PlanChangeSection
+        currentPlan={subscription.plan}
+        subscriptionStatus={subscription.status}
+        onPlanChanged={fetchSubscription}
+      />
+
       {subscription.status === "overdue" && (
         <Card className="border-destructive/50 bg-destructive/5">
           <CardContent className="flex items-start gap-3 py-4">
