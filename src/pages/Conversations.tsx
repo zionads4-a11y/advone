@@ -346,9 +346,17 @@ export default function Conversations() {
                     <p className="text-xs text-muted-foreground">{selectedPhone}</p>
                   </div>
                   {selectedLead && (
-                    <Badge variant="outline" className="ml-auto border-primary/30 text-primary text-[10px]">
-                      Lead cadastrado
-                    </Badge>
+                    <div className="ml-auto flex items-center gap-2">
+                      <LeadBotToggle
+                        leadId={selectedLead.id}
+                        initialDisabled={!!selectedLead.bot_disabled}
+                        compact
+                        onUpdate={() => fetchMessages()}
+                      />
+                      <Badge variant="outline" className="border-primary/30 text-primary text-[10px]">
+                        Lead cadastrado
+                      </Badge>
+                    </div>
                   )}
                 </div>
               </CardHeader>
