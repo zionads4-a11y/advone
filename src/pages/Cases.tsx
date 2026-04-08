@@ -55,11 +55,18 @@ interface CaseRecord {
   company_id: string;
   client_name: string;
   case_number: string | null;
+  lead_id: string | null;
   status: string;
   notes: string | null;
   created_by: string;
   created_at: string;
   doc_count?: number;
+  lead_name?: string;
+}
+
+interface LeadOption {
+  id: string;
+  name: string;
 }
 
 interface CaseDocument {
