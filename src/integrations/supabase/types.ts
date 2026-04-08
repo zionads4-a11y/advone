@@ -558,6 +558,9 @@ export type Database = {
           parent_event_id: string | null
           recurrence_end: string | null
           recurrence_rule: string | null
+          reminder_2h_sent: boolean
+          reminder_30m_sent: boolean
+          reminder_6h_sent: boolean
           reminder_type: string
           title: string
           updated_at: string
@@ -575,6 +578,9 @@ export type Database = {
           parent_event_id?: string | null
           recurrence_end?: string | null
           recurrence_rule?: string | null
+          reminder_2h_sent?: boolean
+          reminder_30m_sent?: boolean
+          reminder_6h_sent?: boolean
           reminder_type?: string
           title: string
           updated_at?: string
@@ -592,6 +598,9 @@ export type Database = {
           parent_event_id?: string | null
           recurrence_end?: string | null
           recurrence_rule?: string | null
+          reminder_2h_sent?: boolean
+          reminder_30m_sent?: boolean
+          reminder_6h_sent?: boolean
           reminder_type?: string
           title?: string
           updated_at?: string
