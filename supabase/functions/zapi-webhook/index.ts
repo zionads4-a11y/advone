@@ -930,7 +930,7 @@ serve(async (req) => {
       });
 
       // AI Auto-Reply with SDR qualification
-      if (config.ai_enabled && config.ai_auto_reply && leadId) {
+      if (config.ai_enabled && config.ai_auto_reply && leadId && !existingLead?.bot_disabled) {
         try {
           const leadStatus = existingLead?.status;
           const isAlreadyHandled = leadStatus && !["new"].includes(leadStatus);
