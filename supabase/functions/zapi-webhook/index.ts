@@ -1013,6 +1013,14 @@ serve(async (req) => {
           const isAlreadyHandled = leadStatus && !["new", "contacted"].includes(leadStatus);
 
           if (!isAlreadyHandled) {
+            // Fetch lead name for AI context
+            const { data: leadData } = await supabase
+              .from("leads")
+              .select("name")
+              .eq("id", leadId)
+              .single();
+            const currentLeadName = leadData?.name || senderName || undefined;
+
             const { data: recentMsgs } = await supabase
               .from("whatsapp_messages")
               .select("message_text, direction")
@@ -1028,7 +1036,7 @@ serve(async (req) => {
                 content: m.message_text || "",
               }));
 
-            const aiReply = await qualifyLeadWithAI(config, history, companyId, leadId, supabase);
+            const aiReply = await qualifyLeadWithAI(config, history, companyId, leadId, supabase, currentLeadName);
 
             if (aiReply) {
               const SERVER_URL = "https://ziondigital.uazapi.com";
