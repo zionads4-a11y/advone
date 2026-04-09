@@ -259,7 +259,7 @@ serve(async (req) => {
 
         // Analyze conversation with AI before sending follow-up
         const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-        if (LOVABLE_API_KEY && msg.day_number >= 2) {
+        if (LOVABLE_API_KEY) {
           try {
             const { data: conversationMsgs } = await supabase
               .from("whatsapp_messages")
