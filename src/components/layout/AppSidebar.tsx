@@ -42,6 +42,7 @@ const adminItems = [
   { title: "Monitoramento", url: "/monitoramento", icon: Radar },
   { title: "Usuários", url: "/client-users", icon: Users },
   { title: "Acessos", url: "/access-management", icon: KeyRound },
+  { title: "Assinaturas", url: "/assinatura", icon: CreditCard },
 ];
 
 const gerenteItems = [
