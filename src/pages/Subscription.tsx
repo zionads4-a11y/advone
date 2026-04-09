@@ -49,12 +49,10 @@ export default function Subscription() {
   const [loading, setLoading] = useState(true);
 
   // Only admin can access this page
-  if (userRole && userRole !== "admin" && userRole !== "member") {
-    return <Navigate to="/dashboard" replace />;
-  }
+  const isAllowed = userRole === "admin" || userRole === "member";
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !isAllowed) return;
 
     const fetch = async () => {
       setLoading(true);
