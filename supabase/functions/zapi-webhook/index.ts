@@ -327,12 +327,13 @@ async function qualifyLeadWithAI(
   conversationHistory: { role: string; content: string }[],
   companyId: string,
   leadId: string,
-  supabase: any
+  supabase: any,
+  leadName?: string
 ) {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!LOVABLE_API_KEY) return null;
 
-  const systemPrompt = buildSDRPrompt(config);
+  const systemPrompt = buildSDRPrompt(config, leadName);
 
   const tools = [
     {
