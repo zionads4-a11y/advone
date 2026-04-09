@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-function buildSDRPrompt(config: any) {
+function buildSDRPrompt(config: any, leadName?: string) {
   const officeName = config.office_name || "o escritório";
   const practiceArea = config.practice_area || "";
   const tone = config.communication_tone || "moderado";
@@ -15,6 +15,7 @@ function buildSDRPrompt(config: any) {
   const targetAudience = config.target_audience || "";
   const customPrompt = config.ai_prompt || "";
   const triageOptions: any[] = Array.isArray(config.triage_options) ? config.triage_options : [];
+  const leadNameInfo = leadName ? `\n\nNOME DO LEAD: O nome do lead é "${leadName}". Use este nome sempre que se referir a ele. NUNCA escreva {nome} literalmente — use "${leadName}" diretamente.\n` : `\n\nNOME DO LEAD: Você ainda não sabe o nome do lead. Pergunte o nome antes de personalizar as mensagens. NUNCA escreva {nome} literalmente.\n`;
 
   const toneInstructions = tone === "formal"
     ? "Use linguagem formal e tratamento respeitoso (Sr./Sra.). Mantenha cordialidade."
@@ -103,7 +104,7 @@ SE O LEAD NÃO SE ENCAIXAR:
   const hasTriagem = triageOptions.length > 0;
 
   return `Você é uma ATENDENTE HUMANA — a assistente virtual de ${officeName}${practiceArea ? `, especializado em ${practiceArea}` : ""}.
-
+${leadNameInfo}
 PERSONALIDADE E HUMANIZAÇÃO:
 - Você conversa como uma pessoa REAL no WhatsApp — simpática, empática e acolhedora
 - Você demonstra interesse genuíno pelo problema do lead
@@ -326,12 +327,13 @@ async function qualifyLeadWithAI(
   conversationHistory: { role: string; content: string }[],
   companyId: string,
   leadId: string,
-  supabase: any
+  supabase: any,
+  leadName?: string
 ) {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!LOVABLE_API_KEY) return null;
 
-  const systemPrompt = buildSDRPrompt(config);
+  const systemPrompt = buildSDRPrompt(config, leadName);
 
   const tools = [
     {
@@ -1011,6 +1013,14 @@ serve(async (req) => {
           const isAlreadyHandled = leadStatus && !["new", "contacted"].includes(leadStatus);
 
           if (!isAlreadyHandled) {
+            // Fetch lead name for AI context
+            const { data: leadData } = await supabase
+              .from("leads")
+              .select("name")
+              .eq("id", leadId)
+              .single();
+            const currentLeadName = leadData?.name || senderName || undefined;
+
             const { data: recentMsgs } = await supabase
               .from("whatsapp_messages")
               .select("message_text, direction")
@@ -1026,7 +1036,7 @@ serve(async (req) => {
                 content: m.message_text || "",
               }));
 
-            const aiReply = await qualifyLeadWithAI(config, history, companyId, leadId, supabase);
+            const aiReply = await qualifyLeadWithAI(config, history, companyId, leadId, supabase, currentLeadName);
 
             if (aiReply) {
               const SERVER_URL = "https://ziondigital.uazapi.com";

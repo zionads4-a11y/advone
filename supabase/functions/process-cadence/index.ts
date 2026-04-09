@@ -147,15 +147,16 @@ async function processInactivityNudges(supabase: any) {
           if (minutesSinceLastNudge < 25) continue;
         }
 
-        // Send the nudge
-        const result = await sendWhatsAppMessage(config, phone, nextNudge.message);
+        // Send the nudge — replace {nome} with actual lead name
+        const nudgeText = nextNudge.message.replace(/\{nome\}/g, lead.name || "");
+        const result = await sendWhatsAppMessage(config, phone, nudgeText);
 
         if (result) {
           await supabase.from("whatsapp_messages").insert({
             company_id: config.company_id,
             lead_id: lead.id,
             phone,
-            message_text: nextNudge.message,
+            message_text: nudgeText,
             direction: "outgoing",
             sender_name: "Nudge",
             message_id_external: result.messageId || result.key?.id || null,
