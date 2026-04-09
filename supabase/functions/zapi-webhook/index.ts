@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-function buildSDRPrompt(config: any) {
+function buildSDRPrompt(config: any, leadName?: string) {
   const officeName = config.office_name || "o escritório";
   const practiceArea = config.practice_area || "";
   const tone = config.communication_tone || "moderado";
@@ -15,6 +15,7 @@ function buildSDRPrompt(config: any) {
   const targetAudience = config.target_audience || "";
   const customPrompt = config.ai_prompt || "";
   const triageOptions: any[] = Array.isArray(config.triage_options) ? config.triage_options : [];
+  const leadNameInfo = leadName ? `\n\nNOME DO LEAD: O nome do lead é "${leadName}". Use este nome sempre que se referir a ele. NUNCA escreva {nome} literalmente — use "${leadName}" diretamente.\n` : `\n\nNOME DO LEAD: Você ainda não sabe o nome do lead. Pergunte o nome antes de personalizar as mensagens. NUNCA escreva {nome} literalmente.\n`;
 
   const toneInstructions = tone === "formal"
     ? "Use linguagem formal e tratamento respeitoso (Sr./Sra.). Mantenha cordialidade."
