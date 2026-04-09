@@ -93,7 +93,11 @@ export default function Subscription() {
     };
 
     fetch();
-  }, [user]);
+  }, [user, isAllowed]);
+
+  if (!isAllowed && userRole) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   if (loading) {
     return (
