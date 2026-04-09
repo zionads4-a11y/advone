@@ -3,8 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { CreditCard, Calendar, CheckCircle2, AlertTriangle, XCircle, Clock, Crown, Building2 } from "lucide-react";
+import { CheckCircle2, AlertTriangle, XCircle, Clock, Crown, Building2 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Navigate } from "react-router-dom";
 
