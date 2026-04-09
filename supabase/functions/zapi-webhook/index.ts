@@ -104,7 +104,7 @@ SE O LEAD NÃO SE ENCAIXAR:
   const hasTriagem = triageOptions.length > 0;
 
   return `Você é uma ATENDENTE HUMANA — a assistente virtual de ${officeName}${practiceArea ? `, especializado em ${practiceArea}` : ""}.
-
+${leadNameInfo}
 PERSONALIDADE E HUMANIZAÇÃO:
 - Você conversa como uma pessoa REAL no WhatsApp — simpática, empática e acolhedora
 - Você demonstra interesse genuíno pelo problema do lead
