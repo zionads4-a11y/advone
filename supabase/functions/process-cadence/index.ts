@@ -229,7 +229,7 @@ serve(async (req) => {
         // Check if lead status changed
         const { data: lead } = await supabase
           .from("leads")
-          .select("status, bot_disabled")
+          .select("status, bot_disabled, name")
           .eq("id", msg.lead_id)
           .single();
 
@@ -245,7 +245,7 @@ serve(async (req) => {
 
         const { data: config } = await supabase
           .from("whatsapp_configs")
-          .select("zapi_instance_id, zapi_token, scheduling_link")
+          .select("zapi_instance_id, zapi_token, scheduling_link, office_name, practice_area")
           .eq("company_id", msg.company_id)
           .maybeSingle();
 
@@ -257,7 +257,106 @@ serve(async (req) => {
           continue;
         }
 
+        // Analyze conversation with AI before sending follow-up
+        const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+        if (LOVABLE_API_KEY && msg.day_number >= 2) {
+          try {
+            const { data: conversationMsgs } = await supabase
+              .from("whatsapp_messages")
+              .select("message_text, direction, sender_name")
+              .eq("company_id", msg.company_id)
+              .eq("phone", msg.phone)
+              .order("timestamp", { ascending: false })
+              .limit(20);
+
+            const history = (conversationMsgs || []).reverse().map((m: any) =>
+              `${m.direction === "incoming" ? "Lead" : (m.sender_name || "Bot")}: ${m.message_text || ""}`
+            ).join("\n");
+
+            if (history.trim()) {
+              const aiAnalysis = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${LOVABLE_API_KEY}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  model: "google/gemini-2.5-flash-lite",
+                  messages: [
+                    {
+                      role: "system",
+                      content: `Você é um analista de leads. Analise a conversa abaixo e responda APENAS com um JSON: {"action": "continue" | "lost", "reason": "motivo breve"}
+
+Responda "continue" se:
+- O lead demonstrou interesse mas parou de responder (normal, vale tentar follow-up)
+- A conversa foi curta e não houve rejeição explícita
+- O lead pediu para falar depois ou disse que estava ocupado
+
+Responda "lost" se:
+- O lead disse EXPLICITAMENTE que NÃO quer ser contatado
+- O lead pediu para parar de enviar mensagens
+- O lead disse que já resolveu o problema
+- O lead foi grosseiro ou bloqueou
+- O lead disse que não tem interesse
+
+Na DÚVIDA, responda "continue".`
+                    },
+                    { role: "user", content: `Conversa:\n${history}` }
+                  ],
+                }),
+              });
+
+              if (aiAnalysis.ok) {
+                const aiData = await aiAnalysis.json();
+                const content = aiData.choices?.[0]?.message?.content || "";
+                
+                // Extract JSON from response
+                const jsonMatch = content.match(/\{[^}]+\}/);
+                if (jsonMatch) {
+                  try {
+                    const decision = JSON.parse(jsonMatch[0]);
+                    if (decision.action === "lost") {
+                      console.log(`AI decided lead ${msg.lead_id} is lost: ${decision.reason}`);
+                      
+                      // Mark as lost
+                      const { data: lostColumn } = await supabase
+                        .from("kanban_columns")
+                        .select("id")
+                        .eq("company_id", msg.company_id)
+                        .eq("is_lost", true)
+                        .maybeSingle();
+
+                      await supabase.from("leads").update({
+                        status: "lost",
+                        notes: `[IA - Follow-up] Lead descartado: ${decision.reason}`,
+                        ...(lostColumn ? { kanban_column_id: lostColumn.id } : {}),
+                      }).eq("id", msg.lead_id);
+
+                      // Cancel all pending cadence
+                      await supabase
+                        .from("cadence_messages")
+                        .update({ status: "cancelled" })
+                        .eq("lead_id", msg.lead_id)
+                        .eq("status", "pending");
+
+                      skipped++;
+                      continue;
+                    }
+                  } catch { /* parse error, continue normally */ }
+                }
+              }
+            }
+          } catch (aiErr) {
+            console.error("AI cadence analysis error:", aiErr);
+            // Continue with normal follow-up on AI error
+          }
+        }
+
         let messageText = msg.message_text || CADENCE_MESSAGES[msg.day_number] || CADENCE_MESSAGES[1];
+        // Replace {nome} with actual lead name
+        if (lead?.name) {
+          messageText = messageText.replace(/\{nome\}/g, lead.name);
+        }
         if ((config as any).scheduling_link) {
           messageText += `\n\n${(config as any).scheduling_link}`;
         }
