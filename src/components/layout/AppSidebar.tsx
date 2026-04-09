@@ -42,6 +42,7 @@ const adminItems = [
   { title: "Monitoramento", url: "/monitoramento", icon: Radar },
   { title: "Usuários", url: "/client-users", icon: Users },
   { title: "Acessos", url: "/access-management", icon: KeyRound },
+  { title: "Assinaturas", url: "/assinatura", icon: CreditCard },
 ];
 
 const gerenteItems = [
@@ -55,7 +56,6 @@ const gerenteItems = [
   { title: "Monitoramento", url: "/monitoramento", icon: Radar },
   { title: "Bot", url: "/bot-config", icon: Bot },
   { title: "Equipe", url: "/client-users", icon: Users },
-  { title: "Assinatura", url: "/assinatura", icon: CreditCard },
   { title: "Configurações", url: "/company-settings", icon: Settings },
 ];
 
