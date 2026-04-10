@@ -83,7 +83,7 @@ export default function ProcessMonitoring() {
     if (isAdmin) {
       supabase.from("companies").select("id, name").then(({ data }) => {
         setCompanies((data || []) as any);
-        if (data?.length) setSelectedCompanyId(data[0].id);
+        setSelectedCompanyId("all");
       });
     } else if (companyIds.length > 0) {
       setSelectedCompanyId(companyIds[0]);
@@ -94,24 +94,33 @@ export default function ProcessMonitoring() {
     if (!selectedCompanyId) return;
     setLoading(true);
 
-    const [procResult, planResult] = await Promise.all([
-      supabase
+    if (isAdmin && selectedCompanyId === "all") {
+      const { data } = await supabase
         .from("monitored_processes")
         .select("*")
-        .eq("company_id", selectedCompanyId)
         .eq("is_active", true)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("company_monitoring_plans")
-        .select("plan_type, max_processes, is_active")
-        .eq("company_id", selectedCompanyId)
-        .maybeSingle(),
-    ]);
-
-    setProcesses((procResult.data || []) as any);
-    setPlan(planResult.data as any);
+        .order("created_at", { ascending: false });
+      setProcesses((data || []) as any);
+      setPlan(null);
+    } else {
+      const [procResult, planResult] = await Promise.all([
+        supabase
+          .from("monitored_processes")
+          .select("*")
+          .eq("company_id", selectedCompanyId)
+          .eq("is_active", true)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("company_monitoring_plans")
+          .select("plan_type, max_processes, is_active")
+          .eq("company_id", selectedCompanyId)
+          .maybeSingle(),
+      ]);
+      setProcesses((procResult.data || []) as any);
+      setPlan(planResult.data as any);
+    }
     setLoading(false);
-  }, [selectedCompanyId]);
+  }, [selectedCompanyId, isAdmin]);
 
   useEffect(() => {
     fetchData();
