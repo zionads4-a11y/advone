@@ -288,7 +288,7 @@ export default function ProcessMonitoring() {
         </div>
       </div>
 
-      {!plan?.is_active && (
+      {!plan?.is_active && selectedCompanyId !== "all" && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card className="border-warning/30 bg-warning/5">
             <CardContent className="flex items-center gap-3 py-4">
