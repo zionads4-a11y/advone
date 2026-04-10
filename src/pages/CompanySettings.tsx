@@ -117,6 +117,13 @@ export default function CompanySettings() {
         <Save className="mr-2 h-4 w-4" />
         {saving ? "Salvando..." : "Salvar Configurações"}
       </Button>
+
+      {!hasMonitoring && company && (
+        <MonitoringPackagePurchase
+          companyId={company.id}
+          onPurchaseComplete={() => fetchCompany(company.id)}
+        />
+      )}
     </div>
   );
 }
