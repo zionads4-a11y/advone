@@ -140,7 +140,8 @@ export default function ProcessMonitoring() {
   };
 
   const handleAddProcess = async () => {
-    if (!newCnj.trim() || !newClientName.trim() || !selectedCompanyId) {
+    const targetCompanyId = isAdmin && selectedCompanyId === "all" ? addCompanyId : selectedCompanyId;
+    if (!newCnj.trim() || !newClientName.trim() || !targetCompanyId) {
       toast.error("Preencha todos os campos");
       return;
     }
@@ -149,7 +150,7 @@ export default function ProcessMonitoring() {
       const { data, error } = await supabase.functions.invoke("escavador-proxy", {
         body: {
           action: "add_process",
-          company_id: selectedCompanyId,
+          company_id: targetCompanyId,
           numero_cnj: newCnj.trim(),
           client_name: newClientName.trim(),
         },
