@@ -103,7 +103,14 @@ SE O LEAD NÃO SE ENCAIXAR:
 
   const hasTriagem = triageOptions.length > 0;
 
+  const todayStr = getTodayBrasilia();
+  const nowBR = getNowBrasilia();
+  const dayNames = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
+  const todayDayName = dayNames[nowBR.getDay()];
+
   return `Você é uma ATENDENTE HUMANA — a assistente virtual de ${officeName}${practiceArea ? `, especializado em ${practiceArea}` : ""}.
+
+📆 DATA E HORA ATUAL: Hoje é ${todayDayName}, ${todayStr} (${String(nowBR.getHours()).padStart(2,"0")}:${String(nowBR.getMinutes()).padStart(2,"0")} horário de Brasília). USE ESTA DATA COMO REFERÊNCIA para "hoje", "amanhã", etc. NUNCA invente datas.
 ${leadNameInfo}
 PERSONALIDADE E HUMANIZAÇÃO:
 - Você conversa como uma pessoa REAL no WhatsApp — simpática, empática e acolhedora
@@ -587,6 +594,35 @@ async function qualifyLeadWithAI(
       // Otherwise loop — the AI needs to generate text after seeing tool results
     }
 
+    // Move lead to "Agendado" when scheduled, even without qualify_lead tool call
+    if (shouldSchedule && leadId) {
+      const targetPosition = 6; // Agendado
+      const { data: columns } = await supabase
+        .from("kanban_columns")
+        .select("id")
+        .eq("company_id", companyId)
+        .order("position", { ascending: true })
+        .limit(targetPosition + 1);
+
+      if (columns && columns.length > targetPosition) {
+        await supabase.from("leads").update({
+          kanban_column_id: columns[targetPosition].id,
+          status: "qualified",
+        }).eq("id", leadId);
+      }
+
+      // Add summary if no qualification result provided one
+      if (!qualificationResult) {
+        await supabase.from("lead_summaries").insert({
+          lead_id: leadId,
+          company_id: companyId,
+          summary_text: `🤖 Agendamento realizado automaticamente pelo bot SDR`,
+          generated_by_ai: true,
+          created_by: "00000000-0000-0000-0000-000000000000",
+        });
+      }
+    }
+
     // Apply qualification results
     if (qualificationResult && leadId) {
       const scoreUpdate: any = {};
@@ -610,18 +646,20 @@ async function qualifyLeadWithAI(
           created_by: "00000000-0000-0000-0000-000000000000",
         });
 
-        const targetPosition = shouldSchedule ? 6 : 5;
-        const { data: columns } = await supabase
-          .from("kanban_columns")
-          .select("id")
-          .eq("company_id", companyId)
-          .order("position", { ascending: true })
-          .limit(targetPosition + 1);
+        if (!shouldSchedule) {
+          const targetPosition = 5;
+          const { data: cols } = await supabase
+            .from("kanban_columns")
+            .select("id")
+            .eq("company_id", companyId)
+            .order("position", { ascending: true })
+            .limit(targetPosition + 1);
 
-        if (columns && columns.length > targetPosition) {
-          await supabase.from("leads").update({
-            kanban_column_id: columns[targetPosition].id,
-          }).eq("id", leadId);
+          if (cols && cols.length > targetPosition) {
+            await supabase.from("leads").update({
+              kanban_column_id: cols[targetPosition].id,
+            }).eq("id", leadId);
+          }
         }
       } else if (qualificationResult.status === "not_qualified") {
         const { data: lostColumn } = await supabase
