@@ -71,9 +71,9 @@ export default function ProcessMonitoring() {
   const [addingProcess, setAddingProcess] = useState(false);
   const [refreshingId, setRefreshingId] = useState<string | null>(null);
 
-  // Add form
   const [newCnj, setNewCnj] = useState("");
   const [newClientName, setNewClientName] = useState("");
+  const [addCompanyId, setAddCompanyId] = useState("");
 
   // Company selection for admin
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
