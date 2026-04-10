@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building2, Save } from "lucide-react";
 import { toast } from "sonner";
 import { BusinessHoursConfig, type BusinessHours, parseBusinessHours, getDefaultBusinessHours } from "@/components/companies/BusinessHoursConfig";
+import MonitoringPackagePurchase from "@/components/monitoring/MonitoringPackagePurchase";
 
 interface Company {
   id: string;
@@ -26,6 +27,7 @@ export default function CompanySettings() {
   const [businessHours, setBusinessHours] = useState<BusinessHours>(getDefaultBusinessHours());
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [hasMonitoring, setHasMonitoring] = useState(true);
 
   useEffect(() => {
     if (companyIds.length > 0) {
@@ -36,13 +38,17 @@ export default function CompanySettings() {
   }, [companyIds, companiesLoading]);
 
   const fetchCompany = async (id: string) => {
-    const { data } = await supabase.from("companies").select("id, name, whatsapp, business_hours").eq("id", id).maybeSingle();
-    if (data) {
-      setCompany(data);
-      setName(data.name);
-      setWhatsapp(data.whatsapp || "");
-      setBusinessHours(parseBusinessHours(data.business_hours));
+    const [companyResult, planResult] = await Promise.all([
+      supabase.from("companies").select("id, name, whatsapp, business_hours").eq("id", id).maybeSingle(),
+      supabase.from("company_monitoring_plans").select("is_active").eq("company_id", id).maybeSingle(),
+    ]);
+    if (companyResult.data) {
+      setCompany(companyResult.data);
+      setName(companyResult.data.name);
+      setWhatsapp(companyResult.data.whatsapp || "");
+      setBusinessHours(parseBusinessHours(companyResult.data.business_hours));
     }
+    setHasMonitoring(!!planResult.data?.is_active);
     setLoading(false);
   };
 
@@ -111,6 +117,13 @@ export default function CompanySettings() {
         <Save className="mr-2 h-4 w-4" />
         {saving ? "Salvando..." : "Salvar Configurações"}
       </Button>
+
+      {!hasMonitoring && company && (
+        <MonitoringPackagePurchase
+          companyId={company.id}
+          onPurchaseComplete={() => fetchCompany(company.id)}
+        />
+      )}
     </div>
   );
 }

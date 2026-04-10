@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import MonitoringPackagePurchase from "@/components/monitoring/MonitoringPackagePurchase";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserCompanies } from "@/hooks/useUserCompanies";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -278,17 +279,20 @@ export default function ProcessMonitoring() {
       </div>
 
       {!plan?.is_active && (
-        <Card className="border-warning/30 bg-warning/5">
-          <CardContent className="flex items-center gap-3 py-4">
-            <AlertCircle className="h-5 w-5 text-warning shrink-0" />
-            <div>
-              <p className="text-sm font-medium text-foreground">Plano de monitoramento não ativo</p>
-              <p className="text-xs text-muted-foreground">
-                Entre em contato para ativar o monitoramento de processos (Plano Profissional: 50 processos / Plano Elite: 100 processos)
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card className="border-warning/30 bg-warning/5">
+            <CardContent className="flex items-center gap-3 py-4">
+              <AlertCircle className="h-5 w-5 text-warning shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-foreground">Plano de monitoramento não ativo</p>
+                <p className="text-xs text-muted-foreground">
+                  Contrate um pacote de monitoramento para acompanhar seus processos
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+          <MonitoringPackagePurchase companyId={selectedCompanyId} onPurchaseComplete={fetchData} />
+        </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -30,47 +30,125 @@ Deno.serve(async (req) => {
     // Payment events — update subscription status based on payment
     if (event.startsWith("PAYMENT_")) {
       const subscriptionId = payment?.subscription;
+      const paymentId = payment?.id;
+      const externalReference = payment?.externalReference || "";
 
-      if (!subscriptionId) {
-        console.log("Payment without subscription, skipping");
-        return new Response(JSON.stringify({ ok: true }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+      // Handle monitoring package payment confirmation
+      if (paymentId && (event === "PAYMENT_CONFIRMED" || event === "PAYMENT_RECEIVED")) {
+        const { data: monPkg } = await adminClient
+          .from("monitoring_packages")
+          .select("id, company_id, quantity, processes_per_package, status")
+          .eq("asaas_payment_id", paymentId)
+          .eq("status", "pending")
+          .maybeSingle();
+
+        if (monPkg) {
+          console.log(`Activating monitoring package ${monPkg.id}`);
+          
+          // Update package status to active
+          await adminClient
+            .from("monitoring_packages")
+            .update({ status: "active" })
+            .eq("id", monPkg.id);
+
+          // Calculate total processes from all active packages for this company
+          const { data: allPackages } = await adminClient
+            .from("monitoring_packages")
+            .select("quantity, processes_per_package")
+            .eq("company_id", monPkg.company_id)
+            .eq("status", "active");
+
+          const totalProcesses = (allPackages || []).reduce(
+            (sum, p) => sum + p.quantity * p.processes_per_package, 0
+          ) + monPkg.quantity * monPkg.processes_per_package;
+
+          // Upsert company_monitoring_plans
+          const { data: existingPlan } = await adminClient
+            .from("company_monitoring_plans")
+            .select("id, max_processes")
+            .eq("company_id", monPkg.company_id)
+            .maybeSingle();
+
+          if (existingPlan) {
+            await adminClient
+              .from("company_monitoring_plans")
+              .update({
+                max_processes: totalProcesses,
+                is_active: true,
+                plan_type: "pacote",
+              })
+              .eq("id", existingPlan.id);
+          } else {
+            await adminClient
+              .from("company_monitoring_plans")
+              .insert({
+                company_id: monPkg.company_id,
+                max_processes: totalProcesses,
+                is_active: true,
+                plan_type: "pacote",
+              });
+          }
+
+          console.log(`Monitoring plan updated: ${totalProcesses} processes for company ${monPkg.company_id}`);
+        }
       }
 
-      let newStatus: string | null = null;
+      // Handle monitoring package subscription payment (recurring)
+      if (subscriptionId && (event === "PAYMENT_CONFIRMED" || event === "PAYMENT_RECEIVED")) {
+        const { data: monPkgSub } = await adminClient
+          .from("monitoring_packages")
+          .select("id, company_id, status")
+          .eq("asaas_subscription_id", subscriptionId)
+          .maybeSingle();
 
-      switch (event) {
-        case "PAYMENT_CONFIRMED":
-        case "PAYMENT_RECEIVED":
-          newStatus = "active";
-          break;
-        case "PAYMENT_OVERDUE":
-          newStatus = "overdue";
-          break;
-        case "PAYMENT_REFUNDED":
-        case "PAYMENT_CHARGEBACK_REQUESTED":
-          newStatus = "refunded";
-          break;
-        case "PAYMENT_DELETED":
-        case "PAYMENT_RESTORED":
-          // No status change
-          break;
-        default:
-          console.log("Unhandled payment event:", event);
-          break;
+        if (monPkgSub && monPkgSub.status === "active") {
+          console.log(`Recurring payment confirmed for monitoring package ${monPkgSub.id}`);
+        }
       }
 
-      if (newStatus) {
-        const { error } = await adminClient
-          .from("subscriptions")
-          .update({ status: newStatus })
-          .eq("asaas_subscription_id", subscriptionId);
+      // Handle monitoring package payment overdue/cancelled
+      if (paymentId && (event === "PAYMENT_OVERDUE")) {
+        await adminClient
+          .from("monitoring_packages")
+          .update({ status: "overdue" })
+          .eq("asaas_payment_id", paymentId);
+      }
 
-        if (error) {
-          console.error("Error updating subscription from payment:", error);
-        } else {
-          console.log(`Subscription ${subscriptionId} updated to ${newStatus}`);
+      // Standard subscription handling
+      if (subscriptionId) {
+        let newStatus: string | null = null;
+
+        switch (event) {
+          case "PAYMENT_CONFIRMED":
+          case "PAYMENT_RECEIVED":
+            newStatus = "active";
+            break;
+          case "PAYMENT_OVERDUE":
+            newStatus = "overdue";
+            break;
+          case "PAYMENT_REFUNDED":
+          case "PAYMENT_CHARGEBACK_REQUESTED":
+            newStatus = "refunded";
+            break;
+          case "PAYMENT_DELETED":
+          case "PAYMENT_RESTORED":
+            break;
+          default:
+            console.log("Unhandled payment event:", event);
+            break;
+        }
+
+        if (newStatus) {
+          const { error } = await adminClient
+            .from("subscriptions")
+            .update({ status: newStatus })
+            .eq("asaas_subscription_id", subscriptionId);
+
+          if (error) {
+            console.error("Error updating subscription from payment:", error);
+          } else {
+            console.log(`Subscription ${subscriptionId} updated to ${newStatus}`);
+          }
         }
       }
     }
@@ -110,6 +188,7 @@ Deno.serve(async (req) => {
       }
 
       if (newStatus) {
+        // Update standard subscriptions
         const { error } = await adminClient
           .from("subscriptions")
           .update({ status: newStatus })
@@ -119,6 +198,45 @@ Deno.serve(async (req) => {
           console.error("Error updating subscription:", error);
         } else {
           console.log(`Subscription ${subId} updated to ${newStatus}`);
+        }
+
+        // Also check monitoring packages
+        if (newStatus === "cancelled" || newStatus === "expired") {
+          const { data: cancelledPkg } = await adminClient
+            .from("monitoring_packages")
+            .select("id, company_id")
+            .eq("asaas_subscription_id", subId)
+            .maybeSingle();
+
+          if (cancelledPkg) {
+            await adminClient
+              .from("monitoring_packages")
+              .update({ status: "cancelled" })
+              .eq("id", cancelledPkg.id);
+
+            // Recalculate total processes
+            const { data: activePkgs } = await adminClient
+              .from("monitoring_packages")
+              .select("quantity, processes_per_package")
+              .eq("company_id", cancelledPkg.company_id)
+              .eq("status", "active");
+
+            const totalProcesses = (activePkgs || []).reduce(
+              (sum, p) => sum + p.quantity * p.processes_per_package, 0
+            );
+
+            if (totalProcesses === 0) {
+              await adminClient
+                .from("company_monitoring_plans")
+                .update({ is_active: false, max_processes: 0 })
+                .eq("company_id", cancelledPkg.company_id);
+            } else {
+              await adminClient
+                .from("company_monitoring_plans")
+                .update({ max_processes: totalProcesses })
+                .eq("company_id", cancelledPkg.company_id);
+            }
+          }
         }
       }
     }
