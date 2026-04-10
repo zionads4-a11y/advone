@@ -71,9 +71,9 @@ export default function ProcessMonitoring() {
   const [addingProcess, setAddingProcess] = useState(false);
   const [refreshingId, setRefreshingId] = useState<string | null>(null);
 
-  // Add form
   const [newCnj, setNewCnj] = useState("");
   const [newClientName, setNewClientName] = useState("");
+  const [addCompanyId, setAddCompanyId] = useState("");
 
   // Company selection for admin
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
@@ -83,7 +83,7 @@ export default function ProcessMonitoring() {
     if (isAdmin) {
       supabase.from("companies").select("id, name").then(({ data }) => {
         setCompanies((data || []) as any);
-        if (data?.length) setSelectedCompanyId(data[0].id);
+        setSelectedCompanyId("all");
       });
     } else if (companyIds.length > 0) {
       setSelectedCompanyId(companyIds[0]);
@@ -94,24 +94,33 @@ export default function ProcessMonitoring() {
     if (!selectedCompanyId) return;
     setLoading(true);
 
-    const [procResult, planResult] = await Promise.all([
-      supabase
+    if (isAdmin && selectedCompanyId === "all") {
+      const { data } = await supabase
         .from("monitored_processes")
         .select("*")
-        .eq("company_id", selectedCompanyId)
         .eq("is_active", true)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("company_monitoring_plans")
-        .select("plan_type, max_processes, is_active")
-        .eq("company_id", selectedCompanyId)
-        .maybeSingle(),
-    ]);
-
-    setProcesses((procResult.data || []) as any);
-    setPlan(planResult.data as any);
+        .order("created_at", { ascending: false });
+      setProcesses((data || []) as any);
+      setPlan(null);
+    } else {
+      const [procResult, planResult] = await Promise.all([
+        supabase
+          .from("monitored_processes")
+          .select("*")
+          .eq("company_id", selectedCompanyId)
+          .eq("is_active", true)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("company_monitoring_plans")
+          .select("plan_type, max_processes, is_active")
+          .eq("company_id", selectedCompanyId)
+          .maybeSingle(),
+      ]);
+      setProcesses((procResult.data || []) as any);
+      setPlan(planResult.data as any);
+    }
     setLoading(false);
-  }, [selectedCompanyId]);
+  }, [selectedCompanyId, isAdmin]);
 
   useEffect(() => {
     fetchData();
@@ -131,7 +140,8 @@ export default function ProcessMonitoring() {
   };
 
   const handleAddProcess = async () => {
-    if (!newCnj.trim() || !newClientName.trim() || !selectedCompanyId) {
+    const targetCompanyId = isAdmin && selectedCompanyId === "all" ? addCompanyId : selectedCompanyId;
+    if (!newCnj.trim() || !newClientName.trim() || !targetCompanyId) {
       toast.error("Preencha todos os campos");
       return;
     }
@@ -140,7 +150,7 @@ export default function ProcessMonitoring() {
       const { data, error } = await supabase.functions.invoke("escavador-proxy", {
         body: {
           action: "add_process",
-          company_id: selectedCompanyId,
+          company_id: targetCompanyId,
           numero_cnj: newCnj.trim(),
           client_name: newClientName.trim(),
         },
@@ -213,12 +223,13 @@ export default function ProcessMonitoring() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          {isAdmin && companies.length > 1 && (
+          {isAdmin && (
             <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="w-[220px]">
                 <SelectValue placeholder="Empresa" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="all">Todas as empresas</SelectItem>
                 {companies.map((c) => (
                   <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                 ))}
@@ -232,7 +243,7 @@ export default function ProcessMonitoring() {
           )}
           <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
             <DialogTrigger asChild>
-              <Button size="sm" disabled={!plan?.is_active}>
+              <Button size="sm" disabled={!plan?.is_active && selectedCompanyId !== "all"}>
                 <Plus className="h-4 w-4 mr-1" /> Adicionar
               </Button>
             </DialogTrigger>
@@ -241,6 +252,21 @@ export default function ProcessMonitoring() {
                 <DialogTitle>Adicionar Processo ao Monitoramento</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 pt-2">
+                {isAdmin && selectedCompanyId === "all" && (
+                  <div className="space-y-2">
+                    <Label>Empresa</Label>
+                    <Select value={addCompanyId} onValueChange={setAddCompanyId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione a empresa" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {companies.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label>Número CNJ</Label>
                   <Input
@@ -278,7 +304,7 @@ export default function ProcessMonitoring() {
         </div>
       </div>
 
-      {!plan?.is_active && (
+      {!plan?.is_active && selectedCompanyId !== "all" && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card className="border-warning/30 bg-warning/5">
             <CardContent className="flex items-center gap-3 py-4">
@@ -328,6 +354,11 @@ export default function ProcessMonitoring() {
                             <p className="text-sm font-medium text-foreground truncate">
                               {proc.client_name}
                             </p>
+                            {isAdmin && selectedCompanyId === "all" && (
+                              <p className="text-[10px] text-primary/70 truncate">
+                                {companies.find(c => c.id === proc.company_id)?.name || "—"}
+                              </p>
+                            )}
                             <p className="text-xs text-muted-foreground font-mono mt-0.5">
                               {proc.numero_cnj}
                             </p>
