@@ -222,12 +222,13 @@ export default function ProcessMonitoring() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          {isAdmin && companies.length > 1 && (
+          {isAdmin && (
             <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="w-[220px]">
                 <SelectValue placeholder="Empresa" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="all">Todas as empresas</SelectItem>
                 {companies.map((c) => (
                   <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                 ))}
@@ -241,7 +242,7 @@ export default function ProcessMonitoring() {
           )}
           <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
             <DialogTrigger asChild>
-              <Button size="sm" disabled={!plan?.is_active}>
+              <Button size="sm" disabled={!plan?.is_active && selectedCompanyId !== "all"}>
                 <Plus className="h-4 w-4 mr-1" /> Adicionar
               </Button>
             </DialogTrigger>
