@@ -551,24 +551,34 @@ async function qualifyLeadWithAI(
             });
 
             // Notify lawyer
+            console.log("[SCHEDULE] Checking alert_whatsapp:", config.alert_whatsapp);
             if (config.alert_whatsapp) {
-              const SERVER_URL = "https://ziondigital.uazapi.com";
-              const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
-              const alertPhone = config.alert_whatsapp.replace(/\D/g, "");
-              const modalityLabel = modality === "presencial" ? "🏢 Presencial" : "💻 Online (vídeo)";
-              const unitLine = modality === "presencial" && unitName ? `🏢 Unidade: ${unitName}\n` : "";
-              const alertMessage = `🔔 *Novo Agendamento Automático*\n\n👤 Nome: ${leadName}\n📱 Telefone: ${leadPhone}\n📅 Data: ${appointmentDate}\n⏰ Horário: ${appointmentTime}\n📍 Modalidade: ${modalityLabel}\n${unitLine}${args.summary ? `📋 Assunto: ${args.summary}\n` : ""}\n_Agendado automaticamente pelo bot SDR_`;
+              try {
+                const SERVER_URL = "https://ziondigital.uazapi.com";
+                const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+                const alertPhone = config.alert_whatsapp.replace(/\D/g, "");
+                const modalityLabel = modality === "presencial" ? "🏢 Presencial" : "💻 Online (vídeo)";
+                const unitLine = modality === "presencial" && unitName ? `🏢 Unidade: ${unitName}\n` : "";
+                const alertMessage = `🔔 *Novo Agendamento Automático*\n\n👤 Nome: ${leadName}\n📱 Telefone: ${leadPhone}\n📅 Data: ${appointmentDate}\n⏰ Horário: ${appointmentTime}\n📍 Modalidade: ${modalityLabel}\n${unitLine}${args.summary ? `📋 Assunto: ${args.summary}\n` : ""}\n_Agendado automaticamente pelo bot SDR_`;
 
-              const alertHeaders: Record<string, string> = { "Content-Type": "application/json" };
-              if (ADMIN_TOKEN) alertHeaders["admintoken"] = ADMIN_TOKEN;
+                const alertHeaders: Record<string, string> = { "Content-Type": "application/json" };
+                if (ADMIN_TOKEN) alertHeaders["admintoken"] = ADMIN_TOKEN;
 
-              const instanceParam = encodeURIComponent(config.zapi_instance_id || "");
-              const tokenParam = encodeURIComponent(config.zapi_token || config.zapi_instance_id || "");
-              await fetch(`${SERVER_URL}/send/text?instance=${instanceParam}&token=${tokenParam}`, {
-                method: "POST",
-                headers: alertHeaders,
-                body: JSON.stringify({ number: alertPhone, text: alertMessage }),
-              });
+                const instanceParam = encodeURIComponent(config.zapi_instance_id || "");
+                const tokenParam = encodeURIComponent(config.zapi_token || config.zapi_instance_id || "");
+                console.log("[SCHEDULE] Sending alert to:", alertPhone, "instance:", instanceParam);
+                const alertRes = await fetch(`${SERVER_URL}/send/text?instance=${instanceParam}&token=${tokenParam}`, {
+                  method: "POST",
+                  headers: alertHeaders,
+                  body: JSON.stringify({ number: alertPhone, text: alertMessage }),
+                });
+                const alertBody = await alertRes.text();
+                console.log("[SCHEDULE] Alert response:", alertRes.status, alertBody);
+              } catch (alertErr) {
+                console.error("[SCHEDULE] Error sending alert:", alertErr);
+              }
+            } else {
+              console.warn("[SCHEDULE] No alert_whatsapp configured for this company!");
             }
           }
           toolResult = { success: true, message: "Agendamento criado com sucesso" };
