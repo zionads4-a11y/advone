@@ -27,6 +27,7 @@ export default function CompanySettings() {
   const [businessHours, setBusinessHours] = useState<BusinessHours>(getDefaultBusinessHours());
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [hasMonitoring, setHasMonitoring] = useState(true);
 
   useEffect(() => {
     if (companyIds.length > 0) {
