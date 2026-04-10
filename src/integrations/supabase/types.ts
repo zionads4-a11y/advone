@@ -905,6 +905,59 @@ export type Database = {
           },
         ]
       }
+      monitoring_packages: {
+        Row: {
+          asaas_customer_id: string | null
+          asaas_payment_id: string | null
+          asaas_subscription_id: string | null
+          company_id: string
+          created_at: string
+          id: string
+          processes_per_package: number
+          quantity: number
+          status: string
+          updated_at: string
+          user_id: string
+          value: number
+        }
+        Insert: {
+          asaas_customer_id?: string | null
+          asaas_payment_id?: string | null
+          asaas_subscription_id?: string | null
+          company_id: string
+          created_at?: string
+          id?: string
+          processes_per_package?: number
+          quantity?: number
+          status?: string
+          updated_at?: string
+          user_id: string
+          value?: number
+        }
+        Update: {
+          asaas_customer_id?: string | null
+          asaas_payment_id?: string | null
+          asaas_subscription_id?: string | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          processes_per_package?: number
+          quantity?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monitoring_packages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       process_movements: {
         Row: {
           company_id: string
