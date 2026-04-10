@@ -338,6 +338,11 @@ export default function ProcessMonitoring() {
                             <p className="text-sm font-medium text-foreground truncate">
                               {proc.client_name}
                             </p>
+                            {isAdmin && selectedCompanyId === "all" && (
+                              <p className="text-[10px] text-primary/70 truncate">
+                                {companies.find(c => c.id === proc.company_id)?.name || "—"}
+                              </p>
+                            )}
                             <p className="text-xs text-muted-foreground font-mono mt-0.5">
                               {proc.numero_cnj}
                             </p>
