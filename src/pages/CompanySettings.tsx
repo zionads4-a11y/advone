@@ -38,13 +38,17 @@ export default function CompanySettings() {
   }, [companyIds, companiesLoading]);
 
   const fetchCompany = async (id: string) => {
-    const { data } = await supabase.from("companies").select("id, name, whatsapp, business_hours").eq("id", id).maybeSingle();
-    if (data) {
-      setCompany(data);
-      setName(data.name);
-      setWhatsapp(data.whatsapp || "");
-      setBusinessHours(parseBusinessHours(data.business_hours));
+    const [companyResult, planResult] = await Promise.all([
+      supabase.from("companies").select("id, name, whatsapp, business_hours").eq("id", id).maybeSingle(),
+      supabase.from("company_monitoring_plans").select("is_active").eq("company_id", id).maybeSingle(),
+    ]);
+    if (companyResult.data) {
+      setCompany(companyResult.data);
+      setName(companyResult.data.name);
+      setWhatsapp(companyResult.data.whatsapp || "");
+      setBusinessHours(parseBusinessHours(companyResult.data.business_hours));
     }
+    setHasMonitoring(!!planResult.data?.is_active);
     setLoading(false);
   };
 
