@@ -252,6 +252,21 @@ export default function ProcessMonitoring() {
                 <DialogTitle>Adicionar Processo ao Monitoramento</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 pt-2">
+                {isAdmin && selectedCompanyId === "all" && (
+                  <div className="space-y-2">
+                    <Label>Empresa</Label>
+                    <Select value={addCompanyId} onValueChange={setAddCompanyId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione a empresa" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {companies.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label>Número CNJ</Label>
                   <Input
