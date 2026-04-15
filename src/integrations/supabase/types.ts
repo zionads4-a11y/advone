@@ -367,6 +367,50 @@ export type Database = {
         }
         Relationships: []
       }
+      company_bot_agents: {
+        Row: {
+          agent_type: Database["public"]["Enums"]["bot_agent_type"]
+          company_id: string
+          contract_template: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          prompt: string | null
+          required_documents: Json | null
+          updated_at: string
+        }
+        Insert: {
+          agent_type: Database["public"]["Enums"]["bot_agent_type"]
+          company_id: string
+          contract_template?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          prompt?: string | null
+          required_documents?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          agent_type?: Database["public"]["Enums"]["bot_agent_type"]
+          company_id?: string
+          contract_template?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          prompt?: string | null
+          required_documents?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_bot_agents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_monitoring_plans: {
         Row: {
           company_id: string
@@ -582,6 +626,66 @@ export type Database = {
           },
         ]
       }
+      lead_document_requests: {
+        Row: {
+          company_id: string
+          created_at: string
+          document_type: string
+          file_url: string | null
+          id: string
+          lead_id: string
+          notes: string | null
+          received_at: string | null
+          requested_at: string
+          reviewed_at: string | null
+          status: Database["public"]["Enums"]["document_request_status"]
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          document_type: string
+          file_url?: string | null
+          id?: string
+          lead_id: string
+          notes?: string | null
+          received_at?: string | null
+          requested_at?: string
+          reviewed_at?: string | null
+          status?: Database["public"]["Enums"]["document_request_status"]
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          document_type?: string
+          file_url?: string | null
+          id?: string
+          lead_id?: string
+          notes?: string | null
+          received_at?: string | null
+          requested_at?: string
+          reviewed_at?: string | null
+          status?: Database["public"]["Enums"]["document_request_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_document_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_document_requests_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lead_reminders: {
         Row: {
           company_id: string
@@ -718,9 +822,11 @@ export type Database = {
       leads: {
         Row: {
           assigned_to: string | null
+          bot_agent_phase: string | null
           bot_disabled: boolean
           campaign_id: string | null
           company_id: string
+          contract_status: string | null
           cpf: string | null
           created_at: string
           email: string | null
@@ -741,13 +847,16 @@ export type Database = {
           utm_source: string | null
           utm_term: string | null
           value: number | null
+          viability_result: Json | null
           whatsapp: string | null
         }
         Insert: {
           assigned_to?: string | null
+          bot_agent_phase?: string | null
           bot_disabled?: boolean
           campaign_id?: string | null
           company_id: string
+          contract_status?: string | null
           cpf?: string | null
           created_at?: string
           email?: string | null
@@ -768,13 +877,16 @@ export type Database = {
           utm_source?: string | null
           utm_term?: string | null
           value?: number | null
+          viability_result?: Json | null
           whatsapp?: string | null
         }
         Update: {
           assigned_to?: string | null
+          bot_agent_phase?: string | null
           bot_disabled?: boolean
           campaign_id?: string | null
           company_id?: string
+          contract_status?: string | null
           cpf?: string | null
           created_at?: string
           email?: string | null
@@ -795,6 +907,7 @@ export type Database = {
           utm_source?: string | null
           utm_term?: string | null
           value?: number | null
+          viability_result?: Json | null
           whatsapp?: string | null
         }
         Relationships: [
@@ -1463,7 +1576,16 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "member" | "client" | "gerente" | "operador"
+      bot_agent_type:
+        | "document_collector"
+        | "viability_analyzer"
+        | "contract_closer"
       campaign_source: "google" | "meta"
+      document_request_status:
+        | "requested"
+        | "received"
+        | "approved"
+        | "rejected"
       lead_status:
         | "new"
         | "contacted"
@@ -1599,7 +1721,18 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "member", "client", "gerente", "operador"],
+      bot_agent_type: [
+        "document_collector",
+        "viability_analyzer",
+        "contract_closer",
+      ],
       campaign_source: ["google", "meta"],
+      document_request_status: [
+        "requested",
+        "received",
+        "approved",
+        "rejected",
+      ],
       lead_status: [
         "new",
         "contacted",

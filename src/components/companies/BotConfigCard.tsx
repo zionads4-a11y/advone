@@ -11,6 +11,7 @@ import { Bot, Loader2, Save, ShieldCheck, Building2, Link2, Users, Clock, ListCh
 import { toast } from "sonner";
 import { TriageOptionsEditor, type TriageOption } from "./TriageOptionsEditor";
 import { BotTestChat } from "./BotTestChat";
+import { AgentConfigPanel } from "./AgentConfigPanel";
 
 interface BotConfigCardProps {
   companyId: string;
@@ -347,6 +348,9 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
           </Button>
         </CardContent>
       </Card>
+
+      {/* Agent Configuration Panel */}
+      <AgentConfigPanel companyId={companyId} aiEnabled={aiEnabled} />
       </div>
 
       {/* Test Chat Panel */}

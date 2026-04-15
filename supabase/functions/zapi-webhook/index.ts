@@ -201,12 +201,126 @@ QUANDO O LEAD PERGUNTAR ALGO JURÍDICO:
 
 QUALIFICAÇÃO (ferramentas disponíveis):
 - "check_availability": SEMPRE use antes de sugerir horários. Informe a data desejada.
-- "schedule_appointment": Use APÓS o lead escolher um horário das opções oferecidas
+- "schedule_appointment": Use APÓS o lead escolher um horário das opções apresentadas
 - "qualify_lead": Use quando souber o suficiente sobre o caso
 - "transfer_to_human": Quando necessário transferir para atendente humano
 
 Responda SEMPRE em português do Brasil.`;
 }
+
+// ====== AGENT PROMPTS ======
+
+function buildDocumentCollectorPrompt(agentConfig: any, config: any, leadName?: string, requiredDocs?: any[]) {
+  const officeName = config.office_name || "o escritório";
+  const tone = config.communication_tone || "moderado";
+  const toneInstructions = tone === "formal"
+    ? "Use linguagem formal e tratamento respeitoso (Sr./Sra.)."
+    : tone === "informal"
+    ? "Use linguagem leve e amigável com emojis 😊"
+    : "Seja educado e profissional, mas acessível.";
+
+  const docs = requiredDocs && requiredDocs.length > 0
+    ? requiredDocs.map((d: any) => `• ${d.name}${d.description ? ` (${d.description})` : ""}${d.required ? " ⚠️ obrigatório" : " (opcional)"}`).join("\n")
+    : "• Documento com foto (RG ou CNH)\n• CPF\n• Comprovante de endereço\n• Documentos do caso (laudos, negativas, etc.)";
+
+  const customPrompt = agentConfig?.prompt || "";
+
+  return `Você é a assistente virtual de ${officeName}, responsável por COLETAR DOCUMENTOS do cliente.
+
+${leadName ? `NOME DO CLIENTE: ${leadName}` : "Pergunte o nome se não souber."}
+
+${toneInstructions}
+
+OBJETIVO: Solicitar e receber os documentos necessários para análise do caso.
+
+DOCUMENTOS NECESSÁRIOS:
+${docs}
+
+${customPrompt ? `INSTRUÇÕES ADICIONAIS:\n${customPrompt}\n` : ""}
+
+FLUXO:
+1. Cumprimente o cliente pelo nome e explique que precisa de alguns documentos
+2. Liste os documentos necessários de forma clara e amigável
+3. Quando o cliente enviar um documento/foto, use a ferramenta "register_document" para registrar
+4. Confirme cada documento recebido com uma mensagem positiva
+5. Quando todos os documentos obrigatórios forem recebidos, use "documents_complete" para avançar
+6. Se o cliente tiver dúvida sobre algum documento, explique com paciência
+
+REGRAS:
+- UMA solicitação por mensagem
+- Seja paciente se o cliente demorar
+- Aceite fotos de documentos normalmente
+- Quando o cliente enviar mídia/foto, registre como documento recebido
+- Não peça todos os documentos de uma vez — vá pedindo um por um
+
+Responda SEMPRE em português do Brasil.`;
+}
+
+function buildViabilityAnalyzerPrompt(agentConfig: any, config: any, leadName?: string, caseData?: any) {
+  const officeName = config.office_name || "o escritório";
+  const customPrompt = agentConfig?.prompt || "";
+
+  return `Você é o assistente de análise de viabilidade de ${officeName}.
+
+${leadName ? `CLIENTE: ${leadName}` : ""}
+
+OBJETIVO: Analisar os dados e documentos do caso e fornecer um parecer de viabilidade.
+
+${caseData ? `DADOS DO CASO:\n${JSON.stringify(caseData, null, 2)}\n` : ""}
+
+${customPrompt ? `INSTRUÇÕES ADICIONAIS:\n${customPrompt}\n` : ""}
+
+FLUXO:
+1. Analise os documentos e informações disponíveis
+2. Faça perguntas adicionais se necessário (UMA por vez)
+3. Quando tiver informações suficientes, use "analyze_viability" para registrar o resultado
+4. Comunique o resultado ao cliente de forma empática e clara
+5. Se viável, use "advance_to_contract" para avançar ao fechamento
+
+REGRAS:
+- Seja objetivo mas empático
+- NÃO dê parecer jurídico definitivo — diga "com base nos dados iniciais"
+- Sempre recomende a análise final pelo advogado
+- Classifique como: "viavel" (boas chances), "parcialmente_viavel" (precisa análise), "inviavel" (sem base legal clara)
+
+Responda SEMPRE em português do Brasil.`;
+}
+
+function buildContractCloserPrompt(agentConfig: any, config: any, leadName?: string, viabilityResult?: any) {
+  const officeName = config.office_name || "o escritório";
+  const contractTemplate = agentConfig?.contract_template || "";
+  const customPrompt = agentConfig?.prompt || "";
+
+  return `Você é o assistente de fechamento de contrato de ${officeName}.
+
+${leadName ? `CLIENTE: ${leadName}` : ""}
+
+OBJETIVO: Conduzir o cliente ao fechamento do contrato de forma natural e confiante.
+
+${viabilityResult ? `RESULTADO DA ANÁLISE:\n${JSON.stringify(viabilityResult, null, 2)}\n` : ""}
+
+${contractTemplate ? `MODELO DE CONTRATO (referência):\n${contractTemplate}\n` : ""}
+
+${customPrompt ? `INSTRUÇÕES ADICIONAIS:\n${customPrompt}\n` : ""}
+
+FLUXO:
+1. Recapitule o caso e o resultado da análise com empatia
+2. Apresente os próximos passos para formalização
+3. Explique os termos do contrato de forma simples
+4. Confirme dados do cliente (nome completo, CPF, endereço)
+5. Quando o cliente confirmar, use "finalize_contract" para registrar
+6. Após fechar, envie mensagem de boas-vindas como cliente
+
+REGRAS:
+- Transmita segurança e profissionalismo
+- Não pressione — conduza naturalmente
+- Tire dúvidas sobre honorários e procedimentos
+- UMA pergunta por mensagem
+
+Responda SEMPRE em português do Brasil.`;
+}
+
+// ====== UTILITY FUNCTIONS ======
 
 function getNowBrasilia(): Date {
   const now = new Date();
@@ -238,7 +352,6 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
 
   const dayConfig = businessHours[dayKey];
   
-  // Support both formats: array of {open,close} or {enabled, shifts:[{start,end}]}
   if (Array.isArray(dayConfig) && dayConfig.length > 0) {
     for (const shift of dayConfig) {
       const start = shift.open || shift.start;
@@ -278,14 +391,12 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
     for (let h = 13; h < 17; h++) { slots.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`); }
   }
 
-  // Enforce 08:00-17:00 hard limit regardless of business hours config
   slots = slots.filter(s => {
     const [h, m] = s.split(":").map(Number);
     const mins = h * 60 + m;
-    return mins >= 480 && mins < 1020; // 08:00 to 17:00
+    return mins >= 480 && mins < 1020;
   });
 
-  // Filter out past slots + 2h minimum advance for today (Brasilia time)
   const todayBR = getTodayBrasilia();
   if (dateStr === todayBR) {
     const nowBR = getNowBrasilia();
@@ -296,7 +407,6 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
     });
   }
 
-  // Query existing appointments for this Brasilia day (UTC-3: 03:00Z to next day 02:59Z)
   const nextDay = new Date(new Date(dateStr + "T12:00:00Z").getTime() + 86400000).toISOString().split("T")[0];
   const { data: existing } = await supabase
     .from("lead_reminders")
@@ -331,96 +441,250 @@ function getNextAvailableDays(count: number, includeToday: boolean = true): stri
   return days;
 }
 
-async function qualifyLeadWithAI(
+// ====== SDR TOOLS ======
+const sdrTools = [
+  {
+    type: "function",
+    function: {
+      name: "check_availability",
+      description: "Verifica horários disponíveis na agenda para uma data específica. SEMPRE use antes de sugerir horários ao lead.",
+      parameters: {
+        type: "object",
+        properties: {
+          date: { type: "string", description: "Data no formato YYYY-MM-DD" }
+        },
+        required: ["date"],
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "qualify_lead",
+      description: "Registra a qualificação do lead.",
+      parameters: {
+        type: "object",
+        properties: {
+          status: { type: "string", enum: ["qualified", "not_qualified", "needs_more_info"] },
+          reason: { type: "string" },
+          summary: { type: "string" },
+          lead_score: { type: "string", enum: ["quente", "morno", "frio"] }
+        },
+        required: ["status", "reason", "lead_score"],
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "schedule_appointment",
+      description: "Agenda uma consulta/reunião para o lead.",
+      parameters: {
+        type: "object",
+        properties: {
+          message_to_lead: { type: "string" },
+          date: { type: "string" },
+          time: { type: "string" },
+          summary: { type: "string" },
+          modality: { type: "string", enum: ["presencial", "online"] },
+          unit: { type: "string" }
+        },
+        required: ["message_to_lead", "date", "time"],
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "transfer_to_human",
+      description: "Transfere para atendente humano.",
+      parameters: {
+        type: "object",
+        properties: { message_to_lead: { type: "string" } },
+        required: ["message_to_lead"],
+        additionalProperties: false
+      }
+    }
+  }
+];
+
+// ====== DOCUMENT COLLECTOR TOOLS ======
+const documentCollectorTools = [
+  {
+    type: "function",
+    function: {
+      name: "register_document",
+      description: "Registra que um documento foi recebido do cliente.",
+      parameters: {
+        type: "object",
+        properties: {
+          document_type: { type: "string", description: "Tipo do documento (ex: RG, CPF, comprovante_endereco, laudo_medico)" },
+          notes: { type: "string", description: "Observações sobre o documento" }
+        },
+        required: ["document_type"],
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "documents_complete",
+      description: "Marca que todos os documentos obrigatórios foram recebidos e avança para análise.",
+      parameters: {
+        type: "object",
+        properties: {
+          message_to_lead: { type: "string", description: "Mensagem confirmando que os documentos estão completos" }
+        },
+        required: ["message_to_lead"],
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "transfer_to_human",
+      description: "Transfere para atendente humano.",
+      parameters: {
+        type: "object",
+        properties: { message_to_lead: { type: "string" } },
+        required: ["message_to_lead"],
+        additionalProperties: false
+      }
+    }
+  }
+];
+
+// ====== VIABILITY ANALYZER TOOLS ======
+const viabilityAnalyzerTools = [
+  {
+    type: "function",
+    function: {
+      name: "analyze_viability",
+      description: "Registra o resultado da análise de viabilidade do caso.",
+      parameters: {
+        type: "object",
+        properties: {
+          result: { type: "string", enum: ["viavel", "parcialmente_viavel", "inviavel"] },
+          reasoning: { type: "string", description: "Justificativa da análise" },
+          recommendations: { type: "string", description: "Recomendações para o caso" },
+          estimated_value: { type: "number", description: "Valor estimado do caso (se aplicável)" }
+        },
+        required: ["result", "reasoning"],
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "advance_to_contract",
+      description: "Avança o lead para a fase de fechamento de contrato.",
+      parameters: {
+        type: "object",
+        properties: {
+          message_to_lead: { type: "string" }
+        },
+        required: ["message_to_lead"],
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "transfer_to_human",
+      description: "Transfere para atendente humano.",
+      parameters: {
+        type: "object",
+        properties: { message_to_lead: { type: "string" } },
+        required: ["message_to_lead"],
+        additionalProperties: false
+      }
+    }
+  }
+];
+
+// ====== CONTRACT CLOSER TOOLS ======
+const contractCloserTools = [
+  {
+    type: "function",
+    function: {
+      name: "finalize_contract",
+      description: "Registra que o contrato foi aceito pelo cliente.",
+      parameters: {
+        type: "object",
+        properties: {
+          message_to_lead: { type: "string" },
+          client_cpf: { type: "string" },
+          client_full_name: { type: "string" },
+          contract_value: { type: "number" },
+          notes: { type: "string" }
+        },
+        required: ["message_to_lead"],
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "transfer_to_human",
+      description: "Transfere para atendente humano.",
+      parameters: {
+        type: "object",
+        properties: { message_to_lead: { type: "string" } },
+        required: ["message_to_lead"],
+        additionalProperties: false
+      }
+    }
+  }
+];
+
+// ====== MAIN AI HANDLER ======
+async function handleAgentPhase(
+  phase: string,
   config: any,
+  agentConfigs: Record<string, any>,
   conversationHistory: { role: string; content: string }[],
   companyId: string,
   leadId: string,
   supabase: any,
-  leadName?: string
-) {
+  leadName?: string,
+  cleanPhone?: string
+): Promise<string | null> {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!LOVABLE_API_KEY) return null;
 
-  const systemPrompt = buildSDRPrompt(config, leadName);
+  let systemPrompt: string;
+  let tools: any[];
 
-  const tools = [
-    {
-      type: "function",
-      function: {
-        name: "check_availability",
-        description: "Verifica horários disponíveis na agenda para uma data específica. SEMPRE use antes de sugerir horários ao lead.",
-        parameters: {
-          type: "object",
-          properties: {
-            date: {
-              type: "string",
-              description: "Data para verificar disponibilidade no formato YYYY-MM-DD. Se o lead não especificou, use o próximo dia útil."
-            }
-          },
-          required: ["date"],
-          additionalProperties: false
-        }
-      }
-    },
-    {
-      type: "function",
-      function: {
-        name: "qualify_lead",
-        description: "Registra a qualificação do lead. Use quando tiver informações suficientes.",
-        parameters: {
-          type: "object",
-          properties: {
-            status: {
-              type: "string",
-              enum: ["qualified", "not_qualified", "needs_more_info"],
-              description: "qualified = lead adequado, not_qualified = caso não se encaixa, needs_more_info = precisa de mais informações"
-            },
-            reason: { type: "string", description: "Motivo da qualificação em português" },
-            summary: { type: "string", description: "Resumo breve do caso do lead" },
-            lead_score: { type: "string", enum: ["quente", "morno", "frio"], description: "quente = muito interessado, morno = moderado, frio = pouco engajamento" }
-          },
-          required: ["status", "reason", "lead_score"],
-          additionalProperties: false
-        }
-      }
-    },
-    {
-      type: "function",
-      function: {
-        name: "schedule_appointment",
-        description: "Agenda uma consulta/reunião para o lead. Use SOMENTE APÓS o lead escolher um horário das opções apresentadas.",
-        parameters: {
-          type: "object",
-          properties: {
-            message_to_lead: { type: "string", description: "Mensagem confirmando o agendamento para o lead" },
-            date: { type: "string", description: "Data escolhida pelo lead no formato YYYY-MM-DD" },
-            time: { type: "string", description: "Horário escolhido pelo lead no formato HH:MM" },
-            summary: { type: "string", description: "Breve descrição do assunto da reunião" },
-            modality: { type: "string", enum: ["presencial", "online"], description: "Modalidade escolhida pelo lead" },
-            unit: { type: "string", description: "Nome da unidade/escritório escolhida pelo lead (se presencial)" }
-          },
-          required: ["message_to_lead", "date", "time"],
-          additionalProperties: false
-        }
-      }
-    },
-    {
-      type: "function",
-      function: {
-        name: "transfer_to_human",
-        description: "Transfere para atendente humano quando necessário.",
-        parameters: {
-          type: "object",
-          properties: {
-            message_to_lead: { type: "string", description: "Mensagem informando que será atendido por um especialista" }
-          },
-          required: ["message_to_lead"],
-          additionalProperties: false
-        }
-      }
-    }
-  ];
+  if (phase === "document_collector") {
+    const agentCfg = agentConfigs["document_collector"];
+    const requiredDocs = agentCfg?.required_documents || [];
+    systemPrompt = buildDocumentCollectorPrompt(agentCfg, config, leadName, requiredDocs);
+    tools = documentCollectorTools;
+  } else if (phase === "viability_analyzer") {
+    const agentCfg = agentConfigs["viability_analyzer"];
+    // Fetch lead data for analysis
+    const { data: leadData } = await supabase.from("leads").select("*").eq("id", leadId).single();
+    const { data: docs } = await supabase.from("lead_document_requests").select("*").eq("lead_id", leadId);
+    systemPrompt = buildViabilityAnalyzerPrompt(agentCfg, config, leadName, { lead: leadData, documents: docs });
+    tools = viabilityAnalyzerTools;
+  } else if (phase === "contract_closer") {
+    const agentCfg = agentConfigs["contract_closer"];
+    const { data: leadData } = await supabase.from("leads").select("viability_result").eq("id", leadId).single();
+    systemPrompt = buildContractCloserPrompt(agentCfg, config, leadName, leadData?.viability_result);
+    tools = contractCloserTools;
+  } else {
+    // SDR phase (default)
+    systemPrompt = buildSDRPrompt(config, leadName);
+    tools = sdrTools;
+  }
 
   try {
     let aiMessages: any[] = [
@@ -429,7 +693,7 @@ async function qualifyLeadWithAI(
     ];
 
     let replyText = "";
-    let qualificationResult: { status: string; reason: string; summary?: string; lead_score?: string } | null = null;
+    let qualificationResult: any = null;
     let shouldSchedule = false;
     let maxIterations = 3;
 
@@ -458,13 +722,11 @@ async function qualifyLeadWithAI(
       const message = aiData.choices?.[0]?.message;
       if (!message) return null;
 
-      // If no tool calls, we have the final text response
       if (!message.tool_calls || message.tool_calls.length === 0) {
         replyText = message.content || "";
         break;
       }
 
-      // Process tool calls
       aiMessages.push(message);
       let hasCheckAvailability = false;
 
@@ -475,15 +737,12 @@ async function qualifyLeadWithAI(
 
         let toolResult: any = {};
 
+        // ===== SDR TOOLS =====
         if (fnName === "check_availability") {
           hasCheckAvailability = true;
-          let dateToCheck = args.date;
-          if (!dateToCheck) {
-            dateToCheck = getNextAvailableDays(1)[0];
-          }
+          let dateToCheck = args.date || getNextAvailableDays(1)[0];
           const availability = await getAvailableSlots(supabase, companyId, dateToCheck);
 
-          // If no slots on requested day, also check next 2 business days
           if (availability.slots.length === 0) {
             const nextDays = getNextAvailableDays(3);
             const alternatives: any[] = [];
@@ -495,20 +754,9 @@ async function qualifyLeadWithAI(
                 if (alternatives.length >= 2) break;
               }
             }
-            toolResult = {
-              requested_date: dateToCheck,
-              requested_day: availability.dayName,
-              available_slots: [],
-              message: `Não há horários disponíveis em ${availability.dayName} (${dateToCheck}).`,
-              alternatives
-            };
+            toolResult = { requested_date: dateToCheck, requested_day: availability.dayName, available_slots: [], message: `Não há horários disponíveis em ${availability.dayName} (${dateToCheck}).`, alternatives };
           } else {
-            toolResult = {
-              date: dateToCheck,
-              day_name: availability.dayName,
-              available_slots: availability.slots,
-              total_available: availability.slots.length
-            };
+            toolResult = { date: dateToCheck, day_name: availability.dayName, available_slots: availability.slots, total_available: availability.slots.length };
           }
         }
 
@@ -532,28 +780,19 @@ async function qualifyLeadWithAI(
             const dueAt = `${appointmentDate}T${appointmentTime}:00-03:00`;
             const modality = args.modality || "online";
 
-            const { data: leadData } = await supabase
-              .from("leads")
-              .select("name, phone, whatsapp")
-              .eq("id", leadId)
-              .single();
-
-            const leadName = leadData?.name || "Lead";
+            const { data: leadData } = await supabase.from("leads").select("name, phone, whatsapp").eq("id", leadId).single();
+            const lName = leadData?.name || "Lead";
             const leadPhone = leadData?.whatsapp || leadData?.phone || cleanPhone || "Não informado";
             const unitName = args.unit || "";
 
             await supabase.from("lead_reminders").insert({
-              lead_id: leadId,
-              company_id: companyId,
-              created_by: "00000000-0000-0000-0000-000000000000",
-              title: `📅 Consulta ${modality === "presencial" ? "presencial" : "online"}: ${leadName}`,
+              lead_id: leadId, company_id: companyId, created_by: "00000000-0000-0000-0000-000000000000",
+              title: `📅 Consulta ${modality === "presencial" ? "presencial" : "online"}: ${lName}`,
               description: args.summary || `Agendamento automático via bot IA (${modality})${unitName ? ` - Unidade: ${unitName}` : ""}`,
-              reminder_type: "meeting",
-              due_at: dueAt,
+              reminder_type: "meeting", due_at: dueAt,
             });
 
             // Notify lawyer
-            console.log("[SCHEDULE] Checking alert_whatsapp:", config.alert_whatsapp);
             if (config.alert_whatsapp) {
               try {
                 const SERVER_URL = "https://ziondigital.uazapi.com";
@@ -561,29 +800,119 @@ async function qualifyLeadWithAI(
                 const alertPhone = config.alert_whatsapp.replace(/\D/g, "");
                 const modalityLabel = modality === "presencial" ? "🏢 Presencial" : "💻 Online (vídeo)";
                 const unitLine = modality === "presencial" && unitName ? `🏢 Unidade: ${unitName}\n` : "";
-                const alertMessage = `🔔 *Novo Agendamento Automático*\n\n👤 Nome: ${leadName}\n📱 Telefone: ${leadPhone}\n📅 Data: ${appointmentDate}\n⏰ Horário: ${appointmentTime}\n📍 Modalidade: ${modalityLabel}\n${unitLine}${args.summary ? `📋 Assunto: ${args.summary}\n` : ""}\n_Agendado automaticamente pelo bot SDR_`;
-
+                const alertMessage = `🔔 *Novo Agendamento Automático*\n\n👤 Nome: ${lName}\n📱 Telefone: ${leadPhone}\n📅 Data: ${appointmentDate}\n⏰ Horário: ${appointmentTime}\n📍 Modalidade: ${modalityLabel}\n${unitLine}${args.summary ? `📋 Assunto: ${args.summary}\n` : ""}\n_Agendado automaticamente pelo bot SDR_`;
                 const alertHeaders: Record<string, string> = { "Content-Type": "application/json" };
                 if (ADMIN_TOKEN) alertHeaders["admintoken"] = ADMIN_TOKEN;
-
                 const instanceParam = encodeURIComponent(config.zapi_instance_id || "");
                 const tokenParam = encodeURIComponent(config.zapi_token || config.zapi_instance_id || "");
-                console.log("[SCHEDULE] Sending alert to:", alertPhone, "instance:", instanceParam);
-                const alertRes = await fetch(`${SERVER_URL}/send/text?instance=${instanceParam}&token=${tokenParam}`, {
-                  method: "POST",
-                  headers: alertHeaders,
+                await fetch(`${SERVER_URL}/send/text?instance=${instanceParam}&token=${tokenParam}`, {
+                  method: "POST", headers: alertHeaders,
                   body: JSON.stringify({ number: alertPhone, text: alertMessage }),
                 });
-                const alertBody = await alertRes.text();
-                console.log("[SCHEDULE] Alert response:", alertRes.status, alertBody);
               } catch (alertErr) {
                 console.error("[SCHEDULE] Error sending alert:", alertErr);
               }
-            } else {
-              console.warn("[SCHEDULE] No alert_whatsapp configured for this company!");
+            }
+
+            // Check if document_collector agent is active — if so, advance phase
+            const docAgent = agentConfigs["document_collector"];
+            if (docAgent?.is_active) {
+              await supabase.from("leads").update({ bot_agent_phase: "document_collector" }).eq("id", leadId);
+              console.log(`Lead ${leadId} advanced to document_collector phase`);
             }
           }
           toolResult = { success: true, message: "Agendamento criado com sucesso" };
+        }
+
+        // ===== DOCUMENT COLLECTOR TOOLS =====
+        if (fnName === "register_document") {
+          await supabase.from("lead_document_requests").insert({
+            lead_id: leadId, company_id: companyId,
+            document_type: args.document_type || "documento",
+            status: "received", notes: args.notes || null,
+            received_at: new Date().toISOString(),
+          });
+          toolResult = { success: true, document_type: args.document_type, status: "received" };
+        }
+
+        if (fnName === "documents_complete") {
+          replyText = args.message_to_lead || "Documentos completos! ✅";
+          // Advance to viability analyzer if active
+          const viabilityAgent = agentConfigs["viability_analyzer"];
+          if (viabilityAgent?.is_active) {
+            await supabase.from("leads").update({ bot_agent_phase: "viability_analyzer" }).eq("id", leadId);
+            console.log(`Lead ${leadId} advanced to viability_analyzer phase`);
+          }
+          toolResult = { success: true };
+        }
+
+        // ===== VIABILITY ANALYZER TOOLS =====
+        if (fnName === "analyze_viability") {
+          const viabilityData = {
+            result: args.result, reasoning: args.reasoning,
+            recommendations: args.recommendations || "",
+            estimated_value: args.estimated_value || null,
+            analyzed_at: new Date().toISOString(),
+          };
+          await supabase.from("leads").update({ viability_result: viabilityData }).eq("id", leadId);
+          await supabase.from("lead_summaries").insert({
+            lead_id: leadId, company_id: companyId,
+            summary_text: `🔍 Análise de Viabilidade: ${args.result}\n\n${args.reasoning}${args.recommendations ? `\n\nRecomendações: ${args.recommendations}` : ""}`,
+            generated_by_ai: true, created_by: "00000000-0000-0000-0000-000000000000",
+          });
+          toolResult = { success: true, result: args.result };
+        }
+
+        if (fnName === "advance_to_contract") {
+          replyText = args.message_to_lead || "";
+          const contractAgent = agentConfigs["contract_closer"];
+          if (contractAgent?.is_active) {
+            await supabase.from("leads").update({ bot_agent_phase: "contract_closer" }).eq("id", leadId);
+            console.log(`Lead ${leadId} advanced to contract_closer phase`);
+          }
+          toolResult = { success: true };
+        }
+
+        // ===== CONTRACT CLOSER TOOLS =====
+        if (fnName === "finalize_contract") {
+          replyText = args.message_to_lead || "Contrato finalizado! 🎉";
+          const updates: any = { contract_status: "signed", bot_agent_phase: "completed" };
+          if (args.client_cpf) updates.cpf = args.client_cpf;
+          if (args.client_full_name) updates.name = args.client_full_name;
+          if (args.contract_value) updates.value = args.contract_value;
+          await supabase.from("leads").update(updates).eq("id", leadId);
+
+          // Move to "Ganho" column
+          const { data: wonCol } = await supabase.from("kanban_columns").select("id")
+            .eq("company_id", companyId).eq("is_won", true).limit(1).maybeSingle();
+          if (wonCol) {
+            await supabase.from("leads").update({ kanban_column_id: wonCol.id, status: "won" }).eq("id", leadId);
+          }
+
+          await supabase.from("lead_summaries").insert({
+            lead_id: leadId, company_id: companyId,
+            summary_text: `🎉 Contrato fechado automaticamente pelo bot!\n${args.notes || ""}`,
+            generated_by_ai: true, created_by: "00000000-0000-0000-0000-000000000000",
+          });
+
+          // Notify lawyer about contract
+          if (config.alert_whatsapp) {
+            try {
+              const SERVER_URL = "https://ziondigital.uazapi.com";
+              const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+              const alertPhone = config.alert_whatsapp.replace(/\D/g, "");
+              const alertMessage = `🎉 *Contrato Fechado Automaticamente!*\n\n👤 Cliente: ${args.client_full_name || leadName || "N/A"}\n${args.client_cpf ? `📄 CPF: ${args.client_cpf}\n` : ""}${args.contract_value ? `💰 Valor: R$ ${args.contract_value}\n` : ""}\n_Fechado automaticamente pelo bot de contrato_`;
+              const alertHeaders: Record<string, string> = { "Content-Type": "application/json" };
+              if (ADMIN_TOKEN) alertHeaders["admintoken"] = ADMIN_TOKEN;
+              const instanceParam = encodeURIComponent(config.zapi_instance_id || "");
+              const tokenParam = encodeURIComponent(config.zapi_token || config.zapi_instance_id || "");
+              await fetch(`${SERVER_URL}/send/text?instance=${instanceParam}&token=${tokenParam}`, {
+                method: "POST", headers: alertHeaders,
+                body: JSON.stringify({ number: alertPhone, text: alertMessage }),
+              });
+            } catch (e) { console.error("Contract alert error:", e); }
+          }
+          toolResult = { success: true };
         }
 
         if (fnName === "transfer_to_human") {
@@ -591,227 +920,131 @@ async function qualifyLeadWithAI(
           toolResult = { success: true };
         }
 
-        // Add tool result to messages for next iteration
-        aiMessages.push({
-          role: "tool",
-          tool_call_id: toolCall.id,
-          content: JSON.stringify(toolResult),
-        });
+        aiMessages.push({ role: "tool", tool_call_id: toolCall.id, content: JSON.stringify(toolResult) });
       }
 
-      // If we got a schedule or transfer (action tools), and there's a reply, break
-      if ((shouldSchedule || replyText) && !hasCheckAvailability) {
-        break;
-      }
-      // Otherwise loop — the AI needs to generate text after seeing tool results
+      if ((shouldSchedule || replyText) && !hasCheckAvailability) break;
     }
 
-    // Move lead to "Agendado" when scheduled, even without qualify_lead tool call
-    if (shouldSchedule && leadId) {
-      const targetPosition = 6; // Agendado
-      const { data: columns } = await supabase
-        .from("kanban_columns")
-        .select("id")
-        .eq("company_id", companyId)
-        .order("position", { ascending: true })
-        .limit(targetPosition + 1);
-
-      if (columns && columns.length > targetPosition) {
-        await supabase.from("leads").update({
-          kanban_column_id: columns[targetPosition].id,
-          status: "qualified",
-        }).eq("id", leadId);
-      }
-
-      // Add summary if no qualification result provided one
-      if (!qualificationResult) {
-        await supabase.from("lead_summaries").insert({
-          lead_id: leadId,
-          company_id: companyId,
-          summary_text: `🤖 Agendamento realizado automaticamente pelo bot SDR`,
-          generated_by_ai: true,
-          created_by: "00000000-0000-0000-0000-000000000000",
-        });
-      }
-    }
-
-    // Apply qualification results
-    if (qualificationResult && leadId) {
-      const scoreUpdate: any = {};
-      if (qualificationResult.lead_score) {
-        scoreUpdate.lead_score = qualificationResult.lead_score;
-      }
-
-      if (qualificationResult.status === "qualified" || shouldSchedule) {
-        const newStatus = shouldSchedule ? "qualified" : "contacted";
-        await supabase.from("leads").update({
-          status: newStatus,
-          notes: `[IA] ${qualificationResult.reason}${qualificationResult.summary ? ` | ${qualificationResult.summary}` : ""}`,
-          ...scoreUpdate,
-        }).eq("id", leadId);
-
-        await supabase.from("lead_summaries").insert({
-          lead_id: leadId,
-          company_id: companyId,
-          summary_text: `🤖 ${shouldSchedule ? "Agendamento" : "Qualificação"}: ${qualificationResult.reason}${qualificationResult.summary ? `\n\nResumo: ${qualificationResult.summary}` : ""}`,
-          generated_by_ai: true,
-          created_by: "00000000-0000-0000-0000-000000000000",
-        });
-
-        if (!shouldSchedule) {
-          const targetPosition = 5;
-          const { data: cols } = await supabase
-            .from("kanban_columns")
-            .select("id")
-            .eq("company_id", companyId)
-            .order("position", { ascending: true })
-            .limit(targetPosition + 1);
-
-          if (cols && cols.length > targetPosition) {
-            await supabase.from("leads").update({
-              kanban_column_id: cols[targetPosition].id,
-            }).eq("id", leadId);
-          }
+    // SDR post-processing (qualification + kanban moves)
+    if (phase === "sdr") {
+      if (shouldSchedule && leadId) {
+        const targetPosition = 6;
+        const { data: columns } = await supabase.from("kanban_columns").select("id")
+          .eq("company_id", companyId).order("position", { ascending: true }).limit(targetPosition + 1);
+        if (columns && columns.length > targetPosition) {
+          await supabase.from("leads").update({ kanban_column_id: columns[targetPosition].id, status: "qualified" }).eq("id", leadId);
         }
-      } else if (qualificationResult.status === "not_qualified") {
-        const { data: lostColumn } = await supabase
-          .from("kanban_columns")
-          .select("id")
-          .eq("company_id", companyId)
-          .eq("is_lost", true)
-          .maybeSingle();
+        if (!qualificationResult) {
+          await supabase.from("lead_summaries").insert({
+            lead_id: leadId, company_id: companyId,
+            summary_text: `🤖 Agendamento realizado automaticamente pelo bot SDR`,
+            generated_by_ai: true, created_by: "00000000-0000-0000-0000-000000000000",
+          });
+        }
+      }
 
-        await supabase.from("leads").update({
-          status: "lost",
-          notes: `[IA - Não qualificado] ${qualificationResult.reason}`,
-          ...scoreUpdate,
-          ...(lostColumn ? { kanban_column_id: lostColumn.id } : {}),
-        }).eq("id", leadId);
+      if (qualificationResult && leadId) {
+        const scoreUpdate: any = {};
+        if (qualificationResult.lead_score) scoreUpdate.lead_score = qualificationResult.lead_score;
 
-        await supabase.from("lead_summaries").insert({
-          lead_id: leadId,
-          company_id: companyId,
-          summary_text: `🤖 Lead não qualificado: ${qualificationResult.reason}`,
-          generated_by_ai: true,
-          created_by: "00000000-0000-0000-0000-000000000000",
-        });
-      } else {
-        if (Object.keys(scoreUpdate).length > 0) {
-          await supabase.from("leads").update(scoreUpdate).eq("id", leadId);
+        if (qualificationResult.status === "qualified" || shouldSchedule) {
+          const newStatus = shouldSchedule ? "qualified" : "contacted";
+          await supabase.from("leads").update({
+            status: newStatus,
+            notes: `[IA] ${qualificationResult.reason}${qualificationResult.summary ? ` | ${qualificationResult.summary}` : ""}`,
+            ...scoreUpdate,
+          }).eq("id", leadId);
+
+          await supabase.from("lead_summaries").insert({
+            lead_id: leadId, company_id: companyId,
+            summary_text: `🤖 ${shouldSchedule ? "Agendamento" : "Qualificação"}: ${qualificationResult.reason}${qualificationResult.summary ? `\n\nResumo: ${qualificationResult.summary}` : ""}`,
+            generated_by_ai: true, created_by: "00000000-0000-0000-0000-000000000000",
+          });
+
+          if (!shouldSchedule) {
+            const targetPosition = 5;
+            const { data: cols } = await supabase.from("kanban_columns").select("id")
+              .eq("company_id", companyId).order("position", { ascending: true }).limit(targetPosition + 1);
+            if (cols && cols.length > targetPosition) {
+              await supabase.from("leads").update({ kanban_column_id: cols[targetPosition].id }).eq("id", leadId);
+            }
+          }
+        } else if (qualificationResult.status === "not_qualified") {
+          const { data: lostColumn } = await supabase.from("kanban_columns").select("id")
+            .eq("company_id", companyId).eq("is_lost", true).maybeSingle();
+          await supabase.from("leads").update({
+            status: "lost", notes: `[IA - Não qualificado] ${qualificationResult.reason}`,
+            ...scoreUpdate, ...(lostColumn ? { kanban_column_id: lostColumn.id } : {}),
+          }).eq("id", leadId);
+          await supabase.from("lead_summaries").insert({
+            lead_id: leadId, company_id: companyId,
+            summary_text: `🤖 Lead não qualificado: ${qualificationResult.reason}`,
+            generated_by_ai: true, created_by: "00000000-0000-0000-0000-000000000000",
+          });
+        } else {
+          if (Object.keys(scoreUpdate).length > 0) {
+            await supabase.from("leads").update(scoreUpdate).eq("id", leadId);
+          }
         }
       }
     }
 
     return replyText || null;
   } catch (error) {
-    console.error("AI qualification error:", error);
+    console.error("AI agent error:", error);
     return null;
   }
 }
 
 async function enrollInCadence(supabase: any, companyId: string, leadId: string, phone: string) {
-  // Check if already enrolled
-  const { data: existing } = await supabase
-    .from("cadence_messages")
-    .select("id")
-    .eq("lead_id", leadId)
-    .eq("status", "pending")
-    .limit(1);
-
-  if (existing && existing.length > 0) return; // Already enrolled
+  const { data: existing } = await supabase.from("cadence_messages").select("id")
+    .eq("lead_id", leadId).eq("status", "pending").limit(1);
+  if (existing && existing.length > 0) return;
 
   const now = new Date();
-  // Attempt 1: 30 minutes after first contact
-  // Attempts 2-5: every 24 hours after the previous
-  const delaysMs = [
-    30 * 60 * 1000,           // 30 min
-    24 * 60 * 60 * 1000,      // +24h (day 1)
-    2 * 24 * 60 * 60 * 1000,  // +48h (day 2)
-    3 * 24 * 60 * 60 * 1000,  // +72h (day 3)
-    4 * 24 * 60 * 60 * 1000,  // +96h (day 4)
-  ];
-
+  const delaysMs = [30*60*1000, 24*60*60*1000, 2*24*60*60*1000, 3*24*60*60*1000, 4*24*60*60*1000];
   const messages = delaysMs.map((delayMs, i) => ({
-    company_id: companyId,
-    lead_id: leadId,
-    phone,
-    day_number: i + 1,
-    scheduled_at: new Date(now.getTime() + delayMs).toISOString(),
-    status: "pending",
+    company_id: companyId, lead_id: leadId, phone, day_number: i + 1,
+    scheduled_at: new Date(now.getTime() + delayMs).toISOString(), status: "pending",
   }));
 
   const { error } = await supabase.from("cadence_messages").insert(messages);
-  if (error) {
-    console.error("Error enrolling in cadence:", error);
-  } else {
-    console.log(`Lead ${leadId} enrolled in cadence (${messages.length} messages, first in 30min)`);
-  }
+  if (error) console.error("Error enrolling in cadence:", error);
+  else console.log(`Lead ${leadId} enrolled in cadence`);
 }
 
-/**
- * Splits an AI response into multiple natural WhatsApp messages.
- * Rules:
- * - Split on double newlines (paragraphs)
- * - If a paragraph is still long (>150 chars), split on sentences
- * - Keep emojis and short phrases together
- * - Never split mid-sentence
- */
 function splitIntoNaturalMessages(text: string): string[] {
   if (!text || text.length <= 120) return [text];
-
-  // First split by double newlines (paragraphs)
   const paragraphs = text.split(/\n\n+/).map((p) => p.trim()).filter(Boolean);
-
   const messages: string[] = [];
 
   for (const para of paragraphs) {
-    if (para.length <= 150) {
-      messages.push(para);
-      continue;
-    }
-
-    // Split long paragraphs by single newlines first
+    if (para.length <= 150) { messages.push(para); continue; }
     const lines = para.split(/\n/).map((l) => l.trim()).filter(Boolean);
-    if (lines.length > 1 && lines.every((l) => l.length <= 150)) {
-      // Each line becomes a message
-      messages.push(...lines);
-      continue;
-    }
-
-    // Split by sentence boundaries (. ! ?)
+    if (lines.length > 1 && lines.every((l) => l.length <= 150)) { messages.push(...lines); continue; }
     const sentences = para.match(/[^.!?]+[.!?]+[\s]*/g) || [para];
     let currentChunk = "";
-
     for (const sentence of sentences) {
-      if ((currentChunk + sentence).length > 150 && currentChunk) {
-        messages.push(currentChunk.trim());
-        currentChunk = sentence;
-      } else {
-        currentChunk += sentence;
-      }
+      if ((currentChunk + sentence).length > 150 && currentChunk) { messages.push(currentChunk.trim()); currentChunk = sentence; }
+      else { currentChunk += sentence; }
     }
-    if (currentChunk.trim()) {
-      messages.push(currentChunk.trim());
-    }
+    if (currentChunk.trim()) messages.push(currentChunk.trim());
   }
 
-  // Ensure we don't have too many tiny messages — merge very short consecutive ones
   const merged: string[] = [];
   for (const msg of messages) {
     if (merged.length > 0 && merged[merged.length - 1].length < 40 && msg.length < 40) {
       merged[merged.length - 1] += "\n" + msg;
-    } else {
-      merged.push(msg);
-    }
+    } else { merged.push(msg); }
   }
 
   return merged.length > 0 ? merged : [text];
 }
 
+// ====== MAIN HANDLER ======
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -823,8 +1056,7 @@ serve(async (req) => {
 
     if (!companyId) {
       return new Response(JSON.stringify({ error: "Missing company_id" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -836,10 +1068,18 @@ serve(async (req) => {
 
     if (!config) {
       return new Response(JSON.stringify({ error: "Company not configured" }), {
-        status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Fetch agent configurations for this company
+    const { data: agentRows } = await supabase
+      .from("company_bot_agents")
+      .select("*")
+      .eq("company_id", companyId);
+    
+    const agentConfigs: Record<string, any> = {};
+    (agentRows || []).forEach((a: any) => { agentConfigs[a.agent_type] = a; });
 
     const body = await req.json();
     console.log("Z-API webhook payload:", JSON.stringify(body).substring(0, 500));
@@ -850,14 +1090,10 @@ serve(async (req) => {
       });
     }
 
-    // Detect message type: UaZapi sends EventType="messages" with message object
-    // Legacy format used body.type === "ReceivedCallback"
     const isUaZapiMessage = body.EventType === "messages" && body.message && !body.message.fromMe;
     const isLegacyMessage = body.type === "ReceivedCallback";
 
-    // Skip non-message events (read receipts, status updates, sent messages, etc.)
     if (!isUaZapiMessage && !isLegacyMessage) {
-      // Handle status/read receipt events silently
       if (body.type === "ReadReceipt" || body.type === "SentCallback" || body.type === "MessageStatusCallback" || body.EventType === "messages_update") {
         return new Response(JSON.stringify({ ok: true, type: body.type || body.EventType }), {
           status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -868,15 +1104,9 @@ serve(async (req) => {
       });
     }
 
-    // Extract fields from UaZapi or legacy format
-    let phone: string;
-    let senderName: string;
-    let messageText: string;
-    let messageIdExternal: string;
-    let isGroup: boolean;
+    let phone: string, senderName: string, messageText: string, messageIdExternal: string, isGroup: boolean;
 
     if (isUaZapiMessage) {
-      // UaZapi format: message.sender_pn = "553184796456@s.whatsapp.net"
       const msg = body.message;
       phone = msg.sender_pn || msg.chatid || "";
       senderName = msg.senderName || body.chat?.name || body.chat?.wa_contactName || "";
@@ -884,7 +1114,6 @@ serve(async (req) => {
       messageIdExternal = msg.messageid || msg.id || "";
       isGroup = msg.isGroup || false;
     } else {
-      // Legacy ReceivedCallback format
       phone = body.phone || "";
       senderName = body.senderName || body.chatName || "";
       messageText = body.text?.message || body.image?.caption || body.video?.caption || "[mídia]";
@@ -898,259 +1127,194 @@ serve(async (req) => {
       });
     }
 
-      const cleanPhone = phone.replace("@c.us", "").replace("@s.whatsapp.net", "");
+    const cleanPhone = phone.replace("@c.us", "").replace("@s.whatsapp.net", "");
 
-      // Extract tracking code
-      let trackingCode: string | null = null;
-      let utmData: any = {};
-      let detectedSource: string | null = null;
+    // Extract tracking code
+    let trackingCode: string | null = null;
+    let utmData: any = {};
+    let detectedSource: string | null = null;
 
-      const codeMatch = messageText.match(/\[([A-Z0-9]{6})\]/);
-      if (codeMatch) {
-        trackingCode = codeMatch[1];
-        const { data: click } = await supabase
-          .from("tracking_clicks")
-          .select("id, utm_source, utm_medium, utm_campaign, utm_content, utm_term")
-          .eq("tracking_code", trackingCode)
-          .is("lead_id", null)
-          .maybeSingle();
+    const codeMatch = messageText.match(/\[([A-Z0-9]{6})\]/);
+    if (codeMatch) {
+      trackingCode = codeMatch[1];
+      const { data: click } = await supabase.from("tracking_clicks")
+        .select("id, utm_source, utm_medium, utm_campaign, utm_content, utm_term")
+        .eq("tracking_code", trackingCode).is("lead_id", null).maybeSingle();
 
-        if (click) {
-          utmData = {
-            utm_source: click.utm_source || undefined,
-            utm_medium: click.utm_medium || undefined,
-            utm_campaign: click.utm_campaign || undefined,
-            utm_content: click.utm_content || undefined,
-            utm_term: click.utm_term || undefined,
-          };
-          const src = (click.utm_source || "").toLowerCase();
-          if (src.includes("google") || src === "gads") detectedSource = "google";
-          else if (src.includes("meta") || src.includes("facebook") || src.includes("instagram")) detectedSource = "meta";
+      if (click) {
+        utmData = {
+          utm_source: click.utm_source || undefined, utm_medium: click.utm_medium || undefined,
+          utm_campaign: click.utm_campaign || undefined, utm_content: click.utm_content || undefined,
+          utm_term: click.utm_term || undefined,
+        };
+        const src = (click.utm_source || "").toLowerCase();
+        if (src.includes("google") || src === "gads") detectedSource = "google";
+        else if (src.includes("meta") || src.includes("facebook") || src.includes("instagram")) detectedSource = "meta";
+      }
+    }
+
+    // Find or create lead
+    const { data: existingLead } = await supabase.from("leads")
+      .select("id, status, bot_disabled, bot_agent_phase")
+      .eq("company_id", companyId)
+      .or(`phone.eq.${cleanPhone},whatsapp.eq.${cleanPhone}`)
+      .maybeSingle();
+
+    let leadId = existingLead?.id;
+    let currentPhase = existingLead?.bot_agent_phase || "sdr";
+
+    if (!leadId) {
+      const { data: firstColumn } = await supabase.from("kanban_columns").select("id")
+        .eq("company_id", companyId).order("position", { ascending: true }).limit(1).maybeSingle();
+
+      const { data: newLead, error: leadError } = await supabase.from("leads").insert({
+        company_id: companyId, name: senderName || `Lead ${cleanPhone}`,
+        phone: cleanPhone, whatsapp: cleanPhone, status: "new", lead_score: "morno",
+        kanban_column_id: firstColumn?.id || null, bot_agent_phase: "sdr",
+        ...(detectedSource && { source: detectedSource }), ...utmData,
+      }).select("id").single();
+
+      if (leadError) { console.error("Error creating lead:", leadError); }
+      else {
+        leadId = newLead.id;
+        currentPhase = "sdr";
+        console.log("New lead created:", leadId);
+        await enrollInCadence(supabase, companyId, leadId, cleanPhone);
+      }
+    } else {
+      await supabase.from("cadence_messages").update({ status: "cancelled" })
+        .eq("lead_id", leadId).eq("status", "pending");
+
+      if (existingLead?.status === "new") {
+        const { data: emAtendimentoCol } = await supabase.from("kanban_columns").select("id")
+          .eq("company_id", companyId).eq("position", 5).maybeSingle();
+        if (emAtendimentoCol) {
+          await supabase.from("leads").update({ kanban_column_id: emAtendimentoCol.id, status: "contacted" }).eq("id", leadId);
         }
       }
 
-      // Find or create lead
-      const { data: existingLead } = await supabase
-        .from("leads")
-        .select("id, status, bot_disabled")
-        .eq("company_id", companyId)
-        .or(`phone.eq.${cleanPhone},whatsapp.eq.${cleanPhone}`)
-        .maybeSingle();
-
-      let leadId = existingLead?.id;
-
-      if (!leadId) {
-        const { data: firstColumn } = await supabase
-          .from("kanban_columns")
-          .select("id")
-          .eq("company_id", companyId)
-          .order("position", { ascending: true })
-          .limit(1)
-          .maybeSingle();
-
-        const { data: newLead, error: leadError } = await supabase
-          .from("leads")
-          .insert({
-            company_id: companyId,
-            name: senderName || `Lead ${cleanPhone}`,
-            phone: cleanPhone,
-            whatsapp: cleanPhone,
-            status: "new",
-            lead_score: "morno",
-            kanban_column_id: firstColumn?.id || null,
-            ...(detectedSource && { source: detectedSource }),
-            ...utmData,
-          })
-          .select("id")
-          .single();
-
-        if (leadError) {
-          console.error("Error creating lead:", leadError);
-        } else {
-          leadId = newLead.id;
-          console.log("New lead created:", leadId);
-
-          // Enroll new lead in cadence (will send follow-ups if they don't respond)
-          await enrollInCadence(supabase, companyId, leadId, cleanPhone);
+      if (Object.keys(utmData).length > 0) {
+        const { data: existingLeadData } = await supabase.from("leads").select("utm_source, source").eq("id", leadId).single();
+        if (existingLeadData) {
+          const updates: Record<string, string> = {};
+          if (!existingLeadData.utm_source) Object.assign(updates, utmData);
+          if (!existingLeadData.source && detectedSource) updates.source = detectedSource;
+          if (Object.keys(updates).length > 0) await supabase.from("leads").update(updates).eq("id", leadId);
         }
-      } else {
-        // Lead responded — cancel any pending cadence
-        await supabase
-          .from("cadence_messages")
-          .update({ status: "cancelled" })
-          .eq("lead_id", leadId)
-          .eq("status", "pending");
+      }
+    }
 
-        // Auto-move lead to "Em Atendimento" (position 5) when lead responds
-        if (existingLead?.status === "new") {
-          const { data: emAtendimentoCol } = await supabase
-            .from("kanban_columns")
-            .select("id")
-            .eq("company_id", companyId)
-            .eq("position", 5)
-            .maybeSingle();
+    if (trackingCode && leadId) {
+      await supabase.from("tracking_clicks").update({ lead_id: leadId, matched_at: new Date().toISOString() })
+        .eq("tracking_code", trackingCode).is("lead_id", null);
+    }
 
-          if (emAtendimentoCol) {
-            await supabase.from("leads").update({
-              kanban_column_id: emAtendimentoCol.id,
-              status: "contacted",
-            }).eq("id", leadId);
-            console.log(`Lead ${leadId} auto-moved to Em Atendimento`);
+    // Deduplicate
+    if (messageIdExternal) {
+      const { data: existingMsg } = await supabase.from("whatsapp_messages").select("id")
+        .eq("message_id_external", messageIdExternal).maybeSingle();
+      if (existingMsg) {
+        return new Response(JSON.stringify({ ok: true, skipped: "duplicate" }), {
+          status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    // Store incoming message
+    await supabase.from("whatsapp_messages").insert({
+      company_id: companyId, lead_id: leadId || null, phone: cleanPhone,
+      message_text: messageText, direction: "incoming", sender_name: senderName,
+      message_id_external: messageIdExternal,
+      timestamp: body.mompiont ? new Date(body.mompiont * 1000).toISOString() : new Date().toISOString(),
+    });
+
+    // AI Auto-Reply with multi-agent support
+    if (config.ai_enabled && config.ai_auto_reply && leadId && !existingLead?.bot_disabled) {
+      try {
+        const leadStatus = existingLead?.status;
+        // Bot continues for active phases, stops for completed
+        const isCompleted = currentPhase === "completed";
+        const isAlreadyHandled = leadStatus && !["new", "contacted", "qualified", "negotiating"].includes(leadStatus);
+
+        if (!isCompleted && !isAlreadyHandled) {
+          // Determine effective phase: if agent for current phase is not active, use SDR
+          let effectivePhase = currentPhase;
+          if (effectivePhase !== "sdr" && !agentConfigs[effectivePhase]?.is_active) {
+            effectivePhase = "sdr";
           }
-        }
 
-        // Update UTM if missing
-        if (Object.keys(utmData).length > 0) {
-          const { data: existingLeadData } = await supabase
-            .from("leads")
-            .select("utm_source, source")
-            .eq("id", leadId)
-            .single();
+          const { data: leadData } = await supabase.from("leads").select("name").eq("id", leadId).single();
+          const currentLeadName = leadData?.name || senderName || undefined;
 
-          if (existingLeadData) {
-            const updates: Record<string, string> = {};
-            if (!existingLeadData.utm_source) Object.assign(updates, utmData);
-            if (!existingLeadData.source && detectedSource) updates.source = detectedSource;
-            if (Object.keys(updates).length > 0) {
-              await supabase.from("leads").update(updates).eq("id", leadId);
-            }
-          }
-        }
-      }
+          const { data: recentMsgs } = await supabase.from("whatsapp_messages")
+            .select("message_text, direction").eq("company_id", companyId)
+            .eq("phone", cleanPhone).order("timestamp", { ascending: false }).limit(15);
 
-      // Match tracking click
-      if (trackingCode && leadId) {
-        await supabase
-          .from("tracking_clicks")
-          .update({ lead_id: leadId, matched_at: new Date().toISOString() })
-          .eq("tracking_code", trackingCode)
-          .is("lead_id", null);
-      }
+          const history = (recentMsgs || []).reverse().map((m: any) => ({
+            role: m.direction === "incoming" ? "user" : "assistant",
+            content: m.message_text || "",
+          }));
 
-      // Deduplicate: skip if this message was already processed
-      if (messageIdExternal) {
-        const { data: existingMsg } = await supabase
-          .from("whatsapp_messages")
-          .select("id")
-          .eq("message_id_external", messageIdExternal)
-          .maybeSingle();
+          const aiReply = await handleAgentPhase(
+            effectivePhase, config, agentConfigs, history,
+            companyId, leadId, supabase, currentLeadName, cleanPhone
+          );
 
-        if (existingMsg) {
-          console.log("Duplicate message skipped:", messageIdExternal);
-          return new Response(JSON.stringify({ ok: true, skipped: "duplicate" }), {
-            status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-      }
+          if (aiReply) {
+            const SERVER_URL = "https://ziondigital.uazapi.com";
+            const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+            const sendHeaders: Record<string, string> = { "Content-Type": "application/json" };
+            if (ADMIN_TOKEN) sendHeaders["admintoken"] = ADMIN_TOKEN;
 
-      // Store incoming message
-      await supabase.from("whatsapp_messages").insert({
-        company_id: companyId,
-        lead_id: leadId || null,
-        phone: cleanPhone,
-        message_text: messageText,
-        direction: "incoming",
-        sender_name: senderName,
-        message_id_external: messageIdExternal,
-        timestamp: body.mompiont ? new Date(body.mompiont * 1000).toISOString() : new Date().toISOString(),
-      });
+            const instanceParam = encodeURIComponent(config.zapi_instance_id);
+            const tokenParam = encodeURIComponent(config.zapi_token || config.zapi_instance_id);
+            const sendUrl = `${SERVER_URL}/send/text?instance=${instanceParam}&token=${tokenParam}`;
 
-      // AI Auto-Reply with SDR qualification
-      if (config.ai_enabled && config.ai_auto_reply && leadId && !existingLead?.bot_disabled) {
-        try {
-          const leadStatus = existingLead?.status;
-          // Bot continues for new and contacted leads — stops only for qualified/won/lost/negotiating
-          const isAlreadyHandled = leadStatus && !["new", "contacted"].includes(leadStatus);
+            const splitMessages = splitIntoNaturalMessages(aiReply);
+            console.log(`[${effectivePhase}] Sending ${splitMessages.length} message(s) to:`, cleanPhone);
 
-          if (!isAlreadyHandled) {
-            // Fetch lead name for AI context
-            const { data: leadData } = await supabase
-              .from("leads")
-              .select("name")
-              .eq("id", leadId)
-              .single();
-            const currentLeadName = leadData?.name || senderName || undefined;
+            for (let i = 0; i < splitMessages.length; i++) {
+              const chunk = splitMessages[i].trim();
+              if (!chunk) continue;
 
-            const { data: recentMsgs } = await supabase
-              .from("whatsapp_messages")
-              .select("message_text, direction")
-              .eq("company_id", companyId)
-              .eq("phone", cleanPhone)
-              .order("timestamp", { ascending: false })
-              .limit(15);
+              if (i > 0) {
+                const delayMs = Math.min(1000 + chunk.length * 30, 3500);
+                await new Promise((r) => setTimeout(r, delayMs));
+              }
 
-            const history = (recentMsgs || [])
-              .reverse()
-              .map((m: any) => ({
-                role: m.direction === "incoming" ? "user" : "assistant",
-                content: m.message_text || "",
-              }));
+              const sendResponse = await fetch(sendUrl, {
+                method: "POST", headers: sendHeaders,
+                body: JSON.stringify({ number: cleanPhone, text: chunk }),
+              });
 
-            const aiReply = await qualifyLeadWithAI(config, history, companyId, leadId, supabase, currentLeadName);
-
-            if (aiReply) {
-              const SERVER_URL = "https://ziondigital.uazapi.com";
-              const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
-              const sendHeaders: Record<string, string> = { "Content-Type": "application/json" };
-              if (ADMIN_TOKEN) sendHeaders["admintoken"] = ADMIN_TOKEN;
-
-              const instanceParam = encodeURIComponent(config.zapi_instance_id);
-              const tokenParam = encodeURIComponent(config.zapi_token || config.zapi_instance_id);
-              const sendUrl = `${SERVER_URL}/send/text?instance=${instanceParam}&token=${tokenParam}`;
-
-              // Split AI reply into multiple natural messages
-              const splitMessages = splitIntoNaturalMessages(aiReply);
-              console.log(`Sending ${splitMessages.length} message(s) to:`, cleanPhone);
-
-              for (let i = 0; i < splitMessages.length; i++) {
-                const chunk = splitMessages[i].trim();
-                if (!chunk) continue;
-
-                // Simulate typing delay (1-3s based on message length)
-                if (i > 0) {
-                  const delayMs = Math.min(1000 + chunk.length * 30, 3500);
-                  await new Promise((r) => setTimeout(r, delayMs));
-                }
-
-                const sendResponse = await fetch(sendUrl, {
-                  method: "POST",
-                  headers: sendHeaders,
-                  body: JSON.stringify({ number: cleanPhone, text: chunk }),
+              if (sendResponse.ok) {
+                const sendResult = await sendResponse.json();
+                await supabase.from("whatsapp_messages").insert({
+                  company_id: companyId, lead_id: leadId, phone: cleanPhone,
+                  message_text: chunk, direction: "outgoing", sender_name: "IA",
+                  message_id_external: sendResult.messageId || sendResult.key?.id || null,
+                  timestamp: new Date().toISOString(),
                 });
-
-                if (sendResponse.ok) {
-                  const sendResult = await sendResponse.json();
-                  await supabase.from("whatsapp_messages").insert({
-                    company_id: companyId,
-                    lead_id: leadId,
-                    phone: cleanPhone,
-                    message_text: chunk,
-                    direction: "outgoing",
-                    sender_name: "IA",
-                    message_id_external: sendResult.messageId || sendResult.key?.id || null,
-                    timestamp: new Date().toISOString(),
-                  });
-                } else {
-                  console.error("Failed to send AI reply chunk:", sendResponse.status, await sendResponse.text());
-                }
+              } else {
+                console.error("Failed to send AI reply:", sendResponse.status, await sendResponse.text());
               }
             }
           }
-        } catch (aiError) {
-          console.error("AI auto-reply error:", aiError);
         }
+      } catch (aiError) {
+        console.error("AI auto-reply error:", aiError);
       }
+    }
 
-      return new Response(
-        JSON.stringify({ ok: true, lead_id: leadId, new_lead: !existingLead, tracking_code: trackingCode }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    return new Response(
+      JSON.stringify({ ok: true, lead_id: leadId, new_lead: !existingLead, tracking_code: trackingCode, agent_phase: currentPhase }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   } catch (error: unknown) {
     console.error("Webhook error:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return new Response(JSON.stringify({ error: errorMessage }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
