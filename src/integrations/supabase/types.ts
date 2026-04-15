@@ -1519,6 +1519,116 @@ export type Database = {
           },
         ]
       }
+      zapsign_configs: {
+        Row: {
+          api_token: string
+          company_id: string
+          created_at: string
+          default_template_id: string | null
+          id: string
+          sandbox: boolean
+          updated_at: string
+        }
+        Insert: {
+          api_token: string
+          company_id: string
+          created_at?: string
+          default_template_id?: string | null
+          id?: string
+          sandbox?: boolean
+          updated_at?: string
+        }
+        Update: {
+          api_token?: string
+          company_id?: string
+          created_at?: string
+          default_template_id?: string | null
+          id?: string
+          sandbox?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zapsign_configs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zapsign_documents: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string
+          document_name: string
+          id: string
+          lead_id: string
+          sent_via_whatsapp: boolean
+          sign_url: string | null
+          signed_at: string | null
+          signer_email: string | null
+          signer_name: string
+          signer_phone: string | null
+          status: string
+          updated_at: string
+          zapsign_doc_id: string
+          zapsign_doc_token: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by: string
+          document_name: string
+          id?: string
+          lead_id: string
+          sent_via_whatsapp?: boolean
+          sign_url?: string | null
+          signed_at?: string | null
+          signer_email?: string | null
+          signer_name: string
+          signer_phone?: string | null
+          status?: string
+          updated_at?: string
+          zapsign_doc_id: string
+          zapsign_doc_token?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          document_name?: string
+          id?: string
+          lead_id?: string
+          sent_via_whatsapp?: boolean
+          sign_url?: string | null
+          signed_at?: string | null
+          signer_email?: string | null
+          signer_name?: string
+          signer_phone?: string | null
+          status?: string
+          updated_at?: string
+          zapsign_doc_id?: string
+          zapsign_doc_token?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zapsign_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zapsign_documents_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       profiles_public: {
