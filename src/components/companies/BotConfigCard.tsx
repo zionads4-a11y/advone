@@ -11,6 +11,7 @@ import { Bot, Loader2, Save, ShieldCheck, Building2, Link2, Users, Clock, ListCh
 import { toast } from "sonner";
 import { TriageOptionsEditor, type TriageOption } from "./TriageOptionsEditor";
 import { BotTestChat } from "./BotTestChat";
+import { AgentConfigPanel } from "./AgentConfigPanel";
 
 interface BotConfigCardProps {
   companyId: string;
