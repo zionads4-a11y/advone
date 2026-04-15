@@ -10,6 +10,7 @@ import { Building2, Save } from "lucide-react";
 import { toast } from "sonner";
 import { BusinessHoursConfig, type BusinessHours, parseBusinessHours, getDefaultBusinessHours } from "@/components/companies/BusinessHoursConfig";
 import MonitoringPackagePurchase from "@/components/monitoring/MonitoringPackagePurchase";
+import { ZapSignConfigCard } from "@/components/companies/ZapSignConfigCard";
 
 interface Company {
   id: string;
@@ -117,6 +118,9 @@ export default function CompanySettings() {
         <Save className="mr-2 h-4 w-4" />
         {saving ? "Salvando..." : "Salvar Configurações"}
       </Button>
+
+      {/* ZapSign Config */}
+      <ZapSignConfigCard companyId={company.id} />
 
       {!hasMonitoring && company && (
         <MonitoringPackagePurchase
