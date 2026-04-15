@@ -1,0 +1,161 @@
+import { useState, useEffect, useRef } from "react";
+import { Bot, User, Send } from "lucide-react";
+
+interface DemoMessage {
+  role: "user" | "bot";
+  text: string;
+  delay: number;
+}
+
+const demoScript: DemoMessage[] = [
+  { role: "user", text: "Olá, boa tarde!", delay: 0 },
+  { role: "bot", text: "Olá! 👋 Seja bem-vindo(a) ao escritório. Como posso ajudar você hoje?", delay: 1200 },
+  { role: "bot", text: "Escolha uma opção:\n1️⃣ Consulta trabalhista\n2️⃣ Direito previdenciário\n3️⃣ Outros assuntos", delay: 2000 },
+  { role: "user", text: "1", delay: 3500 },
+  { role: "bot", text: "Entendi! Vou precisar de algumas informações para analisar seu caso. Qual é o seu nome completo?", delay: 4800 },
+  { role: "user", text: "João da Silva", delay: 6500 },
+  { role: "bot", text: "Obrigado, João! Como o seu caso é urgente, podemos agendar uma consulta amanhã. Você prefere na parte da manhã ou da tarde?", delay: 7800 },
+  { role: "bot", text: "🕘 Manhã: 09:30\n🕐 Tarde: 14:00", delay: 8800 },
+  { role: "user", text: "Manhã por favor", delay: 10500 },
+  { role: "bot", text: "Perfeito! ✅ Agendei sua consulta para amanhã às 09:30. Você receberá um lembrete automático. Até lá, João!", delay: 11800 },
+];
+
+export function InteractiveChatDemo() {
+  const [messages, setMessages] = useState<DemoMessage[]>([]);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [typingBot, setTypingBot] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  useEffect(() => {
+    return () => timeoutsRef.current.forEach(clearTimeout);
+  }, []);
+
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, typingBot]);
+
+  const playDemo = () => {
+    timeoutsRef.current.forEach(clearTimeout);
+    timeoutsRef.current = [];
+    setMessages([]);
+    setIsPlaying(true);
+    setTypingBot(false);
+
+    demoScript.forEach((msg, i) => {
+      // Show typing indicator before bot messages
+      if (msg.role === "bot") {
+        const typingDelay = i === 0 ? msg.delay : msg.delay - 600;
+        const t1 = setTimeout(() => setTypingBot(true), typingDelay);
+        timeoutsRef.current.push(t1);
+      }
+
+      const t2 = setTimeout(() => {
+        setTypingBot(false);
+        setMessages((prev) => [...prev, msg]);
+        if (i === demoScript.length - 1) {
+          setTimeout(() => setIsPlaying(false), 1000);
+        }
+      }, msg.delay);
+      timeoutsRef.current.push(t2);
+    });
+  };
+
+  // Auto-play on mount
+  useEffect(() => {
+    const t = setTimeout(playDemo, 800);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div className="w-full max-w-sm mx-auto">
+      {/* Phone frame */}
+      <div className="rounded-[2rem] border-2 border-[hsl(220,20%,20%)] bg-[hsl(220,25%,8%)] p-1 shadow-2xl shadow-[hsl(153,60%,45%)]/10">
+        {/* Notch */}
+        <div className="flex justify-center pt-2 pb-1">
+          <div className="h-1.5 w-16 rounded-full bg-[hsl(220,20%,16%)]" />
+        </div>
+
+        {/* Chat header */}
+        <div className="mx-1 flex items-center gap-3 rounded-t-2xl bg-[hsl(153,60%,35%)] px-4 py-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[hsl(0,0%,100%)]/20">
+            <Bot className="h-5 w-5 text-[hsl(0,0%,100%)]" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-[hsl(0,0%,100%)]">Assistente AdvOne</p>
+            <p className="text-xs text-[hsl(0,0%,100%)]/70">Online agora</p>
+          </div>
+          <div className="ml-auto flex h-2.5 w-2.5 rounded-full bg-[hsl(120,60%,50%)]">
+            <span className="inline-flex h-full w-full animate-ping rounded-full bg-[hsl(120,60%,50%)] opacity-75" />
+          </div>
+        </div>
+
+        {/* Chat body */}
+        <div className="mx-1 bg-[hsl(220,25%,10%)] px-3" style={{ height: 380, overflowY: "auto" }}>
+          <div className="space-y-2 py-3">
+            {messages.map((msg, i) => (
+              <div
+                key={i}
+                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-fade-in`}
+              >
+                <div
+                  className={`max-w-[80%] rounded-2xl px-3.5 py-2 text-sm whitespace-pre-line ${
+                    msg.role === "user"
+                      ? "bg-[hsl(153,60%,40%)] text-[hsl(0,0%,100%)] rounded-br-md"
+                      : "bg-[hsl(220,20%,16%)] text-[hsl(220,10%,85%)] rounded-bl-md"
+                  }`}
+                >
+                  {msg.text}
+                </div>
+              </div>
+            ))}
+
+            {typingBot && (
+              <div className="flex justify-start animate-fade-in">
+                <div className="rounded-2xl rounded-bl-md bg-[hsl(220,20%,16%)] px-4 py-3">
+                  <div className="flex gap-1.5">
+                    <span className="h-2 w-2 rounded-full bg-[hsl(220,10%,45%)] animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <span className="h-2 w-2 rounded-full bg-[hsl(220,10%,45%)] animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <span className="h-2 w-2 rounded-full bg-[hsl(220,10%,45%)] animate-bounce" style={{ animationDelay: "300ms" }} />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div ref={scrollRef} />
+          </div>
+        </div>
+
+        {/* Input bar */}
+        <div className="mx-1 flex items-center gap-2 rounded-b-2xl bg-[hsl(220,20%,12%)] px-3 py-3">
+          <div className="flex-1 rounded-full bg-[hsl(220,20%,16%)] px-4 py-2 text-sm text-[hsl(220,10%,40%)]">
+            Digite uma mensagem...
+          </div>
+          <button
+            onClick={playDemo}
+            disabled={isPlaying}
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-[hsl(153,60%,45%)] text-[hsl(0,0%,100%)] transition-transform hover:scale-110 disabled:opacity-50"
+          >
+            <Send className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Bottom bar */}
+        <div className="flex justify-center py-2">
+          <div className="h-1 w-24 rounded-full bg-[hsl(220,20%,20%)]" />
+        </div>
+      </div>
+
+      {/* Replay button */}
+      <p
+        onClick={() => !isPlaying && playDemo()}
+        className={`mt-4 text-center text-sm cursor-pointer transition-colors ${
+          isPlaying ? "text-[hsl(220,10%,30%)]" : "text-[hsl(153,60%,45%)] hover:text-[hsl(153,60%,55%)]"
+        }`}
+      >
+        {isPlaying ? "Simulando conversa..." : "▶ Replay da demonstração"}
+      </p>
+    </div>
+  );
+}
