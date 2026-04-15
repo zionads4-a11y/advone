@@ -291,8 +291,16 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
 
   const hasAnyConfig = Object.keys(businessHours).length > 0;
   if (slots.length === 0 && !hasAnyConfig && dayOfWeek >= 1 && dayOfWeek <= 5) {
-    for (let h = 9; h < 12; h++) { slots.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`); }
-    for (let h = 14; h < 18; h++) { slots.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`); }
+    for (let h = 8; h < 12; h++) { slots.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`); }
+    for (let h = 13; h < 17; h++) { slots.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`); }
+  }
+
+  // Enforce 08:00-17:00 hard limit regardless of business hours config
+  slots = slots.filter(s => {
+    const [h, m] = s.split(":").map(Number);
+    const mins = h * 60 + m;
+    return mins >= 480 && mins < 1020; // 08:00 to 17:00
+  });
   }
 
   // Filter out past slots + 2h minimum advance for today (Brasilia time)
