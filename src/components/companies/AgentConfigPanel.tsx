@@ -102,7 +102,7 @@ export function AgentConfigPanel({ companyId, aiEnabled }: AgentConfigPanelProps
               is_active: existing.is_active,
               prompt: existing.prompt || "",
               required_documents: Array.isArray(existing.required_documents)
-                ? existing.required_documents as RequiredDoc[]
+                ? (existing.required_documents as unknown as RequiredDoc[])
                 : def.required_documents,
               contract_template: existing.contract_template || "",
             };
