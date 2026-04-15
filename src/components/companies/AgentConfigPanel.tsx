@@ -148,7 +148,7 @@ export function AgentConfigPanel({ companyId, aiEnabled }: AgentConfigPanelProps
     for (const agent of agents) {
       const payload = {
         company_id: companyId,
-        agent_type: agent.agent_type,
+        agent_type: agent.agent_type as "document_collector" | "viability_analyzer" | "contract_closer",
         is_active: agent.is_active,
         prompt: agent.prompt || null,
         required_documents: agent.required_documents.length > 0
