@@ -164,8 +164,16 @@ Penúltimo: Gatilho emocional + pedido de documentos (opcional)
 📅 AGENDAMENTO HUMANIZADO:
 - Transição suave: "Perfeito, {nome} 🙂\\n\\nCom base no que você me falou, o ideal agora é uma conversa com a equipe pra te orientar direitinho."
 - Pergunte a modalidade: "Como você prefere ser atendido?\\n\\n1️⃣ Online\\n2️⃣ Presencial"
-- Pergunte a preferência de horário: "E qual horário costuma ser melhor pra você?\\n\\nManhã, tarde ou início da noite?"
+- NÃO pergunte "manhã, tarde ou noite" — use a ferramenta check_availability para ver os horários reais e ofereça opções concretas
 - Após confirmar: "Perfeito!\\n\\nJá vou encaminhar seu atendimento e você recebe a confirmação em instantes 🙂\\n\\nQualquer dúvida, pode me chamar por aqui."
+
+⏰ HORÁRIO DE FUNCIONAMENTO (REGRA OBRIGATÓRIA):
+- Agendamentos SOMENTE entre 08:00 e 17:00 (horário de Brasília)
+- NUNCA sugira horários antes das 08:00 ou após as 17:00
+- NUNCA mencione "início da noite" ou "noite" como opção — o escritório NÃO funciona à noite
+- Se o lead pedir horário fora do expediente: "Nosso atendimento é das 08:00 às 17:00, de segunda a sexta 😊 Qual horário dentro desse período fica melhor pra você?"
+- ATENÇÃO À HORA ATUAL: Agora são ${String(nowBR.getHours()).padStart(2,"0")}:${String(nowBR.getMinutes()).padStart(2,"0")}. Se for depois das 17:00, NÃO ofereça horários para hoje — ofereça para o próximo dia útil
+- Se for antes das 08:00, os agendamentos de hoje só começam às 08:00
 
 ARGUMENTOS DE AGENDAMENTO (use com naturalidade, não tudo de uma vez):
 - A reunião é TOTALMENTE GRATUITA, sem compromisso
@@ -186,8 +194,8 @@ ENDEREÇOS DOS ESCRITÓRIOS (quando o lead escolher presencial, pergunte qual un
 
 AGENDAMENTO INTELIGENTE (OBRIGATÓRIO):
 - Quando o lead aceitar agendar, SEMPRE use a ferramenta "check_availability" PRIMEIRO para ver os horários disponíveis
-- PRIORIDADE: Tente agendar para HOJE MESMO se houver horários disponíveis (mínimo 2h de antecedência)
-- Se não houver horário hoje, ofereça o PRÓXIMO DIA ÚTIL mais cedo possível
+- PRIORIDADE: Tente agendar para HOJE MESMO se houver horários disponíveis (mínimo 2h de antecedência E dentro do horário 08:00-17:00)
+- Se não houver horário hoje (ou se já for depois das 15:00), ofereça o PRÓXIMO DIA ÚTIL mais cedo possível
 - Use a data que o lead sugeriu, ou hoje/próximo dia útil se não especificou
 - Após receber os horários, ofereça EXATAMENTE 2 opções ao lead
 - Formato da oferta: "Tenho esses horários disponíveis pra você:\\n\\n📅 Opção 1: [dia da semana], dia [DD/MM] às [HH:MM]\\n📅 Opção 2: [dia da semana], dia [DD/MM] às [HH:MM]\\n\\nQual fica melhor pra você? 😊"
@@ -283,9 +291,16 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
 
   const hasAnyConfig = Object.keys(businessHours).length > 0;
   if (slots.length === 0 && !hasAnyConfig && dayOfWeek >= 1 && dayOfWeek <= 5) {
-    for (let h = 9; h < 12; h++) { slots.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`); }
-    for (let h = 14; h < 18; h++) { slots.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`); }
+    for (let h = 8; h < 12; h++) { slots.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`); }
+    for (let h = 13; h < 17; h++) { slots.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`); }
   }
+
+  // Enforce 08:00-17:00 hard limit regardless of business hours config
+  slots = slots.filter(s => {
+    const [h, m] = s.split(":").map(Number);
+    const mins = h * 60 + m;
+    return mins >= 480 && mins < 1020; // 08:00 to 17:00
+  });
 
   // Filter out past slots + 2h minimum advance for today (Brasilia time)
   const todayBR = getTodayBrasilia();

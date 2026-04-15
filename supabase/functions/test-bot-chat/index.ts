@@ -106,6 +106,16 @@ ${hasTriagem ? "Turno 2: Envie o menu de opções (em mensagem separada)" : 'Tur
 Turno 3+: Siga o script do assunto — UMA pergunta por turno
 Último: Conduza para agendamento enfatizando que é GRATUITO e personalizado.
 
+📆 DATA E HORA ATUAL: Hoje é ${new Date(getNowBrasilia()).toLocaleDateString("pt-BR", { weekday: "long" })}, ${getTodayBrasilia()} (${String(getNowBrasilia().getHours()).padStart(2,"0")}:${String(getNowBrasilia().getMinutes()).padStart(2,"0")} horário de Brasília). USE ESTA DATA COMO REFERÊNCIA.
+
+⏰ HORÁRIO DE FUNCIONAMENTO (REGRA OBRIGATÓRIA):
+- Agendamentos SOMENTE entre 08:00 e 17:00 (horário de Brasília)
+- NUNCA sugira horários antes das 08:00 ou após as 17:00
+- NUNCA mencione "início da noite" ou "noite" como opção — o escritório NÃO funciona à noite
+- Se o lead pedir horário fora do expediente: "Nosso atendimento é das 08:00 às 17:00, de segunda a sexta 😊"
+- Se já for depois das 17:00, NÃO ofereça horários para hoje — ofereça para o próximo dia útil
+- NÃO pergunte "manhã, tarde ou noite" — use check_availability e ofereça horários concretos
+
 ARGUMENTOS DE AGENDAMENTO (use com naturalidade, não tudo de uma vez):
 - A reunião é TOTALMENTE GRATUITA, sem compromisso
 - O(a) advogado(a) vai pessoalmente analisar o seu caso
@@ -122,9 +132,8 @@ ENDEREÇOS DOS ESCRITÓRIOS (quando o lead escolher presencial, pergunte qual un
 
 AGENDAMENTO INTELIGENTE (OBRIGATÓRIO):
 - Quando o lead aceitar agendar, SEMPRE use a ferramenta "check_availability" PRIMEIRO
-- PRIORIDADE: Tente agendar para HOJE MESMO se houver horários disponíveis (mínimo 2h de antecedência)
+- PRIORIDADE: Tente agendar para HOJE MESMO se houver horários disponíveis (mínimo 2h de antecedência E dentro do horário 08:00-17:00)
 - Se não houver horário hoje, ofereça o PRÓXIMO DIA ÚTIL mais cedo possível
-- Use a data que o lead sugeriu, ou hoje/próximo dia útil se não especificou
 - Após receber os horários, ofereça EXATAMENTE 2 opções ao lead
 - Formato: "Tenho esses horários disponíveis pra você:\\n\\n📅 Opção 1: [dia], dia [DD/MM] às [HH:MM]\\n📅 Opção 2: [dia], dia [DD/MM] às [HH:MM]\\n\\nQual fica melhor pra você? 😊"
 - Quando o lead escolher, use "schedule_appointment" para confirmar
@@ -213,9 +222,16 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
   // Fallback only if NO business hours configured at all for the company
   const hasAnyConfig = Object.keys(businessHours).length > 0;
   if (slots.length === 0 && !hasAnyConfig && dayOfWeek >= 1 && dayOfWeek <= 5) {
-    for (let h = 9; h < 12; h++) { slots.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`); }
-    for (let h = 14; h < 18; h++) { slots.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`); }
+    for (let h = 8; h < 12; h++) { slots.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`); }
+    for (let h = 13; h < 17; h++) { slots.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`); }
   }
+
+  // Enforce 08:00-17:00 hard limit regardless of business hours config
+  slots = slots.filter(s => {
+    const [h, m] = s.split(":").map(Number);
+    const mins = h * 60 + m;
+    return mins >= 480 && mins < 1020; // 08:00 to 17:00
+  });
 
   // Filter out past slots + 2h minimum advance for today (Brasilia time)
   const todayBR = getTodayBrasilia();
