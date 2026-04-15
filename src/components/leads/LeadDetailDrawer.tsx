@@ -13,6 +13,7 @@ import { LeadAssignment } from "@/components/leads/LeadAssignment";
 import { LeadProcessData } from "@/components/leads/LeadProcessData";
 import { LeadNotes } from "@/components/leads/LeadNotes";
 import { LeadCases } from "@/components/leads/LeadCases";
+import { LeadContract } from "@/components/leads/LeadContract";
 
 type LeadStatus = "new" | "contacted" | "qualified" | "negotiating" | "won" | "lost";
 
