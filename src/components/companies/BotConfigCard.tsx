@@ -348,6 +348,9 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
           </Button>
         </CardContent>
       </Card>
+
+      {/* Agent Configuration Panel */}
+      <AgentConfigPanel companyId={companyId} aiEnabled={aiEnabled} />
       </div>
 
       {/* Test Chat Panel */}
