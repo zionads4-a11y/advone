@@ -13,6 +13,7 @@ import { LeadAssignment } from "@/components/leads/LeadAssignment";
 import { LeadProcessData } from "@/components/leads/LeadProcessData";
 import { LeadNotes } from "@/components/leads/LeadNotes";
 import { LeadCases } from "@/components/leads/LeadCases";
+import { LeadContract } from "@/components/leads/LeadContract";
 
 type LeadStatus = "new" | "contacted" | "qualified" | "negotiating" | "won" | "lost";
 
@@ -167,6 +168,17 @@ export function LeadDetailDrawer({ lead, open, onOpenChange, onLeadUpdate }: Lea
 
             {/* Linked Cases */}
             <LeadCases leadId={lead.id} companyId={lead.company_id} />
+
+            <Separator />
+
+            {/* Contracts */}
+            <LeadContract
+              leadId={lead.id}
+              companyId={lead.company_id}
+              leadName={lead.name}
+              leadPhone={lead.whatsapp || lead.phone}
+              leadEmail={lead.email}
+            />
 
             <Separator />
 
