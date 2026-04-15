@@ -301,7 +301,6 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
     const mins = h * 60 + m;
     return mins >= 480 && mins < 1020; // 08:00 to 17:00
   });
-  }
 
   // Filter out past slots + 2h minimum advance for today (Brasilia time)
   const todayBR = getTodayBrasilia();
