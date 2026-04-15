@@ -171,6 +171,17 @@ export function LeadDetailDrawer({ lead, open, onOpenChange, onLeadUpdate }: Lea
 
             <Separator />
 
+            {/* Contracts */}
+            <LeadContract
+              leadId={lead.id}
+              companyId={lead.company_id}
+              leadName={lead.name}
+              leadPhone={lead.whatsapp || lead.phone}
+              leadEmail={lead.email}
+            />
+
+            <Separator />
+
             {/* Reminders */}
             <LeadReminders leadId={lead.id} companyId={lead.company_id} />
           </div>
