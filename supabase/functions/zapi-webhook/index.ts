@@ -754,9 +754,11 @@ async function handleAgentPhase(
                 if (alternatives.length >= 2) break;
               }
             }
-            toolResult = { requested_date: dateToCheck, requested_day: availability.dayName, available_slots: [], message: `Não há horários disponíveis em ${availability.dayName} (${dateToCheck}).`, alternatives };
+            const formattedDate = formatDateDMY(dateToCheck);
+            toolResult = { requested_date: formattedDate, requested_day: availability.dayName, available_slots: [], message: `Não há horários disponíveis em ${availability.dayName} (${formattedDate}).`, alternatives };
           } else {
-            toolResult = { date: dateToCheck, day_name: availability.dayName, available_slots: availability.slots, total_available: availability.slots.length };
+            const formattedDate = formatDateDMY(dateToCheck);
+            toolResult = { date: formattedDate, day_name: availability.dayName, available_slots: availability.slots, total_available: availability.slots.length };
           }
         }
 

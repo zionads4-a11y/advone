@@ -470,9 +470,11 @@ serve(async (req) => {
               const alt = await getAvailableSlots(adminClient, company_id, nd);
               if (alt.slots.length > 0) { alternatives.push(alt); if (alternatives.length >= 2) break; }
             }
-            toolResult = { requested_date: dateToCheck, available_slots: [], message: `Sem horários em ${availability.dayName}`, alternatives };
+            const formattedDate = formatDateDMY(dateToCheck);
+            toolResult = { requested_date: formattedDate, available_slots: [], message: `Sem horários em ${availability.dayName}`, alternatives };
           } else {
-            toolResult = { date: dateToCheck, day_name: availability.dayName, available_slots: availability.slots, total_available: availability.slots.length };
+            const formattedDate = formatDateDMY(dateToCheck);
+            toolResult = { date: formattedDate, day_name: availability.dayName, available_slots: availability.slots, total_available: availability.slots.length };
           }
           toolActions.push({ tool: "check_availability", result: toolResult });
         }
