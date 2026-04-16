@@ -121,6 +121,7 @@ Turno 3+: Siga o script do assunto — UMA pergunta por turno
 - Depois use check_availability para buscar horários reais
 - Ofereça EXATAMENTE 2 opções concretas: UMA de manhã (08:00-12:00) e UMA à tarde (13:00-17:00)
 - Formato: "Tenho esses horários pra você:\\n\\n📅 Manhã: [dia], dia [DD/MM] às [HH:MM]\\n📅 Tarde: [dia], dia [DD/MM] às [HH:MM]\\n\\nQual fica melhor pra você? 😊"
+- IMPORTANTE: SEMPRE use datas no formato DD/MM/YYYY (ex: 16/04/2026). NUNCA use formato YYYY-MM-DD.
 - Se só houver horários em um turno, ofereça 2 opções desse turno
 - Quando o lead escolher, use "schedule_appointment" para confirmar
 - Após confirmar, envie: "Pronto, agendado! ✅ [detalhes]"
@@ -248,7 +249,13 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
     })
   );
 
-  return { date: dateStr, dayName, slots: slots.filter(s => !bookedTimes.has(s)) };
+  return { date: formatDateDMY(dateStr), dayName, slots: slots.filter(s => !bookedTimes.has(s)) };
+}
+
+function formatDateDMY(dateStr: string): string {
+  const parts = dateStr.split("-");
+  if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  return dateStr;
 }
 
 function getNextAvailableDays(count: number, includeToday: boolean = true): string[] {
@@ -470,9 +477,11 @@ serve(async (req) => {
               const alt = await getAvailableSlots(adminClient, company_id, nd);
               if (alt.slots.length > 0) { alternatives.push(alt); if (alternatives.length >= 2) break; }
             }
-            toolResult = { requested_date: dateToCheck, available_slots: [], message: `Sem horários em ${availability.dayName}`, alternatives };
+            const formattedDate = formatDateDMY(dateToCheck);
+            toolResult = { requested_date: formattedDate, available_slots: [], message: `Sem horários em ${availability.dayName}`, alternatives };
           } else {
-            toolResult = { date: dateToCheck, day_name: availability.dayName, available_slots: availability.slots, total_available: availability.slots.length };
+            const formattedDate = formatDateDMY(dateToCheck);
+            toolResult = { date: formattedDate, day_name: availability.dayName, available_slots: availability.slots, total_available: availability.slots.length };
           }
           toolActions.push({ tool: "check_availability", result: toolResult });
         }
