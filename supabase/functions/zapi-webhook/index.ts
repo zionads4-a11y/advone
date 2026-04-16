@@ -425,7 +425,7 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
     })
   );
 
-  return { date: dateStr, dayName, slots: slots.filter(s => !bookedTimes.has(s)) };
+  return { date: formatDateDMY(dateStr), dayName, slots: slots.filter(s => !bookedTimes.has(s)) };
 }
 
 function formatDateDMY(dateStr: string): string {
