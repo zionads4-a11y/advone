@@ -24,7 +24,7 @@ export function AnimatedCounter({ value, label }: AnimatedCounterProps) {
     let start = 0;
     const duration = 1500;
     const startTime = performance.now();
-    const suffix = value.replace(/[\d]/g, "");
+    const suffix = match ? match[2] : "";
 
     const animate = (now: number) => {
       const progress = Math.min((now - startTime) / duration, 1);
