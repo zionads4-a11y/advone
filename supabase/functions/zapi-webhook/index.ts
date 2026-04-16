@@ -427,6 +427,12 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
   return { date: dateStr, dayName, slots: slots.filter(s => !bookedTimes.has(s)) };
 }
 
+function formatDateDMY(dateStr: string): string {
+  const parts = dateStr.split("-");
+  if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  return dateStr;
+}
+
 function getNextAvailableDays(count: number, includeToday: boolean = true): string[] {
   const days: string[] = [];
   const nowBR = getNowBrasilia();
