@@ -13,7 +13,9 @@ export function AnimatedCounter({ value, label }: AnimatedCounterProps) {
   // If value is a number, animate it
   useEffect(() => {
     if (!visible) return;
-    const num = parseInt(value.replace(/\D/g, ""));
+    // Only animate values that are purely numeric with an optional trailing suffix (e.g. "100%", "5x")
+    const match = value.match(/^(\d+)(\D*)$/);
+    const num = match ? parseInt(match[1]) : NaN;
     if (isNaN(num) || num === 0) {
       setDisplay(value);
       return;
@@ -22,7 +24,7 @@ export function AnimatedCounter({ value, label }: AnimatedCounterProps) {
     let start = 0;
     const duration = 1500;
     const startTime = performance.now();
-    const suffix = value.replace(/[\d]/g, "");
+    const suffix = match ? match[2] : "";
 
     const animate = (now: number) => {
       const progress = Math.min((now - startTime) / duration, 1);
