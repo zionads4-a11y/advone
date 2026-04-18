@@ -361,6 +361,17 @@ export default function LeadsHistory() {
                         <TableCell className="text-muted-foreground text-xs">
                           {new Date(r.updated_at).toLocaleString("pt-BR")}
                         </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setDrawerLead(r)}
+                            className="h-8"
+                          >
+                            <MessageSquare className="h-3.5 w-3.5 mr-1.5" />
+                            Ver
+                          </Button>
+                        </TableCell>
                       </TableRow>
                     );
                   })
