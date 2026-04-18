@@ -66,10 +66,23 @@ export function InteractiveChatDemo() {
     });
   };
 
-  // Auto-play on mount
+  // Auto-play only when the demo scrolls into view
   useEffect(() => {
-    const t = setTimeout(playDemo, 800);
-    return () => clearTimeout(t);
+    const el = containerRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasPlayedRef.current) {
+          hasPlayedRef.current = true;
+          const t = setTimeout(playDemo, 400);
+          timeoutsRef.current.push(t);
+          obs.disconnect();
+        }
+      },
+      { threshold: 0.35 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
