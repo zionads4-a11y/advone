@@ -453,8 +453,24 @@ const sdrTools = [
   {
     type: "function",
     function: {
+      name: "register_client_cpf",
+      description: "OBRIGATÓRIO antes de agendar qualquer reunião. Registra o CPF do cliente final no lead. NUNCA chame check_availability ou schedule_appointment sem antes ter chamado esta tool.",
+      parameters: {
+        type: "object",
+        properties: {
+          cpf: { type: "string", description: "CPF do cliente final, apenas números (11 dígitos)" },
+          full_name: { type: "string", description: "Nome completo do cliente conforme passado por ele" }
+        },
+        required: ["cpf"],
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
       name: "check_availability",
-      description: "Verifica horários disponíveis na agenda para uma data específica. SEMPRE use antes de sugerir horários ao lead.",
+      description: "Verifica horários disponíveis na agenda para uma data específica. SEMPRE use antes de sugerir horários ao lead. ATENÇÃO: só use APÓS ter registrado o CPF via register_client_cpf.",
       parameters: {
         type: "object",
         properties: {
@@ -487,7 +503,7 @@ const sdrTools = [
     type: "function",
     function: {
       name: "schedule_appointment",
-      description: "Agenda uma consulta/reunião para o lead.",
+      description: "Agenda uma consulta/reunião para o lead. PRÉ-REQUISITO OBRIGATÓRIO: o CPF do cliente já deve ter sido registrado via register_client_cpf. Caso contrário, a chamada será rejeitada.",
       parameters: {
         type: "object",
         properties: {
