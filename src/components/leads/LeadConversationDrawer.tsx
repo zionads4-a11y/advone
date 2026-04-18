@@ -4,7 +4,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowDownLeft, ArrowUpRight, Bot, Calendar, Download, Loader2, MessageSquare } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Bot, Calendar, Download, FileDown, Loader2, MessageSquare } from "lucide-react";
+import jsPDF from "jspdf";
 
 interface Message {
   id: string;
