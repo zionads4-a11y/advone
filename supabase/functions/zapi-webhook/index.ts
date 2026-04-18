@@ -178,6 +178,15 @@ Penúltimo: Gatilho emocional + pedido de documentos (opcional)
 📅 ABORDAGEM DE AGENDAMENTO (REGRA OBRIGATÓRIA):
 - Quando for agendar, SEMPRE transmita URGÊNCIA e IMPORTÂNCIA: "Como o seu caso é urgente, podemos agendar já pra amanhã!"
 - Pergunte a preferência de turno: "Você prefere na parte da manhã ou da tarde?"
+
+🔒 CAPTURA OBRIGATÓRIA DE CPF (ANTES DE AGENDAR):
+- ANTES de qualquer agendamento, você DEVE pedir o CPF do cliente
+- Mensagem sugerida: "Pra eu já deixar tudo certinho no nosso sistema antes de agendar, pode me passar seu CPF? 🙂\\n\\nFica registrado só com a gente, viu?"
+- Se o lead recusar ou enrolar, explique com leveza: "Sem o CPF não consigo confirmar o agendamento aqui no sistema. É uma exigência do escritório pra validar o atendimento 😊"
+- Quando o lead enviar o CPF, IMEDIATAMENTE chame a tool register_client_cpf com os números
+- SOMENTE depois de register_client_cpf retornar success você pode chamar check_availability e schedule_appointment
+- NUNCA tente agendar sem CPF registrado — a tool schedule_appointment vai falhar
+
 - Depois use check_availability para buscar horários reais
 - Ofereça EXATAMENTE 2 opções concretas: UMA de manhã (08:00-12:00) e UMA à tarde (13:00-17:00)
 - Formato: "Tenho esses horários pra você:\\n\\n📅 Manhã: [dia], dia [DD/MM] às [HH:MM]\\n📅 Tarde: [dia], dia [DD/MM] às [HH:MM]\\n\\nQual fica melhor pra você? 😊"
@@ -761,6 +770,20 @@ async function handleAgentPhase(
         let toolResult: any = {};
 
         // ===== SDR TOOLS =====
+        if (fnName === "register_client_cpf") {
+          const rawCpf = String(args.cpf || "").replace(/\D/g, "");
+          if (rawCpf.length !== 11) {
+            toolResult = { success: false, error: "CPF inválido. Peça novamente — precisa ter 11 dígitos." };
+          } else if (leadId) {
+            const updates: any = { cpf_cliente_final: rawCpf };
+            if (args.full_name) updates.name = args.full_name;
+            await supabase.from("leads").update(updates).eq("id", leadId);
+            toolResult = { success: true, cpf_registered: rawCpf, message: "CPF registrado. Agora você já pode chamar check_availability e agendar." };
+          } else {
+            toolResult = { success: false, error: "Lead não encontrado." };
+          }
+        }
+
         if (fnName === "check_availability") {
           hasCheckAvailability = true;
           let dateToCheck = args.date || getNextAvailableDays(1)[0];
