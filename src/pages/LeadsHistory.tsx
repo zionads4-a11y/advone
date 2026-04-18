@@ -381,6 +381,15 @@ export default function LeadsHistory() {
           </div>
         </CardContent>
       </Card>
+
+      <LeadConversationDrawer
+        open={!!drawerLead}
+        onOpenChange={(o) => !o && setDrawerLead(null)}
+        leadId={drawerLead?.id || null}
+        leadName={drawerLead?.name}
+        leadCpf={formatCpf(drawerLead?.cpf_cliente_final || drawerLead?.cpf || null)}
+        leadPhone={drawerLead?.phone}
+      />
     </div>
   );
 }
