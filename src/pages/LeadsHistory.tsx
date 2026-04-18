@@ -295,7 +295,7 @@ export default function LeadsHistory() {
               <TableBody>
                 {filtered.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="py-12 text-center text-muted-foreground">
+                    <TableCell colSpan={10} className="py-12 text-center text-muted-foreground">
                       {loading ? "Carregando..." : (
                         <div className="flex flex-col items-center">
                           <History className="mb-2 h-8 w-8" />
