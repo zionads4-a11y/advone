@@ -62,6 +62,7 @@ export default function LeadsHistory() {
   const [filterCompany, setFilterCompany] = useState<string>("all");
   const [filterPartnership, setFilterPartnership] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [drawerLead, setDrawerLead] = useState<LeadHistoryRow | null>(null);
 
   useEffect(() => {
     fetchData();
