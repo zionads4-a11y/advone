@@ -481,6 +481,17 @@ serve(async (req) => {
 
         let toolResult: any = {};
 
+        if (fnName === "register_client_cpf") {
+          const rawCpf = String(args.cpf || "").replace(/\D/g, "");
+          if (rawCpf.length !== 11) {
+            toolResult = { success: false, error: "CPF inválido. Peça novamente." };
+          } else {
+            cpfRegistered = rawCpf;
+            toolResult = { success: true, cpf_registered: rawCpf, message: "[TESTE] CPF registrado. Já pode agendar." };
+          }
+          toolActions.push({ tool: "register_client_cpf", result: toolResult });
+        }
+
         if (fnName === "check_availability") {
           let dateToCheck = args.date || getNextAvailableDays(1)[0];
           const availability = await getAvailableSlots(adminClient, company_id, dateToCheck);
@@ -503,8 +514,12 @@ serve(async (req) => {
         }
 
         if (fnName === "schedule_appointment") {
-          reply = args.message_to_lead || reply;
-          toolResult = { success: true, message: "[TESTE] Agendamento simulado com sucesso", date: args.date, time: args.time, modality: args.modality || "online", unit: args.unit || "" };
+          if (!cpfRegistered) {
+            toolResult = { success: false, error: "CPF_REQUIRED", message: "[TESTE] Bloqueado: registre o CPF do cliente primeiro via register_client_cpf." };
+          } else {
+            reply = args.message_to_lead || reply;
+            toolResult = { success: true, message: "[TESTE] Agendamento simulado com sucesso", date: args.date, time: args.time, modality: args.modality || "online", unit: args.unit || "", cpf: cpfRegistered };
+          }
           toolActions.push({ tool: "schedule_appointment", result: toolResult });
         }
 
