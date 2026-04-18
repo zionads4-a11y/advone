@@ -8,6 +8,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Plus } from "lucide-react";
 
 interface CompanyFormDialogProps {
@@ -42,6 +49,25 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
           <div className="space-y-2">
             <Label>Telefone / WhatsApp</Label>
             <Input name="whatsapp" placeholder="5511999999999" />
+          </div>
+          <div className="space-y-2">
+            <Label>Tipo de Parceria *</Label>
+            <Select name="partnership_type" defaultValue="mensalidade_zionads">
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o tipo de parceria" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="mensalidade_zionads">
+                  💼 Mensalidade ZionAds (cliente da agência)
+                </SelectItem>
+                <SelectItem value="exito">
+                  🏆 Êxito (comissão por contrato fechado)
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Define como a parceria comercial é gerida com esta empresa.
+            </p>
           </div>
           <Button type="submit" className="w-full gradient-primary text-primary-foreground">
             Adicionar Empresa

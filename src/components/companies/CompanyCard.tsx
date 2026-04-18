@@ -29,6 +29,7 @@ interface CompanyCardProps {
     website: string | null;
     whatsapp: string | null;
     created_at: string;
+    partnership_type?: "exito" | "mensalidade_zionads" | null;
   };
   hasWhatsApp: boolean;
   metrics: CompanyMetrics;
@@ -91,8 +92,8 @@ export function CompanyCard({
           <MetricPill icon={Link2} label="Links" value={metrics.trackingLinks} />
         </div>
 
-        {/* WhatsApp Status */}
-        <div className="flex items-center gap-2">
+        {/* Status Badges */}
+        <div className="flex items-center gap-2 flex-wrap">
           {hasWhatsApp ? (
             <Badge variant="outline" className="border-success/30 text-success text-[10px]">
               <CheckCircle className="mr-1 h-3 w-3" /> WhatsApp Conectado
@@ -100,6 +101,15 @@ export function CompanyCard({
           ) : (
             <Badge variant="outline" className="border-warning/30 text-warning text-[10px]">
               <AlertCircle className="mr-1 h-3 w-3" /> Sem WhatsApp
+            </Badge>
+          )}
+          {company.partnership_type === "exito" ? (
+            <Badge variant="outline" className="border-warning/40 text-warning text-[10px]">
+              🏆 Êxito
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="border-primary/30 text-primary text-[10px]">
+              💼 Mensalidade ZionAds
             </Badge>
           )}
         </div>
