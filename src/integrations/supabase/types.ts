@@ -537,6 +537,7 @@ export type Database = {
           id: string
           logo_url: string | null
           name: string
+          partnership_type: Database["public"]["Enums"]["partnership_type"]
           updated_at: string
           website: string | null
           whatsapp: string | null
@@ -548,6 +549,7 @@ export type Database = {
           id?: string
           logo_url?: string | null
           name: string
+          partnership_type?: Database["public"]["Enums"]["partnership_type"]
           updated_at?: string
           website?: string | null
           whatsapp?: string | null
@@ -559,6 +561,7 @@ export type Database = {
           id?: string
           logo_url?: string | null
           name?: string
+          partnership_type?: Database["public"]["Enums"]["partnership_type"]
           updated_at?: string
           website?: string | null
           whatsapp?: string | null
@@ -1979,6 +1982,7 @@ export type Database = {
         | "negotiating"
         | "won"
         | "lost"
+      partnership_type: "exito" | "mensalidade_zionads"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2127,6 +2131,7 @@ export const Constants = {
         "won",
         "lost",
       ],
+      partnership_type: ["exito", "mensalidade_zionads"],
     },
   },
 } as const
