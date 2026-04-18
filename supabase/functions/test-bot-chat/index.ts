@@ -358,8 +358,24 @@ serve(async (req) => {
       {
         type: "function",
         function: {
+          name: "register_client_cpf",
+          description: "OBRIGATÓRIO antes de agendar. Registra o CPF do cliente final. Sem isso, schedule_appointment será rejeitado.",
+          parameters: {
+            type: "object",
+            properties: {
+              cpf: { type: "string", description: "CPF apenas números (11 dígitos)" },
+              full_name: { type: "string", description: "Nome completo do cliente" }
+            },
+            required: ["cpf"],
+            additionalProperties: false
+          }
+        }
+      },
+      {
+        type: "function",
+        function: {
           name: "check_availability",
-          description: "Verifica horários disponíveis na agenda para uma data específica. SEMPRE use antes de sugerir horários.",
+          description: "Verifica horários disponíveis. Só use APÓS register_client_cpf.",
           parameters: {
             type: "object",
             properties: {
@@ -374,16 +390,16 @@ serve(async (req) => {
         type: "function",
         function: {
           name: "schedule_appointment",
-          description: "Agenda uma consulta. Use SOMENTE APÓS o lead escolher um horário.",
+          description: "Agenda uma consulta. Use SOMENTE APÓS register_client_cpf + lead escolher horário.",
           parameters: {
             type: "object",
             properties: {
-              message_to_lead: { type: "string", description: "Mensagem de confirmação" },
-              date: { type: "string", description: "Data YYYY-MM-DD" },
-              time: { type: "string", description: "Horário HH:MM" },
-              summary: { type: "string", description: "Assunto da reunião" },
+              message_to_lead: { type: "string" },
+              date: { type: "string", description: "YYYY-MM-DD" },
+              time: { type: "string", description: "HH:MM" },
+              summary: { type: "string" },
               modality: { type: "string", enum: ["presencial", "online"] },
-              unit: { type: "string", description: "Nome da unidade/escritório (se presencial)" }
+              unit: { type: "string" }
             },
             required: ["message_to_lead", "date", "time"],
             additionalProperties: false
