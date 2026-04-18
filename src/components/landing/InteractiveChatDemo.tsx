@@ -25,14 +25,19 @@ export function InteractiveChatDemo() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [typingBot, setTypingBot] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const chatBodyRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const hasPlayedRef = useRef(false);
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
     return () => timeoutsRef.current.forEach(clearTimeout);
   }, []);
 
+  // Scroll only the inner chat container, never the page
   useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = chatBodyRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
   }, [messages, typingBot]);
 
   const playDemo = () => {
@@ -61,15 +66,28 @@ export function InteractiveChatDemo() {
     });
   };
 
-  // Auto-play on mount
+  // Auto-play only when the demo scrolls into view
   useEffect(() => {
-    const t = setTimeout(playDemo, 800);
-    return () => clearTimeout(t);
+    const el = containerRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasPlayedRef.current) {
+          hasPlayedRef.current = true;
+          const t = setTimeout(playDemo, 400);
+          timeoutsRef.current.push(t);
+          obs.disconnect();
+        }
+      },
+      { threshold: 0.35 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <div className="w-full max-w-sm mx-auto">
+    <div ref={containerRef} className="w-full max-w-sm mx-auto">
       {/* Phone frame */}
       <div className="rounded-[2rem] border-2 border-[hsl(220,20%,20%)] bg-[hsl(220,25%,8%)] p-1 shadow-2xl shadow-[hsl(153,60%,45%)]/10">
         {/* Notch */}
@@ -92,7 +110,7 @@ export function InteractiveChatDemo() {
         </div>
 
         {/* Chat body */}
-        <div className="mx-1 bg-[hsl(220,25%,10%)] px-3" style={{ height: 380, overflowY: "auto" }}>
+        <div ref={chatBodyRef} className="mx-1 bg-[hsl(220,25%,10%)] px-3" style={{ height: 380, overflowY: "auto" }}>
           <div className="space-y-2 py-3">
             {messages.map((msg, i) => (
               <div
