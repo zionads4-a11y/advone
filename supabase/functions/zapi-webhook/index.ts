@@ -795,13 +795,23 @@ async function handleAgentPhase(
         // ===== SDR TOOLS =====
         if (fnName === "register_client_cpf") {
           const rawCpf = String(args.cpf || "").replace(/\D/g, "");
-          if (rawCpf.length !== 11) {
-            toolResult = { success: false, error: "CPF inválido. Peça novamente — precisa ter 11 dígitos." };
+          const fullName = String(args.full_name || "").trim();
+          const cpfOk = isValidCPF(rawCpf);
+          const nameOk = isValidFullName(fullName);
+
+          if (!cpfOk && !nameOk) {
+            toolResult = { success: false, error: "CPF e nome inválidos. Peça novamente — CPF precisa ter 11 dígitos válidos e nome completo precisa ter pelo menos 3 palavras (nome + sobrenomes)." };
+          } else if (!cpfOk) {
+            toolResult = { success: false, error: "CPF inválido. Os dígitos não conferem — peça novamente, com calma." };
+          } else if (!nameOk) {
+            toolResult = { success: false, error: "Nome incompleto. Peça o nome COMPLETO com sobrenomes (mínimo 3 palavras, ex: 'João da Silva Santos')." };
           } else if (leadId) {
-            const updates: any = { cpf_cliente_final: rawCpf };
-            if (args.full_name) updates.name = args.full_name;
-            await supabase.from("leads").update(updates).eq("id", leadId);
-            toolResult = { success: true, cpf_registered: rawCpf, message: "CPF registrado. Agora você já pode chamar check_availability e agendar." };
+            await supabase.from("leads").update({
+              cpf_cliente_final: rawCpf,
+              name: fullName,
+              pending_data_warning: null,
+            }).eq("id", leadId);
+            toolResult = { success: true, cpf_registered: rawCpf, full_name: fullName, message: "CPF e nome completo registrados. Agora você já pode chamar check_availability e agendar." };
           } else {
             toolResult = { success: false, error: "Lead não encontrado." };
           }
