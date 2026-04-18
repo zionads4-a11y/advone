@@ -243,8 +243,11 @@ export function LeadConversationDrawer({ open, onOpenChange, leadId, leadName, l
               <Calendar className="h-3 w-3 mr-1" /> Agendado
             </Badge>
           )}
-          <Button size="sm" variant="outline" onClick={exportTranscript} disabled={messages.length === 0} className="ml-auto">
-            <Download className="h-3.5 w-3.5 mr-1.5" /> Exportar
+          <Button size="sm" variant="outline" onClick={exportPdf} disabled={messages.length === 0} className="ml-auto">
+            <FileDown className="h-3.5 w-3.5 mr-1.5" /> PDF
+          </Button>
+          <Button size="sm" variant="outline" onClick={exportTranscript} disabled={messages.length === 0}>
+            <Download className="h-3.5 w-3.5 mr-1.5" /> TXT
           </Button>
         </div>
 
