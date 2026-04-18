@@ -87,7 +87,7 @@ export function InteractiveChatDemo() {
   }, []);
 
   return (
-    <div className="w-full max-w-sm mx-auto">
+    <div ref={containerRef} className="w-full max-w-sm mx-auto">
       {/* Phone frame */}
       <div className="rounded-[2rem] border-2 border-[hsl(220,20%,20%)] bg-[hsl(220,25%,8%)] p-1 shadow-2xl shadow-[hsl(153,60%,45%)]/10">
         {/* Notch */}
