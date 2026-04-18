@@ -942,16 +942,64 @@ async function handleAgentPhase(
 
         // ===== CONTRACT CLOSER TOOLS =====
         if (fnName === "finalize_contract") {
+          // 🔒 Validar CPF obrigatório também aqui
+          const cpfFromArg = String(args.client_cpf || "").replace(/\D/g, "");
+          let finalCpf = cpfFromArg.length === 11 ? cpfFromArg : "";
+          if (!finalCpf && leadId) {
+            const { data: leadCheck } = await supabase
+              .from("leads")
+              .select("cpf_cliente_final, cpf")
+              .eq("id", leadId)
+              .maybeSingle();
+            const stored = String(leadCheck?.cpf_cliente_final || leadCheck?.cpf || "").replace(/\D/g, "");
+            if (stored.length === 11) finalCpf = stored;
+          }
+
+          if (!finalCpf) {
+            toolResult = {
+              success: false,
+              error: "CPF_REQUIRED",
+              message: "Não posso finalizar o contrato sem o CPF do cliente. Peça o CPF e use register_client_cpf antes.",
+            };
+            aiMessages.push({ role: "tool", tool_call_id: toolCall.id, content: JSON.stringify(toolResult) });
+            continue;
+          }
+
           replyText = args.message_to_lead || "Contrato finalizado! 🎉";
-          const updates: any = { contract_status: "signed", bot_agent_phase: "completed" };
-          if (args.client_cpf) updates.cpf = args.client_cpf;
+          const updates: any = { contract_status: "signed", bot_agent_phase: "completed", cpf_cliente_final: finalCpf };
+          if (args.client_cpf) updates.cpf = finalCpf;
           if (args.client_full_name) updates.name = args.client_full_name;
-          if (args.contract_value) updates.value = args.contract_value;
+          if (args.contract_value) {
+            updates.value = args.contract_value;
+            updates.honorarios_estimados = args.contract_value;
+          }
           await supabase.from("leads").update(updates).eq("id", leadId);
+
+          // Buscar config de comissão para registrar contrato fechado
+          const { data: commissionCfg } = await supabase
+            .from("commission_settings")
+            .select("commission_percentage")
+            .eq("company_id", companyId)
+            .maybeSingle();
+
+          // Criar registro imutável em closed_contracts
+          await supabase.from("closed_contracts").insert({
+            company_id: companyId,
+            lead_id: leadId,
+            client_name: args.client_full_name || leadName || "Cliente",
+            client_cpf: finalCpf,
+            client_phone: cleanPhone || null,
+            honorarios_estimados: Number(args.contract_value || 0),
+            commission_percentage: Number(commissionCfg?.commission_percentage || 30),
+            commission_status: "aguardando_exito",
+            process_status: "em_andamento",
+            signed_at: new Date().toISOString(),
+            created_by: "00000000-0000-0000-0000-000000000000",
+          });
 
           // Move to "Ganho" column
           const { data: wonCol } = await supabase.from("kanban_columns").select("id")
-            .eq("company_id", companyId).eq("is_won", true).limit(1).maybeSingle();
+            .eq("company_id", companyId).eq("is_won", true).order("position", { ascending: false }).limit(1).maybeSingle();
           if (wonCol) {
             await supabase.from("leads").update({ kanban_column_id: wonCol.id, status: "won" }).eq("id", leadId);
           }
