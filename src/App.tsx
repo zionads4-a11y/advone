@@ -29,6 +29,7 @@ import ProcessMonitoring from "./pages/ProcessMonitoring";
 import Subscription from "./pages/Subscription";
 import Commissions from "./pages/Commissions";
 import FraudAlerts from "./pages/FraudAlerts";
+import ExitoSchedules from "./pages/ExitoSchedules";
 import AppLayout from "./components/layout/AppLayout";
 import NotFound from "./pages/NotFound";
 
@@ -68,6 +69,7 @@ const App = () => (
               <Route path="/assinatura" element={<Subscription />} />
               <Route path="/comissoes" element={<Commissions />} />
               <Route path="/fraudes" element={<FraudAlerts />} />
+              <Route path="/agendamentos-exito" element={<ExitoSchedules />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
