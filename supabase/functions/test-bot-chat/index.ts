@@ -432,6 +432,7 @@ serve(async (req) => {
 
     let reply = "";
     let toolActions: any[] = [];
+    let cpfRegistered = "";
     let maxIterations = 3;
 
     while (maxIterations > 0) {
