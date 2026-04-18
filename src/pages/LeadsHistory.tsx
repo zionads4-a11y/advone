@@ -6,8 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, Filter, History, Download, Shield } from "lucide-react";
+import { Search, Filter, History, Download, Shield, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
+import { LeadConversationDrawer } from "@/components/leads/LeadConversationDrawer";
 
 interface LeadHistoryRow {
   id: string;
