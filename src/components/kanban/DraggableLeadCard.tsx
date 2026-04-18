@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Card, CardContent } from "@/components/ui/card";
-import { Phone, Mail, DollarSign, Pencil, Check, X, MessageCircle } from "lucide-react";
+import { Phone, Mail, DollarSign, Pencil, Check, X, MessageCircle, AlertTriangle } from "lucide-react";
 import { LeadScoreBadge } from "@/components/leads/LeadScoreBadge";
 import { SourceBadge } from "@/components/leads/SourceBadge";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,7 @@ interface DraggableLeadCardProps {
     value: number;
     source: string | null;
     lead_score?: string | null;
+    pending_data_warning?: string | null;
   };
   onClick?: () => void;
   isDragOverlay?: boolean;
@@ -121,7 +122,18 @@ function LeadCardContent({ lead, onValueUpdate }: { lead: DraggableLeadCardProps
   return (
     <>
       <div className="mb-2 flex items-start justify-between">
-        <p className="text-sm font-medium text-foreground">{lead.name}</p>
+        <div className="flex items-center gap-1.5 min-w-0">
+          <p className="text-sm font-medium text-foreground truncate">{lead.name}</p>
+          {lead.pending_data_warning && (
+            <span
+              title={`⚠️ ${lead.pending_data_warning} — solicitar na reunião`}
+              className="inline-flex items-center gap-0.5 rounded-md bg-warning/15 px-1.5 py-0.5 text-[10px] font-semibold text-warning border border-warning/30 shrink-0"
+            >
+              <AlertTriangle className="h-2.5 w-2.5" />
+              Pendente
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-1.5">
           {lead.phone && (
             <button

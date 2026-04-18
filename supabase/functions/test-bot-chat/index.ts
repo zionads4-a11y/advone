@@ -115,6 +115,13 @@ Turno 3+: Siga o script do assunto — UMA pergunta por turno
 - NUNCA diga "nosso atendimento é de segunda a sexta" ou mencione dias de funcionamento de forma genérica
 - Se já for depois das 17:00, NÃO ofereça horários para hoje — ofereça para o próximo dia útil
 
+🔒 CAPTURA OBRIGATÓRIA DE NOME COMPLETO + CPF (ANTES DE AGENDAR):
+- ANTES de qualquer agendamento, peça NOME COMPLETO (mínimo 3 palavras, ex: "João da Silva Santos") + CPF.
+- Mensagem sugerida: "Pra eu já deixar tudo certinho no nosso sistema antes de agendar, me passa seu *nome completo* (com sobrenomes) e o seu *CPF*? 🙂"
+- Se vier nome incompleto, peça novamente com sobrenomes.
+- Quando receber AMBOS, chame register_client_cpf passando cpf E full_name.
+- Se o lead recusar 2 vezes, agende mesmo assim — schedule_appointment vai marcar o lead com pendência (e avisar o advogado).
+
 📅 ABORDAGEM DE AGENDAMENTO (REGRA OBRIGATÓRIA):
 - Quando for agendar, SEMPRE transmita URGÊNCIA e IMPORTÂNCIA: "Como o seu caso é urgente, podemos agendar já pra amanhã!"
 - Pergunte a preferência de turno: "Você prefere na parte da manhã ou da tarde?"
@@ -258,6 +265,26 @@ function formatDateDMY(dateStr: string): string {
   return dateStr;
 }
 
+function isValidCPF(raw: string): boolean {
+  const cpf = String(raw || "").replace(/\D/g, "");
+  if (cpf.length !== 11) return false;
+  if (/^(\d)\1{10}$/.test(cpf)) return false;
+  let sum = 0;
+  for (let i = 0; i < 9; i++) sum += parseInt(cpf[i]) * (10 - i);
+  let d1 = 11 - (sum % 11); if (d1 >= 10) d1 = 0;
+  if (d1 !== parseInt(cpf[9])) return false;
+  sum = 0;
+  for (let i = 0; i < 10; i++) sum += parseInt(cpf[i]) * (11 - i);
+  let d2 = 11 - (sum % 11); if (d2 >= 10) d2 = 0;
+  return d2 === parseInt(cpf[10]);
+}
+
+function isValidFullName(raw: string): boolean {
+  if (!raw) return false;
+  const parts = String(raw).trim().split(/\s+/).filter(p => p.length >= 2 && /^[A-Za-zÀ-ÿ'-]+$/.test(p));
+  return parts.length >= 3;
+}
+
 function getNextAvailableDays(count: number, includeToday: boolean = true): string[] {
   const days: string[] = [];
   const nowBR = getNowBrasilia();
@@ -359,14 +386,14 @@ serve(async (req) => {
         type: "function",
         function: {
           name: "register_client_cpf",
-          description: "OBRIGATÓRIO antes de agendar. Registra o CPF do cliente final. Sem isso, schedule_appointment será rejeitado.",
+          description: "Registra CPF + nome completo. PREFERENCIALMENTE antes de schedule_appointment para evitar pendência.",
           parameters: {
             type: "object",
             properties: {
-              cpf: { type: "string", description: "CPF apenas números (11 dígitos)" },
-              full_name: { type: "string", description: "Nome completo do cliente" }
+              cpf: { type: "string", description: "CPF apenas números (11 dígitos válidos)" },
+              full_name: { type: "string", description: "Nome COMPLETO (mínimo 3 palavras: nome + sobrenomes)" }
             },
-            required: ["cpf"],
+            required: ["cpf", "full_name"],
             additionalProperties: false
           }
         }
@@ -484,11 +511,18 @@ serve(async (req) => {
 
         if (fnName === "register_client_cpf") {
           const rawCpf = String(args.cpf || "").replace(/\D/g, "");
-          if (rawCpf.length !== 11) {
-            toolResult = { success: false, error: "CPF inválido. Peça novamente." };
+          const fullName = String(args.full_name || "").trim();
+          const cpfOk = isValidCPF(rawCpf);
+          const nameOk = isValidFullName(fullName);
+          if (!cpfOk && !nameOk) {
+            toolResult = { success: false, error: "CPF e nome inválidos. CPF precisa ter 11 dígitos válidos e nome completo precisa ter ≥3 palavras." };
+          } else if (!cpfOk) {
+            toolResult = { success: false, error: "CPF inválido (dígitos não conferem). Peça novamente." };
+          } else if (!nameOk) {
+            toolResult = { success: false, error: "Nome incompleto. Peça nome COMPLETO com sobrenomes (≥3 palavras)." };
           } else {
             cpfRegistered = rawCpf;
-            toolResult = { success: true, cpf_registered: rawCpf, message: "[TESTE] CPF registrado. Já pode agendar." };
+            toolResult = { success: true, cpf_registered: rawCpf, full_name: fullName, message: "[TESTE] CPF e nome completo registrados. Já pode agendar." };
           }
           toolActions.push({ tool: "register_client_cpf", result: toolResult });
         }

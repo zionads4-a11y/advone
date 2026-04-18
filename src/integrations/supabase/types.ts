@@ -1102,6 +1102,7 @@ export type Database = {
           message_count: number | null
           name: string
           notes: string | null
+          pending_data_warning: string | null
           phone: string | null
           processo_numero: string | null
           processo_valor: number | null
@@ -1135,6 +1136,7 @@ export type Database = {
           message_count?: number | null
           name: string
           notes?: string | null
+          pending_data_warning?: string | null
           phone?: string | null
           processo_numero?: string | null
           processo_valor?: number | null
@@ -1168,6 +1170,7 @@ export type Database = {
           message_count?: number | null
           name?: string
           notes?: string | null
+          pending_data_warning?: string | null
           phone?: string | null
           processo_numero?: string | null
           processo_valor?: number | null

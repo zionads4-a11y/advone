@@ -179,13 +179,13 @@ Penúltimo: Gatilho emocional + pedido de documentos (opcional)
 - Quando for agendar, SEMPRE transmita URGÊNCIA e IMPORTÂNCIA: "Como o seu caso é urgente, podemos agendar já pra amanhã!"
 - Pergunte a preferência de turno: "Você prefere na parte da manhã ou da tarde?"
 
-🔒 CAPTURA OBRIGATÓRIA DE CPF (ANTES DE AGENDAR):
-- ANTES de qualquer agendamento, você DEVE pedir o CPF do cliente
-- Mensagem sugerida: "Pra eu já deixar tudo certinho no nosso sistema antes de agendar, pode me passar seu CPF? 🙂\\n\\nFica registrado só com a gente, viu?"
-- Se o lead recusar ou enrolar, explique com leveza: "Sem o CPF não consigo confirmar o agendamento aqui no sistema. É uma exigência do escritório pra validar o atendimento 😊"
-- Quando o lead enviar o CPF, IMEDIATAMENTE chame a tool register_client_cpf com os números
-- SOMENTE depois de register_client_cpf retornar success você pode chamar check_availability e schedule_appointment
-- NUNCA tente agendar sem CPF registrado — a tool schedule_appointment vai falhar
+🔒 CAPTURA OBRIGATÓRIA DE NOME COMPLETO + CPF (ANTES DE AGENDAR):
+- ANTES de qualquer agendamento, você DEVE pedir DOIS dados juntos: NOME COMPLETO (com sobrenomes — mínimo 3 palavras, ex: "João da Silva Santos") e CPF.
+- Mensagem sugerida: "Pra eu já deixar tudo certinho no nosso sistema antes de agendar, me passa seu *nome completo* (com sobrenomes) e o seu *CPF*? 🙂\\n\\nFica registrado só com a gente, viu?"
+- Se o lead enviar só o primeiro nome ou nome incompleto (menos de 3 palavras), peça gentilmente: "Pode me passar seu nome COMPLETO, com todos os sobrenomes? É pra ficar correto no sistema 😊"
+- Quando receber CPF + nome completo, IMEDIATAMENTE chame a tool register_client_cpf passando AMBOS (cpf e full_name).
+- Tente OBTER os dois dados ANTES de agendar. Se o lead recusar/enrolar 2 vezes, você PODE prosseguir com o agendamento — mas avise: "Tudo bem, vou já agendar pra você. Só vou precisar do seu nome completo e CPF na hora da reunião pra registrar o atendimento, combinado? 😊"
+- A tool schedule_appointment vai funcionar mesmo sem CPF/nome, mas marcará o lead com pendência (alerta visível ao advogado). PREFIRA SEMPRE coletar antes.
 
 - Depois use check_availability para buscar horários reais
 - Ofereça EXATAMENTE 2 opções concretas: UMA de manhã (08:00-12:00) e UMA à tarde (13:00-17:00)
@@ -457,20 +457,43 @@ function getNextAvailableDays(count: number, includeToday: boolean = true): stri
   return days;
 }
 
+// ====== VALIDATORS ======
+function isValidCPF(raw: string): boolean {
+  const cpf = String(raw || "").replace(/\D/g, "");
+  if (cpf.length !== 11) return false;
+  if (/^(\d)\1{10}$/.test(cpf)) return false;
+  let sum = 0;
+  for (let i = 0; i < 9; i++) sum += parseInt(cpf[i]) * (10 - i);
+  let d1 = 11 - (sum % 11);
+  if (d1 >= 10) d1 = 0;
+  if (d1 !== parseInt(cpf[9])) return false;
+  sum = 0;
+  for (let i = 0; i < 10; i++) sum += parseInt(cpf[i]) * (11 - i);
+  let d2 = 11 - (sum % 11);
+  if (d2 >= 10) d2 = 0;
+  return d2 === parseInt(cpf[10]);
+}
+
+function isValidFullName(raw: string): boolean {
+  if (!raw) return false;
+  const parts = String(raw).trim().split(/\s+/).filter(p => p.length >= 2 && /^[A-Za-zÀ-ÿ'-]+$/.test(p));
+  return parts.length >= 3;
+}
+
 // ====== SDR TOOLS ======
 const sdrTools = [
   {
     type: "function",
     function: {
       name: "register_client_cpf",
-      description: "OBRIGATÓRIO antes de agendar qualquer reunião. Registra o CPF do cliente final no lead. NUNCA chame check_availability ou schedule_appointment sem antes ter chamado esta tool.",
+      description: "Registra CPF + nome completo do cliente final. Use SEMPRE que o lead enviar esses dados. PREFERENCIALMENTE antes de schedule_appointment para evitar marcar o lead com pendência.",
       parameters: {
         type: "object",
         properties: {
-          cpf: { type: "string", description: "CPF do cliente final, apenas números (11 dígitos)" },
-          full_name: { type: "string", description: "Nome completo do cliente conforme passado por ele" }
+          cpf: { type: "string", description: "CPF do cliente final, apenas números (11 dígitos válidos)" },
+          full_name: { type: "string", description: "Nome COMPLETO do cliente (mínimo 3 palavras: nome + sobrenome do meio + último sobrenome). Ex: 'João da Silva Santos'" }
         },
-        required: ["cpf"],
+        required: ["cpf", "full_name"],
         additionalProperties: false
       }
     }
@@ -772,13 +795,23 @@ async function handleAgentPhase(
         // ===== SDR TOOLS =====
         if (fnName === "register_client_cpf") {
           const rawCpf = String(args.cpf || "").replace(/\D/g, "");
-          if (rawCpf.length !== 11) {
-            toolResult = { success: false, error: "CPF inválido. Peça novamente — precisa ter 11 dígitos." };
+          const fullName = String(args.full_name || "").trim();
+          const cpfOk = isValidCPF(rawCpf);
+          const nameOk = isValidFullName(fullName);
+
+          if (!cpfOk && !nameOk) {
+            toolResult = { success: false, error: "CPF e nome inválidos. Peça novamente — CPF precisa ter 11 dígitos válidos e nome completo precisa ter pelo menos 3 palavras (nome + sobrenomes)." };
+          } else if (!cpfOk) {
+            toolResult = { success: false, error: "CPF inválido. Os dígitos não conferem — peça novamente, com calma." };
+          } else if (!nameOk) {
+            toolResult = { success: false, error: "Nome incompleto. Peça o nome COMPLETO com sobrenomes (mínimo 3 palavras, ex: 'João da Silva Santos')." };
           } else if (leadId) {
-            const updates: any = { cpf_cliente_final: rawCpf };
-            if (args.full_name) updates.name = args.full_name;
-            await supabase.from("leads").update(updates).eq("id", leadId);
-            toolResult = { success: true, cpf_registered: rawCpf, message: "CPF registrado. Agora você já pode chamar check_availability e agendar." };
+            await supabase.from("leads").update({
+              cpf_cliente_final: rawCpf,
+              name: fullName,
+              pending_data_warning: null,
+            }).eq("id", leadId);
+            toolResult = { success: true, cpf_registered: rawCpf, full_name: fullName, message: "CPF e nome completo registrados. Agora você já pode chamar check_availability e agendar." };
           } else {
             toolResult = { success: false, error: "Lead não encontrado." };
           }
@@ -819,24 +852,21 @@ async function handleAgentPhase(
         }
 
         if (fnName === "schedule_appointment") {
-          // 🔒 Validar CPF antes de agendar
+          // 🔒 Verificar dados do lead — agendar SEMPRE, mas marcar pendência se faltar
+          let pendingItems: string[] = [];
+          let leadCheckRow: any = null;
           if (leadId) {
             const { data: leadCheck } = await supabase
               .from("leads")
-              .select("cpf_cliente_final")
+              .select("cpf_cliente_final, name")
               .eq("id", leadId)
               .maybeSingle();
-            const hasCpf = leadCheck?.cpf_cliente_final && String(leadCheck.cpf_cliente_final).replace(/\D/g, "").length === 11;
-            if (!hasCpf) {
-              toolResult = {
-                success: false,
-                error: "CPF_REQUIRED",
-                message: "Não posso agendar ainda. Peça o CPF do cliente primeiro e use register_client_cpf antes de tentar agendar novamente.",
-              };
-              aiMessages.push({ role: "tool", tool_call_id: toolCall.id, content: JSON.stringify(toolResult) });
-              continue;
-            }
+            leadCheckRow = leadCheck;
+            const cpfStored = String(leadCheck?.cpf_cliente_final || "").replace(/\D/g, "");
+            if (!isValidCPF(cpfStored)) pendingItems.push("CPF");
+            if (!isValidFullName(leadCheck?.name || "")) pendingItems.push("Nome completo");
           }
+          const pendingWarning = pendingItems.length > 0 ? `${pendingItems.join(" + ")} pendente(s)` : null;
 
           shouldSchedule = true;
           replyText = args.message_to_lead || "";
@@ -854,10 +884,13 @@ async function handleAgentPhase(
 
             await supabase.from("lead_reminders").insert({
               lead_id: leadId, company_id: companyId, created_by: "00000000-0000-0000-0000-000000000000",
-              title: `📅 Consulta ${modality === "presencial" ? "presencial" : "online"}: ${lName}`,
-              description: args.summary || `Agendamento automático via bot IA (${modality})${unitName ? ` - Unidade: ${unitName}` : ""}`,
+              title: `📅 Consulta ${modality === "presencial" ? "presencial" : "online"}: ${lName}${pendingWarning ? " ⚠️" : ""}`,
+              description: `${args.summary || `Agendamento automático via bot IA (${modality})${unitName ? ` - Unidade: ${unitName}` : ""}`}${pendingWarning ? `\n\n⚠️ DADOS PENDENTES: ${pendingWarning}. Solicitar na reunião.` : ""}`,
               reminder_type: "meeting", due_at: dueAt,
             });
+
+            // Marca pendência (ou limpa se estava marcado)
+            await supabase.from("leads").update({ pending_data_warning: pendingWarning }).eq("id", leadId);
 
             // Notify lawyer
             if (config.alert_whatsapp) {
@@ -867,7 +900,8 @@ async function handleAgentPhase(
                 const alertPhone = config.alert_whatsapp.replace(/\D/g, "");
                 const modalityLabel = modality === "presencial" ? "🏢 Presencial" : "💻 Online (vídeo)";
                 const unitLine = modality === "presencial" && unitName ? `🏢 Unidade: ${unitName}\n` : "";
-                const alertMessage = `🔔 *Novo Agendamento Automático*\n\n👤 Nome: ${lName}\n📱 Telefone: ${leadPhone}\n📅 Data: ${appointmentDate}\n⏰ Horário: ${appointmentTime}\n📍 Modalidade: ${modalityLabel}\n${unitLine}${args.summary ? `📋 Assunto: ${args.summary}\n` : ""}\n_Agendado automaticamente pelo bot SDR_`;
+                const pendingLine = pendingWarning ? `\n⚠️ *DADOS PENDENTES:* ${pendingWarning}\n_Solicitar na reunião pra registrar no sistema._\n` : "";
+                const alertMessage = `🔔 *Novo Agendamento Automático*\n\n👤 Nome: ${lName}\n📱 Telefone: ${leadPhone}\n📅 Data: ${appointmentDate}\n⏰ Horário: ${appointmentTime}\n📍 Modalidade: ${modalityLabel}\n${unitLine}${args.summary ? `📋 Assunto: ${args.summary}\n` : ""}${pendingLine}\n_Agendado automaticamente pelo bot SDR_`;
                 const alertHeaders: Record<string, string> = { "Content-Type": "application/json" };
                 if (ADMIN_TOKEN) alertHeaders["admintoken"] = ADMIN_TOKEN;
                 const instanceParam = encodeURIComponent(config.zapi_instance_id || "");
@@ -888,7 +922,7 @@ async function handleAgentPhase(
               console.log(`Lead ${leadId} advanced to document_collector phase`);
             }
           }
-          toolResult = { success: true, message: "Agendamento criado com sucesso" };
+          toolResult = { success: true, message: pendingWarning ? `Agendamento criado, mas marcado com pendência: ${pendingWarning}` : "Agendamento criado com sucesso", pending: pendingWarning };
         }
 
         // ===== DOCUMENT COLLECTOR TOOLS =====
