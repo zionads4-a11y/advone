@@ -819,6 +819,25 @@ async function handleAgentPhase(
         }
 
         if (fnName === "schedule_appointment") {
+          // 🔒 Validar CPF antes de agendar
+          if (leadId) {
+            const { data: leadCheck } = await supabase
+              .from("leads")
+              .select("cpf_cliente_final")
+              .eq("id", leadId)
+              .maybeSingle();
+            const hasCpf = leadCheck?.cpf_cliente_final && String(leadCheck.cpf_cliente_final).replace(/\D/g, "").length === 11;
+            if (!hasCpf) {
+              toolResult = {
+                success: false,
+                error: "CPF_REQUIRED",
+                message: "Não posso agendar ainda. Peça o CPF do cliente primeiro e use register_client_cpf antes de tentar agendar novamente.",
+              };
+              aiMessages.push({ role: "tool", tool_call_id: toolCall.id, content: JSON.stringify(toolResult) });
+              continue;
+            }
+          }
+
           shouldSchedule = true;
           replyText = args.message_to_lead || "";
 
