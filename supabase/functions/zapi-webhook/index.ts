@@ -179,13 +179,13 @@ Penúltimo: Gatilho emocional + pedido de documentos (opcional)
 - Quando for agendar, SEMPRE transmita URGÊNCIA e IMPORTÂNCIA: "Como o seu caso é urgente, podemos agendar já pra amanhã!"
 - Pergunte a preferência de turno: "Você prefere na parte da manhã ou da tarde?"
 
-🔒 CAPTURA OBRIGATÓRIA DE CPF (ANTES DE AGENDAR):
-- ANTES de qualquer agendamento, você DEVE pedir o CPF do cliente
-- Mensagem sugerida: "Pra eu já deixar tudo certinho no nosso sistema antes de agendar, pode me passar seu CPF? 🙂\\n\\nFica registrado só com a gente, viu?"
-- Se o lead recusar ou enrolar, explique com leveza: "Sem o CPF não consigo confirmar o agendamento aqui no sistema. É uma exigência do escritório pra validar o atendimento 😊"
-- Quando o lead enviar o CPF, IMEDIATAMENTE chame a tool register_client_cpf com os números
-- SOMENTE depois de register_client_cpf retornar success você pode chamar check_availability e schedule_appointment
-- NUNCA tente agendar sem CPF registrado — a tool schedule_appointment vai falhar
+🔒 CAPTURA OBRIGATÓRIA DE NOME COMPLETO + CPF (ANTES DE AGENDAR):
+- ANTES de qualquer agendamento, você DEVE pedir DOIS dados juntos: NOME COMPLETO (com sobrenomes — mínimo 3 palavras, ex: "João da Silva Santos") e CPF.
+- Mensagem sugerida: "Pra eu já deixar tudo certinho no nosso sistema antes de agendar, me passa seu *nome completo* (com sobrenomes) e o seu *CPF*? 🙂\\n\\nFica registrado só com a gente, viu?"
+- Se o lead enviar só o primeiro nome ou nome incompleto (menos de 3 palavras), peça gentilmente: "Pode me passar seu nome COMPLETO, com todos os sobrenomes? É pra ficar correto no sistema 😊"
+- Quando receber CPF + nome completo, IMEDIATAMENTE chame a tool register_client_cpf passando AMBOS (cpf e full_name).
+- Tente OBTER os dois dados ANTES de agendar. Se o lead recusar/enrolar 2 vezes, você PODE prosseguir com o agendamento — mas avise: "Tudo bem, vou já agendar pra você. Só vou precisar do seu nome completo e CPF na hora da reunião pra registrar o atendimento, combinado? 😊"
+- A tool schedule_appointment vai funcionar mesmo sem CPF/nome, mas marcará o lead com pendência (alerta visível ao advogado). PREFIRA SEMPRE coletar antes.
 
 - Depois use check_availability para buscar horários reais
 - Ofereça EXATAMENTE 2 opções concretas: UMA de manhã (08:00-12:00) e UMA à tarde (13:00-17:00)
@@ -463,14 +463,14 @@ const sdrTools = [
     type: "function",
     function: {
       name: "register_client_cpf",
-      description: "OBRIGATÓRIO antes de agendar qualquer reunião. Registra o CPF do cliente final no lead. NUNCA chame check_availability ou schedule_appointment sem antes ter chamado esta tool.",
+      description: "Registra CPF + nome completo do cliente final. Use SEMPRE que o lead enviar esses dados. PREFERENCIALMENTE antes de schedule_appointment para evitar marcar o lead com pendência.",
       parameters: {
         type: "object",
         properties: {
-          cpf: { type: "string", description: "CPF do cliente final, apenas números (11 dígitos)" },
-          full_name: { type: "string", description: "Nome completo do cliente conforme passado por ele" }
+          cpf: { type: "string", description: "CPF do cliente final, apenas números (11 dígitos válidos)" },
+          full_name: { type: "string", description: "Nome COMPLETO do cliente (mínimo 3 palavras: nome + sobrenome do meio + último sobrenome). Ex: 'João da Silva Santos'" }
         },
-        required: ["cpf"],
+        required: ["cpf", "full_name"],
         additionalProperties: false
       }
     }
