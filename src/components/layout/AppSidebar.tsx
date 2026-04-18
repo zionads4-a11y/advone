@@ -12,6 +12,8 @@ import {
   Briefcase,
   Radar,
   CreditCard,
+  DollarSign,
+  ShieldAlert,
 } from "lucide-react";
 import logoAdvOne from "@/assets/logo-advone-light.png";
 import { NavLink } from "@/components/NavLink";
@@ -43,6 +45,8 @@ const adminItems = [
   { title: "Usuários", url: "/client-users", icon: Users },
   { title: "Acessos", url: "/access-management", icon: KeyRound },
   { title: "Assinaturas", url: "/assinatura", icon: CreditCard },
+  { title: "Comissões", url: "/comissoes", icon: DollarSign },
+  { title: "Alertas de Fraude", url: "/fraudes", icon: ShieldAlert },
 ];
 
 const gerenteItems = [
