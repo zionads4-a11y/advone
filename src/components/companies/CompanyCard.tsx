@@ -104,7 +104,7 @@ export function CompanyCard({
             </Badge>
           )}
           {company.partnership_type === "exito" ? (
-            <Badge variant="outline" className="border-amber-500/40 text-amber-600 dark:text-amber-400 text-[10px]">
+            <Badge variant="outline" className="border-warning/40 text-warning text-[10px]">
               🏆 Êxito
             </Badge>
           ) : (
