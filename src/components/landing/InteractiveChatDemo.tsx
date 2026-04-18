@@ -110,7 +110,7 @@ export function InteractiveChatDemo() {
         </div>
 
         {/* Chat body */}
-        <div className="mx-1 bg-[hsl(220,25%,10%)] px-3" style={{ height: 380, overflowY: "auto" }}>
+        <div ref={chatBodyRef} className="mx-1 bg-[hsl(220,25%,10%)] px-3" style={{ height: 380, overflowY: "auto" }}>
           <div className="space-y-2 py-3">
             {messages.map((msg, i) => (
               <div
