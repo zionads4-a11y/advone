@@ -30,6 +30,7 @@ import Subscription from "./pages/Subscription";
 import Commissions from "./pages/Commissions";
 import FraudAlerts from "./pages/FraudAlerts";
 import ExitoSchedules from "./pages/ExitoSchedules";
+import LeadsHistory from "./pages/LeadsHistory";
 import AppLayout from "./components/layout/AppLayout";
 import NotFound from "./pages/NotFound";
 
@@ -70,6 +71,7 @@ const App = () => (
               <Route path="/comissoes" element={<Commissions />} />
               <Route path="/fraudes" element={<FraudAlerts />} />
               <Route path="/agendamentos-exito" element={<ExitoSchedules />} />
+              <Route path="/historico-leads" element={<LeadsHistory />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

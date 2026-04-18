@@ -15,6 +15,7 @@ import {
   DollarSign,
   ShieldAlert,
   Trophy,
+  History,
 } from "lucide-react";
 import logoAdvOne from "@/assets/logo-advone-light.png";
 import { NavLink } from "@/components/NavLink";
@@ -48,6 +49,7 @@ const adminItems = [
   { title: "Assinaturas", url: "/assinatura", icon: CreditCard },
   { title: "Comissões", url: "/comissoes", icon: DollarSign },
   { title: "Agendamentos Êxito", url: "/agendamentos-exito", icon: Trophy },
+  { title: "Histórico de Leads", url: "/historico-leads", icon: History },
   { title: "Alertas de Fraude", url: "/fraudes", icon: ShieldAlert },
 ];
 
