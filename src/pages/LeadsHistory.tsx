@@ -289,6 +289,7 @@ export default function LeadsHistory() {
                   <TableHead className="text-muted-foreground">Etapa</TableHead>
                   <TableHead className="text-muted-foreground">Contrato</TableHead>
                   <TableHead className="text-muted-foreground">Atualizado</TableHead>
+                  <TableHead className="text-muted-foreground text-right">Conversa</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
