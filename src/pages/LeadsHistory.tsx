@@ -6,8 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, Filter, History, Download, Shield } from "lucide-react";
+import { Search, Filter, History, Download, Shield, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
+import { LeadConversationDrawer } from "@/components/leads/LeadConversationDrawer";
 
 interface LeadHistoryRow {
   id: string;
@@ -61,6 +62,7 @@ export default function LeadsHistory() {
   const [filterCompany, setFilterCompany] = useState<string>("all");
   const [filterPartnership, setFilterPartnership] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [drawerLead, setDrawerLead] = useState<LeadHistoryRow | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -287,12 +289,13 @@ export default function LeadsHistory() {
                   <TableHead className="text-muted-foreground">Etapa</TableHead>
                   <TableHead className="text-muted-foreground">Contrato</TableHead>
                   <TableHead className="text-muted-foreground">Atualizado</TableHead>
+                  <TableHead className="text-muted-foreground text-right">Conversa</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="py-12 text-center text-muted-foreground">
+                    <TableCell colSpan={10} className="py-12 text-center text-muted-foreground">
                       {loading ? "Carregando..." : (
                         <div className="flex flex-col items-center">
                           <History className="mb-2 h-8 w-8" />
@@ -358,6 +361,17 @@ export default function LeadsHistory() {
                         <TableCell className="text-muted-foreground text-xs">
                           {new Date(r.updated_at).toLocaleString("pt-BR")}
                         </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setDrawerLead(r)}
+                            className="h-8"
+                          >
+                            <MessageSquare className="h-3.5 w-3.5 mr-1.5" />
+                            Ver
+                          </Button>
+                        </TableCell>
                       </TableRow>
                     );
                   })
@@ -367,6 +381,15 @@ export default function LeadsHistory() {
           </div>
         </CardContent>
       </Card>
+
+      <LeadConversationDrawer
+        open={!!drawerLead}
+        onOpenChange={(o) => !o && setDrawerLead(null)}
+        leadId={drawerLead?.id || null}
+        leadName={drawerLead?.name}
+        leadCpf={formatCpf(drawerLead?.cpf_cliente_final || drawerLead?.cpf || null)}
+        leadPhone={drawerLead?.phone}
+      />
     </div>
   );
 }
