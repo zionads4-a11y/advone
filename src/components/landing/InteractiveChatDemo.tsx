@@ -25,14 +25,19 @@ export function InteractiveChatDemo() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [typingBot, setTypingBot] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const chatBodyRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const hasPlayedRef = useRef(false);
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
     return () => timeoutsRef.current.forEach(clearTimeout);
   }, []);
 
+  // Scroll only the inner chat container, never the page
   useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = chatBodyRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
   }, [messages, typingBot]);
 
   const playDemo = () => {
