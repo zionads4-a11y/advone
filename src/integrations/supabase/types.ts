@@ -331,6 +331,204 @@ export type Database = {
           },
         ]
       }
+      closed_contracts: {
+        Row: {
+          client_cpf: string
+          client_name: string
+          client_phone: string | null
+          commission_due: number | null
+          commission_percentage: number
+          commission_status: string
+          company_id: string
+          created_at: string
+          created_by: string
+          honorarios_estimados: number
+          honorarios_recebidos: number | null
+          id: string
+          lead_id: string
+          process_concluded_at: string | null
+          process_status: string
+          processo_cnj: string | null
+          processo_tipo: string | null
+          signed_at: string
+          updated_at: string
+          zapsign_document_id: string | null
+        }
+        Insert: {
+          client_cpf: string
+          client_name: string
+          client_phone?: string | null
+          commission_due?: number | null
+          commission_percentage?: number
+          commission_status?: string
+          company_id: string
+          created_at?: string
+          created_by: string
+          honorarios_estimados?: number
+          honorarios_recebidos?: number | null
+          id?: string
+          lead_id: string
+          process_concluded_at?: string | null
+          process_status?: string
+          processo_cnj?: string | null
+          processo_tipo?: string | null
+          signed_at?: string
+          updated_at?: string
+          zapsign_document_id?: string | null
+        }
+        Update: {
+          client_cpf?: string
+          client_name?: string
+          client_phone?: string | null
+          commission_due?: number | null
+          commission_percentage?: number
+          commission_status?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          honorarios_estimados?: number
+          honorarios_recebidos?: number | null
+          id?: string
+          lead_id?: string
+          process_concluded_at?: string | null
+          process_status?: string
+          processo_cnj?: string | null
+          processo_tipo?: string | null
+          signed_at?: string
+          updated_at?: string
+          zapsign_document_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "closed_contracts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "closed_contracts_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "closed_contracts_zapsign_document_id_fkey"
+            columns: ["zapsign_document_id"]
+            isOneToOne: false
+            referencedRelation: "zapsign_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commission_charges: {
+        Row: {
+          amount: number
+          asaas_invoice_url: string | null
+          asaas_payment_id: string | null
+          closed_contract_id: string
+          company_id: string
+          created_at: string
+          due_date: string
+          id: string
+          notes: string | null
+          paid_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          asaas_invoice_url?: string | null
+          asaas_payment_id?: string | null
+          closed_contract_id: string
+          company_id: string
+          created_at?: string
+          due_date: string
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          asaas_invoice_url?: string | null
+          asaas_payment_id?: string | null
+          closed_contract_id?: string
+          company_id?: string
+          created_at?: string
+          due_date?: string
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commission_charges_closed_contract_id_fkey"
+            columns: ["closed_contract_id"]
+            isOneToOne: false
+            referencedRelation: "closed_contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commission_charges_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commission_settings: {
+        Row: {
+          commission_percentage: number
+          company_id: string
+          contract_terms_accepted: boolean
+          contract_terms_accepted_at: string | null
+          contract_terms_accepted_by: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          monthly_fee: number
+          updated_at: string
+        }
+        Insert: {
+          commission_percentage?: number
+          company_id: string
+          contract_terms_accepted?: boolean
+          contract_terms_accepted_at?: string | null
+          contract_terms_accepted_by?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          monthly_fee?: number
+          updated_at?: string
+        }
+        Update: {
+          commission_percentage?: number
+          company_id?: string
+          contract_terms_accepted?: boolean
+          contract_terms_accepted_at?: string | null
+          contract_terms_accepted_by?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          monthly_fee?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commission_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           business_hours: Json | null
@@ -585,6 +783,72 @@ export type Database = {
           },
         ]
       }
+      fraud_alerts: {
+        Row: {
+          alert_type: string
+          company_id: string
+          created_at: string
+          description: string
+          evidence: Json | null
+          id: string
+          lead_id: string | null
+          resolution_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          severity: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          alert_type: string
+          company_id: string
+          created_at?: string
+          description: string
+          evidence?: Json | null
+          id?: string
+          lead_id?: string | null
+          resolution_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          severity?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          alert_type?: string
+          company_id?: string
+          created_at?: string
+          description?: string
+          evidence?: Json | null
+          id?: string
+          lead_id?: string | null
+          resolution_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          severity?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fraud_alerts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fraud_alerts_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kanban_columns: {
         Row: {
           color: string
@@ -828,11 +1092,14 @@ export type Database = {
           company_id: string
           contract_status: string | null
           cpf: string | null
+          cpf_cliente_final: string | null
           created_at: string
           email: string | null
+          honorarios_estimados: number | null
           id: string
           kanban_column_id: string | null
           lead_score: string | null
+          message_count: number | null
           name: string
           notes: string | null
           phone: string | null
@@ -858,11 +1125,14 @@ export type Database = {
           company_id: string
           contract_status?: string | null
           cpf?: string | null
+          cpf_cliente_final?: string | null
           created_at?: string
           email?: string | null
+          honorarios_estimados?: number | null
           id?: string
           kanban_column_id?: string | null
           lead_score?: string | null
+          message_count?: number | null
           name: string
           notes?: string | null
           phone?: string | null
@@ -888,11 +1158,14 @@ export type Database = {
           company_id?: string
           contract_status?: string | null
           cpf?: string | null
+          cpf_cliente_final?: string | null
           created_at?: string
           email?: string | null
+          honorarios_estimados?: number | null
           id?: string
           kanban_column_id?: string | null
           lead_score?: string | null
+          message_count?: number | null
           name?: string
           notes?: string | null
           phone?: string | null
