@@ -852,24 +852,21 @@ async function handleAgentPhase(
         }
 
         if (fnName === "schedule_appointment") {
-          // 🔒 Validar CPF antes de agendar
+          // 🔒 Verificar dados do lead — agendar SEMPRE, mas marcar pendência se faltar
+          let pendingItems: string[] = [];
+          let leadCheckRow: any = null;
           if (leadId) {
             const { data: leadCheck } = await supabase
               .from("leads")
-              .select("cpf_cliente_final")
+              .select("cpf_cliente_final, name")
               .eq("id", leadId)
               .maybeSingle();
-            const hasCpf = leadCheck?.cpf_cliente_final && String(leadCheck.cpf_cliente_final).replace(/\D/g, "").length === 11;
-            if (!hasCpf) {
-              toolResult = {
-                success: false,
-                error: "CPF_REQUIRED",
-                message: "Não posso agendar ainda. Peça o CPF do cliente primeiro e use register_client_cpf antes de tentar agendar novamente.",
-              };
-              aiMessages.push({ role: "tool", tool_call_id: toolCall.id, content: JSON.stringify(toolResult) });
-              continue;
-            }
+            leadCheckRow = leadCheck;
+            const cpfStored = String(leadCheck?.cpf_cliente_final || "").replace(/\D/g, "");
+            if (!isValidCPF(cpfStored)) pendingItems.push("CPF");
+            if (!isValidFullName(leadCheck?.name || "")) pendingItems.push("Nome completo");
           }
+          const pendingWarning = pendingItems.length > 0 ? `${pendingItems.join(" + ")} pendente(s)` : null;
 
           shouldSchedule = true;
           replyText = args.message_to_lead || "";
@@ -887,10 +884,13 @@ async function handleAgentPhase(
 
             await supabase.from("lead_reminders").insert({
               lead_id: leadId, company_id: companyId, created_by: "00000000-0000-0000-0000-000000000000",
-              title: `📅 Consulta ${modality === "presencial" ? "presencial" : "online"}: ${lName}`,
-              description: args.summary || `Agendamento automático via bot IA (${modality})${unitName ? ` - Unidade: ${unitName}` : ""}`,
+              title: `📅 Consulta ${modality === "presencial" ? "presencial" : "online"}: ${lName}${pendingWarning ? " ⚠️" : ""}`,
+              description: `${args.summary || `Agendamento automático via bot IA (${modality})${unitName ? ` - Unidade: ${unitName}` : ""}`}${pendingWarning ? `\n\n⚠️ DADOS PENDENTES: ${pendingWarning}. Solicitar na reunião.` : ""}`,
               reminder_type: "meeting", due_at: dueAt,
             });
+
+            // Marca pendência (ou limpa se estava marcado)
+            await supabase.from("leads").update({ pending_data_warning: pendingWarning }).eq("id", leadId);
 
             // Notify lawyer
             if (config.alert_whatsapp) {
@@ -900,7 +900,8 @@ async function handleAgentPhase(
                 const alertPhone = config.alert_whatsapp.replace(/\D/g, "");
                 const modalityLabel = modality === "presencial" ? "🏢 Presencial" : "💻 Online (vídeo)";
                 const unitLine = modality === "presencial" && unitName ? `🏢 Unidade: ${unitName}\n` : "";
-                const alertMessage = `🔔 *Novo Agendamento Automático*\n\n👤 Nome: ${lName}\n📱 Telefone: ${leadPhone}\n📅 Data: ${appointmentDate}\n⏰ Horário: ${appointmentTime}\n📍 Modalidade: ${modalityLabel}\n${unitLine}${args.summary ? `📋 Assunto: ${args.summary}\n` : ""}\n_Agendado automaticamente pelo bot SDR_`;
+                const pendingLine = pendingWarning ? `\n⚠️ *DADOS PENDENTES:* ${pendingWarning}\n_Solicitar na reunião pra registrar no sistema._\n` : "";
+                const alertMessage = `🔔 *Novo Agendamento Automático*\n\n👤 Nome: ${lName}\n📱 Telefone: ${leadPhone}\n📅 Data: ${appointmentDate}\n⏰ Horário: ${appointmentTime}\n📍 Modalidade: ${modalityLabel}\n${unitLine}${args.summary ? `📋 Assunto: ${args.summary}\n` : ""}${pendingLine}\n_Agendado automaticamente pelo bot SDR_`;
                 const alertHeaders: Record<string, string> = { "Content-Type": "application/json" };
                 if (ADMIN_TOKEN) alertHeaders["admintoken"] = ADMIN_TOKEN;
                 const instanceParam = encodeURIComponent(config.zapi_instance_id || "");
@@ -921,7 +922,7 @@ async function handleAgentPhase(
               console.log(`Lead ${leadId} advanced to document_collector phase`);
             }
           }
-          toolResult = { success: true, message: "Agendamento criado com sucesso" };
+          toolResult = { success: true, message: pendingWarning ? `Agendamento criado, mas marcado com pendência: ${pendingWarning}` : "Agendamento criado com sucesso", pending: pendingWarning };
         }
 
         // ===== DOCUMENT COLLECTOR TOOLS =====
