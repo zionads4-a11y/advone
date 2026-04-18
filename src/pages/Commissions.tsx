@@ -7,17 +7,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DollarSign, TrendingUp, Clock, CheckCircle2, FileSignature, Building2, Loader2 } from "lucide-react";
 
 const statusLabels: Record<string, { label: string; className: string }> = {
-  em_andamento: { label: "Em andamento", className: "bg-blue-500/10 text-blue-700 border-blue-500/20" },
-  ganho: { label: "Ganho", className: "bg-green-500/10 text-green-700 border-green-500/20" },
-  perdido: { label: "Perdido", className: "bg-red-500/10 text-red-700 border-red-500/20" },
-  acordo: { label: "Acordo", className: "bg-amber-500/10 text-amber-700 border-amber-500/20" },
+  em_andamento: { label: "Em andamento", className: "bg-primary/10 text-primary border-primary/20" },
+  ganho: { label: "Ganho", className: "bg-accent/20 text-accent-foreground border-accent/30" },
+  perdido: { label: "Perdido", className: "bg-destructive/10 text-destructive border-destructive/20" },
+  acordo: { label: "Acordo", className: "bg-secondary/30 text-secondary-foreground border-secondary/40" },
   arquivado: { label: "Arquivado", className: "bg-muted text-muted-foreground" },
 };
 
 const commissionStatusLabels: Record<string, { label: string; className: string }> = {
   aguardando_exito: { label: "Aguardando êxito", className: "bg-muted text-muted-foreground" },
-  cobranca_gerada: { label: "Cobrança gerada", className: "bg-blue-500/10 text-blue-700" },
-  pago: { label: "Pago", className: "bg-green-500/10 text-green-700" },
+  cobranca_gerada: { label: "Cobrança gerada", className: "bg-primary/10 text-primary" },
+  pago: { label: "Pago", className: "bg-accent/20 text-accent-foreground" },
   inadimplente: { label: "Inadimplente", className: "bg-destructive/10 text-destructive" },
 };
 
@@ -65,9 +65,9 @@ export default function Commissions() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Aguardando êxito</p>
-                <p className="text-2xl font-bold text-blue-600">{metrics.contractsWaiting}</p>
+                <p className="text-2xl font-bold text-primary">{metrics.contractsWaiting}</p>
               </div>
-              <Clock className="h-8 w-8 text-blue-500/40" />
+              <Clock className="h-8 w-8 text-primary/40" />
             </div>
           </CardContent>
         </Card>
@@ -76,9 +76,9 @@ export default function Commissions() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Comissão potencial</p>
-                <p className="text-2xl font-bold text-amber-600">{formatBRL(metrics.totalCommissionPending)}</p>
+                <p className="text-2xl font-bold text-accent-foreground">{formatBRL(metrics.totalCommissionPending)}</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-amber-500/40" />
+              <TrendingUp className="h-8 w-8 text-accent/60" />
             </div>
             <p className="text-xs text-muted-foreground mt-1">Sobre honorários estimados</p>
           </CardContent>
@@ -88,9 +88,9 @@ export default function Commissions() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Comissão recebida</p>
-                <p className="text-2xl font-bold text-green-600">{formatBRL(metrics.totalPaid)}</p>
+                <p className="text-2xl font-bold text-accent-foreground">{formatBRL(metrics.totalPaid)}</p>
               </div>
-              <CheckCircle2 className="h-8 w-8 text-green-500/40" />
+              <CheckCircle2 className="h-8 w-8 text-accent/60" />
             </div>
           </CardContent>
         </Card>

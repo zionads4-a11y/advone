@@ -12,18 +12,18 @@ import { ShieldAlert, AlertTriangle, Building2, Loader2, CheckCircle2, XCircle, 
 import { toast } from "sonner";
 
 const severityConfig: Record<string, { label: string; className: string }> = {
-  low: { label: "Baixa", className: "bg-blue-500/10 text-blue-700 border-blue-500/20" },
-  medium: { label: "Média", className: "bg-amber-500/10 text-amber-700 border-amber-500/20" },
-  high: { label: "Alta", className: "bg-orange-500/10 text-orange-700 border-orange-500/20" },
+  low: { label: "Baixa", className: "bg-primary/10 text-primary border-primary/20" },
+  medium: { label: "Média", className: "bg-secondary/30 text-secondary-foreground border-secondary/40" },
+  high: { label: "Alta", className: "bg-accent/20 text-accent-foreground border-accent/30" },
   critical: { label: "Crítica", className: "bg-destructive/10 text-destructive border-destructive/20" },
 };
 
 const statusConfig: Record<string, { label: string; className: string }> = {
-  open: { label: "Aberto", className: "bg-amber-500/10 text-amber-700" },
-  reviewing: { label: "Em análise", className: "bg-blue-500/10 text-blue-700" },
+  open: { label: "Aberto", className: "bg-secondary/30 text-secondary-foreground" },
+  reviewing: { label: "Em análise", className: "bg-primary/10 text-primary" },
   confirmed_fraud: { label: "Fraude confirmada", className: "bg-destructive/10 text-destructive" },
   false_positive: { label: "Falso positivo", className: "bg-muted text-muted-foreground" },
-  resolved: { label: "Resolvido", className: "bg-green-500/10 text-green-700" },
+  resolved: { label: "Resolvido", className: "bg-accent/20 text-accent-foreground" },
 };
 
 export default function FraudAlerts() {
@@ -85,7 +85,7 @@ export default function FraudAlerts() {
         <Card>
           <CardContent className="pt-6">
             <p className="text-sm text-muted-foreground">Alertas abertos</p>
-            <p className="text-2xl font-bold text-amber-600">{openCount}</p>
+            <p className="text-2xl font-bold text-accent-foreground">{openCount}</p>
           </CardContent>
         </Card>
         <Card>
@@ -113,7 +113,7 @@ export default function FraudAlerts() {
         <CardContent>
           {alerts.length === 0 ? (
             <div className="text-center py-12">
-              <CheckCircle2 className="h-12 w-12 mx-auto text-green-500/50 mb-3" />
+              <CheckCircle2 className="h-12 w-12 mx-auto text-accent/60 mb-3" />
               <p className="text-muted-foreground">Nenhum alerta de fraude registrado.</p>
               <p className="text-xs text-muted-foreground mt-1">Tudo certo por aqui!</p>
             </div>
@@ -128,7 +128,7 @@ export default function FraudAlerts() {
                     className="flex items-start justify-between gap-4 p-4 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors"
                   >
                     <div className="flex items-start gap-3 flex-1 min-w-0">
-                      <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
+                      <AlertTriangle className="h-5 w-5 text-destructive mt-0.5 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap mb-1">
                           <h3 className="font-semibold text-sm">{alert.title}</h3>
