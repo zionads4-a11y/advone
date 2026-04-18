@@ -178,6 +178,15 @@ Penúltimo: Gatilho emocional + pedido de documentos (opcional)
 📅 ABORDAGEM DE AGENDAMENTO (REGRA OBRIGATÓRIA):
 - Quando for agendar, SEMPRE transmita URGÊNCIA e IMPORTÂNCIA: "Como o seu caso é urgente, podemos agendar já pra amanhã!"
 - Pergunte a preferência de turno: "Você prefere na parte da manhã ou da tarde?"
+
+🔒 CAPTURA OBRIGATÓRIA DE CPF (ANTES DE AGENDAR):
+- ANTES de qualquer agendamento, você DEVE pedir o CPF do cliente
+- Mensagem sugerida: "Pra eu já deixar tudo certinho no nosso sistema antes de agendar, pode me passar seu CPF? 🙂\\n\\nFica registrado só com a gente, viu?"
+- Se o lead recusar ou enrolar, explique com leveza: "Sem o CPF não consigo confirmar o agendamento aqui no sistema. É uma exigência do escritório pra validar o atendimento 😊"
+- Quando o lead enviar o CPF, IMEDIATAMENTE chame a tool register_client_cpf com os números
+- SOMENTE depois de register_client_cpf retornar success você pode chamar check_availability e schedule_appointment
+- NUNCA tente agendar sem CPF registrado — a tool schedule_appointment vai falhar
+
 - Depois use check_availability para buscar horários reais
 - Ofereça EXATAMENTE 2 opções concretas: UMA de manhã (08:00-12:00) e UMA à tarde (13:00-17:00)
 - Formato: "Tenho esses horários pra você:\\n\\n📅 Manhã: [dia], dia [DD/MM] às [HH:MM]\\n📅 Tarde: [dia], dia [DD/MM] às [HH:MM]\\n\\nQual fica melhor pra você? 😊"
@@ -453,8 +462,24 @@ const sdrTools = [
   {
     type: "function",
     function: {
+      name: "register_client_cpf",
+      description: "OBRIGATÓRIO antes de agendar qualquer reunião. Registra o CPF do cliente final no lead. NUNCA chame check_availability ou schedule_appointment sem antes ter chamado esta tool.",
+      parameters: {
+        type: "object",
+        properties: {
+          cpf: { type: "string", description: "CPF do cliente final, apenas números (11 dígitos)" },
+          full_name: { type: "string", description: "Nome completo do cliente conforme passado por ele" }
+        },
+        required: ["cpf"],
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
       name: "check_availability",
-      description: "Verifica horários disponíveis na agenda para uma data específica. SEMPRE use antes de sugerir horários ao lead.",
+      description: "Verifica horários disponíveis na agenda para uma data específica. SEMPRE use antes de sugerir horários ao lead. ATENÇÃO: só use APÓS ter registrado o CPF via register_client_cpf.",
       parameters: {
         type: "object",
         properties: {
@@ -487,7 +512,7 @@ const sdrTools = [
     type: "function",
     function: {
       name: "schedule_appointment",
-      description: "Agenda uma consulta/reunião para o lead.",
+      description: "Agenda uma consulta/reunião para o lead. PRÉ-REQUISITO OBRIGATÓRIO: o CPF do cliente já deve ter sido registrado via register_client_cpf. Caso contrário, a chamada será rejeitada.",
       parameters: {
         type: "object",
         properties: {
@@ -745,6 +770,20 @@ async function handleAgentPhase(
         let toolResult: any = {};
 
         // ===== SDR TOOLS =====
+        if (fnName === "register_client_cpf") {
+          const rawCpf = String(args.cpf || "").replace(/\D/g, "");
+          if (rawCpf.length !== 11) {
+            toolResult = { success: false, error: "CPF inválido. Peça novamente — precisa ter 11 dígitos." };
+          } else if (leadId) {
+            const updates: any = { cpf_cliente_final: rawCpf };
+            if (args.full_name) updates.name = args.full_name;
+            await supabase.from("leads").update(updates).eq("id", leadId);
+            toolResult = { success: true, cpf_registered: rawCpf, message: "CPF registrado. Agora você já pode chamar check_availability e agendar." };
+          } else {
+            toolResult = { success: false, error: "Lead não encontrado." };
+          }
+        }
+
         if (fnName === "check_availability") {
           hasCheckAvailability = true;
           let dateToCheck = args.date || getNextAvailableDays(1)[0];
@@ -780,6 +819,25 @@ async function handleAgentPhase(
         }
 
         if (fnName === "schedule_appointment") {
+          // 🔒 Validar CPF antes de agendar
+          if (leadId) {
+            const { data: leadCheck } = await supabase
+              .from("leads")
+              .select("cpf_cliente_final")
+              .eq("id", leadId)
+              .maybeSingle();
+            const hasCpf = leadCheck?.cpf_cliente_final && String(leadCheck.cpf_cliente_final).replace(/\D/g, "").length === 11;
+            if (!hasCpf) {
+              toolResult = {
+                success: false,
+                error: "CPF_REQUIRED",
+                message: "Não posso agendar ainda. Peça o CPF do cliente primeiro e use register_client_cpf antes de tentar agendar novamente.",
+              };
+              aiMessages.push({ role: "tool", tool_call_id: toolCall.id, content: JSON.stringify(toolResult) });
+              continue;
+            }
+          }
+
           shouldSchedule = true;
           replyText = args.message_to_lead || "";
 
@@ -884,16 +942,64 @@ async function handleAgentPhase(
 
         // ===== CONTRACT CLOSER TOOLS =====
         if (fnName === "finalize_contract") {
+          // 🔒 Validar CPF obrigatório também aqui
+          const cpfFromArg = String(args.client_cpf || "").replace(/\D/g, "");
+          let finalCpf = cpfFromArg.length === 11 ? cpfFromArg : "";
+          if (!finalCpf && leadId) {
+            const { data: leadCheck } = await supabase
+              .from("leads")
+              .select("cpf_cliente_final, cpf")
+              .eq("id", leadId)
+              .maybeSingle();
+            const stored = String(leadCheck?.cpf_cliente_final || leadCheck?.cpf || "").replace(/\D/g, "");
+            if (stored.length === 11) finalCpf = stored;
+          }
+
+          if (!finalCpf) {
+            toolResult = {
+              success: false,
+              error: "CPF_REQUIRED",
+              message: "Não posso finalizar o contrato sem o CPF do cliente. Peça o CPF e use register_client_cpf antes.",
+            };
+            aiMessages.push({ role: "tool", tool_call_id: toolCall.id, content: JSON.stringify(toolResult) });
+            continue;
+          }
+
           replyText = args.message_to_lead || "Contrato finalizado! 🎉";
-          const updates: any = { contract_status: "signed", bot_agent_phase: "completed" };
-          if (args.client_cpf) updates.cpf = args.client_cpf;
+          const updates: any = { contract_status: "signed", bot_agent_phase: "completed", cpf_cliente_final: finalCpf };
+          if (args.client_cpf) updates.cpf = finalCpf;
           if (args.client_full_name) updates.name = args.client_full_name;
-          if (args.contract_value) updates.value = args.contract_value;
+          if (args.contract_value) {
+            updates.value = args.contract_value;
+            updates.honorarios_estimados = args.contract_value;
+          }
           await supabase.from("leads").update(updates).eq("id", leadId);
+
+          // Buscar config de comissão para registrar contrato fechado
+          const { data: commissionCfg } = await supabase
+            .from("commission_settings")
+            .select("commission_percentage")
+            .eq("company_id", companyId)
+            .maybeSingle();
+
+          // Criar registro imutável em closed_contracts
+          await supabase.from("closed_contracts").insert({
+            company_id: companyId,
+            lead_id: leadId,
+            client_name: args.client_full_name || leadName || "Cliente",
+            client_cpf: finalCpf,
+            client_phone: cleanPhone || null,
+            honorarios_estimados: Number(args.contract_value || 0),
+            commission_percentage: Number(commissionCfg?.commission_percentage || 30),
+            commission_status: "aguardando_exito",
+            process_status: "em_andamento",
+            signed_at: new Date().toISOString(),
+            created_by: "00000000-0000-0000-0000-000000000000",
+          });
 
           // Move to "Ganho" column
           const { data: wonCol } = await supabase.from("kanban_columns").select("id")
-            .eq("company_id", companyId).eq("is_won", true).limit(1).maybeSingle();
+            .eq("company_id", companyId).eq("is_won", true).order("position", { ascending: false }).limit(1).maybeSingle();
           if (wonCol) {
             await supabase.from("leads").update({ kanban_column_id: wonCol.id, status: "won" }).eq("id", leadId);
           }

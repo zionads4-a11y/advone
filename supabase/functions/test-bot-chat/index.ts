@@ -358,8 +358,24 @@ serve(async (req) => {
       {
         type: "function",
         function: {
+          name: "register_client_cpf",
+          description: "OBRIGATÓRIO antes de agendar. Registra o CPF do cliente final. Sem isso, schedule_appointment será rejeitado.",
+          parameters: {
+            type: "object",
+            properties: {
+              cpf: { type: "string", description: "CPF apenas números (11 dígitos)" },
+              full_name: { type: "string", description: "Nome completo do cliente" }
+            },
+            required: ["cpf"],
+            additionalProperties: false
+          }
+        }
+      },
+      {
+        type: "function",
+        function: {
           name: "check_availability",
-          description: "Verifica horários disponíveis na agenda para uma data específica. SEMPRE use antes de sugerir horários.",
+          description: "Verifica horários disponíveis. Só use APÓS register_client_cpf.",
           parameters: {
             type: "object",
             properties: {
@@ -374,16 +390,16 @@ serve(async (req) => {
         type: "function",
         function: {
           name: "schedule_appointment",
-          description: "Agenda uma consulta. Use SOMENTE APÓS o lead escolher um horário.",
+          description: "Agenda uma consulta. Use SOMENTE APÓS register_client_cpf + lead escolher horário.",
           parameters: {
             type: "object",
             properties: {
-              message_to_lead: { type: "string", description: "Mensagem de confirmação" },
-              date: { type: "string", description: "Data YYYY-MM-DD" },
-              time: { type: "string", description: "Horário HH:MM" },
-              summary: { type: "string", description: "Assunto da reunião" },
+              message_to_lead: { type: "string" },
+              date: { type: "string", description: "YYYY-MM-DD" },
+              time: { type: "string", description: "HH:MM" },
+              summary: { type: "string" },
               modality: { type: "string", enum: ["presencial", "online"] },
-              unit: { type: "string", description: "Nome da unidade/escritório (se presencial)" }
+              unit: { type: "string" }
             },
             required: ["message_to_lead", "date", "time"],
             additionalProperties: false
@@ -416,6 +432,7 @@ serve(async (req) => {
 
     let reply = "";
     let toolActions: any[] = [];
+    let cpfRegistered = "";
     let maxIterations = 3;
 
     while (maxIterations > 0) {
@@ -465,6 +482,17 @@ serve(async (req) => {
 
         let toolResult: any = {};
 
+        if (fnName === "register_client_cpf") {
+          const rawCpf = String(args.cpf || "").replace(/\D/g, "");
+          if (rawCpf.length !== 11) {
+            toolResult = { success: false, error: "CPF inválido. Peça novamente." };
+          } else {
+            cpfRegistered = rawCpf;
+            toolResult = { success: true, cpf_registered: rawCpf, message: "[TESTE] CPF registrado. Já pode agendar." };
+          }
+          toolActions.push({ tool: "register_client_cpf", result: toolResult });
+        }
+
         if (fnName === "check_availability") {
           let dateToCheck = args.date || getNextAvailableDays(1)[0];
           const availability = await getAvailableSlots(adminClient, company_id, dateToCheck);
@@ -487,8 +515,12 @@ serve(async (req) => {
         }
 
         if (fnName === "schedule_appointment") {
-          reply = args.message_to_lead || reply;
-          toolResult = { success: true, message: "[TESTE] Agendamento simulado com sucesso", date: args.date, time: args.time, modality: args.modality || "online", unit: args.unit || "" };
+          if (!cpfRegistered) {
+            toolResult = { success: false, error: "CPF_REQUIRED", message: "[TESTE] Bloqueado: registre o CPF do cliente primeiro via register_client_cpf." };
+          } else {
+            reply = args.message_to_lead || reply;
+            toolResult = { success: true, message: "[TESTE] Agendamento simulado com sucesso", date: args.date, time: args.time, modality: args.modality || "online", unit: args.unit || "", cpf: cpfRegistered };
+          }
           toolActions.push({ tool: "schedule_appointment", result: toolResult });
         }
 

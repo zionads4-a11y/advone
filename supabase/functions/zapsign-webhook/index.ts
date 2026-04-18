@@ -110,6 +110,101 @@ async function processWebhook(
       .eq("id", doc.lead_id);
   }
 
+  // ============ AUTO-CRIAR CLOSED_CONTRACT ao ser assinado ============
+  if (newStatus === "signed" && doc.lead_id && doc.company_id) {
+    try {
+      // Verifica se já existe contrato registrado para esse documento
+      const { data: existingContract } = await adminClient
+        .from("closed_contracts")
+        .select("id")
+        .eq("zapsign_document_id", doc.id)
+        .maybeSingle();
+
+      if (!existingContract) {
+        // Buscar dados do lead para preencher o contrato
+        const { data: leadData } = await adminClient
+          .from("leads")
+          .select("name, phone, whatsapp, cpf_cliente_final, cpf, honorarios_estimados, processo_numero, processo_valor")
+          .eq("id", doc.lead_id)
+          .maybeSingle();
+
+        // Buscar config de comissão da empresa
+        const { data: commissionCfg } = await adminClient
+          .from("commission_settings")
+          .select("commission_percentage")
+          .eq("company_id", doc.company_id)
+          .maybeSingle();
+
+        const cpfFinal = leadData?.cpf_cliente_final || leadData?.cpf || "";
+        const honorarios = Number(leadData?.honorarios_estimados || leadData?.processo_valor || 0);
+        const commissionPct = Number(commissionCfg?.commission_percentage || 30);
+
+        // Cria registro imutável do contrato fechado
+        const { error: contractErr } = await adminClient
+          .from("closed_contracts")
+          .insert({
+            company_id: doc.company_id,
+            lead_id: doc.lead_id,
+            zapsign_document_id: doc.id,
+            client_name: doc.signer_name || leadData?.name || "Cliente",
+            client_cpf: cpfFinal,
+            client_phone: doc.signer_phone || leadData?.whatsapp || leadData?.phone || null,
+            honorarios_estimados: honorarios,
+            commission_percentage: commissionPct,
+            commission_status: "aguardando_exito",
+            process_status: "em_andamento",
+            processo_cnj: leadData?.processo_numero || null,
+            signed_at: signedAt || new Date().toISOString(),
+            created_by: doc.created_by,
+          });
+
+        if (contractErr) {
+          console.error("[CLOSED_CONTRACT] Falha ao criar:", contractErr);
+        } else {
+          console.log("[CLOSED_CONTRACT] Criado para lead", doc.lead_id);
+
+          // Mover lead para coluna "Ganho" automaticamente
+          const { data: wonCol } = await adminClient
+            .from("kanban_columns")
+            .select("id")
+            .eq("company_id", doc.company_id)
+            .eq("is_won", true)
+            .order("position", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          if (wonCol) {
+            await adminClient
+              .from("leads")
+              .update({ kanban_column_id: wonCol.id, status: "won" })
+              .eq("id", doc.lead_id);
+          }
+
+          // Cadastrar processo no monitoramento Escavador (se houver CNJ ou CPF)
+          if (leadData?.processo_numero || cpfFinal) {
+            const { data: existingMonitor } = await adminClient
+              .from("monitored_processes")
+              .select("id")
+              .eq("company_id", doc.company_id)
+              .eq("numero_cnj", leadData?.processo_numero || `CPF-${cpfFinal}`)
+              .maybeSingle();
+
+            if (!existingMonitor && leadData?.processo_numero) {
+              await adminClient.from("monitored_processes").insert({
+                company_id: doc.company_id,
+                numero_cnj: leadData.processo_numero,
+                client_name: doc.signer_name || leadData?.name || "Cliente",
+                is_active: true,
+              });
+            }
+          }
+        }
+      }
+    } catch (contractCreateErr) {
+      console.error("[CLOSED_CONTRACT] Exception:", contractCreateErr);
+    }
+  }
+
   // If signed, notify via WhatsApp
   if (newStatus === "signed" && doc.company_id && doc.signer_phone) {
     try {
