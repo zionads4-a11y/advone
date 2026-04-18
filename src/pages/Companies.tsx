@@ -18,6 +18,7 @@ interface Company {
   whatsapp: string | null;
   business_hours: unknown;
   created_at: string;
+  partnership_type: "exito" | "mensalidade_zionads" | null;
 }
 
 interface WhatsAppConfig {
@@ -62,9 +63,12 @@ export default function Companies() {
   const handleAdd = async (formData: FormData) => {
     if (!user) return;
 
+    const partnership = (formData.get("partnership_type") as string) || "mensalidade_zionads";
+
     const { error } = await supabase.from("companies").insert({
       name: formData.get("name") as string,
       whatsapp: (formData.get("whatsapp") as string) || null,
+      partnership_type: partnership as "exito" | "mensalidade_zionads",
       created_by: user.id,
     });
 
@@ -78,7 +82,7 @@ export default function Companies() {
     fetchData();
   };
 
-  const handleUpdate = async (id: string, data: { name: string; whatsapp: string | null; business_hours?: Record<string, unknown[]> }) => {
+  const handleUpdate = async (id: string, data: { name: string; whatsapp: string | null; business_hours?: Record<string, unknown[]>; partnership_type?: "exito" | "mensalidade_zionads" }) => {
     const { error } = await supabase.from("companies").update(data as any).eq("id", id);
 
     if (error) {

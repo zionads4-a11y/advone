@@ -9,6 +9,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -22,19 +29,30 @@ import {
 import { Trash2 } from "lucide-react";
 import { BusinessHoursConfig, type BusinessHours, parseBusinessHours, getDefaultBusinessHours } from "./BusinessHoursConfig";
 
+export type PartnershipType = "exito" | "mensalidade_zionads";
+
 interface Company {
   id: string;
   name: string;
   website: string | null;
   whatsapp: string | null;
   business_hours?: unknown;
+  partnership_type?: PartnershipType | null;
 }
 
 interface CompanyEditDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   company: Company | null;
-  onUpdate: (id: string, data: { name: string; whatsapp: string | null; business_hours: BusinessHours }) => void;
+  onUpdate: (
+    id: string,
+    data: {
+      name: string;
+      whatsapp: string | null;
+      business_hours: BusinessHours;
+      partnership_type: PartnershipType;
+    }
+  ) => void;
   onDelete: (id: string) => void;
 }
 
@@ -48,12 +66,14 @@ export function CompanyEditDialog({
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [businessHours, setBusinessHours] = useState<BusinessHours>(getDefaultBusinessHours());
+  const [partnershipType, setPartnershipType] = useState<PartnershipType>("mensalidade_zionads");
 
   useEffect(() => {
     if (company) {
       setName(company.name);
       setWhatsapp(company.whatsapp || "");
       setBusinessHours(parseBusinessHours(company.business_hours));
+      setPartnershipType((company.partnership_type as PartnershipType) || "mensalidade_zionads");
     }
   }, [company]);
 
@@ -68,7 +88,12 @@ export function CompanyEditDialog({
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            onUpdate(company.id, { name, whatsapp: whatsapp || null, business_hours: businessHours });
+            onUpdate(company.id, {
+              name,
+              whatsapp: whatsapp || null,
+              business_hours: businessHours,
+              partnership_type: partnershipType,
+            });
           }}
           className="space-y-4"
         >
@@ -83,6 +108,28 @@ export function CompanyEditDialog({
               onChange={(e) => setWhatsapp(e.target.value)}
               placeholder="5511999999999"
             />
+          </div>
+          <div className="space-y-2">
+            <Label>Tipo de Parceria *</Label>
+            <Select
+              value={partnershipType}
+              onValueChange={(v) => setPartnershipType(v as PartnershipType)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="mensalidade_zionads">
+                  💼 Mensalidade ZionAds (cliente da agência)
+                </SelectItem>
+                <SelectItem value="exito">
+                  🏆 Êxito (comissão por contrato fechado)
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Define como a parceria comercial é gerida com esta empresa.
+            </p>
           </div>
           <BusinessHoursConfig value={businessHours} onChange={setBusinessHours} />
           <div className="flex gap-2">
