@@ -179,7 +179,7 @@ export default function LandingPage() {
                 </a>
               </div>
               <p className="mt-4 text-sm text-[hsl(220,10%,45%)]">
-                Planos a partir de R$ 297/mês. Configure em minutos.
+                Modelo de parceria sob medida. Configure em minutos.
               </p>
             </div>
 
@@ -417,7 +417,7 @@ export default function LandingPage() {
                   <span className="inline-block rounded-full bg-[hsl(153,60%,45%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(153,60%,45%)]">Essencial</span>
                 </div>
                 <p className="mb-1 text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                  R$ 297<span className="text-base font-normal text-[hsl(220,10%,55%)]">/mês</span>
+                  Sob consulta
                 </p>
                 <p className="mt-2 mb-8 text-sm text-[hsl(220,10%,55%)]">CRM + IA + automação completa</p>
                 <ul className="mb-8 flex-1 space-y-3">
@@ -444,7 +444,7 @@ export default function LandingPage() {
                   <span className="inline-block rounded-full bg-[hsl(210,80%,55%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(210,80%,55%)]">Profissional</span>
                 </div>
                 <p className="mb-1 text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                  R$ 497<span className="text-base font-normal text-[hsl(220,10%,55%)]">/mês</span>
+                  Sob consulta
                 </p>
                 <p className="mt-2 mb-8 text-sm text-[hsl(220,10%,55%)]">Tudo do Essencial + monitoramento</p>
                 <ul className="mb-8 flex-1 space-y-3">
@@ -468,7 +468,7 @@ export default function LandingPage() {
                   <span className="inline-block rounded-full bg-[hsl(0,70%,55%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(0,70%,60%)]">Elite</span>
                 </div>
                 <p className="mb-1 text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                  R$ 697<span className="text-base font-normal text-[hsl(220,10%,55%)]">/mês</span>
+                  Sob consulta
                 </p>
                 <p className="mt-2 mb-8 text-sm text-[hsl(220,10%,55%)]">Tudo do Profissional + prioridade total</p>
                 <ul className="mb-8 flex-1 space-y-3">
