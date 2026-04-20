@@ -380,7 +380,9 @@ Na DÚVIDA, responda "continue".`
             timestamp: new Date().toISOString(),
           });
 
-          const targetPosition = Math.min(msg.day_number, 4);
+          // Novo funil: pos 0=Em Atendimento, pos 1..5=1º a 5º Follow-UP
+          // day_number 1 → pos 1 (1º Follow-UP), ..., day_number 5 → pos 5 (5º Follow-UP)
+          const targetPosition = Math.min(msg.day_number, 5);
           const { data: targetColumn } = await supabase
             .from("kanban_columns")
             .select("id")

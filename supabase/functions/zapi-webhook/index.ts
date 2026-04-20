@@ -1172,7 +1172,14 @@ async function enrollInCadence(supabase: any, companyId: string, leadId: string,
   if (existing && existing.length > 0) return;
 
   const now = new Date();
-  const delaysMs = [30*60*1000, 24*60*60*1000, 2*24*60*60*1000, 3*24*60*60*1000, 4*24*60*60*1000];
+  // Cadência: 10 minutos para o 1º Follow-UP, depois 1 mensagem por dia até o 5º (~5 dias).
+  const delaysMs = [
+    10 * 60 * 1000,           // 1º FU: 10 minutos
+    24 * 60 * 60 * 1000,      // 2º FU: 1 dia
+    2 * 24 * 60 * 60 * 1000,  // 3º FU: 2 dias
+    3 * 24 * 60 * 60 * 1000,  // 4º FU: 3 dias
+    4 * 24 * 60 * 60 * 1000,  // 5º FU: 4 dias
+  ];
   const messages = delaysMs.map((delayMs, i) => ({
     company_id: companyId, lead_id: leadId, phone, day_number: i + 1,
     scheduled_at: new Date(now.getTime() + delayMs).toISOString(), status: "pending",
@@ -1355,8 +1362,9 @@ serve(async (req) => {
         .eq("lead_id", leadId).eq("status", "pending");
 
       if (existingLead?.status === "new") {
+        // Novo funil: "Em Atendimento" agora é a posição 0 (entrada)
         const { data: emAtendimentoCol } = await supabase.from("kanban_columns").select("id")
-          .eq("company_id", companyId).eq("position", 5).maybeSingle();
+          .eq("company_id", companyId).eq("position", 0).maybeSingle();
         if (emAtendimentoCol) {
           await supabase.from("leads").update({ kanban_column_id: emAtendimentoCol.id, status: "contacted" }).eq("id", leadId);
         }
