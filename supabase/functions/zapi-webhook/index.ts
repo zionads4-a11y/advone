@@ -521,11 +521,12 @@ const sdrTools = [
     type: "function",
     function: {
       name: "check_availability",
-      description: "Verifica horários disponíveis na agenda para uma data específica. SEMPRE use antes de sugerir horários ao lead. ATENÇÃO: só use APÓS ter registrado o CPF via register_client_cpf.",
+      description: "Verifica o PRIMEIRO horário disponível na agenda para a data e turno informados. SEMPRE use antes de sugerir horário ao lead. Retorna apenas 1 sugestão (first_available_slot). ATENÇÃO: só use APÓS ter registrado o CPF via register_client_cpf.",
       parameters: {
         type: "object",
         properties: {
-          date: { type: "string", description: "Data no formato YYYY-MM-DD" }
+          date: { type: "string", description: "Data no formato YYYY-MM-DD" },
+          period: { type: "string", enum: ["manha", "tarde", "qualquer"], description: "Turno preferido pelo lead. 'manha' = 08:00-11:59, 'tarde' = 12:00-17:00, 'qualquer' = primeiro do dia." }
         },
         required: ["date"],
         additionalProperties: false
