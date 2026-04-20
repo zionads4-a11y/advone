@@ -99,21 +99,26 @@ serve(async (req) => {
     const leadPhone = lead.whatsapp || lead.phone || "não informado";
 
     const message =
-      `🔔 *Novo agendamento*\n\n` +
-      `📅 Data: ${date}\n` +
-      `⏰ Horário: ${time}\n` +
-      `👤 Cliente: ${lead.name}\n` +
-      `🆔 CPF: ${cpf}\n` +
-      `📱 Contato: ${leadPhone}` +
-      (reminder.title ? `\n\n📝 ${reminder.title}` : "");
+      `🔔 *Novo agendamento confirmado*\n\n` +
+      `📅 *Data:* ${date}\n` +
+      `⏰ *Horário:* ${time}\n` +
+      `👤 *Cliente:* ${lead.name}\n` +
+      `🆔 *CPF:* ${cpf}\n` +
+      `📱 *Contato:* ${leadPhone}` +
+      (reminder.title ? `\n📝 *Compromisso:* ${reminder.title}` : "") +
+      `\n\n💡 _Lembre-se de acessar a agenda do AdvOne para marcar novas atividades, conferir os horários disponíveis e manter seus compromissos sempre atualizados._`;
 
-    const sendResp = await fetch(`${SERVER_URL}/send/text`, {
+    const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN") || "";
+    const instanceParam = encodeURIComponent(config.zapi_instance_id);
+    const tokenParam = encodeURIComponent(config.zapi_token || config.zapi_instance_id);
+
+    const sendResp = await fetch(`${SERVER_URL}/send/text?instance=${instanceParam}&token=${tokenParam}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        token: config.zapi_token || config.zapi_instance_id,
+        admintoken: ADMIN_TOKEN,
       },
-      body: JSON.stringify({ number: alertNumber, body: message }),
+      body: JSON.stringify({ number: alertNumber, text: message }),
     });
 
     const sendText = await sendResp.text();
