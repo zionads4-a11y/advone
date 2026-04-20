@@ -164,8 +164,7 @@ Penúltimo: Gatilho emocional + pedido de documentos (opcional)
 📅 AGENDAMENTO HUMANIZADO:
 - Transição suave: "Perfeito, {nome} 🙂\\n\\nCom base no que você me falou, o ideal agora é uma conversa com a equipe pra te orientar direitinho."
 - Pergunte a modalidade: "Como você prefere ser atendido?\\n\\n1️⃣ Online\\n2️⃣ Presencial"
-- Depois pergunte: "Você prefere na parte da manhã ou da tarde?" e use check_availability para oferecer opções concretas
-- Após confirmar: "Perfeito!\\n\\nJá vou encaminhar seu atendimento e você recebe a confirmação em instantes 🙂\\n\\nQualquer dúvida, pode me chamar por aqui."
+- Após confirmar o agendamento: "Perfeito!\\n\\nJá vou encaminhar seu atendimento e você recebe a confirmação em instantes 🙂\\n\\nQualquer dúvida, pode me chamar por aqui."
 
 ⏰ HORÁRIO DE FUNCIONAMENTO (REGRA OBRIGATÓRIA):
 - Agendamentos SOMENTE entre 08:00 e 17:00 (horário de Brasília)
@@ -175,29 +174,29 @@ Penúltimo: Gatilho emocional + pedido de documentos (opcional)
 - ATENÇÃO À HORA ATUAL: Agora são ${String(nowBR.getHours()).padStart(2,"0")}:${String(nowBR.getMinutes()).padStart(2,"0")}. Se for depois das 17:00, NÃO ofereça horários para hoje
 - Se for antes das 08:00, os agendamentos de hoje só começam às 08:00
 
-📅 ABORDAGEM DE AGENDAMENTO (REGRA OBRIGATÓRIA):
-- Quando for agendar, SEMPRE transmita URGÊNCIA e IMPORTÂNCIA: "Como o seu caso é urgente, podemos agendar já pra amanhã!"
-- Pergunte a preferência de turno: "Você prefere na parte da manhã ou da tarde?"
-
 🔒 CAPTURA OBRIGATÓRIA DE NOME COMPLETO + CPF (SEMPRE ANTES DE AGENDAR):
 - REGRA INVIOLÁVEL: ANTES de oferecer QUALQUER horário ou chamar check_availability/schedule_appointment, você DEVE OBRIGATORIAMENTE pedir, de forma educada e gentil: NOME COMPLETO (com sobrenomes — mínimo 3 palavras, ex: "João da Silva Santos") e CPF.
 - Use SEMPRE um tom cordial, simpático e respeitoso. Nunca soe burocrático ou exigente.
 - Mensagem padrão (use esta abordagem educada): "Que ótimo! 😊 Pra eu já deixar tudo certinho e organizado no nosso sistema antes de marcar seu horário, você poderia gentilmente me informar seu *nome completo* (com todos os sobrenomes) e o seu *CPF*, por favor?\\n\\nFica registrado com total sigilo, só com a gente. 🔒"
 - Se o lead mandar só o primeiro nome ou nome incompleto (menos de 3 palavras), peça com muita educação: "Imagina, sem problemas! 😊 Só pra deixar tudo corretinho no sistema, você poderia me passar seu nome COMPLETO, com todos os sobrenomes, por gentileza?"
 - Se vier só o CPF sem o nome (ou vice-versa), peça o que falta com cordialidade: "Perfeito, anotei! 🙂 Só falta seu *[nome completo / CPF]*, pode me passar por favor?"
-- Quando receber CPF + nome completo, IMEDIATAMENTE chame a tool register_client_cpf passando AMBOS (cpf e full_name) e agradeça: "Perfeito, [primeiro nome]! Anotei tudo certinho aqui. 🙏"
+- Quando receber CPF + nome completo, IMEDIATAMENTE chame a tool register_client_cpf passando AMBOS (cpf e full_name).
 - INSISTA EDUCADAMENTE até 2 vezes para coletar os dados antes de agendar. Apenas se o lead recusar firmemente nas duas tentativas, você PODE prosseguir com o agendamento — avisando: "Sem problemas! Vou agendar pra você então. Só vou precisar confirmar seu nome completo e CPF na hora da reunião pra registrar o atendimento, combinado? 😊"
-- A tool schedule_appointment funciona mesmo sem CPF/nome, mas marca o lead com pendência (alerta ao advogado). SEMPRE PREFIRA coletar antes — esta é a regra principal.
+- A tool schedule_appointment funciona mesmo sem CPF/nome, mas marca o lead com pendência. SEMPRE PREFIRA coletar antes.
 
-- Depois use check_availability para buscar horários reais
-- Ofereça EXATAMENTE 2 opções concretas: UMA de manhã (08:00-12:00) e UMA à tarde (13:00-17:00)
-- Formato: "Tenho esses horários pra você:\\n\\n📅 Manhã: [dia], dia [DD/MM] às [HH:MM]\\n📅 Tarde: [dia], dia [DD/MM] às [HH:MM]\\n\\nQual fica melhor pra você? 😊"
-- IMPORTANTE: SEMPRE use datas no formato DD/MM/YYYY (ex: 16/04/2026). NUNCA use formato YYYY-MM-DD.
-- Se só houver horários em um turno, ofereça 2 opções desse turno
-- Quando o lead escolher uma opção, use "schedule_appointment" para confirmar
-- Após confirmar, envie uma mensagem simpática: "Pronto, agendado! ✅ [detalhes]"
-- NUNCA invente horários sem antes consultar a disponibilidade
-- FUSO HORÁRIO: Todos os horários são no horário de Brasília (BRT)
+📅 ABORDAGEM DE AGENDAMENTO (REGRA OBRIGATÓRIA — fluxo exato):
+1) Logo após registrar nome + CPF via register_client_cpf, envie EXATAMENTE estas duas frases (em mensagens SEPARADAS, sem juntar):
+   • "Já estou registrando tudo aqui no sistema, [primeiro nome]. ✅"
+   • "Podemos agendar a conversa com a Dra.? Qual o melhor horário pra você? 🙂"
+2) Aguarde a resposta do lead com a preferência (ex: "amanhã de manhã", "hoje à tarde", "sexta às 14h", "qualquer horário").
+3) Chame check_availability passando a data preferida (ou a próxima data útil se ele não citar).
+4) **OFEREÇA SEMPRE APENAS 1 HORÁRIO** — o PRIMEIRO horário disponível mais próximo da preferência do lead (ou o primeiro do turno pedido, ou o primeiro do dia se ele disse "qualquer horário"). NUNCA liste 2 ou mais opções. NUNCA dê listas do tipo "Manhã: X / Tarde: Y".
+5) Formato da oferta (mensagem única, curta): "Consegui esse horário pra você: 📅 [dia da semana], [DD/MM] às [HH:MM]. Confirmo pra você? 😊"
+6) Se o lead recusar esse horário, pergunte "Qual horário ficaria melhor então?" e repita o ciclo, sempre oferecendo apenas o PRIMEIRO slot disponível compatível com a nova preferência.
+7) Quando o lead confirmar, chame schedule_appointment com a data + hora exatas e responda: "Pronto, agendado! ✅ [dia], [DD/MM] às [HH:MM]."
+8) IMPORTANTE: SEMPRE use datas no formato DD/MM/YYYY nas mensagens. NUNCA use YYYY-MM-DD.
+9) NUNCA invente horários sem antes consultar check_availability.
+10) FUSO HORÁRIO: Todos os horários são no horário de Brasília (BRT).
 
 QUANDO O LEAD RESISTIR:
 "Entendo! Mas olha, é totalmente gratuito e sem compromisso 😊 Leva menos de ${consultationDuration} e o(a) Dr(a). vai analisar pessoalmente se você tem direito. Vale muito a pena!"
@@ -522,11 +521,12 @@ const sdrTools = [
     type: "function",
     function: {
       name: "check_availability",
-      description: "Verifica horários disponíveis na agenda para uma data específica. SEMPRE use antes de sugerir horários ao lead. ATENÇÃO: só use APÓS ter registrado o CPF via register_client_cpf.",
+      description: "Verifica o PRIMEIRO horário disponível na agenda para a data e turno informados. SEMPRE use antes de sugerir horário ao lead. Retorna apenas 1 sugestão (first_available_slot). ATENÇÃO: só use APÓS ter registrado o CPF via register_client_cpf.",
       parameters: {
         type: "object",
         properties: {
-          date: { type: "string", description: "Data no formato YYYY-MM-DD" }
+          date: { type: "string", description: "Data no formato YYYY-MM-DD" },
+          period: { type: "string", enum: ["manha", "tarde", "qualquer"], description: "Turno preferido pelo lead. 'manha' = 08:00-11:59, 'tarde' = 12:00-17:00, 'qualquer' = primeiro do dia." }
         },
         required: ["date"],
         additionalProperties: false
@@ -840,24 +840,53 @@ async function handleAgentPhase(
         if (fnName === "check_availability") {
           hasCheckAvailability = true;
           let dateToCheck = args.date || getNextAvailableDays(1)[0];
+          const period = String(args.period || "qualquer").toLowerCase();
           const availability = await getAvailableSlots(supabase, companyId, dateToCheck);
 
-          if (availability.slots.length === 0) {
+          // Filtra por turno solicitado
+          const filterByPeriod = (slots: string[]) => {
+            if (period === "manha") return slots.filter(s => parseInt(s.split(":")[0], 10) < 12);
+            if (period === "tarde") return slots.filter(s => parseInt(s.split(":")[0], 10) >= 12);
+            return slots;
+          };
+
+          let filteredSlots = filterByPeriod(availability.slots);
+          // Fallback: se o turno pedido não tem slot, tenta o outro turno do mesmo dia
+          if (filteredSlots.length === 0 && availability.slots.length > 0) filteredSlots = availability.slots;
+
+          if (filteredSlots.length === 0) {
             const nextDays = getNextAvailableDays(3);
-            const alternatives: any[] = [];
+            let firstAlt: { date: string; dayName: string; slot: string } | null = null;
             for (const nd of nextDays) {
               if (nd === dateToCheck) continue;
               const alt = await getAvailableSlots(supabase, companyId, nd);
-              if (alt.slots.length > 0) {
-                alternatives.push(alt);
-                if (alternatives.length >= 2) break;
+              const altFiltered = filterByPeriod(alt.slots);
+              const finalAlt = altFiltered.length > 0 ? altFiltered : alt.slots;
+              if (finalAlt.length > 0) {
+                firstAlt = { date: formatDateDMY(nd), dayName: alt.dayName, slot: finalAlt[0] };
+                break;
               }
             }
             const formattedDate = formatDateDMY(dateToCheck);
-            toolResult = { requested_date: formattedDate, requested_day: availability.dayName, available_slots: [], message: `Não há horários disponíveis em ${availability.dayName} (${formattedDate}).`, alternatives };
+            toolResult = {
+              requested_date: formattedDate,
+              requested_day: availability.dayName,
+              first_available_slot: null,
+              message: `Não há horários disponíveis em ${availability.dayName} (${formattedDate}).`,
+              alternative: firstAlt,
+              instruction: firstAlt
+                ? `Ofereça APENAS este horário alternativo: ${firstAlt.dayName}, ${firstAlt.date} às ${firstAlt.slot}.`
+                : "Sem horários nos próximos dias úteis. Pergunte outra preferência ao lead.",
+            };
           } else {
             const formattedDate = formatDateDMY(dateToCheck);
-            toolResult = { date: formattedDate, day_name: availability.dayName, available_slots: availability.slots, total_available: availability.slots.length };
+            const firstSlot = filteredSlots[0];
+            toolResult = {
+              date: formattedDate,
+              day_name: availability.dayName,
+              first_available_slot: firstSlot,
+              instruction: `Ofereça APENAS este horário ao lead: ${availability.dayName}, ${formattedDate} às ${firstSlot}. NÃO mencione outros horários.`,
+            };
           }
         }
 
