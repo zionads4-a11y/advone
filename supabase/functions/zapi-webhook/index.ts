@@ -840,24 +840,53 @@ async function handleAgentPhase(
         if (fnName === "check_availability") {
           hasCheckAvailability = true;
           let dateToCheck = args.date || getNextAvailableDays(1)[0];
+          const period = String(args.period || "qualquer").toLowerCase();
           const availability = await getAvailableSlots(supabase, companyId, dateToCheck);
 
-          if (availability.slots.length === 0) {
+          // Filtra por turno solicitado
+          const filterByPeriod = (slots: string[]) => {
+            if (period === "manha") return slots.filter(s => parseInt(s.split(":")[0], 10) < 12);
+            if (period === "tarde") return slots.filter(s => parseInt(s.split(":")[0], 10) >= 12);
+            return slots;
+          };
+
+          let filteredSlots = filterByPeriod(availability.slots);
+          // Fallback: se o turno pedido não tem slot, tenta o outro turno do mesmo dia
+          if (filteredSlots.length === 0 && availability.slots.length > 0) filteredSlots = availability.slots;
+
+          if (filteredSlots.length === 0) {
             const nextDays = getNextAvailableDays(3);
-            const alternatives: any[] = [];
+            let firstAlt: { date: string; dayName: string; slot: string } | null = null;
             for (const nd of nextDays) {
               if (nd === dateToCheck) continue;
               const alt = await getAvailableSlots(supabase, companyId, nd);
-              if (alt.slots.length > 0) {
-                alternatives.push(alt);
-                if (alternatives.length >= 2) break;
+              const altFiltered = filterByPeriod(alt.slots);
+              const finalAlt = altFiltered.length > 0 ? altFiltered : alt.slots;
+              if (finalAlt.length > 0) {
+                firstAlt = { date: formatDateDMY(nd), dayName: alt.dayName, slot: finalAlt[0] };
+                break;
               }
             }
             const formattedDate = formatDateDMY(dateToCheck);
-            toolResult = { requested_date: formattedDate, requested_day: availability.dayName, available_slots: [], message: `Não há horários disponíveis em ${availability.dayName} (${formattedDate}).`, alternatives };
+            toolResult = {
+              requested_date: formattedDate,
+              requested_day: availability.dayName,
+              first_available_slot: null,
+              message: `Não há horários disponíveis em ${availability.dayName} (${formattedDate}).`,
+              alternative: firstAlt,
+              instruction: firstAlt
+                ? `Ofereça APENAS este horário alternativo: ${firstAlt.dayName}, ${firstAlt.date} às ${firstAlt.slot}.`
+                : "Sem horários nos próximos dias úteis. Pergunte outra preferência ao lead.",
+            };
           } else {
             const formattedDate = formatDateDMY(dateToCheck);
-            toolResult = { date: formattedDate, day_name: availability.dayName, available_slots: availability.slots, total_available: availability.slots.length };
+            const firstSlot = filteredSlots[0];
+            toolResult = {
+              date: formattedDate,
+              day_name: availability.dayName,
+              first_available_slot: firstSlot,
+              instruction: `Ofereça APENAS este horário ao lead: ${availability.dayName}, ${formattedDate} às ${firstSlot}. NÃO mencione outros horários.`,
+            };
           }
         }
 
