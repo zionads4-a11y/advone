@@ -2,8 +2,9 @@ import { useMemo } from "react";
 import { format, startOfWeek, addDays, isSameDay, isBefore } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
-import { Check, Clock, AlertTriangle, Repeat, Pencil, Trash2 } from "lucide-react";
+import { Check, Clock, AlertTriangle, Repeat, Pencil, Trash2, PartyPopper } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getHolidayForDate } from "@/lib/brazilianHolidays";
 
 interface Reminder {
   id: string;
@@ -62,24 +63,35 @@ export function WeeklyView({ currentDate, reminders, onToggle, onEdit, onDelete,
         <div className="p-2 text-xs text-muted-foreground text-center">Hora</div>
         {weekDays.map((day) => {
           const isToday = format(day, "yyyy-MM-dd") === today;
+          const holiday = getHolidayForDate(day);
+          const isNationalHoliday = holiday?.type === "national";
           return (
             <button
               key={day.toISOString()}
               onClick={() => onSelectDate(day)}
               className={cn(
-                "p-2 text-center transition-colors hover:bg-muted/50",
-                isToday && "bg-primary/10"
+                "p-2 text-center transition-colors hover:bg-muted/50 relative",
+                isToday && "bg-primary/10",
+                isNationalHoliday && "bg-amber-500/10"
               )}
+              title={holiday ? holiday.name : undefined}
             >
               <div className="text-[10px] uppercase text-muted-foreground">
                 {format(day, "EEE", { locale: ptBR })}
               </div>
               <div className={cn(
-                "text-sm font-semibold mt-0.5",
-                isToday ? "text-primary" : "text-foreground"
+                "text-sm font-semibold mt-0.5 flex items-center justify-center gap-1",
+                isToday ? "text-primary" : "text-foreground",
+                isNationalHoliday && "text-amber-700 dark:text-amber-400"
               )}>
                 {format(day, "dd")}
+                {isNationalHoliday && <PartyPopper className="h-3 w-3" />}
               </div>
+              {holiday && (
+                <div className="text-[8px] truncate text-amber-600 dark:text-amber-500 mt-0.5 leading-tight">
+                  {holiday.name}
+                </div>
+              )}
             </button>
           );
         })}
@@ -95,10 +107,14 @@ export function WeeklyView({ currentDate, reminders, onToggle, onEdit, onDelete,
             {weekDays.map((day) => {
               const dayKey = format(day, "yyyy-MM-dd");
               const events = eventsByDayHour.get(`${dayKey}-${hour}`) || [];
+              const isNationalHoliday = getHolidayForDate(day)?.type === "national";
               return (
                 <div
                   key={`${dayKey}-${hour}`}
-                  className="border-l border-border/30 p-0.5 min-h-[52px] hover:bg-muted/20 transition-colors cursor-pointer"
+                  className={cn(
+                    "border-l border-border/30 p-0.5 min-h-[52px] hover:bg-muted/20 transition-colors cursor-pointer",
+                    isNationalHoliday && "bg-amber-500/5 bg-[repeating-linear-gradient(45deg,transparent,transparent_8px,hsl(var(--muted))_8px,hsl(var(--muted))_9px)]"
+                  )}
                   onClick={() => onSelectDate(day)}
                 >
                   {events.map((ev) => (
