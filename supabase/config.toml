@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.escavador-proxy]
 verify_jwt = false
+
+[functions.notify-meeting-scheduled]
+verify_jwt = false
