@@ -33,13 +33,13 @@ interface Lead {
 }
 
 const DEFAULT_COLUMNS = [
-  { name: "1º Contato", color: "#3b82f6", position: 0, is_won: false, is_lost: false },
-  { name: "2º Contato", color: "#60a5fa", position: 1, is_won: false, is_lost: false },
-  { name: "3º Contato", color: "#93c5fd", position: 2, is_won: false, is_lost: false },
-  { name: "4º Contato", color: "#a78bfa", position: 3, is_won: false, is_lost: false },
-  { name: "5º Contato", color: "#c084fc", position: 4, is_won: false, is_lost: false },
-  { name: "Em Atendimento", color: "#f59e0b", position: 5, is_won: false, is_lost: false },
-  { name: "Agendado", color: "#10b981", position: 6, is_won: true, is_lost: false },
+  { name: "Em Atendimento", color: "#f59e0b", position: 0, is_won: false, is_lost: false },
+  { name: "1º Follow-UP", color: "#60a5fa", position: 1, is_won: false, is_lost: false },
+  { name: "2º Follow-UP", color: "#93c5fd", position: 2, is_won: false, is_lost: false },
+  { name: "3º Follow-UP", color: "#a78bfa", position: 3, is_won: false, is_lost: false },
+  { name: "4º Follow-UP", color: "#c084fc", position: 4, is_won: false, is_lost: false },
+  { name: "5º Follow-UP", color: "#d8b4fe", position: 5, is_won: false, is_lost: false },
+  { name: "Agendado", color: "#10b981", position: 6, is_won: false, is_lost: false },
   { name: "Ganho", color: "#22c55e", position: 7, is_won: true, is_lost: false },
   { name: "Perdido", color: "#ef4444", position: 8, is_won: false, is_lost: true },
 ];
