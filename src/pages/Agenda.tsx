@@ -14,7 +14,7 @@ import { ptBR } from "date-fns/locale";
 import { CreateEventDialog } from "@/components/agenda/CreateEventDialog";
 import { WeeklyView } from "@/components/agenda/WeeklyView";
 import { DailyView } from "@/components/agenda/DailyView";
-import { getBrazilianHolidays, getHolidayForDate, isBrazilianHoliday } from "@/lib/brazilianHolidays";
+import { getHolidayForDate, isBrazilianHoliday } from "@/lib/brazilianHolidays";
 import {
   AlertDialog,
   AlertDialogAction,

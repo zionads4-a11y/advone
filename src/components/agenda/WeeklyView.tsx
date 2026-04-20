@@ -1,8 +1,7 @@
 import { useMemo } from "react";
-import { format, startOfWeek, addDays, isSameDay, isBefore } from "date-fns";
+import { format, startOfWeek, addDays, isBefore } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Badge } from "@/components/ui/badge";
-import { Check, Clock, AlertTriangle, Repeat, Pencil, Trash2, PartyPopper } from "lucide-react";
+import { Check, Trash2, PartyPopper } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getHolidayForDate } from "@/lib/brazilianHolidays";
 

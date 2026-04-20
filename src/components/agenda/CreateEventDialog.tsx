@@ -14,7 +14,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Loader2, CalendarPlus, Repeat, AlertTriangle } from "lucide-react";
+import { Loader2, CalendarPlus, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { format, addDays, addWeeks, addMonths, addYears } from "date-fns";
 import { RecurrenceSelector, type RecurrenceConfig } from "./RecurrenceSelector";
