@@ -1,9 +1,10 @@
 import { useMemo } from "react";
 import { format, isBefore } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Check, Clock, AlertTriangle, Repeat, Pencil, Trash2 } from "lucide-react";
+import { Check, Clock, AlertTriangle, Repeat, Pencil, Trash2, PartyPopper } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { getHolidayForDate } from "@/lib/brazilianHolidays";
 
 interface Reminder {
   id: string;
@@ -63,13 +64,29 @@ export function DailyView({ currentDate, reminders, onToggle, onEdit, onDelete }
     return map;
   }, [reminders, dayStr]);
 
+  const holiday = getHolidayForDate(currentDate);
+  const isNationalHoliday = holiday?.type === "national";
+
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b border-border bg-muted/30">
-        <h3 className="text-lg font-semibold text-foreground">
+      <div className={cn(
+        "p-4 border-b border-border",
+        isNationalHoliday ? "bg-amber-500/10" : "bg-muted/30"
+      )}>
+        <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
           {format(currentDate, "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+          {isNationalHoliday && <PartyPopper className="h-5 w-5 text-amber-600 dark:text-amber-400" />}
         </h3>
+        {holiday && (
+          <p className={cn(
+            "text-xs mt-1 font-medium",
+            isNationalHoliday ? "text-amber-700 dark:text-amber-400" : "text-muted-foreground"
+          )}>
+            {holiday.type === "national" ? "🚫 Feriado Nacional" : "ℹ️ Ponto Facultativo"}: {holiday.name}
+            {isNationalHoliday && " — agendamentos bloqueados"}
+          </p>
+        )}
       </div>
 
       {/* Time grid */}

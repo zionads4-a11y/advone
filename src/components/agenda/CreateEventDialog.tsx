@@ -14,10 +14,11 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Loader2, CalendarPlus, Repeat } from "lucide-react";
+import { Loader2, CalendarPlus, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { format, addDays, addWeeks, addMonths, addYears } from "date-fns";
 import { RecurrenceSelector, type RecurrenceConfig } from "./RecurrenceSelector";
+import { getHolidayForDate } from "@/lib/brazilianHolidays";
 
 interface CreateEventDialogProps {
   open: boolean;
@@ -112,10 +113,17 @@ export function CreateEventDialog({
     ? leads.filter((l) => l.company_id === companyId)
     : availableLeads;
 
+  const selectedHoliday = dueDate ? getHolidayForDate(new Date(`${dueDate}T12:00:00`)) : null;
+  const isHolidayBlocked = selectedHoliday?.type === "national";
+
   const handleSave = async () => {
     if (!title.trim()) { toast.error("Título é obrigatório"); return; }
     if (!companyId) { toast.error("Selecione uma empresa"); return; }
     if (!dueDate) { toast.error("Selecione uma data"); return; }
+    if (isHolidayBlocked) {
+      toast.error(`Não é possível agendar em feriado nacional (${selectedHoliday?.name}).`);
+      return;
+    }
 
     setSaving(true);
     const dueAt = `${dueDate}T${dueTime}:00`;
@@ -221,6 +229,27 @@ export function CreateEventDialog({
             </div>
           </div>
 
+          {/* Holiday warning */}
+          {selectedHoliday && (
+            <div className={`flex items-start gap-2 rounded-lg border p-3 text-xs ${
+              isHolidayBlocked
+                ? "border-destructive/30 bg-destructive/10 text-destructive"
+                : "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400"
+            }`}>
+              <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold">
+                  {isHolidayBlocked ? "Feriado Nacional" : "Ponto Facultativo"}: {selectedHoliday.name}
+                </p>
+                <p className="opacity-80 mt-0.5">
+                  {isHolidayBlocked
+                    ? "Não é possível agendar nesta data. Escolha outro dia."
+                    : "Esta data é ponto facultativo — confirme com a equipe se haverá expediente."}
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Recurrence */}
           <RecurrenceSelector value={recurrence} onChange={setRecurrence} />
 
@@ -267,7 +296,7 @@ export function CreateEventDialog({
 
         <DialogFooter className="pt-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-          <Button onClick={handleSave} disabled={saving} className="gap-2">
+          <Button onClick={handleSave} disabled={saving || isHolidayBlocked} className="gap-2">
             {saving && <Loader2 className="h-4 w-4 animate-spin" />}
             {editEvent ? "Salvar" : "Criar"}
           </Button>

@@ -7,13 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, CalendarClock, Check, Clock, AlertTriangle, Plus, Repeat, Pencil, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, CalendarClock, Check, Clock, AlertTriangle, Plus, Repeat, Pencil, Trash2, ChevronLeft, ChevronRight, PartyPopper, Info } from "lucide-react";
 import { toast } from "sonner";
 import { format, isSameDay, isAfter, isBefore, addDays, addWeeks, addMonths, subDays, subWeeks, subMonths, startOfWeek, endOfWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CreateEventDialog } from "@/components/agenda/CreateEventDialog";
 import { WeeklyView } from "@/components/agenda/WeeklyView";
 import { DailyView } from "@/components/agenda/DailyView";
+import { getHolidayForDate, isBrazilianHoliday } from "@/lib/brazilianHolidays";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -247,6 +248,14 @@ export default function Agenda() {
         </div>
       </div>
 
+      {/* Reminder banner */}
+      <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm">
+        <Info className="h-4 w-4 shrink-0 text-primary mt-0.5" />
+        <div className="text-foreground/90">
+          <span className="font-medium text-primary">Lembrete:</span> Confira as agendas regularmente e bloqueie horários indisponíveis. Os <span className="font-medium">feriados nacionais</span> já estão automaticamente bloqueados — nenhum agendamento poderá ser criado nessas datas.
+        </div>
+      </div>
+
       {/* Navigation bar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
@@ -285,22 +294,47 @@ export default function Agenda() {
                 hasOverdue: (date) => eventDays.get(format(date, "yyyy-MM-dd"))?.hasOverdue || false,
                 hasPending: (date) => eventDays.get(format(date, "yyyy-MM-dd"))?.hasPending || false,
                 hasCompleted: (date) => eventDays.get(format(date, "yyyy-MM-dd"))?.hasCompleted || false,
+                isHoliday: (date) => isBrazilianHoliday(date),
               }}
               modifiersClassNames={{
                 hasOverdue: "bg-destructive/20 text-destructive font-bold",
                 hasPending: "bg-primary/20 text-primary font-semibold",
                 hasCompleted: "bg-success/20 text-success",
+                isHoliday: "bg-amber-500/20 text-amber-700 dark:text-amber-400 font-bold line-through opacity-80",
               }}
+              disabled={(date) => isBrazilianHoliday(date)}
               className="pointer-events-auto"
             />
             <div className="mt-3 flex flex-wrap gap-3 text-[10px] text-muted-foreground px-1">
               <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-destructive/40" /> Atrasado</span>
               <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-primary/40" /> Pendente</span>
               <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-success/40" /> Concluído</span>
+              <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-amber-500/40" /> Feriado</span>
             </div>
           </div>
 
           <div className="space-y-6">
+            {(() => {
+              const holiday = getHolidayForDate(selectedDate);
+              if (!holiday) return null;
+              return (
+                <div className={`flex items-start gap-3 rounded-xl border p-4 ${
+                  holiday.type === "national"
+                    ? "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400"
+                    : "border-muted-foreground/20 bg-muted/30 text-muted-foreground"
+                }`}>
+                  <PartyPopper className="h-5 w-5 shrink-0 mt-0.5" />
+                  <div className="text-sm">
+                    <p className="font-semibold">{holiday.name}</p>
+                    <p className="opacity-80 mt-0.5">
+                      {holiday.type === "national"
+                        ? "Feriado nacional — agendamentos bloqueados nesta data."
+                        : "Ponto facultativo — confirme com a equipe se haverá expediente."}
+                    </p>
+                  </div>
+                </div>
+              );
+            })()}
             <MonthDayDetail
               selectedDate={selectedDate}
               reminders={selectedDateReminders}
