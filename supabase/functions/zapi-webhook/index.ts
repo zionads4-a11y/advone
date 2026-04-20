@@ -1132,11 +1132,11 @@ async function handleAgentPhase(
           });
 
           if (!shouldSchedule) {
-            const targetPosition = 5;
-            const { data: cols } = await supabase.from("kanban_columns").select("id")
-              .eq("company_id", companyId).order("position", { ascending: true }).limit(targetPosition + 1);
-            if (cols && cols.length > targetPosition) {
-              await supabase.from("leads").update({ kanban_column_id: cols[targetPosition].id }).eq("id", leadId);
+            // Lead qualificado mas ainda não agendou: mantém em "Em Atendimento" (pos 0).
+            const { data: emAtCol } = await supabase.from("kanban_columns").select("id")
+              .eq("company_id", companyId).eq("position", 0).maybeSingle();
+            if (emAtCol) {
+              await supabase.from("leads").update({ kanban_column_id: emAtCol.id }).eq("id", leadId);
             }
           }
         } else if (qualificationResult.status === "not_qualified") {
