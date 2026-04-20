@@ -1191,31 +1191,66 @@ async function enrollInCadence(supabase: any, companyId: string, leadId: string,
 }
 
 function splitIntoNaturalMessages(text: string): string[] {
-  if (!text || text.length <= 120) return [text];
-  const paragraphs = text.split(/\n\n+/).map((p) => p.trim()).filter(Boolean);
-  const messages: string[] = [];
+  if (!text) return [text];
+  const trimmed = text.trim();
+  if (!trimmed) return [trimmed];
 
+  // 1) Primeiro quebra por parágrafos (\n\n) e quebras de linha simples (\n)
+  const paragraphs = trimmed.split(/\n+/).map((p) => p.trim()).filter(Boolean);
+  const rawSentences: string[] = [];
+
+  // 2) Dentro de cada parágrafo, quebra por frases (., ?, !) — cada pergunta vira mensagem própria
   for (const para of paragraphs) {
-    if (para.length <= 150) { messages.push(para); continue; }
-    const lines = para.split(/\n/).map((l) => l.trim()).filter(Boolean);
-    if (lines.length > 1 && lines.every((l) => l.length <= 150)) { messages.push(...lines); continue; }
-    const sentences = para.match(/[^.!?]+[.!?]+[\s]*/g) || [para];
-    let currentChunk = "";
-    for (const sentence of sentences) {
-      if ((currentChunk + sentence).length > 150 && currentChunk) { messages.push(currentChunk.trim()); currentChunk = sentence; }
-      else { currentChunk += sentence; }
+    // Captura frases preservando pontuação final
+    const matches = para.match(/[^.!?…]+[.!?…]+["')\]]*|[^.!?…]+$/g);
+    if (!matches) { rawSentences.push(para); continue; }
+    for (const m of matches) {
+      const s = m.trim();
+      if (s) rawSentences.push(s);
     }
-    if (currentChunk.trim()) messages.push(currentChunk.trim());
   }
 
-  const merged: string[] = [];
-  for (const msg of messages) {
-    if (merged.length > 0 && merged[merged.length - 1].length < 40 && msg.length < 40) {
-      merged[merged.length - 1] += "\n" + msg;
-    } else { merged.push(msg); }
-  }
+  // 3) Agrupamento inteligente:
+  //    - Toda frase terminada em "?" ou "!" fica SOZINHA (pergunta/exclamação destacada)
+  //    - Frases curtas afirmativas consecutivas (<60 chars) podem ser agrupadas até ~140 chars
+  //    - Saudações isoladas (Oi!, Olá 😊) ficam em mensagem própria
+  const messages: string[] = [];
+  let buffer = "";
 
-  return merged.length > 0 ? merged : [text];
+  const flush = () => {
+    const v = buffer.trim();
+    if (v) messages.push(v);
+    buffer = "";
+  };
+
+  for (const sentence of rawSentences) {
+    const isQuestion = /[?]["')\]]*\s*$/.test(sentence);
+    const isExclam = /[!]["')\]]*\s*$/.test(sentence) && sentence.length < 80;
+    const isShort = sentence.length < 60;
+
+    if (isQuestion || isExclam) {
+      // pergunta/exclamação sempre vai sozinha
+      flush();
+      messages.push(sentence);
+      continue;
+    }
+
+    if (!buffer) {
+      buffer = sentence;
+      continue;
+    }
+
+    // tenta agrupar com a frase anterior se ambas curtas e cabem em ~140 chars
+    if (isShort && buffer.length + sentence.length + 1 <= 140) {
+      buffer = `${buffer} ${sentence}`;
+    } else {
+      flush();
+      buffer = sentence;
+    }
+  }
+  flush();
+
+  return messages.length > 0 ? messages : [trimmed];
 }
 
 // ====== MAIN HANDLER ======
