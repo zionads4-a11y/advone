@@ -335,6 +335,15 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
         </CardContent>
       </Card>
 
+      {/* Editor de fluxos do bot por empresa */}
+      <BotFlowsEditor
+        companyId={companyId}
+        niche={specialty}
+        officeName={officeName}
+        disabled={!aiEnabled}
+        onApplyPrompt={(p) => setAiPrompt(p)}
+      />
+
       {/* Prompt card */}
       <Card className="border-border/50">
         <CardHeader className="pb-3">
