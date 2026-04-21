@@ -315,25 +315,7 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
         </CardContent>
       </Card>
 
-      {/* Triage options card */}
-      <Card className="border-border/50">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <ListChecks className="h-5 w-5 text-primary" />
-            Menu de Triagem do Bot
-          </CardTitle>
-          <p className="text-xs text-muted-foreground">
-            Configure as opções que o bot apresentará ao lead para identificar o assunto. Cada empresa pode ter suas próprias opções.
-          </p>
-        </CardHeader>
-        <CardContent>
-          <TriageOptionsEditor
-            options={triageOptions}
-            onChange={setTriageOptions}
-            disabled={!aiEnabled}
-          />
-        </CardContent>
-      </Card>
+      {/* Menu de Triagem removido — substituído pelo Editor de Fluxos abaixo */}
 
       {/* Editor de fluxos do bot por empresa */}
       <BotFlowsEditor
