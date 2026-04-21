@@ -351,9 +351,10 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
             </div>
             <p className="text-[10px] text-muted-foreground">
               Aplique um prompt pronto com fluxos de qualificação e question_keys alinhados ao Decision Engine.
+              {visibleTemplates.length === 0 && " Defina a Área de Atuação acima para ver templates."}
             </p>
             <div className="flex flex-wrap gap-2">
-              {PROMPT_TEMPLATES.map((tpl) => (
+              {visibleTemplates.map((tpl) => (
                 <Button
                   key={tpl.id}
                   type="button"
