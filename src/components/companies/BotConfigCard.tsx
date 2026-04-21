@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { TriageOptionsEditor, type TriageOption } from "./TriageOptionsEditor";
 import { BotTestChat } from "./BotTestChat";
 import { AgentConfigPanel } from "./AgentConfigPanel";
+import { DecisionRulesPanel } from "./DecisionRulesPanel";
 
 interface BotConfigCardProps {
   companyId: string;
@@ -351,6 +352,9 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
 
       {/* Agent Configuration Panel */}
       <AgentConfigPanel companyId={companyId} aiEnabled={aiEnabled} />
+
+      {/* Decision Engine Rules Panel */}
+      <DecisionRulesPanel companyId={companyId} />
       </div>
 
       {/* Test Chat Panel */}

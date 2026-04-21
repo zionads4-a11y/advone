@@ -650,6 +650,56 @@ export type Database = {
           },
         ]
       }
+      decision_rules: {
+        Row: {
+          case_type: string | null
+          company_id: string | null
+          conditions: Json
+          created_at: string
+          id: string
+          is_active: boolean
+          niche: string
+          output: Json
+          priority: number
+          rule_name: string
+          updated_at: string
+        }
+        Insert: {
+          case_type?: string | null
+          company_id?: string | null
+          conditions?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          niche: string
+          output?: Json
+          priority?: number
+          rule_name: string
+          updated_at?: string
+        }
+        Update: {
+          case_type?: string | null
+          company_id?: string | null
+          conditions?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          niche?: string
+          output?: Json
+          priority?: number
+          rule_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "decision_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
           case_id: string | null
@@ -946,6 +996,60 @@ export type Database = {
           },
           {
             foreignKeyName: "lead_document_requests_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_qualification_answers: {
+        Row: {
+          answers: Json
+          case_type: string | null
+          company_id: string
+          created_at: string
+          decided_at: string | null
+          decision_result: Json | null
+          id: string
+          lead_id: string
+          niche: string
+          updated_at: string
+        }
+        Insert: {
+          answers?: Json
+          case_type?: string | null
+          company_id: string
+          created_at?: string
+          decided_at?: string | null
+          decision_result?: Json | null
+          id?: string
+          lead_id: string
+          niche: string
+          updated_at?: string
+        }
+        Update: {
+          answers?: Json
+          case_type?: string | null
+          company_id?: string
+          created_at?: string
+          decided_at?: string | null
+          decision_result?: Json | null
+          id?: string
+          lead_id?: string
+          niche?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_qualification_answers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_qualification_answers_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "leads"
