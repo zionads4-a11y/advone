@@ -565,6 +565,23 @@ const sdrTools = [
   {
     type: "function",
     function: {
+      name: "decide_lead",
+      description: "Chama o Decision Engine do AdvOne para classificar o lead (score/quente-morno-frio) e decidir a próxima ação (agendar, continuar_qualificacao, pedir_documentos, transferir_humano, encerrar) com base nas respostas estruturadas. Use após coletar respostas suficientes do nicho. Persiste o resultado no lead e move o card no Kanban automaticamente.",
+      parameters: {
+        type: "object",
+        properties: {
+          niche: { type: "string", description: "Ex: 'previdenciario'" },
+          case_type: { type: "string", description: "Ex: 'desconto_indevido', 'bpc_loas', 'demora_inss', 'aposentadoria', 'auxilio_doenca', 'pensao_morte', 'revisao_beneficio'" },
+          answers: { type: "object", description: "Respostas estruturadas. SEMPRE inclua 'wants_help' (sim/nao) para liberar agendamento." }
+        },
+        required: ["niche", "answers"],
+        additionalProperties: true
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
       name: "schedule_appointment",
       description: "Agenda uma consulta/reunião para o lead. PRÉ-REQUISITO OBRIGATÓRIO: o CPF do cliente já deve ter sido registrado via register_client_cpf. Caso contrário, a chamada será rejeitada.",
       parameters: {
@@ -909,6 +926,46 @@ async function handleAgentPhase(
             lead_score: args.lead_score || "morno",
           };
           toolResult = { success: true, status: args.status };
+        }
+
+        if (fnName === "decide_lead") {
+          try {
+            const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+            const decRes = await fetch(
+              `${Deno.env.get("SUPABASE_URL")}/functions/v1/decision-engine`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${SERVICE_KEY}`,
+                },
+                body: JSON.stringify({
+                  lead_id: leadId,
+                  company_id: companyId,
+                  niche: args.niche,
+                  case_type: args.case_type ?? null,
+                  answers: args.answers || {},
+                  dry_run: false,
+                }),
+              }
+            );
+            toolResult = await decRes.json();
+            // Sincroniza qualificationResult para fluxo de pós-processamento
+            if (toolResult?.classification) {
+              qualificationResult = {
+                status:
+                  toolResult.classification === "quente" ? "qualified"
+                  : toolResult.classification === "frio" ? "not_qualified"
+                  : "needs_more_info",
+                reason: toolResult.reason || "",
+                summary: `Decision Engine: ${toolResult.classification} (score ${toolResult.score})`,
+                lead_score: toolResult.classification === "invalido" ? "frio" : toolResult.classification,
+              };
+            }
+          } catch (e) {
+            console.error("decide_lead error:", e);
+            toolResult = { error: "Falha ao chamar decision-engine" };
+          }
         }
 
         if (fnName === "schedule_appointment") {
