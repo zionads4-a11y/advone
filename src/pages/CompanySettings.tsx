@@ -106,6 +106,8 @@ export default function CompanySettings() {
         </CardContent>
       </Card>
 
+      <PracticeSpecialtySelector companyId={company.id} />
+
       <Card className="glass-card">
         <CardHeader>
           <CardTitle className="font-display text-lg">Horário de Atendimento</CardTitle>
