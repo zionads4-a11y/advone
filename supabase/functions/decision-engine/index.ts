@@ -145,19 +145,24 @@ serve(async (req) => {
       });
     }
 
-    const supabaseUser = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { auth: { persistSession: false }, global: { headers: { Authorization: authHeader } } },
-    );
+    const token = authHeader.replace("Bearer ", "");
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const isServiceCall = token === serviceKey;
 
-    const { data: { user }, error: authErr } = await supabaseUser.auth.getUser(
-      authHeader.replace("Bearer ", "")
-    );
-    if (authErr || !user) {
-      return new Response(JSON.stringify({ error: "Token inválido" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    // Se for chamada com service key (vinda de outra edge function como zapi-webhook),
+    // pula a validação de usuário. Senão, valida o JWT.
+    if (!isServiceCall) {
+      const supabaseUser = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_ANON_KEY")!,
+        { auth: { persistSession: false } },
+      );
+      const { data: { user }, error: authErr } = await supabaseUser.auth.getUser(token);
+      if (authErr || !user) {
+        return new Response(JSON.stringify({ error: "Token inválido" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     const body = await req.json().catch(() => ({}));
