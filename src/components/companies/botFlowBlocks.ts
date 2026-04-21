@@ -110,6 +110,20 @@ REGRA INTERNA DEMORA (use no Gatilho conforme dias_desde_der):
 - nao_sei: "Tudo bem, {nome}. A equipe consegue verificar a data exata pelo Meu INSS e ver o melhor caminho."`,
   },
   {
+    flow_key: "salario_maternidade",
+    niche: "previdenciario",
+    case_type: "salario_maternidade",
+    block: `▸ SALÁRIO-MATERNIDADE (case_type: salario_maternidade)
+"Que momento especial 🤰😊 Antes de continuar, como posso te chamar?"
+P1 situacao: "{nome}, qual é a sua situação hoje? 1️⃣ Estou grávida 2️⃣ Bebê já nasceu 3️⃣ Adotei ou estou em processo de adoção 4️⃣ Sofri aborto espontâneo / natimorto" → gravida | nasceu | adocao | aborto
+P2 vinculo: "Como você trabalha (ou trabalhava)? 1️⃣ CLT (carteira assinada) 2️⃣ MEI 3️⃣ Contribuinte individual / autônoma 4️⃣ Desempregada (mas já contribuí antes) 5️⃣ Nunca contribuí" → clt | mei | individual | desempregada | nunca
+P3 tempo_contribuicao: "Há quanto tempo você contribui (ou contribuiu) pro INSS? 1️⃣ Menos de 10 meses 2️⃣ 10 meses ou mais 3️⃣ Não sei dizer" → menos_10 | 10_mais | nao_sei
+P4 ja_pediu: "Você já pediu o salário-maternidade? 1️⃣ Ainda não pedi 2️⃣ Pedi e foi NEGADO 3️⃣ Pedi e está em análise 4️⃣ Recebi mas acho que o valor está errado" → nao_pedi | negado | em_analise | valor_errado
+P5 data_parto: "Qual a data do parto / adoção (ou previsão)? 1️⃣ Já aconteceu há menos de 5 anos 2️⃣ Já aconteceu há mais de 5 anos 3️⃣ Ainda vai acontecer 4️⃣ Não lembro a data exata" → menos_5a | mais_5a | futuro | nao_lembro
+Gatilho: "Entendi, {nome}. O salário-maternidade tem regras diferentes pra cada situação (CLT, MEI, desempregada, adotante). Muitos casos negados ou não pedidos têm direito sim — e dá pra cobrar até 5 anos depois do parto."
+wants_help: "Você quer que a equipe analise se você tem direito (ou se cabe revisão)? 1️⃣ Sim 2️⃣ Tenho dúvida ainda" → sim | duvida`,
+  },
+  {
     flow_key: "fallback_outros",
     niche: "previdenciario",
     case_type: "fallback_outros",
