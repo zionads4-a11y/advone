@@ -14,6 +14,7 @@ import { BotTestChat } from "./BotTestChat";
 import { AgentConfigPanel } from "./AgentConfigPanel";
 import { DecisionRulesPanel } from "./DecisionRulesPanel";
 import { PROMPT_TEMPLATES } from "./PromptTemplates";
+import { PracticeSpecialtySelector, type PracticeSpecialty } from "./PracticeSpecialtySelector";
 
 interface BotConfigCardProps {
   companyId: string;
