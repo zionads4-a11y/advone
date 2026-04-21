@@ -154,8 +154,13 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
           <Save className="h-4 w-4" />
         </Button>
         <p className="text-[10px] text-center text-muted-foreground">
-          O prompt é montado dinamicamente e salvo automaticamente em &quot;Perfil de Qualificação&quot;.
+          O prompt é montado dinamicamente, incluindo {offices.filter((o) => o.is_active).length} unidade(s) ativa(s) para reunião presencial.
         </p>
+        {offices.filter((o) => o.is_active).length === 0 && (
+          <p className="text-[10px] text-center text-amber-600 dark:text-amber-400">
+            ⚠️ Nenhum endereço cadastrado. Para reunião presencial, cadastre as unidades em &quot;Endereços dos Escritórios&quot; (Configurações da Empresa).
+          </p>
+        )}
       </CardContent>
     </Card>
   );
