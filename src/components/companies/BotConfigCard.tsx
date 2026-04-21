@@ -15,6 +15,7 @@ import { AgentConfigPanel } from "./AgentConfigPanel";
 import { DecisionRulesPanel } from "./DecisionRulesPanel";
 import { PROMPT_TEMPLATES } from "./PromptTemplates";
 import { PracticeSpecialtySelector, type PracticeSpecialty } from "./PracticeSpecialtySelector";
+import { BotFlowsEditor } from "./BotFlowsEditor";
 
 interface BotConfigCardProps {
   companyId: string;
