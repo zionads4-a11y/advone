@@ -226,6 +226,14 @@ export interface EnabledFlow {
   niche: "previdenciario" | "trabalhista";
 }
 
+export interface OfficeAddress {
+  name: string;
+  address: string;
+  complement?: string | null;
+  reference_point?: string | null;
+  maps_url?: string | null;
+}
+
 /**
  * Monta o prompt completo da Laura a partir dos fluxos habilitados.
  * Pode ser usado tanto pelo SDR previdenciário, trabalhista ou híbrido.
@@ -234,8 +242,10 @@ export function buildDynamicLauraPrompt(params: {
   niche: "previdenciario" | "trabalhista" | "hibrido";
   officeName?: string;
   enabledFlows: EnabledFlow[];
+  offices?: OfficeAddress[];
+  schedulingLink?: string;
 }): string {
-  const { niche, officeName, enabledFlows } = params;
+  const { niche, officeName, enabledFlows, offices = [], schedulingLink } = params;
 
   const orderedFlows = [...enabledFlows].sort((a, b) => a.position - b.position);
 
@@ -255,6 +265,46 @@ export function buildDynamicLauraPrompt(params: {
       : niche === "trabalhista"
         ? "casos trabalhistas (CLT)"
         : "casos previdenciários (INSS) e trabalhistas (CLT)";
+
+  // Bloco de endereços para reunião presencial
+  const officeNumberEmojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
+  const activeOffices = offices.filter((o) => o.address);
+
+  let presencialBlock = "";
+  if (activeOffices.length === 0) {
+    presencialBlock = `Se o lead escolher PRESENCIAL: pergunte gentilmente o melhor horário (manhã / tarde / início da noite) e diga que a equipe vai confirmar o endereço da unidade na sequência. NÃO invente endereço.`;
+  } else if (activeOffices.length === 1) {
+    const o = activeOffices[0];
+    presencialBlock = `Se o lead escolher PRESENCIAL, confirme antes de gravar:
+"O atendimento presencial é na nossa unidade *${o.name}*:
+📍 ${o.address}${o.complement ? `\n${o.complement}` : ""}${o.reference_point ? `\n🗺️ ${o.reference_point}` : ""}${o.maps_url ? `\n🔗 ${o.maps_url}` : ""}
+
+Posso confirmar essa unidade pra você? 1️⃣ Sim 2️⃣ Prefiro online"
+Só registre o agendamento como presencial após o lead confirmar.`;
+  } else {
+    const optionsList = activeOffices
+      .map((o, idx) => `${officeNumberEmojis[idx] || `${idx + 1}.`} *${o.name}* — ${o.address}`)
+      .join("\n");
+    const detalhes = activeOffices
+      .map(
+        (o, idx) =>
+          `Opção ${idx + 1} — ${o.name}:
+📍 ${o.address}${o.complement ? `\n${o.complement}` : ""}${o.reference_point ? `\n🗺️ ${o.reference_point}` : ""}${o.maps_url ? `\n🔗 ${o.maps_url}` : ""}`,
+      )
+      .join("\n\n");
+    presencialBlock = `Se o lead escolher PRESENCIAL, ofereça as ${activeOffices.length} unidades disponíveis:
+"Temos ${activeOffices.length} unidades, qual fica melhor pra você?
+${optionsList}"
+
+Após o lead escolher (responde com o número da unidade), envie os detalhes completos:
+${detalhes}
+
+Confirme o nome da unidade escolhida no agendamento (ex: "Reunião presencial — ${activeOffices[0].name}").`;
+  }
+
+  const onlineBlock = schedulingLink
+    ? `Se o lead escolher ONLINE: envie "${schedulingLink}" como link de agendamento e peça o melhor horário (manhã / tarde / início da noite).`
+    : `Se o lead escolher ONLINE: pergunte o melhor horário (manhã / tarde / início da noite) e informe que a equipe enviará o link da reunião na confirmação.`;
 
   return `Você é Laura, atendente virtual da equipe ${office}, especializada no atendimento inicial de ${nicheDescription}.
 
@@ -299,13 +349,22 @@ Caso contrário, siga a action retornada (continuar_qualificacao, transferir_hum
 ═══════════════════════════════════════════════════════
 BLOCO FINAL DE AGENDAMENTO
 ═══════════════════════════════════════════════════════
+PASSO 1 — Modalidade:
 "Perfeito, {nome} 🙂 Pra te orientar com segurança, o próximo passo é uma conversa rápida com a equipe. Nessa conversa eles vão te mostrar:
 👉 se o seu caso tem solução
 👉 o que pode ser feito
 👉 e quais os próximos passos
 
-Como você prefere ser atendido? 1️⃣ Online 2️⃣ Presencial
-E qual horário costuma ser melhor pra você? 1️⃣ Manhã 2️⃣ Tarde 3️⃣ Início da noite"
+Como você prefere ser atendido(a)? 1️⃣ Online 2️⃣ Presencial"
 
-Confirmação: "Perfeito! Já estou organizando isso pra você e você recebe a confirmação em instantes 🙂 Se precisar de algo, pode me chamar por aqui."`;
+PASSO 2 — Modalidade escolhida:
+${onlineBlock}
+
+${presencialBlock}
+
+PASSO 3 — Horário (depois de confirmada modalidade/unidade):
+"E qual horário costuma ser melhor pra você? 1️⃣ Manhã 2️⃣ Tarde 3️⃣ Início da noite"
+
+Confirmação final: "Perfeito! Já estou organizando isso pra você e você recebe a confirmação em instantes 🙂 Se precisar de algo, pode me chamar por aqui."`;
 }
+
