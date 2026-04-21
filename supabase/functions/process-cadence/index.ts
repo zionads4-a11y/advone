@@ -7,12 +7,14 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Cadência otimizada alinhada ao funil Kanban (Cadencia_Kanban_Final.pdf)
+// Posições: 0=Em Atendimento → 1..5=1º a 5º Follow-Up (10min, 1d, 2d, 3d, 4d) → LOST
 const CADENCE_MESSAGES: Record<number, string> = {
-  1: "Oi, {nome} 🙂\nPassei por aqui porque fiquei aguardando sua resposta.\n\nSe quiser, posso continuar te ajudando por aqui mesmo.",
-  2: "Oi, {nome} 🙂\n\nDependendo do seu caso, pode existir sim alguma forma de resolver ou melhorar essa situação.\n\nSe quiser, me responde por aqui que continuo contigo 🙂",
-  3: "Oi, {nome} 😊\n\nMuita gente que chega com uma situação parecida com a sua acaba descobrindo detalhes importantes quando analisa melhor o caso.\n\nSe quiser, posso te explicar melhor ou seguir com seu atendimento 🙂",
-  4: "Oi, {nome}.\n\nSó passando pra te avisar que, dependendo do caso, quanto mais o tempo passa, mais pode impactar a situação.\n\nSe quiser retomar, é só me responder por aqui que eu continuo te ajudando 🙂",
-  5: "Oi, {nome} 😊\n\nVou encerrar seu atendimento por enquanto, mas quando quiser continuar é só me chamar por aqui, tá?\n\nVou estar à disposição 🙂",
+  1: "Oi, {nome} 🙂\n\nPassei por aqui porque fiquei aguardando sua resposta. Dependendo do seu caso, pode ter algo importante pra resolver.\n\nMe responde que continuo te ajudando.",
+  2: "Oi, {nome} 🙂\n\nMuitas pessoas descobrem que têm solução quando analisam melhor o caso.\n\nSe fizer sentido, posso te explicar melhor ou ver um horário com a equipe.",
+  3: "Oi, {nome} 🙂\n\nDeixar pra depois pode atrasar ou prejudicar sua situação.\n\nSe quiser retomar, me responde aqui.",
+  4: "Oi, {nome}.\n\nVou ser direto: já vi muitos casos com solução que a pessoa não imaginava.\n\nPosso te encaixar para uma análise rápida com a equipe.",
+  5: "Oi, {nome} 🙂\n\nVou encerrar por agora, mas quando quiser continuar é só me chamar.\n\nEstou à disposição.",
 };
 
 // Inactivity nudge messages during active conversation
