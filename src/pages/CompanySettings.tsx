@@ -12,6 +12,7 @@ import { BusinessHoursConfig, type BusinessHours, parseBusinessHours, getDefault
 import MonitoringPackagePurchase from "@/components/monitoring/MonitoringPackagePurchase";
 import { ZapSignConfigCard } from "@/components/companies/ZapSignConfigCard";
 import { PracticeSpecialtySelector } from "@/components/companies/PracticeSpecialtySelector";
+import { CompanyOfficesEditor } from "@/components/companies/CompanyOfficesEditor";
 
 interface Company {
   id: string;
@@ -107,6 +108,8 @@ export default function CompanySettings() {
       </Card>
 
       <PracticeSpecialtySelector companyId={company.id} />
+
+      <CompanyOfficesEditor companyId={company.id} />
 
       <Card className="glass-card">
         <CardHeader>
