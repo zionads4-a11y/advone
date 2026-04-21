@@ -538,6 +538,7 @@ export type Database = {
           logo_url: string | null
           name: string
           partnership_type: Database["public"]["Enums"]["partnership_type"]
+          practice_specialty: string
           updated_at: string
           website: string | null
           whatsapp: string | null
@@ -550,6 +551,7 @@ export type Database = {
           logo_url?: string | null
           name: string
           partnership_type?: Database["public"]["Enums"]["partnership_type"]
+          practice_specialty?: string
           updated_at?: string
           website?: string | null
           whatsapp?: string | null
@@ -562,6 +564,7 @@ export type Database = {
           logo_url?: string | null
           name?: string
           partnership_type?: Database["public"]["Enums"]["partnership_type"]
+          practice_specialty?: string
           updated_at?: string
           website?: string | null
           whatsapp?: string | null
