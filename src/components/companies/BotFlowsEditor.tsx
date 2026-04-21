@@ -157,7 +157,7 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
           O prompt é montado dinamicamente, incluindo {offices.filter((o) => o.is_active).length} unidade(s) ativa(s) para reunião presencial.
         </p>
         {offices.filter((o) => o.is_active).length === 0 && (
-          <p className="text-[10px] text-center text-amber-600 dark:text-amber-400">
+          <p className="text-[10px] text-center text-destructive">
             ⚠️ Nenhum endereço cadastrado. Para reunião presencial, cadastre as unidades em &quot;Endereços dos Escritórios&quot; (Configurações da Empresa).
           </p>
         )}
