@@ -703,6 +703,56 @@ export type Database = {
           },
         ]
       }
+      company_offices: {
+        Row: {
+          address: string
+          company_id: string
+          complement: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          maps_url: string | null
+          name: string
+          position: number
+          reference_point: string | null
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          company_id: string
+          complement?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          maps_url?: string | null
+          name: string
+          position?: number
+          reference_point?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          company_id?: string
+          complement?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          maps_url?: string | null
+          name?: string
+          position?: number
+          reference_point?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_offices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       decision_rules: {
         Row: {
           case_type: string | null
