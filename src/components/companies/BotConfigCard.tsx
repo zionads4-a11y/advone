@@ -14,6 +14,7 @@ import { BotTestChat } from "./BotTestChat";
 import { AgentConfigPanel } from "./AgentConfigPanel";
 import { DecisionRulesPanel } from "./DecisionRulesPanel";
 import { PROMPT_TEMPLATES } from "./PromptTemplates";
+import { PracticeSpecialtySelector, type PracticeSpecialty } from "./PracticeSpecialtySelector";
 
 interface BotConfigCardProps {
   companyId: string;
@@ -31,8 +32,14 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
   const [consultationDuration, setConsultationDuration] = useState("30 minutos");
   const [targetAudience, setTargetAudience] = useState("");
   const [triageOptions, setTriageOptions] = useState<TriageOption[]>([]);
+  const [specialty, setSpecialty] = useState<PracticeSpecialty>("previdenciario");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  const visibleTemplates = PROMPT_TEMPLATES.filter((tpl) => {
+    if (specialty === "hibrido") return true;
+    return tpl.niche === specialty || tpl.niche === "hibrido";
+  });
 
   useEffect(() => {
     const load = async () => {
@@ -144,6 +151,22 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr,400px]">
       <div className="space-y-6">
+      {/* Practice specialty selector */}
+      <Card className="border-border/50">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <ShieldCheck className="h-5 w-5 text-primary" />
+            Área de Atuação do Escritório
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">
+            Define quais templates de qualificação ficam disponíveis para esta empresa.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <PracticeSpecialtySelector companyId={companyId} onChange={setSpecialty} compact />
+        </CardContent>
+      </Card>
+
       {/* Main toggle card */}
       <Card className="border-border/50">
         <CardHeader className="pb-3">
@@ -328,9 +351,10 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
             </div>
             <p className="text-[10px] text-muted-foreground">
               Aplique um prompt pronto com fluxos de qualificação e question_keys alinhados ao Decision Engine.
+              {visibleTemplates.length === 0 && " Defina a Área de Atuação acima para ver templates."}
             </p>
             <div className="flex flex-wrap gap-2">
-              {PROMPT_TEMPLATES.map((tpl) => (
+              {visibleTemplates.map((tpl) => (
                 <Button
                   key={tpl.id}
                   type="button"
