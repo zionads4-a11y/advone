@@ -72,9 +72,17 @@ export const PREVIDENCIARIO_FLOWS: BotFlowDefinition[] = [
     default_enabled: false,
   },
   {
+    flow_key: "salario_maternidade",
+    label: "Salário-Maternidade (gestante, adotante, desempregada)",
+    icon_emoji: "8️⃣",
+    description: "Salário-maternidade para seguradas empregadas, MEI, contribuinte individual, desempregada (período de graça) ou adotante.",
+    case_type: "salario_maternidade",
+    default_enabled: true,
+  },
+  {
     flow_key: "fallback_outros",
     label: "Outro assunto do INSS",
-    icon_emoji: "8️⃣",
+    icon_emoji: "9️⃣",
     description: "Qualificação livre quando o caso não se enquadra nos fluxos acima.",
     case_type: "fallback_outros",
     default_enabled: true,

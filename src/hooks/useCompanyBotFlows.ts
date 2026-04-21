@@ -114,4 +114,5 @@ const PREV_KEYS: Record<string, true> = {
   auxilio_invalidez: true,
   rmc_rcc: true,
   demora_inss: true,
+  salario_maternidade: true,
 };
