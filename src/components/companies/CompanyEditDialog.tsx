@@ -28,6 +28,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Trash2 } from "lucide-react";
 import { BusinessHoursConfig, type BusinessHours, parseBusinessHours, getDefaultBusinessHours } from "./BusinessHoursConfig";
+import { CompanyOfficesEditor } from "./CompanyOfficesEditor";
+import { Separator } from "@/components/ui/separator";
 
 export type PartnershipType = "exito" | "mensalidade_zionads";
 
@@ -132,6 +134,11 @@ export function CompanyEditDialog({
             </p>
           </div>
           <BusinessHoursConfig value={businessHours} onChange={setBusinessHours} />
+
+          <Separator className="my-2" />
+          <CompanyOfficesEditor companyId={company.id} />
+          <Separator className="my-2" />
+
           <div className="flex gap-2">
             <Button type="submit" className="flex-1 gradient-primary text-primary-foreground">
               Salvar
