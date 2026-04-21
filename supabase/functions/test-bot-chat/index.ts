@@ -468,6 +468,23 @@ serve(async (req) => {
             additionalProperties: false
           }
         }
+      },
+      {
+        type: "function",
+        function: {
+          name: "decide_lead",
+          description: "Chama o Decision Engine do AdvOne para classificar o lead e decidir a próxima ação com base nas respostas coletadas. Use quando tiver respostas suficientes para o nicho/case_type.",
+          parameters: {
+            type: "object",
+            properties: {
+              niche: { type: "string", description: "Ex: 'previdenciario'" },
+              case_type: { type: "string", description: "Ex: 'desconto_indevido', 'bpc_loas', 'aposentadoria', etc." },
+              answers: { type: "object", description: "Respostas estruturadas do lead. Inclua sempre 'wants_help' (sim/nao) para o controle final de agendamento." }
+            },
+            required: ["niche", "answers"],
+            additionalProperties: true
+          }
+        }
       }
     ];
 
@@ -580,6 +597,29 @@ serve(async (req) => {
         if (fnName === "qualify_lead") {
           toolResult = { success: true, status: args.status };
           toolActions.push({ tool: "qualify_lead", result: toolResult });
+        }
+
+        if (fnName === "decide_lead") {
+          try {
+            const decRes = await fetch(
+              `${Deno.env.get("SUPABASE_URL")}/functions/v1/decision-engine`,
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: authHeader },
+                body: JSON.stringify({
+                  company_id,
+                  niche: args.niche,
+                  case_type: args.case_type ?? null,
+                  answers: args.answers || {},
+                  dry_run: true, // modo teste — não persiste
+                }),
+              }
+            );
+            toolResult = await decRes.json();
+          } catch (e) {
+            toolResult = { error: "Falha ao chamar decision-engine", detail: String(e) };
+          }
+          toolActions.push({ tool: "decide_lead", result: toolResult });
         }
 
         aiMessages.push({
