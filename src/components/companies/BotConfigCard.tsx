@@ -36,10 +36,9 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const visibleTemplates = PROMPT_TEMPLATES.filter((tpl) => {
-    if (specialty === "hibrido") return true;
-    return tpl.niche === specialty || tpl.niche === "hibrido";
-  });
+  // Mostra todos os templates disponíveis. A área de atuação serve apenas como referência;
+  // o usuário pode aplicar qualquer prompt (Previdenciário, Trabalhista ou Híbrido).
+  const visibleTemplates = PROMPT_TEMPLATES;
 
   useEffect(() => {
     const load = async () => {
