@@ -151,6 +151,22 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr,400px]">
       <div className="space-y-6">
+      {/* Practice specialty selector */}
+      <Card className="border-border/50">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <ShieldCheck className="h-5 w-5 text-primary" />
+            Área de Atuação do Escritório
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">
+            Define quais templates de qualificação ficam disponíveis para esta empresa.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <PracticeSpecialtySelector companyId={companyId} onChange={setSpecialty} compact />
+        </CardContent>
+      </Card>
+
       {/* Main toggle card */}
       <Card className="border-border/50">
         <CardHeader className="pb-3">
