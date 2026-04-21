@@ -615,6 +615,56 @@ export type Database = {
           },
         ]
       }
+      company_bot_flows: {
+        Row: {
+          company_id: string
+          created_at: string
+          custom_intro: string | null
+          enabled: boolean
+          flow_key: string
+          icon_emoji: string
+          id: string
+          label: string
+          niche: string
+          position: number
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          custom_intro?: string | null
+          enabled?: boolean
+          flow_key: string
+          icon_emoji?: string
+          id?: string
+          label: string
+          niche: string
+          position?: number
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          custom_intro?: string | null
+          enabled?: boolean
+          flow_key?: string
+          icon_emoji?: string
+          id?: string
+          label?: string
+          niche?: string
+          position?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_bot_flows_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_monitoring_plans: {
         Row: {
           company_id: string

@@ -15,6 +15,7 @@ import { AgentConfigPanel } from "./AgentConfigPanel";
 import { DecisionRulesPanel } from "./DecisionRulesPanel";
 import { PROMPT_TEMPLATES } from "./PromptTemplates";
 import { PracticeSpecialtySelector, type PracticeSpecialty } from "./PracticeSpecialtySelector";
+import { BotFlowsEditor } from "./BotFlowsEditor";
 
 interface BotConfigCardProps {
   companyId: string;
@@ -333,6 +334,15 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
           />
         </CardContent>
       </Card>
+
+      {/* Editor de fluxos do bot por empresa */}
+      <BotFlowsEditor
+        companyId={companyId}
+        niche={specialty}
+        officeName={officeName}
+        disabled={!aiEnabled}
+        onApplyPrompt={(p) => setAiPrompt(p)}
+      />
 
       {/* Prompt card */}
       <Card className="border-border/50">
