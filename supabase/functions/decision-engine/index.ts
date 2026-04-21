@@ -52,8 +52,26 @@ function evalCondition(input: any, c: Condition): boolean {
 }
 
 function ruleMatches(input: any, rule: Rule): boolean {
-  if (!Array.isArray(rule.conditions) || rule.conditions.length === 0) return true; // fallback rules
-  return rule.conditions.every((c) => evalCondition(input, c));
+  const conds: any = rule.conditions;
+  // Empty/null conditions = fallback rule (always matches)
+  if (conds == null) return true;
+  if (Array.isArray(conds)) {
+    if (conds.length === 0) return true;
+    return conds.every((c) => evalCondition(input, c));
+  }
+  // Object form: { question_key: value | [values] }, looked up in answers.{key}
+  // Array value means "value must be in array" (in); scalar means "eq".
+  if (typeof conds === "object") {
+    const keys = Object.keys(conds);
+    if (keys.length === 0) return true;
+    return keys.every((k) => {
+      const expected = conds[k];
+      const actual = getByPath(input, `answers.${k}`);
+      if (Array.isArray(expected)) return expected.includes(actual);
+      return actual === expected;
+    });
+  }
+  return false;
 }
 
 async function loadApplicableRules(
