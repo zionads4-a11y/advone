@@ -73,12 +73,12 @@ export function useCompanyBotFlows(companyId: string | null, niche: Niche) {
       .order("position");
 
     // Filtra pelo niche atual (se híbrido, mostra os dois)
-    const filtered = (final || []).filter((f: any) => {
+    const filtered = ((final || []) as unknown as CompanyBotFlow[]).filter((f) => {
       if (niche === "hibrido") return true;
       return f.niche === niche;
     });
 
-    setFlows(filtered as CompanyBotFlow[]);
+    setFlows(filtered);
     setLoading(false);
   }, [companyId, niche]);
 
