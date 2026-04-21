@@ -5,7 +5,8 @@ import { Loader2, Sparkles, ListChecks, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCompanyBotFlows } from "@/hooks/useCompanyBotFlows";
-import { buildDynamicLauraPrompt, type EnabledFlow } from "./botFlowBlocks";
+import { useCompanyOffices } from "@/hooks/useCompanyOffices";
+import { buildDynamicLauraPrompt, type EnabledFlow, type OfficeAddress } from "./botFlowBlocks";
 import type { Niche } from "./botFlowsCatalog";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,6 +22,7 @@ interface Props {
 
 export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApplyPrompt }: Props) {
   const { flows, loading, toggleFlow } = useCompanyBotFlows(companyId, niche);
+  const { offices } = useCompanyOffices(companyId);
 
   const enabledCount = useMemo(() => flows.filter((f) => f.enabled).length, [flows]);
 
@@ -40,20 +42,36 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
       return;
     }
 
-    // Renumera os emojis dos fluxos habilitados (1️⃣, 2️⃣, ...)
     const numberEmojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
     const renumbered = enabledFlows.map((f, idx) => ({
       ...f,
       icon_emoji: numberEmojis[idx] || f.icon_emoji,
     }));
 
+    const { data: cfg } = await supabase
+      .from("whatsapp_configs")
+      .select("scheduling_link")
+      .eq("company_id", companyId)
+      .maybeSingle();
+
+    const activeOffices: OfficeAddress[] = offices
+      .filter((o) => o.is_active)
+      .map((o) => ({
+        name: o.name,
+        address: o.address,
+        complement: o.complement,
+        reference_point: o.reference_point,
+        maps_url: o.maps_url,
+      }));
+
     const prompt = buildDynamicLauraPrompt({
       niche,
       officeName,
       enabledFlows: renumbered,
+      offices: activeOffices,
+      schedulingLink: cfg?.scheduling_link || undefined,
     });
 
-    // Salva direto no whatsapp_configs.ai_prompt
     const { error } = await supabase
       .from("whatsapp_configs")
       .update({ ai_prompt: prompt })
@@ -65,7 +83,9 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
     }
 
     onApplyPrompt?.(prompt);
-    toast.success(`Prompt gerado com ${enabledFlows.length} fluxo(s) e salvo automaticamente.`);
+    toast.success(
+      `Prompt gerado com ${enabledFlows.length} fluxo(s) e ${activeOffices.length} unidade(s).`,
+    );
   };
 
   if (loading) {
