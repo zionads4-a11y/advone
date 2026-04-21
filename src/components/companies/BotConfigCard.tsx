@@ -7,12 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Bot, Loader2, Save, ShieldCheck, Building2, Link2, Users, Clock, ListChecks } from "lucide-react";
+import { Bot, Loader2, Save, ShieldCheck, Building2, Link2, Users, Clock, ListChecks, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { TriageOptionsEditor, type TriageOption } from "./TriageOptionsEditor";
 import { BotTestChat } from "./BotTestChat";
 import { AgentConfigPanel } from "./AgentConfigPanel";
 import { DecisionRulesPanel } from "./DecisionRulesPanel";
+import { PROMPT_TEMPLATES } from "./PromptTemplates";
 
 interface BotConfigCardProps {
   companyId: string;
@@ -320,6 +321,35 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="rounded-lg border border-dashed border-primary/40 bg-primary/5 p-3 space-y-2">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <p className="text-xs font-semibold text-foreground">Templates prontos por nicho</p>
+            </div>
+            <p className="text-[10px] text-muted-foreground">
+              Aplique um prompt pronto com fluxos de qualificação e question_keys alinhados ao Decision Engine.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {PROMPT_TEMPLATES.map((tpl) => (
+                <Button
+                  key={tpl.id}
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={!aiEnabled}
+                  onClick={() => {
+                    setAiPrompt(tpl.prompt);
+                    toast.success(`Template "${tpl.name}" aplicado. Lembre-se de salvar.`);
+                  }}
+                  className="gap-1.5 text-xs"
+                >
+                  <Sparkles className="h-3 w-3" />
+                  {tpl.name}
+                </Button>
+              ))}
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label>Prompt / Instruções do Bot</Label>
             <Textarea
