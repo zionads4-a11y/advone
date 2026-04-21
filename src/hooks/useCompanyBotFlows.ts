@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   getFlowCatalog,
   type Niche,
-  type BotFlowDefinition,
 } from "@/components/companies/botFlowsCatalog";
 
 export interface CompanyBotFlow {
