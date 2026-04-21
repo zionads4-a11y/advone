@@ -32,8 +32,14 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
   const [consultationDuration, setConsultationDuration] = useState("30 minutos");
   const [targetAudience, setTargetAudience] = useState("");
   const [triageOptions, setTriageOptions] = useState<TriageOption[]>([]);
+  const [specialty, setSpecialty] = useState<PracticeSpecialty>("previdenciario");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  const visibleTemplates = PROMPT_TEMPLATES.filter((tpl) => {
+    if (specialty === "hibrido") return true;
+    return tpl.niche === specialty || tpl.niche === "hibrido";
+  });
 
   useEffect(() => {
     const load = async () => {
