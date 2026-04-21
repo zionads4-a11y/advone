@@ -36,10 +36,9 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const visibleTemplates = PROMPT_TEMPLATES.filter((tpl) => {
-    if (specialty === "hibrido") return true;
-    return tpl.niche === specialty || tpl.niche === "hibrido";
-  });
+  // Mostra todos os templates disponíveis. A área de atuação serve apenas como referência;
+  // o usuário pode aplicar qualquer prompt (Previdenciário, Trabalhista ou Híbrido).
+  const visibleTemplates = PROMPT_TEMPLATES;
 
   useEffect(() => {
     const load = async () => {
@@ -351,7 +350,6 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
             </div>
             <p className="text-[10px] text-muted-foreground">
               Aplique um prompt pronto com fluxos de qualificação e question_keys alinhados ao Decision Engine.
-              {visibleTemplates.length === 0 && " Defina a Área de Atuação acima para ver templates."}
             </p>
             <div className="flex flex-wrap gap-2">
               {visibleTemplates.map((tpl) => (
