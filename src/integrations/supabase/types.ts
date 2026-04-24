@@ -1050,6 +1050,160 @@ export type Database = {
           },
         ]
       }
+      google_calendar_connections: {
+        Row: {
+          access_token: string
+          company_id: string
+          connected_by: string
+          created_at: string
+          google_email: string
+          id: string
+          is_active: boolean
+          refresh_token: string
+          scope: string
+          selected_calendar_id: string | null
+          selected_calendar_name: string | null
+          token_expires_at: string
+          updated_at: string
+        }
+        Insert: {
+          access_token: string
+          company_id: string
+          connected_by: string
+          created_at?: string
+          google_email: string
+          id?: string
+          is_active?: boolean
+          refresh_token: string
+          scope: string
+          selected_calendar_id?: string | null
+          selected_calendar_name?: string | null
+          token_expires_at: string
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string
+          company_id?: string
+          connected_by?: string
+          created_at?: string
+          google_email?: string
+          id?: string
+          is_active?: boolean
+          refresh_token?: string
+          scope?: string
+          selected_calendar_id?: string | null
+          selected_calendar_name?: string | null
+          token_expires_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "google_calendar_connections_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      google_calendar_event_links: {
+        Row: {
+          company_id: string
+          created_at: string
+          etag: string | null
+          google_calendar_id: string
+          google_event_id: string
+          id: string
+          last_synced_at: string
+          reminder_id: string | null
+          source: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          etag?: string | null
+          google_calendar_id: string
+          google_event_id: string
+          id?: string
+          last_synced_at?: string
+          reminder_id?: string | null
+          source?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          etag?: string | null
+          google_calendar_id?: string
+          google_event_id?: string
+          id?: string
+          last_synced_at?: string
+          reminder_id?: string | null
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "google_calendar_event_links_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "google_calendar_event_links_reminder_id_fkey"
+            columns: ["reminder_id"]
+            isOneToOne: true
+            referencedRelation: "lead_reminders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      google_calendar_sync_state: {
+        Row: {
+          calendar_id: string
+          channel_expiration: string | null
+          channel_id: string | null
+          company_id: string
+          created_at: string
+          id: string
+          last_synced_at: string | null
+          resource_id: string | null
+          sync_token: string | null
+          updated_at: string
+        }
+        Insert: {
+          calendar_id: string
+          channel_expiration?: string | null
+          channel_id?: string | null
+          company_id: string
+          created_at?: string
+          id?: string
+          last_synced_at?: string | null
+          resource_id?: string | null
+          sync_token?: string | null
+          updated_at?: string
+        }
+        Update: {
+          calendar_id?: string
+          channel_expiration?: string | null
+          channel_id?: string | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          last_synced_at?: string | null
+          resource_id?: string | null
+          sync_token?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "google_calendar_sync_state_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kanban_columns: {
         Row: {
           color: string
