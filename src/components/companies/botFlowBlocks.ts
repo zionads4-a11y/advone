@@ -522,7 +522,21 @@ Caso contrário, siga a action retornada (continuar_qualificacao, transferir_hum
 ═══════════════════════════════════════════════════════
 BLOCO FINAL DE AGENDAMENTO
 ═══════════════════════════════════════════════════════
-PASSO 1 — Transição:
+${niche === "trabalhista" ? `PASSO 1 — Transição (texto natural, sem listar números):
+"Perfeito, {nome} 🙂
+Se fizer sentido pra você, posso te encaixar em uma conversa rápida com a equipe.
+É bem direto ao ponto e você já sai com uma visão clara do seu caso.
+Você prefere que essa conversa seja online ou presencial?"
+
+PASSO 2 — Modalidade escolhida:
+${onlineBlock}
+
+${presencialBlock}
+
+PASSO 3 — Horário (texto natural, sem listar números):
+"E qual horário costuma ser melhor pra você… mais de manhã, à tarde ou no final do dia?"
+
+Confirmação final: "Perfeito! Já estou organizando isso pra você e você recebe a confirmação em instantes 🙂 Se precisar de algo, pode me chamar por aqui."` : `PASSO 1 — Transição:
 "Perfeito, {nome} 🙂
 
 O próximo passo agora é uma conversa rápida com a equipe.
@@ -542,5 +556,5 @@ ${presencialBlock}
 PASSO 3 — Horário (depois de confirmada modalidade/unidade):
 "E qual horário costuma ser melhor pra você? 1️⃣ Manhã 2️⃣ Tarde 3️⃣ Início da noite"
 
-Confirmação final: "Perfeito! Já estou organizando isso pra você e você recebe a confirmação em instantes 🙂 Se precisar de algo, pode me chamar por aqui."`;
+Confirmação final: "Perfeito! Já estou organizando isso pra você e você recebe a confirmação em instantes 🙂 Se precisar de algo, pode me chamar por aqui."`}`;
 }
