@@ -81,7 +81,7 @@ export function CustomFlowDialog({ open, onOpenChange, niche, onCreate }: Props)
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-2">
+        <div className="space-y-4 py-2 px-6 overflow-y-auto flex-1 min-h-0">
           <div className="space-y-2">
             <Label htmlFor="custom-label">Nome curto do fluxo *</Label>
             <Input
