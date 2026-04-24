@@ -18,6 +18,8 @@ export interface CompanyBotFlow {
   is_custom: boolean;
   case_type: string | null;
   description: string | null;
+  /** Prompt customizado pela UI. Quando preenchido, substitui o bloco padrão do código. */
+  custom_prompt_block: string | null;
 }
 
 /**
@@ -103,11 +105,28 @@ export function useCompanyBotFlows(companyId: string | null, niche: Niche) {
   }, []);
 
   const updateFlow = useCallback(
-    async (flowId: string, patch: Partial<Pick<CompanyBotFlow, "label" | "icon_emoji" | "position" | "custom_intro" | "description" | "case_type">>) => {
+    async (flowId: string, patch: Partial<Pick<CompanyBotFlow, "label" | "icon_emoji" | "position" | "custom_intro" | "description" | "case_type" | "custom_prompt_block">>) => {
       setFlows((prev) => prev.map((f) => (f.id === flowId ? { ...f, ...patch } : f)));
       await supabase.from("company_bot_flows" as any).update(patch).eq("id", flowId);
     },
     []
+  );
+
+  /** Salva (ou limpa) o prompt customizado de um fluxo. Passar null volta a usar o padrão. */
+  const updateFlowPrompt = useCallback(
+    async (flowId: string, customPromptBlock: string | null) => {
+      setFlows((prev) =>
+        prev.map((f) =>
+          f.id === flowId ? { ...f, custom_prompt_block: customPromptBlock } : f,
+        ),
+      );
+      const { error } = await supabase
+        .from("company_bot_flows" as any)
+        .update({ custom_prompt_block: customPromptBlock })
+        .eq("id", flowId);
+      if (error) throw error;
+    },
+    [],
   );
 
   /**
@@ -170,7 +189,7 @@ export function useCompanyBotFlows(companyId: string | null, niche: Niche) {
     []
   );
 
-  return { flows, loading, toggleFlow, updateFlow, createCustomFlow, deleteFlow, refetch: seedAndLoad };
+  return { flows, loading, toggleFlow, updateFlow, updateFlowPrompt, createCustomFlow, deleteFlow, refetch: seedAndLoad };
 }
 
 // Conjunto de keys previdenciárias (pra desambiguar no modo híbrido)
