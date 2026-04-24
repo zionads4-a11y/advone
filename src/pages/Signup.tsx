@@ -176,8 +176,12 @@ export default function Signup() {
           Voltar para o site
         </button>
 
-        <div className="flex flex-col items-center gap-2 mb-8">
-          <img src={logoAdvOne} alt="AdvOne" className="h-20 w-auto sm:h-24" />
+        <div className="flex flex-col items-center gap-3 mb-8">
+          <img
+            src={logoAdvOne}
+            alt="AdvOne"
+            className="h-32 w-auto sm:h-40 drop-shadow-[0_0_32px_hsl(153,60%,45%/0.6)]"
+          />
           <p className="text-sm text-[hsl(220,10%,55%)]">Crie sua conta e comece a usar agora</p>
         </div>
 
