@@ -539,10 +539,10 @@ Caso contrário, siga a action retornada (continuar_qualificacao, transferir_hum
 ═══════════════════════════════════════════════════════
 BLOCO FINAL DE AGENDAMENTO
 ═══════════════════════════════════════════════════════
-${niche === "trabalhista" ? `PASSO 1 — Transição (texto natural, sem listar números):
+${useConversationalScheduling ? `PASSO 1 — Transição (texto natural, sem listar números):
 "Perfeito, {nome} 🙂
-Se fizer sentido pra você, posso te encaixar em uma conversa rápida com a equipe.
-É bem direto ao ponto e você já sai com uma visão clara do seu caso.
+Quanto antes a equipe analisar o seu caso, melhor.
+Já vou te encaixar em uma conversa rápida com eles, assim você já entende exatamente o que pode ser feito.
 Você prefere que essa conversa seja online ou presencial?"
 
 PASSO 2 — Modalidade escolhida:
