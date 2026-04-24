@@ -571,6 +571,39 @@ export type Database = {
         }
         Relationships: []
       }
+      company_ai_config: {
+        Row: {
+          company_id: string
+          created_at: string
+          custom_system_prompt: string | null
+          id: string
+          model: string
+          provider: string
+          updated_at: string
+          use_openai_for_testing: boolean
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          custom_system_prompt?: string | null
+          id?: string
+          model?: string
+          provider?: string
+          updated_at?: string
+          use_openai_for_testing?: boolean
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          custom_system_prompt?: string | null
+          id?: string
+          model?: string
+          provider?: string
+          updated_at?: string
+          use_openai_for_testing?: boolean
+        }
+        Relationships: []
+      }
       company_bot_agents: {
         Row: {
           agent_type: Database["public"]["Enums"]["bot_agent_type"]
