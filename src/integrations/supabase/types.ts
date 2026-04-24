@@ -654,6 +654,7 @@ export type Database = {
           company_id: string
           created_at: string
           custom_intro: string | null
+          custom_prompt_block: string | null
           description: string | null
           enabled: boolean
           flow_key: string
@@ -670,6 +671,7 @@ export type Database = {
           company_id: string
           created_at?: string
           custom_intro?: string | null
+          custom_prompt_block?: string | null
           description?: string | null
           enabled?: boolean
           flow_key: string
@@ -686,6 +688,7 @@ export type Database = {
           company_id?: string
           created_at?: string
           custom_intro?: string | null
+          custom_prompt_block?: string | null
           description?: string | null
           enabled?: boolean
           flow_key?: string
