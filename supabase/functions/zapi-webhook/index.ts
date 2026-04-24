@@ -1586,10 +1586,10 @@ serve(async (req) => {
               const chunk = splitMessages[i].trim();
               if (!chunk) continue;
 
-              if (i > 0) {
-                const delayMs = Math.min(1000 + chunk.length * 30, 3500);
-                await new Promise((r) => setTimeout(r, delayMs));
-              }
+              // Delay aleatório entre 4 e 8 segundos antes de cada mensagem (humaniza o bot)
+              const delayMs = Math.floor(Math.random() * (8000 - 4000 + 1)) + 4000;
+              console.log(`[${effectivePhase}] Aguardando ${delayMs}ms antes de enviar msg ${i + 1}/${splitMessages.length}`);
+              await new Promise((r) => setTimeout(r, delayMs));
 
               const sendResponse = await fetch(sendUrl, {
                 method: "POST", headers: sendHeaders,
