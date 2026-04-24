@@ -180,7 +180,7 @@ export default function Signup() {
           <img
             src={logoAdvOne}
             alt="AdvOne"
-            className="h-48 w-auto sm:h-56 md:h-64 drop-shadow-[0_0_40px_hsl(153,60%,45%/0.7)]"
+            className="h-28 w-auto sm:h-32 drop-shadow-[0_0_28px_hsl(153,60%,45%/0.6)]"
           />
           <p className="text-sm text-[hsl(220,10%,55%)]">Crie sua conta e comece a usar agora</p>
         </div>
