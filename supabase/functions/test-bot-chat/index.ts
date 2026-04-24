@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { chatCompletion, getCompanyAIConfig } from "../_shared/aiClient.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -391,14 +392,16 @@ serve(async (req) => {
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      return new Response(JSON.stringify({ error: "API key não configurada" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    // Carrega config de IA da empresa (provider + modelo + custom prompt opcional)
+    const aiConfig = await getCompanyAIConfig(company_id);
 
-    const systemPrompt = buildSDRPrompt(config);
+    // No ambiente de teste, se a empresa marcou "use_openai_for_testing", força OpenAI
+    const forceProvider = aiConfig.use_openai_for_testing ? "openai" as const : undefined;
+
+    let systemPrompt = buildSDRPrompt(config);
+    if (aiConfig.custom_system_prompt) {
+      systemPrompt += `\n\n--- INSTRUÇÕES ADICIONAIS DO ESCRITÓRIO ---\n${aiConfig.custom_system_prompt}`;
+    }
 
     const tools = [
       {
@@ -501,25 +504,26 @@ serve(async (req) => {
     while (maxIterations > 0) {
       maxIterations--;
 
-      const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash-lite",
+      let aiData: any;
+      try {
+        aiData = await chatCompletion({
+          companyId: company_id,
+          forceProvider,
           messages: aiMessages,
           tools,
-        }),
-      });
-
-      if (!aiResponse.ok) {
-        const errText = await aiResponse.text();
-        console.error("AI error:", aiResponse.status, errText);
-        if (aiResponse.status === 429) {
+          fallbackModel: "google/gemini-2.5-flash-lite",
+        });
+      } catch (e: any) {
+        const msg = String(e?.message || e);
+        console.error("AI error:", msg);
+        if (msg.includes(" 429")) {
           return new Response(JSON.stringify({ error: "Limite de requisições excedido." }), {
             status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        if (msg.includes(" 402")) {
+          return new Response(JSON.stringify({ error: "Créditos da IA esgotados. Adicione saldo para continuar." }), {
+            status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
         return new Response(JSON.stringify({ error: "Erro ao processar resposta da IA" }), {
@@ -527,7 +531,6 @@ serve(async (req) => {
         });
       }
 
-      const aiData = await aiResponse.json();
       const message = aiData.choices?.[0]?.message;
       if (!message) break;
 
@@ -632,7 +635,13 @@ serve(async (req) => {
 
     const parts = splitIntoNaturalMessages(reply);
 
-    return new Response(JSON.stringify({ reply, parts, tool_actions: toolActions }), {
+    return new Response(JSON.stringify({
+      reply,
+      parts,
+      tool_actions: toolActions,
+      ai_provider: forceProvider ?? aiConfig.provider,
+      ai_model: aiConfig.model,
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
