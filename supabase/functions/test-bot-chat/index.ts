@@ -635,7 +635,13 @@ serve(async (req) => {
 
     const parts = splitIntoNaturalMessages(reply);
 
-    return new Response(JSON.stringify({ reply, parts, tool_actions: toolActions }), {
+    return new Response(JSON.stringify({
+      reply,
+      parts,
+      tool_actions: toolActions,
+      ai_provider: forceProvider ?? aiConfig.provider,
+      ai_model: aiConfig.model,
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
