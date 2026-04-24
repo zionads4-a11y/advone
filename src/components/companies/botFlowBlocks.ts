@@ -335,6 +335,42 @@ export interface EnabledFlow {
   icon_emoji: string;
   position: number;
   niche: "previdenciario" | "trabalhista";
+  /** Quando true, é um fluxo customizado (tese específica do escritório). */
+  is_custom?: boolean;
+  /** Tipo de caso usado pelo decide_lead. Para fluxos do catálogo é igual ao flow_key. */
+  case_type?: string;
+  /** Descrição/tese livre que o escritório cadastrou. Usada pra montar o bloco do prompt. */
+  description?: string;
+}
+
+/**
+ * Gera dinamicamente o bloco de prompt para um fluxo CUSTOMIZADO.
+ * Mantém o mesmo formato dos fluxos do catálogo pra Laura/Julia entender.
+ */
+function buildCustomFlowBlock(flow: EnabledFlow): string {
+  const caseType = flow.case_type || flow.flow_key;
+  const tese = (flow.description || "").trim();
+  const teseLine = tese
+    ? `Contexto/tese deste escritório: ${tese}`
+    : "Contexto: tese específica deste escritório (sem descrição cadastrada).";
+
+  return `▸ ${flow.label.toUpperCase()} (case_type: ${caseType}) — FLUXO PERSONALIZADO
+${teseLine}
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez, identificando se o lead se encaixa nessa tese:
+- "Antes de continuar, como posso te chamar?"
+- Pergunte sobre a situação do lead com empatia, validando se os critérios da tese acima se aplicam ao caso dele.
+- Confirme tempo/duração da situação, documentos disponíveis e se ele ainda está na situação descrita.
+
+Empatia ao longo da conversa: "Entendi…" / "Imagino o quanto isso te preocupou…"
+
+Gatilho de valor: "Entendi, {nome}. Esse é exatamente o tipo de caso em que a equipe consegue te orientar com clareza sobre seus direitos. Muita gente passa por isso e nem imagina que pode buscar uma solução."
+
+Transição: "Pra te orientar com segurança, o ideal é a equipe analisar com mais calma 🙂"
+
+wants_help (texto natural): "Posso encaixar uma conversa rápida com a equipe pra olharem isso pra você?" → interprete livre como sim | duvida.
+
+Para decide_lead, registre o que conseguir capturar do lead + wants_help. Use case_type "${caseType}".`;
 }
 
 export interface OfficeAddress {
@@ -371,9 +407,14 @@ export function buildDynamicLauraPrompt(params: {
     list.map((f) => `${f.icon_emoji} ${f.label}`).join("\n");
 
   const flowBlocks = orderedFlows
-    .map((f) => getFlowBlock(f.niche, f.flow_key))
-    .filter((b): b is FlowPromptBlock => Boolean(b))
-    .map((b) => b.block)
+    .map((f) => {
+      if (f.is_custom) {
+        return buildCustomFlowBlock(f);
+      }
+      const block = getFlowBlock(f.niche, f.flow_key);
+      return block?.block || null;
+    })
+    .filter((b): b is string => Boolean(b))
     .join("\n\n");
 
   const office = officeName ? `${officeName}` : "do escritório";
