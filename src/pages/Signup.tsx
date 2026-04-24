@@ -40,12 +40,12 @@ const PLANS: Record<PlanKey, {
     color: "hsl(210,80%,55%)",
     features: COMMON_FEATURES,
   },
-  bimestral: {
-    label: "Bimestral",
+  trimestral: {
+    label: "Trimestral",
     monthly: 797,
-    charged: 1594,
-    billingLabel: "Cobrança única de R$ 1.594 (2x R$ 797)",
-    ctaSuffix: "R$ 1.594 à vista",
+    charged: 2391,
+    billingLabel: "Cobrança única de R$ 2.391 (3x R$ 797)",
+    ctaSuffix: "R$ 2.391 à vista",
     color: "hsl(153,60%,45%)",
     features: COMMON_FEATURES,
   },
