@@ -147,81 +147,180 @@ wants_help: "Você quer que a equipe analise melhor seu caso? 1️⃣ Sim 2️�
   },
 ];
 
+// ─────────────────────────────────────────────────────────────────────
+// TRABALHISTA — Estilo "Julia" (conversacional, sem menus numerados)
+// Versão: abr/2026
+// O bot identifica o case_type INTERNAMENTE (sem mostrar opções ao lead)
+// e ainda chama decide_lead ao final, preservando Kanban + scoring.
+// ─────────────────────────────────────────────────────────────────────
 const TRAB_FLOW_BLOCKS: FlowPromptBlock[] = [
   {
     flow_key: "rescisao_verbas",
     niche: "trabalhista",
     case_type: "rescisao_verbas",
     block: `▸ RESCISÃO / VERBAS (case_type: rescisao_verbas)
-"Entendi 😊 Antes de continuar, como posso te chamar?"
-P1 employment_status: "Você já saiu da empresa ou ainda trabalha lá? 1️⃣ Já saí 2️⃣ Ainda trabalho 3️⃣ Estou cumprindo aviso" → ja_sai | ainda_trabalha | aviso
-P2 signed_contract: "Você trabalhava com carteira assinada? 1️⃣ Sim 2️⃣ Não 3️⃣ Em parte" → sim | nao | parcial
-P3 missing_termination_payment: "Você sente que faltou alguma verba no acerto? 1️⃣ Sim 2️⃣ Não tenho certeza 3️⃣ Não recebi nada" → sim | nao_tenho_certeza | nao_recebi_nada
-P4 termination_docs: "Você tem documentos, holerites, termo de rescisão ou comprovantes? 1️⃣ Sim 2️⃣ Não 3️⃣ Posso conseguir" → sim | nao | posso_conseguir
-Gatilho: "Entendi, {nome}. Muita gente só descobre depois que recebeu menos do que deveria — e quanto mais o tempo passa, mais difícil fica reunir as provas. A equipe consegue analisar seu acerto e te mostrar com clareza se faltou algo."
-wants_help: "Quer que a equipe analise seu acerto? 1️⃣ Sim 2️⃣ Tenho dúvida ainda" → sim | duvida`,
+Use este fluxo quando o lead descrever: demissão, acerto/rescisão errada, FGTS não pago, verbas faltando, acordo mal feito.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez, sem menus numerados. Vá adaptando conforme as respostas:
+- "Você ainda está trabalhando lá ou já saiu?"
+- "Isso aconteceu recentemente ou já faz um tempo?"
+- "Chegaram a te pagar tudo certinho na saída?"
+- "Você trabalhava com carteira assinada?"
+- "Você tem holerite, termo de rescisão ou alguma mensagem que comprove isso?"
+
+Empatia obrigatória ao longo da conversa: "Entendi… isso acontece com muita gente mesmo 😕" / "Imagino o quanto isso deve ter te incomodado…"
+
+Gatilho de valor (após entender o cenário): "Entendi, {nome}… Muita gente passa por isso e acaba deixando pra lá sem saber que pode ter valores para receber. E dependendo do caso, dá pra recuperar coisas importantes que ficaram pra trás."
+
+Transição: "Pra te orientar com segurança mesmo, o ideal é a equipe analisar seu caso com mais calma 🙂 Eles conseguem te dizer exatamente se existe algum direito e o que pode ser feito."
+
+wants_help (pergunta final, em texto natural — sem listar números): "Se fizer sentido pra você, posso te encaixar em uma conversa rápida com a equipe. Quer que eu organize isso pra você?" → interprete a resposta livre do lead como sim | duvida.
+
+Ao montar a chamada de decide_lead, registre internamente:
+- employment_status (ja_sai | ainda_trabalha | aviso)
+- signed_contract (sim | nao | parcial)
+- missing_termination_payment (sim | nao_tenho_certeza | nao_recebi_nada)
+- termination_docs (sim | nao | posso_conseguir)
+- wants_help (sim | duvida)`,
   },
   {
     flow_key: "horas_extras",
     niche: "trabalhista",
     case_type: "horas_extras",
     block: `▸ HORAS EXTRAS (case_type: horas_extras)
-"Entendi 🙂 Antes de continuar, me fala seu nome?"
-P1 signed_contract: "Você trabalhava com carteira assinada? 1️⃣ Sim 2️⃣ Não 3️⃣ De mais de uma forma" → sim | nao | parcial
-P2 worked_overtime: "Você trabalhava além do horário? 1️⃣ Sim 2️⃣ Não 3️⃣ Às vezes" → sim | nao | as_vezes
-P3 overtime_paid: "Essas horas eram pagas? 1️⃣ Não 2️⃣ Parcialmente 3️⃣ Iam pra banco de horas 4️⃣ Não sei" → nao | parcial | banco_horas | nao_sei
-P4 has_worktime_proof: "Você tem mensagens, escala, ponto ou alguma prova? 1️⃣ Sim 2️⃣ Não 3️⃣ Posso conseguir" → sim | nao | posso_conseguir
-Gatilho: "Entendi, {nome}. Quando a jornada vai além do horário e isso não é pago corretamente, a pessoa pode estar deixando dinheiro na mesa sem perceber. A equipe consegue olhar o contexto e te orientar melhor sobre isso."
-wants_help: "Quer que a equipe avalie seu caso? 1️⃣ Sim 2️⃣ Tenho dúvida ainda" → sim | duvida`,
+Use este fluxo quando o lead descrever: jornada além do horário, banco de horas indevido, horas não pagas.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez, sem menus numerados:
+- "Você trabalhava com carteira assinada?"
+- "Você costumava ficar além do seu horário com frequência?"
+- "Essas horas a mais eram pagas certinho ou iam pro banco de horas?"
+- "Você ainda está nessa empresa ou já saiu?"
+- "Você tem mensagens, escala, registro de ponto ou algo que mostre isso?"
+
+Empatia: "Entendi… isso é mais comum do que parece 😕"
+
+Gatilho de valor: "Entendi, {nome}. Quando a jornada vai além do horário e isso não é pago do jeito certo, a pessoa pode estar deixando dinheiro na mesa sem perceber. Em alguns casos dá pra recuperar valores importantes."
+
+Transição: "Pra te dizer com mais clareza se isso aí virou direito, o ideal é a equipe olhar com calma seu caso 🙂"
+
+wants_help (texto natural): "Se fizer sentido pra você, posso te encaixar em uma conversa rápida com a equipe. Quer que eu organize?" → interprete livre como sim | duvida.
+
+Para decide_lead, registre internamente:
+- signed_contract (sim | nao | parcial)
+- worked_overtime (sim | nao | as_vezes)
+- overtime_paid (nao | parcial | banco_horas | nao_sei)
+- has_worktime_proof (sim | nao | posso_conseguir)
+- wants_help (sim | duvida)`,
   },
   {
     flow_key: "vinculo_sem_carteira",
     niche: "trabalhista",
     case_type: "vinculo_sem_carteira",
     block: `▸ VÍNCULO SEM CARTEIRA (case_type: vinculo_sem_carteira)
-"Entendi 😊 Antes de continuar, como posso te chamar?"
-P1 fixed_work_relation: "Você trabalhava de forma fixa para essa empresa? 1️⃣ Sim 2️⃣ Não 3️⃣ Mais ou menos" → sim | nao | mais_ou_menos
-P2 subordination: "Tinha horário definido e recebia ordens? 1️⃣ Sim 2️⃣ Não 3️⃣ Em parte" → sim | nao | parcial
-P3 recurring_payment: "Recebia pagamento recorrente? 1️⃣ Sim 2️⃣ Não 3️⃣ Variava" → sim | nao | varia
-P4 has_relation_proof: "Tem conversas, comprovantes ou testemunhas? 1️⃣ Sim 2️⃣ Não 3️⃣ Posso conseguir" → sim | nao | posso_conseguir
-Gatilho: "Entendi, {nome}. Trabalhar sem registro pode ter impactos importantes — desde verbas que você teria direito até reflexo no INSS lá na frente. A equipe consegue olhar com calma e te dizer o que dá pra buscar."
-wants_help: "Quer entender melhor com a equipe? 1️⃣ Sim 2️⃣ Tenho dúvida ainda" → sim | duvida`,
+Use este fluxo quando o lead disser: trabalhava sem registro / sem carteira / como PJ mas era CLT.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Você trabalhava fixo pra essa empresa?"
+- "Tinha horário pra cumprir e recebia ordens de algum chefe?"
+- "Recebia certinho todo mês ou variava muito?"
+- "Trabalhou nesse esquema por quanto tempo, mais ou menos?"
+- "Você guardou conversas, comprovantes ou tem alguém que possa testemunhar?"
+
+Empatia: "Entendi… infelizmente isso é bem comum 😕"
+
+Gatilho de valor: "Entendi, {nome}. Trabalhar sem registro pode pesar bastante — tanto em verbas que você teria direito quanto no INSS lá na frente. Muita gente nem imagina o que pode buscar."
+
+Transição: "Pra te explicar direitinho o que cabe no seu caso, o melhor é a equipe analisar com mais cuidado 🙂"
+
+wants_help (texto natural): "Quer que eu organize uma conversa rápida com a equipe?" → interprete livre como sim | duvida.
+
+Para decide_lead:
+- fixed_work_relation (sim | nao | mais_ou_menos)
+- subordination (sim | nao | parcial)
+- recurring_payment (sim | nao | varia)
+- has_relation_proof (sim | nao | posso_conseguir)
+- wants_help (sim | duvida)`,
   },
   {
     flow_key: "acidente_trabalho",
     niche: "trabalhista",
     case_type: "acidente_trabalho",
     block: `▸ ACIDENTE DE TRABALHO (case_type: acidente_trabalho)
-"Sinto muito por isso. Antes de continuar, me fala seu nome?"
-P1 accident_or_illness: "Foi acidente ou problema de saúde por causa do trabalho? 1️⃣ Acidente 2️⃣ Problema de saúde 3️⃣ Tenho dúvida" → acidente | problema_saude | duvida
-P2 time_off: "Você precisou se afastar? 1️⃣ Sim 2️⃣ Não 3️⃣ Parcialmente" → sim | nao | parcial
-P3 cat_or_company_support: "A empresa emitiu CAT ou deu suporte? 1️⃣ Sim 2️⃣ Não 3️⃣ Não sei" → sim | nao | nao_sei
-P4 medical_docs: "Você tem laudos, exames, atestados ou outros documentos? 1️⃣ Sim 2️⃣ Não 3️⃣ Tenho alguns" → sim | nao | tenho_alguns
-Gatilho: "Entendi, {nome}. Em casos assim, a documentação médica e o registro do que aconteceu fazem muita diferença pra garantir o seu direito. A equipe pode analisar tudo com calma e te mostrar o melhor caminho."
-wants_help: "Quer que a equipe analise seu caso? 1️⃣ Sim 2️⃣ Tenho dúvida ainda" → sim | duvida`,
+Use este fluxo quando o lead descrever: acidente no trabalho, doença ocupacional, afastamento.
+
+Comece com empatia REAL: "Sinto muito que você esteja passando por isso 😕"
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Foi um acidente mesmo ou um problema de saúde que apareceu por causa do trabalho?"
+- "Você precisou se afastar?"
+- "A empresa chegou a emitir a CAT ou te deu algum suporte?"
+- "Você tem laudos, exames ou atestados que registrem isso?"
+- "Hoje você ainda está afastado(a) ou já voltou?"
+
+Gatilho de valor: "Entendi, {nome}. Em casos assim, a documentação médica e o registro do que aconteceu fazem TODA a diferença pra garantir seu direito. E quanto antes a equipe olhar isso, melhor."
+
+Transição: "O ideal é a equipe analisar tudo com calma e te mostrar o melhor caminho 🙂"
+
+wants_help (texto natural): "Posso encaixar uma conversa rápida com a equipe pra você?" → interprete livre como sim | duvida.
+
+Para decide_lead:
+- accident_or_illness (acidente | problema_saude | duvida)
+- time_off (sim | nao | parcial)
+- cat_or_company_support (sim | nao | nao_sei)
+- medical_docs (sim | nao | tenho_alguns)
+- wants_help (sim | duvida)`,
   },
   {
     flow_key: "assedio_moral",
     niche: "trabalhista",
     case_type: "assedio_moral",
     block: `▸ ASSÉDIO MORAL (case_type: assedio_moral)
-"Sinto muito por você passar por isso. Antes de continuar, me fala seu nome?"
-P1 harassment_context: "Envolve humilhação, pressão ou perseguição? 1️⃣ Sim 2️⃣ Não 3️⃣ Tenho dúvida" → sim | nao | duvida
-P2 frequency: "Foi uma vez ou frequente? 1️⃣ Uma vez 2️⃣ Frequente 3️⃣ Ainda acontecendo" → uma_vez | frequente | ainda_acontecendo
-P3 harassment_proof: "Você tem mensagens, áudios, testemunhas ou alguma prova? 1️⃣ Sim 2️⃣ Não 3️⃣ Posso conseguir" → sim | nao | posso_conseguir
-P4 still_employed: "Você ainda trabalha lá? 1️⃣ Sim 2️⃣ Não 3️⃣ Estou saindo" → sim | nao | estou_saindo
-Gatilho: "Entendi, {nome}. Situações assim abalam muito a pessoa e, muitas vezes, ela acaba suportando isso sem saber que pode buscar orientação. A equipe pode analisar o contexto, as provas e te dizer com mais clareza o melhor caminho."
-wants_help: "Quer que a equipe entenda melhor o seu caso? 1️⃣ Sim 2️⃣ Tenho dúvida ainda" → sim | duvida`,
+Use este fluxo quando o lead descrever: humilhação, pressão excessiva, perseguição, assédio sexual ou moral.
+
+Comece com empatia FORTE: "Sinto muito que você esteja passando por isso 😕 Pode ficar tranquilo(a), aqui é um espaço seguro pra conversar."
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez, com muito cuidado:
+- "Você ainda trabalha lá ou já saiu?"
+- "Isso vem acontecendo há bastante tempo?"
+- "Foi com você diretamente ou envolveu mais pessoas?"
+- "Você guardou mensagens, áudios ou tem alguém que viu o que aconteceu?"
+
+Empatia ativa entre as perguntas: "Imagino o quanto isso deve ter te abalado…" / "Infelizmente isso é mais comum do que parece…"
+
+Gatilho de valor: "Entendi, {nome}. Situações assim abalam demais a pessoa, e muita gente acaba suportando sem saber que pode buscar orientação. Em casos com prova consistente, dá pra ir atrás de direitos importantes."
+
+Transição: "Pra te orientar com segurança, o ideal é a equipe entender melhor o contexto e as provas 🙂"
+
+wants_help (texto natural): "Posso encaixar uma conversa rápida com a equipe pra te ouvir com mais calma?" → interprete livre como sim | duvida.
+
+Para decide_lead:
+- harassment_context (sim | nao | duvida)
+- frequency (uma_vez | frequente | ainda_acontecendo)
+- harassment_proof (sim | nao | posso_conseguir)
+- still_employed (sim | nao | estou_saindo)
+- wants_help (sim | duvida)`,
   },
   {
     flow_key: "fallback_outros",
     niche: "trabalhista",
     case_type: "fallback_outros",
     block: `▸ OUTRO TIPO TRABALHISTA (case_type: fallback_outros)
-"Entendi 😊 Para eu te direcionar melhor, me fala seu nome primeiro."
-Qualificação livre: "Prazer, {nome}. Me conta com suas palavras o que está acontecendo no seu caso trabalhista."
-Transição: "Entendi, {nome}. Obrigado por me explicar. Como cada situação tem detalhes importantes, o ideal é a equipe analisar com mais atenção antes de te orientar."
-wants_help: "Quer que a equipe analise seu caso? 1️⃣ Sim 2️⃣ Tenho dúvida ainda" → sim | duvida`,
+Use quando o caso do lead não se encaixa claramente em rescisão, horas extras, vínculo, acidente ou assédio (ex: acúmulo/desvio de função, FGTS, equiparação salarial etc.).
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "Me conta com suas palavras o que aconteceu no seu trabalho."
+- "Você ainda está nessa empresa ou já saiu?"
+- "Isso aconteceu recentemente ou já faz um tempo?"
+- "Você tem algum documento, mensagem ou comprovante sobre isso?"
+
+Empatia ao longo: "Entendi… imagino o quanto isso te incomodou."
+
+Gatilho de valor: "Entendi, {nome}. Situações assim, quando não são resolvidas, acabam gerando prejuízo sem a pessoa perceber. A equipe consegue olhar seu caso e te dizer com clareza o que dá pra fazer."
+
+wants_help (texto natural): "Quer que eu encaixe uma conversa rápida com a equipe?" → interprete livre como sim | duvida.
+
+Para decide_lead, registre o que conseguir capturar + wants_help.`,
   },
 ];
 
