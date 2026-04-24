@@ -639,6 +639,17 @@ Caso contrário, siga a action retornada (continuar_qualificacao, transferir_hum
 ═══════════════════════════════════════════════════════
 BLOCO FINAL DE AGENDAMENTO
 ═══════════════════════════════════════════════════════
+⚠️ ORDEM OBRIGATÓRIA — NÃO INVERTA NUNCA:
+1) Lead aceitou conversar com a equipe (wants_help = sim) ✅
+2) Pergunte a MODALIDADE (online ou presencial)
+3) Se PRESENCIAL e houver mais de uma unidade, pergunte qual UNIDADE
+4) Pergunte o HORÁRIO preferido (manhã / tarde / final do dia)
+5) SOMENTE AGORA peça o NOME COMPLETO
+6) NÃO peça CPF aqui — o CPF só será coletado pela equipe humana na reunião (ou em momento posterior, nunca antes do horário ser definido).
+
+❌ É PROIBIDO pedir nome completo ou CPF antes do passo 5.
+❌ É PROIBIDO pedir CPF nessa etapa do bot — sempre deixe pra equipe humana.
+
 ${useConversationalScheduling ? `PASSO 1 — Transição (texto natural, sem listar números):
 "Perfeito, {nome} 🙂
 Quanto antes a equipe analisar o seu caso, melhor.
@@ -650,10 +661,14 @@ ${onlineBlock}
 
 ${presencialBlock}
 
-PASSO 3 — Horário (texto natural, sem listar números):
+PASSO 3 — Horário (texto natural, sem listar números, SÓ depois de modalidade + unidade confirmadas):
 "E qual horário costuma ser melhor pra você… mais de manhã, à tarde ou no final do dia?"
 
-Confirmação final: "Perfeito! Já estou organizando isso pra você e você recebe a confirmação em instantes 🙂 Se precisar de algo, pode me chamar por aqui."` : `PASSO 1 — Transição:
+PASSO 4 — Nome completo (SÓ DEPOIS do horário escolhido):
+"Perfeito 🙂 Pra já deixar tudo organizado aqui pra equipe, me passa o seu nome completo, por favor? (com sobrenomes)"
+⚠️ NÃO peça CPF nesse momento. O CPF é coletado depois pela equipe humana.
+
+Confirmação final (após receber o nome completo): "Perfeito, {nome completo}! Já estou organizando isso pra você e em instantes você recebe a confirmação do horário 🙂 Se precisar de algo, é só me chamar por aqui."` : `PASSO 1 — Transição:
 "Perfeito, {nome} 🙂
 
 O próximo passo agora é uma conversa rápida com a equipe.
@@ -673,5 +688,9 @@ ${presencialBlock}
 PASSO 3 — Horário (depois de confirmada modalidade/unidade):
 "E qual horário costuma ser melhor pra você? 1️⃣ Manhã 2️⃣ Tarde 3️⃣ Início da noite"
 
-Confirmação final: "Perfeito! Já estou organizando isso pra você e você recebe a confirmação em instantes 🙂 Se precisar de algo, pode me chamar por aqui."`}`;
+PASSO 4 — Nome completo (SÓ DEPOIS do horário escolhido):
+"Perfeito 🙂 Pra já deixar tudo organizado aqui pra equipe, me passa o seu nome completo, por favor? (com sobrenomes)"
+⚠️ NÃO peça CPF nesse momento. O CPF é coletado depois pela equipe humana.
+
+Confirmação final (após receber o nome completo): "Perfeito, {nome completo}! Já estou organizando isso pra você e em instantes você recebe a confirmação do horário 🙂 Se precisar de algo, é só me chamar por aqui."`}`;
 }
