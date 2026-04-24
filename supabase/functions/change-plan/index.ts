@@ -5,17 +5,17 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Charged value per plan (NOT the monthly equivalent)
+// mensal:    R$ 997 recorrente mensal
+// bimestral: R$ 1.594 à vista (2x R$ 797)
+// anual:     R$ 7.164 à vista (12x R$ 597)
 const PLAN_VALUES: Record<string, number> = {
-  essencial: 297,
-  profissional: 497,
-  elite: 697,
+  mensal: 997,
+  bimestral: 1594,
+  anual: 7164,
 };
 
-const PLAN_PROCESSES: Record<string, number> = {
-  essencial: 0,
-  profissional: 50,
-  elite: 100,
-};
+const STANDARD_MAX_PROCESSES = 50;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -67,8 +67,8 @@ Deno.serve(async (req) => {
 
     const newValue = PLAN_VALUES[new_plan];
 
-    // Update Asaas subscription if exists
-    if (subscription.asaas_subscription_id) {
+    // Update Asaas subscription if exists (only meaningful for recurring monthly plan)
+    if (subscription.asaas_subscription_id && subscription.plan === "mensal" && new_plan === "mensal") {
       const asaasBase = "https://api.asaas.com/v3";
       const asaasRes = await fetch(`${asaasBase}/subscriptions/${subscription.asaas_subscription_id}`, {
         method: "PUT",
@@ -97,15 +97,14 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Erro ao atualizar assinatura" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Update monitoring plan limits if company exists
-    if (subscription.company_id && PLAN_PROCESSES[new_plan] > 0) {
-      const planType = new_plan === "elite" ? "elite" : "professional";
+    // Ensure standard monitoring limit for the company
+    if (subscription.company_id) {
       await supabase
         .from("company_monitoring_plans")
         .upsert({
           company_id: subscription.company_id,
-          plan_type: planType,
-          max_processes: PLAN_PROCESSES[new_plan],
+          plan_type: "professional",
+          max_processes: STANDARD_MAX_PROCESSES,
           is_active: true,
           updated_at: new Date().toISOString(),
         }, { onConflict: "company_id" });

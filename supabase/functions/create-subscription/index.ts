@@ -5,10 +5,26 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const PLAN_CONFIG: Record<string, { value: number; maxProcesses: number; planType: string }> = {
-  essencial: { value: 297, maxProcesses: 0, planType: "essencial" },
-  profissional: { value: 497, maxProcesses: 50, planType: "profissional" },
-  elite: { value: 697, maxProcesses: 100, planType: "elite" },
+// Standard monitoring limit for all 3 plans
+const STANDARD_MAX_PROCESSES = 50;
+
+// Plan configuration:
+// - mensal:    R$ 997/mês recorrente (PIX ou cartão)
+// - bimestral: R$ 1.594 cobrança única (2x R$ 797 — equivalente a R$ 797/mês)
+// - anual:     R$ 7.164 cobrança única (12x R$ 597 — equivalente a R$ 597/mês)
+type BillingMode = "recurring_monthly" | "one_time";
+
+interface PlanInfo {
+  monthlyEquivalent: number; // shown to user
+  chargedValue: number;       // what Asaas actually charges
+  billing: BillingMode;
+  description: string;
+}
+
+const PLAN_CONFIG: Record<string, PlanInfo> = {
+  mensal:    { monthlyEquivalent: 997, chargedValue: 997,  billing: "recurring_monthly", description: "AdvOne — Plano Mensal (R$ 997/mês)" },
+  bimestral: { monthlyEquivalent: 797, chargedValue: 1594, billing: "one_time",          description: "AdvOne — Plano Bimestral (2x R$ 797 = R$ 1.594 à vista)" },
+  anual:     { monthlyEquivalent: 597, chargedValue: 7164, billing: "one_time",          description: "AdvOne — Plano Anual (12x R$ 597 = R$ 7.164 à vista)" },
 };
 
 Deno.serve(async (req) => {
@@ -84,15 +100,13 @@ Deno.serve(async (req) => {
     // 4. Link user to company
     await adminClient.from("client_companies").insert({ user_id: userId, company_id: company.id });
 
-    // 5. Create monitoring plan if applicable
-    if (planConfig.maxProcesses > 0) {
-      await adminClient.from("company_monitoring_plans").insert({
-        company_id: company.id,
-        plan_type: planConfig.planType,
-        max_processes: planConfig.maxProcesses,
-        is_active: true,
-      });
-    }
+    // 5. Standard monitoring plan for all 3 tiers
+    await adminClient.from("company_monitoring_plans").insert({
+      company_id: company.id,
+      plan_type: "professional",
+      max_processes: STANDARD_MAX_PROCESSES,
+      is_active: true,
+    });
 
     // 6. Create Asaas customer
     const asaasBaseUrl = "https://api.asaas.com/v3";
@@ -115,16 +129,15 @@ Deno.serve(async (req) => {
     if (!customerRes.ok) {
       const errBody = await customerRes.text();
       console.error("Asaas customer error:", errBody);
-      // Save subscription without Asaas IDs for manual retry
       await adminClient.from("subscriptions").insert({
         company_id: company.id,
         user_id: userId,
         plan,
-        value: planConfig.value,
+        value: planConfig.chargedValue,
         status: "asaas_error",
       });
-      return new Response(JSON.stringify({ 
-        success: true, 
+      return new Response(JSON.stringify({
+        success: true,
         warning: "Conta criada, mas houve erro ao criar assinatura no Asaas. Entre em contato com o suporte.",
         user_id: userId,
       }), {
@@ -135,44 +148,74 @@ Deno.serve(async (req) => {
     const customer = await customerRes.json();
     const asaasCustomerId = customer.id;
 
-    // 7. Create Asaas subscription
+    // 7. Create Asaas charge — recurring subscription OR one-time payment
     const today = new Date();
     const nextDueDate = today.toISOString().split("T")[0];
 
-    const subscriptionRes = await fetch(`${asaasBaseUrl}/subscriptions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "access_token": asaasApiKey,
-      },
-      body: JSON.stringify({
-        customer: asaasCustomerId,
-        billingType: "UNDEFINED",
-        value: planConfig.value,
-        nextDueDate,
-        cycle: "MONTHLY",
-        description: `AdvOne - Plano ${plan.charAt(0).toUpperCase() + plan.slice(1)}`,
-        maxPayments: 0,
-      }),
-    });
+    let asaasSubscriptionId: string | null = null;
+    let asaasPaymentId: string | null = null;
 
-    let asaasSubscriptionId = null;
-    if (subscriptionRes.ok) {
-      const subData = await subscriptionRes.json();
-      asaasSubscriptionId = subData.id;
+    if (planConfig.billing === "recurring_monthly") {
+      // Recurring monthly subscription (PIX or credit card via UNDEFINED billingType)
+      const subscriptionRes = await fetch(`${asaasBaseUrl}/subscriptions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "access_token": asaasApiKey,
+        },
+        body: JSON.stringify({
+          customer: asaasCustomerId,
+          billingType: "UNDEFINED", // lets customer pick PIX or credit card
+          value: planConfig.chargedValue,
+          nextDueDate,
+          cycle: "MONTHLY",
+          description: planConfig.description,
+          maxPayments: 0,
+        }),
+      });
+
+      if (subscriptionRes.ok) {
+        const subData = await subscriptionRes.json();
+        asaasSubscriptionId = subData.id;
+      } else {
+        console.error("Asaas subscription error:", await subscriptionRes.text());
+      }
     } else {
-      console.error("Asaas subscription error:", await subscriptionRes.text());
+      // One-time payment (bimestral / anual)
+      const paymentRes = await fetch(`${asaasBaseUrl}/payments`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "access_token": asaasApiKey,
+        },
+        body: JSON.stringify({
+          customer: asaasCustomerId,
+          billingType: "UNDEFINED",
+          value: planConfig.chargedValue,
+          dueDate: nextDueDate,
+          description: planConfig.description,
+        }),
+      });
+
+      if (paymentRes.ok) {
+        const payData = await paymentRes.json();
+        asaasPaymentId = payData.id;
+      } else {
+        console.error("Asaas payment error:", await paymentRes.text());
+      }
     }
+
+    const hasAsaasCharge = !!(asaasSubscriptionId || asaasPaymentId);
 
     // 8. Save subscription record
     await adminClient.from("subscriptions").insert({
       company_id: company.id,
       user_id: userId,
       plan,
-      value: planConfig.value,
+      value: planConfig.chargedValue,
       asaas_customer_id: asaasCustomerId,
-      asaas_subscription_id: asaasSubscriptionId,
-      status: asaasSubscriptionId ? "active" : "pending",
+      asaas_subscription_id: asaasSubscriptionId ?? asaasPaymentId,
+      status: hasAsaasCharge ? "active" : "pending",
     });
 
     // 9. Update profile with phone
@@ -186,6 +229,7 @@ Deno.serve(async (req) => {
       company_id: company.id,
       plan,
       asaas_subscription_id: asaasSubscriptionId,
+      asaas_payment_id: asaasPaymentId,
     }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useNavigate, useSearchParams, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,18 +10,63 @@ import { Loader2, CheckCircle2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import logoAdvOne from "@/assets/logo-advone.png";
 
-const PLANS = {
-  essencial: { label: "Essencial", value: 297, color: "hsl(153,60%,45%)", features: ["CRM completo com Kanban", "Bot com IA no WhatsApp", "Cadência automática", "Agenda integrada"] },
-  profissional: { label: "Profissional", value: 497, color: "hsl(210,80%,55%)", features: ["Tudo do Essencial", "Monitoramento até 50 processos", "Alertas automáticos", "Financeiro com Asaas"] },
-  elite: { label: "Elite", value: 697, color: "hsl(0,70%,60%)", features: ["Tudo do Profissional", "Monitoramento até 100 processos", "Prioridade nos alertas", "Gerente dedicado"] },
+type PlanKey = "mensal" | "bimestral" | "anual";
+
+const COMMON_FEATURES = [
+  "CRM completo com Kanban",
+  "Bot com IA no WhatsApp",
+  "Cadência automática",
+  "Agenda integrada",
+  "Monitoramento de até 50 processos",
+  "Alertas automáticos de movimentação",
+  "Financeiro integrado com Asaas",
+];
+
+const PLANS: Record<PlanKey, {
+  label: string;
+  monthly: number;       // valor mensal exibido
+  charged: number;       // valor que o Asaas cobra de fato
+  billingLabel: string;  // descrição da cobrança
+  ctaSuffix: string;     // texto do botão
+  color: string;
+  features: string[];
+}> = {
+  mensal: {
+    label: "Mensal",
+    monthly: 997,
+    charged: 997,
+    billingLabel: "Cobrança recorrente mensal (PIX ou cartão)",
+    ctaSuffix: "R$ 997/mês",
+    color: "hsl(210,80%,55%)",
+    features: COMMON_FEATURES,
+  },
+  bimestral: {
+    label: "Bimestral",
+    monthly: 797,
+    charged: 1594,
+    billingLabel: "Cobrança única de R$ 1.594 (2x R$ 797)",
+    ctaSuffix: "R$ 1.594 à vista",
+    color: "hsl(153,60%,45%)",
+    features: COMMON_FEATURES,
+  },
+  anual: {
+    label: "Anual",
+    monthly: 597,
+    charged: 7164,
+    billingLabel: "Cobrança única de R$ 7.164 (12x R$ 597)",
+    ctaSuffix: "R$ 7.164 à vista",
+    color: "hsl(38,90%,55%)",
+    features: COMMON_FEATURES,
+  },
 };
 
 export default function Signup() {
   const { user, loading: authLoading } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const planKey = (searchParams.get("plan") || "essencial") as keyof typeof PLANS;
-  const plan = PLANS[planKey] || PLANS.essencial;
+  const planParam = (searchParams.get("plan") || "mensal") as PlanKey;
+  const planKey: PlanKey = PLANS[planParam] ? planParam : "mensal";
+  const plan = PLANS[planKey];
 
   const [form, setForm] = useState({
     full_name: "",
@@ -147,9 +192,9 @@ export default function Signup() {
                   </span>
                 </div>
                 <CardTitle className="text-3xl font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                  R$ {plan.value}<span className="text-base font-normal text-[hsl(220,10%,55%)]">/mês</span>
+                  R$ {plan.monthly}<span className="text-base font-normal text-[hsl(220,10%,55%)]">/mês</span>
                 </CardTitle>
-                <CardDescription className="text-[hsl(220,10%,55%)]">Assinatura mensal recorrente</CardDescription>
+                <CardDescription className="text-[hsl(220,10%,55%)]">{plan.billingLabel}</CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
@@ -227,7 +272,7 @@ export default function Signup() {
 
                   <Button type="submit" disabled={loading} className="w-full gradient-primary text-[hsl(0,0%,100%)] font-semibold py-6 text-base">
                     {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
-                    Criar conta e assinar — R$ {plan.value}/mês
+                    Criar conta e assinar — {plan.ctaSuffix}
                   </Button>
 
                   <p className="text-center text-xs text-[hsl(220,10%,45%)]">

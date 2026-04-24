@@ -16,27 +16,42 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
+const COMMON_FEATURES = [
+  "CRM completo com Kanban",
+  "Bot com IA no WhatsApp",
+  "Cadência automática",
+  "Agenda integrada",
+  "Monitoramento de até 50 processos",
+  "Alertas automáticos de movimentação",
+];
+
 const PLANS = [
   {
-    key: "essencial",
-    label: "Essencial",
-    value: 297,
-    color: "hsl(var(--primary))",
-    features: ["CRM Completo", "Kanban de Leads", "Bot WhatsApp com IA", "Agenda e Lembretes"],
-  },
-  {
-    key: "profissional",
-    label: "Profissional",
-    value: 497,
-    color: "hsl(262, 80%, 60%)",
-    features: ["Tudo do Essencial", "Até 50 processos monitorados", "Alertas de movimentação", "Relatórios avançados"],
-  },
-  {
-    key: "elite",
-    label: "Elite",
-    value: 697,
+    key: "anual",
+    label: "Anual",
+    monthly: 597,
+    charged: 7164,
+    billingLabel: "12x R$ 597 — R$ 7.164 à vista",
     color: "hsl(38, 90%, 55%)",
-    features: ["Tudo do Profissional", "Até 100 processos monitorados", "Suporte prioritário", "Funcionalidades exclusivas"],
+    features: COMMON_FEATURES,
+  },
+  {
+    key: "bimestral",
+    label: "Bimestral",
+    monthly: 797,
+    charged: 1594,
+    billingLabel: "2x R$ 797 — R$ 1.594 à vista",
+    color: "hsl(153, 60%, 45%)",
+    features: COMMON_FEATURES,
+  },
+  {
+    key: "mensal",
+    label: "Mensal",
+    monthly: 997,
+    charged: 997,
+    billingLabel: "Recorrente mensal (PIX ou cartão)",
+    color: "hsl(var(--primary))",
+    features: COMMON_FEATURES,
   },
 ];
 
@@ -50,6 +65,7 @@ export default function PlanChangeSection({ currentPlan, subscriptionStatus, onP
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Index reflects "monthly cost" — anual is cheapest per month, mensal is most expensive
   const currentIndex = PLANS.findIndex((p) => p.key === currentPlan);
 
   const handleChangePlan = async () => {
@@ -69,8 +85,9 @@ export default function PlanChangeSection({ currentPlan, subscriptionStatus, onP
 
       toast.success(`Plano alterado para ${PLANS.find((p) => p.key === selectedPlan)?.label} com sucesso!`);
       onPlanChanged();
-    } catch (err: any) {
-      toast.error(err.message || "Erro ao alterar plano");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Erro ao alterar plano";
+      toast.error(msg);
     } finally {
       setLoading(false);
       setSelectedPlan(null);
@@ -88,8 +105,8 @@ export default function PlanChangeSection({ currentPlan, subscriptionStatus, onP
         <div className="grid gap-4 sm:grid-cols-3">
           {PLANS.map((plan, index) => {
             const isCurrent = plan.key === currentPlan;
-            const isUpgrade = index > currentIndex;
-            const isDowngrade = index < currentIndex;
+            // Lower index = cheaper per month = "downgrade in commitment level"
+            const isUpgrade = index < currentIndex;
 
             return (
               <Card
@@ -111,8 +128,9 @@ export default function PlanChangeSection({ currentPlan, subscriptionStatus, onP
                     <CardTitle className="text-base">{plan.label}</CardTitle>
                   </div>
                   <p className="text-2xl font-bold text-foreground mt-1">
-                    R$ {plan.value}<span className="text-sm font-normal text-muted-foreground">/mês</span>
+                    R$ {plan.monthly}<span className="text-sm font-normal text-muted-foreground">/mês</span>
                   </p>
+                  <p className="text-xs text-muted-foreground mt-1">{plan.billingLabel}</p>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <ul className="space-y-1.5">
@@ -133,12 +151,12 @@ export default function PlanChangeSection({ currentPlan, subscriptionStatus, onP
                       {isUpgrade ? (
                         <>
                           <ArrowUp className="h-3.5 w-3.5 mr-1" />
-                          Upgrade
+                          Mudar para este plano
                         </>
                       ) : (
                         <>
                           <ArrowDown className="h-3.5 w-3.5 mr-1" />
-                          Downgrade
+                          Mudar para este plano
                         </>
                       )}
                     </Button>
@@ -161,7 +179,7 @@ export default function PlanChangeSection({ currentPlan, subscriptionStatus, onP
                   <strong>{PLANS.find((p) => p.key === selectedPlan)?.label}</strong>.
                   <br />
                   <br />
-                  O novo valor será de <strong>R$ {PLANS.find((p) => p.key === selectedPlan)?.value},00/mês</strong>.
+                  O novo valor será de <strong>R$ {PLANS.find((p) => p.key === selectedPlan)?.monthly},00/mês</strong> ({PLANS.find((p) => p.key === selectedPlan)?.billingLabel}).
                   A alteração será aplicada no próximo ciclo de cobrança.
                 </>
               )}
