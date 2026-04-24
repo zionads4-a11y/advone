@@ -525,7 +525,11 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-[hsl(220,20%,16%)] bg-[hsl(220,28%,5%)]">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-8 md:flex-row">
-          <img src={logoAdvOne} alt="AdvOne" className="h-10 w-auto" />
+          <img
+            src={logoAdvOne}
+            alt="AdvOne"
+            className="h-16 w-auto drop-shadow-[0_0_20px_hsl(153,60%,45%/0.5)]"
+          />
           <p className="text-sm text-[hsl(220,10%,45%)]">
             © {new Date().getFullYear()} AdvOne. Todos os direitos reservados.
           </p>
