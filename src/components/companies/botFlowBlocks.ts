@@ -496,7 +496,8 @@ Me conta uma coisa rapidinho 👇 Qual dessas situações mais parece com a sua 
 ${renderMenu(orderedFlows)}`;
   }
 
-  const assistantName = niche === "trabalhista" ? "Julia" : "Laura";
+  const assistantName = niche === "trabalhista" || niche === "hibrido" ? "Julia" : "Laura";
+  const useConversationalScheduling = niche === "trabalhista" || niche === "hibrido";
 
   return `Você é ${assistantName}, atendente virtual da equipe ${office}, especializada no atendimento inicial de ${nicheDescription}.
 
