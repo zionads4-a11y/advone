@@ -426,7 +426,8 @@ Confirme o nome da unidade escolhida no agendamento (ex: "Reunião presencial �
     : `Se o lead escolher ONLINE: pergunte o melhor horário (manhã / tarde / início da noite) e informe que a equipe enviará a confirmação e os detalhes da reunião.`;
 
   // Abertura: para HÍBRIDO usamos o passo INSS x Trabalhista do Prompt v2.
-  // Para nichos puros, mantemos um único menu direto.
+  // Para TRABALHISTA puro, usamos a abertura conversacional da "Julia" (sem menus).
+  // Para PREVIDENCIÁRIO puro, mantemos o menu direto da Laura.
   let aberturaBlock: string;
   if (niche === "hibrido") {
     aberturaBlock = `Oi! Tudo bem? 😊 Seja bem-vindo(a)!
@@ -441,7 +442,7 @@ Qual dessas situações combina mais com o que você está vivendo hoje?
 2️⃣ Tenho um problema no trabalho / empresa
 
 → Se a pessoa escolher 1️⃣, siga para o MENU PREVIDENCIÁRIO.
-→ Se a pessoa escolher 2️⃣, siga para o MENU TRABALHISTA.
+→ Se a pessoa escolher 2️⃣, siga para o MENU TRABALHISTA (estilo Julia, sem menu numerado — conduza por texto livre).
 
 ═══════════════════════════════════════════════════════
 MENU PREVIDENCIÁRIO
@@ -450,10 +451,27 @@ Entendi. Me diz qual dessas situações mais parece com a sua hoje:
 ${renderMenu(prevFlows) || "(nenhum fluxo previdenciário habilitado)"}
 
 ═══════════════════════════════════════════════════════
-MENU TRABALHISTA
+ATENDIMENTO TRABALHISTA (estilo conversacional)
 ═══════════════════════════════════════════════════════
-Entendi. Agora me diz qual dessas situações mais parece com a sua hoje:
-${renderMenu(trabFlows) || "(nenhum fluxo trabalhista habilitado)"}`;
+NÃO mostre menu numerado para casos trabalhistas. Apenas pergunte com naturalidade:
+"Entendi 🙂 Me conta… o que aconteceu no seu trabalho?"
+Depois, conforme a resposta, identifique INTERNAMENTE qual case_type abaixo se aplica e siga o fluxo correspondente:
+${trabFlows.map((f) => `• ${f.label} → ${f.flow_key}`).join("\n") || "(nenhum fluxo trabalhista habilitado)"}`;
+  } else if (niche === "trabalhista") {
+    aberturaBlock = `Oi! Tudo bem? 😊
+Eu sou a Julia, aqui da equipe ${office}.
+
+Pode ficar tranquilo(a), vou te ajudar a entender melhor o que pode estar acontecendo no seu caso 🙂
+
+Me conta… o que aconteceu no seu trabalho?
+
+⚠️ REGRAS DE OURO DESSA ABERTURA:
+- NÃO mostre lista numerada nem peça pra escolher opções.
+- NÃO faça interrogatório.
+- Após a primeira resposta do lead, peça o nome de forma natural: "Antes de continuar, como posso te chamar?"
+- Identifique INTERNAMENTE (sem mostrar) qual dos casos abaixo combina com a história do lead, e siga o fluxo correspondente:
+${orderedFlows.map((f) => `• ${f.label} → ${f.flow_key}`).join("\n")}
+- Se o caso não se encaixar em nenhum, use o fluxo "fallback_outros".`;
   } else {
     aberturaBlock = `Oi! Tudo bem? 😊 Seja bem-vindo(a)! Eu sou a Laura, aqui da equipe ${office}.
 Pode ficar tranquilo(a). Vou te ajudar a entender melhor o que pode estar acontecendo no seu caso 🙂
