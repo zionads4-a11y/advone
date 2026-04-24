@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Sparkles, ListChecks, Save, Plus, Trash2 } from "lucide-react";
+import { Loader2, Sparkles, ListChecks, Save, Plus, Trash2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -19,6 +19,7 @@ import { useCompanyOffices } from "@/hooks/useCompanyOffices";
 import { buildDynamicLauraPrompt, type EnabledFlow, type OfficeAddress } from "./botFlowBlocks";
 import type { Niche } from "./botFlowsCatalog";
 import { CustomFlowDialog } from "./CustomFlowDialog";
+import { EditFlowPromptDialog } from "./EditFlowPromptDialog";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -32,10 +33,11 @@ interface Props {
 }
 
 export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApplyPrompt }: Props) {
-  const { flows, loading, toggleFlow, createCustomFlow, deleteFlow } = useCompanyBotFlows(companyId, niche);
+  const { flows, loading, toggleFlow, createCustomFlow, deleteFlow, updateFlowPrompt } = useCompanyBotFlows(companyId, niche);
   const { offices } = useCompanyOffices(companyId);
   const [customDialogOpen, setCustomDialogOpen] = useState(false);
   const [flowToDelete, setFlowToDelete] = useState<CompanyBotFlow | null>(null);
+  const [flowToEdit, setFlowToEdit] = useState<CompanyBotFlow | null>(null);
 
   const enabledCount = useMemo(() => flows.filter((f) => f.enabled).length, [flows]);
   const customCount = useMemo(() => flows.filter((f) => f.is_custom).length, [flows]);
@@ -52,6 +54,7 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
         is_custom: f.is_custom,
         case_type: f.case_type || undefined,
         description: f.description || undefined,
+        custom_prompt_block: f.custom_prompt_block,
       }));
 
     if (enabledFlows.length === 0) {
@@ -182,6 +185,11 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
                         Personalizado
                       </Badge>
                     )}
+                    {flow.custom_prompt_block && flow.custom_prompt_block.trim().length > 0 && (
+                      <Badge variant="outline" className="text-[10px] border-primary/40 text-primary">
+                        ✏️ Prompt editado
+                      </Badge>
+                    )}
                   </div>
                   <p className="text-[11px] text-muted-foreground font-mono truncate">
                     case_type: {flow.case_type || flow.flow_key}
@@ -194,6 +202,17 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
                 </div>
               </div>
               <div className="flex items-center gap-1 shrink-0">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setFlowToEdit(flow)}
+                  disabled={disabled}
+                  className="h-8 w-8 text-muted-foreground hover:text-primary"
+                  title="Editar prompt deste fluxo"
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
                 <Switch
                   checked={flow.enabled}
                   onCheckedChange={(v) => toggleFlow(flow.id, v)}
@@ -240,6 +259,13 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
         onOpenChange={setCustomDialogOpen}
         niche={niche}
         onCreate={createCustomFlow}
+      />
+
+      <EditFlowPromptDialog
+        open={!!flowToEdit}
+        onOpenChange={(o) => !o && setFlowToEdit(null)}
+        flow={flowToEdit}
+        onSave={updateFlowPrompt}
       />
 
       <AlertDialog open={!!flowToDelete} onOpenChange={(o) => !o && setFlowToDelete(null)}>

@@ -341,6 +341,13 @@ export interface EnabledFlow {
   case_type?: string;
   /** Descrição/tese livre que o escritório cadastrou. Usada pra montar o bloco do prompt. */
   description?: string;
+  /**
+   * Texto completo do bloco de prompt editado pela UI. Quando preenchido,
+   * SUBSTITUI o bloco padrão do código (catálogo) ou o bloco gerado
+   * dinamicamente (custom). Permite o usuário customizar o prompt de cada
+   * fluxo sem mexer no código.
+   */
+  custom_prompt_block?: string | null;
 }
 
 /**
@@ -408,9 +415,15 @@ export function buildDynamicLauraPrompt(params: {
 
   const flowBlocks = orderedFlows
     .map((f) => {
+      // 1) Se o usuário editou o bloco pela UI, ele tem prioridade absoluta
+      if (f.custom_prompt_block && f.custom_prompt_block.trim().length > 0) {
+        return f.custom_prompt_block.trim();
+      }
+      // 2) Fluxo personalizado sem edição → gera dinamicamente a partir da descrição
       if (f.is_custom) {
         return buildCustomFlowBlock(f);
       }
+      // 3) Fluxo do catálogo → usa o bloco padrão do código
       const block = getFlowBlock(f.niche, f.flow_key);
       return block?.block || null;
     })
