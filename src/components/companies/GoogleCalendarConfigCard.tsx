@@ -276,7 +276,7 @@ export function GoogleCalendarConfigCard({ companyId }: Props) {
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold">2. Conectar conta Google</h3>
             {connection?.is_active ? (
-              <Badge className="gap-1 bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/20">
+              <Badge className="gap-1 bg-primary/15 text-primary hover:bg-primary/20">
                 <CheckCircle2 className="h-3 w-3" /> Conectado
               </Badge>
             ) : (

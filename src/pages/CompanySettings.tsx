@@ -14,6 +14,7 @@ import { ZapSignConfigCard } from "@/components/companies/ZapSignConfigCard";
 import { PracticeSpecialtySelector } from "@/components/companies/PracticeSpecialtySelector";
 import { CompanyOfficesEditor } from "@/components/companies/CompanyOfficesEditor";
 import { CompanyAIConfigCard } from "@/components/companies/CompanyAIConfigCard";
+import { GoogleCalendarConfigCard } from "@/components/companies/GoogleCalendarConfigCard";
 
 interface Company {
   id: string;
@@ -131,6 +132,9 @@ export default function CompanySettings() {
 
       {/* ZapSign Config */}
       <ZapSignConfigCard companyId={company.id} />
+
+      {/* Google Calendar Integration */}
+      <GoogleCalendarConfigCard companyId={company.id} />
 
       {!hasMonitoring && company && (
         <MonitoringPackagePurchase
