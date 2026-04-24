@@ -14,7 +14,6 @@ import { ZapSignConfigCard } from "@/components/companies/ZapSignConfigCard";
 import { PracticeSpecialtySelector } from "@/components/companies/PracticeSpecialtySelector";
 import { CompanyOfficesEditor } from "@/components/companies/CompanyOfficesEditor";
 import { CompanyAIConfigCard } from "@/components/companies/CompanyAIConfigCard";
-import { GoogleCalendarConfigCard } from "@/components/companies/GoogleCalendarConfigCard";
 
 interface Company {
   id: string;
