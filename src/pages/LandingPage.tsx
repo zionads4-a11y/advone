@@ -528,7 +528,7 @@ export default function LandingPage() {
           <img
             src={logoAdvOne}
             alt="AdvOne"
-            className="h-24 w-auto drop-shadow-[0_0_28px_hsl(153,60%,45%/0.55)]"
+            className="h-14 w-auto drop-shadow-[0_0_20px_hsl(153,60%,45%/0.5)]"
           />
           <p className="text-sm text-[hsl(220,10%,45%)]">
             © {new Date().getFullYear()} AdvOne. Todos os direitos reservados.
