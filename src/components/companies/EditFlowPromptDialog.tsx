@@ -156,7 +156,7 @@ export function EditFlowPromptDialog({ open, onOpenChange, flow, onSave }: Props
             <p className="text-[11px] text-muted-foreground">
               {text.length} caracteres
               {isDirty && (
-                <span className="ml-2 text-amber-600 dark:text-amber-400">
+                <span className="ml-2 text-primary">
                   • alterações não salvas
                 </span>
               )}

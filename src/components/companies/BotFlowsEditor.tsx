@@ -186,8 +186,8 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
                       </Badge>
                     )}
                     {flow.custom_prompt_block && flow.custom_prompt_block.trim().length > 0 && (
-                      <Badge className="text-[10px] bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/20">
-                        Prompt editado
+                      <Badge variant="outline" className="text-[10px] border-primary/40 text-primary">
+                        ✏️ Prompt editado
                       </Badge>
                     )}
                   </div>
