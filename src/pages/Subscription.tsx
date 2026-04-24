@@ -21,9 +21,13 @@ interface SubscriptionRow {
 }
 
 const planLabels: Record<string, string> = {
-  essencial: "Essencial",
-  profissional: "Profissional",
-  elite: "Elite",
+  mensal: "Mensal",
+  bimestral: "Bimestral",
+  anual: "Anual",
+  // legacy plans (kept for read-only display of historical records)
+  essencial: "Essencial (legado)",
+  profissional: "Profissional (legado)",
+  elite: "Elite (legado)",
 };
 
 function getStatusConfig(status: string) {

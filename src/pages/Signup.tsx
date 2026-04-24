@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useNavigate, useSearchParams, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -192,9 +192,9 @@ export default function Signup() {
                   </span>
                 </div>
                 <CardTitle className="text-3xl font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                  R$ {plan.value}<span className="text-base font-normal text-[hsl(220,10%,55%)]">/mês</span>
+                  R$ {plan.monthly}<span className="text-base font-normal text-[hsl(220,10%,55%)]">/mês</span>
                 </CardTitle>
-                <CardDescription className="text-[hsl(220,10%,55%)]">Assinatura mensal recorrente</CardDescription>
+                <CardDescription className="text-[hsl(220,10%,55%)]">{plan.billingLabel}</CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
@@ -272,7 +272,7 @@ export default function Signup() {
 
                   <Button type="submit" disabled={loading} className="w-full gradient-primary text-[hsl(0,0%,100%)] font-semibold py-6 text-base">
                     {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
-                    Criar conta e assinar — R$ {plan.value}/mês
+                    Criar conta e assinar — {plan.ctaSuffix}
                   </Button>
 
                   <p className="text-center text-xs text-[hsl(220,10%,45%)]">
