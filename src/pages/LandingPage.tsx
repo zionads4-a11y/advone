@@ -120,7 +120,7 @@ export default function LandingPage() {
           <img
             src={logoAdvOne}
             alt="AdvOne"
-            className="h-28 w-auto md:h-32 drop-shadow-[0_0_32px_hsl(153,60%,45%/0.65)] transition-transform hover:scale-105"
+            className="h-16 w-auto md:h-20 drop-shadow-[0_0_24px_hsl(153,60%,45%/0.55)] transition-transform hover:scale-105"
           />
           <div className="hidden items-center gap-8 md:flex">
             <a href="#funcionalidades" className="text-sm text-[hsl(220,10%,70%)] transition-colors hover:text-[hsl(153,60%,45%)]">Funcionalidades</a>
