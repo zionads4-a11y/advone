@@ -439,20 +439,20 @@ export default function LandingPage() {
               </div>
             </Reveal>
 
-            {/* Bimestral — destaque */}
+            {/* Trimestral — destaque */}
             <Reveal delay={150}>
               <div className="relative rounded-2xl border-2 border-[hsl(153,60%,45%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col h-full shadow-lg shadow-[hsl(153,60%,45%)]/10 transition-all duration-500 hover:-translate-y-2">
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[hsl(153,60%,45%)] px-4 py-1 text-xs font-bold text-[hsl(220,25%,6%)]">
                   MAIS POPULAR
                 </div>
                 <div className="mb-6 flex items-center justify-between">
-                  <span className="inline-block rounded-full bg-[hsl(153,60%,45%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(153,60%,45%)]">Bimestral</span>
+                  <span className="inline-block rounded-full bg-[hsl(153,60%,45%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(153,60%,45%)]">Trimestral</span>
                   <span className="rounded-full bg-[hsl(153,60%,45%)]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[hsl(153,60%,45%)]">Economia 20%</span>
                 </div>
                 <p className="mb-1 text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                   R$ 797<span className="text-base font-normal text-[hsl(220,10%,55%)]">/mês</span>
                 </p>
-                <p className="mt-1 mb-6 text-sm text-[hsl(220,10%,55%)]">2x R$ 797 — R$ 1.594 à vista</p>
+                <p className="mt-1 mb-6 text-sm text-[hsl(220,10%,55%)]">3x R$ 797 — R$ 2.391 à vista</p>
                 <ul className="mb-8 flex-1 space-y-3">
                   {["CRM completo com Kanban", "Bot com IA no WhatsApp", "Cadência automática de 5 tentativas", "Agenda integrada", "Monitoramento de até 50 processos", "Alertas automáticos de movimentação", "Financeiro integrado com Asaas", "Suporte prioritário"].map((item) => (
                     <li key={item} className="flex items-start gap-2 text-sm text-[hsl(220,10%,75%)]">
@@ -461,8 +461,8 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <Button onClick={() => navigate("/signup?plan=bimestral")} className="w-full gradient-primary text-[hsl(0,0%,100%)] font-semibold">
-                  Assinar plano bimestral
+                <Button onClick={() => navigate("/signup?plan=trimestral")} className="w-full gradient-primary text-[hsl(0,0%,100%)] font-semibold">
+                  Assinar plano trimestral
                 </Button>
               </div>
             </Reveal>
