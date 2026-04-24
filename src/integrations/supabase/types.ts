@@ -650,39 +650,48 @@ export type Database = {
       }
       company_bot_flows: {
         Row: {
+          case_type: string | null
           company_id: string
           created_at: string
           custom_intro: string | null
+          description: string | null
           enabled: boolean
           flow_key: string
           icon_emoji: string
           id: string
+          is_custom: boolean
           label: string
           niche: string
           position: number
           updated_at: string
         }
         Insert: {
+          case_type?: string | null
           company_id: string
           created_at?: string
           custom_intro?: string | null
+          description?: string | null
           enabled?: boolean
           flow_key: string
           icon_emoji?: string
           id?: string
+          is_custom?: boolean
           label: string
           niche: string
           position?: number
           updated_at?: string
         }
         Update: {
+          case_type?: string | null
           company_id?: string
           created_at?: string
           custom_intro?: string | null
+          description?: string | null
           enabled?: boolean
           flow_key?: string
           icon_emoji?: string
           id?: string
+          is_custom?: boolean
           label?: string
           niche?: string
           position?: number

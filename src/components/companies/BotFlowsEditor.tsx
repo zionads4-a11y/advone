@@ -1,13 +1,24 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Sparkles, ListChecks, Save } from "lucide-react";
+import { Loader2, Sparkles, ListChecks, Save, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useCompanyBotFlows } from "@/hooks/useCompanyBotFlows";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useCompanyBotFlows, type CompanyBotFlow } from "@/hooks/useCompanyBotFlows";
 import { useCompanyOffices } from "@/hooks/useCompanyOffices";
 import { buildDynamicLauraPrompt, type EnabledFlow, type OfficeAddress } from "./botFlowBlocks";
 import type { Niche } from "./botFlowsCatalog";
+import { CustomFlowDialog } from "./CustomFlowDialog";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -21,10 +32,13 @@ interface Props {
 }
 
 export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApplyPrompt }: Props) {
-  const { flows, loading, toggleFlow } = useCompanyBotFlows(companyId, niche);
+  const { flows, loading, toggleFlow, createCustomFlow, deleteFlow } = useCompanyBotFlows(companyId, niche);
   const { offices } = useCompanyOffices(companyId);
+  const [customDialogOpen, setCustomDialogOpen] = useState(false);
+  const [flowToDelete, setFlowToDelete] = useState<CompanyBotFlow | null>(null);
 
   const enabledCount = useMemo(() => flows.filter((f) => f.enabled).length, [flows]);
+  const customCount = useMemo(() => flows.filter((f) => f.is_custom).length, [flows]);
 
   const handleApply = async () => {
     const enabledFlows: EnabledFlow[] = flows
@@ -35,6 +49,9 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
         icon_emoji: f.icon_emoji,
         position: f.position,
         niche: f.niche as "previdenciario" | "trabalhista",
+        is_custom: f.is_custom,
+        case_type: f.case_type || undefined,
+        description: f.description || undefined,
       }));
 
     if (enabledFlows.length === 0) {
@@ -45,7 +62,8 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
     const numberEmojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
     const renumbered = enabledFlows.map((f, idx) => ({
       ...f,
-      icon_emoji: numberEmojis[idx] || f.icon_emoji,
+      // Mantém o emoji custom dos fluxos personalizados, renumera só os do catálogo
+      icon_emoji: f.is_custom ? f.icon_emoji : (numberEmojis[idx] || f.icon_emoji),
     }));
 
     const { data: cfg } = await supabase
@@ -88,6 +106,18 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
     );
   };
 
+  const handleDeleteConfirm = async () => {
+    if (!flowToDelete) return;
+    try {
+      await deleteFlow(flowToDelete.id);
+      toast.success("Fluxo personalizado removido. Clique em \"Gerar prompt\" pra atualizar o bot.");
+    } catch (err) {
+      toast.error("Erro ao remover fluxo");
+    } finally {
+      setFlowToDelete(null);
+    }
+  };
+
   if (loading) {
     return (
       <Card className="border-border/50">
@@ -99,69 +129,139 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
   }
 
   return (
-    <Card className="border-border/50">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <ListChecks className="h-5 w-5 text-primary" />
-          Fluxos Atendidos pelo Escritório
-          <Badge variant="secondary" className="ml-auto">
-            {enabledCount} ativos
-          </Badge>
-        </CardTitle>
-        <p className="text-xs text-muted-foreground">
-          Habilite apenas os assuntos que este escritório realmente atende. O bot só vai
-          oferecer essas opções no menu de abertura. Ex: escritório que só faz RMC/RCC,
-          BPC e Demora INSS pode desativar Aposentadoria e Revisão.
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        {flows.map((flow) => (
-          <div
-            key={flow.id}
-            className={`flex items-center justify-between gap-3 rounded-lg border p-3 transition-colors ${
-              flow.enabled ? "border-primary/40 bg-primary/5" : "border-border bg-muted/20"
-            }`}
+    <>
+      <Card className="border-border/50">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base flex-wrap">
+            <ListChecks className="h-5 w-5 text-primary" />
+            Fluxos Atendidos pelo Escritório
+            <Badge variant="secondary" className="ml-auto">
+              {enabledCount} ativos
+            </Badge>
+            {customCount > 0 && (
+              <Badge variant="outline" className="border-primary/40 text-primary">
+                {customCount} personalizado(s)
+              </Badge>
+            )}
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">
+            Habilite apenas os assuntos que este escritório realmente atende. O bot só vai
+            oferecer essas opções no menu de abertura. Você também pode adicionar fluxos personalizados
+            com teses específicas (ex: FGTS para professor contratado).
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setCustomDialogOpen(true)}
+            disabled={disabled}
+            className="w-full gap-2 border-dashed border-primary/40 text-primary hover:bg-primary/5"
           >
-            <div className="flex items-start gap-3 min-w-0 flex-1">
-              <span className="text-lg leading-none mt-0.5">{flow.icon_emoji}</span>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-sm font-medium text-foreground truncate">{flow.label}</p>
-                  <Badge variant="outline" className="text-[10px] capitalize">
-                    {flow.niche}
-                  </Badge>
+            <Plus className="h-4 w-4" />
+            Adicionar fluxo personalizado (tese específica)
+          </Button>
+
+          {flows.map((flow) => (
+            <div
+              key={flow.id}
+              className={`flex items-center justify-between gap-3 rounded-lg border p-3 transition-colors ${
+                flow.enabled ? "border-primary/40 bg-primary/5" : "border-border bg-muted/20"
+              }`}
+            >
+              <div className="flex items-start gap-3 min-w-0 flex-1">
+                <span className="text-lg leading-none mt-0.5">{flow.icon_emoji}</span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-sm font-medium text-foreground truncate">{flow.label}</p>
+                    <Badge variant="outline" className="text-[10px] capitalize">
+                      {flow.niche}
+                    </Badge>
+                    {flow.is_custom && (
+                      <Badge className="text-[10px] bg-primary/15 text-primary border-primary/30 hover:bg-primary/20">
+                        Personalizado
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-muted-foreground font-mono truncate">
+                    case_type: {flow.case_type || flow.flow_key}
+                  </p>
+                  {flow.is_custom && flow.description && (
+                    <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">
+                      {flow.description}
+                    </p>
+                  )}
                 </div>
-                <p className="text-[11px] text-muted-foreground font-mono truncate">
-                  case_type: {flow.flow_key}
-                </p>
+              </div>
+              <div className="flex items-center gap-1 shrink-0">
+                <Switch
+                  checked={flow.enabled}
+                  onCheckedChange={(v) => toggleFlow(flow.id, v)}
+                  disabled={disabled}
+                />
+                {flow.is_custom && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setFlowToDelete(flow)}
+                    disabled={disabled}
+                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
             </div>
-            <Switch
-              checked={flow.enabled}
-              onCheckedChange={(v) => toggleFlow(flow.id, v)}
-              disabled={disabled}
-            />
-          </div>
-        ))}
+          ))}
 
-        <Button
-          onClick={handleApply}
-          disabled={disabled || enabledCount === 0}
-          className="w-full gradient-primary text-primary-foreground gap-2 mt-4"
-        >
-          <Sparkles className="h-4 w-4" />
-          Gerar prompt com os fluxos selecionados
-          <Save className="h-4 w-4" />
-        </Button>
-        <p className="text-[10px] text-center text-muted-foreground">
-          O prompt é montado dinamicamente, incluindo {offices.filter((o) => o.is_active).length} unidade(s) ativa(s) para reunião presencial.
-        </p>
-        {offices.filter((o) => o.is_active).length === 0 && (
-          <p className="text-[10px] text-center text-destructive">
-            ⚠️ Nenhum endereço cadastrado. Para reunião presencial, cadastre as unidades em &quot;Endereços dos Escritórios&quot; (Configurações da Empresa).
+          <Button
+            onClick={handleApply}
+            disabled={disabled || enabledCount === 0}
+            className="w-full gradient-primary text-primary-foreground gap-2 mt-4"
+          >
+            <Sparkles className="h-4 w-4" />
+            Gerar prompt com os fluxos selecionados
+            <Save className="h-4 w-4" />
+          </Button>
+          <p className="text-[10px] text-center text-muted-foreground">
+            O prompt é montado dinamicamente, incluindo {offices.filter((o) => o.is_active).length} unidade(s) ativa(s) para reunião presencial.
           </p>
-        )}
-      </CardContent>
-    </Card>
+          {offices.filter((o) => o.is_active).length === 0 && (
+            <p className="text-[10px] text-center text-destructive">
+              ⚠️ Nenhum endereço cadastrado. Para reunião presencial, cadastre as unidades em &quot;Endereços dos Escritórios&quot; (Configurações da Empresa).
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      <CustomFlowDialog
+        open={customDialogOpen}
+        onOpenChange={setCustomDialogOpen}
+        niche={niche}
+        onCreate={createCustomFlow}
+      />
+
+      <AlertDialog open={!!flowToDelete} onOpenChange={(o) => !o && setFlowToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover fluxo personalizado?</AlertDialogTitle>
+            <AlertDialogDescription>
+              O fluxo <strong>{flowToDelete?.label}</strong> será removido permanentemente.
+              Lembre-se de clicar em &quot;Gerar prompt&quot; pra atualizar o bot.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Remover
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
