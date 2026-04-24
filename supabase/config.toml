@@ -21,8 +21,3 @@ verify_jwt = false
 [functions.notify-meeting-scheduled]
 verify_jwt = false
 
-[functions.google-calendar-oauth-callback]
-verify_jwt = false
-
-[functions.google-calendar-push]
-verify_jwt = false
