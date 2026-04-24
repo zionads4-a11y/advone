@@ -392,14 +392,16 @@ serve(async (req) => {
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      return new Response(JSON.stringify({ error: "API key não configurada" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    // Carrega config de IA da empresa (provider + modelo + custom prompt opcional)
+    const aiConfig = await getCompanyAIConfig(company_id);
 
-    const systemPrompt = buildSDRPrompt(config);
+    // No ambiente de teste, se a empresa marcou "use_openai_for_testing", força OpenAI
+    const forceProvider = aiConfig.use_openai_for_testing ? "openai" as const : undefined;
+
+    let systemPrompt = buildSDRPrompt(config);
+    if (aiConfig.custom_system_prompt) {
+      systemPrompt += `\n\n--- INSTRUÇÕES ADICIONAIS DO ESCRITÓRIO ---\n${aiConfig.custom_system_prompt}`;
+    }
 
     const tools = [
       {
