@@ -504,25 +504,26 @@ serve(async (req) => {
     while (maxIterations > 0) {
       maxIterations--;
 
-      const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash-lite",
+      let aiData: any;
+      try {
+        aiData = await chatCompletion({
+          companyId: company_id,
+          forceProvider,
           messages: aiMessages,
           tools,
-        }),
-      });
-
-      if (!aiResponse.ok) {
-        const errText = await aiResponse.text();
-        console.error("AI error:", aiResponse.status, errText);
-        if (aiResponse.status === 429) {
+          fallbackModel: "google/gemini-2.5-flash-lite",
+        });
+      } catch (e: any) {
+        const msg = String(e?.message || e);
+        console.error("AI error:", msg);
+        if (msg.includes(" 429")) {
           return new Response(JSON.stringify({ error: "Limite de requisições excedido." }), {
             status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        if (msg.includes(" 402")) {
+          return new Response(JSON.stringify({ error: "Créditos da IA esgotados. Adicione saldo para continuar." }), {
+            status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
         return new Response(JSON.stringify({ error: "Erro ao processar resposta da IA" }), {
@@ -530,7 +531,6 @@ serve(async (req) => {
         });
       }
 
-      const aiData = await aiResponse.json();
       const message = aiData.choices?.[0]?.message;
       if (!message) break;
 
