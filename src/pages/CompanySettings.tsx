@@ -132,8 +132,6 @@ export default function CompanySettings() {
       {/* ZapSign Config */}
       <ZapSignConfigCard companyId={company.id} />
 
-      {/* Google Calendar Integration */}
-      <GoogleCalendarConfigCard companyId={company.id} />
 
       {!hasMonitoring && company && (
         <MonitoringPackagePurchase
