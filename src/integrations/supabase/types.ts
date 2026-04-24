@@ -1204,6 +1204,47 @@ export type Database = {
           },
         ]
       }
+      google_oauth_credentials: {
+        Row: {
+          client_id: string
+          client_secret: string
+          company_id: string
+          created_at: string
+          created_by: string
+          id: string
+          redirect_uri: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          client_secret: string
+          company_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          redirect_uri: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          client_secret?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          redirect_uri?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "google_oauth_credentials_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kanban_columns: {
         Row: {
           color: string
