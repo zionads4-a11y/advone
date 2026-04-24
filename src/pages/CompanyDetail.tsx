@@ -13,6 +13,7 @@ import { CompanyLeads } from "@/components/companies/CompanyLeads";
 import { WhatsAppConfigDialog } from "@/components/companies/WhatsAppConfigDialog";
 import { CompanyKanban } from "@/components/companies/CompanyKanban";
 import { BotConfigCard } from "@/components/companies/BotConfigCard";
+import { CompanyAIConfigCard } from "@/components/companies/CompanyAIConfigCard";
 
 interface Company {
   id: string;
@@ -144,6 +145,9 @@ export default function CompanyDetail() {
 
       {/* Bot Config */}
       <BotConfigCard companyId={company.id} hasWhatsappConfig={!!whatsappConfig} />
+
+      {/* Provedor de IA (acesso restrito ao Super Admin via /companies/:id) */}
+      <CompanyAIConfigCard companyId={company.id} />
 
       {/* Tabs */}
       <Tabs defaultValue="kanban" className="space-y-4">
