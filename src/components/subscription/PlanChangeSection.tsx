@@ -107,7 +107,6 @@ export default function PlanChangeSection({ currentPlan, subscriptionStatus, onP
             const isCurrent = plan.key === currentPlan;
             // Lower index = cheaper per month = "downgrade in commitment level"
             const isUpgrade = index < currentIndex;
-            const isDowngrade = index > currentIndex;
 
             return (
               <Card

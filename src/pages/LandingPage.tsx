@@ -128,7 +128,7 @@ export default function LandingPage() {
             <Button variant="ghost" onClick={() => navigate("/auth")} className="text-[hsl(220,10%,70%)] hover:text-[hsl(153,60%,45%)]">
               Login
             </Button>
-            <Button onClick={() => navigate("/signup?plan=essencial")} className="gradient-primary text-[hsl(0,0%,100%)] font-semibold">
+            <Button onClick={() => navigate("/signup?plan=mensal")} className="gradient-primary text-[hsl(0,0%,100%)] font-semibold">
               Começar agora
             </Button>
           </div>
@@ -164,7 +164,7 @@ export default function LandingPage() {
               <div className="flex flex-col items-center gap-4 sm:flex-row lg:justify-start animate-slide-up" style={{ animationDelay: "0.2s" }}>
                 <Button
                   size="lg"
-                  onClick={() => navigate("/signup?plan=essencial")}
+                  onClick={() => navigate("/signup?plan=mensal")}
                   className="gradient-primary glow-primary px-8 py-6 text-lg font-semibold text-[hsl(0,0%,100%)] group"
                 >
                   Começar agora
@@ -410,77 +410,79 @@ export default function LandingPage() {
             </h2>
           </Reveal>
           <div className="grid gap-8 md:grid-cols-3">
-            {/* Essencial */}
+            {/* Anual — melhor custo/mês */}
             <Reveal delay={0}>
-              <div className="rounded-2xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col h-full transition-all duration-500 hover:border-[hsl(153,60%,45%)]/20 hover:-translate-y-1">
-                <div className="mb-6">
-                  <span className="inline-block rounded-full bg-[hsl(153,60%,45%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(153,60%,45%)]">Essencial</span>
+              <div className="rounded-2xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col h-full transition-all duration-500 hover:border-[hsl(38,90%,55%)]/30 hover:-translate-y-1">
+                <div className="mb-6 flex items-center justify-between">
+                  <span className="inline-block rounded-full bg-[hsl(38,90%,55%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(38,90%,55%)]">Anual</span>
+                  <span className="rounded-full bg-[hsl(38,90%,55%)]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[hsl(38,90%,55%)]">Economia 40%</span>
                 </div>
                 <p className="mb-1 text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                  Sob consulta
+                  R$ 597<span className="text-base font-normal text-[hsl(220,10%,55%)]">/mês</span>
                 </p>
-                <p className="mt-2 mb-8 text-sm text-[hsl(220,10%,55%)]">CRM + IA + automação completa</p>
+                <p className="mt-1 mb-6 text-sm text-[hsl(220,10%,55%)]">12x R$ 597 — R$ 7.164 à vista</p>
                 <ul className="mb-8 flex-1 space-y-3">
-                  {["CRM completo com Kanban", "Bot com IA no WhatsApp", "Cadência automática de 5 tentativas", "Agenda integrada", "Gestão de documentos até 600MB", "Equipe e permissões"].map((item) => (
+                  {["CRM completo com Kanban", "Bot com IA no WhatsApp", "Cadência automática de 5 tentativas", "Agenda integrada", "Monitoramento de até 50 processos", "Alertas automáticos de movimentação", "Financeiro integrado com Asaas", "Suporte prioritário"].map((item) => (
                     <li key={item} className="flex items-start gap-2 text-sm text-[hsl(220,10%,75%)]">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(153,60%,45%)]" />
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(38,90%,55%)]" />
                       {item}
                     </li>
                   ))}
                 </ul>
-                <Button onClick={() => navigate("/signup?plan=essencial")} className="w-full gradient-primary text-[hsl(0,0%,100%)] font-semibold">
-                  Começar agora
+                <Button onClick={() => navigate("/signup?plan=anual")} className="w-full gradient-primary text-[hsl(0,0%,100%)] font-semibold">
+                  Assinar plano anual
                 </Button>
               </div>
             </Reveal>
 
-            {/* Profissional */}
+            {/* Bimestral — destaque */}
             <Reveal delay={150}>
               <div className="relative rounded-2xl border-2 border-[hsl(153,60%,45%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col h-full shadow-lg shadow-[hsl(153,60%,45%)]/10 transition-all duration-500 hover:-translate-y-2">
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[hsl(153,60%,45%)] px-4 py-1 text-xs font-bold text-[hsl(220,25%,6%)]">
                   MAIS POPULAR
                 </div>
-                <div className="mb-6">
-                  <span className="inline-block rounded-full bg-[hsl(210,80%,55%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(210,80%,55%)]">Profissional</span>
+                <div className="mb-6 flex items-center justify-between">
+                  <span className="inline-block rounded-full bg-[hsl(153,60%,45%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(153,60%,45%)]">Bimestral</span>
+                  <span className="rounded-full bg-[hsl(153,60%,45%)]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[hsl(153,60%,45%)]">Economia 20%</span>
                 </div>
                 <p className="mb-1 text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                  Sob consulta
+                  R$ 797<span className="text-base font-normal text-[hsl(220,10%,55%)]">/mês</span>
                 </p>
-                <p className="mt-2 mb-8 text-sm text-[hsl(220,10%,55%)]">Tudo do Essencial + monitoramento</p>
+                <p className="mt-1 mb-6 text-sm text-[hsl(220,10%,55%)]">2x R$ 797 — R$ 1.594 à vista</p>
                 <ul className="mb-8 flex-1 space-y-3">
-                  {["Tudo do plano Essencial", "Monitoramento de até 50 processos", "Alertas automáticos de movimentação", "Financeiro integrado com Asaas", "Relatórios avançados", "Suporte prioritário"].map((item) => (
+                  {["CRM completo com Kanban", "Bot com IA no WhatsApp", "Cadência automática de 5 tentativas", "Agenda integrada", "Monitoramento de até 50 processos", "Alertas automáticos de movimentação", "Financeiro integrado com Asaas", "Suporte prioritário"].map((item) => (
                     <li key={item} className="flex items-start gap-2 text-sm text-[hsl(220,10%,75%)]">
                       <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(153,60%,45%)]" />
                       {item}
                     </li>
                   ))}
                 </ul>
-                <Button onClick={() => navigate("/signup?plan=profissional")} className="w-full gradient-primary text-[hsl(0,0%,100%)] font-semibold">
-                  Começar agora
+                <Button onClick={() => navigate("/signup?plan=bimestral")} className="w-full gradient-primary text-[hsl(0,0%,100%)] font-semibold">
+                  Assinar plano bimestral
                 </Button>
               </div>
             </Reveal>
 
-            {/* Elite */}
+            {/* Mensal */}
             <Reveal delay={300}>
-              <div className="rounded-2xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col h-full transition-all duration-500 hover:border-[hsl(153,60%,45%)]/20 hover:-translate-y-1">
+              <div className="rounded-2xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col h-full transition-all duration-500 hover:border-[hsl(210,80%,55%)]/30 hover:-translate-y-1">
                 <div className="mb-6">
-                  <span className="inline-block rounded-full bg-[hsl(0,70%,55%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(0,70%,60%)]">Elite</span>
+                  <span className="inline-block rounded-full bg-[hsl(210,80%,55%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(210,80%,55%)]">Mensal</span>
                 </div>
                 <p className="mb-1 text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                  Sob consulta
+                  R$ 997<span className="text-base font-normal text-[hsl(220,10%,55%)]">/mês</span>
                 </p>
-                <p className="mt-2 mb-8 text-sm text-[hsl(220,10%,55%)]">Tudo do Profissional + prioridade total</p>
+                <p className="mt-1 mb-6 text-sm text-[hsl(220,10%,55%)]">Recorrência mensal — PIX ou cartão</p>
                 <ul className="mb-8 flex-1 space-y-3">
-                  {["Tudo do plano Profissional", "Monitoramento de até 100 processos", "Prioridade máxima nos alertas", "Onboarding personalizado", "Consultoria de automação", "Gerente de conta dedicado"].map((item) => (
+                  {["CRM completo com Kanban", "Bot com IA no WhatsApp", "Cadência automática de 5 tentativas", "Agenda integrada", "Monitoramento de até 50 processos", "Alertas automáticos de movimentação", "Financeiro integrado com Asaas", "Suporte prioritário"].map((item) => (
                     <li key={item} className="flex items-start gap-2 text-sm text-[hsl(220,10%,75%)]">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(153,60%,45%)]" />
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(210,80%,55%)]" />
                       {item}
                     </li>
                   ))}
                 </ul>
-                <Button onClick={() => navigate("/signup?plan=elite")} className="w-full gradient-primary text-[hsl(0,0%,100%)] font-semibold">
-                  Começar agora
+                <Button onClick={() => navigate("/signup?plan=mensal")} className="w-full gradient-primary text-[hsl(0,0%,100%)] font-semibold">
+                  Assinar plano mensal
                 </Button>
               </div>
             </Reveal>
@@ -506,7 +508,7 @@ export default function LandingPage() {
             </p>
             <Button
               size="lg"
-              onClick={() => navigate("/signup?plan=essencial")}
+              onClick={() => navigate("/signup?plan=mensal")}
               className="gradient-primary glow-primary px-10 py-6 text-lg font-semibold text-[hsl(0,0%,100%)] group"
             >
               Começar agora
