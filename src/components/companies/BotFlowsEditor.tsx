@@ -185,6 +185,11 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
                         Personalizado
                       </Badge>
                     )}
+                    {flow.custom_prompt_block && flow.custom_prompt_block.trim().length > 0 && (
+                      <Badge className="text-[10px] bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/20">
+                        Prompt editado
+                      </Badge>
+                    )}
                   </div>
                   <p className="text-[11px] text-muted-foreground font-mono truncate">
                     case_type: {flow.case_type || flow.flow_key}
@@ -197,6 +202,17 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
                 </div>
               </div>
               <div className="flex items-center gap-1 shrink-0">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setFlowToEdit(flow)}
+                  disabled={disabled}
+                  className="h-8 w-8 text-muted-foreground hover:text-primary"
+                  title="Editar prompt deste fluxo"
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
                 <Switch
                   checked={flow.enabled}
                   onCheckedChange={(v) => toggleFlow(flow.id, v)}
@@ -243,6 +259,13 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
         onOpenChange={setCustomDialogOpen}
         niche={niche}
         onCreate={createCustomFlow}
+      />
+
+      <EditFlowPromptDialog
+        open={!!flowToEdit}
+        onOpenChange={(o) => !o && setFlowToEdit(null)}
+        flow={flowToEdit}
+        onSave={updateFlowPrompt}
       />
 
       <AlertDialog open={!!flowToDelete} onOpenChange={(o) => !o && setFlowToDelete(null)}>
