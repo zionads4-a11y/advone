@@ -10,7 +10,7 @@ import { Loader2, CheckCircle2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import logoAdvOne from "@/assets/logo-advone.png";
 
-type PlanKey = "mensal" | "bimestral" | "anual";
+type PlanKey = "mensal" | "trimestral" | "anual";
 
 const COMMON_FEATURES = [
   "CRM completo com Kanban",
