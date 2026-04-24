@@ -10,11 +10,11 @@ const corsHeaders = {
 // Cadência otimizada alinhada ao funil Kanban (Cadencia_Kanban_Final.pdf)
 // Posições: 0=Em Atendimento → 1..5=1º a 5º Follow-Up (10min, 1d, 2d, 3d, 4d) → LOST
 const CADENCE_MESSAGES: Record<number, string> = {
-  1: "Oi, {nome} 🙂\n\nPassei por aqui porque fiquei aguardando sua resposta. Dependendo do seu caso, pode ter algo importante pra resolver.\n\nMe responde que continuo te ajudando.",
-  2: "Oi, {nome} 🙂\n\nMuitas pessoas descobrem que têm solução quando analisam melhor o caso.\n\nSe fizer sentido, posso te explicar melhor ou ver um horário com a equipe.",
-  3: "Oi, {nome} 🙂\n\nDeixar pra depois pode atrasar ou prejudicar sua situação.\n\nSe quiser retomar, me responde aqui.",
-  4: "Oi, {nome}.\n\nVou ser direto: já vi muitos casos com solução que a pessoa não imaginava.\n\nPosso te encaixar para uma análise rápida com a equipe.",
-  5: "Oi, {nome} 🙂\n\nVou encerrar por agora, mas quando quiser continuar é só me chamar.\n\nEstou à disposição.",
+  1: "Oi, {nome} 🙂\n\nFiquei te esperando aqui…\n\nDependendo do seu caso, pode ter algo importante que vale a pena ver agora.\n\nMe chama que eu continuo te ajudando 👇",
+  2: "Oi, {nome} 🙂\n\nOntem eu fiquei pensando no que você me falou…\n\nMuita gente só descobre que tem direito quando analisa melhor o caso.\n\nSe quiser, posso te explicar rapidinho ou já ver um horário com a equipe.",
+  3: "Oi, {nome} 🙂\n\nSó te dando um toque…\n\nDependendo da situação, esperar pode acabar atrasando ou até fazendo você perder algo importante.\n\nSe quiser retomar, me chama aqui que te ajudo 👇",
+  4: "Oi, {nome}.\n\nVou ser bem direto com você…\n\nJá vi muitos casos parecidos com o seu que tinham solução — e a pessoa nem imaginava.\n\nPosso te encaixar em uma análise rápida com a equipe e você já entende exatamente o que pode fazer.",
+  5: "Oi, {nome} 🙂\n\nVou encerrar por aqui pra não ficar te incomodando.\n\nMas se quiser retomar depois, é só me chamar — pode ser que ainda dê tempo de resolver seu caso.\n\nFico à disposição 🙂",
 };
 
 // Inactivity nudge messages during active conversation
