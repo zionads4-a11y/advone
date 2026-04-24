@@ -13,6 +13,7 @@ import MonitoringPackagePurchase from "@/components/monitoring/MonitoringPackage
 import { ZapSignConfigCard } from "@/components/companies/ZapSignConfigCard";
 import { PracticeSpecialtySelector } from "@/components/companies/PracticeSpecialtySelector";
 import { CompanyOfficesEditor } from "@/components/companies/CompanyOfficesEditor";
+import { CompanyAIConfigCard } from "@/components/companies/CompanyAIConfigCard";
 
 interface Company {
   id: string;
@@ -124,6 +125,9 @@ export default function CompanySettings() {
         <Save className="mr-2 h-4 w-4" />
         {saving ? "Salvando..." : "Salvar Configurações"}
       </Button>
+
+      {/* Provedor de IA (Lovable Gemini vs OpenAI) */}
+      <CompanyAIConfigCard companyId={company.id} />
 
       {/* ZapSign Config */}
       <ZapSignConfigCard companyId={company.id} />
