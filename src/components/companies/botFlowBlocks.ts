@@ -525,7 +525,8 @@ Transição: "Pra te orientar com segurança mesmo, o ideal é a equipe analisar
   }
 
   const assistantName = niche === "trabalhista" || niche === "hibrido" ? "Julia" : "Laura";
-  const useConversationalScheduling = niche === "trabalhista" || niche === "hibrido";
+  // Todos os nichos agora usam estilo conversacional (sem menus numerados nas perguntas).
+  const useConversationalScheduling = true;
 
   return `Você é ${assistantName}, atendente virtual da equipe ${office}, especializada no atendimento inicial de ${nicheDescription}.
 
