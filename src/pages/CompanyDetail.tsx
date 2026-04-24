@@ -14,6 +14,7 @@ import { WhatsAppConfigDialog } from "@/components/companies/WhatsAppConfigDialo
 import { CompanyKanban } from "@/components/companies/CompanyKanban";
 import { BotConfigCard } from "@/components/companies/BotConfigCard";
 import { CompanyAIConfigCard } from "@/components/companies/CompanyAIConfigCard";
+import { PracticeSpecialtySelector } from "@/components/companies/PracticeSpecialtySelector";
 
 interface Company {
   id: string;
@@ -148,6 +149,9 @@ export default function CompanyDetail() {
 
       {/* Provedor de IA (acesso restrito ao Super Admin via /companies/:id) */}
       <CompanyAIConfigCard companyId={company.id} />
+
+      {/* Área de Atuação (acesso restrito ao Super Admin) */}
+      <PracticeSpecialtySelector companyId={company.id} />
 
       {/* Tabs */}
       <Tabs defaultValue="kanban" className="space-y-4">
