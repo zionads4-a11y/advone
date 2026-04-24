@@ -9,9 +9,9 @@ const corsHeaders = {
 const STANDARD_MAX_PROCESSES = 50;
 
 // Plan configuration:
-// - mensal:    R$ 997/mês recorrente (PIX ou cartão)
-// - bimestral: R$ 1.594 cobrança única (2x R$ 797 — equivalente a R$ 797/mês)
-// - anual:     R$ 7.164 cobrança única (12x R$ 597 — equivalente a R$ 597/mês)
+// - mensal:     R$ 997/mês recorrente (PIX ou cartão)
+// - trimestral: R$ 2.391 cobrança única (3x R$ 797 — equivalente a R$ 797/mês)
+// - anual:      R$ 7.164 cobrança única (12x R$ 597 — equivalente a R$ 597/mês)
 type BillingMode = "recurring_monthly" | "one_time";
 
 interface PlanInfo {
@@ -22,9 +22,9 @@ interface PlanInfo {
 }
 
 const PLAN_CONFIG: Record<string, PlanInfo> = {
-  mensal:    { monthlyEquivalent: 997, chargedValue: 997,  billing: "recurring_monthly", description: "AdvOne — Plano Mensal (R$ 997/mês)" },
-  bimestral: { monthlyEquivalent: 797, chargedValue: 1594, billing: "one_time",          description: "AdvOne — Plano Bimestral (2x R$ 797 = R$ 1.594 à vista)" },
-  anual:     { monthlyEquivalent: 597, chargedValue: 7164, billing: "one_time",          description: "AdvOne — Plano Anual (12x R$ 597 = R$ 7.164 à vista)" },
+  mensal:     { monthlyEquivalent: 997, chargedValue: 997,  billing: "recurring_monthly", description: "AdvOne — Plano Mensal (R$ 997/mês)" },
+  trimestral: { monthlyEquivalent: 797, chargedValue: 2391, billing: "one_time",          description: "AdvOne — Plano Trimestral (3x R$ 797 = R$ 2.391 à vista)" },
+  anual:      { monthlyEquivalent: 597, chargedValue: 7164, billing: "one_time",          description: "AdvOne — Plano Anual (12x R$ 597 = R$ 7.164 à vista)" },
 };
 
 Deno.serve(async (req) => {
