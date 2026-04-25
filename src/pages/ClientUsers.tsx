@@ -356,6 +356,7 @@ export default function ClientUsers() {
             <TableHeader>
               <TableRow className="border-border hover:bg-transparent">
                 <TableHead className="text-muted-foreground">Nome</TableHead>
+                <TableHead className="text-muted-foreground">Cargo</TableHead>
                 <TableHead className="text-muted-foreground">Tipo</TableHead>
                 {!isGerente && <TableHead className="text-muted-foreground">Empresa</TableHead>}
                 {isGerente && <TableHead className="text-muted-foreground w-[160px] text-right">Ações</TableHead>}
@@ -364,12 +365,12 @@ export default function ClientUsers() {
             <TableBody>
               {clients.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={isGerente ? 3 : 3} className="py-12 text-center text-muted-foreground">
+                  <TableCell colSpan={isGerente ? 4 : 4} className="py-12 text-center text-muted-foreground">
                     <Users className="mx-auto mb-2 h-8 w-8" />
                     <p>Nenhum usuário cadastrado</p>
                     <p className="text-xs">
                       {isGerente
-                        ? "Adicione operadores para atender os leads"
+                        ? "Adicione membros (advogados, estagiários, secretárias, financeiro) para sua equipe"
                         : "Crie gerentes e operadores para as empresas"}
                     </p>
                   </TableCell>
@@ -378,6 +379,15 @@ export default function ClientUsers() {
                 clients.map((client) => (
                   <TableRow key={client.id} className="border-border hover:bg-secondary/50">
                     <TableCell className="font-medium text-foreground">{client.full_name}</TableCell>
+                    <TableCell>
+                      {client.job_title ? (
+                        <Badge variant="outline" className="border-border bg-secondary/60 text-foreground">
+                          {getJobTitleLabel(client.job_title)}
+                        </Badge>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
                     <TableCell>{getRoleBadge(client.role)}</TableCell>
                     {!isGerente && (
                       <TableCell>
