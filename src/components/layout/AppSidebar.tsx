@@ -39,6 +39,8 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useNewMessageNotifications } from "@/hooks/useNewMessageNotifications";
 import { useCompanyServiceMode } from "@/hooks/useCompanyServiceMode";
+import { useModulePermissions } from "@/hooks/useModulePermissions";
+import { MODULE_BY_ROUTE, type ModuleKey } from "@/lib/modulePermissions";
 
 import { LayoutDashboard, Kanban, MessageSquare } from "lucide-react";
 
