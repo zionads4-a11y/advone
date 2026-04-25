@@ -25,6 +25,11 @@ import {
   Clock,
   Target,
   Play,
+  Scale,
+  Sparkles,
+  GraduationCap,
+  BookOpen,
+  Gavel,
 } from "lucide-react";
 
 const stats = [
@@ -125,6 +130,10 @@ export default function LandingPage() {
           <div className="hidden items-center gap-8 md:flex">
             <a href="#funcionalidades" className="text-sm text-[hsl(220,10%,70%)] transition-colors hover:text-[hsl(153,60%,45%)]">Funcionalidades</a>
             <a href="#demo" className="text-sm text-[hsl(220,10%,70%)] transition-colors hover:text-[hsl(153,60%,45%)]">Demo</a>
+            <a href="#ia-juridica" className="text-sm font-medium text-[hsl(38,90%,55%)] transition-colors hover:text-[hsl(45,95%,60%)] flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5" />
+              IA Jurídica
+            </a>
             <a href="#depoimentos" className="text-sm text-[hsl(220,10%,70%)] transition-colors hover:text-[hsl(153,60%,45%)]">Depoimentos</a>
             <a href="#planos" className="text-sm text-[hsl(220,10%,70%)] transition-colors hover:text-[hsl(153,60%,45%)]">Planos</a>
           </div>
@@ -372,7 +381,143 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* IA Jurídica Premium */}
+      <section id="ia-juridica" className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(220,25%,6%)] via-[hsl(220,25%,8%)] to-[hsl(220,25%,6%)]" />
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-1/4 left-1/4 h-72 w-72 rounded-full bg-[hsl(38,90%,55%)]/10 blur-3xl" />
+          <div className="absolute bottom-1/4 right-1/4 h-72 w-72 rounded-full bg-[hsl(153,60%,45%)]/10 blur-3xl" />
+        </div>
+        <div className="relative mx-auto max-w-6xl px-6 py-24">
+          <Reveal className="text-center mb-14">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[hsl(38,90%,55%)]/40 bg-[hsl(38,90%,55%)]/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-[hsl(38,90%,55%)]">
+              <Sparkles className="h-3.5 w-3.5" />
+              Exclusivo Premium
+            </div>
+            <h2 className="text-3xl font-bold md:text-5xl mb-5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              Conheça a <span className="bg-gradient-to-r from-[hsl(38,90%,55%)] via-[hsl(45,95%,60%)] to-[hsl(38,90%,55%)] bg-clip-text text-transparent">Dra. Helena</span>
+              <br />
+              sua sócia jurídica com IA.
+            </h2>
+            <p className="mx-auto max-w-2xl text-lg text-[hsl(220,10%,65%)] leading-relaxed">
+              Uma advogada virtual com <strong className="text-[hsl(220,10%,85%)]">30+ anos de experiência</strong>, doutora pela USP, especialista em redigir petições, contratos, mandados de segurança e pareceres em segundos — direto dentro do seu CRM.
+            </p>
+          </Reveal>
+
+          <div className="grid gap-10 lg:grid-cols-2 items-center mb-16">
+            {/* Mockup Chat IA */}
+            <Reveal direction="left">
+              <div className="relative">
+                <div className="absolute -inset-4 bg-gradient-to-r from-[hsl(38,90%,55%)]/20 via-[hsl(153,60%,45%)]/10 to-[hsl(38,90%,55%)]/20 blur-2xl rounded-3xl" />
+                <div className="relative rounded-2xl border border-[hsl(38,90%,55%)]/20 bg-[hsl(220,28%,8%)] p-6 shadow-2xl">
+                  <div className="mb-4 flex items-center gap-3 border-b border-[hsl(220,20%,16%)] pb-4">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-[hsl(38,90%,55%)] to-[hsl(45,95%,60%)] text-[hsl(220,25%,6%)]">
+                      <Scale className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-[hsl(220,10%,92%)]">Dra. Helena Vasconcellos</p>
+                      <p className="text-xs text-[hsl(153,60%,55%)] flex items-center gap-1.5">
+                        <span className="h-1.5 w-1.5 rounded-full bg-[hsl(153,60%,55%)] animate-pulse" />
+                        Online · Doutora em Direito
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-3 text-sm">
+                    <div className="ml-auto max-w-[80%] rounded-2xl rounded-tr-sm bg-[hsl(153,60%,45%)]/20 px-4 py-2.5 text-[hsl(220,10%,90%)]">
+                      Preciso de uma petição inicial trabalhista por horas extras não pagas.
+                    </div>
+                    <div className="max-w-[90%] rounded-2xl rounded-tl-sm bg-[hsl(220,25%,12%)] px-4 py-3 text-[hsl(220,10%,80%)] border border-[hsl(220,20%,16%)]">
+                      <p className="mb-2 text-xs font-bold text-[hsl(38,90%,55%)] uppercase tracking-wide">Petição Inicial — Reclamação Trabalhista</p>
+                      <p className="text-[13px] leading-relaxed">
+                        EXCELENTÍSSIMO(A) SENHOR(A) JUIZ(A) DO TRABALHO DA __ª VARA…<br /><br />
+                        <span className="text-[hsl(220,10%,55%)]">[fundamentação com art. 59 da CLT, Súmula 85 TST, jurisprudência…]</span>
+                      </p>
+                      <div className="mt-3 flex items-center gap-2 text-xs text-[hsl(38,90%,55%)]">
+                        <Sparkles className="h-3 w-3" />
+                        Pronta para download em .docx (ABNT)
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+
+            {/* Diferenciais */}
+            <Reveal direction="right" delay={150}>
+              <div className="space-y-5">
+                {[
+                  {
+                    icon: GraduationCap,
+                    title: "Doutora em Direito pela USP",
+                    desc: "Pós-doutorado em Constitucional, Civil, Trabalhista, Previdenciário e Tributário.",
+                  },
+                  {
+                    icon: Gavel,
+                    title: "Petições prontas em segundos",
+                    desc: "Iniciais, contestações, recursos, embargos, mandados de segurança, habeas corpus.",
+                  },
+                  {
+                    icon: BookOpen,
+                    title: "Contratos e pareceres técnicos",
+                    desc: "Cíveis, empresariais, trabalhistas, locação, prestação de serviços. Tudo com base legal citada.",
+                  },
+                  {
+                    icon: FileText,
+                    title: "Export direto em .docx (ABNT)",
+                    desc: "Times New Roman, margens corretas. Edite no Word e protocole no mesmo dia.",
+                  },
+                ].map((item) => (
+                  <div key={item.title} className="flex gap-4 group">
+                    <div className="shrink-0 flex h-11 w-11 items-center justify-center rounded-xl bg-[hsl(38,90%,55%)]/10 text-[hsl(38,90%,55%)] border border-[hsl(38,90%,55%)]/20 transition-all duration-300 group-hover:bg-[hsl(38,90%,55%)]/20 group-hover:scale-110">
+                      <item.icon className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-[hsl(220,10%,92%)] mb-1">{item.title}</h4>
+                      <p className="text-sm text-[hsl(220,10%,60%)] leading-relaxed">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Reveal>
+          </div>
+
+          {/* Comparativo de tempo */}
+          <Reveal>
+            <div className="rounded-2xl border border-[hsl(38,90%,55%)]/20 bg-gradient-to-r from-[hsl(220,25%,9%)] via-[hsl(220,25%,10%)] to-[hsl(220,25%,9%)] p-8 md:p-10">
+              <div className="grid gap-8 md:grid-cols-3 text-center">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest text-[hsl(220,10%,55%)] mb-2">Sem IA Jurídica</p>
+                  <p className="text-4xl font-bold text-[hsl(0,70%,60%)] mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>2–4h</p>
+                  <p className="text-sm text-[hsl(220,10%,55%)]">por petição</p>
+                </div>
+                <div className="border-x border-[hsl(220,20%,16%)] px-4">
+                  <p className="text-xs font-bold uppercase tracking-widest text-[hsl(38,90%,55%)] mb-2">Com Dra. Helena</p>
+                  <p className="text-4xl font-bold bg-gradient-to-r from-[hsl(38,90%,55%)] to-[hsl(45,95%,60%)] bg-clip-text text-transparent mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>30s</p>
+                  <p className="text-sm text-[hsl(220,10%,55%)]">primeira versão pronta</p>
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest text-[hsl(220,10%,55%)] mb-2">Tempo recuperado</p>
+                  <p className="text-4xl font-bold text-[hsl(153,60%,55%)] mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>+240x</p>
+                  <p className="text-sm text-[hsl(220,10%,55%)]">para fechar contratos</p>
+                </div>
+              </div>
+              <div className="mt-8 flex flex-col items-center gap-3">
+                <Button
+                  size="lg"
+                  onClick={() => navigate("/signup?plan=mensal")}
+                  className="bg-gradient-to-r from-[hsl(38,90%,55%)] to-[hsl(45,95%,60%)] hover:opacity-90 text-[hsl(220,25%,6%)] font-bold px-8 py-6 text-base shadow-lg shadow-[hsl(38,90%,55%)]/20"
+                >
+                  <Sparkles className="mr-2 h-5 w-5" />
+                  Quero a Dra. Helena no meu escritório
+                </Button>
+                <p className="text-xs text-[hsl(220,10%,50%)]">Disponível nos planos Mensal, Trimestral e Anual</p>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+
       <section id="depoimentos">
         <div className="mx-auto max-w-6xl px-6 py-24">
           <Reveal className="mb-16 text-center">
