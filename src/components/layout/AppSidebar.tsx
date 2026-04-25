@@ -64,7 +64,6 @@ const gerenteItems = [
   { title: "Documentos", url: "/documentos", icon: FileText },
   { title: "Processos", url: "/processos", icon: Briefcase },
   { title: "Monitoramento", url: "/monitoramento", icon: Radar },
-  { title: "Bot", url: "/bot-config", icon: Bot },
   { title: "Equipe", url: "/client-users", icon: Users },
   { title: "Configurações", url: "/company-settings", icon: Settings },
 ];
@@ -76,7 +75,6 @@ const operadorItems = [
   { title: "IA Jurídica", url: "/ia-juridica", icon: Scale, premium: true },
   { title: "Documentos", url: "/documentos", icon: FileText },
   { title: "Processos", url: "/processos", icon: Briefcase },
-  { title: "Bot", url: "/bot-config", icon: Bot },
 ];
 
 const clientItems = [
