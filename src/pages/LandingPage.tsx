@@ -7,7 +7,7 @@ import { InteractiveChatDemo } from "@/components/landing/InteractiveChatDemo";
 import { Reveal } from "@/components/landing/useScrollReveal";
 import { AnimatedCounter } from "@/components/landing/AnimatedCounter";
 import {
-  Bot,
+  Headphones,
   Kanban,
   CalendarDays,
   Wallet,
@@ -33,14 +33,14 @@ import {
 } from "lucide-react";
 
 const stats = [
-  { value: "100%", label: "Automação com IA" },
-  { value: "24/7", label: "Bot ativo no WhatsApp" },
+  { value: "100%", label: "Atendimento com IA" },
+  { value: "24/7", label: "Secretária Virtual no ar" },
   { value: "5x", label: "Mais agendamentos" },
   { value: "0", label: "Leads esquecidos" },
 ];
 
 const features = [
-  { icon: Bot, title: "Bot com IA no WhatsApp", desc: "Atendimento automático 24h, triagem inteligente e agendamento direto pelo WhatsApp." },
+  { icon: Headphones, title: "Secretária Virtual com IA", desc: "Recebe, escuta, qualifica e agenda seu cliente pelo WhatsApp 24h por dia — com a empatia de uma humana e a precisão de uma máquina." },
   { icon: Kanban, title: "Kanban Automatizado", desc: "Leads se movem automaticamente pelo funil com cadência de 5 tentativas de contato." },
   { icon: CalendarDays, title: "Agenda Integrada", desc: "Agendamentos automáticos respeitando horários livres e expediente configurado." },
   { icon: Wallet, title: "Financeiro com Asaas", desc: "Contas a pagar, receber e faturamento líquido integrado com o Asaas." },
@@ -54,7 +54,7 @@ const valueProps = [
   {
     icon: Clock,
     title: "Mais tempo para o que importa",
-    desc: "Automatize cadências, agendamentos e follow-ups. Seu time foca em fechar negócios enquanto o bot cuida do primeiro contato.",
+    desc: "Automatize cadências, agendamentos e follow-ups. Seu time foca em fechar contratos enquanto sua Secretária Virtual cuida do primeiro contato.",
   },
   {
     icon: Target,
@@ -173,7 +173,7 @@ export default function LandingPage() {
                 <span className="gradient-text">CRM completo</span> para a gestão do seu escritório de advocacia.
               </h1>
               <p className="mx-auto mb-8 max-w-xl text-lg text-[hsl(220,10%,55%)] lg:mx-0 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-                Bot com IA que agenda automaticamente, cadência de follow-up e controle financeiro — tudo em um só lugar.
+                Sua Secretária Virtual atende, qualifica e agenda 24h por dia. E o CRM cuida do resto — cadência, agenda e financeiro num só lugar.
               </p>
               <div className="flex flex-col items-center gap-4 sm:flex-row lg:justify-start animate-slide-up" style={{ animationDelay: "0.2s" }}>
                 <Button
@@ -189,7 +189,7 @@ export default function LandingPage() {
                   className="flex items-center gap-2 text-sm text-[hsl(220,10%,70%)] transition-colors hover:text-[hsl(153,60%,45%)]"
                 >
                   <Play className="h-4 w-4" />
-                  Ver demo do bot
+                  Ver a Secretária Virtual em ação
                 </a>
               </div>
               <p className="mt-4 text-sm text-[hsl(220,10%,45%)]">
@@ -414,7 +414,7 @@ export default function LandingPage() {
         <Reveal>
           <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-3 px-6">
             {[
-              "Bot WhatsApp com IA",
+              "Secretária Virtual com IA",
               "Cadência Automática",
               "Kanban Inteligente",
               "Agenda Integrada",
@@ -445,17 +445,18 @@ export default function LandingPage() {
             <div>
               <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Veja em ação</p>
               <h2 className="text-3xl font-bold md:text-4xl mb-6" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                Seu bot de IA atendendo <span className="gradient-text">24 horas por dia.</span>
+                Sua Secretária Virtual <span className="gradient-text">nunca tira folga.</span>
               </h2>
               <p className="text-[hsl(220,10%,55%)] leading-relaxed mb-6">
-                O assistente inteligente do AdvOne conversa naturalmente com seus leads, faz triagem, qualifica e agenda consultas — tudo sem intervenção humana.
+                Veja abaixo um atendimento real do escritório fictício <strong className="text-[hsl(220,10%,85%)]">Mendes &amp; Vasconcelos Advocacia</strong>. A IA conversa com empatia, qualifica o caso, oferece horário e agenda — em segundos, sem intervenção humana.
               </p>
               <ul className="space-y-4">
                 {[
-                  "Triagem inteligente com menu personalizável",
-                  "Agendamento automático respeitando o horário comercial",
-                  "Cadência de 5 tentativas de follow-up",
-                  "Notificações em tempo real para a equipe",
+                  "Recebe o lead em até 3 segundos, dia ou noite",
+                  "Faz triagem jurídica e identifica o tipo de caso",
+                  "Agenda respeitando o expediente do escritório",
+                  "5 tentativas automáticas se o lead sumir",
+                  "Avisa a equipe na hora que a consulta é fechada",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3 text-[hsl(220,10%,75%)]">
                     <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[hsl(153,60%,45%)]" />
@@ -521,22 +522,22 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* How the Bot Works */}
+      {/* How the Virtual Secretary Works */}
       <section className="border-y border-[hsl(220,20%,16%)] bg-[hsl(220,25%,8%)]">
         <div className="mx-auto max-w-5xl px-6 py-24">
           <Reveal className="mb-16 text-center">
-            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Automação Inteligente</p>
+            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Atendimento Inteligente</p>
             <h2 className="text-3xl font-bold md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Como funciona a cadência automática
+              Como sua Secretária Virtual transforma leads em consultas
             </h2>
           </Reveal>
           <div className="grid gap-6 md:grid-cols-5">
             {[
-              { step: "1", title: "Lead entra", desc: "Novo lead chega pelo WhatsApp ou campanha" },
-              { step: "2", title: "Bot atende", desc: "IA faz triagem e oferece horários disponíveis" },
-              { step: "3", title: "Cadência", desc: "5 tentativas automáticas de contato" },
-              { step: "4", title: "Agendamento", desc: "Bot agenda e notifica o escritório" },
-              { step: "5", title: "Resultado", desc: "Lead marcado como Ganho ou Perdido" },
+              { step: "1", title: "Lead entra", desc: "Novo cliente chega pelo WhatsApp ou campanha" },
+              { step: "2", title: "Secretária responde", desc: "Recebe na hora, escuta o caso e faz a triagem" },
+              { step: "3", title: "Cadência", desc: "5 tentativas automáticas se o lead sumir" },
+              { step: "4", title: "Agendamento", desc: "Marca a consulta e avisa o escritório" },
+              { step: "5", title: "Resultado", desc: "Lead movido para Ganho ou Perdido no Kanban" },
             ].map((s, i) => (
               <Reveal key={s.step} delay={i * 120}>
                 <div className="relative text-center group">
@@ -601,7 +602,7 @@ export default function LandingPage() {
               { icon: Wallet, title: "Financeiro Avançado", desc: "Contas a pagar, a receber, comissões e faturamento líquido com integração nativa Asaas — boletos, Pix e cobrança automática.", items: ["Integração Asaas nativa", "Comissões por contrato", "Faturamento em tempo real"] },
               { icon: BarChart3, title: "Business Intelligence", desc: "Dashboards com taxa de conversão, origem de leads, faturamento, pipeline e produtividade — tudo em tempo real.", items: ["Conversão por etapa", "ROI por campanha", "Performance da equipe"] },
               { icon: Users, title: "CRM Nativo + Equipe", desc: "Gerentes, operadores e clientes com acessos personalizados. Cada perfil vê apenas o que precisa, sem ruído.", items: ["5 níveis de permissão", "RLS por empresa", "Auditoria de ações"] },
-              { icon: Kanban, title: "Kanban + Cadência", desc: "Pipeline padronizado com 9 colunas e cadência automática de 5 tentativas. Nenhum lead esquecido — nunca mais.", items: ["Pipeline padrão pronto", "5 follow-ups automáticos", "Movimentação por bot"] },
+              { icon: Kanban, title: "Kanban + Cadência", desc: "Pipeline padronizado com 9 colunas e cadência automática de 5 tentativas. Nenhum lead esquecido — nunca mais.", items: ["Pipeline padrão pronto", "5 follow-ups automáticos", "Movimentação automática"] },
               { icon: CalendarDays, title: "Agenda + Lembretes", desc: "Reuniões agendadas pela IA respeitando seu expediente. Lembretes automáticos por WhatsApp em 6h, 2h e 30min antes.", items: ["Agenda mensal/semanal", "Lembretes WhatsApp", "Recorrência configurável"] },
               { icon: FileText, title: "Documentos + Petições", desc: "Upload de documentos até 600MB, contratos por ZapSign, procurações e modelos prontos organizados por pasta.", items: ["ZapSign integrado", "Storage por empresa", "Modelos de contrato"] },
               { icon: Shield, title: "Monitoramento de Processos", desc: "Acompanhamento semanal automático via Escavador. Alertas de movimentações novas direto no painel do cliente.", items: ["Sincronização semanal", "Alertas automáticos", "Pacotes adicionais"] },
