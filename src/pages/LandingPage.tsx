@@ -130,6 +130,10 @@ export default function LandingPage() {
           <div className="hidden items-center gap-8 md:flex">
             <a href="#funcionalidades" className="text-sm text-[hsl(220,10%,70%)] transition-colors hover:text-[hsl(153,60%,45%)]">Funcionalidades</a>
             <a href="#demo" className="text-sm text-[hsl(220,10%,70%)] transition-colors hover:text-[hsl(153,60%,45%)]">Demo</a>
+            <a href="#ia-juridica" className="text-sm font-medium text-[hsl(38,90%,55%)] transition-colors hover:text-[hsl(45,95%,60%)] flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5" />
+              IA Jurídica
+            </a>
             <a href="#depoimentos" className="text-sm text-[hsl(220,10%,70%)] transition-colors hover:text-[hsl(153,60%,45%)]">Depoimentos</a>
             <a href="#planos" className="text-sm text-[hsl(220,10%,70%)] transition-colors hover:text-[hsl(153,60%,45%)]">Planos</a>
           </div>
