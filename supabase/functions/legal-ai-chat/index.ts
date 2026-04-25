@@ -1,5 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { getErrorMessage } from "../_shared/errors.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -173,7 +174,7 @@ async function handler(req: Request): Promise<Response> {
     return new Response(browserStream, { headers });
   } catch (e) {
     console.error("legal-ai-chat error:", e);
-    return jsonResponse({ error: e instanceof Error ? e.message : "Erro inesperado" }, 500);
+    return jsonResponse({ error: getErrorMessage(e, "Erro inesperado") }, 500);
   }
 }
 
