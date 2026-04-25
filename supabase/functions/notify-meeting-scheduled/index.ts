@@ -68,13 +68,20 @@ serve(async (req) => {
       });
     }
 
-    // Fetch company + whatsapp config
-    const [{ data: company }, { data: config }] = await Promise.all([
+    // Fetch company, whatsapp config and niche-specific routing
+    const [{ data: company }, { data: config }, { data: qualification }] = await Promise.all([
       supabase.from("companies").select("name, whatsapp").eq("id", reminder.company_id).maybeSingle(),
       supabase
         .from("whatsapp_configs")
         .select("zapi_token, zapi_instance_id, alert_whatsapp")
         .eq("company_id", reminder.company_id)
+        .maybeSingle(),
+      supabase
+        .from("lead_qualification_answers")
+        .select("niche")
+        .eq("lead_id", reminder.lead_id)
+        .order("created_at", { ascending: false })
+        .limit(1)
         .maybeSingle(),
     ]);
 
@@ -86,13 +93,38 @@ serve(async (req) => {
       });
     }
 
-    const alertNumber = config?.alert_whatsapp || company?.whatsapp;
-    if (!alertNumber) {
-      console.log("No alert number for company", reminder.company_id);
-      return new Response(JSON.stringify({ skipped: "no alert number" }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    // Determina o(s) destinatário(s):
+    // 1) número específico do nicho (se cadastrado e ativo)
+    // 2) fallback: alert_whatsapp da empresa ou whatsapp principal
+    const recipients: { number: string; label: string }[] = [];
+    const leadNiche = qualification?.niche || null;
+
+    if (leadNiche) {
+      const { data: nicheAlert } = await supabase
+        .from("company_niche_alerts")
+        .select("whatsapp, lawyer_name")
+        .eq("company_id", reminder.company_id)
+        .eq("niche", leadNiche)
+        .eq("is_active", true)
+        .maybeSingle();
+      if (nicheAlert?.whatsapp) {
+        recipients.push({
+          number: nicheAlert.whatsapp,
+          label: nicheAlert.lawyer_name || `advogado ${leadNiche}`,
+        });
+      }
+    }
+
+    if (recipients.length === 0) {
+      const fallback = config?.alert_whatsapp || company?.whatsapp;
+      if (!fallback) {
+        console.log("No alert number for company", reminder.company_id);
+        return new Response(JSON.stringify({ skipped: "no alert number" }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      recipients.push({ number: fallback, label: "empresa" });
     }
 
     const { date, time } = formatBR(new Date(reminder.due_at));
