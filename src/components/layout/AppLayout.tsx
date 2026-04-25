@@ -53,17 +53,23 @@ export default function AppLayout() {
     <NewMessageNotificationProvider>
       <ReminderAlertProvider>
         <SidebarProvider>
-          <div className="flex min-h-screen w-full">
+          <div className="flex min-h-screen w-full bg-background">
             <AppSidebar />
             <main className="flex-1 overflow-auto">
-              <header className="sticky top-0 z-10 flex h-14 items-center border-b border-border bg-background/80 px-4 backdrop-blur-md">
-                <SidebarTrigger className="text-muted-foreground" />
+              <header className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b border-border bg-background/85 px-4 backdrop-blur-xl">
+                <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
+                <div className="h-5 w-px bg-border" />
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="font-semibold text-foreground">AdvOne</span>
+                  <span className="text-muted-foreground/50">/</span>
+                  <span className="text-muted-foreground">Workspace</span>
+                </div>
                 <div className="ml-auto flex items-center gap-2">
                   <ReminderAlertBell />
                   <HeaderNotification />
                 </div>
               </header>
-              <div className="p-3 sm:p-4 md:p-6">
+              <div className="p-4 sm:p-6 md:p-8">
                 <Outlet />
               </div>
             </main>
