@@ -273,10 +273,13 @@ export default function ClientUsers() {
                 <p className="text-xs text-muted-foreground">
                   {isGerente ? (
                     <>
-                      O operador terá acesso às <strong className="text-foreground">Conversas</strong> e{" "}
-                      <strong className="text-foreground">Kanban</strong>, podendo atender leads e alterar status.
+                      Após criar o acesso, clique em{" "}
+                      <strong className="text-foreground">Permissões</strong> na linha
+                      do advogado para liberar os módulos (Conversas, Kanban, Agenda,
+                      Casos, Documentos, IA Jurídica, Monitoramento e Financeiro).
                       <br />
-                      <strong className="text-foreground">Senha padrão: 123456</strong>
+                      <strong className="text-foreground">Senha padrão: 123456</strong>{" "}
+                      — peça para o advogado alterar no primeiro login.
                     </>
                   ) : (
                     <>
