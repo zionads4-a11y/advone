@@ -25,6 +25,11 @@ import {
   Clock,
   Target,
   Play,
+  Scale,
+  Sparkles,
+  GraduationCap,
+  BookOpen,
+  Gavel,
 } from "lucide-react";
 
 const stats = [
