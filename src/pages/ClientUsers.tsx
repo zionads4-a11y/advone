@@ -205,14 +205,21 @@ export default function ClientUsers() {
           <DialogTrigger asChild>
             <Button className="gradient-primary text-primary-foreground">
               <UserPlus className="mr-2 h-4 w-4" />
-              {isGerente ? "Novo Operador" : "Novo Usuário"}
+              {isGerente ? "Cadastrar Advogado" : "Novo Usuário"}
             </Button>
           </DialogTrigger>
           <DialogContent className="bg-card text-foreground">
             <DialogHeader>
               <DialogTitle className="font-display">
-                {isGerente ? "Adicionar Operador" : "Criar Usuário da Empresa"}
+                {isGerente ? "Cadastrar Advogado / Operador" : "Criar Usuário da Empresa"}
               </DialogTitle>
+              {isGerente && (
+                <p className="text-xs text-muted-foreground">
+                  Crie o acesso do advogado. Depois, na lista, clique em{" "}
+                  <strong className="text-primary">Permissões</strong> para escolher
+                  quais módulos ele pode acessar.
+                </p>
+              )}
             </DialogHeader>
             <form onSubmit={handleCreateUser} className="space-y-4">
               <div className="space-y-2">
@@ -266,10 +273,13 @@ export default function ClientUsers() {
                 <p className="text-xs text-muted-foreground">
                   {isGerente ? (
                     <>
-                      O operador terá acesso às <strong className="text-foreground">Conversas</strong> e{" "}
-                      <strong className="text-foreground">Kanban</strong>, podendo atender leads e alterar status.
+                      Após criar o acesso, clique em{" "}
+                      <strong className="text-foreground">Permissões</strong> na linha
+                      do advogado para liberar os módulos (Conversas, Kanban, Agenda,
+                      Casos, Documentos, IA Jurídica, Monitoramento e Financeiro).
                       <br />
-                      <strong className="text-foreground">Senha padrão: 123456</strong>
+                      <strong className="text-foreground">Senha padrão: 123456</strong>{" "}
+                      — peça para o advogado alterar no primeiro login.
                     </>
                   ) : (
                     <>
