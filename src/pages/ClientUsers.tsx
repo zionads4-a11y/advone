@@ -211,8 +211,15 @@ export default function ClientUsers() {
           <DialogContent className="bg-card text-foreground">
             <DialogHeader>
               <DialogTitle className="font-display">
-                {isGerente ? "Adicionar Operador" : "Criar Usuário da Empresa"}
+                {isGerente ? "Cadastrar Advogado / Operador" : "Criar Usuário da Empresa"}
               </DialogTitle>
+              {isGerente && (
+                <p className="text-xs text-muted-foreground">
+                  Crie o acesso do advogado. Depois, na lista, clique em{" "}
+                  <strong className="text-primary">Permissões</strong> para escolher
+                  quais módulos ele pode acessar.
+                </p>
+              )}
             </DialogHeader>
             <form onSubmit={handleCreateUser} className="space-y-4">
               <div className="space-y-2">
