@@ -225,15 +225,185 @@ export default function LandingPage() {
           </p>
         </Reveal>
         <Reveal delay={200}>
-          <div className="overflow-hidden rounded-2xl border border-[hsl(220,20%,16%)] shadow-2xl shadow-[hsl(153,60%,45%)]/5 transition-transform duration-500 hover:scale-[1.01]">
-            <img
-              src={dashboardMockup}
-              alt="Dashboard do CRM AdvOne"
-              className="w-full"
-              loading="lazy"
-              width={1200}
-              height={800}
-            />
+          <div className="relative">
+            <div className="absolute -inset-6 bg-gradient-to-r from-[hsl(153,60%,45%)]/10 via-[hsl(38,90%,55%)]/10 to-[hsl(153,60%,45%)]/10 blur-3xl rounded-3xl" />
+            <div className="relative overflow-hidden rounded-2xl border border-[hsl(220,20%,16%)] bg-[hsl(220,28%,7%)] shadow-2xl shadow-[hsl(153,60%,45%)]/10 transition-transform duration-500 hover:scale-[1.01]">
+              {/* Browser bar */}
+              <div className="flex items-center gap-2 border-b border-[hsl(220,20%,16%)] bg-[hsl(220,28%,5%)] px-4 py-3">
+                <div className="flex gap-1.5">
+                  <div className="h-3 w-3 rounded-full bg-[hsl(0,70%,55%)]/80" />
+                  <div className="h-3 w-3 rounded-full bg-[hsl(38,90%,55%)]/80" />
+                  <div className="h-3 w-3 rounded-full bg-[hsl(153,60%,45%)]/80" />
+                </div>
+                <div className="ml-4 flex-1 rounded-md bg-[hsl(220,25%,9%)] px-3 py-1 text-xs text-[hsl(220,10%,50%)]">
+                  app.advone.online/dashboard
+                </div>
+              </div>
+
+              <div className="p-5 md:p-7 space-y-5">
+                {/* Performance hero card */}
+                <div className="rounded-xl border border-[hsl(220,20%,16%)] bg-gradient-to-br from-[hsl(220,28%,9%)] to-[hsl(220,28%,7%)] p-5 md:p-6">
+                  <div className="flex items-start justify-between gap-6 flex-wrap">
+                    <div className="flex-1 min-w-[260px]">
+                      <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-[hsl(153,60%,55%)] flex items-center gap-2">
+                        <span className="h-1.5 w-1.5 rounded-full bg-[hsl(153,60%,55%)] animate-pulse" />
+                        Performance do mês
+                      </p>
+                      <div className="flex items-baseline gap-3 mb-2">
+                        <h3 className="text-4xl md:text-5xl font-bold text-[hsl(220,10%,95%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                          38.4%
+                        </h3>
+                        <span className="rounded-md bg-[hsl(153,60%,45%)]/15 px-2 py-1 text-xs font-semibold text-[hsl(153,60%,55%)] flex items-center gap-1">
+                          <TrendingUp className="h-3 w-3" />
+                          Taxa de conversão
+                        </span>
+                      </div>
+                      <p className="text-sm text-[hsl(220,10%,60%)] mb-4">
+                        47 contratos fechados de 122 leads recebidos. Cadência mantendo o ritmo.
+                      </p>
+                      <div className="grid grid-cols-3 gap-4 pt-4 border-t border-[hsl(220,20%,16%)]">
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-[hsl(220,10%,50%)] mb-1">Faturamento</p>
+                          <p className="text-lg font-bold text-[hsl(38,90%,55%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 142.380</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-[hsl(220,10%,50%)] mb-1">Pipeline</p>
+                          <p className="text-lg font-bold text-[hsl(210,80%,60%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>68</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-[hsl(220,10%,50%)] mb-1">Perdidos</p>
+                          <p className="text-lg font-bold text-[hsl(220,10%,70%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>7</p>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Mini chart */}
+                    <div className="flex-1 min-w-[260px] h-[140px] relative">
+                      <svg viewBox="0 0 400 140" className="w-full h-full" preserveAspectRatio="none">
+                        <defs>
+                          <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="hsl(153,60%,45%)" stopOpacity="0.4" />
+                            <stop offset="100%" stopColor="hsl(153,60%,45%)" stopOpacity="0" />
+                          </linearGradient>
+                        </defs>
+                        <path
+                          d="M 0,110 C 40,90 60,40 100,50 C 140,60 160,100 200,95 C 240,90 260,30 300,25 C 340,20 360,70 400,60 L 400,140 L 0,140 Z"
+                          fill="url(#chartGrad)"
+                        />
+                        <path
+                          d="M 0,110 C 40,90 60,40 100,50 C 140,60 160,100 200,95 C 240,90 260,30 300,25 C 340,20 360,70 400,60"
+                          fill="none"
+                          stroke="hsl(153,60%,55%)"
+                          strokeWidth="2.5"
+                        />
+                        {[
+                          { x: 0, y: 110 }, { x: 100, y: 50 }, { x: 200, y: 95 }, { x: 300, y: 25 }, { x: 400, y: 60 }
+                        ].map((p, i) => (
+                          <circle key={i} cx={p.x} cy={p.y} r="3.5" fill="hsl(153,60%,55%)" />
+                        ))}
+                      </svg>
+                      <div className="absolute bottom-0 left-0 right-0 flex justify-between text-[10px] text-[hsl(220,10%,45%)] px-1">
+                        {["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((d) => <span key={d}>{d}</span>)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* KPI Cards */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {[
+                    { label: "Total de Leads", value: "122", icon: Users, color: "hsl(210,80%,60%)" },
+                    { label: "Novos Leads", value: "23", sub: "Aguardando contato", icon: Target, color: "hsl(38,90%,55%)" },
+                    { label: "Vendas Fechadas", value: "47", icon: TrendingUp, color: "hsl(153,60%,55%)" },
+                    { label: "Faturamento", value: "R$ 142k", icon: Wallet, color: "hsl(45,95%,60%)" },
+                  ].map((kpi) => (
+                    <div key={kpi.label} className="rounded-xl border border-[hsl(220,20%,16%)] bg-[hsl(220,28%,8%)] p-4">
+                      <div className="flex items-start justify-between mb-2">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-[hsl(220,10%,55%)]">{kpi.label}</p>
+                        <div className="flex h-7 w-7 items-center justify-center rounded-md" style={{ backgroundColor: `${kpi.color}20`, color: kpi.color }}>
+                          <kpi.icon className="h-3.5 w-3.5" />
+                        </div>
+                      </div>
+                      <p className="text-2xl font-bold" style={{ color: kpi.color, fontFamily: "'Space Grotesk', sans-serif" }}>
+                        {kpi.value}
+                      </p>
+                      {kpi.sub && <p className="mt-1 text-[10px] text-[hsl(220,10%,55%)]">{kpi.sub}</p>}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Bottom: Origin + Funnel */}
+                <div className="grid md:grid-cols-2 gap-3">
+                  <div className="rounded-xl border border-[hsl(220,20%,16%)] bg-[hsl(220,28%,8%)] p-5">
+                    <div className="mb-4">
+                      <h4 className="text-sm font-semibold text-[hsl(220,10%,90%)] flex items-center gap-2">
+                        <BarChart3 className="h-4 w-4 text-[hsl(210,80%,60%)]" />
+                        Leads por Origem
+                      </h4>
+                      <p className="text-[10px] text-[hsl(220,10%,50%)] mt-0.5">Distribuição por canal de aquisição</p>
+                    </div>
+                    <div className="flex items-end justify-around h-[120px] gap-3">
+                      {[
+                        { label: "Google", value: 58, height: 100 },
+                        { label: "Meta", value: 41, height: 70 },
+                        { label: "Orgânico", value: 23, height: 40 },
+                      ].map((b) => (
+                        <div key={b.label} className="flex-1 flex flex-col items-center gap-2">
+                          <span className="text-xs font-bold text-[hsl(220,10%,80%)]">{b.value}</span>
+                          <div
+                            className="w-full rounded-t-md bg-gradient-to-t from-[hsl(210,80%,55%)] to-[hsl(210,80%,65%)] transition-all"
+                            style={{ height: `${b.height}px` }}
+                          />
+                          <span className="text-[10px] text-[hsl(220,10%,55%)]">{b.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-[hsl(220,20%,16%)] bg-[hsl(220,28%,8%)] p-5">
+                    <div className="mb-4">
+                      <h4 className="text-sm font-semibold text-[hsl(220,10%,90%)] flex items-center gap-2">
+                        <Target className="h-4 w-4 text-[hsl(153,60%,55%)]" />
+                        Status dos Leads
+                      </h4>
+                      <p className="text-[10px] text-[hsl(220,10%,50%)] mt-0.5">Funil de conversão</p>
+                    </div>
+                    <div className="flex items-center gap-5">
+                      <div className="relative h-[120px] w-[120px] shrink-0">
+                        <svg viewBox="0 0 100 100" className="-rotate-90 h-full w-full">
+                          <circle cx="50" cy="50" r="40" fill="none" stroke="hsl(220,20%,14%)" strokeWidth="14" />
+                          <circle cx="50" cy="50" r="40" fill="none" stroke="hsl(153,60%,55%)" strokeWidth="14"
+                            strokeDasharray="95.5 251" strokeLinecap="butt" />
+                          <circle cx="50" cy="50" r="40" fill="none" stroke="hsl(210,80%,60%)" strokeWidth="14"
+                            strokeDasharray="70 251" strokeDashoffset="-95.5" strokeLinecap="butt" />
+                          <circle cx="50" cy="50" r="40" fill="none" stroke="hsl(38,90%,55%)" strokeWidth="14"
+                            strokeDasharray="48 251" strokeDashoffset="-165.5" strokeLinecap="butt" />
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <p className="text-xl font-bold text-[hsl(220,10%,95%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>122</p>
+                          <p className="text-[9px] text-[hsl(220,10%,50%)] uppercase tracking-wide">Total</p>
+                        </div>
+                      </div>
+                      <div className="flex-1 space-y-2 text-xs">
+                        {[
+                          { label: "Ganhos", value: 47, color: "hsl(153,60%,55%)" },
+                          { label: "Em atendimento", value: 34, color: "hsl(210,80%,60%)" },
+                          { label: "Novos", value: 23, color: "hsl(38,90%,55%)" },
+                          { label: "Perdidos", value: 18, color: "hsl(220,10%,40%)" },
+                        ].map((s) => (
+                          <div key={s.label} className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: s.color }} />
+                              <span className="text-[hsl(220,10%,75%)]">{s.label}</span>
+                            </div>
+                            <span className="font-semibold text-[hsl(220,10%,90%)]">{s.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </Reveal>
       </section>
