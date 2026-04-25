@@ -12,6 +12,7 @@ import { BusinessHoursConfig, type BusinessHours, parseBusinessHours, getDefault
 import MonitoringPackagePurchase from "@/components/monitoring/MonitoringPackagePurchase";
 import { ZapSignConfigCard } from "@/components/companies/ZapSignConfigCard";
 import { CompanyOfficesEditor } from "@/components/companies/CompanyOfficesEditor";
+import { CompanyNicheAlertsCard } from "@/components/companies/CompanyNicheAlertsCard";
 
 interface Company {
   id: string;
@@ -121,6 +122,9 @@ export default function CompanySettings() {
         <Save className="mr-2 h-4 w-4" />
         {saving ? "Salvando..." : "Salvar Configurações"}
       </Button>
+
+      {/* Notificação de reunião por área de atuação */}
+      <CompanyNicheAlertsCard companyId={company.id} />
 
       {/* ZapSign Config */}
       <ZapSignConfigCard companyId={company.id} />
