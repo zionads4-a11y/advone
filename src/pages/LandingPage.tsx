@@ -552,6 +552,110 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Gestão Completa do Escritório (ADM) */}
+      <section id="gestao" className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(220,25%,6%)] via-[hsl(220,25%,7%)] to-[hsl(220,25%,6%)]" />
+        <div className="absolute inset-0 opacity-25">
+          <div className="absolute top-1/3 -left-20 h-96 w-96 rounded-full bg-[hsl(153,60%,45%)]/15 blur-3xl" />
+          <div className="absolute bottom-1/4 -right-20 h-96 w-96 rounded-full bg-[hsl(200,80%,55%)]/10 blur-3xl" />
+        </div>
+
+        <div className="relative mx-auto max-w-6xl px-6 py-24">
+          <Reveal className="mb-14 text-center">
+            <p className="mb-3 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">
+              Gestão Completa · ADM
+            </p>
+            <h2 className="mx-auto max-w-3xl text-3xl font-bold leading-tight md:text-5xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              Seu escritório inteiro em <span className="text-[hsl(153,60%,45%)]">um só lugar</span>
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-base text-[hsl(220,10%,65%)] md:text-lg">
+              Da captação do lead até a entrega final do processo. Centralize processos, prazos, financeiro,
+              equipe e clientes em uma plataforma conectada e sincronizada — controle total sem perder agilidade.
+            </p>
+          </Reveal>
+
+          <Reveal>
+            <div className="mb-16 grid grid-cols-2 gap-4 rounded-2xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,8%)]/60 p-6 backdrop-blur md:grid-cols-4 md:gap-8 md:p-10">
+              <div className="text-center">
+                <p className="text-3xl font-bold text-[hsl(153,60%,45%)] md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>+1.200</p>
+                <p className="mt-1 text-xs text-[hsl(220,10%,55%)] md:text-sm">Escritórios atendidos</p>
+              </div>
+              <div className="text-center">
+                <p className="text-3xl font-bold text-[hsl(153,60%,45%)] md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>+50 mil</p>
+                <p className="mt-1 text-xs text-[hsl(220,10%,55%)] md:text-sm">Leads gerenciados</p>
+              </div>
+              <div className="text-center">
+                <p className="text-3xl font-bold text-[hsl(153,60%,45%)] md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>+R$ 80mi</p>
+                <p className="mt-1 text-xs text-[hsl(220,10%,55%)] md:text-sm">Em honorários gestionados</p>
+              </div>
+              <div className="text-center">
+                <p className="text-3xl font-bold text-[hsl(153,60%,45%)] md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>98%</p>
+                <p className="mt-1 text-xs text-[hsl(220,10%,55%)] md:text-sm">Satisfação dos gestores</p>
+              </div>
+            </div>
+          </Reveal>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            {[
+              { icon: Briefcase, title: "Workflow Jurídico", desc: "Pastas por cliente, processos vinculados, andamentos e prazos em um pipeline visual que sua equipe entende em segundos.", items: ["Pasta digital por cliente", "Vínculo lead → processo", "Andamentos centralizados"] },
+              { icon: Wallet, title: "Financeiro Avançado", desc: "Contas a pagar, a receber, comissões e faturamento líquido com integração nativa Asaas — boletos, Pix e cobrança automática.", items: ["Integração Asaas nativa", "Comissões por contrato", "Faturamento em tempo real"] },
+              { icon: BarChart3, title: "Business Intelligence", desc: "Dashboards com taxa de conversão, origem de leads, faturamento, pipeline e produtividade — tudo em tempo real.", items: ["Conversão por etapa", "ROI por campanha", "Performance da equipe"] },
+              { icon: Users, title: "CRM Nativo + Equipe", desc: "Gerentes, operadores e clientes com acessos personalizados. Cada perfil vê apenas o que precisa, sem ruído.", items: ["5 níveis de permissão", "RLS por empresa", "Auditoria de ações"] },
+              { icon: Kanban, title: "Kanban + Cadência", desc: "Pipeline padronizado com 9 colunas e cadência automática de 5 tentativas. Nenhum lead esquecido — nunca mais.", items: ["Pipeline padrão pronto", "5 follow-ups automáticos", "Movimentação por bot"] },
+              { icon: CalendarDays, title: "Agenda + Lembretes", desc: "Reuniões agendadas pela IA respeitando seu expediente. Lembretes automáticos por WhatsApp em 6h, 2h e 30min antes.", items: ["Agenda mensal/semanal", "Lembretes WhatsApp", "Recorrência configurável"] },
+              { icon: FileText, title: "Documentos + Petições", desc: "Upload de documentos até 600MB, contratos por ZapSign, procurações e modelos prontos organizados por pasta.", items: ["ZapSign integrado", "Storage por empresa", "Modelos de contrato"] },
+              { icon: Shield, title: "Monitoramento de Processos", desc: "Acompanhamento semanal automático via Escavador. Alertas de movimentações novas direto no painel do cliente.", items: ["Sincronização semanal", "Alertas automáticos", "Pacotes adicionais"] },
+              { icon: Target, title: "Tracking + Atribuição", desc: "Links rastreáveis com UTMs por campanha. Saiba exatamente quanto cada anúncio do Meta ou Google rendeu de fato.", items: ["UTMs automáticos", "Origem por lead", "ROI por campanha"] },
+            ].map((pillar, i) => (
+              <Reveal key={pillar.title} delay={i * 70}>
+                <div className="group h-full rounded-xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] p-6 transition-all duration-500 hover:-translate-y-1 hover:border-[hsl(153,60%,45%)]/40 hover:shadow-[0_20px_60px_-20px_hsl(153,60%,45%/0.25)]">
+                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg bg-[hsl(153,60%,45%)]/10 transition-transform duration-300 group-hover:scale-110">
+                    <pillar.icon className="h-5 w-5 text-[hsl(153,60%,45%)]" />
+                  </div>
+                  <h3 className="mb-2 text-lg font-semibold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{pillar.title}</h3>
+                  <p className="mb-4 text-sm leading-relaxed text-[hsl(220,10%,60%)]">{pillar.desc}</p>
+                  <ul className="space-y-1.5">
+                    {pillar.items.map((it) => (
+                      <li key={it} className="flex items-center gap-2 text-xs text-[hsl(220,10%,70%)]">
+                        <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-[hsl(153,60%,45%)]" />
+                        <span>{it}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+
+          <div className="mt-20 grid gap-6 md:grid-cols-3">
+            {[
+              { icon: Clock, title: "Mais tempo para estratégia, menos burocracia", desc: "Automatize prazos, follow-ups e tarefas repetitivas. Sua equipe foca em construir casos sólidos e relacionamento." },
+              { icon: BarChart3, title: "Mais controle, menos margem para erro", desc: "Visibilidade completa da operação com métricas em tempo real, financeiro integrado e indicadores de produtividade." },
+              { icon: TrendingUp, title: "Mais clientes com a mesma equipe", desc: "Quando a operação roda automaticamente, você aceita mais casos sem comprometer qualidade nem sobrecarregar o time." },
+            ].map((b, i) => (
+              <Reveal key={b.title} delay={i * 100}>
+                <div className="rounded-xl border border-[hsl(220,20%,16%)] bg-gradient-to-br from-[hsl(220,25%,9%)] to-[hsl(220,25%,7%)] p-6">
+                  <p className="mb-2 text-xs font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Isso significa</p>
+                  <div className="mb-3 flex items-center gap-3">
+                    <b.icon className="h-5 w-5 text-[hsl(153,60%,45%)]" />
+                    <h4 className="text-base font-semibold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{b.title}</h4>
+                  </div>
+                  <p className="text-sm leading-relaxed text-[hsl(220,10%,60%)]">{b.desc}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+
+          <Reveal className="mt-16 text-center">
+            <Button size="lg" onClick={() => navigate("/signup?plan=mensal")} className="gradient-primary text-[hsl(0,0%,100%)] font-semibold shadow-[0_10px_40px_-10px_hsl(153,60%,45%/0.5)]">
+              Quero ter o controle total do meu escritório
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+            <p className="mt-3 text-xs text-[hsl(220,10%,55%)]">Sem cartão de crédito • Setup guiado • Migração assistida</p>
+          </Reveal>
+        </div>
+      </section>
+
       {/* IA Jurídica Premium */}
       <section id="ia-juridica" className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[hsl(220,25%,6%)] via-[hsl(220,25%,8%)] to-[hsl(220,25%,6%)]" />
