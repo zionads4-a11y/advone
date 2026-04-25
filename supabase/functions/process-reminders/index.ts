@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { getErrorMessage } from "../_shared/errors.ts";
+import { REMINDER_WINDOWS, formatDateBR, formatTimeBR } from "./_logic.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -9,57 +10,6 @@ const corsHeaders = {
 };
 
 const SERVER_URL = "https://ziondigital.uazapi.com";
-
-interface ReminderWindow {
-  column: string;       // DB column to mark as sent
-  hoursBeforeMin: number; // min hours before event
-  hoursBeforeMax: number; // max hours before event
-  getMessage: (name: string, dateStr: string, timeStr: string) => string;
-}
-
-// 🎯 Cadência de lembretes com gatilhos psicológicos:
-// 5h antes  → Reciprocidade ("o(a) Dr(a). já está estudando seu caso")
-// 1h antes  → Compromisso ativo (pedir documentos + confirmar presença)
-// 30min antes → Iminência ("Dr(a). está se preparando agora")
-const REMINDER_WINDOWS: ReminderWindow[] = [
-  {
-    // 5 HORAS ANTES — Reciprocidade + Valorização
-    column: "reminder_6h_sent",
-    hoursBeforeMin: 4.5,
-    hoursBeforeMax: 6,
-    getMessage: (name, dateStr, timeStr) =>
-      `Olá, ${name}! 👋\n\nPassando aqui para te avisar que o(a) Dr(a). responsável pelo seu atendimento *já foi informado(a)* sobre nossa conversa de hoje (${dateStr} às *${timeStr}*) e já está separando tudo para te ajudar a resolver o seu caso da melhor forma. ⚖️✨\n\nFoi reservado um horário exclusivo para você, então conto com a sua presença! 🤝`,
-  },
-  {
-    // 1 HORA ANTES — Compromisso ativo + Pedido de confirmação
-    column: "reminder_2h_sent",
-    hoursBeforeMin: 0.85,
-    hoursBeforeMax: 1.5,
-    getMessage: (name, _dateStr, timeStr) =>
-      `${name}, falta *1 hora* para o seu atendimento com o(a) advogado(a)! ⏰\n\n📅 Horário: *${timeStr}*\n\nPara aproveitarmos cada minuto e já sair com encaminhamentos concretos, peço que você:\n\n✅ Separe os *documentos* relacionados ao seu caso (mesmo que sejam fotos pelo celular)\n✅ Anote suas *dúvidas* principais\n✅ Esteja em um lugar *tranquilo* na hora da ligação\n\nMe responde aqui com um *"vou estar pronto(a)"* só para eu confirmar com o(a) Dr(a)? 😉`,
-  },
-  {
-    // 30 MIN ANTES — Iminência + Escassez ("já está se preparando")
-    column: "reminder_30m_sent",
-    hoursBeforeMin: 0.25,
-    hoursBeforeMax: 0.6,
-    getMessage: (name, _dateStr, timeStr) =>
-      `${name}, é AGORA! 🚨\n\nO(A) Dr(a). já está *preparando a sala* e em *25 minutos* vai entrar em contato com você (horário marcado: *${timeStr}*).\n\n📱 Deixe o celular por perto e o WhatsApp aberto\n📄 Documentos em mãos\n🔇 Ambiente em silêncio\n\nNos falamos em instantes! 👨‍⚖️✨`,
-  },
-];
-
-function formatDateBR(date: Date): string {
-  const days = ["domingo", "segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado"];
-  const d = date.getUTCDate().toString().padStart(2, "0");
-  const m = (date.getUTCMonth() + 1).toString().padStart(2, "0");
-  return `${days[date.getUTCDay()]}, ${d}/${m}`;
-}
-
-function formatTimeBR(date: Date): string {
-  const h = date.getUTCHours().toString().padStart(2, "0");
-  const min = date.getUTCMinutes().toString().padStart(2, "0");
-  return `${h}:${min}`;
-}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
