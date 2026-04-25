@@ -32,6 +32,7 @@ import { CompanyOfficesEditor } from "./CompanyOfficesEditor";
 import { Separator } from "@/components/ui/separator";
 
 export type PartnershipType = "exito" | "mensalidade_zionads";
+export type ServiceMode = "full" | "ai_only";
 
 interface Company {
   id: string;
@@ -40,6 +41,7 @@ interface Company {
   whatsapp: string | null;
   business_hours?: unknown;
   partnership_type?: PartnershipType | null;
+  service_mode?: ServiceMode | null;
 }
 
 interface CompanyEditDialogProps {
@@ -53,6 +55,7 @@ interface CompanyEditDialogProps {
       whatsapp: string | null;
       business_hours: BusinessHours;
       partnership_type: PartnershipType;
+      service_mode: ServiceMode;
     }
   ) => void;
   onDelete: (id: string) => void;
