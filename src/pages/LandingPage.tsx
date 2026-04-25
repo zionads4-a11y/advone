@@ -395,12 +395,12 @@ export default function LandingPage() {
               Exclusivo Premium
             </div>
             <h2 className="text-3xl font-bold md:text-5xl mb-5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Conheça a <span className="bg-gradient-to-r from-[hsl(38,90%,55%)] via-[hsl(45,95%,60%)] to-[hsl(38,90%,55%)] bg-clip-text text-transparent">Dra. Helena</span>
+              <span className="bg-gradient-to-r from-[hsl(38,90%,55%)] via-[hsl(45,95%,60%)] to-[hsl(38,90%,55%)] bg-clip-text text-transparent">IA Jurídica</span> integrada
               <br />
-              sua sócia jurídica com IA.
+              ao seu CRM.
             </h2>
             <p className="mx-auto max-w-2xl text-lg text-[hsl(220,10%,65%)] leading-relaxed">
-              Uma advogada virtual com <strong className="text-[hsl(220,10%,85%)]">30+ anos de experiência</strong>, doutora pela USP, especialista em redigir petições, contratos, mandados de segurança e pareceres em segundos — direto dentro do seu CRM.
+              Uma <strong className="text-[hsl(220,10%,85%)]">assistente jurídica com IA</strong> treinada para redigir petições, contratos, mandados de segurança e pareceres em segundos — direto dentro do seu CRM.
             </p>
           </Reveal>
 
@@ -415,10 +415,10 @@ export default function LandingPage() {
                       <Scale className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="font-semibold text-[hsl(220,10%,92%)]">Dra. Helena Vasconcellos</p>
+                      <p className="font-semibold text-[hsl(220,10%,92%)]">IA Jurídica AdvOne</p>
                       <p className="text-xs text-[hsl(153,60%,55%)] flex items-center gap-1.5">
                         <span className="h-1.5 w-1.5 rounded-full bg-[hsl(153,60%,55%)] animate-pulse" />
-                        Online · Doutora em Direito
+                        Online · Assistente jurídica
                       </p>
                     </div>
                   </div>
@@ -448,8 +448,8 @@ export default function LandingPage() {
                 {[
                   {
                     icon: GraduationCap,
-                    title: "Doutora em Direito pela USP",
-                    desc: "Pós-doutorado em Constitucional, Civil, Trabalhista, Previdenciário e Tributário.",
+                    title: "Treinada em Direito brasileiro",
+                    desc: "Especializada em Constitucional, Civil, Trabalhista, Previdenciário e Tributário com base na legislação vigente.",
                   },
                   {
                     icon: Gavel,
@@ -491,7 +491,7 @@ export default function LandingPage() {
                   <p className="text-sm text-[hsl(220,10%,55%)]">por petição</p>
                 </div>
                 <div className="border-x border-[hsl(220,20%,16%)] px-4">
-                  <p className="text-xs font-bold uppercase tracking-widest text-[hsl(38,90%,55%)] mb-2">Com Dra. Helena</p>
+                  <p className="text-xs font-bold uppercase tracking-widest text-[hsl(38,90%,55%)] mb-2">Com IA Jurídica</p>
                   <p className="text-4xl font-bold bg-gradient-to-r from-[hsl(38,90%,55%)] to-[hsl(45,95%,60%)] bg-clip-text text-transparent mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>30s</p>
                   <p className="text-sm text-[hsl(220,10%,55%)]">primeira versão pronta</p>
                 </div>
@@ -508,7 +508,7 @@ export default function LandingPage() {
                   className="bg-gradient-to-r from-[hsl(38,90%,55%)] to-[hsl(45,95%,60%)] hover:opacity-90 text-[hsl(220,25%,6%)] font-bold px-8 py-6 text-base shadow-lg shadow-[hsl(38,90%,55%)]/20"
                 >
                   <Sparkles className="mr-2 h-5 w-5" />
-                  Quero a Dra. Helena no meu escritório
+                  Quero a IA Jurídica no meu escritório
                 </Button>
                 <p className="text-xs text-[hsl(220,10%,50%)]">Disponível nos planos Mensal, Trimestral e Anual</p>
               </div>
