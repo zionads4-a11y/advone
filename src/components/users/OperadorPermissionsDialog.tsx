@@ -134,7 +134,7 @@ export function OperadorPermissionsDialog({
                       {m.sensitive && (
                         <Badge
                           variant="outline"
-                          className="border-amber-500/30 bg-amber-500/10 text-[10px] text-amber-500"
+                          className="border-destructive/40 bg-destructive/10 text-[10px] text-destructive"
                         >
                           Sensível
                         </Badge>
