@@ -140,6 +140,7 @@ export default function ClientUsers() {
     const fullName = formData.get("full_name") as string;
     const companyId = isGerente ? selectedCompanyId : (formData.get("company_id") as string);
     const role = isGerente ? "operador" : (formData.get("role") as string) || "gerente";
+    const jobTitle = (formData.get("job_title") as string) || "advogado";
 
     if (!email || !fullName || !companyId) {
       toast.error("Preencha todos os campos");
@@ -149,7 +150,14 @@ export default function ClientUsers() {
     setLoading(true);
 
     const { data, error } = await supabase.functions.invoke("create-client-user", {
-      body: { email, password: "123456", full_name: fullName, company_id: companyId, role },
+      body: {
+        email,
+        password: "123456",
+        full_name: fullName,
+        company_id: companyId,
+        role,
+        job_title: jobTitle,
+      },
     });
 
     console.log("create-client-user response:", { data, error: error?.message });
@@ -158,8 +166,8 @@ export default function ClientUsers() {
     if (errorMsg) {
       toast.error(errorMsg);
     } else {
-      const roleLabel = role === "gerente" ? "Gerente" : "Operador";
-      toast.success(`${roleLabel} criado com sucesso! Email: ${email} | Senha padrão: 123456`);
+      const jobLabel = getJobTitleLabel(jobTitle) ?? "Usuário";
+      toast.success(`${jobLabel} criado com sucesso! Email: ${email} | Senha padrão: 123456`);
       setDialogOpen(false);
       fetchData();
     }
