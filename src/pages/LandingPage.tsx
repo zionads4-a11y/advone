@@ -448,8 +448,8 @@ export default function LandingPage() {
                 {[
                   {
                     icon: GraduationCap,
-                    title: "Doutora em Direito pela USP",
-                    desc: "Pós-doutorado em Constitucional, Civil, Trabalhista, Previdenciário e Tributário.",
+                    title: "Treinada em Direito brasileiro",
+                    desc: "Especializada em Constitucional, Civil, Trabalhista, Previdenciário e Tributário com base na legislação vigente.",
                   },
                   {
                     icon: Gavel,
