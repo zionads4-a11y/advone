@@ -16,6 +16,7 @@ import {
   ShieldAlert,
   Trophy,
   History,
+  Scale,
 } from "lucide-react";
 import logoAdvOne from "@/assets/logo-advone-light.png";
 import { NavLink } from "@/components/NavLink";
@@ -58,6 +59,7 @@ const gerenteItems = [
   { title: "Kanban", url: "/kanban", icon: Kanban },
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
+  { title: "IA Jurídica", url: "/ia-juridica", icon: Scale, premium: true },
   { title: "Financeiro", url: "/financeiro", icon: Wallet },
   { title: "Documentos", url: "/documentos", icon: FileText },
   { title: "Processos", url: "/processos", icon: Briefcase },
@@ -71,6 +73,7 @@ const operadorItems = [
   { title: "Kanban", url: "/kanban", icon: Kanban },
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
+  { title: "IA Jurídica", url: "/ia-juridica", icon: Scale, premium: true },
   { title: "Documentos", url: "/documentos", icon: FileText },
   { title: "Processos", url: "/processos", icon: Briefcase },
   { title: "Bot", url: "/bot-config", icon: Bot },
@@ -148,6 +151,7 @@ export function AppSidebar() {
             <SidebarMenu className="gap-0.5">
               {menuItems.map((item) => {
                 const showBadge = item.url === "/conversations" && unreadCount > 0;
+                const isPremium = (item as any).premium === true;
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
@@ -159,6 +163,11 @@ export function AppSidebar() {
                       >
                         <item.icon className="h-4 w-4 shrink-0 transition-colors" />
                         <span className="flex-1 truncate">{item.title}</span>
+                        {isPremium && (
+                          <span className="rounded bg-accent/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-accent">
+                            Pro
+                          </span>
+                        )}
                         {showBadge && (
                           <span className="flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-bold text-destructive-foreground shadow-sm animate-pulse-soft">
                             {unreadCount > 99 ? "99+" : unreadCount}
