@@ -205,7 +205,7 @@ export default function ClientUsers() {
           <DialogTrigger asChild>
             <Button className="gradient-primary text-primary-foreground">
               <UserPlus className="mr-2 h-4 w-4" />
-              {isGerente ? "Novo Operador" : "Novo Usuário"}
+              {isGerente ? "Cadastrar Advogado" : "Novo Usuário"}
             </Button>
           </DialogTrigger>
           <DialogContent className="bg-card text-foreground">
