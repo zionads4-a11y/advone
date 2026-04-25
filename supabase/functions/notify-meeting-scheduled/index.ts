@@ -145,27 +145,29 @@ serve(async (req) => {
     const instanceParam = encodeURIComponent(config.zapi_instance_id);
     const tokenParam = encodeURIComponent(config.zapi_token || config.zapi_instance_id);
 
-    const sendResp = await fetch(`${SERVER_URL}/send/text?instance=${instanceParam}&token=${tokenParam}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        admintoken: ADMIN_TOKEN,
-      },
-      body: JSON.stringify({ number: alertNumber, text: message }),
-    });
-
-    const sendText = await sendResp.text();
-    if (!sendResp.ok) {
-      console.error("Failed to send meeting alert:", sendText);
-      return new Response(JSON.stringify({ error: "send failed", details: sendText }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const results: { to: string; ok: boolean; details?: string }[] = [];
+    for (const r of recipients) {
+      const sendResp = await fetch(
+        `${SERVER_URL}/send/text?instance=${instanceParam}&token=${tokenParam}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", admintoken: ADMIN_TOKEN },
+          body: JSON.stringify({ number: r.number, text: message }),
+        }
+      );
+      const sendText = await sendResp.text();
+      if (!sendResp.ok) {
+        console.error(`Failed to send meeting alert to ${r.label} (${r.number}):`, sendText);
+        results.push({ to: r.number, ok: false, details: sendText });
+      } else {
+        console.log(`Meeting alert sent to ${r.label} (${r.number}) for reminder ${reminder_id}`);
+        results.push({ to: r.number, ok: true });
+      }
     }
 
-    console.log(`Meeting alert sent to ${alertNumber} for reminder ${reminder_id}`);
-    return new Response(JSON.stringify({ sent: true, to: alertNumber }), {
-      status: 200,
+    const allOk = results.every((r) => r.ok);
+    return new Response(JSON.stringify({ sent: allOk, niche: leadNiche, results }), {
+      status: allOk ? 200 : 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err: unknown) {
