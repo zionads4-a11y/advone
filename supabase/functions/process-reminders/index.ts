@@ -16,27 +16,34 @@ interface ReminderWindow {
   getMessage: (name: string, dateStr: string, timeStr: string) => string;
 }
 
+// 🎯 Cadência de lembretes com gatilhos psicológicos:
+// 5h antes  → Reciprocidade ("o(a) Dr(a). já está estudando seu caso")
+// 1h antes  → Compromisso ativo (pedir documentos + confirmar presença)
+// 30min antes → Iminência ("Dr(a). está se preparando agora")
 const REMINDER_WINDOWS: ReminderWindow[] = [
   {
+    // 5 HORAS ANTES — Reciprocidade + Valorização
     column: "reminder_6h_sent",
-    hoursBeforeMin: 5,
-    hoursBeforeMax: 7,
+    hoursBeforeMin: 4.5,
+    hoursBeforeMax: 6,
     getMessage: (name, dateStr, timeStr) =>
-      `Oi, ${name}! 😊 Passando para lembrar que amanhã você tem um atendimento agendado.\n📅 ${dateStr} às ${timeStr}.\nSe puder, já deixe seus documentos separados para facilitar nossa análise.`,
+      `Olá, ${name}! 👋\n\nPassando aqui para te avisar que o(a) Dr(a). responsável pelo seu atendimento *já foi informado(a)* sobre nossa conversa de hoje (${dateStr} às *${timeStr}*) e já está separando tudo para te ajudar a resolver o seu caso da melhor forma. ⚖️✨\n\nFoi reservado um horário exclusivo para você, então conto com a sua presença! 🤝`,
   },
   {
+    // 1 HORA ANTES — Compromisso ativo + Pedido de confirmação
     column: "reminder_2h_sent",
-    hoursBeforeMin: 1.5,
-    hoursBeforeMax: 3,
+    hoursBeforeMin: 0.85,
+    hoursBeforeMax: 1.5,
     getMessage: (name, _dateStr, timeStr) =>
-      `Oi, ${name}! 😊\nSeu atendimento é daqui a pouco, às ${timeStr}.\nSe possível, deixe seus documentos por perto.`,
+      `${name}, falta *1 hora* para o seu atendimento com o(a) advogado(a)! ⏰\n\n📅 Horário: *${timeStr}*\n\nPara aproveitarmos cada minuto e já sair com encaminhamentos concretos, peço que você:\n\n✅ Separe os *documentos* relacionados ao seu caso (mesmo que sejam fotos pelo celular)\n✅ Anote suas *dúvidas* principais\n✅ Esteja em um lugar *tranquilo* na hora da ligação\n\nMe responde aqui com um *"vou estar pronto(a)"* só para eu confirmar com o(a) Dr(a)? 😉`,
   },
   {
+    // 30 MIN ANTES — Iminência + Escassez ("já está se preparando")
     column: "reminder_30m_sent",
     hoursBeforeMin: 0.25,
-    hoursBeforeMax: 0.75,
+    hoursBeforeMax: 0.6,
     getMessage: (name, _dateStr, timeStr) =>
-      `${name}, faltam poucos minutos para o seu atendimento! ⏰\nHorário: ${timeStr}. Estamos te aguardando.`,
+      `${name}, é AGORA! 🚨\n\nO(A) Dr(a). já está *preparando a sala* e em *25 minutos* vai entrar em contato com você (horário marcado: *${timeStr}*).\n\n📱 Deixe o celular por perto e o WhatsApp aberto\n📄 Documentos em mãos\n🔇 Ambiente em silêncio\n\nNos falamos em instantes! 👨‍⚖️✨`,
   },
 ];
 
