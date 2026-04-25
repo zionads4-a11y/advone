@@ -146,10 +146,19 @@ export function AppSidebar() {
   const { unreadCount } = useNewMessageNotifications();
   const { profile, initials } = useUserProfile();
   const { isAiOnly } = useCompanyServiceMode();
+  const { can, isUnrestricted } = useModulePermissions();
   const baseItems = getMenuItems(userRole);
-  const menuItems = isAiOnly
+  const aiFiltered = isAiOnly
     ? baseItems.filter((item) => AI_ONLY_ROUTES.has(item.url))
     : baseItems;
+  // Para operador, filtra também pelos módulos liberados pelo gerente
+  const menuItems =
+    userRole === "operador" && !isUnrestricted
+      ? aiFiltered.filter((item) => {
+          const moduleKey = MODULE_BY_ROUTE[item.url] as ModuleKey | undefined;
+          return moduleKey ? can(moduleKey) : true;
+        })
+      : aiFiltered;
 
   return (
     <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border bg-sidebar">
