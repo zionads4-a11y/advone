@@ -53,7 +53,7 @@ serve(async (req) => {
 
     const callerRole = roleData?.role;
 
-    const { email, password, full_name, company_id, role: targetRole } = await req.json();
+    const { email, password, full_name, company_id, role: targetRole, job_title } = await req.json();
 
     if (!email || !password || !full_name || !company_id) {
       return new Response(JSON.stringify({ error: "Campos obrigatórios: email, password, full_name, company_id" }), {
