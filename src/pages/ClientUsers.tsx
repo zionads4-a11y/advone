@@ -105,12 +105,17 @@ export default function ClientUsers() {
     }
 
     const [profilesRes, rolesRes] = await Promise.all([
-      supabase.from("profiles").select("user_id, full_name").in("user_id", userIds),
+      supabase.from("profiles").select("user_id, full_name, job_title").in("user_id", userIds),
       supabase.from("user_roles").select("user_id, role").in("user_id", userIds),
     ]);
 
-    const profileMap: Record<string, string> = {};
-    profilesRes.data?.forEach((p) => (profileMap[p.user_id] = p.full_name));
+    const profileMap: Record<string, { full_name: string; job_title: string | null }> = {};
+    profilesRes.data?.forEach((p) => {
+      profileMap[p.user_id] = {
+        full_name: p.full_name,
+        job_title: (p as { job_title?: string | null }).job_title ?? null,
+      };
+    });
 
     const roleMap: Record<string, string> = {};
     rolesRes.data?.forEach((r) => (roleMap[r.user_id] = r.role));
@@ -118,10 +123,11 @@ export default function ClientUsers() {
     const clientList: ClientUser[] = clientCompanies.map((cc) => ({
       id: cc.id,
       user_id: cc.user_id,
-      full_name: profileMap[cc.user_id] || "—",
+      full_name: profileMap[cc.user_id]?.full_name || "—",
       company_name: companyMap[cc.company_id] || "—",
       company_id: cc.company_id,
       role: roleMap[cc.user_id] || "client",
+      job_title: profileMap[cc.user_id]?.job_title ?? null,
     }));
 
     setClients(clientList);
