@@ -143,7 +143,11 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const { unreadCount } = useNewMessageNotifications();
   const { profile, initials } = useUserProfile();
-  const menuItems = getMenuItems(userRole);
+  const { isAiOnly } = useCompanyServiceMode();
+  const baseItems = getMenuItems(userRole);
+  const menuItems = isAiOnly
+    ? baseItems.filter((item) => AI_ONLY_ROUTES.has(item.url))
+    : baseItems;
 
   return (
     <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border bg-sidebar">
