@@ -491,7 +491,7 @@ export default function LandingPage() {
                   <p className="text-sm text-[hsl(220,10%,55%)]">por petição</p>
                 </div>
                 <div className="border-x border-[hsl(220,20%,16%)] px-4">
-                  <p className="text-xs font-bold uppercase tracking-widest text-[hsl(38,90%,55%)] mb-2">Com Dra. Helena</p>
+                  <p className="text-xs font-bold uppercase tracking-widest text-[hsl(38,90%,55%)] mb-2">Com IA Jurídica</p>
                   <p className="text-4xl font-bold bg-gradient-to-r from-[hsl(38,90%,55%)] to-[hsl(45,95%,60%)] bg-clip-text text-transparent mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>30s</p>
                   <p className="text-sm text-[hsl(220,10%,55%)]">primeira versão pronta</p>
                 </div>
