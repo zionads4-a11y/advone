@@ -137,7 +137,7 @@ Deno.serve(async (req) => {
         try {
           processData = await escavadorFetch(`/processos/numero_cnj/${encodeURIComponent(numero_cnj)}`);
         } catch (e) {
-          console.log("Process not found in Escavador, saving with basic data:", e.message);
+          console.log("Process not found in Escavador, saving with basic data:", (e as Error).message);
         }
 
         const fonte = processData?.fontes?.[0];
@@ -191,7 +191,7 @@ Deno.serve(async (req) => {
               await admin.from("process_movements").insert(movRows);
             }
           } catch (e) {
-            console.error("Error fetching movements:", e.message);
+            console.error("Error fetching movements:", (e as Error).message);
           }
         }
 
@@ -292,7 +292,7 @@ Deno.serve(async (req) => {
               console.log(`WhatsApp alert sent to ${alertPhone} for process ${proc.numero_cnj}`);
             }
           } catch (e) {
-            console.error("Error sending WhatsApp movement alert:", e.message);
+            console.error("Error sending WhatsApp movement alert:", (e as Error).message);
           }
         }
 
@@ -317,7 +317,7 @@ Deno.serve(async (req) => {
     }
   } catch (error) {
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: (error as Error).message }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
