@@ -415,10 +415,10 @@ export default function LandingPage() {
                       <Scale className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="font-semibold text-[hsl(220,10%,92%)]">Dra. Helena Vasconcellos</p>
+                      <p className="font-semibold text-[hsl(220,10%,92%)]">IA Jurídica AdvOne</p>
                       <p className="text-xs text-[hsl(153,60%,55%)] flex items-center gap-1.5">
                         <span className="h-1.5 w-1.5 rounded-full bg-[hsl(153,60%,55%)] animate-pulse" />
-                        Online · Doutora em Direito
+                        Online · Assistente jurídica
                       </p>
                     </div>
                   </div>
