@@ -400,7 +400,7 @@ export default function LandingPage() {
               sua sócia jurídica com IA.
             </h2>
             <p className="mx-auto max-w-2xl text-lg text-[hsl(220,10%,65%)] leading-relaxed">
-              Uma advogada virtual com <strong className="text-[hsl(220,10%,85%)]">30+ anos de experiência</strong>, doutora pela USP, especialista em redigir petições, contratos, mandados de segurança e pareceres em segundos — direto dentro do seu CRM.
+              Uma <strong className="text-[hsl(220,10%,85%)]">assistente jurídica com IA</strong> treinada para redigir petições, contratos, mandados de segurança e pareceres em segundos — direto dentro do seu CRM.
             </p>
           </Reveal>
 
