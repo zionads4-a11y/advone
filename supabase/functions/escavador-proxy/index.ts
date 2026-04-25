@@ -128,7 +128,7 @@ Deno.serve(async (req) => {
           escavadorMonitoring = await escavadorFetch("/processos/monitorar", "POST", monitoringBody);
           console.log("Escavador monitoring registered:", JSON.stringify(escavadorMonitoring));
         } catch (e) {
-          console.error("Error registering monitoring on Escavador:", e.message);
+          console.error("Error registering monitoring on Escavador:", (e as Error).message);
           // Continue - save locally even if Escavador registration fails
         }
 
