@@ -72,6 +72,7 @@ export function CompanyEditDialog({
   const [whatsapp, setWhatsapp] = useState("");
   const [businessHours, setBusinessHours] = useState<BusinessHours>(getDefaultBusinessHours());
   const [partnershipType, setPartnershipType] = useState<PartnershipType>("mensalidade_zionads");
+  const [serviceMode, setServiceMode] = useState<ServiceMode>("full");
 
   useEffect(() => {
     if (company) {
