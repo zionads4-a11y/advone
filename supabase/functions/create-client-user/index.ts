@@ -123,6 +123,14 @@ serve(async (req) => {
       company_id,
     });
 
+    // Save job_title (cargo/função visual) on profile when provided
+    if (job_title && typeof job_title === "string") {
+      await adminClient
+        .from("profiles")
+        .update({ job_title })
+        .eq("user_id", newUserId);
+    }
+
     const roleLabel = assignedRole === "gerente" ? "Gerente" : "Operador";
 
     return new Response(
