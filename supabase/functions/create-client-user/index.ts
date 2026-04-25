@@ -53,7 +53,7 @@ serve(async (req) => {
 
     const callerRole = roleData?.role;
 
-    const { email, password, full_name, company_id, role: targetRole } = await req.json();
+    const { email, password, full_name, company_id, role: targetRole, job_title } = await req.json();
 
     if (!email || !password || !full_name || !company_id) {
       return new Response(JSON.stringify({ error: "Campos obrigatórios: email, password, full_name, company_id" }), {
@@ -122,6 +122,14 @@ serve(async (req) => {
       user_id: newUserId,
       company_id,
     });
+
+    // Save job_title (cargo/função visual) on profile when provided
+    if (job_title && typeof job_title === "string") {
+      await adminClient
+        .from("profiles")
+        .update({ job_title })
+        .eq("user_id", newUserId);
+    }
 
     const roleLabel = assignedRole === "gerente" ? "Gerente" : "Operador";
 

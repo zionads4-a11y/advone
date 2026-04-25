@@ -21,6 +21,20 @@ interface ClientUser {
   company_name: string;
   company_id: string;
   role: string;
+  job_title: string | null;
+}
+
+const JOB_TITLES = [
+  { value: "advogado", label: "Advogado(a)" },
+  { value: "estagiario", label: "Estagiário(a)" },
+  { value: "secretaria", label: "Secretária(o)" },
+  { value: "financeiro", label: "Financeiro" },
+  { value: "outro", label: "Outro" },
+] as const;
+
+function getJobTitleLabel(value: string | null) {
+  if (!value) return null;
+  return JOB_TITLES.find((j) => j.value === value)?.label ?? value;
 }
 
 interface Company {
@@ -91,12 +105,17 @@ export default function ClientUsers() {
     }
 
     const [profilesRes, rolesRes] = await Promise.all([
-      supabase.from("profiles").select("user_id, full_name").in("user_id", userIds),
+      supabase.from("profiles").select("user_id, full_name, job_title").in("user_id", userIds),
       supabase.from("user_roles").select("user_id, role").in("user_id", userIds),
     ]);
 
-    const profileMap: Record<string, string> = {};
-    profilesRes.data?.forEach((p) => (profileMap[p.user_id] = p.full_name));
+    const profileMap: Record<string, { full_name: string; job_title: string | null }> = {};
+    profilesRes.data?.forEach((p) => {
+      profileMap[p.user_id] = {
+        full_name: p.full_name,
+        job_title: (p as { job_title?: string | null }).job_title ?? null,
+      };
+    });
 
     const roleMap: Record<string, string> = {};
     rolesRes.data?.forEach((r) => (roleMap[r.user_id] = r.role));
@@ -104,10 +123,11 @@ export default function ClientUsers() {
     const clientList: ClientUser[] = clientCompanies.map((cc) => ({
       id: cc.id,
       user_id: cc.user_id,
-      full_name: profileMap[cc.user_id] || "—",
+      full_name: profileMap[cc.user_id]?.full_name || "—",
       company_name: companyMap[cc.company_id] || "—",
       company_id: cc.company_id,
       role: roleMap[cc.user_id] || "client",
+      job_title: profileMap[cc.user_id]?.job_title ?? null,
     }));
 
     setClients(clientList);
@@ -120,6 +140,7 @@ export default function ClientUsers() {
     const fullName = formData.get("full_name") as string;
     const companyId = isGerente ? selectedCompanyId : (formData.get("company_id") as string);
     const role = isGerente ? "operador" : (formData.get("role") as string) || "gerente";
+    const jobTitle = (formData.get("job_title") as string) || "advogado";
 
     if (!email || !fullName || !companyId) {
       toast.error("Preencha todos os campos");
@@ -129,7 +150,14 @@ export default function ClientUsers() {
     setLoading(true);
 
     const { data, error } = await supabase.functions.invoke("create-client-user", {
-      body: { email, password: "123456", full_name: fullName, company_id: companyId, role },
+      body: {
+        email,
+        password: "123456",
+        full_name: fullName,
+        company_id: companyId,
+        role,
+        job_title: jobTitle,
+      },
     });
 
     console.log("create-client-user response:", { data, error: error?.message });
@@ -138,8 +166,8 @@ export default function ClientUsers() {
     if (errorMsg) {
       toast.error(errorMsg);
     } else {
-      const roleLabel = role === "gerente" ? "Gerente" : "Operador";
-      toast.success(`${roleLabel} criado com sucesso! Email: ${email} | Senha padrão: 123456`);
+      const jobLabel = getJobTitleLabel(jobTitle) ?? "Usuário";
+      toast.success(`${jobLabel} criado com sucesso! Email: ${email} | Senha padrão: 123456`);
       setDialogOpen(false);
       fetchData();
     }
@@ -197,7 +225,7 @@ export default function ClientUsers() {
           </h1>
           <p className="text-sm text-muted-foreground">
             {isGerente
-              ? "Gerencie os operadores da sua empresa"
+              ? "Cadastre advogados, estagiários, secretárias ou financeiro e libere os módulos de acesso de cada um."
               : "Gerencie gerentes e operadores das empresas"}
           </p>
         </div>
@@ -205,19 +233,20 @@ export default function ClientUsers() {
           <DialogTrigger asChild>
             <Button className="gradient-primary text-primary-foreground">
               <UserPlus className="mr-2 h-4 w-4" />
-              {isGerente ? "Cadastrar Advogado" : "Novo Usuário"}
+              {isGerente ? "Cadastrar Membro" : "Novo Usuário"}
             </Button>
           </DialogTrigger>
           <DialogContent className="bg-card text-foreground">
             <DialogHeader>
               <DialogTitle className="font-display">
-                {isGerente ? "Cadastrar Advogado / Operador" : "Criar Usuário da Empresa"}
+                {isGerente ? "Cadastrar Membro da Equipe" : "Criar Usuário da Empresa"}
               </DialogTitle>
               {isGerente && (
                 <p className="text-xs text-muted-foreground">
-                  Crie o acesso do advogado. Depois, na lista, clique em{" "}
+                  Cadastre advogados, estagiários, secretárias ou financeiro. Depois,
+                  na lista, clique em{" "}
                   <strong className="text-primary">Permissões</strong> para escolher
-                  quais módulos ele pode acessar.
+                  quais módulos cada um pode acessar.
                 </p>
               )}
             </DialogHeader>
@@ -229,6 +258,25 @@ export default function ClientUsers() {
               <div className="space-y-2">
                 <Label>Email *</Label>
                 <Input name="email" type="email" required placeholder="usuario@empresa.com" />
+              </div>
+              <div className="space-y-2">
+                <Label>Cargo / Função *</Label>
+                <Select name="job_title" defaultValue="advogado">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {JOB_TITLES.map((j) => (
+                      <SelectItem key={j.value} value={j.value}>
+                        {j.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-[11px] text-muted-foreground">
+                  Apenas rótulo visual. As permissões reais são definidas no botão{" "}
+                  <strong>Permissões</strong> após o cadastro.
+                </p>
               </div>
 
               {!isGerente && (
@@ -308,6 +356,7 @@ export default function ClientUsers() {
             <TableHeader>
               <TableRow className="border-border hover:bg-transparent">
                 <TableHead className="text-muted-foreground">Nome</TableHead>
+                <TableHead className="text-muted-foreground">Cargo</TableHead>
                 <TableHead className="text-muted-foreground">Tipo</TableHead>
                 {!isGerente && <TableHead className="text-muted-foreground">Empresa</TableHead>}
                 {isGerente && <TableHead className="text-muted-foreground w-[160px] text-right">Ações</TableHead>}
@@ -316,12 +365,12 @@ export default function ClientUsers() {
             <TableBody>
               {clients.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={isGerente ? 3 : 3} className="py-12 text-center text-muted-foreground">
+                  <TableCell colSpan={isGerente ? 4 : 4} className="py-12 text-center text-muted-foreground">
                     <Users className="mx-auto mb-2 h-8 w-8" />
                     <p>Nenhum usuário cadastrado</p>
                     <p className="text-xs">
                       {isGerente
-                        ? "Adicione operadores para atender os leads"
+                        ? "Adicione membros (advogados, estagiários, secretárias, financeiro) para sua equipe"
                         : "Crie gerentes e operadores para as empresas"}
                     </p>
                   </TableCell>
@@ -330,6 +379,15 @@ export default function ClientUsers() {
                 clients.map((client) => (
                   <TableRow key={client.id} className="border-border hover:bg-secondary/50">
                     <TableCell className="font-medium text-foreground">{client.full_name}</TableCell>
+                    <TableCell>
+                      {client.job_title ? (
+                        <Badge variant="outline" className="border-border bg-secondary/60 text-foreground">
+                          {getJobTitleLabel(client.job_title)}
+                        </Badge>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
                     <TableCell>{getRoleBadge(client.role)}</TableCell>
                     {!isGerente && (
                       <TableCell>
