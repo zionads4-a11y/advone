@@ -135,17 +135,17 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border bg-sidebar">
-      <div className="flex items-center justify-center px-4 py-5">
-        <img src={logoAdvOne} alt="AdvOne" className="h-20 w-auto" />
+      <div className="flex items-center justify-center border-b border-sidebar-border/60 px-4 py-5">
+        <img src={logoAdvOne} alt="AdvOne" className="h-16 w-auto" />
       </div>
 
-      <SidebarContent>
+      <SidebarContent className="px-2 py-3">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/50 text-xs uppercase tracking-wider">
+          <SidebarGroupLabel className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-sidebar-foreground/40">
             {getGroupLabel(userRole)}
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-0.5">
               {menuItems.map((item) => {
                 const showBadge = item.url === "/conversations" && unreadCount > 0;
                 return (
@@ -154,13 +154,13 @@ export function AppSidebar() {
                       <NavLink
                         to={item.url}
                         end={item.url === "/dashboard"}
-                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                        activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                        className="group relative flex items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium text-sidebar-foreground/80 transition-all duration-150 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                        activeClassName="!bg-sidebar-accent !text-sidebar-primary before:absolute before:left-0 before:top-1/2 before:h-5 before:w-[3px] before:-translate-y-1/2 before:rounded-r-full before:bg-sidebar-primary"
                       >
-                        <item.icon className="h-4 w-4" />
-                        <span className="flex-1">{item.title}</span>
+                        <item.icon className="h-4 w-4 shrink-0 transition-colors" />
+                        <span className="flex-1 truncate">{item.title}</span>
                         {showBadge && (
-                          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-bold text-destructive-foreground animate-pulse">
+                          <span className="flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-bold text-destructive-foreground shadow-sm animate-pulse-soft">
                             {unreadCount > 99 ? "99+" : unreadCount}
                           </span>
                         )}
@@ -174,45 +174,47 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border p-4">
-        <div className="mb-2 flex items-center gap-3">
-          <Avatar className="h-9 w-9 border border-sidebar-border">
+      <SidebarFooter className="border-t border-sidebar-border/60 p-3">
+        <div
+          onClick={() => navigate("/profile")}
+          className="mb-2 flex cursor-pointer items-center gap-3 rounded-md p-2 transition-colors hover:bg-sidebar-accent"
+        >
+          <Avatar className="h-9 w-9 border border-sidebar-border ring-2 ring-sidebar-primary/20">
             <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || "Avatar"} />
-            <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+            <AvatarFallback className="bg-sidebar-primary/15 text-sidebar-primary text-xs font-semibold">
               {initials}
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-sidebar-foreground">
+            <p className="truncate text-sm font-semibold text-sidebar-foreground">
               {profile?.full_name || "Usuário"}
             </p>
-            <div className="flex items-center gap-1.5">
-              <Badge variant="outline" className="text-[10px] border-sidebar-border text-sidebar-foreground/50">
-                {getRoleLabel(userRole)}
-              </Badge>
-            </div>
+            <p className="truncate text-[11px] text-sidebar-foreground/50">
+              {user?.email}
+            </p>
           </div>
+          <Badge variant="outline" className="shrink-0 border-sidebar-primary/30 bg-sidebar-primary/10 text-[9px] font-semibold uppercase tracking-wider text-sidebar-primary">
+            {getRoleLabel(userRole)}
+          </Badge>
         </div>
-        <div className="mb-3 truncate text-xs text-sidebar-foreground/50 pl-12">
-          {user?.email}
-        </div>
-        <div className="flex gap-2">
+        <div className="flex gap-1">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => navigate("/profile")}
-            className="flex-1 justify-start text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-primary"
+            className="flex-1 justify-start text-xs font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-primary"
           >
-            <UserCircle className="mr-2 h-4 w-4" />
+            <UserCircle className="mr-2 h-3.5 w-3.5" />
             Perfil
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={signOut}
-            className="justify-start text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-destructive"
+            className="text-sidebar-foreground/70 hover:bg-destructive/15 hover:text-destructive"
+            aria-label="Sair"
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="h-3.5 w-3.5" />
           </Button>
         </div>
       </SidebarFooter>
