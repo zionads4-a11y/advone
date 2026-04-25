@@ -10,8 +10,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { UserPlus, Users, Building2, Shield, Headphones, Trash2 } from "lucide-react";
+import { UserPlus, Users, Building2, Shield, Headphones, Trash2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
+import { OperadorPermissionsDialog } from "@/components/users/OperadorPermissionsDialog";
 
 interface ClientUser {
   id: string;
@@ -36,6 +37,7 @@ export default function ClientUsers() {
   const [selectedCompanyId, setSelectedCompanyId] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<ClientUser | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [permTarget, setPermTarget] = useState<ClientUser | null>(null);
 
   const isGerente = userRole === "gerente";
 
