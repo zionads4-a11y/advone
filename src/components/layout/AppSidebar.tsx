@@ -16,6 +16,7 @@ import {
   ShieldAlert,
   Trophy,
   History,
+  Scale,
 } from "lucide-react";
 import logoAdvOne from "@/assets/logo-advone-light.png";
 import { NavLink } from "@/components/NavLink";
@@ -58,6 +59,7 @@ const gerenteItems = [
   { title: "Kanban", url: "/kanban", icon: Kanban },
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
+  { title: "IA Jurídica", url: "/ia-juridica", icon: Scale, premium: true },
   { title: "Financeiro", url: "/financeiro", icon: Wallet },
   { title: "Documentos", url: "/documentos", icon: FileText },
   { title: "Processos", url: "/processos", icon: Briefcase },
@@ -71,6 +73,7 @@ const operadorItems = [
   { title: "Kanban", url: "/kanban", icon: Kanban },
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
+  { title: "IA Jurídica", url: "/ia-juridica", icon: Scale, premium: true },
   { title: "Documentos", url: "/documentos", icon: FileText },
   { title: "Processos", url: "/processos", icon: Briefcase },
   { title: "Bot", url: "/bot-config", icon: Bot },
