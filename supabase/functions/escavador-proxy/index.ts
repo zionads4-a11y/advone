@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { getErrorMessage } from "../_shared/errors.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -128,7 +129,7 @@ Deno.serve(async (req) => {
           escavadorMonitoring = await escavadorFetch("/processos/monitorar", "POST", monitoringBody);
           console.log("Escavador monitoring registered:", JSON.stringify(escavadorMonitoring));
         } catch (e) {
-          console.error("Error registering monitoring on Escavador:", (e as Error).message);
+          console.error("Error registering monitoring on Escavador:", getErrorMessage(e));
           // Continue - save locally even if Escavador registration fails
         }
 
@@ -137,7 +138,7 @@ Deno.serve(async (req) => {
         try {
           processData = await escavadorFetch(`/processos/numero_cnj/${encodeURIComponent(numero_cnj)}`);
         } catch (e) {
-          console.log("Process not found in Escavador, saving with basic data:", (e as Error).message);
+          console.log("Process not found in Escavador, saving with basic data:", getErrorMessage(e));
         }
 
         const fonte = processData?.fontes?.[0];
@@ -191,7 +192,7 @@ Deno.serve(async (req) => {
               await admin.from("process_movements").insert(movRows);
             }
           } catch (e) {
-            console.error("Error fetching movements:", (e as Error).message);
+            console.error("Error fetching movements:", getErrorMessage(e));
           }
         }
 
@@ -292,7 +293,7 @@ Deno.serve(async (req) => {
               console.log(`WhatsApp alert sent to ${alertPhone} for process ${proc.numero_cnj}`);
             }
           } catch (e) {
-            console.error("Error sending WhatsApp movement alert:", (e as Error).message);
+            console.error("Error sending WhatsApp movement alert:", getErrorMessage(e));
           }
         }
 
@@ -317,7 +318,7 @@ Deno.serve(async (req) => {
     }
   } catch (error) {
     return new Response(
-      JSON.stringify({ error: (error as Error).message }),
+      JSON.stringify({ error: getErrorMessage(error) }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
