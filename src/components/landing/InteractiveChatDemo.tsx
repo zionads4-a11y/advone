@@ -8,16 +8,16 @@ interface DemoMessage {
 }
 
 const demoScript: DemoMessage[] = [
-  { role: "user", text: "Olá, boa tarde!", delay: 0 },
-  { role: "bot", text: "Olá! 👋 Seja bem-vindo(a) ao escritório. Como posso ajudar você hoje?", delay: 1200 },
-  { role: "bot", text: "Escolha uma opção:\n1️⃣ Consulta trabalhista\n2️⃣ Direito previdenciário\n3️⃣ Outros assuntos", delay: 2000 },
-  { role: "user", text: "1", delay: 3500 },
-  { role: "bot", text: "Entendi! Vou precisar de algumas informações para analisar seu caso. Qual é o seu nome completo?", delay: 4800 },
-  { role: "user", text: "João da Silva", delay: 6500 },
-  { role: "bot", text: "Obrigado, João! Como o seu caso é urgente, podemos agendar uma consulta amanhã. Você prefere na parte da manhã ou da tarde?", delay: 7800 },
-  { role: "bot", text: "🕘 Manhã: 09:30\n🕐 Tarde: 14:00", delay: 8800 },
-  { role: "user", text: "Manhã por favor", delay: 10500 },
-  { role: "bot", text: "Perfeito! ✅ Agendei sua consulta para amanhã às 09:30. Você receberá um lembrete automático. Até lá, João!", delay: 11800 },
+  { role: "user", text: "Oi, boa tarde. Vi o anúncio de vocês.", delay: 0 },
+  { role: "bot", text: "Boa tarde! 👋 Aqui é a Júlia, secretária virtual do escritório Mendes & Vasconcelos Advocacia. Que bom ter você por aqui! Pra eu te ajudar direitinho, me conta: o que aconteceu?", delay: 1400 },
+  { role: "user", text: "Fui demitido semana passada e acho que não recebi tudo certo.", delay: 3600 },
+  { role: "bot", text: "Imagino o quanto isso é estressante 😔 Fica tranquilo(a), vou te ajudar. Você trabalhou de carteira assinada?", delay: 5200 },
+  { role: "user", text: "Sim, 4 anos e meio.", delay: 7000 },
+  { role: "bot", text: "Perfeito. Pelo tempo de casa, já adianto: provavelmente tem rescisão, FGTS, multa de 40% e aviso prévio pra revisar. Vale muito a pena uma análise do Dr. Mendes. Posso agendar uma consulta gratuita pra você?", delay: 8800 },
+  { role: "user", text: "Pode sim, por favor", delay: 11000 },
+  { role: "bot", text: "Maravilha! ✨ Tenho dois horários amanhã:\n🕘 09:30 (manhã)\n🕐 14:00 (tarde)\nQual prefere?", delay: 12400 },
+  { role: "user", text: "14h tá ótimo", delay: 14200 },
+  { role: "bot", text: "Pronto! ✅ Consulta agendada pra amanhã às 14:00 com o Dr. Mendes. Vou te enviar lembretes 6h, 2h e 30min antes. Qualquer coisa, é só chamar aqui. Até amanhã! 🤝", delay: 15600 },
 ];
 
 export function InteractiveChatDemo() {
@@ -101,8 +101,8 @@ export function InteractiveChatDemo() {
             <Bot className="h-5 w-5 text-[hsl(0,0%,100%)]" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-[hsl(0,0%,100%)]">Assistente AdvOne</p>
-            <p className="text-xs text-[hsl(0,0%,100%)]/70">Online agora</p>
+            <p className="text-sm font-semibold text-[hsl(0,0%,100%)]">Júlia · Secretária Virtual</p>
+            <p className="text-xs text-[hsl(0,0%,100%)]/70">Mendes &amp; Vasconcelos · online</p>
           </div>
           <div className="ml-auto flex h-2.5 w-2.5 rounded-full bg-[hsl(120,60%,50%)]">
             <span className="inline-flex h-full w-full animate-ping rounded-full bg-[hsl(120,60%,50%)] opacity-75" />
