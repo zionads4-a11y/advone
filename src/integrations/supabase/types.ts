@@ -751,6 +751,47 @@ export type Database = {
           },
         ]
       }
+      company_niche_alerts: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          lawyer_name: string | null
+          niche: string
+          updated_at: string
+          whatsapp: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          lawyer_name?: string | null
+          niche: string
+          updated_at?: string
+          whatsapp: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          lawyer_name?: string | null
+          niche?: string
+          updated_at?: string
+          whatsapp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_niche_alerts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_offices: {
         Row: {
           address: string
@@ -1942,6 +1983,47 @@ export type Database = {
           },
         ]
       }
+      user_module_permissions: {
+        Row: {
+          company_id: string
+          created_at: string
+          granted: boolean
+          granted_by: string | null
+          id: string
+          module: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          granted?: boolean
+          granted_by?: string | null
+          id?: string
+          module: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          granted?: boolean
+          granted_by?: string | null
+          id?: string
+          module?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_module_permissions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -2295,6 +2377,10 @@ export type Database = {
       }
       user_belongs_to_company: {
         Args: { _company_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_has_module: {
+        Args: { _company_id: string; _module: string; _user_id: string }
         Returns: boolean
       }
     }
