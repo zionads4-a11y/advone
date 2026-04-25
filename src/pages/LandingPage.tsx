@@ -847,7 +847,7 @@ export default function LandingPage() {
                 </p>
                 <p className="mt-1 mb-6 text-sm text-[hsl(220,10%,55%)]">12x R$ 597 — R$ 7.164 à vista</p>
                 <ul className="mb-8 flex-1 space-y-3">
-                  {["CRM completo com Kanban", "Bot com IA no WhatsApp", "Cadência automática de 5 tentativas", "Agenda integrada", "Monitoramento de até 50 processos", "Alertas automáticos de movimentação", "Financeiro integrado com Asaas", "Suporte prioritário"].map((item) => (
+                  {["CRM completo com Kanban", "Secretária Virtual com IA", "Cadência automática de 5 tentativas", "Agenda integrada", "Monitoramento de até 50 processos", "Alertas automáticos de movimentação", "Financeiro integrado com Asaas", "Suporte prioritário"].map((item) => (
                     <li key={item} className="flex items-start gap-2 text-sm text-[hsl(220,10%,75%)]">
                       <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(38,90%,55%)]" />
                       {item}
@@ -875,7 +875,7 @@ export default function LandingPage() {
                 </p>
                 <p className="mt-1 mb-6 text-sm text-[hsl(220,10%,55%)]">3x R$ 797 — R$ 2.391 à vista</p>
                 <ul className="mb-8 flex-1 space-y-3">
-                  {["CRM completo com Kanban", "Bot com IA no WhatsApp", "Cadência automática de 5 tentativas", "Agenda integrada", "Monitoramento de até 50 processos", "Alertas automáticos de movimentação", "Financeiro integrado com Asaas", "Suporte prioritário"].map((item) => (
+                  {["CRM completo com Kanban", "Secretária Virtual com IA", "Cadência automática de 5 tentativas", "Agenda integrada", "Monitoramento de até 50 processos", "Alertas automáticos de movimentação", "Financeiro integrado com Asaas", "Suporte prioritário"].map((item) => (
                     <li key={item} className="flex items-start gap-2 text-sm text-[hsl(220,10%,75%)]">
                       <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(153,60%,45%)]" />
                       {item}
@@ -899,7 +899,7 @@ export default function LandingPage() {
                 </p>
                 <p className="mt-1 mb-6 text-sm text-[hsl(220,10%,55%)]">Recorrência mensal — PIX ou cartão</p>
                 <ul className="mb-8 flex-1 space-y-3">
-                  {["CRM completo com Kanban", "Bot com IA no WhatsApp", "Cadência automática de 5 tentativas", "Agenda integrada", "Monitoramento de até 50 processos", "Alertas automáticos de movimentação", "Financeiro integrado com Asaas", "Suporte prioritário"].map((item) => (
+                  {["CRM completo com Kanban", "Secretária Virtual com IA", "Cadência automática de 5 tentativas", "Agenda integrada", "Monitoramento de até 50 processos", "Alertas automáticos de movimentação", "Financeiro integrado com Asaas", "Suporte prioritário"].map((item) => (
                     <li key={item} className="flex items-start gap-2 text-sm text-[hsl(220,10%,75%)]">
                       <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(210,80%,55%)]" />
                       {item}
