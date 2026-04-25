@@ -1465,6 +1465,82 @@ export type Database = {
           },
         ]
       }
+      legal_ai_conversations: {
+        Row: {
+          company_id: string
+          created_at: string
+          document_type: string | null
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          document_type?: string | null
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          document_type?: string | null
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_ai_conversations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      legal_ai_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          document_type: string | null
+          id: string
+          is_document: boolean
+          role: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          document_type?: string | null
+          id?: string
+          is_document?: boolean
+          role: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          document_type?: string | null
+          id?: string
+          is_document?: boolean
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_ai_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "legal_ai_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       monitored_processes: {
         Row: {
           area: string | null
@@ -2191,6 +2267,10 @@ export type Database = {
       }
     }
     Functions: {
+      company_has_legal_ai_access: {
+        Args: { _company_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
