@@ -19,6 +19,7 @@ interface Company {
   business_hours: unknown;
   created_at: string;
   partnership_type: "exito" | "mensalidade_zionads" | null;
+  service_mode: "full" | "ai_only" | null;
 }
 
 interface WhatsAppConfig {
