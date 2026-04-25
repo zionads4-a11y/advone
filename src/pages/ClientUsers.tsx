@@ -233,19 +233,20 @@ export default function ClientUsers() {
           <DialogTrigger asChild>
             <Button className="gradient-primary text-primary-foreground">
               <UserPlus className="mr-2 h-4 w-4" />
-              {isGerente ? "Cadastrar Advogado" : "Novo Usuário"}
+              {isGerente ? "Cadastrar Membro" : "Novo Usuário"}
             </Button>
           </DialogTrigger>
           <DialogContent className="bg-card text-foreground">
             <DialogHeader>
               <DialogTitle className="font-display">
-                {isGerente ? "Cadastrar Advogado / Operador" : "Criar Usuário da Empresa"}
+                {isGerente ? "Cadastrar Membro da Equipe" : "Criar Usuário da Empresa"}
               </DialogTitle>
               {isGerente && (
                 <p className="text-xs text-muted-foreground">
-                  Crie o acesso do advogado. Depois, na lista, clique em{" "}
+                  Cadastre advogados, estagiários, secretárias ou financeiro. Depois,
+                  na lista, clique em{" "}
                   <strong className="text-primary">Permissões</strong> para escolher
-                  quais módulos ele pode acessar.
+                  quais módulos cada um pode acessar.
                 </p>
               )}
             </DialogHeader>
