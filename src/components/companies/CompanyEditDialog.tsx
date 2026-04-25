@@ -32,6 +32,7 @@ import { CompanyOfficesEditor } from "./CompanyOfficesEditor";
 import { Separator } from "@/components/ui/separator";
 
 export type PartnershipType = "exito" | "mensalidade_zionads";
+export type ServiceMode = "full" | "ai_only";
 
 interface Company {
   id: string;
@@ -40,6 +41,7 @@ interface Company {
   whatsapp: string | null;
   business_hours?: unknown;
   partnership_type?: PartnershipType | null;
+  service_mode?: ServiceMode | null;
 }
 
 interface CompanyEditDialogProps {
@@ -53,6 +55,7 @@ interface CompanyEditDialogProps {
       whatsapp: string | null;
       business_hours: BusinessHours;
       partnership_type: PartnershipType;
+      service_mode: ServiceMode;
     }
   ) => void;
   onDelete: (id: string) => void;
@@ -69,6 +72,7 @@ export function CompanyEditDialog({
   const [whatsapp, setWhatsapp] = useState("");
   const [businessHours, setBusinessHours] = useState<BusinessHours>(getDefaultBusinessHours());
   const [partnershipType, setPartnershipType] = useState<PartnershipType>("mensalidade_zionads");
+  const [serviceMode, setServiceMode] = useState<ServiceMode>("full");
 
   useEffect(() => {
     if (company) {
@@ -76,6 +80,7 @@ export function CompanyEditDialog({
       setWhatsapp(company.whatsapp || "");
       setBusinessHours(parseBusinessHours(company.business_hours));
       setPartnershipType((company.partnership_type as PartnershipType) || "mensalidade_zionads");
+      setServiceMode((company.service_mode as ServiceMode) || "full");
     }
   }, [company]);
 
@@ -95,6 +100,7 @@ export function CompanyEditDialog({
               whatsapp: whatsapp || null,
               business_hours: businessHours,
               partnership_type: partnershipType,
+              service_mode: serviceMode,
             });
           }}
           className="space-y-4"
@@ -131,6 +137,28 @@ export function CompanyEditDialog({
             </Select>
             <p className="text-xs text-muted-foreground">
               Define como a parceria comercial é gerida com esta empresa.
+            </p>
+          </div>
+          <div className="space-y-2">
+            <Label>Modo de Serviço *</Label>
+            <Select
+              value={serviceMode}
+              onValueChange={(v) => setServiceMode(v as ServiceMode)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="full">
+                  🏢 CRM Completo (Kanban, Financeiro, Casos, etc.)
+                </SelectItem>
+                <SelectItem value="ai_only">
+                  🤖 Apenas IA (Secretária Virtual + Áreas de Atuação)
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              "Apenas IA" oculta módulos do CRM e libera só Conversas, Leads, Agenda e a configuração da IA.
             </p>
           </div>
           <BusinessHoursConfig value={businessHours} onChange={setBusinessHours} />

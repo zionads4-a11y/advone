@@ -19,6 +19,7 @@ interface Company {
   business_hours: unknown;
   created_at: string;
   partnership_type: "exito" | "mensalidade_zionads" | null;
+  service_mode: "full" | "ai_only" | null;
 }
 
 interface WhatsAppConfig {
@@ -52,7 +53,7 @@ export default function Companies() {
       supabase.from("companies").select("*").order("created_at", { ascending: false }),
       supabase.from("whatsapp_configs").select("*"),
     ]);
-    if (companiesRes.data) setCompanies(companiesRes.data);
+    if (companiesRes.data) setCompanies(companiesRes.data as Company[]);
     if (configsRes.data) {
       const map: Record<string, WhatsAppConfig> = {};
       configsRes.data.forEach((c) => (map[c.company_id] = c as WhatsAppConfig));
@@ -64,13 +65,15 @@ export default function Companies() {
     if (!user) return;
 
     const partnership = (formData.get("partnership_type") as string) || "mensalidade_zionads";
+    const serviceMode = (formData.get("service_mode") as string) || "full";
 
     const { error } = await supabase.from("companies").insert({
       name: formData.get("name") as string,
       whatsapp: (formData.get("whatsapp") as string) || null,
       partnership_type: partnership as "exito" | "mensalidade_zionads",
+      service_mode: serviceMode as "full" | "ai_only",
       created_by: user.id,
-    });
+    } as any);
 
     if (error) {
       toast.error("Erro: " + error.message);
@@ -82,7 +85,7 @@ export default function Companies() {
     fetchData();
   };
 
-  const handleUpdate = async (id: string, data: { name: string; whatsapp: string | null; business_hours?: Record<string, unknown[]>; partnership_type?: "exito" | "mensalidade_zionads" }) => {
+  const handleUpdate = async (id: string, data: { name: string; whatsapp: string | null; business_hours?: Record<string, unknown[]>; partnership_type?: "exito" | "mensalidade_zionads"; service_mode?: "full" | "ai_only" }) => {
     const { error } = await supabase.from("companies").update(data as any).eq("id", id);
 
     if (error) {

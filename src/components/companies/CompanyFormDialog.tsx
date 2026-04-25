@@ -69,6 +69,25 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
               Define como a parceria comercial é gerida com esta empresa.
             </p>
           </div>
+          <div className="space-y-2">
+            <Label>Modo de Serviço *</Label>
+            <Select name="service_mode" defaultValue="full">
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="full">
+                  🏢 CRM Completo (Kanban, Financeiro, Casos, etc.)
+                </SelectItem>
+                <SelectItem value="ai_only">
+                  🤖 Apenas IA (Secretária Virtual + Áreas de Atuação)
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              "Apenas IA" oculta módulos do CRM e libera só Conversas, Leads, Agenda e a configuração da IA.
+            </p>
+          </div>
           <Button type="submit" className="w-full gradient-primary text-primary-foreground">
             Adicionar Empresa
           </Button>

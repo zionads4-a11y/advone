@@ -38,8 +38,19 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useNewMessageNotifications } from "@/hooks/useNewMessageNotifications";
+import { useCompanyServiceMode } from "@/hooks/useCompanyServiceMode";
 
 import { LayoutDashboard, Kanban, MessageSquare } from "lucide-react";
+
+// Rotas permitidas no modo "Apenas IA" (Secretária Virtual)
+const AI_ONLY_ROUTES = new Set([
+  "/dashboard",
+  "/conversations",
+  "/historico-leads",
+  "/agenda",
+  "/company-settings",
+  "/client-users",
+]);
 
 const adminItems = [
   { title: "Empresas", url: "/companies", icon: Building2 },
@@ -132,7 +143,11 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const { unreadCount } = useNewMessageNotifications();
   const { profile, initials } = useUserProfile();
-  const menuItems = getMenuItems(userRole);
+  const { isAiOnly } = useCompanyServiceMode();
+  const baseItems = getMenuItems(userRole);
+  const menuItems = isAiOnly
+    ? baseItems.filter((item) => AI_ONLY_ROUTES.has(item.url))
+    : baseItems;
 
   return (
     <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border bg-sidebar">
