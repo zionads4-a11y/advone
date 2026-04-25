@@ -80,6 +80,7 @@ export function CompanyEditDialog({
       setWhatsapp(company.whatsapp || "");
       setBusinessHours(parseBusinessHours(company.business_hours));
       setPartnershipType((company.partnership_type as PartnershipType) || "mensalidade_zionads");
+      setServiceMode((company.service_mode as ServiceMode) || "full");
     }
   }, [company]);
 
