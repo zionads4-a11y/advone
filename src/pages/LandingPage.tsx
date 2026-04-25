@@ -508,7 +508,7 @@ export default function LandingPage() {
                   className="bg-gradient-to-r from-[hsl(38,90%,55%)] to-[hsl(45,95%,60%)] hover:opacity-90 text-[hsl(220,25%,6%)] font-bold px-8 py-6 text-base shadow-lg shadow-[hsl(38,90%,55%)]/20"
                 >
                   <Sparkles className="mr-2 h-5 w-5" />
-                  Quero a Dra. Helena no meu escritório
+                  Quero a IA Jurídica no meu escritório
                 </Button>
                 <p className="text-xs text-[hsl(220,10%,50%)]">Disponível nos planos Mensal, Trimestral e Anual</p>
               </div>
