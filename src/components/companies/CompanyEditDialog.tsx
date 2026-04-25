@@ -139,6 +139,28 @@ export function CompanyEditDialog({
               Define como a parceria comercial é gerida com esta empresa.
             </p>
           </div>
+          <div className="space-y-2">
+            <Label>Modo de Serviço *</Label>
+            <Select
+              value={serviceMode}
+              onValueChange={(v) => setServiceMode(v as ServiceMode)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="full">
+                  🏢 CRM Completo (Kanban, Financeiro, Casos, etc.)
+                </SelectItem>
+                <SelectItem value="ai_only">
+                  🤖 Apenas IA (Secretária Virtual + Áreas de Atuação)
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              "Apenas IA" oculta módulos do CRM e libera só Conversas, Leads, Agenda e a configuração da IA.
+            </p>
+          </div>
           <BusinessHoursConfig value={businessHours} onChange={setBusinessHours} />
 
           <Separator className="my-2" />
