@@ -300,7 +300,7 @@ export default function ClientUsers() {
                 <TableHead className="text-muted-foreground">Nome</TableHead>
                 <TableHead className="text-muted-foreground">Tipo</TableHead>
                 {!isGerente && <TableHead className="text-muted-foreground">Empresa</TableHead>}
-                {isGerente && <TableHead className="text-muted-foreground w-[80px]">Ações</TableHead>}
+                {isGerente && <TableHead className="text-muted-foreground w-[160px] text-right">Ações</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -330,15 +330,28 @@ export default function ClientUsers() {
                       </TableCell>
                     )}
                     {isGerente && (
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                          onClick={() => setDeleteTarget(client)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          {client.role === "operador" && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 gap-1.5 text-xs text-muted-foreground hover:text-primary"
+                              onClick={() => setPermTarget(client)}
+                            >
+                              <ShieldCheck className="h-3.5 w-3.5" />
+                              Permissões
+                            </Button>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                            onClick={() => setDeleteTarget(client)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     )}
                   </TableRow>
@@ -348,6 +361,17 @@ export default function ClientUsers() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Permissions dialog */}
+      {permTarget && (
+        <OperadorPermissionsDialog
+          open={!!permTarget}
+          onOpenChange={(open) => !open && setPermTarget(null)}
+          userId={permTarget.user_id}
+          userName={permTarget.full_name}
+          companyId={permTarget.company_id}
+        />
+      )}
 
       {/* Confirm delete dialog */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
