@@ -21,6 +21,20 @@ interface ClientUser {
   company_name: string;
   company_id: string;
   role: string;
+  job_title: string | null;
+}
+
+const JOB_TITLES = [
+  { value: "advogado", label: "Advogado(a)" },
+  { value: "estagiario", label: "Estagiário(a)" },
+  { value: "secretaria", label: "Secretária(o)" },
+  { value: "financeiro", label: "Financeiro" },
+  { value: "outro", label: "Outro" },
+] as const;
+
+function getJobTitleLabel(value: string | null) {
+  if (!value) return null;
+  return JOB_TITLES.find((j) => j.value === value)?.label ?? value;
 }
 
 interface Company {
