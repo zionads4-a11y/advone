@@ -259,6 +259,25 @@ export default function ClientUsers() {
                 <Label>Email *</Label>
                 <Input name="email" type="email" required placeholder="usuario@empresa.com" />
               </div>
+              <div className="space-y-2">
+                <Label>Cargo / Função *</Label>
+                <Select name="job_title" defaultValue="advogado">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {JOB_TITLES.map((j) => (
+                      <SelectItem key={j.value} value={j.value}>
+                        {j.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-[11px] text-muted-foreground">
+                  Apenas rótulo visual. As permissões reais são definidas no botão{" "}
+                  <strong>Permissões</strong> após o cadastro.
+                </p>
+              </div>
 
               {!isGerente && (
                 <>
