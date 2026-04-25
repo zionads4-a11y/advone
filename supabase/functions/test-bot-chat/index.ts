@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { chatCompletion, getCompanyAIConfig } from "../_shared/aiClient.ts";
+import { getErrorMessage } from "../_shared/errors.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -513,8 +514,8 @@ serve(async (req) => {
           tools,
           fallbackModel: "google/gemini-2.5-flash-lite",
         });
-      } catch (e: any) {
-        const msg = String(e?.message || e);
+      } catch (e) {
+        const msg = getErrorMessage(e);
         console.error("AI error:", msg);
         if (msg.includes(" 429")) {
           return new Response(JSON.stringify({ error: "Limite de requisições excedido." }), {

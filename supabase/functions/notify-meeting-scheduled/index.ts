@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { getErrorMessage } from "../_shared/errors.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -136,7 +137,7 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : "unknown";
+    const msg = getErrorMessage(err, "unknown");
     console.error("notify-meeting-scheduled error:", msg);
     return new Response(JSON.stringify({ error: msg }), {
       status: 500,

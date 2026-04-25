@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { getErrorMessage } from "../_shared/errors.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -193,7 +194,7 @@ async function disconnectUaZapiInstance(config: { zapi_instance_id: string; zapi
       if (res.ok) return { ok: true, payload, failures: [] };
       failures.push({ url, method, status: res.status, payload });
     } catch (err) {
-      failures.push({ url, method, status: 0, payload: { message: err instanceof Error ? err.message : "Erro" } });
+      failures.push({ url, method, status: 0, payload: { message: getErrorMessage(err, "Erro") } });
     }
   }
 
@@ -659,7 +660,7 @@ serve(async (req) => {
     );
   } catch (error: unknown) {
     console.error("Error in zapi-qrcode:", error);
-    const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+    const errorMessage = getErrorMessage(error, "Erro desconhecido");
     return new Response(
       JSON.stringify({ error: errorMessage }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
