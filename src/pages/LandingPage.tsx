@@ -395,9 +395,9 @@ export default function LandingPage() {
               Exclusivo Premium
             </div>
             <h2 className="text-3xl font-bold md:text-5xl mb-5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Conheça a <span className="bg-gradient-to-r from-[hsl(38,90%,55%)] via-[hsl(45,95%,60%)] to-[hsl(38,90%,55%)] bg-clip-text text-transparent">Dra. Helena</span>
+              <span className="bg-gradient-to-r from-[hsl(38,90%,55%)] via-[hsl(45,95%,60%)] to-[hsl(38,90%,55%)] bg-clip-text text-transparent">IA Jurídica</span> integrada
               <br />
-              sua sócia jurídica com IA.
+              ao seu CRM.
             </h2>
             <p className="mx-auto max-w-2xl text-lg text-[hsl(220,10%,65%)] leading-relaxed">
               Uma <strong className="text-[hsl(220,10%,85%)]">assistente jurídica com IA</strong> treinada para redigir petições, contratos, mandados de segurança e pareceres em segundos — direto dentro do seu CRM.
