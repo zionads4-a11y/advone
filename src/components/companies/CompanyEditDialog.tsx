@@ -100,6 +100,7 @@ export function CompanyEditDialog({
               whatsapp: whatsapp || null,
               business_hours: businessHours,
               partnership_type: partnershipType,
+              service_mode: serviceMode,
             });
           }}
           className="space-y-4"
