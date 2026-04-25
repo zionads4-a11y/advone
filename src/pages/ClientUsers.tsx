@@ -225,7 +225,7 @@ export default function ClientUsers() {
           </h1>
           <p className="text-sm text-muted-foreground">
             {isGerente
-              ? "Gerencie os operadores da sua empresa"
+              ? "Cadastre advogados, estagiários, secretárias ou financeiro e libere os módulos de acesso de cada um."
               : "Gerencie gerentes e operadores das empresas"}
           </p>
         </div>
