@@ -53,7 +53,7 @@ export default function Companies() {
       supabase.from("companies").select("*").order("created_at", { ascending: false }),
       supabase.from("whatsapp_configs").select("*"),
     ]);
-    if (companiesRes.data) setCompanies(companiesRes.data);
+    if (companiesRes.data) setCompanies(companiesRes.data as Company[]);
     if (configsRes.data) {
       const map: Record<string, WhatsAppConfig> = {};
       configsRes.data.forEach((c) => (map[c.company_id] = c as WhatsAppConfig));
