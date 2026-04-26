@@ -274,6 +274,7 @@ export default function Kanban() {
                     <DraggableLeadCard
                       key={lead.id}
                       lead={lead}
+                      isInMeetingHeld={(col as any).is_meeting_held === true}
                       onClick={() => {
                         setSelectedLead({ ...lead, status: "new", whatsapp: null, assigned_to: null });
                         setDrawerOpen(true);
