@@ -824,7 +824,13 @@ async function handleAgentPhase(
     tools = contractCloserTools;
   } else {
     // SDR phase (default)
-    systemPrompt = buildSDRPrompt(config, leadName);
+    const { data: companyOffices } = await supabase
+      .from("company_offices")
+      .select("name, address, complement, reference_point, maps_url, is_active, position")
+      .eq("company_id", companyId)
+      .eq("is_active", true)
+      .order("position", { ascending: true });
+    systemPrompt = buildSDRPrompt(config, leadName, companyOffices || []);
     tools = sdrTools;
   }
 
