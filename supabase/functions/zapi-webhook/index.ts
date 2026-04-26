@@ -1658,11 +1658,12 @@ serve(async (req) => {
     }
 
     // Store incoming message
+    const incomingTimestamp = body.mompiont ? new Date(body.mompiont * 1000).toISOString() : new Date().toISOString();
     await supabase.from("whatsapp_messages").insert({
       company_id: companyId, lead_id: leadId || null, phone: cleanPhone,
       message_text: messageText, direction: "incoming", sender_name: senderName,
       message_id_external: messageIdExternal,
-      timestamp: body.mompiont ? new Date(body.mompiont * 1000).toISOString() : new Date().toISOString(),
+      timestamp: incomingTimestamp,
     });
 
     // AI Auto-Reply with multi-agent support
@@ -1678,6 +1679,33 @@ serve(async (req) => {
           let effectivePhase = currentPhase;
           if (effectivePhase !== "sdr" && !agentConfigs[effectivePhase]?.is_active) {
             effectivePhase = "sdr";
+          }
+
+          // 🔒 DEBOUNCE / DEDUPLICAÇÃO POR LEAD
+          // Problema: lead manda 2-3 mensagens em rajada ("Oi", "Sim", "tô interessado").
+          // Cada webhook dispara uma execução paralela e a Laura responde 3 vezes a mesma coisa.
+          //
+          // Solução: aguarda 7s para "agrupar" rajada. Antes de chamar a IA, verifica se chegou
+          // mensagem MAIS NOVA do lead após esta. Se sim, desiste — a execução mais recente
+          // vai responder com o histórico completo (incluindo todas as mensagens da rajada).
+          await new Promise((r) => setTimeout(r, 7000));
+
+          const { data: newerMsg } = await supabase.from("whatsapp_messages")
+            .select("id, timestamp")
+            .eq("company_id", companyId)
+            .eq("phone", cleanPhone)
+            .eq("direction", "incoming")
+            .gt("timestamp", incomingTimestamp)
+            .order("timestamp", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          if (newerMsg) {
+            console.log(`[debounce] Pulando resposta para ${cleanPhone}: chegou msg mais nova (${newerMsg.timestamp}) após esta (${incomingTimestamp}). A execução mais recente responderá.`);
+            return new Response(
+              JSON.stringify({ ok: true, lead_id: leadId, debounced: true }),
+              { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+            );
           }
 
           const { data: leadData } = await supabase.from("leads").select("name").eq("id", leadId).single();
