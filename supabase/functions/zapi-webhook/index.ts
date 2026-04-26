@@ -1339,14 +1339,15 @@ async function handleAgentPhase(
 }
 
 async function enrollInCadence(supabase: any, companyId: string, leadId: string, phone: string) {
-  const { data: existing } = await supabase.from("cadence_messages").select("id")
-    .eq("lead_id", leadId).eq("status", "pending").limit(1);
-  if (existing && existing.length > 0) return;
+  // Sempre que o bot envia uma mensagem, reagenda a cadência a partir de agora.
+  // Cancela qualquer cadência pendente anterior pra evitar duplicata.
+  await supabase.from("cadence_messages").update({ status: "cancelled" })
+    .eq("lead_id", leadId).eq("status", "pending");
 
   const now = new Date();
-  // Defaults caso a empresa não tenha configurado nada
+  // Regra padrão: 30 min sem resposta → 1º Follow-UP. Demais etapas em intervalos de 1 dia.
   const defaultSteps = [
-    { step_number: 1, delay_minutes: 10,           message_text: null },
+    { step_number: 1, delay_minutes: 30,           message_text: null },
     { step_number: 2, delay_minutes: 60 * 24,      message_text: null },
     { step_number: 3, delay_minutes: 60 * 24 * 2,  message_text: null },
     { step_number: 4, delay_minutes: 60 * 24 * 3,  message_text: null },
@@ -1710,6 +1711,11 @@ serve(async (req) => {
                 console.error("Failed to send AI reply:", sendResponse.status, await sendResponse.text());
               }
             }
+            // Bot acabou de responder → reagenda cadência baseada em agora.
+            // Se o lead ficar 30+ min sem responder, dispara o 1º Follow-UP.
+            if (leadId) {
+              await enrollInCadence(supabase, companyId, leadId, cleanPhone);
+            }
           } else {
             // 🆘 FALLBACK: IA falhou (timeout, rate-limit, loop sem texto). Envia ponte humana
             // pra não deixar o lead em silêncio + alerta o gerente.
@@ -1731,6 +1737,11 @@ serve(async (req) => {
               }
             } catch (fbErr) {
               console.error("Fallback message send error:", fbErr);
+            }
+
+            // Mesmo no fallback, reagenda cadência: bot enviou algo, relógio reinicia.
+            if (leadId) {
+              await enrollInCadence(supabase, companyId, leadId, cleanPhone);
             }
 
             // Alerta gerente

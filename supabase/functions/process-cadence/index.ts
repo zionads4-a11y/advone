@@ -530,7 +530,7 @@ serve(async (req) => {
     // ========== PART 1: Process scheduled cadence messages ==========
     const { data: pendingMessages, error: fetchError } = await supabase
       .from("cadence_messages")
-      .select("id, company_id, lead_id, phone, day_number, message_text")
+      .select("id, company_id, lead_id, phone, day_number, message_text, scheduled_at")
       .eq("status", "pending")
       .lte("scheduled_at", new Date().toISOString())
       .limit(50);
@@ -548,34 +548,50 @@ serve(async (req) => {
 
     for (const msg of (pendingMessages || [])) {
       try {
-        // Check if lead has responded since cadence was created
-        const { data: recentIncoming } = await supabase
+        // Regra: a cadência é válida se o lead NÃO respondeu desde a última
+        // mensagem do bot. Se ele já respondeu (depois da última outgoing), pula
+        // essa cadência — provavelmente o webhook já reagendou uma nova.
+        const { data: lastOutgoing } = await supabase
+          .from("whatsapp_messages")
+          .select("timestamp")
+          .eq("company_id", msg.company_id)
+          .eq("phone", msg.phone)
+          .eq("direction", "outgoing")
+          .order("timestamp", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        const referenceTs = lastOutgoing?.timestamp || msg.scheduled_at;
+
+        const { data: replyAfterLastBot } = await supabase
           .from("whatsapp_messages")
           .select("id")
           .eq("company_id", msg.company_id)
           .eq("phone", msg.phone)
           .eq("direction", "incoming")
-          .gte("timestamp", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+          .gt("timestamp", referenceTs)
           .limit(1);
 
-        if (recentIncoming && recentIncoming.length > 0) {
+        if (replyAfterLastBot && replyAfterLastBot.length > 0) {
+          // Lead já respondeu depois da última msg do bot → cancela esta cadência.
+          // O webhook já cuidou de reagendar uma nova baseada na próxima resposta do bot.
           await supabase
             .from("cadence_messages")
             .update({ status: "cancelled" })
-            .eq("lead_id", msg.lead_id)
-            .eq("status", "pending");
+            .eq("id", msg.id);
           skipped++;
           continue;
         }
 
-        // Check if lead status changed
+        // Check if lead status changed (won, lost, qualified+agendado, bot desativado)
         const { data: lead } = await supabase
           .from("leads")
-          .select("status, bot_disabled, name")
+          .select("status, bot_disabled, name, kanban_column_id")
           .eq("id", msg.lead_id)
           .single();
 
-        if (lead && (lead.status !== "new" || lead.bot_disabled)) {
+        // Bloqueia se o bot foi desligado ou se o lead já está em estado terminal
+        if (lead && (lead.bot_disabled || lead.status === "won" || lead.status === "lost" || lead.status === "qualified")) {
           await supabase
             .from("cadence_messages")
             .update({ status: "cancelled" })
