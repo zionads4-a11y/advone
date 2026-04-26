@@ -169,21 +169,31 @@ async function generateContextualNudge(
     ? `\n\n🎯 ASSUNTO EM ABERTO (tópico: ${topic}): "${openQuestion}"\nRetome ESTE ponto especificamente.`
     : `\n\n🎯 TÓPICO EM ABERTO: ${topic}.`;
 
+  // Quando o tópico em aberto é horário, geramos slots alternativos para a IA escolher um
+  let alternativeSlotsHint = "";
+  if (topic === "schedule_time") {
+    const slots = await suggestAlternativeSlots(supabase, companyId);
+    if (slots.length > 0) {
+      alternativeSlotsHint = `\n\n📅 HORÁRIOS DISPONÍVEIS NA AGENDA (BRT) — escolha 1 que se encaixe na preferência demonstrada pelo lead (manhã/tarde):\n${slots.map((s) => `• ${s.weekday}, ${s.date} às ${s.time}`).join("\n")}\n\nSe o lead disse "tarde", escolha um após 13:00. Se disse "manhã", escolha um antes de 12:00. Se não especificou, prefira tarde (14:00-16:00).`;
+    }
+  }
+
   const system = `${aiPrompt || "Você é uma atendente virtual de um escritório de advocacia."}
 
 ═══════════════════════════════════════
 🔄 CONTEXTO: NUDGE DE INATIVIDADE (${attemptNumber}/4)
 ═══════════════════════════════════════
-O lead parou de responder há um tempo. Você precisa retomar a conversa.
+O lead parou de responder há um tempo. Você precisa retomar a conversa de forma INTELIGENTE — não basta repetir a pergunta.
 
 REGRAS OBRIGATÓRIAS:
-1. LEIA toda a conversa abaixo
+1. LEIA TODA a conversa abaixo do começo ao fim — entenda o contexto, o caso, e principalmente as PREFERÊNCIAS já manifestadas (período do dia, modalidade, unidade)
 2. Continue de ONDE PAROU — natural, humano, sem soar robô
-3. NÃO se reapresente, NÃO repita perguntas já feitas, NÃO mande "olá novamente"
-4. Se você perguntou algo concreto (horário, modalidade, dado), retome ESSA pergunta de forma leve
-5. Tom: ${tone || "profissional e acolhedor"}. Curto (1-2 linhas).
-6. Use o nome se possível: "${leadName || ""}"
-7. Responda APENAS com o texto da mensagem, sem aspas, sem JSON, sem explicação${topicHint}${previousBlock}`;
+3. NÃO se reapresente, NÃO repita perguntas idênticas já feitas, NÃO mande "olá novamente"
+4. 🎯 SE VOCÊ JÁ OFERECEU UM HORÁRIO E O LEAD NÃO RESPONDEU: NÃO repita o mesmo horário. PROPONHA UM NOVO horário alternativo baseado na preferência dele (se mencionou tarde/manhã, respeite)
+5. Se você perguntou algo concreto (horário, modalidade, dado) e ele não respondeu, faça de forma diferente — ofereça uma alternativa concreta ao invés de só re-perguntar
+6. Tom: ${tone || "profissional e acolhedor"}. Curto (1-3 linhas).
+7. Use o nome se possível: "${leadName || ""}"
+8. Responda APENAS com o texto da mensagem, sem aspas, sem JSON, sem explicação${topicHint}${alternativeSlotsHint}${previousBlock}`;
 
   try {
     const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
