@@ -30,6 +30,113 @@ export const INACTIVITY_NUDGES: { minutesAfter: number; message: string }[] = [
   },
 ];
 
+// ─────────────────────────────────────────────────────────────
+// Tópicos detectáveis para fallback inteligente e estado da conversa
+// ─────────────────────────────────────────────────────────────
+export type OpenTopic =
+  | "schedule_time"      // bot perguntou manhã/tarde/horário
+  | "modality"           // bot perguntou online/presencial
+  | "personal_data"      // bot pediu nome/CPF/dados
+  | "scheduling_link"    // bot mandou link e está esperando confirmação
+  | "office_choice"      // bot perguntou qual unidade
+  | "greeting"           // bot só cumprimentou / perguntou se pode ajudar
+  | "other";
+
+/**
+ * Detecta o tópico em aberto a partir da ÚLTIMA mensagem que o bot enviou.
+ * Determinístico, sem IA — barato.
+ */
+export function detectOpenTopic(lastBotMessage: string | null | undefined): OpenTopic {
+  if (!lastBotMessage) return "other";
+  const t = lastBotMessage.toLowerCase();
+
+  // Horário (manhã/tarde/quando)
+  if (
+    /\b(manh[ãa]|tarde|noite|fim do dia|final do dia)\b/.test(t) ||
+    /\bque hor[áa]rio\b/.test(t) ||
+    /\bque hora\b/.test(t) ||
+    /\bmelhor hor[áa]rio\b/.test(t) ||
+    /\bprefere.*(manh|tarde|hor)/.test(t)
+  ) {
+    return "schedule_time";
+  }
+
+  // Modalidade
+  if (
+    /\b(online|presencial|v[íi]deo|chamada de v[íi]deo|google meet|zoom)\b/.test(t) &&
+    /(prefere|fica melhor|gostaria|consegue|faz por|pode ser)/.test(t)
+  ) {
+    return "modality";
+  }
+
+  // Unidade
+  if (/(qual unidade|qual escrit[óo]rio|qual filial)/.test(t)) {
+    return "office_choice";
+  }
+
+  // Dados pessoais
+  if (
+    /\b(nome completo|cpf|seu nome)\b/.test(t) ||
+    /\bme passa.*(nome|cpf|dados)\b/.test(t)
+  ) {
+    return "personal_data";
+  }
+
+  // Link de agendamento já enviado
+  if (/(https?:\/\/|calendly|cal\.com|agendaaqui)/.test(t)) {
+    return "scheduling_link";
+  }
+
+  // Saudação/abertura
+  if (
+    /\b(ol[áa]|oi|bom dia|boa tarde|boa noite)\b/.test(t) &&
+    /\b(posso te ajudar|como posso ajudar|tudo bem)\b/.test(t)
+  ) {
+    return "greeting";
+  }
+
+  return "other";
+}
+
+/**
+ * Tenta extrair a pergunta exata do bot (última frase com "?").
+ * Usado para guardar como `open_question` no audit.
+ */
+export function extractOpenQuestion(lastBotMessage: string | null | undefined): string | null {
+  if (!lastBotMessage) return null;
+  const sentences = lastBotMessage.split(/(?<=[.?!\n])\s+/);
+  const questions = sentences.filter((s) => s.trim().endsWith("?"));
+  if (questions.length === 0) return null;
+  return questions[questions.length - 1].trim().slice(0, 200);
+}
+
+/**
+ * Fallback por tópico: usado se a IA falhar.
+ * Mensagens curtas que retomam o assunto sem soar genérico.
+ */
+export const TOPIC_FALLBACKS: Record<OpenTopic, string> = {
+  schedule_time:
+    "Oi {nome}, tudo certo? 🙂 Só pra retomar: manhã ou tarde fica melhor pra você?",
+  modality:
+    "Oi {nome}! Ainda dá pra a gente acertar — prefere online ou presencial?",
+  personal_data:
+    "Oi {nome}, voltei aqui rapidinho 🙂 Pra eu já reservar pra você, me confirma seu nome completo e CPF?",
+  scheduling_link:
+    "Oi {nome}! Conseguiu abrir o link do agendamento? Se preferir, eu mesma te encaixo aqui pelo WhatsApp.",
+  office_choice:
+    "Oi {nome}! Qual unidade fica melhor pra você?",
+  greeting:
+    "Oi {nome}! Estou por aqui ainda 🙂 Quer que eu te explique como funciona ou já marcamos uma conversa rápida?",
+  other:
+    "Oi {nome}! Voltei rapidinho aqui 🙂 Conseguiu pensar no que conversamos?",
+};
+
+export function renderTopicFallback(topic: OpenTopic, leadName: string | null | undefined): string {
+  const tpl = TOPIC_FALLBACKS[topic] ?? TOPIC_FALLBACKS.other;
+  const name = (leadName || "").trim().split(" ")[0] || "tudo bem";
+  return tpl.replaceAll("{nome}", name);
+}
+
 /** Replace {nome} placeholder, falling back to a friendly default. */
 export function renderCadenceMessage(dayNumber: number, leadName: string | null | undefined): string {
   const template = CADENCE_MESSAGES[dayNumber];
@@ -60,4 +167,41 @@ export function nextCadenceDelayMs(currentAttempt: number): number | null {
   if (next > MAX_CADENCE_ATTEMPTS) return null;
   if (next === 1) return 10 * 60 * 1000;
   return 24 * 60 * 60 * 1000;
+}
+
+/**
+ * Normaliza para comparação: lowercase, sem acentos, sem pontuação, espaços únicos.
+ */
+function normalize(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Similaridade Jaccard (palavras únicas).
+ * Usado como pré-filtro barato ANTES de chamar IA validadora.
+ * 0 = totalmente diferente, 1 = idêntico.
+ */
+export function jaccardSimilarity(a: string, b: string): number {
+  const wa = new Set(normalize(a).split(" ").filter(Boolean));
+  const wb = new Set(normalize(b).split(" ").filter(Boolean));
+  if (wa.size === 0 && wb.size === 0) return 1;
+  let inter = 0;
+  for (const w of wa) if (wb.has(w)) inter++;
+  const union = wa.size + wb.size - inter;
+  return union === 0 ? 0 : inter / union;
+}
+
+/**
+ * Considera "muito parecida" se Jaccard >= 0.7 OU se a normalização for idêntica.
+ */
+export function isTooSimilar(candidate: string, previous: string, threshold = 0.7): boolean {
+  if (!candidate || !previous) return false;
+  if (normalize(candidate) === normalize(previous)) return true;
+  return jaccardSimilarity(candidate, previous) >= threshold;
 }

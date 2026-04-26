@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_followup_audit: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          inactive_minutes: number | null
+          lead_id: string
+          message_sent: string
+          open_question: string | null
+          open_topic: string | null
+          phone: string
+          repetition_check: string
+          source: string
+          trigger_kind: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          inactive_minutes?: number | null
+          lead_id: string
+          message_sent: string
+          open_question?: string | null
+          open_topic?: string | null
+          phone: string
+          repetition_check?: string
+          source?: string
+          trigger_kind: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          inactive_minutes?: number | null
+          lead_id?: string
+          message_sent?: string
+          open_question?: string | null
+          open_topic?: string | null
+          phone?: string
+          repetition_check?: string
+          source?: string
+          trigger_kind?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_followup_audit_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_followup_audit_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       asaas_configs: {
         Row: {
           api_key: string
