@@ -27,7 +27,7 @@ interface DraggableLeadCardProps {
   isInMeetingHeld?: boolean;
 }
 
-export function DraggableLeadCard({ lead, onClick, isDragOverlay, onValueUpdate }: DraggableLeadCardProps) {
+export function DraggableLeadCard({ lead, onClick, isDragOverlay, onValueUpdate, isInMeetingHeld }: DraggableLeadCardProps) {
   const {
     attributes,
     listeners,
@@ -51,7 +51,7 @@ export function DraggableLeadCard({ lead, onClick, isDragOverlay, onValueUpdate 
     return (
       <Card className="glass-card border-primary/50 shadow-xl rotate-2 w-[260px]">
         <CardContent className="p-3">
-          <LeadCardContent lead={lead} />
+          <LeadCardContent lead={lead} isInMeetingHeld={isInMeetingHeld} />
         </CardContent>
       </Card>
     );
@@ -67,7 +67,7 @@ export function DraggableLeadCard({ lead, onClick, isDragOverlay, onValueUpdate 
     >
       <Card className="glass-card cursor-grab transition-all hover:border-primary/30 hover:shadow-md active:cursor-grabbing">
         <CardContent className="p-3">
-          <LeadCardContent lead={lead} onValueUpdate={onValueUpdate} />
+          <LeadCardContent lead={lead} onValueUpdate={onValueUpdate} isInMeetingHeld={isInMeetingHeld} />
         </CardContent>
       </Card>
     </div>
