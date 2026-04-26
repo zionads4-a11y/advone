@@ -36,13 +36,81 @@ async function sendWhatsAppMessage(
   return null;
 }
 
+async function generateContextualNudge(
+  supabase: any,
+  companyId: string,
+  phone: string,
+  leadName: string,
+  attemptNumber: number,
+  aiPrompt: string,
+  tone: string,
+): Promise<string | null> {
+  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+  if (!LOVABLE_API_KEY) return null;
+
+  const { data: convMsgs } = await supabase
+    .from("whatsapp_messages")
+    .select("message_text, direction, sender_name, timestamp")
+    .eq("company_id", companyId)
+    .eq("phone", phone)
+    .order("timestamp", { ascending: false })
+    .limit(30);
+
+  const history = (convMsgs || []).reverse().map((m: any) =>
+    `${m.direction === "incoming" ? "Lead" : (m.sender_name || "Atendente")}: ${m.message_text || ""}`
+  ).join("\n");
+
+  if (!history.trim()) return null;
+
+  const system = `${aiPrompt || "Você é uma atendente virtual de um escritório de advocacia."}
+
+═══════════════════════════════════════
+🔄 CONTEXTO: NUDGE DE INATIVIDADE (${attemptNumber}/4)
+═══════════════════════════════════════
+O lead parou de responder há um tempo. Você precisa retomar a conversa.
+
+REGRAS OBRIGATÓRIAS:
+1. LEIA toda a conversa abaixo
+2. Identifique a ÚLTIMA pergunta/assunto em aberto que VOCÊ deixou
+3. Continue de ONDE PAROU — natural, humano, sem soar robô
+4. NÃO se reapresente, NÃO repita perguntas já feitas, NÃO mande "olá novamente"
+5. Se você perguntou algo concreto (horário, modalidade, dado), retome ESSA pergunta de forma leve
+6. Tom: ${tone || "profissional e acolhedor"}. Curto (1-2 linhas). 
+7. Use o nome se possível: "${leadName || ""}"
+8. Responda APENAS com o texto da mensagem, sem aspas, sem JSON, sem explicação`;
+
+  try {
+    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: `Histórico:\n\n${history}\n\n---\nGere a próxima mensagem de retomada continuando de onde parou.` },
+        ],
+      }),
+    });
+    if (!resp.ok) return null;
+    const j = await resp.json();
+    const txt = (j.choices?.[0]?.message?.content || "").trim();
+    return txt.replace(/^["'`]+|["'`]+$/g, "").trim() || null;
+  } catch (e) {
+    console.error("Nudge AI error:", e);
+    return null;
+  }
+}
+
 async function processInactivityNudges(supabase: any) {
   let nudgesSent = 0;
 
   // Get all companies with AI enabled
   const { data: configs } = await supabase
     .from("whatsapp_configs")
-    .select("company_id, zapi_instance_id, zapi_token, ai_enabled, ai_auto_reply")
+    .select("company_id, zapi_instance_id, zapi_token, ai_enabled, ai_auto_reply, ai_prompt, communication_tone")
     .eq("ai_enabled", true)
     .eq("ai_auto_reply", true);
 
@@ -119,8 +187,22 @@ async function processInactivityNudges(supabase: any) {
           if (minutesSinceLastNudge < 25) continue;
         }
 
-        // Send the nudge — replace {nome} with actual lead name
-        const nudgeText = nextNudge.message.replace(/\{nome\}/g, lead.name || "");
+        // Generate contextual nudge with AI (reads conversation, continues naturally)
+        let nudgeText = await generateContextualNudge(
+          supabase,
+          config.company_id,
+          phone,
+          lead.name || "",
+          nudgeCount + 1,
+          (config as any).ai_prompt || "",
+          (config as any).communication_tone || "",
+        );
+
+        // Fallback to template if AI failed
+        if (!nudgeText) {
+          nudgeText = nextNudge.message.replace(/\{nome\}/g, lead.name || "");
+        }
+
         const result = await sendWhatsAppMessage(config, phone, nudgeText);
 
         if (result) {
@@ -135,7 +217,7 @@ async function processInactivityNudges(supabase: any) {
             timestamp: new Date().toISOString(),
           });
 
-          console.log(`Nudge ${nudgeCount + 1}/4 sent to ${phone} (${minutesSinceLastMsg.toFixed(0)}min inactive)`);
+          console.log(`Nudge ${nudgeCount + 1}/4 (AI-contextual) sent to ${phone} (${minutesSinceLastMsg.toFixed(0)}min inactive)`);
           nudgesSent++;
         }
       }
