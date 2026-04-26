@@ -324,12 +324,87 @@ Na DÚVIDA, responda "continue".`
           }
         }
 
-        let messageText = msg.message_text || CADENCE_MESSAGES[msg.day_number] || CADENCE_MESSAGES[1];
-        // Replace {nome} with actual lead name
-        if (lead?.name) {
-          messageText = messageText.replace(/\{nome\}/g, lead.name);
+        // Generate continuation message using AI based on full conversation
+        let messageText = "";
+        if (LOVABLE_API_KEY) {
+          try {
+            const { data: convForReply } = await supabase
+              .from("whatsapp_messages")
+              .select("message_text, direction, sender_name, timestamp")
+              .eq("company_id", msg.company_id)
+              .eq("phone", msg.phone)
+              .order("timestamp", { ascending: false })
+              .limit(30);
+
+            const convHistory = (convForReply || []).reverse().map((m: any) =>
+              `${m.direction === "incoming" ? "Lead" : (m.sender_name || "Atendente")}: ${m.message_text || ""}`
+            ).join("\n");
+
+            const basePrompt = (config as any).ai_prompt || "Você é uma atendente virtual cordial e objetiva de um escritório de advocacia.";
+            const tone = (config as any).communication_tone || "profissional e acolhedor";
+
+            const followupSystem = `${basePrompt}
+
+═══════════════════════════════════════
+🔄 CONTEXTO ESPECIAL: FOLLOW-UP DE CADÊNCIA
+═══════════════════════════════════════
+O lead PAROU de responder. Esta é a tentativa ${msg.day_number} de ${MAX_CADENCE_ATTEMPTS} de retomada.
+
+REGRAS OBRIGATÓRIAS:
+1. LEIA TODA a conversa abaixo com atenção
+2. Identifique EXATAMENTE qual foi a ÚLTIMA pergunta/assunto que VOCÊ (atendente) deixou em aberto
+3. Continue de ONDE PAROU — NÃO recomece a conversa, NÃO se apresente de novo, NÃO repita perguntas já feitas
+4. Se a última coisa que você perguntou foi sobre horário (manhã/tarde), retome ESSA pergunta de forma natural
+5. Se foi sobre modalidade (online/presencial), retome ESSA
+6. Se foi sobre dados, retome ESSES
+7. Tom: ${tone}. Curto (1-3 linhas). Humano. Sem soar robô. Sem "Olá novamente", sem "Conforme conversamos anteriormente"
+8. Use o nome do lead se souber: "${lead?.name || ""}"
+9. NUNCA mande mensagem genérica tipo "ainda está aí?" se houver pergunta concreta em aberto
+10. Responda APENAS com o texto da mensagem a enviar, sem aspas, sem prefixo, sem JSON
+
+EXEMPLO:
+Se a última mensagem sua foi "Prefere de manhã ou de tarde?", uma boa retomada é:
+"Oi {nome}, e aí, conseguiu ver? Manhã ou tarde fica melhor pra você?"
+
+NUNCA faça:
+"Olá! Tudo bem? Sou a Laura do escritório..." (já se apresentou)
+"Como posso te ajudar?" (já estava ajudando)`;
+
+            const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${LOVABLE_API_KEY}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                model: "google/gemini-2.5-flash",
+                messages: [
+                  { role: "system", content: followupSystem },
+                  { role: "user", content: `Histórico completo da conversa:\n\n${convHistory}\n\n---\nGere AGORA a próxima mensagem de retomada, continuando exatamente de onde a conversa parou. Sem aspas, sem explicação.` },
+                ],
+              }),
+            });
+
+            if (aiResp.ok) {
+              const aiJson = await aiResp.json();
+              const aiText = (aiJson.choices?.[0]?.message?.content || "").trim();
+              // Strip surrounding quotes if model added them
+              messageText = aiText.replace(/^["'`]+|["'`]+$/g, "").trim();
+            }
+          } catch (genErr) {
+            console.error("AI follow-up generation error:", genErr);
+          }
         }
-        if ((config as any).scheduling_link) {
+
+        // Fallback to template if AI failed
+        if (!messageText) {
+          messageText = msg.message_text || CADENCE_MESSAGES[msg.day_number] || CADENCE_MESSAGES[1];
+          if (lead?.name) {
+            messageText = messageText.replace(/\{nome\}/g, lead.name);
+          }
+        }
+
+        if ((config as any).scheduling_link && msg.day_number >= 2 && !messageText.includes("http")) {
           messageText += `\n\n${(config as any).scheduling_link}`;
         }
 
