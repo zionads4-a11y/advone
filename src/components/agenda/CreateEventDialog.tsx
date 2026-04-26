@@ -127,7 +127,8 @@ export function CreateEventDialog({
     }
 
     setSaving(true);
-    const dueAt = `${dueDate}T${dueTime}:00`;
+    // SEMPRE assume horário de Brasília (UTC-3) — independente do fuso do navegador do operador.
+    const dueAt = brtDateTimeToIso(dueDate, dueTime);
 
     let finalLeadId = leadId !== "none" ? leadId : null;
     if (!finalLeadId) {
