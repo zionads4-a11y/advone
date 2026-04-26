@@ -400,7 +400,7 @@ export default function ClientUsers() {
                     {isGerente && (
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1">
-                          {client.role === "operador" && (
+                          {client.role !== "gerente" && (
                             <Button
                               variant="ghost"
                               size="sm"
