@@ -7,7 +7,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-function buildSDRPrompt(config: any, leadName?: string) {
+function buildSDRPrompt(config: any, leadName?: string, offices: any[] = []) {
   const officeName = config.office_name || "o escritório";
   const practiceArea = config.practice_area || "";
   const tone = config.communication_tone || "moderado";
@@ -16,6 +16,45 @@ function buildSDRPrompt(config: any, leadName?: string) {
   const targetAudience = config.target_audience || "";
   const customPrompt = config.ai_prompt || "";
   const triageOptions: any[] = Array.isArray(config.triage_options) ? config.triage_options : [];
+
+  // 🏢 Bloco de endereços DINÂMICO por empresa (NUNCA hardcode endereços de outras empresas).
+  const activeOffices = (offices || []).filter((o: any) => o && o.is_active !== false);
+  const officesCount = activeOffices.length;
+  const officesListForPrompt = activeOffices
+    .map((o: any, i: number) => {
+      const lines = [
+        `*${i + 1}️⃣ ${o.name}*`,
+        `📍 ${o.address}`,
+      ];
+      if (o.complement) lines.push(`🏢 ${o.complement}`);
+      if (o.reference_point) lines.push(`🗺️ ${o.reference_point}`);
+      if (o.maps_url) lines.push(`🔗 ${o.maps_url}`);
+      return lines.join("\\n");
+    })
+    .join("\\n\\n");
+  const unitNamesForTool = activeOffices.map((o: any) => `"${o.name}"`).join(" OU ");
+
+  let presencialBlock: string;
+  if (officesCount === 0) {
+    // ⚠️ Empresa SEM endereço cadastrado → NUNCA inventar/listar endereços de outra empresa.
+    presencialBlock =
+      `   • Se o lead escolher PRESENCIAL: NÃO liste endereços (este escritório ainda não cadastrou unidades no sistema). Responda EXATAMENTE: "Claro! 😊 Pra confirmar o endereço certinho da nossa unidade vou alinhar com o time aqui e já te passo. Enquanto isso, posso já reservar um horário pra você?"\\n` +
+      `   • NUNCA invente endereços, ruas, bairros ou telefones. NUNCA use endereços de outros escritórios. Se não tiver certeza, ofereça reunião ONLINE como alternativa.\\n` +
+      `   • GUARDE mentalmente a modalidade (online/presencial). Em schedule_appointment use \`modality\` = "online" ou "presencial" e \`unit\` = "A confirmar" se presencial sem unidade definida.`;
+  } else if (officesCount === 1) {
+    const only = activeOffices[0];
+    presencialBlock =
+      `   • Se o lead escolher PRESENCIAL, envie em SEGUIDA (mensagem separada) o endereço EXATO da nossa unidade:\\n` +
+      `     "Perfeito! 🙂 Nossa unidade fica aqui:\\n\\n*${only.name}*\\n📍 ${only.address}${only.complement ? `\\n🏢 ${only.complement}` : ""}${only.reference_point ? `\\n🗺️ ${only.reference_point}` : ""}${only.maps_url ? `\\n🔗 ${only.maps_url}` : ""}"\\n` +
+      `   • GUARDE mentalmente a modalidade. Em schedule_appointment use \`modality\` = "online"|"presencial" e \`unit\` = "${only.name}" OU "Online".\\n` +
+      `   • NUNCA invente outros endereços além desse. NUNCA cite ruas/bairros que não estejam acima.`;
+  } else {
+    presencialBlock =
+      `   • Se o lead escolher PRESENCIAL, envie em SEGUIDA (mensagem separada) os ${officesCount} endereços EXATAMENTE assim:\\n` +
+      `     "Perfeito! 🙂 Temos *${officesCount} unidades* disponíveis. Qual fica melhor pra você?\\n\\n${officesListForPrompt}"\\n` +
+      `   • GUARDE mentalmente a modalidade e a unidade escolhida — você DEVE passar esses valores depois em schedule_appointment (campos \`modality\` = "online"|"presencial" e \`unit\` = ${unitNamesForTool} OU "Online").\\n` +
+      `   • NUNCA invente endereços que não estejam na lista acima. NUNCA use endereços de outros escritórios.`;
+  }
   const leadNameInfo = leadName ? `\n\nNOME DO LEAD: O nome do lead é "${leadName}". Use este nome sempre que se referir a ele. NUNCA escreva {nome} literalmente — use "${leadName}" diretamente.\n` : `\n\nNOME DO LEAD: Você ainda não sabe o nome do lead. Pergunte o nome antes de personalizar as mensagens. NUNCA escreva {nome} literalmente.\n`;
 
   const toneInstructions = tone === "formal"
