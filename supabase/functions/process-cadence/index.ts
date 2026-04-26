@@ -132,6 +132,73 @@ async function sendWhatsAppMessage(
   return null;
 }
 
+// ─────────────────────────────────────────────────────────────
+// Sugestão de horários alternativos (BRT) — para nudges de schedule_time
+// ─────────────────────────────────────────────────────────────
+const WEEKDAY_NAMES = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
+const WEEKDAY_KEYS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+
+function nowBRT(): Date {
+  const fmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+  });
+  const parts = fmt.formatToParts(new Date());
+  const get = (t: string) => Number(parts.find((p) => p.type === t)?.value || 0);
+  return new Date(Date.UTC(get("year"), get("month") - 1, get("day"), get("hour"), get("minute"), get("second")));
+}
+
+async function suggestAlternativeSlots(supabase: any, companyId: string): Promise<{ weekday: string; date: string; time: string }[]> {
+  const { data: company } = await supabase.from("companies").select("business_hours").eq("id", companyId).maybeSingle();
+  const businessHours: Record<string, { open: string; close: string }[]> = company?.business_hours || {};
+
+  const now = nowBRT();
+  const results: { weekday: string; date: string; time: string }[] = [];
+
+  for (let offset = 1; offset <= 5 && results.length < 6; offset++) {
+    const day = new Date(now);
+    day.setUTCDate(day.getUTCDate() + offset);
+    const dow = day.getUTCDay();
+    const key = WEEKDAY_KEYS[dow];
+    const windows = businessHours[key] || [];
+    if (!windows.length) continue;
+
+    const dd = String(day.getUTCDate()).padStart(2, "0");
+    const mm = String(day.getUTCMonth() + 1).padStart(2, "0");
+    const dateStr = `${dd}/${mm}`;
+    const dateISO = `${day.getUTCFullYear()}-${mm}-${dd}`;
+
+    const dayStart = new Date(`${dateISO}T00:00:00-03:00`);
+    const dayEnd = new Date(`${dateISO}T23:59:59-03:00`);
+    const { data: booked } = await supabase
+      .from("lead_reminders")
+      .select("due_at")
+      .eq("company_id", companyId)
+      .eq("reminder_type", "meeting")
+      .gte("due_at", dayStart.toISOString())
+      .lte("due_at", dayEnd.toISOString());
+
+    const bookedTimes = new Set<string>();
+    for (const b of (booked || []) as { due_at: string }[]) {
+      const dt = new Date(b.due_at);
+      const fmt = new Intl.DateTimeFormat("en-GB", { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit", hour12: false });
+      bookedTimes.add(fmt.format(dt));
+    }
+
+    for (const w of windows) {
+      const [openH, openM] = w.open.split(":").map(Number);
+      const [closeH] = w.close.split(":").map(Number);
+      for (let h = openH; h < closeH && results.length < 6; h++) {
+        const time = `${String(h).padStart(2, "0")}:${String(openM || 0).padStart(2, "0")}`;
+        if (bookedTimes.has(time)) continue;
+        results.push({ weekday: WEEKDAY_NAMES[dow], date: dateStr, time });
+      }
+    }
+  }
+  return results;
+}
+
 async function generateContextualNudge(
   supabase: any,
   companyId: string,
@@ -169,21 +236,31 @@ async function generateContextualNudge(
     ? `\n\n🎯 ASSUNTO EM ABERTO (tópico: ${topic}): "${openQuestion}"\nRetome ESTE ponto especificamente.`
     : `\n\n🎯 TÓPICO EM ABERTO: ${topic}.`;
 
+  // Quando o tópico em aberto é horário, geramos slots alternativos para a IA escolher um
+  let alternativeSlotsHint = "";
+  if (topic === "schedule_time") {
+    const slots = await suggestAlternativeSlots(supabase, companyId);
+    if (slots.length > 0) {
+      alternativeSlotsHint = `\n\n📅 HORÁRIOS DISPONÍVEIS NA AGENDA (BRT) — escolha 1 que se encaixe na preferência demonstrada pelo lead (manhã/tarde):\n${slots.map((s) => `• ${s.weekday}, ${s.date} às ${s.time}`).join("\n")}\n\nSe o lead disse "tarde", escolha um após 13:00. Se disse "manhã", escolha um antes de 12:00. Se não especificou, prefira tarde (14:00-16:00).`;
+    }
+  }
+
   const system = `${aiPrompt || "Você é uma atendente virtual de um escritório de advocacia."}
 
 ═══════════════════════════════════════
 🔄 CONTEXTO: NUDGE DE INATIVIDADE (${attemptNumber}/4)
 ═══════════════════════════════════════
-O lead parou de responder há um tempo. Você precisa retomar a conversa.
+O lead parou de responder há um tempo. Você precisa retomar a conversa de forma INTELIGENTE — não basta repetir a pergunta.
 
 REGRAS OBRIGATÓRIAS:
-1. LEIA toda a conversa abaixo
+1. LEIA TODA a conversa abaixo do começo ao fim — entenda o contexto, o caso, e principalmente as PREFERÊNCIAS já manifestadas (período do dia, modalidade, unidade)
 2. Continue de ONDE PAROU — natural, humano, sem soar robô
-3. NÃO se reapresente, NÃO repita perguntas já feitas, NÃO mande "olá novamente"
-4. Se você perguntou algo concreto (horário, modalidade, dado), retome ESSA pergunta de forma leve
-5. Tom: ${tone || "profissional e acolhedor"}. Curto (1-2 linhas).
-6. Use o nome se possível: "${leadName || ""}"
-7. Responda APENAS com o texto da mensagem, sem aspas, sem JSON, sem explicação${topicHint}${previousBlock}`;
+3. NÃO se reapresente, NÃO repita perguntas idênticas já feitas, NÃO mande "olá novamente"
+4. 🎯 SE VOCÊ JÁ OFERECEU UM HORÁRIO E O LEAD NÃO RESPONDEU: NÃO repita o mesmo horário. PROPONHA UM NOVO horário alternativo baseado na preferência dele (se mencionou tarde/manhã, respeite)
+5. Se você perguntou algo concreto (horário, modalidade, dado) e ele não respondeu, faça de forma diferente — ofereça uma alternativa concreta ao invés de só re-perguntar
+6. Tom: ${tone || "profissional e acolhedor"}. Curto (1-3 linhas).
+7. Use o nome se possível: "${leadName || ""}"
+8. Responda APENAS com o texto da mensagem, sem aspas, sem JSON, sem explicação${topicHint}${alternativeSlotsHint}${previousBlock}`;
 
   try {
     const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
