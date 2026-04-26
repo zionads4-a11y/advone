@@ -40,8 +40,9 @@ const DEFAULT_COLUMNS = [
   { name: "4º Follow-UP", color: "#c084fc", position: 4, is_won: false, is_lost: false },
   { name: "5º Follow-UP", color: "#d8b4fe", position: 5, is_won: false, is_lost: false },
   { name: "Agendado", color: "#10b981", position: 6, is_won: false, is_lost: false },
-  { name: "Ganho", color: "#22c55e", position: 7, is_won: true, is_lost: false },
-  { name: "Perdido", color: "#ef4444", position: 8, is_won: false, is_lost: true },
+  { name: "Reunião Realizada", color: "#14b8a6", position: 7, is_won: false, is_lost: false },
+  { name: "Ganho", color: "#22c55e", position: 8, is_won: true, is_lost: false },
+  { name: "Perdido", color: "#ef4444", position: 9, is_won: false, is_lost: true },
 ];
 
 interface CompanyKanbanProps {
