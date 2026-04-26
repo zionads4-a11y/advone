@@ -69,7 +69,7 @@ export function LeadReminders({ leadId, companyId, leadName }: LeadRemindersProp
       title: title.trim(),
       description: description.trim() || null,
       reminder_type: reminderType,
-      due_at: new Date(dueAt).toISOString(),
+      due_at: brtLocalInputToIso(dueAt),
     });
     if (error) {
       toast.error("Erro ao criar lembrete");
