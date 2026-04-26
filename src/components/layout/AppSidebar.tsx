@@ -78,6 +78,7 @@ const gerenteItems = [
   { title: "Processos", url: "/processos", icon: Briefcase },
   { title: "Monitoramento", url: "/monitoramento", icon: Radar },
   { title: "Equipe", url: "/client-users", icon: Users },
+  { title: "Faturamento p/ Reunião", url: "/comissoes", icon: DollarSign },
   { title: "Configurações", url: "/company-settings", icon: Settings },
 ];
 
