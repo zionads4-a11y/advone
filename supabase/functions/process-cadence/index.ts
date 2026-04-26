@@ -140,6 +140,9 @@ async function generateContextualNudge(
   attemptNumber: number,
   aiPrompt: string,
   tone: string,
+  topic: OpenTopic,
+  openQuestion: string | null,
+  previousFollowups: string[],
 ): Promise<string | null> {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!LOVABLE_API_KEY) return null;
@@ -158,6 +161,14 @@ async function generateContextualNudge(
 
   if (!history.trim()) return null;
 
+  const previousBlock = previousFollowups.length > 0
+    ? `\n\n⛔ TENTATIVAS DE RETOMADA JÁ ENVIADAS (NÃO REPETIR — varie ângulo e palavras):\n${previousFollowups.slice(0, 5).map((m, i) => `${i + 1}. ${m}`).join("\n")}`
+    : "";
+
+  const topicHint = openQuestion
+    ? `\n\n🎯 ASSUNTO EM ABERTO (tópico: ${topic}): "${openQuestion}"\nRetome ESTE ponto especificamente.`
+    : `\n\n🎯 TÓPICO EM ABERTO: ${topic}.`;
+
   const system = `${aiPrompt || "Você é uma atendente virtual de um escritório de advocacia."}
 
 ═══════════════════════════════════════
@@ -167,13 +178,12 @@ O lead parou de responder há um tempo. Você precisa retomar a conversa.
 
 REGRAS OBRIGATÓRIAS:
 1. LEIA toda a conversa abaixo
-2. Identifique a ÚLTIMA pergunta/assunto em aberto que VOCÊ deixou
-3. Continue de ONDE PAROU — natural, humano, sem soar robô
-4. NÃO se reapresente, NÃO repita perguntas já feitas, NÃO mande "olá novamente"
-5. Se você perguntou algo concreto (horário, modalidade, dado), retome ESSA pergunta de forma leve
-6. Tom: ${tone || "profissional e acolhedor"}. Curto (1-2 linhas). 
-7. Use o nome se possível: "${leadName || ""}"
-8. Responda APENAS com o texto da mensagem, sem aspas, sem JSON, sem explicação`;
+2. Continue de ONDE PAROU — natural, humano, sem soar robô
+3. NÃO se reapresente, NÃO repita perguntas já feitas, NÃO mande "olá novamente"
+4. Se você perguntou algo concreto (horário, modalidade, dado), retome ESSA pergunta de forma leve
+5. Tom: ${tone || "profissional e acolhedor"}. Curto (1-2 linhas).
+6. Use o nome se possível: "${leadName || ""}"
+7. Responda APENAS com o texto da mensagem, sem aspas, sem JSON, sem explicação${topicHint}${previousBlock}`;
 
   try {
     const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
