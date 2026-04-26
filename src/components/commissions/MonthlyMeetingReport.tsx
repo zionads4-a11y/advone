@@ -59,7 +59,7 @@ export function MonthlyMeetingReport() {
         r.total_meetings += 1;
         r.total_amount += Number(c.amount);
       }
-      r[c.status as keyof Row] = (r[c.status as keyof Row] as number) + 1;
+      (r as any)[c.status] = ((r as any)[c.status] || 0) + 1;
     });
 
     setRows(Object.values(grouped).sort((a, b) => b.total_meetings - a.total_meetings));
