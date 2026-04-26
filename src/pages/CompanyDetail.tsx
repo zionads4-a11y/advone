@@ -152,6 +152,12 @@ export default function CompanyDetail() {
       {/* Provedor de IA (acesso restrito ao Super Admin via /companies/:id) */}
       <CompanyAIConfigCard companyId={company.id} />
 
+      {/* Cadência de Follow-Up */}
+      <CadenceConfigCard companyId={company.id} />
+
+      {/* Lembretes de Reunião */}
+      <MeetingRemindersConfigCard companyId={company.id} />
+
 
       {/* Tabs */}
       <Tabs defaultValue="kanban" className="space-y-4">
