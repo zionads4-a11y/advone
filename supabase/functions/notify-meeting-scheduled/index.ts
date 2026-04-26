@@ -142,6 +142,68 @@ serve(async (req) => {
     const cpf = lead.cpf_cliente_final || lead.cpf || "não informado";
     const leadPhone = lead.whatsapp || lead.phone || "não informado";
 
+    // ===== Resumo da conversa via IA =====
+    // Pega últimas 30 mensagens do lead e gera resumo executivo curto.
+    let conversationSummary = "";
+    try {
+      const phoneForLookup = lead.whatsapp || lead.phone;
+      if (phoneForLookup) {
+        const { data: msgs } = await supabase
+          .from("whatsapp_messages")
+          .select("direction, sender_name, message_text, timestamp")
+          .eq("company_id", reminder.company_id)
+          .eq("phone", String(phoneForLookup).replace(/\D/g, ""))
+          .order("timestamp", { ascending: true })
+          .limit(30);
+
+        if (msgs && msgs.length > 0) {
+          const transcript = msgs
+            .map((m: any) => {
+              const who = m.direction === "incoming" ? "Cliente" : (m.sender_name === "IA" ? "IA" : "Atendente");
+              return `[${who}]: ${m.message_text || "[mídia]"}`;
+            })
+            .join("\n");
+
+          const openaiKey = Deno.env.get("OPENAI_API_KEY");
+          const lovableKey = Deno.env.get("LOVABLE_API_KEY");
+
+          // Prefere Lovable AI (grátis); cai pra OpenAI se faltar
+          const aiUrl = lovableKey
+            ? "https://ai.gateway.lovable.dev/v1/chat/completions"
+            : "https://api.openai.com/v1/chat/completions";
+          const aiKey = lovableKey || openaiKey;
+          const aiModel = lovableKey ? "google/gemini-2.5-flash-lite" : "gpt-5-mini";
+
+          if (aiKey) {
+            const sumResp = await fetch(aiUrl, {
+              method: "POST",
+              headers: { Authorization: `Bearer ${aiKey}`, "Content-Type": "application/json" },
+              body: JSON.stringify({
+                model: aiModel,
+                messages: [
+                  {
+                    role: "system",
+                    content:
+                      "Você resume conversas de WhatsApp entre uma SDR jurídica (IA) e um cliente. Gere um resumo CURTO (máx. 5 bullets) cobrindo: tipo de caso, dados informados pelo cliente, principais dores/objetivos e qualquer ponto crítico. Português, objetivo, sem floreios. Sem saudação no início. Use bullets com '•'.",
+                  },
+                  { role: "user", content: `Conversa:\n${transcript}` },
+                ],
+              }),
+            });
+            if (sumResp.ok) {
+              const sumData = await sumResp.json();
+              const txt = sumData.choices?.[0]?.message?.content?.trim();
+              if (txt) conversationSummary = txt;
+            } else {
+              console.error("Summary AI failed:", sumResp.status, await sumResp.text());
+            }
+          }
+        }
+      }
+    } catch (sumErr) {
+      console.error("Erro ao gerar resumo da conversa:", sumErr);
+    }
+
     const message =
       `🔔 *Novo agendamento confirmado*\n\n` +
       `📅 *Data:* ${date}\n` +
@@ -150,6 +212,7 @@ serve(async (req) => {
       `🆔 *CPF:* ${cpf}\n` +
       `📱 *Contato:* ${leadPhone}` +
       (reminder.title ? `\n📝 *Compromisso:* ${reminder.title}` : "") +
+      (conversationSummary ? `\n\n📋 *Resumo da conversa:*\n${conversationSummary}` : "") +
       `\n\n💡 _Lembre-se de acessar a agenda do AdvOne para marcar novas atividades, conferir os horários disponíveis e manter seus compromissos sempre atualizados._`;
 
     const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN") || "";

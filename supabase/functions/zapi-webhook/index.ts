@@ -1541,20 +1541,98 @@ serve(async (req) => {
     }
 
     let phone: string, senderName: string, messageText: string, messageIdExternal: string, isGroup: boolean;
+    let audioUrl: string | null = null;
+    let messageType: string = "text";
 
     if (isUaZapiMessage) {
       const msg = body.message;
       phone = msg.sender_pn || msg.chatid || "";
       senderName = msg.senderName || body.chat?.name || body.chat?.wa_contactName || "";
-      messageText = msg.text || msg.content || msg.caption || "[mídia]";
+      messageText = msg.text || msg.content || msg.caption || "";
       messageIdExternal = msg.messageid || msg.id || "";
       isGroup = msg.isGroup || false;
+      messageType = (msg.type || msg.messageType || "").toString().toLowerCase();
+      // UaZapi pode entregar URL de áudio em vários campos
+      if (messageType.includes("audio") || messageType === "ptt" || messageType === "voice") {
+        audioUrl = msg.audio?.url || msg.audio?.audioUrl || msg.mediaUrl || msg.fileURL || msg.url || msg.media?.url || null;
+      }
+      if (!messageText) messageText = "[mídia]";
     } else {
       phone = body.phone || "";
       senderName = body.senderName || body.chatName || "";
-      messageText = body.text?.message || body.image?.caption || body.video?.caption || "[mídia]";
+      messageText = body.text?.message || body.image?.caption || body.video?.caption || "";
       messageIdExternal = body.messageId || "";
       isGroup = body.isGroup || false;
+      if (body.audio || body.ptt) {
+        audioUrl = body.audio?.audioUrl || body.audio?.url || body.ptt?.audioUrl || body.ptt?.url || null;
+        messageType = "audio";
+      }
+      if (!messageText) messageText = "[mídia]";
+    }
+
+    // ===== TRANSCRIÇÃO DE ÁUDIO (Whisper) =====
+    // Se for áudio e tivermos URL, transcrevemos antes de seguir o fluxo normal.
+    // Mensagem fica como texto puro pra IA processar igual a qualquer outra.
+    if (audioUrl) {
+      try {
+        const openaiKey = Deno.env.get("OPENAI_API_KEY");
+        if (!openaiKey) {
+          console.error("[audio] OPENAI_API_KEY não configurada — não foi possível transcrever áudio");
+        } else {
+          console.log(`[audio] Baixando áudio de: ${audioUrl}`);
+          const audioResp = await fetch(audioUrl);
+          if (!audioResp.ok) {
+            console.error(`[audio] Falha ao baixar áudio: ${audioResp.status}`);
+          } else {
+            const audioBlob = await audioResp.blob();
+            const audioSize = audioBlob.size;
+            console.log(`[audio] Áudio baixado: ${audioSize} bytes`);
+
+            if (audioSize > 25 * 1024 * 1024) {
+              console.error("[audio] Áudio maior que 25MB, Whisper não suporta");
+              messageText = "[áudio muito longo — não transcrito]";
+            } else {
+              const fd = new FormData();
+              fd.append("file", audioBlob, "audio.ogg");
+              fd.append("model", "whisper-1");
+              fd.append("language", "pt");
+              fd.append("response_format", "json");
+              // temperature 0 = mais determinístico, evita alucinação
+              fd.append("temperature", "0");
+
+              const whisperResp = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+                method: "POST",
+                headers: { Authorization: `Bearer ${openaiKey}` },
+                body: fd,
+              });
+
+              if (!whisperResp.ok) {
+                const errTxt = await whisperResp.text();
+                console.error(`[audio] Whisper falhou ${whisperResp.status}: ${errTxt}`);
+                messageText = "[áudio recebido — não foi possível transcrever]";
+              } else {
+                const whisperData = await whisperResp.json();
+                const transcription = (whisperData.text || "").trim();
+                if (transcription) {
+                  console.log(`[audio] Transcrição (${transcription.length} chars): ${transcription.substring(0, 120)}...`);
+                  // Marcamos como áudio pra histórico mas tratamos como texto
+                  messageText = `🎤 [áudio transcrito]: ${transcription}`;
+                } else {
+                  messageText = "[áudio sem fala detectada]";
+                }
+              }
+            }
+          }
+        }
+      } catch (audioErr) {
+        console.error("[audio] Erro inesperado na transcrição:", audioErr);
+        messageText = "[áudio recebido — erro ao transcrever]";
+      }
+    }
+
+    // Garante que messageText sempre seja string (evita erros tipo .match is not a function)
+    if (typeof messageText !== "string") {
+      messageText = String(messageText ?? "");
     }
 
     if (isGroup || !phone) {
