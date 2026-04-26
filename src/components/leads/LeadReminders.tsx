@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  Bell, CalendarClock, Plus, Check, Trash2, Loader2,
+  Bell, CalendarClock, Plus, Check, Trash2, Loader2, CheckCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -20,14 +20,17 @@ interface Reminder {
   completed: boolean;
   completed_at: string | null;
   created_at: string;
+  meeting_held?: boolean;
+  meeting_held_at?: string | null;
 }
 
 interface LeadRemindersProps {
   leadId: string;
   companyId: string;
+  leadName?: string;
 }
 
-export function LeadReminders({ leadId, companyId }: LeadRemindersProps) {
+export function LeadReminders({ leadId, companyId, leadName }: LeadRemindersProps) {
   const { user } = useAuth();
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
