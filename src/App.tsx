@@ -32,6 +32,7 @@ import FraudAlerts from "./pages/FraudAlerts";
 import ExitoSchedules from "./pages/ExitoSchedules";
 import LeadsHistory from "./pages/LeadsHistory";
 import LegalAI from "./pages/LegalAI";
+import LandingIA from "./pages/LandingIA";
 import AppLayout from "./components/layout/AppLayout";
 import NotFound from "./pages/NotFound";
 
