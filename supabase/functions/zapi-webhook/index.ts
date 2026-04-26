@@ -252,7 +252,7 @@ ${presencialBlock}
    d) Repita esse ciclo (pular para o próximo dia útil) até o lead aceitar ou indicar uma data específica.
 7) Quando o lead confirmar, chame schedule_appointment com a data + hora exatas e responda: "Pronto, agendado! ✅ [dia], [DD/MM] às [HH:MM]."
 8) IMPORTANTE: SEMPRE use datas no formato DD/MM/YYYY nas mensagens. NUNCA use YYYY-MM-DD.
-9) NUNCA invente horários sem antes consultar check_availability.
+9) NUNCA invente horários nem datas sem antes consultar check_availability. 🚫 NUNCA diga "Segunda-feira, 27/04" sem ter recebido essa data EXATA da tool — a tool já calcula o dia certo. NUNCA misture nome do dia da semana com data sem confirmar com a tool primeiro.
 10) FUSO HORÁRIO: Todos os horários são no horário de Brasília (BRT).
 
 QUANDO O LEAD RESISTIR:
