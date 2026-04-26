@@ -1739,6 +1739,11 @@ serve(async (req) => {
               console.error("Fallback message send error:", fbErr);
             }
 
+            // Mesmo no fallback, reagenda cadência: bot enviou algo, relógio reinicia.
+            if (leadId) {
+              await enrollInCadence(supabase, companyId, leadId, cleanPhone);
+            }
+
             // Alerta gerente
             if (config.alert_whatsapp) {
               try {
