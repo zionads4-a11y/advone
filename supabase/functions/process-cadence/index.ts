@@ -1,13 +1,109 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { getErrorMessage } from "../_shared/errors.ts";
-import { CADENCE_MESSAGES, INACTIVITY_NUDGES, MAX_CADENCE_ATTEMPTS } from "./_logic.ts";
+import {
+  CADENCE_MESSAGES,
+  INACTIVITY_NUDGES,
+  MAX_CADENCE_ATTEMPTS,
+  detectOpenTopic,
+  extractOpenQuestion,
+  renderTopicFallback,
+  isTooSimilar,
+  type OpenTopic,
+} from "./_logic.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+// ─────────────────────────────────────────────────────────────
+// Validador de repetição (pré-filtro Jaccard + IA quando duvidoso)
+// ─────────────────────────────────────────────────────────────
+async function isRepetitiveByAI(candidate: string, previousMessages: string[]): Promise<boolean> {
+  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+  if (!LOVABLE_API_KEY || previousMessages.length === 0) return false;
+  try {
+    const previousList = previousMessages.slice(0, 5).map((m, i) => `${i + 1}) ${m}`).join("\n");
+    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash-lite",
+        messages: [
+          { role: "system", content: "Você é um validador. Responda SOMENTE com 'SIM' ou 'NAO'. Diga SIM se a mensagem candidata for muito parecida (mesma intenção, mesma pergunta, mesma estrutura) com alguma das tentativas anteriores. Diga NAO se ela trouxer ângulo, pergunta ou tom claramente diferente." },
+          { role: "user", content: `CANDIDATA:\n${candidate}\n\nTENTATIVAS ANTERIORES:\n${previousList}\n\nÉ muito parecida?` },
+        ],
+      }),
+    });
+    if (!resp.ok) return false;
+    const j = await resp.json();
+    const reply = (j.choices?.[0]?.message?.content || "").trim().toUpperCase();
+    return reply.startsWith("SIM");
+  } catch (err) {
+    console.error("isRepetitiveByAI error:", err);
+    return false;
+  }
+}
+
+async function checkRepetition(
+  candidate: string,
+  previousMessages: string[],
+): Promise<"allowed" | "blocked_identical" | "blocked_similar"> {
+  if (previousMessages.length === 0) return "allowed";
+  for (const prev of previousMessages) {
+    if (isTooSimilar(candidate, prev, 0.85)) return "blocked_identical";
+  }
+  let needsAi = false;
+  for (const prev of previousMessages) {
+    if (isTooSimilar(candidate, prev, 0.5)) { needsAi = true; break; }
+  }
+  if (needsAi) {
+    const repetitive = await isRepetitiveByAI(candidate, previousMessages);
+    if (repetitive) return "blocked_similar";
+  }
+  return "allowed";
+}
+
+async function loadConversationState(
+  supabase: any,
+  leadId: string,
+  lastBotMessage: string | null,
+): Promise<{ topic: OpenTopic; openQuestion: string | null; previousFollowups: string[] }> {
+  const { data: lastAudit } = await supabase
+    .from("ai_followup_audit")
+    .select("message_sent")
+    .eq("lead_id", leadId)
+    .order("created_at", { ascending: false })
+    .limit(10);
+  const previousFollowups = (lastAudit || []).map((r: any) => r.message_sent).filter(Boolean);
+  return {
+    topic: detectOpenTopic(lastBotMessage),
+    openQuestion: extractOpenQuestion(lastBotMessage),
+    previousFollowups,
+  };
+}
+
+async function recordFollowupAudit(supabase: any, params: {
+  companyId: string; leadId: string; phone: string;
+  topic: OpenTopic; openQuestion: string | null;
+  messageSent: string; source: string; triggerKind: string;
+  inactiveMinutes: number; repetitionCheck: string;
+}) {
+  await supabase.from("ai_followup_audit").insert({
+    company_id: params.companyId,
+    lead_id: params.leadId,
+    phone: params.phone,
+    open_topic: params.topic,
+    open_question: params.openQuestion,
+    message_sent: params.messageSent,
+    source: params.source,
+    trigger_kind: params.triggerKind,
+    inactive_minutes: params.inactiveMinutes,
+    repetition_check: params.repetitionCheck,
+  });
+}
 
 async function sendWhatsAppMessage(
   config: any,
