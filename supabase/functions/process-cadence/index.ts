@@ -284,14 +284,22 @@ async function generateContextualNudge(
     ? `\n\n🎯 ASSUNTO EM ABERTO (tópico: ${topic}): "${openQuestion}"\nRetome ESTE ponto especificamente.`
     : `\n\n🎯 TÓPICO EM ABERTO: ${topic}.`;
 
-  // Quando o tópico em aberto é horário, geramos slots alternativos para a IA escolher um
+  // Quando o tópico em aberto é horário, buscamos o PRIMEIRO horário disponível
+  // respeitando a preferência (manhã/tarde) já manifestada pelo lead no histórico.
   let alternativeSlotsHint = "";
   if (topic === "schedule_time") {
-    const slots = await suggestAlternativeSlots(supabase, companyId);
-    if (slots.length > 0) {
-      alternativeSlotsHint = `\n\n📅 HORÁRIOS DISPONÍVEIS NA AGENDA (BRT) — escolha 1 que se encaixe na preferência demonstrada pelo lead (manhã/tarde):\n${slots.map((s) => `• ${s.weekday}, ${s.date} às ${s.time}`).join("\n")}\n\nSe o lead disse "tarde", escolha um após 13:00. Se disse "manhã", escolha um antes de 12:00. Se não especificou, prefira tarde (14:00-16:00).`;
+    const period = detectPeriodPreference(history);
+    const slot = await findFirstAvailableSlot(supabase, companyId, period);
+    if (slot) {
+      const periodLabel =
+        period === "morning" ? "manhã (lead disse que prefere manhã)"
+        : period === "afternoon" ? "tarde (lead disse que prefere tarde)"
+        : period === "evening" ? "fim do dia (lead disse que prefere noite)"
+        : "primeiro horário útil disponível";
+      alternativeSlotsHint = `\n\n📅 PRÓXIMO HORÁRIO DISPONÍVEL NA AGENDA (BRT) — período: ${periodLabel}:\n👉 ${slot.weekday}, ${slot.date} às ${slot.time}\n\nOFEREÇA EXATAMENTE ESSE HORÁRIO. Não invente outro, não liste opções — proponha ESSE como sugestão concreta e pergunte se serve.`;
     }
   }
+
 
   const system = `${aiPrompt || "Você é uma atendente virtual de um escritório de advocacia."}
 
