@@ -683,6 +683,19 @@ REGRAS OBRIGATÓRIAS:
             timestamp: new Date().toISOString(),
           });
 
+          await recordFollowupAudit(supabase, {
+            companyId: msg.company_id,
+            leadId: msg.lead_id,
+            phone: msg.phone,
+            topic: cadenceState.topic,
+            openQuestion: cadenceState.openQuestion,
+            messageSent: messageText,
+            source: cadenceSource || "ai",
+            triggerKind: `cadence_day_${msg.day_number}`,
+            inactiveMinutes: 0,
+            repetitionCheck: cadenceRepetition,
+          });
+
           // Novo funil: pos 0=Em Atendimento, pos 1..5=1º a 5º Follow-UP
           // day_number 1 → pos 1 (1º Follow-UP), ..., day_number 5 → pos 5 (5º Follow-UP)
           const targetPosition = Math.min(msg.day_number, 5);
