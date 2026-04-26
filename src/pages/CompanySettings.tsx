@@ -13,6 +13,8 @@ import MonitoringPackagePurchase from "@/components/monitoring/MonitoringPackage
 import { ZapSignConfigCard } from "@/components/companies/ZapSignConfigCard";
 import { CompanyOfficesEditor } from "@/components/companies/CompanyOfficesEditor";
 import { CompanyNicheAlertsCard } from "@/components/companies/CompanyNicheAlertsCard";
+import { CadenceConfigCard } from "@/components/companies/CadenceConfigCard";
+import { MeetingRemindersConfigCard } from "@/components/companies/MeetingRemindersConfigCard";
 
 interface Company {
   id: string;
@@ -122,6 +124,12 @@ export default function CompanySettings() {
         <Save className="mr-2 h-4 w-4" />
         {saving ? "Salvando..." : "Salvar Configurações"}
       </Button>
+
+      {/* Cadência de Follow-Up */}
+      <CadenceConfigCard companyId={company.id} />
+
+      {/* Lembretes de Reunião */}
+      <MeetingRemindersConfigCard companyId={company.id} />
 
       {/* Notificação de reunião por área de atuação */}
       <CompanyNicheAlertsCard companyId={company.id} />

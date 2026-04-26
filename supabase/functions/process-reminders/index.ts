@@ -83,14 +83,51 @@ serve(async (req) => {
       const dateStr = formatDateBR(dueBrasilia);
       const timeStr = formatTimeBR(dueBrasilia);
 
+      // Carrega configuração customizada da empresa (tempos + textos)
+      const { data: customWindows } = await supabase
+        .from("company_meeting_reminder_config")
+        .select("window_key, minutes_before, message_text, enabled")
+        .eq("company_id", reminder.company_id);
+
+      const customByKey = new Map<string, { minutes_before: number; message_text: string; enabled: boolean }>();
+      for (const c of (customWindows || [])) {
+        customByKey.set(c.window_key, c);
+      }
+
       for (const window of REMINDER_WINDOWS) {
         // Check if already sent
         if ((reminder as any)[window.column] === true) continue;
 
-        // Check if within the time window
-        if (hoursUntil < window.hoursBeforeMin || hoursUntil > window.hoursBeforeMax) continue;
+        // Mapeia coluna -> chave de janela ('reminder_6h_sent' -> 'reminder_6h')
+        const windowKey = window.column.replace(/_sent$/, "");
+        const custom = customByKey.get(windowKey);
 
-        const messageText = window.getMessage(leadName, dateStr, timeStr);
+        // Se a empresa desabilitou esta janela, pula
+        if (custom && custom.enabled === false) continue;
+
+        // Tempo (minutos antes) — usa custom se houver, senão calcula do range padrão (média)
+        let minutesBefore: number;
+        if (custom) {
+          minutesBefore = custom.minutes_before;
+        } else {
+          minutesBefore = Math.round(((window.hoursBeforeMin + window.hoursBeforeMax) / 2) * 60);
+        }
+
+        // Tolerância de ±15 minutos em torno do alvo (cron roda a cada 5-10min)
+        const minutesUntil = (dueAt.getTime() - now.getTime()) / (1000 * 60);
+        const tolerance = 15;
+        const lowerBound = custom ? minutesBefore - tolerance : window.hoursBeforeMin * 60;
+        const upperBound = custom ? minutesBefore + tolerance : window.hoursBeforeMax * 60;
+
+        if (minutesUntil < lowerBound || minutesUntil > upperBound) continue;
+
+        // Texto: customizado (com placeholders) ou template default
+        const messageText = custom
+          ? custom.message_text
+              .replaceAll("{nome}", leadName)
+              .replaceAll("{data}", dateStr)
+              .replaceAll("{horario}", timeStr)
+          : window.getMessage(leadName, dateStr, timeStr);
 
         try {
           const sendUrl = `${SERVER_URL}/send/text`;
