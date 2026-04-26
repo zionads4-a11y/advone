@@ -293,7 +293,22 @@ async function processInactivityNudges(supabase: any) {
           if (minutesSinceLastNudge < 25) continue;
         }
 
-        // Generate contextual nudge with AI (reads conversation, continues naturally)
+        // Carrega estado da conversa (tópico, pergunta em aberto, follow-ups anteriores)
+        const lastBotText = lastMsg && lastMsg.direction === "outgoing"
+          ? (await supabase
+              .from("whatsapp_messages")
+              .select("message_text")
+              .eq("company_id", config.company_id)
+              .eq("phone", phone)
+              .eq("direction", "outgoing")
+              .order("timestamp", { ascending: false })
+              .limit(1)
+              .maybeSingle()).data?.message_text || null
+          : null;
+
+        const state = await loadConversationState(supabase, lead.id, lastBotText);
+
+        // 1. Tenta gerar via IA contextualizada
         let nudgeText = await generateContextualNudge(
           supabase,
           config.company_id,
@@ -302,11 +317,32 @@ async function processInactivityNudges(supabase: any) {
           nudgeCount + 1,
           (config as any).ai_prompt || "",
           (config as any).communication_tone || "",
+          state.topic,
+          state.openQuestion,
+          state.previousFollowups,
         );
+        let source = nudgeText ? "ai" : "";
+        let repetitionCheck: "allowed" | "blocked_identical" | "blocked_similar" = "allowed";
 
-        // Fallback to template if AI failed
+        // 2. Validador de repetição: se IA gerou algo muito parecido, descarta e usa fallback por tópico
+        if (nudgeText) {
+          repetitionCheck = await checkRepetition(nudgeText, state.previousFollowups);
+          if (repetitionCheck !== "allowed") {
+            console.log(`Nudge IA descartado (${repetitionCheck}) → fallback por tópico ${state.topic}`);
+            nudgeText = renderTopicFallback(state.topic, lead.name || "");
+            source = "template_fallback_topic";
+          }
+        }
+
+        // 3. Fallback final: por tópico (não a mensagem genérica antiga)
         if (!nudgeText) {
-          nudgeText = nextNudge.message.replace(/\{nome\}/g, lead.name || "");
+          nudgeText = renderTopicFallback(state.topic, lead.name || "");
+          source = "template_fallback_topic";
+          // Se ainda assim ficar vazio (não deveria), cai no antigo
+          if (!nudgeText) {
+            nudgeText = nextNudge.message.replace(/\{nome\}/g, lead.name || "");
+            source = "template_fallback_default";
+          }
         }
 
         const result = await sendWhatsAppMessage(config, phone, nudgeText);
@@ -323,7 +359,20 @@ async function processInactivityNudges(supabase: any) {
             timestamp: new Date().toISOString(),
           });
 
-          console.log(`Nudge ${nudgeCount + 1}/4 (AI-contextual) sent to ${phone} (${minutesSinceLastMsg.toFixed(0)}min inactive)`);
+          await recordFollowupAudit(supabase, {
+            companyId: config.company_id,
+            leadId: lead.id,
+            phone,
+            topic: state.topic,
+            openQuestion: state.openQuestion,
+            messageSent: nudgeText,
+            source,
+            triggerKind: `nudge_${nextNudge.minutesAfter}m`,
+            inactiveMinutes: Math.round(minutesSinceLastMsg),
+            repetitionCheck,
+          });
+
+          console.log(`Nudge ${nudgeCount + 1}/4 [${source}] sent to ${phone} (${minutesSinceLastMsg.toFixed(0)}min, topic=${state.topic})`);
           nudgesSent++;
         }
       }
