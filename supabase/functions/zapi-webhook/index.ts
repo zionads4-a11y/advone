@@ -1270,22 +1270,49 @@ async function enrollInCadence(supabase: any, companyId: string, leadId: string,
   if (existing && existing.length > 0) return;
 
   const now = new Date();
-  // Cadência: 10 minutos para o 1º Follow-UP, depois 1 mensagem por dia até o 5º (~5 dias).
-  const delaysMs = [
-    10 * 60 * 1000,           // 1º FU: 10 minutos
-    24 * 60 * 60 * 1000,      // 2º FU: 1 dia
-    2 * 24 * 60 * 60 * 1000,  // 3º FU: 2 dias
-    3 * 24 * 60 * 60 * 1000,  // 4º FU: 3 dias
-    4 * 24 * 60 * 60 * 1000,  // 5º FU: 4 dias
+  // Defaults caso a empresa não tenha configurado nada
+  const defaultSteps = [
+    { step_number: 1, delay_minutes: 10,           message_text: null },
+    { step_number: 2, delay_minutes: 60 * 24,      message_text: null },
+    { step_number: 3, delay_minutes: 60 * 24 * 2,  message_text: null },
+    { step_number: 4, delay_minutes: 60 * 24 * 3,  message_text: null },
+    { step_number: 5, delay_minutes: 60 * 24 * 4,  message_text: null },
   ];
-  const messages = delaysMs.map((delayMs, i) => ({
-    company_id: companyId, lead_id: leadId, phone, day_number: i + 1,
-    scheduled_at: new Date(now.getTime() + delayMs).toISOString(), status: "pending",
-  }));
+
+  // Carrega configuração customizada da empresa (se houver)
+  const { data: customSteps } = await supabase
+    .from("company_cadence_config")
+    .select("step_number, delay_minutes, message_text, enabled")
+    .eq("company_id", companyId)
+    .order("step_number", { ascending: true });
+
+  const stepsByNumber = new Map<number, { delay_minutes: number; message_text: string | null; enabled: boolean }>();
+  for (const s of defaultSteps) {
+    stepsByNumber.set(s.step_number, { delay_minutes: s.delay_minutes, message_text: s.message_text, enabled: true });
+  }
+  for (const s of (customSteps || [])) {
+    stepsByNumber.set(s.step_number, { delay_minutes: s.delay_minutes, message_text: s.message_text, enabled: s.enabled });
+  }
+
+  const messages = [];
+  for (const [stepNumber, cfg] of stepsByNumber.entries()) {
+    if (!cfg.enabled) continue;
+    messages.push({
+      company_id: companyId,
+      lead_id: leadId,
+      phone,
+      day_number: stepNumber,
+      message_text: cfg.message_text, // null = process-cadence usa template default
+      scheduled_at: new Date(now.getTime() + cfg.delay_minutes * 60 * 1000).toISOString(),
+      status: "pending",
+    });
+  }
+
+  if (messages.length === 0) return;
 
   const { error } = await supabase.from("cadence_messages").insert(messages);
   if (error) console.error("Error enrolling in cadence:", error);
-  else console.log(`Lead ${leadId} enrolled in cadence`);
+  else console.log(`Lead ${leadId} enrolled in cadence (${messages.length} steps)`);
 }
 
 function splitIntoNaturalMessages(text: string): string[] {
