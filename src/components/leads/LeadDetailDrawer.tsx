@@ -185,6 +185,11 @@ export function LeadDetailDrawer({ lead, open, onOpenChange, onLeadUpdate }: Lea
 
             {/* Reminders */}
             <LeadReminders leadId={lead.id} companyId={lead.company_id} leadName={lead.name} />
+
+            <Separator />
+
+            {/* Histórico do Kanban */}
+            <LeadKanbanHistory leadId={lead.id} />
           </div>
         </ScrollArea>
       </SheetContent>
