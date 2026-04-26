@@ -517,7 +517,38 @@ async function processInactivityNudges(supabase: any) {
   return nudgesSent;
 }
 
-serve(async (req) => {
+/**
+ * Busca o delay_minutes configurado para o próximo step da cadência.
+ * Retorna null se o step estiver desabilitado.
+ * Defaults: step 1 = 30min; demais = 1 dia.
+ */
+async function getNextCadenceDelay(
+  supabase: any,
+  companyId: string,
+  stepNumber: number,
+): Promise<number | null> {
+  const defaults: Record<number, number> = {
+    1: 30,
+    2: 60 * 24,
+    3: 60 * 24,
+    4: 60 * 24,
+    5: 60 * 24,
+  };
+
+  const { data: customStep } = await supabase
+    .from("company_cadence_config")
+    .select("delay_minutes, enabled")
+    .eq("company_id", companyId)
+    .eq("step_number", stepNumber)
+    .maybeSingle();
+
+  if (customStep) {
+    if (customStep.enabled === false) return null;
+    return customStep.delay_minutes ?? defaults[stepNumber] ?? 60 * 24;
+  }
+  return defaults[stepNumber] ?? null;
+}
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
