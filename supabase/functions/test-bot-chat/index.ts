@@ -285,9 +285,11 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
 
   const bookedTimes = new Set(
     (existing || []).map((r: any) => {
-      const d = new Date(r.due_at);
-      const brTime = new Date(d.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
-      return `${String(brTime.getHours()).padStart(2, "0")}:${String(brTime.getMinutes()).padStart(2, "0")}`;
+      const fmt = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "America/Sao_Paulo",
+        hour: "2-digit", minute: "2-digit", hour12: false,
+      });
+      return fmt.format(new Date(r.due_at));
     })
   );
 
