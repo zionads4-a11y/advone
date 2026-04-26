@@ -14,6 +14,7 @@ import { LeadProcessData } from "@/components/leads/LeadProcessData";
 import { LeadNotes } from "@/components/leads/LeadNotes";
 import { LeadCases } from "@/components/leads/LeadCases";
 import { LeadContract } from "@/components/leads/LeadContract";
+import { LeadKanbanHistory } from "@/components/leads/LeadKanbanHistory";
 
 type LeadStatus = "new" | "contacted" | "qualified" | "negotiating" | "won" | "lost";
 
