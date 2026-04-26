@@ -17,6 +17,7 @@ import {
 import { Loader2, CalendarPlus, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { format, addDays, addWeeks, addMonths, addYears } from "date-fns";
+import { brtDateTimeToIso } from "@/lib/utils";
 import { RecurrenceSelector, type RecurrenceConfig } from "./RecurrenceSelector";
 import { getHolidayForDate } from "@/lib/brazilianHolidays";
 
@@ -126,7 +127,8 @@ export function CreateEventDialog({
     }
 
     setSaving(true);
-    const dueAt = `${dueDate}T${dueTime}:00`;
+    // SEMPRE assume horário de Brasília (UTC-3) — independente do fuso do navegador do operador.
+    const dueAt = brtDateTimeToIso(dueDate, dueTime);
 
     let finalLeadId = leadId !== "none" ? leadId : null;
     if (!finalLeadId) {
@@ -144,7 +146,7 @@ export function CreateEventDialog({
 
     const recurrenceRule = buildRecurrenceRule(recurrence);
     const recurrenceEnd = recurrence.type !== "none" && recurrence.endDate
-      ? `${recurrence.endDate}T23:59:59` : null;
+      ? brtDateTimeToIso(recurrence.endDate, "23:59") : null;
 
     const eventData = {
       lead_id: finalLeadId,
