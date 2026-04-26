@@ -24,6 +24,7 @@ interface DraggableLeadCardProps {
   onClick?: () => void;
   isDragOverlay?: boolean;
   onValueUpdate?: (leadId: string, newValue: number) => void;
+  isInMeetingHeld?: boolean;
 }
 
 export function DraggableLeadCard({ lead, onClick, isDragOverlay, onValueUpdate }: DraggableLeadCardProps) {
