@@ -74,7 +74,7 @@ export function DraggableLeadCard({ lead, onClick, isDragOverlay, onValueUpdate,
   );
 }
 
-function LeadCardContent({ lead, onValueUpdate }: { lead: DraggableLeadCardProps["lead"]; onValueUpdate?: (leadId: string, newValue: number) => void }) {
+function LeadCardContent({ lead, onValueUpdate, isInMeetingHeld }: { lead: DraggableLeadCardProps["lead"]; onValueUpdate?: (leadId: string, newValue: number) => void; isInMeetingHeld?: boolean }) {
   const navigate = useNavigate();
   const [editingValue, setEditingValue] = useState(false);
   const [tempValue, setTempValue] = useState("");
