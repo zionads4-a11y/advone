@@ -27,7 +27,7 @@ serve(async (req) => {
 
     const { data: reminders, error } = await supabase
       .from("lead_reminders")
-      .select("id, lead_id, company_id, title, due_at, reminder_type, reminder_6h_sent, reminder_2h_sent, reminder_30m_sent")
+      .select("id, lead_id, company_id, title, due_at, reminder_type, reminder_6h_sent, reminder_2h_sent, reminder_30m_sent, lawyer_3h_sent, lawyer_30m_sent")
       .eq("completed", false)
       .eq("reminder_type", "meeting")
       .gte("due_at", now.toISOString())
