@@ -1277,6 +1277,42 @@ export type Database = {
           },
         ]
       }
+      lead_kanban_history: {
+        Row: {
+          company_id: string
+          created_at: string
+          from_column_id: string | null
+          from_column_name: string | null
+          id: string
+          lead_id: string
+          moved_by: string | null
+          to_column_id: string | null
+          to_column_name: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          from_column_id?: string | null
+          from_column_name?: string | null
+          id?: string
+          lead_id: string
+          moved_by?: string | null
+          to_column_id?: string | null
+          to_column_name?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          from_column_id?: string | null
+          from_column_name?: string | null
+          id?: string
+          lead_id?: string
+          moved_by?: string | null
+          to_column_id?: string | null
+          to_column_name?: string | null
+        }
+        Relationships: []
+      }
       lead_qualification_answers: {
         Row: {
           answers: Json

@@ -14,6 +14,7 @@ import { LeadProcessData } from "@/components/leads/LeadProcessData";
 import { LeadNotes } from "@/components/leads/LeadNotes";
 import { LeadCases } from "@/components/leads/LeadCases";
 import { LeadContract } from "@/components/leads/LeadContract";
+import { LeadKanbanHistory } from "@/components/leads/LeadKanbanHistory";
 
 type LeadStatus = "new" | "contacted" | "qualified" | "negotiating" | "won" | "lost";
 
@@ -184,6 +185,11 @@ export function LeadDetailDrawer({ lead, open, onOpenChange, onLeadUpdate }: Lea
 
             {/* Reminders */}
             <LeadReminders leadId={lead.id} companyId={lead.company_id} leadName={lead.name} />
+
+            <Separator />
+
+            {/* Histórico do Kanban */}
+            <LeadKanbanHistory leadId={lead.id} />
           </div>
         </ScrollArea>
       </SheetContent>
