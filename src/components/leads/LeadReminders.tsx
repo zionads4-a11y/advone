@@ -261,13 +261,18 @@ export function LeadReminders({ leadId, companyId, leadName }: LeadRemindersProp
                 {r.completed && <Check className="h-3 w-3" />}
               </button>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 flex-wrap">
                   <span className={`text-xs font-medium ${r.completed ? "line-through text-muted-foreground" : "text-foreground"}`}>
                     {r.title}
                   </span>
                   <Badge variant="outline" className="text-[9px] px-1.5 py-0">
                     {r.reminder_type === "meeting" ? "📅 Reunião" : "🔔 Lembrete"}
                   </Badge>
+                  {r.meeting_held && (
+                    <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-accent/20 text-accent-foreground border-accent/30">
+                      ✓ Realizada
+                    </Badge>
+                  )}
                 </div>
                 {r.description && (
                   <p className="text-[11px] text-muted-foreground mt-0.5">{r.description}</p>
@@ -278,6 +283,17 @@ export function LeadReminders({ leadId, companyId, leadName }: LeadRemindersProp
                   {isOverdue(r.due_at, r.completed) ? "⚠️ Atrasado — " : ""}
                   {formatDueAt(r.due_at)}
                 </p>
+                {r.reminder_type === "meeting" && !r.meeting_held && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => markMeetingHeld(r)}
+                    className="mt-2 h-6 text-[10px] px-2 gap-1"
+                  >
+                    <CheckCheck className="h-3 w-3" />
+                    Reunião realizada (R$ 97)
+                  </Button>
+                )}
               </div>
               <button
                 onClick={() => handleDelete(r.id)}
