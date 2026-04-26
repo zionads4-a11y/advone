@@ -32,6 +32,7 @@ import FraudAlerts from "./pages/FraudAlerts";
 import ExitoSchedules from "./pages/ExitoSchedules";
 import LeadsHistory from "./pages/LeadsHistory";
 import LegalAI from "./pages/LegalAI";
+import LandingIA from "./pages/LandingIA";
 import AppLayout from "./components/layout/AppLayout";
 import NotFound from "./pages/NotFound";
 
@@ -48,6 +49,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/IA" element={<LandingIA />} />
+            <Route path="/ia" element={<LandingIA />} />
             <Route path="/connect/:token" element={<ConnectWhatsApp />} />
             <Route element={<AppLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
