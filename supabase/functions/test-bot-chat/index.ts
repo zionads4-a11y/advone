@@ -171,8 +171,22 @@ Responda SEMPRE em português do Brasil.`;
 }
 
 function getNowBrasilia(): Date {
-  const now = new Date();
-  return new Date(now.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
+  // Date cujos getters locais (getFullYear, getMonth, getDate, getDay, getHours, getMinutes)
+  // representam o horário real em America/Sao_Paulo. Confiável em qualquer fuso de servidor.
+  const fmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+    hour12: false,
+  });
+  const parts = fmt.formatToParts(new Date());
+  const get = (t: string) => parts.find(p => p.type === t)?.value ?? "0";
+  let h = Number(get("hour"));
+  if (h === 24) h = 0;
+  return new Date(
+    Number(get("year")), Number(get("month")) - 1, Number(get("day")),
+    h, Number(get("minute")), Number(get("second"))
+  );
 }
 
 function getTodayBrasilia(): string {
@@ -271,9 +285,11 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
 
   const bookedTimes = new Set(
     (existing || []).map((r: any) => {
-      const d = new Date(r.due_at);
-      const brTime = new Date(d.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
-      return `${String(brTime.getHours()).padStart(2, "0")}:${String(brTime.getMinutes()).padStart(2, "0")}`;
+      const fmt = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "America/Sao_Paulo",
+        hour: "2-digit", minute: "2-digit", hour12: false,
+      });
+      return fmt.format(new Date(r.due_at));
     })
   );
 

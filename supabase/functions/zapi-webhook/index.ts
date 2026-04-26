@@ -147,10 +147,11 @@ SE O LEAD NÃO SE ENCAIXAR:
   const nowBR = getNowBrasilia();
   const dayNames = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
   const todayDayName = dayNames[nowBR.getDay()];
+  const todayDMY = `${String(nowBR.getDate()).padStart(2,"0")}/${String(nowBR.getMonth()+1).padStart(2,"0")}/${nowBR.getFullYear()}`;
 
   return `Você é uma ATENDENTE HUMANA — a assistente virtual de ${officeName}${practiceArea ? `, especializado em ${practiceArea}` : ""}.
 
-📆 DATA E HORA ATUAL: Hoje é ${todayDayName}, ${todayStr} (${String(nowBR.getHours()).padStart(2,"0")}:${String(nowBR.getMinutes()).padStart(2,"0")} horário de Brasília). USE ESTA DATA COMO REFERÊNCIA para "hoje", "amanhã", etc. NUNCA invente datas.
+📆 DATA E HORA ATUAL (FONTE DA VERDADE — siga RIGOROSAMENTE): Hoje é ${todayDayName}, ${todayDMY} (${String(nowBR.getHours()).padStart(2,"0")}:${String(nowBR.getMinutes()).padStart(2,"0")} horário de Brasília — UTC-3). USE ESTA DATA como referência para "hoje", "amanhã", "depois de amanhã", "semana que vem", etc. NUNCA invente nem calcule datas de cabeça — sempre derive a partir desta data atual e SEMPRE confirme com check_availability antes de citar qualquer data específica para o lead.
 ${leadNameInfo}
 PERSONALIDADE E HUMANIZAÇÃO:
 - Você conversa como uma pessoa REAL no WhatsApp — simpática, empática e acolhedora
@@ -409,8 +410,27 @@ Responda SEMPRE em português do Brasil.`;
 // ====== UTILITY FUNCTIONS ======
 
 function getNowBrasilia(): Date {
-  const now = new Date();
-  return new Date(now.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
+  // Retorna uma Date cujos getters locais (getFullYear, getMonth, getDate, getDay, getHours, getMinutes)
+  // representam EXATAMENTE o horário de Brasília (America/Sao_Paulo, UTC-3, sem horário de verão).
+  // Usamos Intl para extrair os componentes reais em SP, evitando o bug de toLocaleString +
+  // new Date() (que reinterpreta como fuso do servidor).
+  const fmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+    hour12: false,
+  });
+  const parts = fmt.formatToParts(new Date());
+  const get = (t: string) => parts.find(p => p.type === t)?.value ?? "0";
+  const y = Number(get("year"));
+  const mo = Number(get("month"));
+  const d = Number(get("day"));
+  let h = Number(get("hour"));
+  if (h === 24) h = 0; // alguns runtimes retornam 24 em vez de 0
+  const mi = Number(get("minute"));
+  const s = Number(get("second"));
+  // new Date(y, mo-1, d, h, mi, s) cria uma data local cujos getters retornam exatamente esses valores.
+  return new Date(y, mo - 1, d, h, mi, s);
 }
 
 function getTodayBrasilia(): string {
@@ -504,9 +524,12 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
 
   const bookedTimes = new Set(
     (existing || []).map((r: any) => {
-      const d = new Date(r.due_at);
-      const brTime = new Date(d.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
-      return `${String(brTime.getHours()).padStart(2, "0")}:${String(brTime.getMinutes()).padStart(2, "0")}`;
+      // Extrai HH:mm em America/Sao_Paulo de forma confiável (sem reinterpretar fuso).
+      const fmt = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "America/Sao_Paulo",
+        hour: "2-digit", minute: "2-digit", hour12: false,
+      });
+      return fmt.format(new Date(r.due_at)); // "HH:mm"
     })
   );
 
