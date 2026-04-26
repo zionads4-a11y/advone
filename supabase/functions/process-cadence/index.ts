@@ -149,14 +149,56 @@ function nowBRT(): Date {
   return new Date(Date.UTC(get("year"), get("month") - 1, get("day"), get("hour"), get("minute"), get("second")));
 }
 
-async function suggestAlternativeSlots(supabase: any, companyId: string): Promise<{ weekday: string; date: string; time: string }[]> {
+/**
+ * Detecta preferência de período a partir do histórico do lead.
+ * Olha as últimas mensagens INCOMING (do lead) procurando manhã/tarde/noite.
+ */
+function detectPeriodPreference(history: string): "morning" | "afternoon" | "evening" | null {
+  // Pega só as linhas do Lead
+  const leadLines = history
+    .split("\n")
+    .filter((l) => l.toLowerCase().startsWith("lead:"))
+    .join(" ")
+    .toLowerCase();
+
+  if (!leadLines) return null;
+
+  // Prioridade: o que apareceu mais recente conta mais — varremos as últimas 3 falas do lead
+  const recentLeadLines = history
+    .split("\n")
+    .filter((l) => l.toLowerCase().startsWith("lead:"))
+    .slice(-3)
+    .join(" ")
+    .toLowerCase();
+
+  if (/\b(tarde|à tarde|de tarde|pela tarde|depois do almoço|depois das? 13|depois das? 14)\b/.test(recentLeadLines)) {
+    return "afternoon";
+  }
+  if (/\b(manh[ãa]|de manh[ãa]|pela manh[ãa]|cedo|antes do almoço|antes das? 12)\b/.test(recentLeadLines)) {
+    return "morning";
+  }
+  if (/\b(noite|à noite|de noite|fim do dia|final do dia|depois das? 18)\b/.test(recentLeadLines)) {
+    return "evening";
+  }
+  return null;
+}
+
+/**
+ * Retorna o PRIMEIRO horário disponível na agenda respeitando o período preferido.
+ * Varre os próximos 5 dias úteis em ordem; dentro de cada dia, pega o primeiro slot livre
+ * que cair no período. Se não houver preferência, devolve o primeiro slot do próximo dia útil.
+ */
+async function findFirstAvailableSlot(
+  supabase: any,
+  companyId: string,
+  period: "morning" | "afternoon" | "evening" | null,
+): Promise<{ weekday: string; date: string; time: string } | null> {
   const { data: company } = await supabase.from("companies").select("business_hours").eq("id", companyId).maybeSingle();
   const businessHours: Record<string, { open: string; close: string }[]> = company?.business_hours || {};
 
   const now = nowBRT();
-  const results: { weekday: string; date: string; time: string }[] = [];
 
-  for (let offset = 1; offset <= 5 && results.length < 6; offset++) {
+  for (let offset = 1; offset <= 7; offset++) {
     const day = new Date(now);
     day.setUTCDate(day.getUTCDate() + offset);
     const dow = day.getUTCDay();
@@ -189,14 +231,20 @@ async function suggestAlternativeSlots(supabase: any, companyId: string): Promis
     for (const w of windows) {
       const [openH, openM] = w.open.split(":").map(Number);
       const [closeH] = w.close.split(":").map(Number);
-      for (let h = openH; h < closeH && results.length < 6; h++) {
+      for (let h = openH; h < closeH; h++) {
+        // Filtro de período
+        if (period === "morning" && h >= 12) continue;
+        if (period === "afternoon" && (h < 13 || h >= 18)) continue;
+        if (period === "evening" && h < 18) continue;
+
         const time = `${String(h).padStart(2, "0")}:${String(openM || 0).padStart(2, "0")}`;
         if (bookedTimes.has(time)) continue;
-        results.push({ weekday: WEEKDAY_NAMES[dow], date: dateStr, time });
+
+        return { weekday: WEEKDAY_NAMES[dow], date: dateStr, time };
       }
     }
   }
-  return results;
+  return null;
 }
 
 async function generateContextualNudge(
@@ -236,14 +284,22 @@ async function generateContextualNudge(
     ? `\n\n🎯 ASSUNTO EM ABERTO (tópico: ${topic}): "${openQuestion}"\nRetome ESTE ponto especificamente.`
     : `\n\n🎯 TÓPICO EM ABERTO: ${topic}.`;
 
-  // Quando o tópico em aberto é horário, geramos slots alternativos para a IA escolher um
+  // Quando o tópico em aberto é horário, buscamos o PRIMEIRO horário disponível
+  // respeitando a preferência (manhã/tarde) já manifestada pelo lead no histórico.
   let alternativeSlotsHint = "";
   if (topic === "schedule_time") {
-    const slots = await suggestAlternativeSlots(supabase, companyId);
-    if (slots.length > 0) {
-      alternativeSlotsHint = `\n\n📅 HORÁRIOS DISPONÍVEIS NA AGENDA (BRT) — escolha 1 que se encaixe na preferência demonstrada pelo lead (manhã/tarde):\n${slots.map((s) => `• ${s.weekday}, ${s.date} às ${s.time}`).join("\n")}\n\nSe o lead disse "tarde", escolha um após 13:00. Se disse "manhã", escolha um antes de 12:00. Se não especificou, prefira tarde (14:00-16:00).`;
+    const period = detectPeriodPreference(history);
+    const slot = await findFirstAvailableSlot(supabase, companyId, period);
+    if (slot) {
+      const periodLabel =
+        period === "morning" ? "manhã (lead disse que prefere manhã)"
+        : period === "afternoon" ? "tarde (lead disse que prefere tarde)"
+        : period === "evening" ? "fim do dia (lead disse que prefere noite)"
+        : "primeiro horário útil disponível";
+      alternativeSlotsHint = `\n\n📅 PRÓXIMO HORÁRIO DISPONÍVEL NA AGENDA (BRT) — período: ${periodLabel}:\n👉 ${slot.weekday}, ${slot.date} às ${slot.time}\n\nOFEREÇA EXATAMENTE ESSE HORÁRIO. Não invente outro, não liste opções — proponha ESSE como sugestão concreta e pergunte se serve.`;
     }
   }
+
 
   const system = `${aiPrompt || "Você é uma atendente virtual de um escritório de advocacia."}
 
