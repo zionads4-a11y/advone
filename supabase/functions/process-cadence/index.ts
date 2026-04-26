@@ -517,6 +517,38 @@ async function processInactivityNudges(supabase: any) {
   return nudgesSent;
 }
 
+/**
+ * Busca o delay_minutes configurado para o próximo step da cadência.
+ * Retorna null se o step estiver desabilitado.
+ * Defaults: step 1 = 30min; demais = 1 dia.
+ */
+async function getNextCadenceDelay(
+  supabase: any,
+  companyId: string,
+  stepNumber: number,
+): Promise<number | null> {
+  const defaults: Record<number, number> = {
+    1: 30,
+    2: 60 * 24,
+    3: 60 * 24,
+    4: 60 * 24,
+    5: 60 * 24,
+  };
+
+  const { data: customStep } = await supabase
+    .from("company_cadence_config")
+    .select("delay_minutes, enabled")
+    .eq("company_id", companyId)
+    .eq("step_number", stepNumber)
+    .maybeSingle();
+
+  if (customStep) {
+    if (customStep.enabled === false) return null;
+    return customStep.delay_minutes ?? defaults[stepNumber] ?? 60 * 24;
+  }
+  return defaults[stepNumber] ?? null;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -859,6 +891,26 @@ REGRAS OBRIGATÓRIAS:
             await supabase.from("leads").update({
               kanban_column_id: targetColumn.id,
             }).eq("id", msg.lead_id);
+          }
+
+          // Enfileira a PRÓXIMA etapa da cadência (se houver) com base no
+          // delay_minutes configurado. Regra: só dispara se o lead continuar
+          // 30min (ou o tempo configurado) sem responder após esta mensagem.
+          if (msg.day_number < MAX_CADENCE_ATTEMPTS) {
+            const nextStep = msg.day_number + 1;
+            const nextDelayMin = await getNextCadenceDelay(supabase, msg.company_id, nextStep);
+            if (nextDelayMin !== null) {
+              const nextScheduledAt = new Date(Date.now() + nextDelayMin * 60 * 1000).toISOString();
+              await supabase.from("cadence_messages").insert({
+                company_id: msg.company_id,
+                lead_id: msg.lead_id,
+                phone: msg.phone,
+                day_number: nextStep,
+                message_text: null,
+                scheduled_at: nextScheduledAt,
+                status: "pending",
+              });
+            }
           }
 
           if (msg.day_number >= MAX_CADENCE_ATTEMPTS) {
