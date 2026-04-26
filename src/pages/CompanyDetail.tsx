@@ -14,6 +14,8 @@ import { WhatsAppConfigDialog } from "@/components/companies/WhatsAppConfigDialo
 import { CompanyKanban } from "@/components/companies/CompanyKanban";
 import { BotConfigCard } from "@/components/companies/BotConfigCard";
 import { CompanyAIConfigCard } from "@/components/companies/CompanyAIConfigCard";
+import { CadenceConfigCard } from "@/components/companies/CadenceConfigCard";
+import { MeetingRemindersConfigCard } from "@/components/companies/MeetingRemindersConfigCard";
 
 
 interface Company {
