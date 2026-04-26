@@ -861,6 +861,26 @@ REGRAS OBRIGATÓRIAS:
             }).eq("id", msg.lead_id);
           }
 
+          // Enfileira a PRÓXIMA etapa da cadência (se houver) com base no
+          // delay_minutes configurado. Regra: só dispara se o lead continuar
+          // 30min (ou o tempo configurado) sem responder após esta mensagem.
+          if (msg.day_number < MAX_CADENCE_ATTEMPTS) {
+            const nextStep = msg.day_number + 1;
+            const nextDelayMin = await getNextCadenceDelay(supabase, msg.company_id, nextStep);
+            if (nextDelayMin !== null) {
+              const nextScheduledAt = new Date(Date.now() + nextDelayMin * 60 * 1000).toISOString();
+              await supabase.from("cadence_messages").insert({
+                company_id: msg.company_id,
+                lead_id: msg.lead_id,
+                phone: msg.phone,
+                day_number: nextStep,
+                message_text: null,
+                scheduled_at: nextScheduledAt,
+                status: "pending",
+              });
+            }
+          }
+
           if (msg.day_number >= MAX_CADENCE_ATTEMPTS) {
             const { data: lostColumn } = await supabase
               .from("kanban_columns")
