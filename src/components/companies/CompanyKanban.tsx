@@ -196,7 +196,7 @@ export function CompanyKanban({ companyId, companyName }: CompanyKanbanProps) {
             return (
               <DroppableColumn key={col.id} column={col} leadIds={colLeads.map((l) => l.id)} isOver={overColumnId === col.id}>
                 {colLeads.map((lead) => (
-                  <DraggableLeadCard key={lead.id} lead={lead} />
+                  <DraggableLeadCard key={lead.id} lead={lead} isInMeetingHeld={(col as any).is_meeting_held === true} />
                 ))}
               </DroppableColumn>
             );
