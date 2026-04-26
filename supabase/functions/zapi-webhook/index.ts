@@ -1711,7 +1711,13 @@ serve(async (req) => {
                 console.error("Failed to send AI reply:", sendResponse.status, await sendResponse.text());
               }
             }
+            // Bot acabou de responder → reagenda cadência baseada em agora.
+            // Se o lead ficar 30+ min sem responder, dispara o 1º Follow-UP.
+            if (leadId) {
+              await enrollInCadence(supabase, companyId, leadId, cleanPhone);
+            }
           } else {
+            // dummy block to keep structure (real else handled below)
             // 🆘 FALLBACK: IA falhou (timeout, rate-limit, loop sem texto). Envia ponte humana
             // pra não deixar o lead em silêncio + alerta o gerente.
             console.error(`[${effectivePhase}] AI returned null for lead ${leadId}. Sending fallback message + alerting manager.`);
