@@ -1342,6 +1342,8 @@ export type Database = {
           due_at: string
           id: string
           lead_id: string
+          meeting_held: boolean
+          meeting_held_at: string | null
           parent_event_id: string | null
           recurrence_end: string | null
           recurrence_rule: string | null
@@ -1362,6 +1364,8 @@ export type Database = {
           due_at: string
           id?: string
           lead_id: string
+          meeting_held?: boolean
+          meeting_held_at?: string | null
           parent_event_id?: string | null
           recurrence_end?: string | null
           recurrence_rule?: string | null
@@ -1382,6 +1386,8 @@ export type Database = {
           due_at?: string
           id?: string
           lead_id?: string
+          meeting_held?: boolean
+          meeting_held_at?: string | null
           parent_event_id?: string | null
           recurrence_end?: string | null
           recurrence_rule?: string | null
@@ -1663,6 +1669,91 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "legal_ai_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meeting_charges: {
+        Row: {
+          amount: number
+          asaas_invoice_url: string | null
+          asaas_payment_id: string | null
+          company_id: string
+          confirmed_at: string
+          confirmed_by: string | null
+          created_at: string
+          id: string
+          invoice_month: string | null
+          invoiced_at: string | null
+          lead_id: string | null
+          lead_name: string
+          meeting_at: string
+          notes: string | null
+          paid_at: string | null
+          reminder_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          asaas_invoice_url?: string | null
+          asaas_payment_id?: string | null
+          company_id: string
+          confirmed_at?: string
+          confirmed_by?: string | null
+          created_at?: string
+          id?: string
+          invoice_month?: string | null
+          invoiced_at?: string | null
+          lead_id?: string | null
+          lead_name: string
+          meeting_at: string
+          notes?: string | null
+          paid_at?: string | null
+          reminder_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          asaas_invoice_url?: string | null
+          asaas_payment_id?: string | null
+          company_id?: string
+          confirmed_at?: string
+          confirmed_by?: string | null
+          created_at?: string
+          id?: string
+          invoice_month?: string | null
+          invoiced_at?: string | null
+          lead_id?: string | null
+          lead_name?: string
+          meeting_at?: string
+          notes?: string | null
+          paid_at?: string | null
+          reminder_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_charges_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_charges_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_charges_reminder_id_fkey"
+            columns: ["reminder_id"]
+            isOneToOne: false
+            referencedRelation: "lead_reminders"
             referencedColumns: ["id"]
           },
         ]
