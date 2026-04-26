@@ -143,6 +143,7 @@ function LeadCardContent({ lead, onValueUpdate, isInMeetingHeld }: { lead: Dragg
               R$ 97
             </span>
           )}
+        </div>
         <div className="flex items-center gap-1.5">
           {lead.phone && (
             <button
