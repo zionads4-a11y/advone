@@ -549,6 +549,7 @@ async function getNextCadenceDelay(
   return defaults[stepNumber] ?? null;
 }
 
+serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
