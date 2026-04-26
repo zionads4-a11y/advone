@@ -27,7 +27,7 @@ serve(async (req) => {
 
     const { data: reminders, error } = await supabase
       .from("lead_reminders")
-      .select("id, lead_id, company_id, title, due_at, reminder_type, reminder_6h_sent, reminder_2h_sent, reminder_30m_sent")
+      .select("id, lead_id, company_id, title, due_at, reminder_type, reminder_6h_sent, reminder_2h_sent, reminder_30m_sent, lawyer_3h_sent, lawyer_30m_sent")
       .eq("completed", false)
       .eq("reminder_type", "meeting")
       .gte("due_at", now.toISOString())
@@ -168,6 +168,140 @@ serve(async (req) => {
           }
         } catch (err) {
           console.error(`Error sending ${window.column}:`, err);
+        }
+      }
+
+      // ===== Lembretes para o(s) ADVOGADO(s) =====
+      // 2 janelas: 3h antes e 30min antes da reunião.
+      const LAWYER_WINDOWS = [
+        {
+          column: "lawyer_3h_sent" as const,
+          minutesBefore: 180,
+          tolerance: 20,
+          label: "3h",
+        },
+        {
+          column: "lawyer_30m_sent" as const,
+          minutesBefore: 30,
+          tolerance: 12,
+          label: "30min",
+        },
+      ];
+
+      const pendingLawyerWindows = LAWYER_WINDOWS.filter((w) => {
+        if ((reminder as any)[w.column] === true) return false;
+        const minutesUntil = (dueAt.getTime() - now.getTime()) / (1000 * 60);
+        return (
+          minutesUntil >= w.minutesBefore - w.tolerance &&
+          minutesUntil <= w.minutesBefore + w.tolerance
+        );
+      });
+
+      if (pendingLawyerWindows.length > 0) {
+        // Resolve destinatários: nicho específico OU alert_whatsapp/companies.whatsapp.
+        const recipients: { number: string; label: string }[] = [];
+
+        const { data: qualification } = await supabase
+          .from("lead_qualification_answers")
+          .select("niche")
+          .eq("lead_id", reminder.lead_id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        const leadNiche = qualification?.niche || null;
+
+        if (leadNiche) {
+          const { data: nicheAlert } = await supabase
+            .from("company_niche_alerts")
+            .select("whatsapp, lawyer_name")
+            .eq("company_id", reminder.company_id)
+            .eq("niche", leadNiche)
+            .eq("is_active", true)
+            .maybeSingle();
+          if (nicheAlert?.whatsapp) {
+            recipients.push({
+              number: nicheAlert.whatsapp,
+              label: nicheAlert.lawyer_name || `advogado ${leadNiche}`,
+            });
+          }
+        }
+
+        if (recipients.length === 0) {
+          const { data: alertConf } = await supabase
+            .from("whatsapp_configs")
+            .select("alert_whatsapp")
+            .eq("company_id", reminder.company_id)
+            .maybeSingle();
+          const { data: companyRow } = await supabase
+            .from("companies")
+            .select("whatsapp, name")
+            .eq("id", reminder.company_id)
+            .maybeSingle();
+          const fallback = alertConf?.alert_whatsapp || companyRow?.whatsapp;
+          if (fallback) {
+            recipients.push({ number: fallback, label: "empresa" });
+          }
+        }
+
+        if (recipients.length > 0) {
+          const { data: companyName } = await supabase
+            .from("companies")
+            .select("name")
+            .eq("id", reminder.company_id)
+            .maybeSingle();
+          const _ = companyName; // not used in template, kept for future
+
+          for (const lw of pendingLawyerWindows) {
+            const lawyerMessage =
+              `🔔 *Lembrete de reunião — ${lw.label} antes*\n\n` +
+              `📅 *Data:* ${dateStr}\n` +
+              `⏰ *Horário:* ${timeStr}\n` +
+              `👤 *Cliente:* ${lead.name}\n` +
+              `📱 *Contato do cliente:* ${phone}` +
+              (reminder.title ? `\n📝 *Compromisso:* ${reminder.title}` : "") +
+              `\n\n💡 _Prepare-se: confira o histórico do lead no AdvOne antes do horário._`;
+
+            let allOk = true;
+            for (const r of recipients) {
+              try {
+                const sendResp = await fetch(`${SERVER_URL}/send/text`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "token": config.zapi_token || config.zapi_instance_id,
+                  },
+                  body: JSON.stringify({ number: r.number, body: lawyerMessage }),
+                });
+                if (!sendResp.ok) {
+                  allOk = false;
+                  console.error(
+                    `Failed to send lawyer ${lw.label} alert to ${r.label} (${r.number}):`,
+                    await sendResp.text()
+                  );
+                } else {
+                  console.log(
+                    `Lawyer ${lw.label} alert sent to ${r.label} (${r.number}) for reminder ${reminder.id}`
+                  );
+                  sent++;
+                }
+              } catch (err) {
+                allOk = false;
+                console.error(`Error sending lawyer ${lw.label} alert:`, err);
+              }
+            }
+
+            if (allOk) {
+              await supabase
+                .from("lead_reminders")
+                .update({ [lw.column]: true })
+                .eq("id", reminder.id);
+            }
+          }
+        } else {
+          console.log(
+            `No lawyer recipient configured for company ${reminder.company_id} (reminder ${reminder.id})`
+          );
         }
       }
     }
