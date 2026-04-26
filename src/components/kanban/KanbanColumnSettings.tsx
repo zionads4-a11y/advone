@@ -17,6 +17,7 @@ export interface KanbanColumn {
   position: number;
   is_won: boolean;
   is_lost: boolean;
+  is_meeting_held?: boolean;
 }
 
 interface KanbanColumnSettingsProps {

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Card, CardContent } from "@/components/ui/card";
-import { Phone, Mail, DollarSign, Pencil, Check, X, MessageCircle, AlertTriangle } from "lucide-react";
+import { Phone, Mail, DollarSign, Pencil, Check, X, MessageCircle, AlertTriangle, CalendarCheck } from "lucide-react";
 import { LeadScoreBadge } from "@/components/leads/LeadScoreBadge";
 import { SourceBadge } from "@/components/leads/SourceBadge";
 import { Input } from "@/components/ui/input";
@@ -24,9 +24,10 @@ interface DraggableLeadCardProps {
   onClick?: () => void;
   isDragOverlay?: boolean;
   onValueUpdate?: (leadId: string, newValue: number) => void;
+  isInMeetingHeld?: boolean;
 }
 
-export function DraggableLeadCard({ lead, onClick, isDragOverlay, onValueUpdate }: DraggableLeadCardProps) {
+export function DraggableLeadCard({ lead, onClick, isDragOverlay, onValueUpdate, isInMeetingHeld }: DraggableLeadCardProps) {
   const {
     attributes,
     listeners,
@@ -50,7 +51,7 @@ export function DraggableLeadCard({ lead, onClick, isDragOverlay, onValueUpdate 
     return (
       <Card className="glass-card border-primary/50 shadow-xl rotate-2 w-[260px]">
         <CardContent className="p-3">
-          <LeadCardContent lead={lead} />
+          <LeadCardContent lead={lead} isInMeetingHeld={isInMeetingHeld} />
         </CardContent>
       </Card>
     );
@@ -66,14 +67,14 @@ export function DraggableLeadCard({ lead, onClick, isDragOverlay, onValueUpdate 
     >
       <Card className="glass-card cursor-grab transition-all hover:border-primary/30 hover:shadow-md active:cursor-grabbing">
         <CardContent className="p-3">
-          <LeadCardContent lead={lead} onValueUpdate={onValueUpdate} />
+          <LeadCardContent lead={lead} onValueUpdate={onValueUpdate} isInMeetingHeld={isInMeetingHeld} />
         </CardContent>
       </Card>
     </div>
   );
 }
 
-function LeadCardContent({ lead, onValueUpdate }: { lead: DraggableLeadCardProps["lead"]; onValueUpdate?: (leadId: string, newValue: number) => void }) {
+function LeadCardContent({ lead, onValueUpdate, isInMeetingHeld }: { lead: DraggableLeadCardProps["lead"]; onValueUpdate?: (leadId: string, newValue: number) => void; isInMeetingHeld?: boolean }) {
   const navigate = useNavigate();
   const [editingValue, setEditingValue] = useState(false);
   const [tempValue, setTempValue] = useState("");
@@ -131,6 +132,15 @@ function LeadCardContent({ lead, onValueUpdate }: { lead: DraggableLeadCardProps
             >
               <AlertTriangle className="h-2.5 w-2.5" />
               Pendente
+            </span>
+          )}
+          {isInMeetingHeld && (
+            <span
+              title="Reunião realizada — cobrança de R$ 97 gerada"
+              className="inline-flex items-center gap-0.5 rounded-md bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold text-primary border border-primary/30 shrink-0"
+            >
+              <CalendarCheck className="h-2.5 w-2.5" />
+              R$ 97
             </span>
           )}
         </div>
