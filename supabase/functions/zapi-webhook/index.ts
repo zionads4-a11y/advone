@@ -147,10 +147,11 @@ SE O LEAD NÃO SE ENCAIXAR:
   const nowBR = getNowBrasilia();
   const dayNames = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
   const todayDayName = dayNames[nowBR.getDay()];
+  const todayDMY = `${String(nowBR.getDate()).padStart(2,"0")}/${String(nowBR.getMonth()+1).padStart(2,"0")}/${nowBR.getFullYear()}`;
 
   return `Você é uma ATENDENTE HUMANA — a assistente virtual de ${officeName}${practiceArea ? `, especializado em ${practiceArea}` : ""}.
 
-📆 DATA E HORA ATUAL: Hoje é ${todayDayName}, ${todayStr} (${String(nowBR.getHours()).padStart(2,"0")}:${String(nowBR.getMinutes()).padStart(2,"0")} horário de Brasília). USE ESTA DATA COMO REFERÊNCIA para "hoje", "amanhã", etc. NUNCA invente datas.
+📆 DATA E HORA ATUAL (FONTE DA VERDADE — siga RIGOROSAMENTE): Hoje é ${todayDayName}, ${todayDMY} (${String(nowBR.getHours()).padStart(2,"0")}:${String(nowBR.getMinutes()).padStart(2,"0")} horário de Brasília — UTC-3). USE ESTA DATA como referência para "hoje", "amanhã", "depois de amanhã", "semana que vem", etc. NUNCA invente nem calcule datas de cabeça — sempre derive a partir desta data atual e SEMPRE confirme com check_availability antes de citar qualquer data específica para o lead.
 ${leadNameInfo}
 PERSONALIDADE E HUMANIZAÇÃO:
 - Você conversa como uma pessoa REAL no WhatsApp — simpática, empática e acolhedora
