@@ -132,6 +132,73 @@ async function sendWhatsAppMessage(
   return null;
 }
 
+// ─────────────────────────────────────────────────────────────
+// Sugestão de horários alternativos (BRT) — para nudges de schedule_time
+// ─────────────────────────────────────────────────────────────
+const WEEKDAY_NAMES = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
+const WEEKDAY_KEYS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+
+function nowBRT(): Date {
+  const fmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+  });
+  const parts = fmt.formatToParts(new Date());
+  const get = (t: string) => Number(parts.find((p) => p.type === t)?.value || 0);
+  return new Date(Date.UTC(get("year"), get("month") - 1, get("day"), get("hour"), get("minute"), get("second")));
+}
+
+async function suggestAlternativeSlots(supabase: any, companyId: string): Promise<{ weekday: string; date: string; time: string }[]> {
+  const { data: company } = await supabase.from("companies").select("business_hours").eq("id", companyId).maybeSingle();
+  const businessHours: Record<string, { open: string; close: string }[]> = company?.business_hours || {};
+
+  const now = nowBRT();
+  const results: { weekday: string; date: string; time: string }[] = [];
+
+  for (let offset = 1; offset <= 5 && results.length < 6; offset++) {
+    const day = new Date(now);
+    day.setUTCDate(day.getUTCDate() + offset);
+    const dow = day.getUTCDay();
+    const key = WEEKDAY_KEYS[dow];
+    const windows = businessHours[key] || [];
+    if (!windows.length) continue;
+
+    const dd = String(day.getUTCDate()).padStart(2, "0");
+    const mm = String(day.getUTCMonth() + 1).padStart(2, "0");
+    const dateStr = `${dd}/${mm}`;
+    const dateISO = `${day.getUTCFullYear()}-${mm}-${dd}`;
+
+    const dayStart = new Date(`${dateISO}T00:00:00-03:00`);
+    const dayEnd = new Date(`${dateISO}T23:59:59-03:00`);
+    const { data: booked } = await supabase
+      .from("lead_reminders")
+      .select("due_at")
+      .eq("company_id", companyId)
+      .eq("reminder_type", "meeting")
+      .gte("due_at", dayStart.toISOString())
+      .lte("due_at", dayEnd.toISOString());
+
+    const bookedTimes = new Set<string>();
+    for (const b of (booked || []) as { due_at: string }[]) {
+      const dt = new Date(b.due_at);
+      const fmt = new Intl.DateTimeFormat("en-GB", { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit", hour12: false });
+      bookedTimes.add(fmt.format(dt));
+    }
+
+    for (const w of windows) {
+      const [openH, openM] = w.open.split(":").map(Number);
+      const [closeH] = w.close.split(":").map(Number);
+      for (let h = openH; h < closeH && results.length < 6; h++) {
+        const time = `${String(h).padStart(2, "0")}:${String(openM || 0).padStart(2, "0")}`;
+        if (bookedTimes.has(time)) continue;
+        results.push({ weekday: WEEKDAY_NAMES[dow], date: dateStr, time });
+      }
+    }
+  }
+  return results;
+}
+
 async function generateContextualNudge(
   supabase: any,
   companyId: string,
