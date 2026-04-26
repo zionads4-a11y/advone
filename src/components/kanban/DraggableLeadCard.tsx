@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Card, CardContent } from "@/components/ui/card";
-import { Phone, Mail, DollarSign, Pencil, Check, X, MessageCircle, AlertTriangle } from "lucide-react";
+import { Phone, Mail, DollarSign, Pencil, Check, X, MessageCircle, AlertTriangle, CalendarCheck } from "lucide-react";
 import { LeadScoreBadge } from "@/components/leads/LeadScoreBadge";
 import { SourceBadge } from "@/components/leads/SourceBadge";
 import { Input } from "@/components/ui/input";
