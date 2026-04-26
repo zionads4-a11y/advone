@@ -1717,7 +1717,6 @@ serve(async (req) => {
               await enrollInCadence(supabase, companyId, leadId, cleanPhone);
             }
           } else {
-            // dummy block to keep structure (real else handled below)
             // 🆘 FALLBACK: IA falhou (timeout, rate-limit, loop sem texto). Envia ponte humana
             // pra não deixar o lead em silêncio + alerta o gerente.
             console.error(`[${effectivePhase}] AI returned null for lead ${leadId}. Sending fallback message + alerting manager.`);
