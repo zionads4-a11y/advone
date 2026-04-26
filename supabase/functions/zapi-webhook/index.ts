@@ -811,7 +811,7 @@ async function handleAgentPhase(
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash-lite",
+          model: "google/gemini-2.5-flash",
           messages: aiMessages,
           tools,
         }),
@@ -1597,16 +1597,16 @@ serve(async (req) => {
             companyId, leadId, supabase, currentLeadName, cleanPhone
           );
 
+          const SERVER_URL = "https://ziondigital.uazapi.com";
+          const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+          const sendHeaders: Record<string, string> = { "Content-Type": "application/json" };
+          if (ADMIN_TOKEN) sendHeaders["admintoken"] = ADMIN_TOKEN;
+
+          const instanceParam = encodeURIComponent(config.zapi_instance_id);
+          const tokenParam = encodeURIComponent(config.zapi_token || config.zapi_instance_id);
+          const sendUrl = `${SERVER_URL}/send/text?instance=${instanceParam}&token=${tokenParam}`;
+
           if (aiReply) {
-            const SERVER_URL = "https://ziondigital.uazapi.com";
-            const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
-            const sendHeaders: Record<string, string> = { "Content-Type": "application/json" };
-            if (ADMIN_TOKEN) sendHeaders["admintoken"] = ADMIN_TOKEN;
-
-            const instanceParam = encodeURIComponent(config.zapi_instance_id);
-            const tokenParam = encodeURIComponent(config.zapi_token || config.zapi_instance_id);
-            const sendUrl = `${SERVER_URL}/send/text?instance=${instanceParam}&token=${tokenParam}`;
-
             const splitMessages = splitIntoNaturalMessages(aiReply);
             console.log(`[${effectivePhase}] Sending ${splitMessages.length} message(s) to:`, cleanPhone);
 
@@ -1634,6 +1634,43 @@ serve(async (req) => {
                 });
               } else {
                 console.error("Failed to send AI reply:", sendResponse.status, await sendResponse.text());
+              }
+            }
+          } else {
+            // 🆘 FALLBACK: IA falhou (timeout, rate-limit, loop sem texto). Envia ponte humana
+            // pra não deixar o lead em silêncio + alerta o gerente.
+            console.error(`[${effectivePhase}] AI returned null for lead ${leadId}. Sending fallback message + alerting manager.`);
+            const fallbackText = "Deixa eu olhar isso aqui com calma e já te respondo, tá bom? 🙏";
+            try {
+              const fbResp = await fetch(sendUrl, {
+                method: "POST", headers: sendHeaders,
+                body: JSON.stringify({ number: cleanPhone, text: fallbackText }),
+              });
+              if (fbResp.ok) {
+                const fbResult = await fbResp.json();
+                await supabase.from("whatsapp_messages").insert({
+                  company_id: companyId, lead_id: leadId, phone: cleanPhone,
+                  message_text: fallbackText, direction: "outgoing", sender_name: "IA (fallback)",
+                  message_id_external: fbResult.messageId || fbResult.key?.id || null,
+                  timestamp: new Date().toISOString(),
+                });
+              }
+            } catch (fbErr) {
+              console.error("Fallback message send error:", fbErr);
+            }
+
+            // Alerta gerente
+            if (config.alert_whatsapp) {
+              try {
+                const alertPhone = String(config.alert_whatsapp).replace(/\D/g, "");
+                const lastMsg = history.length > 0 ? history[history.length - 1].content : "(sem texto)";
+                const alertText = `⚠️ *Lead sem resposta da IA*\n\n👤 ${currentLeadName || "Lead"}\n📱 ${cleanPhone}\n\n💬 Última msg do lead:\n_"${String(lastMsg).substring(0, 300)}"_\n\nA IA não conseguiu responder. Por favor assumir manualmente.`;
+                await fetch(sendUrl.replace(`token=${tokenParam}`, `token=${tokenParam}`), {
+                  method: "POST", headers: sendHeaders,
+                  body: JSON.stringify({ number: alertPhone, text: alertText }),
+                });
+              } catch (alertErr) {
+                console.error("Alert manager error:", alertErr);
               }
             }
           }
