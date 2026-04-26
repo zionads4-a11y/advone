@@ -43,12 +43,23 @@ serve(async (req) => {
     // Fetch reminder
     const { data: reminder } = await supabase
       .from("lead_reminders")
-      .select("id, lead_id, company_id, due_at, reminder_type, title")
+      .select("id, lead_id, company_id, due_at, reminder_type, title, created_by")
       .eq("id", reminder_id)
       .maybeSingle();
 
     if (!reminder || reminder.reminder_type !== "meeting") {
       return new Response(JSON.stringify({ skipped: true }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Só notifica quando o agendamento foi criado pela IA (sentinel UUID).
+    // Agendamentos manuais (feitos pelo próprio advogado/operador na agenda) não disparam alerta.
+    const AI_SENTINEL = "00000000-0000-0000-0000-000000000000";
+    if (reminder.created_by !== AI_SENTINEL) {
+      console.log(`Skipping manual meeting alert for reminder ${reminder_id} (created_by=${reminder.created_by})`);
+      return new Response(JSON.stringify({ skipped: "manual creation" }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
