@@ -409,8 +409,27 @@ Responda SEMPRE em português do Brasil.`;
 // ====== UTILITY FUNCTIONS ======
 
 function getNowBrasilia(): Date {
-  const now = new Date();
-  return new Date(now.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
+  // Retorna uma Date cujos getters locais (getFullYear, getMonth, getDate, getDay, getHours, getMinutes)
+  // representam EXATAMENTE o horário de Brasília (America/Sao_Paulo, UTC-3, sem horário de verão).
+  // Usamos Intl para extrair os componentes reais em SP, evitando o bug de toLocaleString +
+  // new Date() (que reinterpreta como fuso do servidor).
+  const fmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+    hour12: false,
+  });
+  const parts = fmt.formatToParts(new Date());
+  const get = (t: string) => parts.find(p => p.type === t)?.value ?? "0";
+  const y = Number(get("year"));
+  const mo = Number(get("month"));
+  const d = Number(get("day"));
+  let h = Number(get("hour"));
+  if (h === 24) h = 0; // alguns runtimes retornam 24 em vez de 0
+  const mi = Number(get("minute"));
+  const s = Number(get("second"));
+  // new Date(y, mo-1, d, h, mi, s) cria uma data local cujos getters retornam exatamente esses valores.
+  return new Date(y, mo - 1, d, h, mi, s);
 }
 
 function getTodayBrasilia(): string {
