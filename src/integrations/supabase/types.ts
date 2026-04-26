@@ -713,6 +713,88 @@ export type Database = {
           },
         ]
       }
+      company_cadence_config: {
+        Row: {
+          company_id: string
+          created_at: string
+          delay_minutes: number
+          enabled: boolean
+          id: string
+          message_text: string
+          step_number: number
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          delay_minutes: number
+          enabled?: boolean
+          id?: string
+          message_text: string
+          step_number: number
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          delay_minutes?: number
+          enabled?: boolean
+          id?: string
+          message_text?: string
+          step_number?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_cadence_config_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_meeting_reminder_config: {
+        Row: {
+          company_id: string
+          created_at: string
+          enabled: boolean
+          id: string
+          message_text: string
+          minutes_before: number
+          updated_at: string
+          window_key: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          message_text: string
+          minutes_before: number
+          updated_at?: string
+          window_key: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          message_text?: string
+          minutes_before?: number
+          updated_at?: string
+          window_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_meeting_reminder_config_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_monitoring_plans: {
         Row: {
           company_id: string
