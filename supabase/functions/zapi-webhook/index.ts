@@ -1658,9 +1658,11 @@ serve(async (req) => {
           const { data: leadData } = await supabase.from("leads").select("name").eq("id", leadId).single();
           const currentLeadName = leadData?.name || senderName || undefined;
 
+          // Lê as últimas 30 mensagens (mesmo tamanho usado em process-cadence) para garantir
+          // que a IA tenha contexto completo da conversa antes de responder com coerência.
           const { data: recentMsgs } = await supabase.from("whatsapp_messages")
             .select("message_text, direction").eq("company_id", companyId)
-            .eq("phone", cleanPhone).order("timestamp", { ascending: false }).limit(15);
+            .eq("phone", cleanPhone).order("timestamp", { ascending: false }).limit(30);
 
           const history = (recentMsgs || []).reverse().map((m: any) => ({
             role: m.direction === "incoming" ? "user" : "assistant",
