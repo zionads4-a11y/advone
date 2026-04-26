@@ -61,7 +61,7 @@ const adminItems = [
   { title: "Usuários", url: "/client-users", icon: Users },
   { title: "Acessos", url: "/access-management", icon: KeyRound },
   { title: "Assinaturas", url: "/assinatura", icon: CreditCard },
-  { title: "Comissões", url: "/comissoes", icon: DollarSign },
+  { title: "Faturamento p/ Reunião", url: "/comissoes", icon: DollarSign },
   { title: "Agendamentos Êxito", url: "/agendamentos-exito", icon: Trophy },
   { title: "Histórico de Leads", url: "/historico-leads", icon: History },
   { title: "Alertas de Fraude", url: "/fraudes", icon: ShieldAlert },
@@ -78,6 +78,7 @@ const gerenteItems = [
   { title: "Processos", url: "/processos", icon: Briefcase },
   { title: "Monitoramento", url: "/monitoramento", icon: Radar },
   { title: "Equipe", url: "/client-users", icon: Users },
+  { title: "Faturamento p/ Reunião", url: "/comissoes", icon: DollarSign },
   { title: "Configurações", url: "/company-settings", icon: Settings },
 ];
 

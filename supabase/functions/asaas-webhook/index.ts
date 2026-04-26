@@ -94,6 +94,22 @@ Deno.serve(async (req) => {
         }
       }
 
+      // Handle meeting charges (faturamento por reunião)
+      if (paymentId && (event === "PAYMENT_CONFIRMED" || event === "PAYMENT_RECEIVED")) {
+        const { data: charges } = await adminClient
+          .from("meeting_charges")
+          .select("id")
+          .eq("asaas_payment_id", paymentId)
+          .eq("status", "invoiced");
+        if (charges && charges.length > 0) {
+          await adminClient
+            .from("meeting_charges")
+            .update({ status: "paid", paid_at: new Date().toISOString() })
+            .eq("asaas_payment_id", paymentId);
+          console.log(`Meeting charges marked as paid: ${charges.length} (payment ${paymentId})`);
+        }
+      }
+
       // Handle monitoring package subscription payment (recurring)
       if (subscriptionId && (event === "PAYMENT_CONFIRMED" || event === "PAYMENT_RECEIVED")) {
         const { data: monPkgSub } = await adminClient

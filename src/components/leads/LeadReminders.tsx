@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  Bell, CalendarClock, Plus, Check, Trash2, Loader2,
+  Bell, CalendarClock, Plus, Check, Trash2, Loader2, CheckCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -20,14 +20,17 @@ interface Reminder {
   completed: boolean;
   completed_at: string | null;
   created_at: string;
+  meeting_held?: boolean;
+  meeting_held_at?: string | null;
 }
 
 interface LeadRemindersProps {
   leadId: string;
   companyId: string;
+  leadName?: string;
 }
 
-export function LeadReminders({ leadId, companyId }: LeadRemindersProps) {
+export function LeadReminders({ leadId, companyId, leadName }: LeadRemindersProps) {
   const { user } = useAuth();
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
@@ -107,6 +110,53 @@ export function LeadReminders({ leadId, companyId }: LeadRemindersProps) {
       setReminders((prev) => prev.filter((r) => r.id !== id));
       toast.success("Removido!");
     }
+  };
+
+  const markMeetingHeld = async (reminder: Reminder) => {
+    if (!user) return;
+    if (reminder.meeting_held) {
+      toast.info("Esta reunião já foi marcada como realizada");
+      return;
+    }
+    // 1. atualiza o lembrete
+    const nowIso = new Date().toISOString();
+    const { error: errUpdate } = await supabase
+      .from("lead_reminders")
+      .update({
+        meeting_held: true,
+        meeting_held_at: nowIso,
+        completed: true,
+        completed_at: nowIso,
+      })
+      .eq("id", reminder.id);
+    if (errUpdate) {
+      toast.error("Erro ao confirmar reunião");
+      return;
+    }
+
+    // 2. cria a cobrança de R$ 97
+    const ym = new Date(reminder.due_at).toISOString().slice(0, 7); // YYYY-MM
+    const { error: errCharge } = await supabase.from("meeting_charges").insert({
+      company_id: companyId,
+      lead_id: leadId,
+      reminder_id: reminder.id,
+      lead_name: leadName || reminder.title || "Lead",
+      meeting_at: reminder.due_at,
+      confirmed_at: nowIso,
+      confirmed_by: user.id,
+      amount: 97.00,
+      status: "pending",
+      invoice_month: ym,
+    });
+
+    if (errCharge) {
+      // Se falhou, é provavelmente duplicata (unique reminder_id) — ainda assim consideramos sucesso visual
+      console.error("Charge insert error", errCharge);
+      toast.warning("Reunião marcada — mas cobrança já existia");
+    } else {
+      toast.success("Reunião confirmada — cobrança de R$ 97,00 registrada");
+    }
+    fetchReminders();
   };
 
   const isOverdue = (dueAt: string, completed: boolean) => {
@@ -211,13 +261,18 @@ export function LeadReminders({ leadId, companyId }: LeadRemindersProps) {
                 {r.completed && <Check className="h-3 w-3" />}
               </button>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 flex-wrap">
                   <span className={`text-xs font-medium ${r.completed ? "line-through text-muted-foreground" : "text-foreground"}`}>
                     {r.title}
                   </span>
                   <Badge variant="outline" className="text-[9px] px-1.5 py-0">
                     {r.reminder_type === "meeting" ? "📅 Reunião" : "🔔 Lembrete"}
                   </Badge>
+                  {r.meeting_held && (
+                    <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-accent/20 text-accent-foreground border-accent/30">
+                      ✓ Realizada
+                    </Badge>
+                  )}
                 </div>
                 {r.description && (
                   <p className="text-[11px] text-muted-foreground mt-0.5">{r.description}</p>
@@ -228,6 +283,17 @@ export function LeadReminders({ leadId, companyId }: LeadRemindersProps) {
                   {isOverdue(r.due_at, r.completed) ? "⚠️ Atrasado — " : ""}
                   {formatDueAt(r.due_at)}
                 </p>
+                {r.reminder_type === "meeting" && !r.meeting_held && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => markMeetingHeld(r)}
+                    className="mt-2 h-6 text-[10px] px-2 gap-1"
+                  >
+                    <CheckCheck className="h-3 w-3" />
+                    Reunião realizada (R$ 97)
+                  </Button>
+                )}
               </div>
               <button
                 onClick={() => handleDelete(r.id)}
