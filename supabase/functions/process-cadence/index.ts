@@ -530,7 +530,7 @@ serve(async (req) => {
     // ========== PART 1: Process scheduled cadence messages ==========
     const { data: pendingMessages, error: fetchError } = await supabase
       .from("cadence_messages")
-      .select("id, company_id, lead_id, phone, day_number, message_text")
+      .select("id, company_id, lead_id, phone, day_number, message_text, scheduled_at")
       .eq("status", "pending")
       .lte("scheduled_at", new Date().toISOString())
       .limit(50);
