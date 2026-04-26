@@ -146,7 +146,7 @@ export function CreateEventDialog({
 
     const recurrenceRule = buildRecurrenceRule(recurrence);
     const recurrenceEnd = recurrence.type !== "none" && recurrence.endDate
-      ? `${recurrence.endDate}T23:59:59` : null;
+      ? brtDateTimeToIso(recurrence.endDate, "23:59") : null;
 
     const eventData = {
       lead_id: finalLeadId,
