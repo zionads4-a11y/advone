@@ -1359,50 +1359,60 @@ async function enrollInCadence(supabase: any, companyId: string, leadId: string,
   await supabase.from("cadence_messages").update({ status: "cancelled" })
     .eq("lead_id", leadId).eq("status", "pending");
 
-  const now = new Date();
-  // Regra padrão: 30 min sem resposta → 1º Follow-UP. Demais etapas em intervalos de 1 dia.
-  const defaultSteps = [
-    { step_number: 1, delay_minutes: 30,           message_text: null },
-    { step_number: 2, delay_minutes: 60 * 24,      message_text: null },
-    { step_number: 3, delay_minutes: 60 * 24 * 2,  message_text: null },
-    { step_number: 4, delay_minutes: 60 * 24 * 3,  message_text: null },
-    { step_number: 5, delay_minutes: 60 * 24 * 4,  message_text: null },
-  ];
+  // ⚠️ MUDANÇA: agora enfileira SÓ o próximo step (step 1).
+  // Quando ele for enviado pelo process-cadence, o próprio process-cadence
+  // enfileira o step 2 com base no delay configurado, e assim por diante.
+  // Isso garante a regra: "se ficar 30min sem responder após cada follow-up,
+  // o próximo é disparado" — e não 5 follow-ups agendados de uma vez.
 
-  // Carrega configuração customizada da empresa (se houver)
-  const { data: customSteps } = await supabase
-    .from("company_cadence_config")
-    .select("step_number, delay_minutes, message_text, enabled")
-    .eq("company_id", companyId)
-    .order("step_number", { ascending: true });
+  const delayMinutes = await getCadenceDelayForStep(supabase, companyId, 1);
+  if (delayMinutes === null) return; // step 1 desabilitado
 
-  const stepsByNumber = new Map<number, { delay_minutes: number; message_text: string | null; enabled: boolean }>();
-  for (const s of defaultSteps) {
-    stepsByNumber.set(s.step_number, { delay_minutes: s.delay_minutes, message_text: s.message_text, enabled: true });
-  }
-  for (const s of (customSteps || [])) {
-    stepsByNumber.set(s.step_number, { delay_minutes: s.delay_minutes, message_text: s.message_text, enabled: s.enabled });
-  }
+  const scheduledAt = new Date(Date.now() + delayMinutes * 60 * 1000).toISOString();
 
-  const messages = [];
-  for (const [stepNumber, cfg] of stepsByNumber.entries()) {
-    if (!cfg.enabled) continue;
-    messages.push({
-      company_id: companyId,
-      lead_id: leadId,
-      phone,
-      day_number: stepNumber,
-      message_text: cfg.message_text, // null = process-cadence usa template default
-      scheduled_at: new Date(now.getTime() + cfg.delay_minutes * 60 * 1000).toISOString(),
-      status: "pending",
-    });
-  }
-
-  if (messages.length === 0) return;
-
-  const { error } = await supabase.from("cadence_messages").insert(messages);
+  const { error } = await supabase.from("cadence_messages").insert({
+    company_id: companyId,
+    lead_id: leadId,
+    phone,
+    day_number: 1,
+    message_text: null,
+    scheduled_at: scheduledAt,
+    status: "pending",
+  });
   if (error) console.error("Error enrolling in cadence:", error);
-  else console.log(`Lead ${leadId} enrolled in cadence (${messages.length} steps)`);
+  else console.log(`Lead ${leadId} enrolled in cadence step 1 in ${delayMinutes}min`);
+}
+
+/**
+ * Busca o delay_minutes configurado para um step específico.
+ * Retorna null se o step estiver desabilitado.
+ * Defaults: step 1 = 30min, demais = 1 dia (1440min).
+ */
+async function getCadenceDelayForStep(
+  supabase: any,
+  companyId: string,
+  stepNumber: number,
+): Promise<number | null> {
+  const defaults: Record<number, number> = {
+    1: 30,
+    2: 60 * 24,
+    3: 60 * 24,
+    4: 60 * 24,
+    5: 60 * 24,
+  };
+
+  const { data: customStep } = await supabase
+    .from("company_cadence_config")
+    .select("delay_minutes, enabled")
+    .eq("company_id", companyId)
+    .eq("step_number", stepNumber)
+    .maybeSingle();
+
+  if (customStep) {
+    if (customStep.enabled === false) return null;
+    return customStep.delay_minutes ?? defaults[stepNumber] ?? 60 * 24;
+  }
+  return defaults[stepNumber] ?? null;
 }
 
 function splitIntoNaturalMessages(text: string): string[] {
