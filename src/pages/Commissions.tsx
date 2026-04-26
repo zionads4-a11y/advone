@@ -72,135 +72,157 @@ export default function Commissions() {
         </div>
       )}
 
-      {/* Metrics */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Reuniões realizadas</p>
-                <p className="text-2xl font-bold">{metrics.totalMeetings}</p>
-              </div>
-              <CalendarCheck className="h-8 w-8 text-primary/40" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">A faturar</p>
-                <p className="text-2xl font-bold text-primary">{formatBRL(metrics.totalPending)}</p>
-              </div>
-              <Clock className="h-8 w-8 text-primary/40" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Faturado (aguardando pgto)</p>
-                <p className="text-2xl font-bold text-accent-foreground">{formatBRL(metrics.totalInvoiced)}</p>
-              </div>
-              <Receipt className="h-8 w-8 text-accent/60" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Recebido</p>
-                <p className="text-2xl font-bold text-accent-foreground">{formatBRL(metrics.totalPaid)}</p>
-              </div>
-              <CheckCircle2 className="h-8 w-8 text-accent/60" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <Tabs defaultValue="charges" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="charges">Reuniões</TabsTrigger>
+          <TabsTrigger value="consolidation">Consolidar Asaas</TabsTrigger>
+          <TabsTrigger value="report">Relatório mensal</TabsTrigger>
+        </TabsList>
 
-      {/* Charges Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Reuniões realizadas</CardTitle>
-          <CardDescription>
-            Cada reunião confirmada gera R$ 97,00. As cobranças são consolidadas no fim de cada mês em uma única fatura por empresa via Asaas.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {charges.length === 0 ? (
-            <p className="text-center text-muted-foreground py-12">
-              Nenhuma reunião realizada registrada{companyFilter !== "all" ? " para esta empresa" : ""}. As reuniões aparecem aqui quando o gerente marca como "realizada" no card do lead.
-            </p>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    {isAdmin && <TableHead>Empresa</TableHead>}
-                    <TableHead>Lead</TableHead>
-                    <TableHead>Reunião em</TableHead>
-                    <TableHead>Confirmada em</TableHead>
-                    <TableHead className="text-right">Valor</TableHead>
-                    <TableHead>Mês fatura</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Fatura</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {charges.map((c) => {
-                    const st = statusConfig[c.status] || statusConfig.pending;
-                    return (
-                      <TableRow key={c.id}>
-                        {isAdmin && (
-                          <TableCell>
-                            <span className="flex items-center gap-1.5 text-sm">
-                              <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
-                              {availableCompanies.find((a) => a.id === c.company_id)?.name || "—"}
-                            </span>
-                          </TableCell>
-                        )}
-                        <TableCell className="font-medium">{c.lead_name}</TableCell>
-                        <TableCell className="text-xs">
-                          {new Date(c.meeting_at).toLocaleString("pt-BR", {
-                            day: "2-digit", month: "2-digit", year: "2-digit",
-                            hour: "2-digit", minute: "2-digit",
-                          })}
-                        </TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          {new Date(c.confirmed_at).toLocaleDateString("pt-BR")}
-                        </TableCell>
-                        <TableCell className="text-right font-semibold text-primary">
-                          {formatBRL(Number(c.amount))}
-                        </TableCell>
-                        <TableCell className="text-xs">{formatMonth(c.invoice_month)}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className={st.className}>{st.label}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          {c.asaas_invoice_url ? (
-                            <a
-                              href={c.asaas_invoice_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                            >
-                              <FileText className="h-3 w-3" /> Ver
-                            </a>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">—</span>
-                          )}
-                        </TableCell>
+        <TabsContent value="charges" className="space-y-6">
+          {/* Metrics */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Reuniões realizadas</p>
+                    <p className="text-2xl font-bold">{metrics.totalMeetings}</p>
+                  </div>
+                  <CalendarCheck className="h-8 w-8 text-primary/40" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">A faturar</p>
+                    <p className="text-2xl font-bold text-primary">{formatBRL(metrics.totalPending)}</p>
+                  </div>
+                  <Clock className="h-8 w-8 text-primary/40" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Faturado (aguardando pgto)</p>
+                    <p className="text-2xl font-bold text-accent-foreground">{formatBRL(metrics.totalInvoiced)}</p>
+                  </div>
+                  <Receipt className="h-8 w-8 text-accent/60" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Recebido</p>
+                    <p className="text-2xl font-bold text-accent-foreground">{formatBRL(metrics.totalPaid)}</p>
+                  </div>
+                  <CheckCircle2 className="h-8 w-8 text-accent/60" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Charges Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Reuniões realizadas</CardTitle>
+              <CardDescription>
+                Cada reunião realizada gera R$ 97,00 automaticamente quando o lead vai para "Reunião Realizada" no Kanban. Voltar para coluna anterior estorna automaticamente.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {charges.length === 0 ? (
+                <p className="text-center text-muted-foreground py-12">
+                  Nenhuma reunião realizada registrada{companyFilter !== "all" ? " para esta empresa" : ""}. Para registrar, mova o card do lead para a coluna "Reunião Realizada" no Kanban.
+                </p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        {isAdmin && <TableHead>Empresa</TableHead>}
+                        <TableHead>Lead</TableHead>
+                        <TableHead>Reunião em</TableHead>
+                        <TableHead>Confirmada em</TableHead>
+                        <TableHead className="text-right">Valor</TableHead>
+                        <TableHead>Mês fatura</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Fatura</TableHead>
                       </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
+                    </TableHeader>
+                    <TableBody>
+                      {charges.map((c) => {
+                        const st = statusConfig[c.status] || statusConfig.pending;
+                        return (
+                          <TableRow key={c.id}>
+                            {isAdmin && (
+                              <TableCell>
+                                <span className="flex items-center gap-1.5 text-sm">
+                                  <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                                  {availableCompanies.find((a) => a.id === c.company_id)?.name || "—"}
+                                </span>
+                              </TableCell>
+                            )}
+                            <TableCell className="font-medium">{c.lead_name}</TableCell>
+                            <TableCell className="text-xs">
+                              {new Date(c.meeting_at).toLocaleString("pt-BR", {
+                                day: "2-digit", month: "2-digit", year: "2-digit",
+                                hour: "2-digit", minute: "2-digit",
+                              })}
+                            </TableCell>
+                            <TableCell className="text-xs text-muted-foreground">
+                              {new Date(c.confirmed_at).toLocaleDateString("pt-BR")}
+                            </TableCell>
+                            <TableCell className="text-right font-semibold text-primary">
+                              {formatBRL(Number(c.amount))}
+                            </TableCell>
+                            <TableCell className="text-xs">{formatMonth(c.invoice_month)}</TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className={st.className}>{st.label}</Badge>
+                            </TableCell>
+                            <TableCell>
+                              {c.asaas_invoice_url ? (
+                                <a
+                                  href={c.asaas_invoice_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                                >
+                                  <FileText className="h-3 w-3" /> Ver
+                                </a>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">—</span>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="consolidation">
+          {isAdmin ? (
+            <MonthlyConsolidation />
+          ) : (
+            <Card><CardContent className="py-12 text-center text-muted-foreground text-sm">Apenas administradores podem consolidar faturas.</CardContent></Card>
           )}
-        </CardContent>
-      </Card>
+        </TabsContent>
+
+        <TabsContent value="report">
+          <MonthlyMeetingReport />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
