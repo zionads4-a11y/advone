@@ -37,7 +37,6 @@ const defaultAgents: AgentConfig[] = [
     prompt: "",
     required_documents: [
       { name: "RG ou CNH", description: "Documento com foto", required: true },
-      { name: "CPF", description: "Cadastro de Pessoa Física", required: true },
       { name: "Comprovante de endereço", description: "Últimos 3 meses", required: true },
       { name: "Documentos do caso", description: "Laudos, negativas, etc.", required: false },
     ],
