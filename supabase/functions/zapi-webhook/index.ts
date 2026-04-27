@@ -695,6 +695,36 @@ const contractCloserTools = [
   }
 ];
 
+// ====== REPLY SANITIZER ======
+// Remove linhas que vazaram instruções internas do prompt para o lead.
+// Se a resposta ficar vazia depois da limpeza, retorna fallback educado.
+function sanitizeReply(text: string | null | undefined): string | null {
+  if (!text) return null;
+  const leakPatterns = [
+    /REGRA\s+(CR[ÍI]TICA|DE\s+OURO|INVIOL[ÁA]VEL|FINAL|ABSOLUTA)/i,
+    /\bPASSO\s*\d/i,
+    /\bETAPA\s*\d/i,
+    /case_type|wants_help|decide_lead|schedule_appointment|check_availability|register_client_cpf/i,
+    /\[INSTRU[ÇC][ÃA]O\s+INTERNA\]?/i,
+    /^Releia\s+(o|todo)/im,
+    /Identifique\s+INTERNAMENTE/i,
+    /\bFLUXO\s+(OBRIGAT[ÓO]RIO|DISPON[ÍI]VEIS?)/i,
+    /MODALIDADE\s+—/i,
+    /Em\s+schedule_appointment/i,
+  ];
+  // Remove linhas que casem com qualquer padrão de vazamento.
+  const cleanedLines = text
+    .split(/\r?\n/)
+    .filter((line) => !leakPatterns.some((re) => re.test(line)));
+  let cleaned = cleanedLines.join("\n").trim();
+
+  // Se removeu praticamente tudo, descarta a resposta inteira.
+  if (cleaned.length < Math.min(20, text.length * 0.3)) {
+    return null;
+  }
+  return cleaned;
+}
+
 // ====== MAIN AI HANDLER ======
 async function handleAgentPhase(
   phase: string,
