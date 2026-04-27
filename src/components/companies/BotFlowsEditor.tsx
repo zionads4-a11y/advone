@@ -195,6 +195,16 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
                 {customCount} personalizado(s)
               </Badge>
             )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDownloadReport}
+              className="ml-auto h-7 text-[10px] gap-1"
+              title="Baixar relatório dos prompts para auditoria"
+            >
+              <FileText className="h-3 w-3" />
+              Relatório Auditoria
+            </Button>
           </CardTitle>
           <p className="text-xs text-muted-foreground">
             Habilite apenas os assuntos que este escritório realmente atende. O bot só vai
