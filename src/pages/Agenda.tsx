@@ -60,6 +60,34 @@ export default function Agenda() {
   const [viewMode, setViewMode] = useState<"month" | "week" | "day">("month");
 
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get("code");
+    if (code) {
+      const handleGoogleCallback = async () => {
+        try {
+          // Here we would call an edge function to exchange the code for tokens
+          // and store them in the database.
+          // For now, let's just show a toast and clear the URL.
+          const { error } = await supabase.functions.invoke("google-calendar-auth", {
+            body: { code, redirectUri: `${window.location.origin}/agenda` }
+          });
+          
+          if (error) throw error;
+          
+          toast.success("Google Agenda conectado com sucesso!");
+          window.history.replaceState({}, document.title, window.location.pathname);
+          setRefreshKey(k => k + 1);
+        } catch (error: any) {
+          console.error("Erro ao conectar Google Agenda:", error);
+          toast.error("Erro ao conectar Google Agenda");
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      };
+      handleGoogleCallback();
+    }
+  }, []);
+
+  useEffect(() => {
     const fetchCompanies = async () => {
       if (!user) return;
       let query = supabase.from("companies").select("id, name").order("name");
