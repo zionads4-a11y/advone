@@ -114,14 +114,30 @@ export default function Kanban() {
   };
 
   const moveLeadToColumn = useCallback(async (leadId: string, columnId: string) => {
+    const targetColumn = kanbanColumns.find(c => c.id === columnId);
+    let newStatus: string | undefined;
+    
+    if (targetColumn?.is_won) newStatus = "won";
+    else if (targetColumn?.is_lost) newStatus = "lost";
+    else if (targetColumn?.position === 0) newStatus = "contacted";
+
     // Optimistic update
-    setLeads((prev) => prev.map((l) => (l.id === leadId ? { ...l, kanban_column_id: columnId } : l)));
-    const { error } = await supabase.from("leads").update({ kanban_column_id: columnId }).eq("id", leadId);
+    setLeads((prev) => prev.map((l) => (l.id === leadId ? { 
+      ...l, 
+      kanban_column_id: columnId,
+      ...(newStatus ? { status: newStatus } : {})
+    } : l)));
+
+    const { error } = await supabase.from("leads").update({ 
+      kanban_column_id: columnId,
+      ...(newStatus ? { status: newStatus } : {})
+    }).eq("id", leadId);
+
     if (error) {
       toast.error("Erro ao mover lead");
       fetchColumnsAndLeads(); // Revert
     }
-  }, []);
+  }, [kanbanColumns]);
 
   const sortedColumns = useMemo(() => [...kanbanColumns].sort((a, b) => a.position - b.position), [kanbanColumns]);
   const filteredLeads = useMemo(() => filterSource === "all" ? leads : leads.filter((l) => l.source === filterSource), [leads, filterSource]);
