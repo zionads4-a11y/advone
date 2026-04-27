@@ -340,8 +340,9 @@ export default function Agenda() {
               authUrl.searchParams.set("response_type", "code");
               authUrl.searchParams.set("scope", scopes);
               authUrl.searchParams.set("access_type", "offline");
-              authUrl.searchParams.set("prompt", "consent");
-              
+                authUrl.searchParams.set("prompt", "consent");
+                authUrl.searchParams.set("resource", "https://calendarmcp.googleapis.com/mcp/v1");
+
               window.location.href = authUrl.toString();
             }}
           >
