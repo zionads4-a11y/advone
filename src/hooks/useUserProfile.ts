@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 interface UserProfile {
   full_name: string;
+  email: string;
   avatar_url: string | null;
   phone: string | null;
 }
