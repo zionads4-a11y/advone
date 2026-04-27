@@ -594,6 +594,8 @@ export type Database = {
           business_hours: Json | null
           created_at: string
           created_by: string
+          google_client_id: string | null
+          google_client_secret: string | null
           id: string
           logo_url: string | null
           name: string
@@ -608,6 +610,8 @@ export type Database = {
           business_hours?: Json | null
           created_at?: string
           created_by: string
+          google_client_id?: string | null
+          google_client_secret?: string | null
           id?: string
           logo_url?: string | null
           name: string
@@ -622,6 +626,8 @@ export type Database = {
           business_hours?: Json | null
           created_at?: string
           created_by?: string
+          google_client_id?: string | null
+          google_client_secret?: string | null
           id?: string
           logo_url?: string | null
           name?: string

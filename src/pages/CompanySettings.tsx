@@ -21,6 +21,8 @@ interface Company {
   name: string;
   whatsapp: string | null;
   business_hours: unknown;
+  google_client_id: string | null;
+  google_client_secret: string | null;
 }
 
 export default function CompanySettings() {
@@ -29,6 +31,8 @@ export default function CompanySettings() {
   const [company, setCompany] = useState<Company | null>(null);
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
+  const [googleClientId, setGoogleClientId] = useState("");
+  const [googleClientSecret, setGoogleClientSecret] = useState("");
   const [businessHours, setBusinessHours] = useState<BusinessHours>(getDefaultBusinessHours());
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -44,13 +48,15 @@ export default function CompanySettings() {
 
   const fetchCompany = async (id: string) => {
     const [companyResult, planResult] = await Promise.all([
-      supabase.from("companies").select("id, name, whatsapp, business_hours").eq("id", id).maybeSingle(),
+      supabase.from("companies").select("id, name, whatsapp, business_hours, google_client_id, google_client_secret").eq("id", id).maybeSingle(),
       supabase.from("company_monitoring_plans").select("is_active").eq("company_id", id).maybeSingle(),
     ]);
     if (companyResult.data) {
-      setCompany(companyResult.data);
+      setCompany(companyResult.data as Company);
       setName(companyResult.data.name);
       setWhatsapp(companyResult.data.whatsapp || "");
+      setGoogleClientId(companyResult.data.google_client_id || "");
+      setGoogleClientSecret(companyResult.data.google_client_secret || "");
       setBusinessHours(parseBusinessHours(companyResult.data.business_hours));
     }
     setHasMonitoring(!!planResult.data?.is_active);
@@ -62,7 +68,13 @@ export default function CompanySettings() {
     setSaving(true);
     const { error } = await supabase
       .from("companies")
-      .update({ name, whatsapp: whatsapp || null, business_hours: businessHours as any })
+      .update({ 
+        name, 
+        whatsapp: whatsapp || null, 
+        business_hours: businessHours as any,
+        google_client_id: googleClientId || null,
+        google_client_secret: googleClientSecret || null
+      })
       .eq("id", company.id);
 
     if (error) {
@@ -105,6 +117,31 @@ export default function CompanySettings() {
           <div className="space-y-2">
             <Label>Telefone / WhatsApp</Label>
             <Input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="5511999999999" />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="font-display text-lg">Google OAuth (Agenda)</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>ID do Cliente (OAuth)</Label>
+            <Input 
+              value={googleClientId} 
+              onChange={(e) => setGoogleClientId(e.target.value)} 
+              placeholder="123456-abcde.apps.googleusercontent.com"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Segredo do Cliente</Label>
+            <Input 
+              type="password"
+              value={googleClientSecret} 
+              onChange={(e) => setGoogleClientSecret(e.target.value)} 
+              placeholder="••••••••••••••••"
+            />
           </div>
         </CardContent>
       </Card>
