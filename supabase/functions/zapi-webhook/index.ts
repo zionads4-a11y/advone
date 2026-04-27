@@ -543,7 +543,7 @@ const documentCollectorTools = [
       parameters: {
         type: "object",
         properties: {
-          document_type: { type: "string", description: "Tipo do documento (ex: RG, CPF, comprovante_endereco, laudo_medico)" },
+          document_type: { type: "string", description: "Tipo do documento (ex: RG, comprovante_endereco, laudo_medico)" },
           notes: { type: "string", description: "Observações sobre o documento" }
         },
         required: ["document_type"],
