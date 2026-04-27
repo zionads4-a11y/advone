@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, CheckCircle2, ArrowLeft } from "lucide-react";
+import { Loader2, CheckCircle2, ArrowLeft, ArrowRight, Building2, UserCircle2, Wallet2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import logoAdvOne from "@/assets/logo-advone.png";
+import { Progress } from "@/components/ui/progress";
 
 type PlanKey = "mensal" | "trimestral" | "anual";
 
@@ -17,17 +18,17 @@ const COMMON_FEATURES = [
   "Bot com IA no WhatsApp",
   "Cadência automática",
   "Agenda integrada",
-  "Monitoramento de até 50 processos",
-  "Alertas automáticos de movimentação",
-  "Financeiro integrado com Asaas",
+  "Monitoramento de processos",
+  "Alertas automáticos",
+  "Financeiro integrado",
 ];
 
 const PLANS: Record<PlanKey, {
   label: string;
-  monthly: number;       // valor mensal exibido
-  charged: number;       // valor que o Asaas cobra de fato
-  billingLabel: string;  // descrição da cobrança
-  ctaSuffix: string;     // texto do botão
+  monthly: number;
+  charged: number;
+  billingLabel: string;
+  ctaSuffix: string;
   color: string;
   features: string[];
 }> = {
@@ -35,7 +36,7 @@ const PLANS: Record<PlanKey, {
     label: "Mensal",
     monthly: 997,
     charged: 997,
-    billingLabel: "Cobrança recorrente mensal (PIX ou cartão)",
+    billingLabel: "Recorrente mensal",
     ctaSuffix: "R$ 997/mês",
     color: "hsl(210,80%,55%)",
     features: COMMON_FEATURES,
@@ -44,7 +45,7 @@ const PLANS: Record<PlanKey, {
     label: "Trimestral",
     monthly: 797,
     charged: 2391,
-    billingLabel: "Cobrança única de R$ 2.391 (3x R$ 797)",
+    billingLabel: "R$ 2.391 (3x R$ 797)",
     ctaSuffix: "R$ 2.391 à vista",
     color: "hsl(153,60%,45%)",
     features: COMMON_FEATURES,
@@ -53,7 +54,7 @@ const PLANS: Record<PlanKey, {
     label: "Anual",
     monthly: 597,
     charged: 7164,
-    billingLabel: "Cobrança única de R$ 7.164 (12x R$ 597)",
+    billingLabel: "R$ 7.164 (12x R$ 597)",
     ctaSuffix: "R$ 7.164 à vista",
     color: "hsl(38,90%,55%)",
     features: COMMON_FEATURES,
@@ -68,6 +69,8 @@ export default function Signup() {
   const planKey: PlanKey = PLANS[planParam] ? planParam : "mensal";
   const plan = PLANS[planKey];
 
+  const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     full_name: "",
     email: "",
@@ -77,7 +80,6 @@ export default function Signup() {
     password: "",
     confirmPassword: "",
   });
-  const [loading, setLoading] = useState(false);
 
   if (authLoading) {
     return (
@@ -115,17 +117,35 @@ export default function Signup() {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  const nextStep = () => {
+    if (step === 1) {
+      if (!form.full_name || !form.email || !form.password || !form.confirmPassword) {
+        toast.error("Preencha todos os campos obrigatórios");
+        return;
+      }
+      if (form.password !== form.confirmPassword) {
+        toast.error("As senhas não coincidem");
+        return;
+      }
+      if (form.password.length < 6) {
+        toast.error("A senha deve ter pelo menos 6 caracteres");
+        return;
+      }
+    }
+    if (step === 2) {
+      if (!form.company_name) {
+        toast.error("Informe o nome do seu escritório");
+        return;
+      }
+    }
+    setStep(step + 1);
+  };
+
+  const prevStep = () => setStep(step - 1);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (form.password !== form.confirmPassword) {
-      toast.error("As senhas não coincidem");
-      return;
-    }
-    if (form.password.length < 6) {
-      toast.error("A senha deve ter pelo menos 6 caracteres");
-      return;
-    }
     if (form.cpf_cnpj.replace(/\D/g, "").length < 11) {
       toast.error("CPF/CNPJ inválido");
       return;
@@ -168,126 +188,228 @@ export default function Signup() {
     }
   };
 
-  return (
-    <div className="dark min-h-screen bg-[hsl(220,25%,6%)] text-[hsl(220,10%,92%)]">
-      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
-        <button onClick={() => navigate("/")} className="mb-6 flex items-center gap-2 text-sm text-[hsl(220,10%,55%)] hover:text-[hsl(153,60%,45%)] transition-colors">
-          <ArrowLeft className="h-4 w-4" />
-          Voltar para o site
-        </button>
+  const progress = (step / 3) * 100;
 
-        <div className="flex flex-col items-center gap-3 mb-8">
+  return (
+    <div className="dark min-h-screen bg-[hsl(220,25%,6%)] text-[hsl(220,10%,92%)] font-sans">
+      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+        <div className="flex flex-col items-center gap-4 mb-10">
           <img
             src={logoAdvOne}
             alt="AdvOne"
-            className="h-28 w-auto sm:h-32 drop-shadow-[0_0_28px_hsl(153,60%,45%/0.6)]"
+            className="h-20 w-auto sm:h-24 drop-shadow-[0_0_20px_hsl(153,60%,45%/0.4)]"
           />
-          <p className="text-sm text-[hsl(220,10%,55%)]">Crie sua conta e comece a usar agora</p>
+          <div className="w-full max-w-md space-y-2">
+            <div className="flex justify-between text-xs font-medium text-[hsl(220,10%,55%)] mb-1">
+              <span>Passo {step} de 3</span>
+              <span>{Math.round(progress)}% completo</span>
+            </div>
+            <Progress value={progress} className="h-2 bg-[hsl(220,20%,12%)]" />
+          </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-5">
-          {/* Plan Summary */}
-          <div className="md:col-span-2">
-            <Card className="border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] text-[hsl(220,10%,92%)] sticky top-8">
-              <CardHeader>
-                <div className="mb-2">
-                  <span className="inline-block rounded-full px-3 py-1 text-xs font-semibold" style={{ backgroundColor: `${plan.color}20`, color: plan.color }}>
-                    Plano {plan.label}
-                  </span>
+        <div className="grid gap-8 md:grid-cols-12 items-start">
+          {/* Main Form Area */}
+          <div className="md:col-span-8">
+            <Card className="border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] text-[hsl(220,10%,92%)] shadow-2xl overflow-hidden">
+              <CardHeader className="border-b border-[hsl(220,20%,14%)] bg-[hsl(220,25%,10%)] pb-6">
+                <div className="flex items-center gap-3 mb-1">
+                  {step === 1 && <UserCircle2 className="h-5 w-5 text-[hsl(153,60%,45%)]" />}
+                  {step === 2 && <Building2 className="h-5 w-5 text-[hsl(153,60%,45%)]" />}
+                  {step === 3 && <Wallet2 className="h-5 w-5 text-[hsl(153,60%,45%)]" />}
+                  <CardTitle className="text-xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                    {step === 1 && "Identificação básica"}
+                    {step === 2 && "Dados do escritório"}
+                    {step === 3 && "Ativação da assinatura"}
+                  </CardTitle>
                 </div>
-                <CardTitle className="text-3xl font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                  R$ {plan.monthly}<span className="text-base font-normal text-[hsl(220,10%,55%)]">/mês</span>
-                </CardTitle>
-                <CardDescription className="text-[hsl(220,10%,55%)]">{plan.billingLabel}</CardDescription>
+                <CardDescription className="text-[hsl(220,10%,55%)]">
+                  {step === 1 && "Como podemos te identificar?"}
+                  {step === 2 && "Conte-nos um pouco sobre seu escritório"}
+                  {step === 3 && "Finalize para começar a usar a IA"}
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-[hsl(220,10%,75%)]">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(153,60%,45%)]" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-6 flex gap-2">
-                  {Object.entries(PLANS).map(([key, p]) => (
-                    <button
-                      key={key}
-                      onClick={() => navigate(`/signup?plan=${key}`, { replace: true })}
-                      className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${
-                        key === planKey
-                          ? "border-[hsl(153,60%,45%)] bg-[hsl(153,60%,45%)]/10 text-[hsl(153,60%,45%)]"
-                          : "border-[hsl(220,20%,16%)] text-[hsl(220,10%,55%)] hover:border-[hsl(220,10%,55%)]"
-                      }`}
-                    >
-                      {p.label}
-                    </button>
-                  ))}
-                </div>
+              <CardContent className="pt-8">
+                {step === 1 && (
+                  <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-500">
+                    <div className="space-y-2">
+                      <Label htmlFor="full_name">Nome completo *</Label>
+                      <Input
+                        id="full_name"
+                        value={form.full_name}
+                        onChange={(e) => handleChange("full_name", e.target.value)}
+                        placeholder="Seu nome completo"
+                        className="h-12 bg-[hsl(220,25%,12%)] border-[hsl(220,20%,20%)] focus:border-[hsl(153,60%,45%)] transition-all"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email profissional *</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={form.email}
+                        onChange={(e) => handleChange("email", e.target.value)}
+                        placeholder="seu@email.com"
+                        className="h-12 bg-[hsl(220,25%,12%)] border-[hsl(220,20%,20%)] focus:border-[hsl(153,60%,45%)] transition-all"
+                      />
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="password">Criar senha *</Label>
+                        <Input
+                          id="password"
+                          type="password"
+                          value={form.password}
+                          onChange={(e) => handleChange("password", e.target.value)}
+                          placeholder="Mínimo 6 chars"
+                          className="h-12 bg-[hsl(220,25%,12%)] border-[hsl(220,20%,20%)] focus:border-[hsl(153,60%,45%)] transition-all"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="confirmPassword">Confirmar senha *</Label>
+                        <Input
+                          id="confirmPassword"
+                          type="password"
+                          value={form.confirmPassword}
+                          onChange={(e) => handleChange("confirmPassword", e.target.value)}
+                          placeholder="Repita a senha"
+                          className="h-12 bg-[hsl(220,25%,12%)] border-[hsl(220,20%,20%)] focus:border-[hsl(153,60%,45%)] transition-all"
+                        />
+                      </div>
+                    </div>
+                    <Button onClick={nextStep} className="w-full h-14 mt-4 gradient-primary text-white font-bold text-lg group">
+                      Próximo passo
+                      <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                    </Button>
+                  </div>
+                )}
+
+                {step === 2 && (
+                  <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-500">
+                    <div className="space-y-2">
+                      <Label htmlFor="company_name">Nome do escritório *</Label>
+                      <Input
+                        id="company_name"
+                        value={form.company_name}
+                        onChange={(e) => handleChange("company_name", e.target.value)}
+                        placeholder="Ex: Torres & Souza Advocacia"
+                        className="h-12 bg-[hsl(220,25%,12%)] border-[hsl(220,20%,20%)] focus:border-[hsl(153,60%,45%)] transition-all"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Telefone / WhatsApp (Opcional)</Label>
+                      <Input
+                        id="phone"
+                        value={form.phone}
+                        onChange={(e) => handleChange("phone", e.target.value)}
+                        placeholder="(11) 99999-9999"
+                        maxLength={15}
+                        className="h-12 bg-[hsl(220,25%,12%)] border-[hsl(220,20%,20%)] focus:border-[hsl(153,60%,45%)] transition-all"
+                      />
+                    </div>
+                    <div className="flex gap-3 mt-4">
+                      <Button variant="outline" onClick={prevStep} className="flex-1 h-14 border-[hsl(220,20%,20%)] text-[hsl(220,10%,70%)]">
+                        Voltar
+                      </Button>
+                      <Button onClick={nextStep} className="flex-[2] h-14 gradient-primary text-white font-bold text-lg group">
+                        Continuar
+                        <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {step === 3 && (
+                  <form onSubmit={handleSubmit} className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-500">
+                    <div className="rounded-xl border border-[hsl(38,90%,55%)]/20 bg-[hsl(38,90%,55%)]/5 p-4 mb-4">
+                      <p className="text-sm text-[hsl(38,90%,55%)] flex items-start gap-2">
+                        <Sparkles className="h-5 w-5 shrink-0 mt-0.5" />
+                        O CPF/CNPJ é necessário apenas para a emissão da nota fiscal e processamento seguro do pagamento via Asaas.
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="cpf_cnpj">CPF ou CNPJ para faturamento *</Label>
+                      <Input
+                        id="cpf_cnpj"
+                        value={form.cpf_cnpj}
+                        onChange={(e) => handleChange("cpf_cnpj", e.target.value)}
+                        required
+                        placeholder="000.000.000-00"
+                        maxLength={18}
+                        className="h-12 bg-[hsl(220,25%,12%)] border-[hsl(220,20%,20%)] focus:border-[hsl(153,60%,45%)] transition-all"
+                      />
+                    </div>
+
+                    <div className="flex gap-3 mt-6">
+                      <Button variant="outline" onClick={prevStep} disabled={loading} className="flex-1 h-14 border-[hsl(220,20%,20%)] text-[hsl(220,10%,70%)]">
+                        Voltar
+                      </Button>
+                      <Button type="submit" disabled={loading} className="flex-[2] h-14 gradient-primary text-white font-bold text-lg shadow-lg shadow-[hsl(153,60%,45%)/0.2]">
+                        {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
+                        Finalizar e Ativar — {plan.monthly}/mês
+                      </Button>
+                    </div>
+                    <p className="text-center text-xs text-[hsl(220,10%,45%)] mt-4">
+                      Ao clicar em finalizar, você concorda com nossos Termos de Uso e Política de Privacidade.
+                    </p>
+                  </form>
+                )}
               </CardContent>
             </Card>
           </div>
 
-          {/* Form */}
-          <div className="md:col-span-3">
+          {/* Sidebar Summary */}
+          <div className="md:col-span-4 space-y-4">
             <Card className="border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] text-[hsl(220,10%,92%)]">
-              <CardHeader>
-                <CardTitle style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Dados da conta</CardTitle>
-                <CardDescription className="text-[hsl(220,10%,55%)]">Preencha seus dados para criar a conta e ativar a assinatura</CardDescription>
+              <CardHeader className="pb-4">
+                <CardTitle className="text-lg">Resumo do Plano</CardTitle>
               </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="full_name">Nome completo *</Label>
-                    <Input id="full_name" value={form.full_name} onChange={(e) => handleChange("full_name", e.target.value)} required placeholder="Seu nome completo" className="bg-[hsl(220,25%,12%)] border-[hsl(220,20%,20%)]" />
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between pb-4 border-b border-[hsl(220,20%,14%)]">
+                  <div>
+                    <p className="text-sm font-medium text-[hsl(153,60%,45%)]">Plano {plan.label}</p>
+                    <p className="text-2xl font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ {plan.monthly}/mês</p>
                   </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email *</Label>
-                    <Input id="email" type="email" value={form.email} onChange={(e) => handleChange("email", e.target.value)} required placeholder="seu@email.com" className="bg-[hsl(220,25%,12%)] border-[hsl(220,20%,20%)]" />
-                  </div>
-
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Telefone</Label>
-                      <Input id="phone" value={form.phone} onChange={(e) => handleChange("phone", e.target.value)} placeholder="(11) 99999-9999" maxLength={15} className="bg-[hsl(220,25%,12%)] border-[hsl(220,20%,20%)]" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="cpf_cnpj">CPF/CNPJ *</Label>
-                      <Input id="cpf_cnpj" value={form.cpf_cnpj} onChange={(e) => handleChange("cpf_cnpj", e.target.value)} required placeholder="000.000.000-00" maxLength={18} className="bg-[hsl(220,25%,12%)] border-[hsl(220,20%,20%)]" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="company_name">Nome do escritório</Label>
-                    <Input id="company_name" value={form.company_name} onChange={(e) => handleChange("company_name", e.target.value)} placeholder="Ex: Torres & Souza Advocacia" className="bg-[hsl(220,25%,12%)] border-[hsl(220,20%,20%)]" />
-                  </div>
-
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="password">Senha *</Label>
-                      <Input id="password" type="password" value={form.password} onChange={(e) => handleChange("password", e.target.value)} required placeholder="Mínimo 6 caracteres" className="bg-[hsl(220,25%,12%)] border-[hsl(220,20%,20%)]" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="confirmPassword">Confirmar senha *</Label>
-                      <Input id="confirmPassword" type="password" value={form.confirmPassword} onChange={(e) => handleChange("confirmPassword", e.target.value)} required placeholder="Repita a senha" className="bg-[hsl(220,25%,12%)] border-[hsl(220,20%,20%)]" />
-                    </div>
-                  </div>
-
-                  <Button type="submit" disabled={loading} className="w-full gradient-primary text-[hsl(0,0%,100%)] font-semibold py-6 text-base">
-                    {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
-                    Criar conta e assinar — {plan.ctaSuffix}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs text-[hsl(220,10%,50%)] hover:text-[hsl(153,60%,45%)]"
+                    onClick={() => setStep(1)}
+                  >
+                    Alterar
                   </Button>
+                </div>
 
-                  <p className="text-center text-xs text-[hsl(220,10%,45%)]">
-                    Já tem uma conta?{" "}
-                    <button type="button" onClick={() => navigate("/auth")} className="text-[hsl(153,60%,45%)] hover:underline">
-                      Faça login
-                    </button>
-                  </p>
-                </form>
+                <ul className="space-y-2.5">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-xs text-[hsl(220,10%,70%)]">
+                      <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[hsl(153,60%,45%)]" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                
+                <div className="pt-4 mt-4 border-t border-[hsl(220,20%,14%)]">
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-[hsl(220,10%,50%)]">Faturamento:</span>
+                    <span className="text-[hsl(220,10%,80%)]">{plan.billingLabel}</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-[hsl(220,10%,50%)]">Ativação:</span>
+                    <span className="text-[hsl(153,60%,45%)]">Imediata</span>
+                  </div>
+                </div>
               </CardContent>
             </Card>
+            
+            <button 
+              onClick={() => navigate("/")} 
+              className="flex items-center gap-2 text-sm text-[hsl(220,10%,45%)] hover:text-[hsl(220,10%,70%)] transition-colors w-full justify-center py-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Voltar para o site
+            </button>
           </div>
         </div>
       </div>
