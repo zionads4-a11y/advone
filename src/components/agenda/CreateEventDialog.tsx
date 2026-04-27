@@ -187,7 +187,7 @@ export function CreateEventDialog({
         onCreated();
         onOpenChange(false);
       } else {
-        toast.success(eventType === "meeting" ? "Reunião criada!" : eventType === "block" ? "Horário bloqueado!" : "Tarefa criada!");
+        toast.success(eventType === "meeting" ? "Reunião criada!" : eventType === "block" ? "Dia/Horário fechado!" : "Tarefa criada!");
         onCreated();
         onOpenChange(false);
       }
