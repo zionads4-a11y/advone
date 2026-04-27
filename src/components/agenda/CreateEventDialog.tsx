@@ -24,7 +24,7 @@ import { getHolidayForDate } from "@/lib/brazilianHolidays";
 interface CreateEventDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreated: () => void;
+  onCreated: (syncWithGoogle?: boolean) => void;
   defaultDate?: Date;
   defaultTime?: string;
   defaultType?: "meeting" | "reminder" | "block";
