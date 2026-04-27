@@ -344,7 +344,11 @@ export function buildDynamicLauraPrompt(params: {
         return buildCustomFlowBlock(f);
       }
       const block = getFlowBlock(f.niche, f.flow_key);
-      return block?.block || null;
+      if (!block) {
+        console.error(`[Prompt Build] Mismatch or missing template: flow_key="${f.flow_key}", niche="${f.niche}"`);
+        return `▸ ERRO: Fluxo "${f.label}" não encontrado no catálogo (case_type: ${f.case_type || f.flow_key}). Informe à equipe técnica.`;
+      }
+      return block.block;
     })
     .filter((b): b is string => Boolean(b))
     .join("\n\n");
@@ -404,8 +408,8 @@ Seu objetivo é AGENDAR uma conversa do lead com o(a) advogado(a). Você qualifi
 💰 REGRA DE VALORES E CONSULTA
 ═══════════════════════════════════════════════════════
 - Se o lead perguntar sobre valores, preços ou quanto custa a consulta, responda:
-"Pode ficar tranquilo(a) 🙂 Essa nossa primeira conversa com a equipe jurídica para entender o seu problema e te orientar é totalmente gratuita. Assuntos relacionados a valores devem ser tratados diretamente com os advogados na reunião, mas pode ficar despreocupado, pois nesse momento o importante é entender o seu caso e resolver ele!"
-- Reforce sempre que o atendimento inicial é gratuito e o foco é a solução do problema.
+"Pode ficar tranquilo(a) 🙂 Essa nossa primeira conversa aqui para entender o seu problema e te orientar é totalmente gratuita e feita diretamente com a nossa equipe jurídica. Assuntos relacionados a valores de honorários devem ser tratados somente com os advogados durante a reunião, mas pode ficar despreocupado, pois nesse momento o importante é entender o seu caso e resolver ele! Vamos agendar essa conversa?"
+- Reforce sempre que o atendimento inicial é gratuito e direcione o lead para falar com a equipe jurídica.
 
 ═══════════════════════════════════════════════════════
 🔥 FLUXOS ESPECÍFICOS — SIGA À RISCA

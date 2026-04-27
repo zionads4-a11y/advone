@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Sparkles, ListChecks, Save, Plus, Trash2, Pencil } from "lucide-react";
+import { Loader2, Sparkles, ListChecks, Save, Plus, Trash2, Pencil, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useCompanyBotFlows, type CompanyBotFlow } from "@/hooks/useCompanyBotFlows";
 import { useCompanyOffices } from "@/hooks/useCompanyOffices";
-import { buildDynamicLauraPrompt, type EnabledFlow, type OfficeAddress } from "./botFlowBlocks";
+import { buildDynamicLauraPrompt, getFlowBlock, type EnabledFlow, type OfficeAddress } from "./botFlowBlocks";
 import type { Niche } from "./botFlowsCatalog";
 import { CustomFlowDialog } from "./CustomFlowDialog";
 import { EditFlowPromptDialog } from "./EditFlowPromptDialog";
@@ -109,6 +109,55 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
     );
   };
 
+  const handleDownloadReport = () => {
+    const enabledFlows = flows.filter((f) => f.enabled);
+    if (enabledFlows.length === 0) {
+      toast.error("Habilite pelo menos um fluxo para gerar o relatório.");
+      return;
+    }
+
+    const reportLines = [
+      `RELATÓRIO DE CONFIGURAÇÃO DO BOT - ${officeName.toUpperCase()}`,
+      `Data: ${new Date().toLocaleDateString("pt-BR")} ${new Date().toLocaleTimeString("pt-BR")}`,
+      `Nicho: ${niche.toUpperCase()}`,
+      `Fluxos Ativos: ${enabledFlows.length}`,
+      `═══════════════════════════════════════════════════════`,
+      ``,
+      `💰 SEÇÃO: REGRA DE VALORES`,
+      `"Pode ficar tranquilo(a) 🙂 Essa nossa primeira conversa aqui para entender o seu problema e te orientar é totalmente gratuita e feita diretamente com a nossa equipe jurídica. Assuntos relacionados a valores de honorários devem ser tratados somente com os advogados durante a reunião, mas pode ficar despreocupado, pois nesse momento o importante é entender o seu caso e resolver ele! Vamos agendar essa conversa?"`,
+      ``,
+      `═══════════════════════════════════════════════════════`,
+      ``,
+      `🔥 FLUXOS SELECIONADOS:`,
+      ``,
+    ];
+
+    enabledFlows.forEach((f, idx) => {
+      const caseType = f.case_type || f.flow_key;
+      reportLines.push(`${idx + 1}. [${f.icon_emoji}] ${f.label.toUpperCase()}`);
+      reportLines.push(`   case_type: ${caseType}`);
+      
+      const block = f.custom_prompt_block || getFlowBlock(f.niche as any, f.flow_key)?.block || "Bloco não encontrado";
+      reportLines.push(`   --- CONTEÚDO DO PROMPT ---`);
+      reportLines.push(block.split('\n').map(line => `   ${line}`).join('\n'));
+      reportLines.push(``);
+      reportLines.push(`-------------------------------------------------------`);
+      reportLines.push(``);
+    });
+
+    const reportText = reportLines.join('\n');
+    const blob = new Blob([reportText], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `relatorio-bot-${officeName.toLowerCase().replace(/\s+/g, '-')}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success("Relatório gerado com sucesso! (Formato TXT para auditoria)");
+  };
+
   const handleDeleteConfirm = async () => {
     if (!flowToDelete) return;
     try {
@@ -138,7 +187,7 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
           <CardTitle className="flex items-center gap-2 text-base flex-wrap">
             <ListChecks className="h-5 w-5 text-primary" />
             Fluxos Atendidos pelo Escritório
-            <Badge variant="secondary" className="ml-auto">
+            <Badge variant="secondary">
               {enabledCount} ativos
             </Badge>
             {customCount > 0 && (
@@ -146,6 +195,16 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
                 {customCount} personalizado(s)
               </Badge>
             )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDownloadReport}
+              className="ml-auto h-7 text-[10px] gap-1"
+              title="Baixar relatório dos prompts para auditoria"
+            >
+              <FileText className="h-3 w-3" />
+              Relatório Auditoria
+            </Button>
           </CardTitle>
           <p className="text-xs text-muted-foreground">
             Habilite apenas os assuntos que este escritório realmente atende. O bot só vai
