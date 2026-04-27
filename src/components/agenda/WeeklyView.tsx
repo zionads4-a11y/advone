@@ -55,6 +55,18 @@ export function WeeklyView({ currentDate, reminders, onToggle, onEdit, onDelete,
   const now = new Date();
   const today = format(now, "yyyy-MM-dd");
 
+  const currentTimeLinePos = useMemo(() => {
+    const currentHour = now.getHours();
+    const currentMinutes = now.getMinutes();
+    if (currentHour < HOURS[0] || currentHour >= HOURS[HOURS.length - 1] + 1) return null;
+    
+    const hourIndex = HOURS.indexOf(currentHour);
+    if (hourIndex === -1) return null;
+    
+    // Each row is 52px
+    return (hourIndex * 52) + (currentMinutes / 60 * 52);
+  }, [now]);
+
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
       {/* Header */}
