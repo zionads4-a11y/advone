@@ -324,10 +324,26 @@ export default function Agenda() {
             className={`gap-2 ${isGoogleConnected ? 'bg-green-100 text-green-700 hover:bg-green-200 border-green-200' : ''}`}
             onClick={() => {
               if (isGoogleConnected) return;
+              // Using the provided client_id and scopes for the OAuth flow
               const clientId = "181481259367-kqbftmnd121er1dmpvss7l4bjfpt5c3n.apps.googleusercontent.com";
               const redirectUri = `${window.location.origin}/agenda`;
-              const scope = "https://www.googleapis.com/auth/calendar";
-              window.open(`https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&access_type=offline&prompt=consent`, '_self');
+              const scopes = [
+                "openid",
+                "https://www.googleapis.com/auth/userinfo.email",
+                "https://www.googleapis.com/auth/calendar",
+                "https://www.googleapis.com/auth/calendar.events"
+              ].join(" ");
+              
+              const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+              authUrl.searchParams.set("client_id", clientId);
+              authUrl.searchParams.set("redirect_uri", redirectUri);
+              authUrl.searchParams.set("response_type", "code");
+              authUrl.searchParams.set("scope", scopes);
+              authUrl.searchParams.set("access_type", "offline");
+                authUrl.searchParams.set("prompt", "consent");
+                authUrl.searchParams.set("resource", "https://calendarmcp.googleapis.com/mcp/v1");
+
+              window.location.href = authUrl.toString();
             }}
           >
             {isGoogleConnected ? (
