@@ -48,13 +48,15 @@ export default function CompanySettings() {
 
   const fetchCompany = async (id: string) => {
     const [companyResult, planResult] = await Promise.all([
-      supabase.from("companies").select("id, name, whatsapp, business_hours").eq("id", id).maybeSingle(),
+      supabase.from("companies").select("id, name, whatsapp, business_hours, google_client_id, google_client_secret").eq("id", id).maybeSingle(),
       supabase.from("company_monitoring_plans").select("is_active").eq("company_id", id).maybeSingle(),
     ]);
     if (companyResult.data) {
-      setCompany(companyResult.data);
+      setCompany(companyResult.data as Company);
       setName(companyResult.data.name);
       setWhatsapp(companyResult.data.whatsapp || "");
+      setGoogleClientId(companyResult.data.google_client_id || "");
+      setGoogleClientSecret(companyResult.data.google_client_secret || "");
       setBusinessHours(parseBusinessHours(companyResult.data.business_hours));
     }
     setHasMonitoring(!!planResult.data?.is_active);
@@ -66,7 +68,13 @@ export default function CompanySettings() {
     setSaving(true);
     const { error } = await supabase
       .from("companies")
-      .update({ name, whatsapp: whatsapp || null, business_hours: businessHours as any })
+      .update({ 
+        name, 
+        whatsapp: whatsapp || null, 
+        business_hours: businessHours as any,
+        google_client_id: googleClientId || null,
+        google_client_secret: googleClientSecret || null
+      })
       .eq("id", company.id);
 
     if (error) {
