@@ -1549,7 +1549,7 @@ export type Database = {
           id: string
           lawyer_30m_sent: boolean
           lawyer_3h_sent: boolean
-          lead_id: string
+          lead_id: string | null
           meeting_held: boolean
           meeting_held_at: string | null
           parent_event_id: string | null
@@ -1575,7 +1575,7 @@ export type Database = {
           id?: string
           lawyer_30m_sent?: boolean
           lawyer_3h_sent?: boolean
-          lead_id: string
+          lead_id?: string | null
           meeting_held?: boolean
           meeting_held_at?: string | null
           parent_event_id?: string | null
@@ -1601,7 +1601,7 @@ export type Database = {
           id?: string
           lawyer_30m_sent?: boolean
           lawyer_3h_sent?: boolean
-          lead_id?: string
+          lead_id?: string | null
           meeting_held?: boolean
           meeting_held_at?: string | null
           parent_event_id?: string | null
