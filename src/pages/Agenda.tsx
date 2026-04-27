@@ -328,6 +328,7 @@ export default function Agenda() {
               // Using the provided client_id and scopes for the OAuth flow
               const clientId = "181481259367-kqbftmnd121er1dmpvss7l4bjfpt5c3n.apps.googleusercontent.com";
               const redirectUri = `${window.location.origin}/agenda`;
+              console.log("Iniciando OAuth com redirectUri:", redirectUri);
               const scopes = [
                 "openid",
                 "https://www.googleapis.com/auth/userinfo.email",
