@@ -100,16 +100,41 @@ export default function Profile() {
 
   const handleSaveProfile = async () => {
     if (!user) return;
+
+    if (!fullName.trim()) {
+      toast.error("O nome é obrigatório");
+      return;
+    }
+
+    if (!email.trim()) {
+      toast.error("O e-mail é obrigatório");
+      return;
+    }
+
+    // Basic email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Por favor, insira um e-mail válido");
+      return;
+    }
+
     setSavingProfile(true);
+
+    const normalizedEmail = email.toLowerCase().trim();
 
     const { error } = await supabase
       .from("profiles")
-      .update({ full_name: fullName, phone })
+      .update({ 
+        full_name: fullName.trim(), 
+        email: normalizedEmail,
+        phone: phone.trim() 
+      })
       .eq("user_id", user.id);
 
     if (error) {
       toast.error("Erro ao salvar: " + error.message);
     } else {
+      setEmail(normalizedEmail);
       toast.success("Perfil atualizado!");
     }
     setSavingProfile(false);
