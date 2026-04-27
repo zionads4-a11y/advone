@@ -462,24 +462,8 @@ const sdrTools = [
   {
     type: "function",
     function: {
-      name: "register_client_cpf",
-      description: "Registra CPF + nome completo do cliente final. Use SEMPRE que o lead enviar esses dados. PREFERENCIALMENTE antes de schedule_appointment para evitar marcar o lead com pendência.",
-      parameters: {
-        type: "object",
-        properties: {
-          cpf: { type: "string", description: "CPF do cliente final, apenas números (11 dígitos válidos)" },
-          full_name: { type: "string", description: "Nome COMPLETO do cliente (mínimo 3 palavras: nome + sobrenome do meio + último sobrenome). Ex: 'João da Silva Santos'" }
-        },
-        required: ["cpf", "full_name"],
-        additionalProperties: false
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
       name: "check_availability",
-      description: "Verifica o PRIMEIRO horário disponível na agenda para a data e turno informados. SEMPRE use antes de sugerir horário ao lead. Retorna apenas 1 sugestão (first_available_slot). ATENÇÃO: só use APÓS ter registrado o CPF via register_client_cpf.",
+      description: "Verifica o PRIMEIRO horário disponível na agenda para a data e turno informados. SEMPRE use antes de sugerir horário ao lead. Retorna apenas 1 sugestão (first_available_slot). Só use APÓS o lead ter indicado o turno (manhã/tarde/qualquer).",
       parameters: {
         type: "object",
         properties: {
