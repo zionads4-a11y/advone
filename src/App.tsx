@@ -37,6 +37,8 @@ import LandingIA from "./pages/LandingIA";
 import AppLayout from "./components/layout/AppLayout";
 import ProfileCheck from "./pages/ProfileCheck";
 import NotFound from "./pages/NotFound";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +56,8 @@ const App = () => (
             <Route path="/IA" element={<LandingIA />} />
             <Route path="/ia" element={<LandingIA />} />
             <Route path="/connect/:token" element={<ConnectWhatsApp />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
             <Route
               element={
                 <ProtectedRoute>
