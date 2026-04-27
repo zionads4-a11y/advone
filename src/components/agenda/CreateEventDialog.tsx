@@ -165,6 +165,7 @@ export function CreateEventDialog({
       description: description || null,
       reminder_type: eventType,
       due_at: dueAt,
+      end_at: endAt,
       recurrence_rule: recurrenceRule,
       recurrence_end: recurrenceEnd,
     };
