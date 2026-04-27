@@ -396,6 +396,8 @@ export default function Agenda() {
             <Plus className="h-4 w-4" />
             Novo Evento
           </Button>
+        </div>
+      </div>
 
       {/* Reminder banner */}
       <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm">
