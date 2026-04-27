@@ -30,6 +30,7 @@ interface DailyViewProps {
   onToggle: (id: string, completed: boolean) => void;
   onEdit: (r: Reminder) => void;
   onDelete: (r: Reminder) => void;
+  onSelectTime?: (date: Date, hour: number) => void;
 }
 
 const HOURS = Array.from({ length: 18 }, (_, i) => i + 5); // 5:00 to 22:00
