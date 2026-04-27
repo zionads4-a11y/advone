@@ -21,6 +21,7 @@ interface Reminder {
   due_at: string;
   completed: boolean;
   completed_at: string | null;
+  end_at?: string | null;
   created_at: string;
   meeting_held?: boolean;
   meeting_held_at?: string | null;
