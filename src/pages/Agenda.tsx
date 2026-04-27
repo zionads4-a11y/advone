@@ -587,7 +587,10 @@ export default function Agenda() {
       <CreateEventDialog
         open={createDialogOpen}
         onOpenChange={(open) => { setCreateDialogOpen(open); if (!open) setEditEvent(null); }}
-        onCreated={() => setRefreshKey((k) => k + 1)}
+        onCreated={(sync) => { 
+          setRefreshKey((k) => k + 1);
+          if (sync) handleSync(true);
+        }}
         defaultDate={selectedDate}
         defaultTime={selectedTime}
         defaultType={defaultEventType}
