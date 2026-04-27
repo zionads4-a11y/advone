@@ -54,6 +54,7 @@ export default function Agenda() {
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [loading, setLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [selectedTime, setSelectedTime] = useState<string | undefined>(undefined);
   const [editEvent, setEditEvent] = useState<any>(null);
   const [deleteTarget, setDeleteTarget] = useState<Reminder | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
