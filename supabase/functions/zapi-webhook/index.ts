@@ -712,12 +712,14 @@ async function handleAgentPhase(
     if (officesError) console.error("[SDR] Erro ao buscar offices:", officesError.message);
     systemPrompt = buildSDRPrompt(config, leadName, companyOffices || [], flowsBlock || "", triageBlock || "");
     tools = sdrTools;
-    console.log("[SDR PROMPT DEBUG]", JSON.stringify({
-      companyId,
-      flowsCount: flowsBlock ? flowsBlock.split("\n\n").length : 0,
-      hasTriageOptions: !!triageBlock,
-      promptLength: systemPrompt.length,
-    }));
+    if (config?.debug_mode) {
+      console.log("[SDR PROMPT DEBUG]", JSON.stringify({
+        companyId,
+        flowsCount: flowsBlock ? flowsBlock.split("\n\n").length : 0,
+        hasTriageOptions: !!triageBlock,
+        promptLength: systemPrompt.length,
+      }));
+    }
   }
 
   const coherenceGuard = `
