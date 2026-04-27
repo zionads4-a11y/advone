@@ -90,7 +90,7 @@ export function CreateEventDialog({
           setRecurrence({ type: "none" });
         }
       } else {
-        setTitle(defaultType === "block" ? "BLOQUEADO" : "");
+        setTitle(defaultType === "block" ? "FECHADO" : "");
         setDescription("");
         setEventType(defaultType || "reminder");
         setDueDate(defaultDate ? format(defaultDate, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"));
