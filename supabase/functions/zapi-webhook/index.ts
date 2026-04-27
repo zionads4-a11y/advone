@@ -688,7 +688,7 @@ function sanitizeReply(text: string | null | undefined): string | null {
     /REGRA\s+(CR[ÍI]TICA|DE\s+OURO|INVIOL[ÁA]VEL|FINAL|ABSOLUTA)/i,
     /\bPASSO\s*\d/i,
     /\bETAPA\s*\d/i,
-    /case_type|wants_help|decide_lead|schedule_appointment|check_availability|register_client_cpf/i,
+    /case_type|wants_help|decide_lead|schedule_appointment|check_availability|register_client_cpf|P\d+/i,
     /\[INSTRU[ÇC][ÃA]O\s+INTERNA\]?/i,
     /^Releia\s+(o|todo)/im,
     /Identifique\s+INTERNAMENTE/i,
