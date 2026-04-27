@@ -35,6 +35,7 @@ import LeadsHistory from "./pages/LeadsHistory";
 import LegalAI from "./pages/LegalAI";
 import LandingIA from "./pages/LandingIA";
 import AppLayout from "./components/layout/AppLayout";
+import ProfileCheck from "./pages/ProfileCheck";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -84,6 +85,7 @@ const App = () => (
               <Route path="/agendamentos-exito" element={<ExitoSchedules />} />
               <Route path="/historico-leads" element={<LeadsHistory />} />
               <Route path="/ia-juridica" element={<LegalAI />} />
+              <Route path="/perfil-check" element={<ProfileCheck />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
