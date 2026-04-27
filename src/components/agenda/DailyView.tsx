@@ -106,7 +106,16 @@ export function DailyView({ currentDate, reminders, onToggle, onEdit, onDelete, 
       </div>
 
       {/* Time grid */}
-      <div className="max-h-[600px] overflow-y-auto">
+      <div className="max-h-[600px] overflow-y-auto relative">
+        {currentTimeLinePos !== null && (
+          <div 
+            className="absolute left-[60px] right-0 z-10 flex items-center pointer-events-none"
+            style={{ top: `${currentTimeLinePos}px` }}
+          >
+            <div className="w-2 h-2 rounded-full bg-red-500 -ml-1" />
+            <div className="flex-1 h-[2px] bg-red-500" />
+          </div>
+        )}
         {HOURS.map((hour) => {
           const events = eventsByHour.get(hour) || [];
           const isCurrentHour = now.getHours() === hour && format(now, "yyyy-MM-dd") === dayStr;
