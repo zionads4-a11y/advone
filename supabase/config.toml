@@ -1,5 +1,11 @@
 project_id = "oonteavjxzkovrzktnie"
 
+[auth]
+enable_email_signup = true
+enable_email_signin = true
+enable_confirm_email = false # To help the user get in quickly
+
+
 [functions.create-client-user]
 verify_jwt = false
 
