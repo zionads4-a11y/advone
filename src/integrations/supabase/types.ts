@@ -1242,6 +1242,42 @@ export type Database = {
           },
         ]
       }
+      google_calendar_sync_queue: {
+        Row: {
+          action: string
+          attempts: number | null
+          created_at: string | null
+          error_message: string | null
+          id: string
+          reminder_id: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          attempts?: number | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          reminder_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          attempts?: number | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          reminder_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       kanban_columns: {
         Row: {
           color: string
