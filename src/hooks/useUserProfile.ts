@@ -45,6 +45,7 @@ export function useUserProfile() {
           const newData = payload.new as UserProfile & { user_id: string };
           setProfile({
             full_name: newData.full_name,
+            email: newData.email,
             avatar_url: newData.avatar_url,
             phone: newData.phone,
           });
