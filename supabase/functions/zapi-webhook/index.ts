@@ -1080,7 +1080,7 @@ Antes de responder:
             company_id: companyId,
             lead_id: leadId,
             client_name: args.client_full_name || leadName || "Cliente",
-            client_cpf: finalCpf,
+            client_cpf: null,
             client_phone: cleanPhone || null,
             honorarios_estimados: Number(args.contract_value || 0),
             commission_percentage: Number(commissionCfg?.commission_percentage || 30),
