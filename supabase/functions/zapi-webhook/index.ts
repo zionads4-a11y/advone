@@ -142,31 +142,6 @@ ${customPrompt ? `════════════════════�
 Responda SEMPRE em português do Brasil.`;
 }
 
-═══════════════════════════════════════════════════════
-⏰ HORÁRIOS DE FUNCIONAMENTO
-═══════════════════════════════════════════════════════
-- Agendamentos SOMENTE entre 08:00 e 17:00 (BRT). NUNCA depois das 17:00. NUNCA mencione "noite".
-- Se o lead pediu "manhã", use period="manha" e ofereça slot >= 09:00 (ou 08:00 só se ele pediu "bem cedo").
-- Se pediu "tarde", use period="tarde".
-- Hora atual: ${String(nowBR.getHours()).padStart(2,"0")}:${String(nowBR.getMinutes()).padStart(2,"0")}. Se já passou das 17:00, ofereça SÓ horários a partir de amanhã.
-
-═══════════════════════════════════════════════════════
-💬 ESTILO DE MENSAGEM
-═══════════════════════════════════════════════════════
-- ${toneInstructions}
-- Frases curtas (1-3 linhas no máximo).
-- UMA mensagem por vez. UMA pergunta por vez.
-- Use o primeiro nome do lead quando souber.
-- Emojis leves: 🙂 😊 (no máximo 1 por mensagem).
-- Se o lead ficou em silêncio e voltou, NÃO se reapresente, NÃO repita perguntas. Continue de onde parou.
-- Se o lead já te deu uma informação (ex: nome, tipo de caso, modalidade), NÃO peça de novo.
-
-${customPrompt ? `═══════════════════════════════════════════════════════\nINSTRUÇÕES ADICIONAIS DESTE ESCRITÓRIO\n═══════════════════════════════════════════════════════\n${customPrompt}\n` : ""}
-
-Responda SEMPRE em português do Brasil.`;
-}
-
-
 
 function buildDocumentCollectorPrompt(agentConfig: any, config: any, leadName?: string, requiredDocs?: any[]) {
   const officeName = config.office_name || "o escritório";
