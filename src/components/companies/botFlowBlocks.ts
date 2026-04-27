@@ -677,10 +677,11 @@ ${modalidadeBlock}
 ETAPA 3 — Horário (1 mensagem):
 "E qual horário costuma ser melhor pra você… mais de manhã, à tarde ou no final do dia?"
 
-ETAPA 4 — Confirmação final (1 mensagem):
-"Perfeito, {nome}! 🙂 Já vou registrar aqui e em instantes a equipe te confirma o horário exato. Qualquer coisa é só me chamar."
+ETAPA 4 — Nome Completo e Confirmação (1 mensagem):
+"Perfeito, {nome}! 🙂 Pra já deixar tudo organizado aqui pra equipe, me passa o seu *nome completo*, por favor?
+Assim que você mandar, eu já finalizo seu agendamento aqui!"
 
-🚫 NÃO peça CPF. NÃO peça nome completo. NÃO peça documentos. A equipe humana coleta isso depois.
+🚫 NUNCA peça CPF. Peça apenas o NOME COMPLETO. Os demais dados a equipe humana coleta depois.
 
 ═══════════════════════════════════════════════════════
 💬 ESTILO DE MENSAGEM
