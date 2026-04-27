@@ -109,6 +109,55 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
     );
   };
 
+  const handleDownloadReport = () => {
+    const enabledFlows = flows.filter((f) => f.enabled);
+    if (enabledFlows.length === 0) {
+      toast.error("Habilite pelo menos um fluxo para gerar o relatório.");
+      return;
+    }
+
+    const reportLines = [
+      `RELATÓRIO DE CONFIGURAÇÃO DO BOT - ${officeName.toUpperCase()}`,
+      `Data: ${new Date().toLocaleDateString("pt-BR")} ${new Date().toLocaleTimeString("pt-BR")}`,
+      `Nicho: ${niche.toUpperCase()}`,
+      `Fluxos Ativos: ${enabledFlows.length}`,
+      `═══════════════════════════════════════════════════════`,
+      ``,
+      `💰 SEÇÃO: REGRA DE VALORES`,
+      `"Pode ficar tranquilo(a) 🙂 Essa nossa primeira conversa aqui para entender o seu problema e te orientar é totalmente gratuita e feita diretamente com a nossa equipe jurídica. Assuntos relacionados a valores de honorários devem ser tratados somente com os advogados durante a reunião, mas pode ficar despreocupado, pois nesse momento o importante é entender o seu caso e resolver ele! Vamos agendar essa conversa?"`,
+      ``,
+      `═══════════════════════════════════════════════════════`,
+      ``,
+      `🔥 FLUXOS SELECIONADOS:`,
+      ``,
+    ];
+
+    enabledFlows.forEach((f, idx) => {
+      const caseType = f.case_type || f.flow_key;
+      reportLines.push(`${idx + 1}. [${f.icon_emoji}] ${f.label.toUpperCase()}`);
+      reportLines.push(`   case_type: ${caseType}`);
+      
+      const block = f.custom_prompt_block || getFlowBlock(f.niche as any, f.flow_key)?.block || "Bloco não encontrado";
+      reportLines.push(`   --- CONTEÚDO DO PROMPT ---`);
+      reportLines.push(block.split('\n').map(line => `   ${line}`).join('\n'));
+      reportLines.push(``);
+      reportLines.push(`-------------------------------------------------------`);
+      reportLines.push(``);
+    });
+
+    const reportText = reportLines.join('\n');
+    const blob = new Blob([reportText], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `relatorio-bot-${officeName.toLowerCase().replace(/\s+/g, '-')}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success("Relatório gerado com sucesso! (Formato TXT para auditoria)");
+  };
+
   const handleDeleteConfirm = async () => {
     if (!flowToDelete) return;
     try {
