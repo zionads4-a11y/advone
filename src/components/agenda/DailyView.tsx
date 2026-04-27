@@ -48,7 +48,7 @@ function getRecurrenceLabel(rule: string): string {
   return labels[rule] || rule;
 }
 
-export function DailyView({ currentDate, reminders, onToggle, onEdit, onDelete }: DailyViewProps) {
+export function DailyView({ currentDate, reminders, onToggle, onEdit, onDelete, onSelectTime }: DailyViewProps) {
   const dayStr = format(currentDate, "yyyy-MM-dd");
   const now = new Date();
 
