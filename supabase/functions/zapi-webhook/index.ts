@@ -1222,7 +1222,7 @@ Antes de responder:
       }
     }
 
-    return replyText || null;
+    return sanitizeReply(replyText) || null;
   } catch (error) {
     console.error("AI agent error:", error);
     return null;
