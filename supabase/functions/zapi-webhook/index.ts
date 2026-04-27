@@ -11,7 +11,13 @@ function buildSDRPrompt(config: any, leadName?: string, offices: any[] = []) {
   const officeName = config.office_name || "o escritório";
   const practiceArea = config.practice_area || "";
   const tone = config.communication_tone || "moderado";
-  const customPrompt = config.ai_prompt || "";
+  const customPrompt = (config.ai_prompt || "").trim();
+
+  // Se o prompt customizado começar com "Você é", assumimos que é o prompt completo
+  // gerado pelo construtor dinâmico e o usamos diretamente.
+  if (customPrompt.startsWith("Você é")) {
+    return customPrompt;
+  }
 
   // 🏢 Endereços DINÂMICOS — sem endereço cadastrado = SOMENTE online
   const activeOffices = (offices || []).filter((o: any) => o && o.is_active !== false);
