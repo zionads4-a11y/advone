@@ -507,7 +507,8 @@ export default function Conversations() {
                     </div>
                   )}
                 </div>
-              </CardHeader>
+              </div>
+            </CardHeader>
 
               {/* Messages area */}
               <CardContent className="p-0 flex-1 overflow-hidden">
