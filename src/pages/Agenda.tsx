@@ -447,29 +447,6 @@ export default function Agenda() {
         </p>
       </div>
 
-      {/* Navigation bar */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={goToToday}>Hoje</Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigateDate("prev")}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigateDate("next")}>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-          <span className="text-sm font-semibold text-foreground capitalize ml-1">
-            {getNavigationLabel()}
-          </span>
-        </div>
-        <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as any)}>
-          <TabsList>
-            <TabsTrigger value="day">Dia</TabsTrigger>
-            <TabsTrigger value="week">Semana</TabsTrigger>
-            <TabsTrigger value="month">Mês</TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
-
       {/* Views */}
       {viewMode === "month" && (
         <div className="grid gap-6 lg:grid-cols-[auto_1fr]">
