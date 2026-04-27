@@ -99,9 +99,16 @@ export default function Agenda() {
 
   useEffect(() => {
     if (isGoogleConnected) {
-      handleSync();
+      handleSync(true); // Sincronização silenciosa ao carregar
+      
+      // Configurar polling para sincronização de entrada (Google -> Sistema) a cada 5 minutos
+      const interval = setInterval(() => {
+        handleSync(true);
+      }, 5 * 60 * 1000);
+      
+      return () => clearInterval(interval);
     }
-  }, [isGoogleConnected]);
+  }, [isGoogleConnected, handleSync]);
 
   useEffect(() => {
     const checkGoogleConnection = async () => {
