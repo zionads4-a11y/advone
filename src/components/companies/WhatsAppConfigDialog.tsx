@@ -228,7 +228,7 @@ export function WhatsAppConfigDialog({
     const newValues = {
       ai_enabled: aiEnabled,
       ai_auto_reply: aiAutoReply,
-      ai_prompt: aiPrompt,
+      ai_prompt: "", // Removido da UI: prompt agora é montado dinamicamente pelo Bot Flows Editor
       ai_objective: aiObjective,
       alert_whatsapp: alertWhatsapp || null,
     };
