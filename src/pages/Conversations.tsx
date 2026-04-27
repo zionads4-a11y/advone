@@ -159,6 +159,68 @@ export default function Conversations() {
     }
   };
 
+  const exportAllConversationsToPdf = () => {
+    const doc = new jsPDF();
+    let y = 10;
+    const margin = 10;
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    doc.setFontSize(16);
+    doc.text("Relatorio de Conversas WhatsApp", margin, y);
+    y += 10;
+
+    const allPhones = Object.keys(conversations).sort((a, b) => {
+      const lastA = conversations[a][conversations[a].length - 1]?.timestamp || "";
+      const lastB = conversations[b][conversations[b].length - 1]?.timestamp || "";
+      return lastB.localeCompare(lastA);
+    });
+
+    if (allPhones.length === 0) {
+      toast.error("Nenhuma conversa para exportar");
+      return;
+    }
+
+    allPhones.forEach((phone) => {
+      const msgs = conversations[phone];
+      const lead = leads[phone];
+      const contactName = lead?.name || phone;
+
+      if (y > 270) {
+        doc.addPage();
+        y = 10;
+      }
+
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text(`Contato: ${contactName} (${phone})`, margin, y);
+      y += 7;
+
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+
+      msgs.forEach((msg) => {
+        const date = new Date(msg.timestamp).toLocaleString("pt-BR");
+        const sender = msg.direction === "incoming" ? "Lead" : (msg.sender_name || "Sistema");
+        const text = `${date} - [${sender}]: ${msg.message_text || "[midia]"}`;
+        
+        const splitText = doc.splitTextToSize(text, pageWidth - margin * 2);
+        
+        if (y + (splitText.length * 5) > 280) {
+          doc.addPage();
+          y = 10;
+        }
+
+        doc.text(splitText, margin, y);
+        y += (splitText.length * 5) + 2;
+      });
+
+      y += 5; // Space between contacts
+    });
+
+    doc.save(`conversas_whatsapp_${new Date().toISOString().split('T')[0]}.pdf`);
+    toast.success("PDF gerado com sucesso!");
+  };
+
   const handleSendMessage = async () => {
     if (!messageText.trim() || !selectedPhone || !selectedCompanyId) return;
 
