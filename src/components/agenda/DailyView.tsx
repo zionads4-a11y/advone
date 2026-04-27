@@ -65,6 +65,21 @@ export function DailyView({ currentDate, reminders, onToggle, onEdit, onDelete, 
     return map;
   }, [reminders, dayStr]);
 
+  const currentTimeLinePos = useMemo(() => {
+    const isToday = format(now, "yyyy-MM-dd") === dayStr;
+    if (!isToday) return null;
+
+    const currentHour = now.getHours();
+    const currentMinutes = now.getMinutes();
+    if (currentHour < HOURS[0] || currentHour >= HOURS[HOURS.length - 1] + 1) return null;
+
+    const hourIndex = HOURS.indexOf(currentHour);
+    if (hourIndex === -1) return null;
+
+    // Each row is 56px in DailyView
+    return (hourIndex * 56) + (currentMinutes / 60 * 56);
+  }, [now, dayStr]);
+
   const holiday = getHolidayForDate(currentDate);
   const isNationalHoliday = holiday?.type === "national";
 
