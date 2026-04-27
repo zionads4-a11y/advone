@@ -28,11 +28,17 @@ interface Lead {
   name: string;
   email: string | null;
   phone: string | null;
+  whatsapp: string | null;
+  status: string;
   value: number;
   source: string | null;
   company_id: string;
   kanban_column_id: string | null;
   created_at: string;
+  assigned_to: string | null;
+  lead_score: string | null;
+  pending_data_warning: string | null;
+  bot_disabled: boolean;
 }
 
 interface Company {
