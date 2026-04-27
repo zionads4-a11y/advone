@@ -79,19 +79,21 @@ export default function Agenda() {
   const [defaultEventType, setDefaultEventType] = useState<"meeting" | "reminder" | "block">("reminder");
   const googleRedirectUri = getGoogleRedirectUri();
 
-  const handleSync = useCallback(async () => {
+  const handleSync = useCallback(async (silent = false) => {
     if (!isGoogleConnected) return;
-    setSyncLoading(true);
+    if (!silent) setSyncLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("google-calendar-sync");
       if (error) throw error;
-      toast.success(`${data.count} eventos sincronizados com sucesso!`);
+      if (!silent) {
+        toast.success(`${data.count} eventos sincronizados com sucesso!`);
+      }
       setRefreshKey(k => k + 1);
     } catch (error: any) {
       console.error("Erro ao sincronizar Google Agenda:", error);
-      toast.error("Erro ao sincronizar eventos");
+      if (!silent) toast.error("Erro ao sincronizar eventos");
     } finally {
-      setSyncLoading(false);
+      if (!silent) setSyncLoading(false);
     }
   }, [isGoogleConnected]);
 
@@ -385,7 +387,7 @@ export default function Agenda() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={handleSync}
+              onClick={() => handleSync(false)}
               disabled={syncLoading}
               className="gap-2 text-xs h-9"
             >
@@ -585,7 +587,10 @@ export default function Agenda() {
       <CreateEventDialog
         open={createDialogOpen}
         onOpenChange={(open) => { setCreateDialogOpen(open); if (!open) setEditEvent(null); }}
-        onCreated={() => setRefreshKey((k) => k + 1)}
+        onCreated={(sync) => { 
+          setRefreshKey((k) => k + 1);
+          if (sync) handleSync(true);
+        }}
         defaultDate={selectedDate}
         defaultTime={selectedTime}
         defaultType={defaultEventType}

@@ -99,7 +99,55 @@ serve(async (req) => {
       accessToken = await refreshGoogleToken(supabaseClient, integration);
     }
 
-    // Fetch events from Google Calendar
+    // Fetch reminders from DB to push to Google if they don't have google_event_id
+    const { data: localReminders, error: localError } = await supabaseClient
+      .from("lead_reminders")
+      .select("*")
+      .eq("created_by", user.id)
+      .is("google_event_id", null);
+
+    if (localError) console.error("Error fetching local reminders:", localError);
+
+    if (localReminders && localReminders.length > 0) {
+      console.log(`Pushing ${localReminders.length} local events to Google`);
+      for (const reminder of localReminders) {
+        try {
+          const googleEvent = {
+            summary: reminder.title,
+            description: reminder.description,
+            start: { dateTime: reminder.due_at },
+            end: { dateTime: reminder.end_at || new Date(new Date(reminder.due_at).getTime() + 60 * 60 * 1000).toISOString() },
+          };
+
+          const pushResponse = await fetch(
+            "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+            {
+              method: "POST",
+              headers: { 
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify(googleEvent),
+            }
+          );
+
+          if (pushResponse.ok) {
+            const pushedData = await pushResponse.json();
+            await supabaseClient
+              .from("lead_reminders")
+              .update({ google_event_id: pushedData.id })
+              .eq("id", reminder.id);
+          } else {
+            const errorData = await pushResponse.json();
+            console.error(`Error pushing event ${reminder.id}:`, errorData);
+          }
+        } catch (pushErr) {
+          console.error(`Error pushing event ${reminder.id}:`, pushErr);
+        }
+      }
+    }
+
+    // Fetch events from Google Calendar to sync back
     const now = new Date();
     const timeMin = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days ago
     const timeMax = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString(); // 90 days ahead
@@ -129,7 +177,7 @@ serve(async (req) => {
     }
 
     const events = eventsData.items || [];
-    console.log(`Found ${events.length} events to sync`);
+    console.log(`Found ${events.length} events from Google to sync`);
 
     for (const event of events) {
       const startTime = event.start?.dateTime || event.start?.date;
