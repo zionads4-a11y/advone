@@ -305,16 +305,19 @@ export default function Agenda() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6 pb-10">
       {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-display font-bold text-foreground">Agenda</h1>
-          <p className="text-sm text-muted-foreground">Lembretes e reuniões agendadas</p>
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between bg-card p-6 rounded-2xl border border-border shadow-sm">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-display font-bold text-foreground tracking-tight">Agenda</h1>
+          <p className="text-sm text-muted-foreground flex items-center gap-2">
+            <CalendarClock className="h-4 w-4" />
+            Lembretes, reuniões e bloqueios de horário
+          </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[200px] h-10 bg-background">
               <SelectValue placeholder="Filtrar por empresa" />
             </SelectTrigger>
             <SelectContent>
@@ -324,27 +327,69 @@ export default function Agenda() {
               ))}
             </SelectContent>
           </Select>
+          
+          <Button 
+            variant="outline"
+            onClick={() => { 
+              setEditEvent(null); 
+              setDefaultEventType("block");
+              setCreateDialogOpen(true); 
+            }} 
+            className="h-10 gap-2 border-destructive/20 text-destructive hover:bg-destructive/5 hover:text-destructive"
+          >
+            <Lock className="h-4 w-4" />
+            Bloquear
+          </Button>
+          <Button 
+            onClick={() => { 
+              setEditEvent(null); 
+              setDefaultEventType("reminder");
+              setCreateDialogOpen(true); 
+            }} 
+            className="h-10 gap-2 shadow-sm"
+          >
+            <Plus className="h-4 w-4" />
+            Novo Evento
+          </Button>
+        </div>
+      </div>
+
+      {/* Toolbar & Sync */}
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+        <div className="flex items-center gap-3 bg-card p-1.5 rounded-xl border border-border shadow-sm w-full sm:w-auto">
+          <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as any)} className="w-full">
+            <TabsList className="grid grid-cols-3 w-full sm:w-[300px] h-9">
+              <TabsTrigger value="day" className="text-xs">Dia</TabsTrigger>
+              <TabsTrigger value="week" className="text-xs">Semana</TabsTrigger>
+              <TabsTrigger value="month" className="text-xs">Mês</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
           {isGoogleConnected && (
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={handleSync}
               disabled={syncLoading}
-              className="gap-2"
+              className="gap-2 text-xs h-9"
             >
-              <RefreshCw className={`h-4 w-4 ${syncLoading ? "animate-spin" : ""}`} />
+              <RefreshCw className={`h-3 w-3 ${syncLoading ? "animate-spin" : ""}`} />
               Sincronizar
             </Button>
           )}
           <Button 
-            variant={isGoogleConnected ? "secondary" : "outline"}
-            className={`gap-2 ${isGoogleConnected ? 'bg-green-100 text-green-700 hover:bg-green-200 border-green-200' : ''}`}
+            variant="outline"
+            size="sm"
+            className={cn(
+              "gap-2 text-xs h-9",
+              isGoogleConnected ? 'bg-green-50 text-green-700 border-green-100 hover:bg-green-100 hover:text-green-800' : ''
+            )}
             onClick={() => {
               if (isGoogleConnected) return;
-              // Using the provided client_id and scopes for the OAuth flow
               const clientId = "181481259367-kqbftmnd121er1dmpvss7l4bjfpt5c3n.apps.googleusercontent.com";
               const redirectUri = `${window.location.origin}/agenda`;
-              console.log("Iniciando OAuth com redirectUri:", redirectUri);
               const scopes = [
                 "openid",
                 "https://www.googleapis.com/auth/userinfo.email",
@@ -359,55 +404,47 @@ export default function Agenda() {
               authUrl.searchParams.set("scope", scopes);
               authUrl.searchParams.set("access_type", "offline");
               authUrl.searchParams.set("prompt", "consent");
-
-
               window.location.href = authUrl.toString();
             }}
           >
             {isGoogleConnected ? (
               <>
-                <Check className="h-4 w-4" />
-                Google Conectado
+                <Check className="h-3 w-3" />
+                Google OK
               </>
             ) : (
               <>
-                <Settings2 className="h-4 w-4" />
+                <Settings2 className="h-3 w-3" />
                 Conectar Google
               </>
             )}
           </Button>
-          <Button 
-            variant="outline"
-            onClick={() => { 
-              setEditEvent(null); 
-              setDefaultEventType("block");
-              setCreateDialogOpen(true); 
-            }} 
-            className="gap-2 border-destructive/30 text-destructive hover:bg-destructive/5 hover:text-destructive"
-          >
-            <Lock className="h-4 w-4" />
-            Fechar Agenda
-          </Button>
-          <Button 
-            onClick={() => { 
-              setEditEvent(null); 
-              setDefaultEventType("reminder");
-              setCreateDialogOpen(true); 
-            }} 
-            className="gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Novo Evento
-          </Button>
         </div>
       </div>
 
-      {/* Reminder banner */}
-      <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm">
-        <Info className="h-4 w-4 shrink-0 text-primary mt-0.5" />
-        <div className="text-foreground/90">
-          <span className="font-medium text-primary">Lembrete:</span> Confira as agendas regularmente e bloqueie horários indisponíveis. Os <span className="font-medium">feriados nacionais</span> já estão automaticamente bloqueados — nenhum agendamento poderá ser criado nessas datas.
+      {/* Navigation & Label */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-1 bg-card rounded-lg border border-border p-1 shadow-sm">
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigateDate("prev")}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={goToToday} className="text-xs font-medium px-3 h-8">Hoje</Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigateDate("next")}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
+        
+        <h2 className="text-lg font-semibold text-foreground capitalize flex-1 text-center sm:text-left">
+          {getNavigationLabel()}
+        </h2>
+      </div>
+
+      {/* Reminder banner - made more subtle */}
+      <div className="flex items-center gap-3 rounded-xl border border-primary/10 bg-primary/5 px-4 py-2 text-xs">
+        <Info className="h-3.5 w-3.5 shrink-0 text-primary" />
+        <p className="text-foreground/70">
+          <span className="font-semibold text-primary">Dica:</span> Os feriados nacionais são bloqueados automaticamente. Use o botão <strong>Bloquear</strong> para fechar horários personalizados.
+        </p>
       </div>
 
       {/* Navigation bar */}
