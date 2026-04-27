@@ -513,7 +513,7 @@ export default function Agenda() {
           onToggle={handleToggleComplete}
           onEdit={handleEdit}
           onDelete={(r) => setDeleteTarget(r)}
-          onSelectDate={(d) => { setSelectedDate(d); setViewMode("day"); }}
+          onSelectDate={handleSelectDateTime}
         />
       )}
 
@@ -524,6 +524,7 @@ export default function Agenda() {
           onToggle={handleToggleComplete}
           onEdit={handleEdit}
           onDelete={(r) => setDeleteTarget(r)}
+          onSelectTime={handleSelectDateTime}
         />
       )}
 
@@ -532,6 +533,7 @@ export default function Agenda() {
         onOpenChange={(open) => { setCreateDialogOpen(open); if (!open) setEditEvent(null); }}
         onCreated={() => setRefreshKey((k) => k + 1)}
         defaultDate={selectedDate}
+        defaultTime={selectedTime}
         companies={companies}
         preselectedCompanyId={selectedCompany !== "all" ? selectedCompany : undefined}
         editEvent={editEvent}
