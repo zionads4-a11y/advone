@@ -114,7 +114,7 @@ export function WeeklyView({ currentDate, reminders, onToggle, onEdit, onDelete,
                     "border-l border-border/30 p-0.5 min-h-[52px] hover:bg-muted/20 transition-colors cursor-pointer",
                     isNationalHoliday && "bg-amber-500/5 bg-[repeating-linear-gradient(45deg,transparent,transparent_8px,hsl(var(--muted))_8px,hsl(var(--muted))_9px)]"
                   )}
-                  onClick={() => onSelectDate(day)}
+                  onClick={() => onSelectDate(day, hour)}
                 >
                   {events.map((ev) => (
                     <WeekEventChip key={ev.id} event={ev} onToggle={onToggle} onEdit={onEdit} onDelete={onDelete} />
