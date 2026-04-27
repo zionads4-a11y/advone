@@ -856,7 +856,12 @@ Antes de responder:
         }
 
         if (fnName === "decide_lead") {
-          try {
+          // 🛡️ Prevenção de qualificação duplicada: se o lead já tiver um score definitivo e não for SDR, evitamos re-classificar
+          const { data: existingLead } = await supabase.from("leads").select("lead_score, bot_agent_phase").eq("id", leadId).maybeSingle();
+          if (existingLead?.lead_score && existingLead?.bot_agent_phase && existingLead.bot_agent_phase !== "sdr") {
+            toolResult = { success: true, classification: existingLead.lead_score, note: "O lead já foi classificado anteriormente." };
+          } else {
+            try {
             const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
             const decRes = await fetch(
               `${Deno.env.get("SUPABASE_URL")}/functions/v1/decision-engine`,
