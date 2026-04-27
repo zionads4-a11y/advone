@@ -58,6 +58,21 @@ export default function Agenda() {
   const [deleteTarget, setDeleteTarget] = useState<Reminder | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [viewMode, setViewMode] = useState<"month" | "week" | "day">("month");
+  const [isGoogleConnected, setIsGoogleConnected] = useState(false);
+
+  useEffect(() => {
+    const checkGoogleConnection = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from("user_integrations")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("provider", "google")
+        .maybeSingle();
+      setIsGoogleConnected(!!data);
+    };
+    checkGoogleConnection();
+  }, [user, refreshKey]);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
