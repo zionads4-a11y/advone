@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, CalendarClock, Check, Clock, AlertTriangle, Plus, Repeat, Pencil, Trash2, ChevronLeft, ChevronRight, PartyPopper, Info, Settings2 } from "lucide-react";
+import { Loader2, CalendarClock, Check, Clock, AlertTriangle, Plus, Repeat, Pencil, Trash2, ChevronLeft, ChevronRight, PartyPopper, Info, Settings2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { format, isSameDay, isAfter, isBefore, addDays, addWeeks, addMonths, subDays, subWeeks, subMonths, startOfWeek, endOfWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -59,6 +59,29 @@ export default function Agenda() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [viewMode, setViewMode] = useState<"month" | "week" | "day">("month");
   const [isGoogleConnected, setIsGoogleConnected] = useState(false);
+  const [syncLoading, setSyncLoading] = useState(false);
+
+  const handleSync = useCallback(async () => {
+    if (!isGoogleConnected) return;
+    setSyncLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("google-calendar-sync");
+      if (error) throw error;
+      toast.success(`${data.count} eventos sincronizados com sucesso!`);
+      setRefreshKey(k => k + 1);
+    } catch (error: any) {
+      console.error("Erro ao sincronizar Google Agenda:", error);
+      toast.error("Erro ao sincronizar eventos");
+    } finally {
+      setSyncLoading(false);
+    }
+  }, [isGoogleConnected]);
+
+  useEffect(() => {
+    if (isGoogleConnected) {
+      handleSync();
+    }
+  }, [isGoogleConnected]);
 
   useEffect(() => {
     const checkGoogleConnection = async () => {
@@ -284,11 +307,23 @@ export default function Agenda() {
               ))}
             </SelectContent>
           </Select>
+          {isGoogleConnected && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSync}
+              disabled={syncLoading}
+              className="gap-2"
+            >
+              <RefreshCw className={`h-4 w-4 ${syncLoading ? "animate-spin" : ""}`} />
+              Sincronizar
+            </Button>
+          )}
           <Button 
             variant={isGoogleConnected ? "secondary" : "outline"}
             className={`gap-2 ${isGoogleConnected ? 'bg-green-100 text-green-700 hover:bg-green-200 border-green-200' : ''}`}
-            disabled={isGoogleConnected}
             onClick={() => {
+              if (isGoogleConnected) return;
               const clientId = "181481259367-kqbftmnd121er1dmpvss7l4bjfpt5c3n.apps.googleusercontent.com";
               const redirectUri = `${window.location.origin}/agenda`;
               const scope = "https://www.googleapis.com/auth/calendar";
