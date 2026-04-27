@@ -514,7 +514,7 @@ const sdrTools = [
     type: "function",
     function: {
       name: "schedule_appointment",
-      description: "Agenda uma consulta/reunião para o lead. PRÉ-REQUISITO OBRIGATÓRIO: o CPF do cliente já deve ter sido registrado via register_client_cpf. Caso contrário, a chamada será rejeitada.",
+      description: "Agenda uma consulta/reunião para o lead. Use APÓS o lead confirmar a data/hora oferecida via check_availability. NÃO peça CPF.",
       parameters: {
         type: "object",
         properties: {
