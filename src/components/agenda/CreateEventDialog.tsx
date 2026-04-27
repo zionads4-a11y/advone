@@ -58,7 +58,7 @@ export function CreateEventDialog({
   const [saving, setSaving] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [eventType, setEventType] = useState<"meeting" | "reminder">("reminder");
+  const [eventType, setEventType] = useState<"meeting" | "reminder" | "block">("reminder");
   const [dueDate, setDueDate] = useState("");
   const [dueTime, setDueTime] = useState("10:00");
   const [companyId, setCompanyId] = useState("");
