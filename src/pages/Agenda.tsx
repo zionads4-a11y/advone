@@ -285,12 +285,27 @@ export default function Agenda() {
             </SelectContent>
           </Select>
           <Button 
-            variant="outline"
+            variant={isGoogleConnected ? "success" : "outline"}
             className="gap-2"
-            onClick={() => window.open(`https://accounts.google.com/o/oauth2/v2/auth?client_id=YOUR_CLIENT_ID&redirect_uri=${window.location.origin}/agenda&response_type=code&scope=https://www.googleapis.com/auth/calendar&access_type=offline&prompt=consent`, '_self')}
+            disabled={isGoogleConnected}
+            onClick={() => {
+              const clientId = "181481259367-kqbftmnd121er1dmpvss7l4bjfpt5c3n.apps.googleusercontent.com"; // O seu Client ID
+              const redirectUri = `${window.location.origin}/agenda`;
+              const scope = "https://www.googleapis.com/auth/calendar";
+              window.open(`https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&access_type=offline&prompt=consent`, '_self');
+            }}
           >
-            <Settings2 className="h-4 w-4" />
-            Conectar Google
+            {isGoogleConnected ? (
+              <>
+                <Check className="h-4 w-4" />
+                Google Conectado
+              </>
+            ) : (
+              <>
+                <Settings2 className="h-4 w-4" />
+                Conectar Google
+              </>
+            )}
           </Button>
           <Button onClick={() => { setEditEvent(null); setCreateDialogOpen(true); }} className="gap-2">
             <Plus className="h-4 w-4" />
