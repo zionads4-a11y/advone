@@ -1,0 +1,1 @@
+ALTER FUNCTION public.normalize_profile_email() SET search_path = public;

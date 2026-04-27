@@ -15,6 +15,7 @@ export default function Profile() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
@@ -34,12 +35,13 @@ export default function Profile() {
     if (!user) return;
     const { data } = await supabase
       .from("profiles")
-      .select("full_name, phone, avatar_url")
+      .select("full_name, email, phone, avatar_url")
       .eq("user_id", user.id)
       .maybeSingle();
 
     if (data) {
       setFullName(data.full_name || "");
+      setEmail(data.email || "");
       setPhone(data.phone || "");
       setAvatarUrl(data.avatar_url);
     }
@@ -98,16 +100,41 @@ export default function Profile() {
 
   const handleSaveProfile = async () => {
     if (!user) return;
+
+    if (!fullName.trim()) {
+      toast.error("O nome é obrigatório");
+      return;
+    }
+
+    if (!email.trim()) {
+      toast.error("O e-mail é obrigatório");
+      return;
+    }
+
+    // Basic email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Por favor, insira um e-mail válido");
+      return;
+    }
+
     setSavingProfile(true);
+
+    const normalizedEmail = email.toLowerCase().trim();
 
     const { error } = await supabase
       .from("profiles")
-      .update({ full_name: fullName, phone })
+      .update({ 
+        full_name: fullName.trim(), 
+        email: normalizedEmail,
+        phone: phone.trim() 
+      })
       .eq("user_id", user.id);
 
     if (error) {
       toast.error("Erro ao salvar: " + error.message);
     } else {
+      setEmail(normalizedEmail);
       toast.success("Perfil atualizado!");
     }
     setSavingProfile(false);
@@ -224,7 +251,7 @@ export default function Profile() {
 
           <Separator />
 
-          {/* Name & Phone */}
+          {/* Name & Email & Phone */}
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="fullName">Nome completo</Label>
@@ -233,6 +260,16 @@ export default function Profile() {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Seu nome"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">E-mail</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="seu@email.com"
               />
             </div>
             <div className="space-y-2">
