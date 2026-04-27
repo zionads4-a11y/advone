@@ -913,12 +913,31 @@ Antes de responder:
             const appointmentDate = args.date || getNextAvailableDays(1)[0];
             const appointmentTime = args.time || "10:00";
             const dueAt = `${appointmentDate}T${appointmentTime}:00-03:00`;
-            const modality = args.modality || "online";
+            let modality = args.modality || "online";
+            let unitName = args.unit || "";
+
+            // 🛡️ Validação de Modality e Unit (evita alucinação de endereços)
+            const activeOfficesList = companyOffices || [];
+            const hasOffices = activeOfficesList.length > 0;
+
+            if (!hasOffices) {
+              modality = "online";
+              unitName = "Online";
+            } else if (modality === "presencial") {
+              const matchedOffice = activeOfficesList.find((o: any) => o.name.toLowerCase().trim() === unitName.toLowerCase().trim());
+              if (matchedOffice) {
+                unitName = matchedOffice.name;
+              } else {
+                unitName = activeOfficesList[0].name;
+              }
+            } else {
+              modality = "online";
+              unitName = "Online";
+            }
 
             const { data: leadData } = await supabase.from("leads").select("name, phone, whatsapp").eq("id", leadId).single();
             const lName = leadData?.name || "Lead";
             const leadPhone = leadData?.whatsapp || leadData?.phone || cleanPhone || "Não informado";
-            const unitName = args.unit || "";
 
             await supabase.from("lead_reminders").insert({
               lead_id: leadId, company_id: companyId, created_by: "00000000-0000-0000-0000-000000000000",
