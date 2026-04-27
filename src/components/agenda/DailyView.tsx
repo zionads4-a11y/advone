@@ -167,6 +167,8 @@ function DayEventCard({
           ? "bg-destructive/10 border border-destructive/20"
           : event.reminder_type === "meeting"
           ? "bg-primary/10 border border-primary/20"
+          : event.reminder_type === "block"
+          ? "bg-slate-100 border border-slate-300 dark:bg-slate-800 dark:border-slate-700"
           : "bg-accent/30 border border-accent/40"
       )}
       onClick={() => onEdit(event)}
