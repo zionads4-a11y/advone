@@ -26,6 +26,7 @@ interface CreateEventDialogProps {
   onOpenChange: (open: boolean) => void;
   onCreated: () => void;
   defaultDate?: Date;
+  defaultTime?: string;
   companies: { id: string; name: string }[];
   leads?: { id: string; name: string; company_id: string }[];
   preselectedCompanyId?: string;
@@ -47,6 +48,7 @@ export function CreateEventDialog({
   onOpenChange,
   onCreated,
   defaultDate,
+  defaultTime,
   companies,
   leads,
   preselectedCompanyId,
@@ -56,7 +58,7 @@ export function CreateEventDialog({
   const [saving, setSaving] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [eventType, setEventType] = useState<"meeting" | "reminder">("reminder");
+  const [eventType, setEventType] = useState<"meeting" | "reminder" | "block">("reminder");
   const [dueDate, setDueDate] = useState("");
   const [dueTime, setDueTime] = useState("10:00");
   const [companyId, setCompanyId] = useState("");
@@ -71,7 +73,10 @@ export function CreateEventDialog({
         const cleanTitle = editEvent.title.replace(/^(📅|🔔)\s*/, "");
         setTitle(cleanTitle);
         setDescription(editEvent.description || "");
-        setEventType(editEvent.reminder_type === "meeting" ? "meeting" : "reminder");
+        setEventType(
+          editEvent.reminder_type === "meeting" ? "meeting" : 
+          editEvent.reminder_type === "block" ? "block" : "reminder"
+        );
         setDueDate(format(new Date(editEvent.due_at), "yyyy-MM-dd"));
         setDueTime(format(new Date(editEvent.due_at), "HH:mm"));
         setCompanyId(editEvent.company_id);
@@ -86,13 +91,13 @@ export function CreateEventDialog({
         setDescription("");
         setEventType("reminder");
         setDueDate(defaultDate ? format(defaultDate, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"));
-        setDueTime("10:00");
+        setDueTime(defaultTime || "10:00");
         setCompanyId(preselectedCompanyId || (companies.length === 1 ? companies[0].id : ""));
         setLeadId("none");
         setRecurrence({ type: "none" });
       }
     }
-  }, [open, defaultDate, companies, preselectedCompanyId, editEvent]);
+  }, [open, defaultDate, defaultTime, companies, preselectedCompanyId, editEvent]);
 
   useEffect(() => {
     if (!companyId || leads) return;
@@ -152,7 +157,7 @@ export function CreateEventDialog({
       lead_id: finalLeadId,
       company_id: companyId,
       created_by: user?.id || "00000000-0000-0000-0000-000000000000",
-      title: `${eventType === "meeting" ? "📅" : "🔔"} ${title}`,
+      title: `${eventType === "meeting" ? "📅" : eventType === "block" ? "🚫" : "🔔"} ${title}`,
       description: description || null,
       reminder_type: eventType,
       due_at: dueAt,
@@ -201,14 +206,18 @@ export function CreateEventDialog({
 
         <div className="space-y-4 pt-2">
           {/* Event Type */}
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             <Button type="button" variant={eventType === "reminder" ? "default" : "outline"} size="sm"
-              onClick={() => setEventType("reminder")} className="gap-2">
+              onClick={() => { setEventType("reminder"); if (title === "BLOQUEADO") setTitle(""); }} className="gap-2 px-1">
               🔔 Tarefa
             </Button>
             <Button type="button" variant={eventType === "meeting" ? "default" : "outline"} size="sm"
-              onClick={() => setEventType("meeting")} className="gap-2">
+              onClick={() => { setEventType("meeting"); if (title === "BLOQUEADO") setTitle(""); }} className="gap-2 px-1">
               📅 Reunião
+            </Button>
+            <Button type="button" variant={eventType === "block" ? "default" : "outline"} size="sm"
+              onClick={() => { setEventType("block"); setTitle("BLOQUEADO"); }} className="gap-2 px-1">
+              🚫 Bloqueio
             </Button>
           </div>
 

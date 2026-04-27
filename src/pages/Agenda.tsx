@@ -54,6 +54,7 @@ export default function Agenda() {
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [loading, setLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [selectedTime, setSelectedTime] = useState<string | undefined>(undefined);
   const [editEvent, setEditEvent] = useState<any>(null);
   const [deleteTarget, setDeleteTarget] = useState<Reminder | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -260,6 +261,17 @@ export default function Agenda() {
       setCurrentMonth(newMonth);
       return prev;
     });
+  };
+  
+  const handleSelectDateTime = (date: Date, hour?: number) => {
+    setSelectedDate(date);
+    if (hour !== undefined) {
+      setSelectedTime(`${String(hour).padStart(2, "0")}:00`);
+    } else {
+      setSelectedTime(undefined);
+    }
+    setEditEvent(null);
+    setCreateDialogOpen(true);
   };
 
   const goToToday = () => {
@@ -501,7 +513,7 @@ export default function Agenda() {
           onToggle={handleToggleComplete}
           onEdit={handleEdit}
           onDelete={(r) => setDeleteTarget(r)}
-          onSelectDate={(d) => { setSelectedDate(d); setViewMode("day"); }}
+          onSelectDate={handleSelectDateTime}
         />
       )}
 
@@ -512,6 +524,7 @@ export default function Agenda() {
           onToggle={handleToggleComplete}
           onEdit={handleEdit}
           onDelete={(r) => setDeleteTarget(r)}
+          onSelectTime={handleSelectDateTime}
         />
       )}
 
@@ -520,6 +533,7 @@ export default function Agenda() {
         onOpenChange={(open) => { setCreateDialogOpen(open); if (!open) setEditEvent(null); }}
         onCreated={() => setRefreshKey((k) => k + 1)}
         defaultDate={selectedDate}
+        defaultTime={selectedTime}
         companies={companies}
         preselectedCompanyId={selectedCompany !== "all" ? selectedCompany : undefined}
         editEvent={editEvent}

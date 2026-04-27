@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { format, isBefore } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Check, Clock, AlertTriangle, Repeat, Pencil, Trash2, PartyPopper } from "lucide-react";
+import { Check, Clock, AlertTriangle, Repeat, Pencil, Trash2, PartyPopper, Ban } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { getHolidayForDate } from "@/lib/brazilianHolidays";
@@ -30,6 +30,7 @@ interface DailyViewProps {
   onToggle: (id: string, completed: boolean) => void;
   onEdit: (r: Reminder) => void;
   onDelete: (r: Reminder) => void;
+  onSelectTime?: (date: Date, hour: number) => void;
 }
 
 const HOURS = Array.from({ length: 18 }, (_, i) => i + 5); // 5:00 to 22:00
@@ -47,7 +48,7 @@ function getRecurrenceLabel(rule: string): string {
   return labels[rule] || rule;
 }
 
-export function DailyView({ currentDate, reminders, onToggle, onEdit, onDelete }: DailyViewProps) {
+export function DailyView({ currentDate, reminders, onToggle, onEdit, onDelete, onSelectTime }: DailyViewProps) {
   const dayStr = format(currentDate, "yyyy-MM-dd");
   const now = new Date();
 
@@ -64,6 +65,21 @@ export function DailyView({ currentDate, reminders, onToggle, onEdit, onDelete }
     return map;
   }, [reminders, dayStr]);
 
+  const currentTimeLinePos = useMemo(() => {
+    const isToday = format(now, "yyyy-MM-dd") === dayStr;
+    if (!isToday) return null;
+
+    const currentHour = now.getHours();
+    const currentMinutes = now.getMinutes();
+    if (currentHour < HOURS[0] || currentHour >= HOURS[HOURS.length - 1] + 1) return null;
+
+    const hourIndex = HOURS.indexOf(currentHour);
+    if (hourIndex === -1) return null;
+
+    // Each row is 56px in DailyView
+    return (hourIndex * 56) + (currentMinutes / 60 * 56);
+  }, [now, dayStr]);
+
   const holiday = getHolidayForDate(currentDate);
   const isNationalHoliday = holiday?.type === "national";
 
@@ -71,7 +87,7 @@ export function DailyView({ currentDate, reminders, onToggle, onEdit, onDelete }
     <div className="rounded-xl border border-border bg-card overflow-hidden">
       {/* Header */}
       <div className={cn(
-        "p-4 border-b border-border",
+        "p-4 border-b border-border sticky top-0 z-20 backdrop-blur-sm",
         isNationalHoliday ? "bg-amber-500/10" : "bg-muted/30"
       )}>
         <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
@@ -90,7 +106,16 @@ export function DailyView({ currentDate, reminders, onToggle, onEdit, onDelete }
       </div>
 
       {/* Time grid */}
-      <div className="max-h-[600px] overflow-y-auto">
+      <div className="max-h-[600px] overflow-y-auto relative">
+        {currentTimeLinePos !== null && (
+          <div 
+            className="absolute left-[60px] right-0 z-10 flex items-center pointer-events-none"
+            style={{ top: `${currentTimeLinePos}px` }}
+          >
+            <div className="w-2 h-2 rounded-full bg-red-500 -ml-1" />
+            <div className="flex-1 h-[2px] bg-red-500" />
+          </div>
+        )}
         {HOURS.map((hour) => {
           const events = eventsByHour.get(hour) || [];
           const isCurrentHour = now.getHours() === hour && format(now, "yyyy-MM-dd") === dayStr;
@@ -98,9 +123,10 @@ export function DailyView({ currentDate, reminders, onToggle, onEdit, onDelete }
             <div
               key={hour}
               className={cn(
-                "grid grid-cols-[60px_1fr] border-b border-border/50 min-h-[56px]",
+                "grid grid-cols-[60px_1fr] border-b border-border/50 min-h-[56px] hover:bg-muted/10 transition-colors cursor-pointer",
                 isCurrentHour && "bg-primary/5"
               )}
+              onClick={() => onSelectTime?.(currentDate, hour)}
             >
               <div className="p-2 text-xs text-muted-foreground text-right pr-3 pt-2 font-mono">
                 {String(hour).padStart(2, "0")}:00
@@ -141,6 +167,8 @@ function DayEventCard({
           ? "bg-destructive/10 border border-destructive/20"
           : event.reminder_type === "meeting"
           ? "bg-primary/10 border border-primary/20"
+          : event.reminder_type === "block"
+          ? "bg-slate-100 border border-slate-300 dark:bg-slate-800 dark:border-slate-700"
           : "bg-accent/30 border border-accent/40"
       )}
       onClick={() => onEdit(event)}
@@ -156,7 +184,7 @@ function DayEventCard({
             : "bg-primary/20 text-primary hover:bg-primary/30"
         )}
       >
-        {event.completed ? <Check className="h-3 w-3" /> : isOverdue ? <AlertTriangle className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
+        {event.completed ? <Check className="h-3 w-3" /> : isOverdue ? <AlertTriangle className="h-3 w-3" /> : event.reminder_type === 'block' ? <Ban className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
       </button>
 
       <div className="flex-1 min-w-0">
@@ -168,7 +196,7 @@ function DayEventCard({
             {format(new Date(event.due_at), "HH:mm")}
           </span>
           <Badge variant="outline" className="text-[9px] px-1.5 py-0">
-            {event.reminder_type === "meeting" ? "📅 Reunião" : "🔔 Tarefa"}
+            {event.reminder_type === "meeting" ? "📅 Reunião" : event.reminder_type === "block" ? "🚫 Bloqueio" : "🔔 Tarefa"}
           </Badge>
           {event.recurrence_rule && (
             <Badge variant="secondary" className="text-[9px] px-1.5 py-0 gap-1">
