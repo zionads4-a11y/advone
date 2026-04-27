@@ -173,6 +173,8 @@ function WeekEventChip({
           ? "bg-destructive/15 text-destructive border-l-2 border-destructive"
           : event.reminder_type === "meeting"
           ? "bg-primary/15 text-primary border-l-2 border-primary"
+          : event.reminder_type === "block"
+          ? "bg-slate-200 text-slate-600 border-l-2 border-slate-400 dark:bg-slate-800 dark:text-slate-400"
           : "bg-accent/50 text-foreground border-l-2 border-accent"
       )}
       onClick={(e) => { e.stopPropagation(); onEdit(event); }}
