@@ -564,7 +564,6 @@ Seu objetivo é AGENDAR uma conversa do lead com o(a) advogado(a). Você NÃO é
 6. NUNCA tire dúvidas técnicas. Leve sempre para o agendamento.
 
 ═══════════════════════════════════════════════════════
-═══════════════════════════════════════════════════════
 🔥 FLUXOS ESPECÍFICOS DESTE ESCRITÓRIO — SIGA À RISCA
 ═══════════════════════════════════════════════════════
 ⚠️ AS REGRAS ABAIXO TÊM PRIORIDADE ABSOLUTA. Se houver conflito entre estas regras e as regras gerais, SIGA ESTAS:
