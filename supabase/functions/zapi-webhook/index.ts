@@ -245,7 +245,7 @@ FLUXO:
 1. Recapitule o caso e o resultado da análise com empatia
 2. Apresente os próximos passos para formalização
 3. Explique os termos do contrato de forma simples
-4. Confirme dados do cliente (nome completo, CPF, endereço)
+4. Confirme dados do cliente (nome completo, endereço)
 5. Quando o cliente confirmar, use "finalize_contract" para registrar
 6. Após fechar, envie mensagem de boas-vindas como cliente
 
