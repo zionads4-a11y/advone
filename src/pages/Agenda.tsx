@@ -46,6 +46,19 @@ interface Reminder {
   parent_event_id?: string | null;
 }
 
+const GOOGLE_OAUTH_FALLBACK_ORIGIN = "https://advone.online";
+
+function getGoogleRedirectUri() {
+  if (typeof window === "undefined") {
+    return `${GOOGLE_OAUTH_FALLBACK_ORIGIN}/agenda`;
+  }
+
+  const { origin, hostname } = window.location;
+  const isPreviewHost = hostname.includes("lovableproject.com") || hostname.startsWith("id-preview--");
+
+  return `${isPreviewHost ? GOOGLE_OAUTH_FALLBACK_ORIGIN : origin}/agenda`;
+}
+
 export default function Agenda() {
   const { user, userRole } = useAuth();
   const { companyIds, isClient, loading: companiesLoading } = useUserCompanies();
@@ -64,6 +77,7 @@ export default function Agenda() {
   const [isGoogleConnected, setIsGoogleConnected] = useState(false);
   const [syncLoading, setSyncLoading] = useState(false);
   const [defaultEventType, setDefaultEventType] = useState<"meeting" | "reminder" | "block">("reminder");
+  const googleRedirectUri = getGoogleRedirectUri();
 
   const handleSync = useCallback(async () => {
     if (!isGoogleConnected) return;
@@ -111,7 +125,7 @@ export default function Agenda() {
           // and store them in the database.
           // For now, let's just show a toast and clear the URL.
           const { error } = await supabase.functions.invoke("google-calendar-auth", {
-            body: { code, redirectUri: `${window.location.origin}/agenda` }
+            body: { code, redirectUri: googleRedirectUri }
           });
           
           if (error) throw error;
@@ -389,7 +403,7 @@ export default function Agenda() {
             onClick={() => {
               if (isGoogleConnected) return;
               const clientId = "181481259367-kqbftmnd121er1dmpvss7l4bjfpt5c3n.apps.googleusercontent.com";
-              const redirectUri = `${window.location.origin}/agenda`;
+              const redirectUri = googleRedirectUri;
               const scopes = [
                 "openid",
                 "https://www.googleapis.com/auth/userinfo.email",
