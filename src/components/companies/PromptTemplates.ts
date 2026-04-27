@@ -111,7 +111,7 @@ Prefere mais cedo ou mais no final do dia?"
 Após o horário, peça o NOME COMPLETO.
 "Perfeito! Já estou organizando tudo por aqui e a equipe já entra em contato com você 🙂"`;
 
-export const PROMPT_TEMPLATES = {
-  trabalhista: LAURA_TRABALHISTA_PROMPT,
-  previdenciario: LAURA_PREVIDENCIARIO_PROMPT,
-};
+export const PROMPT_TEMPLATES = [
+  { id: "trab", name: "Trabalhista Otimizado", prompt: LAURA_TRABALHISTA_PROMPT },
+  { id: "prev", name: "Previdenciário Otimizado", prompt: LAURA_PREVIDENCIARIO_PROMPT },
+];
