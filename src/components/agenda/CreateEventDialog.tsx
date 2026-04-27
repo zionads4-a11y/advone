@@ -48,6 +48,7 @@ export function CreateEventDialog({
   onOpenChange,
   onCreated,
   defaultDate,
+  defaultTime,
   companies,
   leads,
   preselectedCompanyId,
