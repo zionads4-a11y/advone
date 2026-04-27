@@ -28,11 +28,17 @@ interface Lead {
   name: string;
   email: string | null;
   phone: string | null;
+  whatsapp: string | null;
+  status: string;
   value: number;
   source: string | null;
   company_id: string;
   kanban_column_id: string | null;
   created_at: string;
+  assigned_to: string | null;
+  lead_score: string | null;
+  pending_data_warning: string | null;
+  bot_disabled: boolean;
 }
 
 interface Company {
@@ -93,7 +99,7 @@ export default function Kanban() {
   const fetchColumnsAndLeads = async () => {
     const [columnsRes, leadsRes] = await Promise.all([
       supabase.from("kanban_columns").select("*").eq("company_id", selectedCompanyId).order("position"),
-      supabase.from("leads").select("id, name, email, phone, value, source, company_id, kanban_column_id, created_at, lead_score, pending_data_warning").eq("company_id", selectedCompanyId).order("created_at", { ascending: false }),
+      supabase.from("leads").select("*").eq("company_id", selectedCompanyId).order("created_at", { ascending: false }),
     ]);
     if (columnsRes.data) setKanbanColumns(columnsRes.data as KanbanColumn[]);
     if (leadsRes.data) setLeads(leadsRes.data as Lead[]);
@@ -108,14 +114,30 @@ export default function Kanban() {
   };
 
   const moveLeadToColumn = useCallback(async (leadId: string, columnId: string) => {
+    const targetColumn = kanbanColumns.find(c => c.id === columnId);
+    let newStatus: "won" | "lost" | "contacted" | undefined;
+    
+    if (targetColumn?.is_won) newStatus = "won";
+    else if (targetColumn?.is_lost) newStatus = "lost";
+    else if (targetColumn?.position === 0) newStatus = "contacted";
+
     // Optimistic update
-    setLeads((prev) => prev.map((l) => (l.id === leadId ? { ...l, kanban_column_id: columnId } : l)));
-    const { error } = await supabase.from("leads").update({ kanban_column_id: columnId }).eq("id", leadId);
+    setLeads((prev) => prev.map((l) => (l.id === leadId ? { 
+      ...l, 
+      kanban_column_id: columnId,
+      ...(newStatus ? { status: newStatus } : {})
+    } : l)));
+
+    const { error } = await supabase.from("leads").update({ 
+      kanban_column_id: columnId,
+      ...(newStatus ? { status: newStatus } : {})
+    }).eq("id", leadId);
+
     if (error) {
       toast.error("Erro ao mover lead");
       fetchColumnsAndLeads(); // Revert
     }
-  }, []);
+  }, [kanbanColumns]);
 
   const sortedColumns = useMemo(() => [...kanbanColumns].sort((a, b) => a.position - b.position), [kanbanColumns]);
   const filteredLeads = useMemo(() => filterSource === "all" ? leads : leads.filter((l) => l.source === filterSource), [leads, filterSource]);
@@ -276,7 +298,7 @@ export default function Kanban() {
                       lead={lead}
                       isInMeetingHeld={(col as any).is_meeting_held === true}
                       onClick={() => {
-                        setSelectedLead({ ...lead, status: "new", whatsapp: null, assigned_to: null });
+                        setSelectedLead(lead);
                         setDrawerOpen(true);
                       }}
                       onValueUpdate={(leadId, newValue) => {
