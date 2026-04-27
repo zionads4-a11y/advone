@@ -928,12 +928,10 @@ Antes de responder:
           if (leadId) {
             const { data: leadCheck } = await supabase
               .from("leads")
-              .select("cpf_cliente_final, name")
+              .select("name")
               .eq("id", leadId)
               .maybeSingle();
             leadCheckRow = leadCheck;
-            const cpfStored = String(leadCheck?.cpf_cliente_final || "").replace(/\D/g, "");
-            if (!isValidCPF(cpfStored)) pendingItems.push("CPF");
             if (!isValidFullName(leadCheck?.name || "")) pendingItems.push("Nome completo");
           }
           const pendingWarning = pendingItems.length > 0 ? `${pendingItems.join(" + ")} pendente(s)` : null;
