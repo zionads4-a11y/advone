@@ -241,6 +241,14 @@ export default function Agenda() {
               ))}
             </SelectContent>
           </Select>
+          <Button 
+            variant="outline"
+            className="gap-2"
+            onClick={() => window.open(`https://accounts.google.com/o/oauth2/v2/auth?client_id=YOUR_CLIENT_ID&redirect_uri=${window.location.origin}/agenda&response_type=code&scope=https://www.googleapis.com/auth/calendar&access_type=offline&prompt=consent`, '_self')}
+          >
+            <Settings2 className="h-4 w-4" />
+            Conectar Google
+          </Button>
           <Button onClick={() => { setEditEvent(null); setCreateDialogOpen(true); }} className="gap-2">
             <Plus className="h-4 w-4" />
             Novo Evento
