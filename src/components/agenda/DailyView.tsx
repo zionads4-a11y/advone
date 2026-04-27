@@ -161,68 +161,83 @@ function DayEventCard({
   return (
     <div
       className={cn(
-        "group flex items-start gap-2 rounded-lg p-2 transition-colors cursor-pointer",
+        "group flex items-start gap-3 rounded-lg border p-3 transition-all cursor-pointer shadow-sm hover:shadow-md",
         event.completed
-          ? "bg-muted/30 opacity-60"
+          ? "bg-muted/30 border-border opacity-60"
           : isOverdue
-          ? "bg-destructive/10 border border-destructive/20"
+          ? "bg-destructive/5 border-destructive/30"
           : event.reminder_type === "meeting"
-          ? "bg-primary/10 border border-primary/20"
+          ? "bg-primary/5 border-primary/20"
           : event.reminder_type === "block"
-          ? "bg-slate-100 border border-slate-300 dark:bg-slate-800 dark:border-slate-700"
-          : "bg-accent/30 border border-accent/40"
+          ? "bg-slate-100 border-slate-300 dark:bg-slate-800 dark:border-slate-700"
+          : "bg-background border-border"
       )}
       onClick={() => onEdit(event)}
     >
-      <button
-        onClick={(e) => { e.stopPropagation(); onToggle(event.id, !event.completed); }}
+      <div 
         className={cn(
-          "mt-0.5 shrink-0 rounded-full p-1 transition-colors",
-          event.completed
-            ? "bg-muted text-muted-foreground hover:bg-muted/80"
-            : isOverdue
-            ? "bg-destructive/20 text-destructive hover:bg-destructive/30"
-            : "bg-primary/20 text-primary hover:bg-primary/30"
+          "w-1 self-stretch rounded-full",
+          event.completed ? "bg-muted-foreground/30" :
+          isOverdue ? "bg-destructive" :
+          event.reminder_type === "meeting" ? "bg-primary" :
+          event.reminder_type === "block" ? "bg-slate-500" :
+          "bg-accent"
         )}
-      >
-        {event.completed ? <Check className="h-3 w-3" /> : isOverdue ? <AlertTriangle className="h-3 w-3" /> : event.reminder_type === 'block' ? <Ban className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
-      </button>
+      />
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className={cn("text-sm font-medium", event.completed && "line-through text-muted-foreground")}>
-            {event.title.replace(/^(📅|🔔)\s*/, "")}
-          </span>
-          <span className="text-[10px] text-muted-foreground font-mono">
-            {format(new Date(event.due_at), "HH:mm")}
-            {event.reminder_type === "meeting" && event.end_at && ` - ${format(new Date(event.end_at), "HH:mm")}`}
-          </span>
-          <Badge variant="outline" className="text-[9px] px-1.5 py-0">
-            {event.reminder_type === "meeting" ? "📅 Reunião" : event.reminder_type === "block" ? "🚫 Fechar Dia" : "🔔 Tarefa"}
-          </Badge>
-          {event.recurrence_rule && (
-            <Badge variant="secondary" className="text-[9px] px-1.5 py-0 gap-1">
-              <Repeat className="h-2.5 w-2.5" />
-              {getRecurrenceLabel(event.recurrence_rule)}
-            </Badge>
-          )}
+        <div className="flex items-center justify-between gap-2 mb-1">
+          <div className="flex items-center gap-2">
+            <span className={cn(
+              "text-sm font-semibold", 
+              event.completed ? "line-through text-muted-foreground" : "text-foreground"
+            )}>
+              {event.title.replace(/^(📅|🔔)\s*/, "")}
+            </span>
+            {event.recurrence_rule && (
+              <span title={getRecurrenceLabel(event.recurrence_rule)}>
+                <Repeat className="h-3 w-3 text-muted-foreground" />
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+              {format(new Date(event.due_at), "HH:mm")}
+              {event.reminder_type === "meeting" && event.end_at && ` - ${format(new Date(event.end_at), "HH:mm")}`}
+            </span>
+          </div>
         </div>
-        {event.description && (
-          <p className="text-xs text-muted-foreground mt-0.5 truncate">{event.description}</p>
-        )}
-        <div className="flex items-center gap-2 mt-0.5 text-[10px] text-muted-foreground">
-          {event.lead_name && event.lead_name !== "Agenda Geral" && <span className="text-primary/70">{event.lead_name}</span>}
-          {event.company_name && <span>• {event.company_name}</span>}
-        </div>
-      </div>
 
-      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button onClick={(e) => { e.stopPropagation(); onEdit(event); }} className="p-1 rounded hover:bg-muted" title="Editar">
-          <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
-        </button>
-        <button onClick={(e) => { e.stopPropagation(); onDelete(event); }} className="p-1 rounded hover:bg-destructive/10" title="Excluir">
-          <Trash2 className="h-3.5 w-3.5 text-destructive" />
-        </button>
+        {event.description && (
+          <p className="text-xs text-muted-foreground mb-2 line-clamp-1">{event.description}</p>
+        )}
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+            {event.lead_name && event.lead_name !== "Agenda Geral" && (
+              <Badge variant="secondary" className="px-1 py-0 h-4 font-normal bg-primary/10 text-primary border-none">
+                {event.lead_name}
+              </Badge>
+            )}
+            {event.company_name && <span className="opacity-70">{event.company_name}</span>}
+          </div>
+          
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button
+              onClick={(e) => { e.stopPropagation(); onToggle(event.id, !event.completed); }}
+              className={cn(
+                "p-1.5 rounded-full transition-colors",
+                event.completed ? "bg-success/20 text-success" : "bg-muted text-muted-foreground hover:bg-success/10 hover:text-success"
+              )}
+              title={event.completed ? "Marcar como pendente" : "Concluir"}
+            >
+              <Check className="h-3.5 w-3.5" />
+            </button>
+            <button onClick={(e) => { e.stopPropagation(); onDelete(event); }} className="p-1.5 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive" title="Excluir">
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

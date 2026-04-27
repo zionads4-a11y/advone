@@ -167,35 +167,49 @@ function WeekEventChip({
   return (
     <div
       className={cn(
-        "group relative rounded px-1.5 py-0.5 text-[10px] leading-tight mb-0.5 cursor-pointer transition-colors",
+        "group relative rounded-md border p-1 text-[10px] leading-tight mb-1 cursor-pointer transition-all hover:shadow-sm",
         event.completed
-          ? "bg-muted/40 text-muted-foreground line-through"
+          ? "bg-muted/40 border-border/50 text-muted-foreground line-through"
           : isOverdue
-          ? "bg-destructive/15 text-destructive border-l-2 border-destructive"
+          ? "bg-destructive/5 border-destructive/30 text-destructive"
           : event.reminder_type === "meeting"
-          ? "bg-primary/15 text-primary border-l-2 border-primary"
+          ? "bg-primary/5 border-primary/20 text-primary"
           : event.reminder_type === "block"
-          ? "bg-slate-200 text-slate-600 border-l-2 border-slate-400 dark:bg-slate-800 dark:text-slate-400"
-          : "bg-accent/50 text-foreground border-l-2 border-accent"
+          ? "bg-slate-100 border-slate-300 text-slate-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400"
+          : "bg-background border-border text-foreground"
       )}
       onClick={(e) => { e.stopPropagation(); onEdit(event); }}
     >
-      <div className="font-medium truncate pr-8">
-        {format(new Date(event.due_at), "HH:mm")}
-        {event.reminder_type === "meeting" && event.end_at && ` - ${format(new Date(event.end_at), "HH:mm")}`}
-        {" "}{event.title.replace(/^(📅|🔔)\s*/, "")}
+      <div className="flex items-center gap-1 font-bold mb-0.5">
+        <span className="shrink-0">{format(new Date(event.due_at), "HH:mm")}</span>
+        <div 
+          className={cn(
+            "w-1 h-2 rounded-full",
+            event.completed ? "bg-muted-foreground/30" :
+            isOverdue ? "bg-destructive" :
+            event.reminder_type === "meeting" ? "bg-primary" :
+            event.reminder_type === "block" ? "bg-slate-500" :
+            "bg-accent"
+          )}
+        />
       </div>
+      
+      <div className="font-semibold truncate">
+        {event.title.replace(/^(📅|🔔)\s*/, "")}
+      </div>
+
       {event.lead_name && event.lead_name !== "Agenda Geral" && (
-        <div className="truncate text-[9px] opacity-70">{event.lead_name}</div>
+        <div className="truncate text-[9px] mt-0.5 opacity-80 font-medium">
+          {event.lead_name}
+        </div>
       )}
-      <div className="absolute right-0 top-0 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button onClick={(e) => { e.stopPropagation(); onToggle(event.id, !event.completed); }}
-          className="p-0.5 rounded hover:bg-muted" title={event.completed ? "Pendente" : "Concluir"}>
+
+      <div className="absolute top-0 right-0 p-0.5 flex gap-0.5 opacity-0 group-hover:opacity-100 bg-inherit rounded-bl-md">
+        <button 
+          onClick={(e) => { e.stopPropagation(); onToggle(event.id, !event.completed); }}
+          className="p-0.5 rounded hover:bg-success/20 transition-colors"
+        >
           <Check className="h-2.5 w-2.5" />
-        </button>
-        <button onClick={(e) => { e.stopPropagation(); onDelete(event); }}
-          className="p-0.5 rounded hover:bg-destructive/10" title="Excluir">
-          <Trash2 className="h-2.5 w-2.5 text-destructive" />
         </button>
       </div>
     </div>
