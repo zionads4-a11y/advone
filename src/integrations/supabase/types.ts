@@ -2454,6 +2454,7 @@ export type Database = {
           company_id: string
           consultation_duration: string | null
           created_at: string
+          debug_mode: boolean | null
           id: string
           office_name: string | null
           phone_number: string | null
@@ -2477,6 +2478,7 @@ export type Database = {
           company_id: string
           consultation_duration?: string | null
           created_at?: string
+          debug_mode?: boolean | null
           id?: string
           office_name?: string | null
           phone_number?: string | null
@@ -2500,6 +2502,7 @@ export type Database = {
           company_id?: string
           consultation_duration?: string | null
           created_at?: string
+          debug_mode?: boolean | null
           id?: string
           office_name?: string | null
           phone_number?: string | null
