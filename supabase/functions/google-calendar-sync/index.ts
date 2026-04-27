@@ -149,7 +149,33 @@ serve(async (req) => {
 
     // Fetch events from Google Calendar to sync back
     const now = new Date();
-...
+    const timeMin = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days ago
+    const timeMax = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString(); // 90 days ahead
+
+    let eventsResponse = await fetch(
+      `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime`,
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }
+    );
+
+    // If 401, try refreshing once even if we thought it was valid
+    if (eventsResponse.status === 401) {
+      console.log("Received 401 from Google, attempting one-time refresh...");
+      accessToken = await refreshGoogleToken(supabaseClient, integration);
+      eventsResponse = await fetch(
+        `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
+    }
+
+    const eventsData = await eventsResponse.json();
+    if (eventsData.error) {
+      throw new Error(`Google Calendar error: ${eventsData.error.message}`);
+    }
+
     const events = eventsData.items || [];
     console.log(`Found ${events.length} events from Google to sync`);
 
