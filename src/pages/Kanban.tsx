@@ -93,7 +93,7 @@ export default function Kanban() {
   const fetchColumnsAndLeads = async () => {
     const [columnsRes, leadsRes] = await Promise.all([
       supabase.from("kanban_columns").select("*").eq("company_id", selectedCompanyId).order("position"),
-      supabase.from("leads").select("id, name, email, phone, value, source, company_id, kanban_column_id, created_at, lead_score, pending_data_warning").eq("company_id", selectedCompanyId).order("created_at", { ascending: false }),
+      supabase.from("leads").select("*").eq("company_id", selectedCompanyId).order("created_at", { ascending: false }),
     ]);
     if (columnsRes.data) setKanbanColumns(columnsRes.data as KanbanColumn[]);
     if (leadsRes.data) setLeads(leadsRes.data as Lead[]);
