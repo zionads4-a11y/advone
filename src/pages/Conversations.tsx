@@ -159,6 +159,45 @@ export default function Conversations() {
     }
   };
 
+  const exportCurrentConversationToPdf = () => {
+    if (!selectedPhone || !conversations[selectedPhone]) {
+      toast.error("Selecione uma conversa para exportar");
+      return;
+    }
+
+    const doc = new jsPDF();
+    let y = 10;
+    const margin = 10;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const msgs = conversations[selectedPhone];
+    const lead = leads[selectedPhone];
+    const contactName = lead?.name || selectedPhone;
+
+    doc.setFontSize(16);
+    doc.text(`Conversa: ${contactName}`, margin, y);
+    y += 10;
+
+    doc.setFontSize(10);
+    msgs.forEach((msg) => {
+      const date = new Date(msg.timestamp).toLocaleString("pt-BR");
+      const sender = msg.direction === "incoming" ? "Lead" : (msg.sender_name || "Sistema");
+      const text = `${date} - [${sender}]: ${msg.message_text || "[midia]"}`;
+      
+      const splitText = doc.splitTextToSize(text, pageWidth - margin * 2);
+      
+      if (y + (splitText.length * 5) > 280) {
+        doc.addPage();
+        y = 10;
+      }
+
+      doc.text(splitText, margin, y);
+      y += (splitText.length * 5) + 2;
+    });
+
+    doc.save(`conversa_${selectedPhone}_${new Date().toISOString().split('T')[0]}.pdf`);
+    toast.success("Conversa exportada com sucesso!");
+  };
+
   const exportAllConversationsToPdf = () => {
     const doc = new jsPDF();
     let y = 10;
