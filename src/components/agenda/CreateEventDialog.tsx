@@ -201,10 +201,10 @@ export function CreateEventDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {eventType === "block" ? <Lock className="h-5 w-5 text-destructive" /> : <CalendarPlus className="h-5 w-5 text-primary" />}
-            {editEvent ? "Editar Evento" : eventType === "block" ? "Fechar Horário" : "Novo Evento"}
+            {editEvent ? "Editar Evento" : eventType === "block" ? "Fechar Dia/Horário" : "Novo Evento"}
           </DialogTitle>
           <DialogDescription>
-            {editEvent ? "Edite as informações do evento" : eventType === "block" ? "Bloqueie um horário na agenda para não receber agendamentos" : "Crie uma tarefa ou agende uma reunião"}
+            {editEvent ? "Edite as informações do evento" : eventType === "block" ? "Bloqueie um dia ou horário na agenda para não receber agendamentos" : "Crie uma tarefa ou agende uma reunião"}
           </DialogDescription>
         </DialogHeader>
 
