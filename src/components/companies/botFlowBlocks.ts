@@ -344,7 +344,11 @@ export function buildDynamicLauraPrompt(params: {
         return buildCustomFlowBlock(f);
       }
       const block = getFlowBlock(f.niche, f.flow_key);
-      return block?.block || null;
+      if (!block) {
+        console.error(`[Prompt Build] Mismatch or missing template: flow_key="${f.flow_key}", niche="${f.niche}"`);
+        return `▸ ERRO: Fluxo "${f.label}" não encontrado no catálogo (case_type: ${f.case_type || f.flow_key}). Informe à equipe técnica.`;
+      }
+      return block.block;
     })
     .filter((b): b is string => Boolean(b))
     .join("\n\n");
