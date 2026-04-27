@@ -54,6 +54,16 @@ serve(async (req) => {
       throw new Error("Unauthorized");
     }
 
+    // Get existing integration to avoid overwriting refresh_token if it's not provided in this call
+    const { data: existingIntegration } = await supabaseClient
+      .from("user_integrations")
+      .select("refresh_token")
+      .eq("user_id", user.id)
+      .eq("provider", "google")
+      .maybeSingle();
+
+    const refreshToken = tokens.refresh_token || existingIntegration?.refresh_token;
+
     // Store tokens in user_integrations
     const { error: upsertError } = await supabaseClient
       .from("user_integrations")
@@ -61,10 +71,11 @@ serve(async (req) => {
         user_id: user.id,
         provider: "google",
         access_token: tokens.access_token,
-        refresh_token: tokens.refresh_token, // Only provided if prompt=consent and access_type=offline
+        refresh_token: refreshToken, // Use existing one if new one is missing
         expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
         scopes: tokens.scope?.split(" "),
         sync_enabled: true,
+        updated_at: new Date().toISOString(),
       }, {
         onConflict: "user_id,provider"
       });
@@ -75,6 +86,7 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
+    console.error("Auth error:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 400,
