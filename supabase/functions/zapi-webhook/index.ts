@@ -1109,7 +1109,7 @@ Antes de responder:
               const SERVER_URL = "https://ziondigital.uazapi.com";
               const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
               const alertPhone = config.alert_whatsapp.replace(/\D/g, "");
-              const alertMessage = `🎉 *Contrato Fechado Automaticamente!*\n\n👤 Cliente: ${args.client_full_name || leadName || "N/A"}\n${args.client_cpf ? `📄 CPF: ${args.client_cpf}\n` : ""}${args.contract_value ? `💰 Valor: R$ ${args.contract_value}\n` : ""}\n_Fechado automaticamente pelo bot de contrato_`;
+              const alertMessage = `🎉 *Contrato Fechado Automaticamente!*\n\n👤 Cliente: ${args.client_full_name || leadName || "N/A"}\n${args.contract_value ? `💰 Valor: R$ ${args.contract_value}\n` : ""}\n_Fechado automaticamente pelo bot de contrato_`;
               const alertHeaders: Record<string, string> = { "Content-Type": "application/json" };
               if (ADMIN_TOKEN) alertHeaders["admintoken"] = ADMIN_TOKEN;
               const instanceParam = encodeURIComponent(config.zapi_instance_id || "");
