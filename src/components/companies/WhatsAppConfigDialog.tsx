@@ -228,7 +228,7 @@ export function WhatsAppConfigDialog({
     const newValues = {
       ai_enabled: aiEnabled,
       ai_auto_reply: aiAutoReply,
-      ai_prompt: aiPrompt,
+      ai_prompt: "", // Removido da UI: prompt agora é montado dinamicamente pelo Bot Flows Editor
       ai_objective: aiObjective,
       alert_whatsapp: alertWhatsapp || null,
     };
@@ -434,21 +434,6 @@ export function WhatsAppConfigDialog({
                         placeholder="Ex: Entrar em contatos com os Leads e agendar uma reunião"
                       />
                       <p className="text-xs text-muted-foreground">Define o objetivo principal do chatbot</p>
-                    </div>
-
-                    {/* Script/Prompt da IA */}
-                    <div className="space-y-2">
-                      <Label className="font-medium">Script/Prompt da IA</Label>
-                      <Textarea
-                        value={aiPrompt}
-                        onChange={(e) => setAiPrompt(e.target.value)}
-                        placeholder="Instruções para a IA..."
-                        rows={8}
-                        className="text-sm"
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Este script guia o comportamento da IA. Seja específico sobre seu negócio e objetivo.
-                      </p>
                     </div>
 
                     {/* WhatsApp para Alertas */}

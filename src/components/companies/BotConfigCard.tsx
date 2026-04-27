@@ -81,7 +81,7 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
     const newValues = {
       ai_enabled: aiEnabled,
       ai_auto_reply: aiAutoReply,
-      ai_prompt: aiPrompt,
+      ai_prompt: "", // Removido da UI: prompt montado pelo Bot Flows Editor
       office_name: officeName || null,
       practice_area: practiceArea || null,
       communication_tone: communicationTone,
@@ -326,59 +326,9 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
         onApplyPrompt={(p) => setAiPrompt(p)}
       />
 
-      {/* Prompt card */}
+      {/* Botão de salvar (prompt agora é montado pelo Bot Flows Editor) */}
       <Card className="border-border/50">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <ShieldCheck className="h-5 w-5 text-primary" />
-            Perfil de Qualificação
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="rounded-lg border border-dashed border-primary/40 bg-primary/5 p-3 space-y-2">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-primary" />
-              <p className="text-xs font-semibold text-foreground">Templates prontos por nicho</p>
-            </div>
-            <p className="text-[10px] text-muted-foreground">
-              Aplique um prompt pronto com fluxos de qualificação e question_keys alinhados ao Decision Engine.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {visibleTemplates.map((tpl) => (
-                <Button
-                  key={tpl.id}
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={!aiEnabled}
-                  onClick={() => {
-                    setAiPrompt(tpl.prompt);
-                    toast.success(`Template "${tpl.name}" aplicado. Lembre-se de salvar.`);
-                  }}
-                  className="gap-1.5 text-xs"
-                >
-                  <Sparkles className="h-3 w-3" />
-                  {tpl.name}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Prompt / Instruções do Bot</Label>
-            <Textarea
-              value={aiPrompt}
-              onChange={(e) => setAiPrompt(e.target.value)}
-              placeholder="Descreva o perfil de clientes que o escritório deseja atender..."
-              rows={6}
-              className="text-sm"
-              disabled={!aiEnabled}
-            />
-            <p className="text-[10px] text-muted-foreground">
-              Descreva critérios de qualificação, orientações para o bot e informações sobre a empresa.
-            </p>
-          </div>
-
+        <CardContent className="pt-6">
           <Button
             onClick={handleSave}
             disabled={saving}
@@ -391,6 +341,9 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
             )}
             {saving ? "Salvando..." : "Salvar Configuração do Bot"}
           </Button>
+          <p className="mt-2 text-[10px] text-muted-foreground text-center">
+            O prompt da Laura é montado automaticamente pelos fluxos ativados acima.
+          </p>
         </CardContent>
       </Card>
 
