@@ -72,12 +72,22 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Get user from Authorization header
-    const authHeader = req.headers.get("Authorization")!;
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(authHeader.replace("Bearer ", ""));
-
-    if (userError || !user) {
-      throw new Error("Unauthorized");
+    // Get user from Authorization header or body (for background sync)
+    let user;
+    const body = await req.json().catch(() => ({}));
+    const authHeader = req.headers.get("Authorization");
+    
+    if (authHeader) {
+      const { data: { user: authUser }, error: userError } = await supabaseClient.auth.getUser(authHeader.replace("Bearer ", ""));
+      if (userError || !authUser) throw new Error("Unauthorized");
+      user = authUser;
+    } else if (body.userId) {
+      // Internal call with userId
+      const { data: userData, error: fetchUserError } = await supabaseClient.auth.admin.getUserById(body.userId);
+      if (fetchUserError || !userData.user) throw new Error("User not found");
+      user = userData.user;
+    } else {
+      throw new Error("No authorization provided");
     }
 
     // Get user integration
