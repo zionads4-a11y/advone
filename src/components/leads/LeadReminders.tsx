@@ -291,6 +291,7 @@ export function LeadReminders({ leadId, companyId, leadName }: LeadRemindersProp
                 }`}>
                   {isOverdue(r.due_at, r.completed) ? "⚠️ Atrasado — " : ""}
                   {formatDueAt(r.due_at)}
+                  {r.reminder_type === "meeting" && r.end_at && ` - ${new Date(r.end_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`}
                 </p>
                 {r.reminder_type === "meeting" && !r.meeting_held && (
                   <Button
