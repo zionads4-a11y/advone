@@ -59,6 +59,29 @@ export default function Agenda() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [viewMode, setViewMode] = useState<"month" | "week" | "day">("month");
   const [isGoogleConnected, setIsGoogleConnected] = useState(false);
+  const [syncLoading, setSyncLoading] = useState(false);
+
+  const handleSync = useCallback(async () => {
+    if (!isGoogleConnected) return;
+    setSyncLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("google-calendar-sync");
+      if (error) throw error;
+      toast.success(`${data.count} eventos sincronizados com sucesso!`);
+      setRefreshKey(k => k + 1);
+    } catch (error: any) {
+      console.error("Erro ao sincronizar Google Agenda:", error);
+      toast.error("Erro ao sincronizar eventos");
+    } finally {
+      setSyncLoading(false);
+    }
+  }, [isGoogleConnected]);
+
+  useEffect(() => {
+    if (isGoogleConnected) {
+      handleSync();
+    }
+  }, [isGoogleConnected]);
 
   useEffect(() => {
     const checkGoogleConnection = async () => {
