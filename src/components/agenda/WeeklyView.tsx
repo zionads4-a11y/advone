@@ -29,7 +29,7 @@ interface WeeklyViewProps {
   onToggle: (id: string, completed: boolean) => void;
   onEdit: (r: Reminder) => void;
   onDelete: (r: Reminder) => void;
-  onSelectDate: (date: Date) => void;
+  onSelectDate: (date: Date, hour?: number) => void;
 }
 
 const HOURS = Array.from({ length: 16 }, (_, i) => i + 6); // 6:00 to 21:00
