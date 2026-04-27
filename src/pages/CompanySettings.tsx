@@ -31,6 +31,8 @@ export default function CompanySettings() {
   const [company, setCompany] = useState<Company | null>(null);
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
+  const [googleClientId, setGoogleClientId] = useState("");
+  const [googleClientSecret, setGoogleClientSecret] = useState("");
   const [businessHours, setBusinessHours] = useState<BusinessHours>(getDefaultBusinessHours());
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
