@@ -121,6 +121,31 @@ export default function CompanySettings() {
         </CardContent>
       </Card>
 
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="font-display text-lg">Google OAuth (Agenda)</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>ID do Cliente (OAuth)</Label>
+            <Input 
+              value={googleClientId} 
+              onChange={(e) => setGoogleClientId(e.target.value)} 
+              placeholder="123456-abcde.apps.googleusercontent.com"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Segredo do Cliente</Label>
+            <Input 
+              type="password"
+              value={googleClientSecret} 
+              onChange={(e) => setGoogleClientSecret(e.target.value)} 
+              placeholder="••••••••••••••••"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
       <CompanyOfficesEditor companyId={company.id} />
 
       <Card className="glass-card">
