@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, CalendarClock, Check, Clock, AlertTriangle, Plus, Repeat, Pencil, Trash2, ChevronLeft, ChevronRight, PartyPopper, Info } from "lucide-react";
+import { Loader2, CalendarClock, Check, Clock, AlertTriangle, Plus, Repeat, Pencil, Trash2, ChevronLeft, ChevronRight, PartyPopper, Info, Settings2 } from "lucide-react";
 import { toast } from "sonner";
 import { format, isSameDay, isAfter, isBefore, addDays, addWeeks, addMonths, subDays, subWeeks, subMonths, startOfWeek, endOfWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -58,6 +58,49 @@ export default function Agenda() {
   const [deleteTarget, setDeleteTarget] = useState<Reminder | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [viewMode, setViewMode] = useState<"month" | "week" | "day">("month");
+  const [isGoogleConnected, setIsGoogleConnected] = useState(false);
+
+  useEffect(() => {
+    const checkGoogleConnection = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from("user_integrations")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("provider", "google")
+        .maybeSingle();
+      setIsGoogleConnected(!!data);
+    };
+    checkGoogleConnection();
+  }, [user, refreshKey]);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get("code");
+    if (code) {
+      const handleGoogleCallback = async () => {
+        try {
+          // Here we would call an edge function to exchange the code for tokens
+          // and store them in the database.
+          // For now, let's just show a toast and clear the URL.
+          const { error } = await supabase.functions.invoke("google-calendar-auth", {
+            body: { code, redirectUri: `${window.location.origin}/agenda` }
+          });
+          
+          if (error) throw error;
+          
+          toast.success("Google Agenda conectado com sucesso!");
+          window.history.replaceState({}, document.title, window.location.pathname);
+          setRefreshKey(k => k + 1);
+        } catch (error: any) {
+          console.error("Erro ao conectar Google Agenda:", error);
+          toast.error("Erro ao conectar Google Agenda");
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      };
+      handleGoogleCallback();
+    }
+  }, []);
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -241,6 +284,29 @@ export default function Agenda() {
               ))}
             </SelectContent>
           </Select>
+          <Button 
+            variant={isGoogleConnected ? "secondary" : "outline"}
+            className={`gap-2 ${isGoogleConnected ? 'bg-green-100 text-green-700 hover:bg-green-200 border-green-200' : ''}`}
+            disabled={isGoogleConnected}
+            onClick={() => {
+              const clientId = "181481259367-kqbftmnd121er1dmpvss7l4bjfpt5c3n.apps.googleusercontent.com";
+              const redirectUri = `${window.location.origin}/agenda`;
+              const scope = "https://www.googleapis.com/auth/calendar";
+              window.open(`https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&access_type=offline&prompt=consent`, '_self');
+            }}
+          >
+            {isGoogleConnected ? (
+              <>
+                <Check className="h-4 w-4" />
+                Google Conectado
+              </>
+            ) : (
+              <>
+                <Settings2 className="h-4 w-4" />
+                Conectar Google
+              </>
+            )}
+          </Button>
           <Button onClick={() => { setEditEvent(null); setCreateDialogOpen(true); }} className="gap-2">
             <Plus className="h-4 w-4" />
             Novo Evento
