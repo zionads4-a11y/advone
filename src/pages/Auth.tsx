@@ -74,12 +74,12 @@ function LoginForm() {
   };
 
   return (
-    <Card className="border-border bg-card">
-      <CardHeader>
-        <CardTitle className="font-display text-foreground text-center text-2xl">Acesse sua conta</CardTitle>
-        <CardDescription className="text-center">Escolha sua forma de login preferida</CardDescription>
+    <Card className="border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] text-[hsl(220,10%,92%)] shadow-2xl">
+      <CardHeader className="space-y-1">
+        <CardTitle className="font-display text-foreground text-center text-2xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Acesse sua conta</CardTitle>
+        <CardDescription className="text-center text-[hsl(220,10%,55%)]">Bem-vindo de volta ao AdvOne</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-5">
         <form onSubmit={handleEmailSignIn} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -90,10 +90,14 @@ function LoginForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              className="h-11 bg-[hsl(220,25%,12%)] border-[hsl(220,20%,20%)] focus:border-[hsl(153,60%,45%)] transition-all"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Senha</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password">Senha</Label>
+              <button type="button" className="text-xs text-[hsl(153,60%,45%)] hover:underline">Esqueceu a senha?</button>
+            </div>
             <Input 
               id="password" 
               type="password" 
@@ -101,15 +105,16 @@ function LoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              className="h-11 bg-[hsl(220,25%,12%)] border-[hsl(220,20%,20%)] focus:border-[hsl(153,60%,45%)] transition-all"
             />
           </div>
           <Button 
             type="submit" 
-            className="w-full" 
+            className="w-full h-12 gradient-primary text-white font-bold" 
             disabled={emailLoading || googleLoading}
           >
             {emailLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            Entrar com Email
+            Entrar no Painel
           </Button>
         </form>
 
