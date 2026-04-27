@@ -271,6 +271,7 @@ export default function Agenda() {
     } else {
       setSelectedTime(undefined);
     }
+    setDefaultEventType("reminder");
     setEditEvent(null);
     setCreateDialogOpen(true);
   };
