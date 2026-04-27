@@ -21,6 +21,8 @@ interface Company {
   name: string;
   whatsapp: string | null;
   business_hours: unknown;
+  google_client_id: string | null;
+  google_client_secret: string | null;
 }
 
 export default function CompanySettings() {
