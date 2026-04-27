@@ -627,7 +627,7 @@ const contractCloserTools = [
         type: "object",
         properties: {
           message_to_lead: { type: "string" },
-          client_cpf: { type: "string" },
+          
           client_full_name: { type: "string" },
           contract_value: { type: "number" },
           notes: { type: "string" }
