@@ -475,8 +475,26 @@ export default function Conversations() {
                     </CardTitle>
                     <p className="text-xs text-muted-foreground">{selectedPhone}</p>
                   </div>
-                  {selectedLead && (
-                    <div className="ml-auto flex items-center gap-2">
+                  <div className="ml-auto flex items-center gap-2">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={exportCurrentConversationToPdf}
+                            className="h-8 w-8"
+                          >
+                            <FileDown className="h-4 w-4 text-muted-foreground" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Exportar conversa para PDF</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    {selectedLead && (
+                      <div className="flex items-center gap-2">
                       <LeadBotToggle
                         leadId={selectedLead.id}
                         initialDisabled={!!selectedLead.bot_disabled}
