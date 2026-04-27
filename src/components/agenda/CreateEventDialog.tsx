@@ -87,7 +87,7 @@ export function CreateEventDialog({
         setDescription("");
         setEventType("reminder");
         setDueDate(defaultDate ? format(defaultDate, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"));
-        setDueTime("10:00");
+        setDueTime(defaultTime || "10:00");
         setCompanyId(preselectedCompanyId || (companies.length === 1 ? companies[0].id : ""));
         setLeadId("none");
         setRecurrence({ type: "none" });
