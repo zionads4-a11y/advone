@@ -23,11 +23,15 @@ export default function Auth() {
   if (user) return <Navigate to="/dashboard" replace />;
 
   return (
-    <div className="dark flex min-h-screen items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md space-y-4">
-        <div className="flex flex-col items-center gap-1">
-          <img src={logoAdvOne} alt="AdvOne" className="h-64 w-auto" />
-          <p className="text-sm text-muted-foreground">
+    <div className="dark flex min-h-screen items-center justify-center bg-[hsl(220,25%,6%)] p-4">
+      <div className="w-full max-w-md space-y-6">
+        <div className="flex flex-col items-center gap-2">
+          <img 
+            src={logoAdvOne} 
+            alt="AdvOne" 
+            className="h-32 w-auto sm:h-40 drop-shadow-[0_0_20px_hsl(153,60%,45%/0.4)]" 
+          />
+          <p className="text-sm text-[hsl(220,10%,55%)] font-medium">
             CRM inteligente para gestão de leads
           </p>
         </div>
@@ -70,12 +74,12 @@ function LoginForm() {
   };
 
   return (
-    <Card className="border-border bg-card">
-      <CardHeader>
-        <CardTitle className="font-display text-foreground text-center text-2xl">Acesse sua conta</CardTitle>
-        <CardDescription className="text-center">Escolha sua forma de login preferida</CardDescription>
+    <Card className="border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] text-[hsl(220,10%,92%)] shadow-2xl">
+      <CardHeader className="space-y-1">
+        <CardTitle className="font-display text-foreground text-center text-2xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Acesse sua conta</CardTitle>
+        <CardDescription className="text-center text-[hsl(220,10%,55%)]">Bem-vindo de volta ao AdvOne</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-5">
         <form onSubmit={handleEmailSignIn} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -86,10 +90,14 @@ function LoginForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              className="h-11 bg-[hsl(220,25%,12%)] border-[hsl(220,20%,20%)] focus:border-[hsl(153,60%,45%)] transition-all"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Senha</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password">Senha</Label>
+              <button type="button" className="text-xs text-[hsl(153,60%,45%)] hover:underline">Esqueceu a senha?</button>
+            </div>
             <Input 
               id="password" 
               type="password" 
@@ -97,31 +105,32 @@ function LoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              className="h-11 bg-[hsl(220,25%,12%)] border-[hsl(220,20%,20%)] focus:border-[hsl(153,60%,45%)] transition-all"
             />
           </div>
           <Button 
             type="submit" 
-            className="w-full" 
+            className="w-full h-12 gradient-primary text-white font-bold" 
             disabled={emailLoading || googleLoading}
           >
             {emailLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            Entrar com Email
+            Entrar no Painel
           </Button>
         </form>
 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-border" />
+            <span className="w-full border-t border-[hsl(220,20%,16%)]" />
           </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-card px-2 text-muted-foreground">ou continue com</span>
+          <div className="relative flex justify-center text-[10px] uppercase tracking-widest font-bold">
+            <span className="bg-[hsl(220,25%,9%)] px-2 text-[hsl(220,10%,45%)]">ou entre com</span>
           </div>
         </div>
 
         <Button 
           type="button" 
           variant="outline" 
-          className="w-full shadow-sm transition-all hover:bg-accent/50 hover:shadow-md" 
+          className="w-full h-11 border-[hsl(220,20%,20%)] bg-[hsl(220,25%,12%)] hover:bg-[hsl(220,25%,15%)] text-[hsl(220,10%,80%)] shadow-sm transition-all" 
           onClick={handleGoogleSignIn}
           disabled={googleLoading || emailLoading}
         >
@@ -145,16 +154,15 @@ function LoginForm() {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 fill="#EA4335"
               />
-              <path d="M1 1h22v22H1z" fill="none" />
             </svg>
           )}
-          Entrar com Google
+          Google Workspace
         </Button>
 
-        <p className="text-center text-sm text-muted-foreground mt-4">
-          Não tem uma conta?{" "}
-          <Link to="/signup" className="text-primary hover:underline font-medium">
-            Cadastre-se
+        <p className="text-center text-sm text-[hsl(220,10%,55%)] mt-6">
+          Novo por aqui?{" "}
+          <Link to="/signup" className="text-[hsl(153,60%,45%)] hover:underline font-bold">
+            Crie sua conta
           </Link>
         </p>
       </CardContent>
