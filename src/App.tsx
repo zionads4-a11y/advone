@@ -85,6 +85,7 @@ const App = () => (
               <Route path="/agendamentos-exito" element={<ExitoSchedules />} />
               <Route path="/historico-leads" element={<LeadsHistory />} />
               <Route path="/ia-juridica" element={<LegalAI />} />
+              <Route path="/perfil-check" element={<ProfileCheck />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
