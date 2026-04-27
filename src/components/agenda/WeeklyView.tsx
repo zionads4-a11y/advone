@@ -109,7 +109,16 @@ export function WeeklyView({ currentDate, reminders, onToggle, onEdit, onDelete,
       </div>
 
       {/* Time grid */}
-      <div className="max-h-[600px] overflow-y-auto">
+      <div className="max-h-[600px] overflow-y-auto relative">
+        {currentTimeLinePos !== null && (
+          <div 
+            className="absolute left-[60px] right-0 z-10 flex items-center pointer-events-none"
+            style={{ top: `${currentTimeLinePos}px` }}
+          >
+            <div className="w-2 h-2 rounded-full bg-red-500 -ml-1" />
+            <div className="flex-1 h-[2px] bg-red-500" />
+          </div>
+        )}
         {HOURS.map((hour) => (
           <div key={hour} className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-border/50 min-h-[52px]">
             <div className="p-1 text-[10px] text-muted-foreground text-right pr-2 pt-1">
