@@ -23,11 +23,15 @@ export default function Auth() {
   if (user) return <Navigate to="/dashboard" replace />;
 
   return (
-    <div className="dark flex min-h-screen items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md space-y-4">
-        <div className="flex flex-col items-center gap-1">
-          <img src={logoAdvOne} alt="AdvOne" className="h-64 w-auto" />
-          <p className="text-sm text-muted-foreground">
+    <div className="dark flex min-h-screen items-center justify-center bg-[hsl(220,25%,6%)] p-4">
+      <div className="w-full max-w-md space-y-6">
+        <div className="flex flex-col items-center gap-2">
+          <img 
+            src={logoAdvOne} 
+            alt="AdvOne" 
+            className="h-32 w-auto sm:h-40 drop-shadow-[0_0_20px_hsl(153,60%,45%/0.4)]" 
+          />
+          <p className="text-sm text-[hsl(220,10%,55%)] font-medium">
             CRM inteligente para gestão de leads
           </p>
         </div>
