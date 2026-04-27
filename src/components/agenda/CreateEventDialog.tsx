@@ -73,7 +73,10 @@ export function CreateEventDialog({
         const cleanTitle = editEvent.title.replace(/^(📅|🔔)\s*/, "");
         setTitle(cleanTitle);
         setDescription(editEvent.description || "");
-        setEventType(editEvent.reminder_type === "meeting" ? "meeting" : "reminder");
+        setEventType(
+          editEvent.reminder_type === "meeting" ? "meeting" : 
+          editEvent.reminder_type === "block" ? "block" : "reminder"
+        );
         setDueDate(format(new Date(editEvent.due_at), "yyyy-MM-dd"));
         setDueTime(format(new Date(editEvent.due_at), "HH:mm"));
         setCompanyId(editEvent.company_id);
