@@ -14,7 +14,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Loader2, CalendarPlus, AlertTriangle } from "lucide-react";
+import { Loader2, CalendarPlus, AlertTriangle, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { format, addDays, addWeeks, addMonths, addYears, addHours } from "date-fns";
 import { brtDateTimeToIso } from "@/lib/utils";
@@ -27,6 +27,7 @@ interface CreateEventDialogProps {
   onCreated: () => void;
   defaultDate?: Date;
   defaultTime?: string;
+  defaultType?: "meeting" | "reminder" | "block";
   companies: { id: string; name: string }[];
   leads?: { id: string; name: string; company_id: string }[];
   preselectedCompanyId?: string;
@@ -50,6 +51,7 @@ export function CreateEventDialog({
   onCreated,
   defaultDate,
   defaultTime,
+  defaultType,
   companies,
   leads,
   preselectedCompanyId,
