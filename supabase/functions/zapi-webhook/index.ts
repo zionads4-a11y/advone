@@ -1,22 +1,39 @@
+// deno-lint-ignore-file no-explicit-any
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { getErrorMessage } from "../_shared/errors.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-function buildSDRPrompt(config: any, leadName?: string, offices: any[] = []) {
+// ====== PROMPT BUILDERS ======
+function buildSDRPrompt(
+  config: any,
+  leadName: string | undefined,
+  offices: any[] = [],
+  flowsBlock: string = "",
+  triageBlock: string = "",
+): string {
   const officeName = config.office_name || "o escritório";
   const practiceArea = config.practice_area || "";
   const tone = config.communication_tone || "moderado";
   const customPrompt = (config.ai_prompt || "").trim();
 
   // Se o prompt customizado começar com "Você é", assumimos que é o prompt completo
-  // gerado pelo construtor dinâmico e o usamos diretamente.
+  // gerado pelo construtor dinâmico — mas ainda injetamos fluxos e triage ao final.
   if (customPrompt.startsWith("Você é")) {
-    return customPrompt;
+    const extras = [
+      flowsBlock
+        ? `\n\n═══════════════════════════════════════\nFLUXOS ATIVOS DESTE ESCRITÓRIO\n═══════════════════════════════════════\n${flowsBlock}`
+        : "",
+      triageBlock
+        ? `\n\n═══════════════════════════════════════\nCRITÉRIOS DE QUALIFICAÇÃO\n═══════════════════════════════════════\n${triageBlock}`
+        : "",
+    ].join("");
+    return customPrompt + extras;
   }
 
   // 🏢 Endereços DINÂMICOS — sem endereço cadastrado = SOMENTE online
@@ -25,16 +42,13 @@ function buildSDRPrompt(config: any, leadName?: string, offices: any[] = []) {
   const hasOffices = officesCount > 0;
 
   let modalidadeBlock: string;
-  let unitParamHint: string;
   if (!hasOffices) {
-    // Sem endereço cadastrado → SOMENTE ONLINE. Bot não pergunta nem oferece presencial.
     modalidadeBlock =
-      `🟢 MODALIDADE — SOMENTE ONLINE (este escritório NÃO possui endereço cadastrado, atendimento é 100% online):\\n` +
-      `   • REGRA CRÍTICA: Você NÃO atende presencial. NÃO pergunte se o lead prefere online ou presencial.\\n` +
-      `   • REGRA CRÍTICA: NÃO ofereça atendimento presencial em hipótese alguma.\\n` +
-      `   • Apenas confirme: "Como o nosso atendimento para o seu caso é 100% online (por videochamada), podemos seguir com o agendamento? 🙂" e, após o "sim", pergunte o horário.\\n` +
-      `   • Em schedule_appointment use sempre modality="online" e unit="Online".`;
-    unitParamHint = `unit="Online"`;
+      "🟢 MODALIDADE — SOMENTE ONLINE (este escritório NÃO possui endereço cadastrado, atendimento é 100% online):\n" +
+      "• REGRA CRÍTICA: Você NÃO atende presencial. NÃO pergunte se o lead prefere online ou presencial.\n" +
+      "• REGRA CRÍTICA: NÃO ofereça atendimento presencial em hipótese alguma.\n" +
+      '• Apenas confirme: "Como o nosso atendimento para o seu caso é 100% online (por videochamada), podemos seguir com o agendamento? 🙂" e, após o "sim", pergunte o horário.\n' +
+      '• Em schedule_appointment use sempre modality="online" e unit="Online".';
   } else if (officesCount === 1) {
     const only = activeOffices[0];
     const enderecoLinhas = [
@@ -43,35 +57,31 @@ function buildSDRPrompt(config: any, leadName?: string, offices: any[] = []) {
       only.complement ? `🏢 ${only.complement}` : null,
       only.reference_point ? `🗺️ ${only.reference_point}` : null,
       only.maps_url ? `🔗 ${only.maps_url}` : null,
-    ].filter(Boolean).join("\\n");
+    ].filter(Boolean).join("\n");
     modalidadeBlock =
-      `🟢 MODALIDADE — pergunte UMA vez só (este escritório atende online E presencial):\\n` +
-      `   "Você prefere que essa conversa seja online (por videochamada) ou presencial aqui no escritório? 🙂"\\n` +
-      `   • Se ONLINE: confirme e siga pro horário.\\n` +
-      `   • Se PRESENCIAL: envie em mensagem separada o endereço da unidade:\\n` +
-      `     "Perfeito! 🙂 Nosso escritório fica aqui:\\n\\n${enderecoLinhas}"\\n` +
-      `   • NUNCA invente outro endereço. Use SÓ esse.\\n` +
-      `   • Em schedule_appointment use modality="online"|"presencial" e unit="${only.name}" ou "Online".`;
-    unitParamHint = `unit="${only.name}" ou "Online"`;
+      "🟢 MODALIDADE — pergunte UMA vez só (este escritório atende online E presencial):\n" +
+      '"Você prefere que essa conversa seja online (por videochamada) ou presencial aqui no escritório? 🙂"\n' +
+      "• Se ONLINE: confirme e siga pro horário.\n" +
+      `• Se PRESENCIAL: envie em mensagem separada o endereço da unidade:\n"Perfeito! 🙂 Nosso escritório fica aqui:\n\n${enderecoLinhas}"\n` +
+      "• NUNCA invente outro endereço. Use SÓ esse.\n" +
+      `• Em schedule_appointment use modality="online"|"presencial" e unit="${only.name}" ou "Online".`;
   } else {
     const lista = activeOffices
       .map((o: any, i: number) => `${i + 1}️⃣ *${o.name}* — 📍 ${o.address}`)
-      .join("\\n");
+      .join("\n");
     const unitNames = activeOffices.map((o: any) => `"${o.name}"`).join(" OU ");
     modalidadeBlock =
-      `🟢 MODALIDADE — pergunte UMA vez só (este escritório atende online E presencial):\\n` +
-      `   "Você prefere que essa conversa seja online (por videochamada) ou presencial em uma das nossas unidades? 🙂"\\n` +
-      `   • Se ONLINE: confirme e siga pro horário.\\n` +
-      `   • Se PRESENCIAL, pergunte qual unidade fica melhor:\\n` +
-      `     "Temos ${officesCount} unidades, qual fica melhor pra você?\\n\\n${lista}"\\n` +
-      `   • Use SÓ as unidades acima. NUNCA invente endereço.\\n` +
-      `   • Em schedule_appointment use modality="online"|"presencial" e unit=${unitNames} ou "Online".`;
-    unitParamHint = `unit=${unitNames} ou "Online"`;
+      "🟢 MODALIDADE — pergunte UMA vez só (este escritório atende online E presencial):\n" +
+      '"Você prefere que essa conversa seja online (por videochamada) ou presencial em uma das nossas unidades? 🙂"\n' +
+      "• Se ONLINE: confirme e siga pro horário.\n" +
+      `• Se PRESENCIAL, pergunte qual unidade fica melhor:\n"Temos ${officesCount} unidades, qual fica melhor pra você?\n\n${lista}"\n` +
+      "• Use SÓ as unidades acima. NUNCA invente endereço.\n" +
+      `• Em schedule_appointment use modality="online"|"presencial" e unit=${unitNames} ou "Online".`;
   }
 
   const leadNameInfo = leadName
     ? `\n\nNOME DO LEAD: O nome do lead é "${leadName}". Use esse nome quando se referir a ele. NUNCA escreva {nome} literalmente.\n`
-    : `\n\nNOME DO LEAD: Você ainda não sabe o nome. Pergunte uma única vez de forma natural.\n`;
+    : "\n\nNOME DO LEAD: Você ainda não sabe o nome. Pergunte uma única vez de forma natural.\n";
 
   const toneInstructions = tone === "formal"
     ? "Use linguagem cordial e respeitosa."
@@ -79,17 +89,28 @@ function buildSDRPrompt(config: any, leadName?: string, offices: any[] = []) {
     ? "Use linguagem leve e amigável com emojis 😊"
     : "Seja educada, próxima e acolhedora.";
 
-  const todayStr = getTodayBrasilia();
   const nowBR = getNowBrasilia();
   const dayNames = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
   const todayDayName = dayNames[nowBR.getDay()];
-  const todayDMY = `${String(nowBR.getDate()).padStart(2,"0")}/${String(nowBR.getMonth()+1).padStart(2,"0")}/${nowBR.getFullYear()}`;
+  const todayDMY = `${String(nowBR.getDate()).padStart(2, "0")}/${String(nowBR.getMonth() + 1).padStart(2, "0")}/${nowBR.getFullYear()}`;
+
+  const flowsSection = flowsBlock
+    ? `\n\n═══════════════════════════════════════\nFLUXOS ATIVOS — SIGA FIELMENTE\n═══════════════════════════════════════\nATENÇÃO: Se houver instruções específicas de fluxos abaixo, siga-as fielmente, inclusive se elas solicitarem o uso de opções ou menus numerados.\n\n${flowsBlock}`
+    : "";
+
+  const triageSection = triageBlock
+    ? `\n\n═══════════════════════════════════════\nCRITÉRIOS DE QUALIFICAÇÃO\n═══════════════════════════════════════\n${triageBlock}`
+    : "";
+
+  const customSection = customPrompt
+    ? `\n\n═══════════════════════════════════════\nINSTRUÇÕES ADICIONAIS DESTE ESCRITÓRIO\n═══════════════════════════════════════\n${customPrompt}\n`
+    : "";
 
   return `Você é Laura, atendente virtual da equipe ${officeName}${practiceArea ? `, especializada no atendimento inicial de casos ${practiceArea}` : ""}.
 
-═══════════════════════════════════════════════════════
+═══════════════════════════════════════
 IDENTIDADE E TOM
-═══════════════════════════════════════════════════════
+═══════════════════════════════════════
 - Nome: Laura
 - Nunca diga que é IA ou robô
 - Papel: SDR humanizada, acolhedora, paciente e objetiva
@@ -98,19 +119,19 @@ IDENTIDADE E TOM
 - Regra de ouro: UMA pergunta por vez
 - Nunca dê parecer jurídico definitivo
 - Seu papel não é resolver tudo no chat; seu papel é qualificar, gerar confiança e conduzir para o próximo passo
-- ATENÇÃO: Se houver instruções específicas de fluxos abaixo, siga-as fielmente, inclusive se elas solicitarem o uso de opções ou menus numerados.
+- ${toneInstructions}
 
-📆 HOJE: ${todayDayName}, ${todayDMY} (${String(nowBR.getHours()).padStart(2,"0")}:${String(nowBR.getMinutes()).padStart(2,"0")} BRT).
+📅 HOJE: ${todayDayName}, ${todayDMY} (${String(nowBR.getHours()).padStart(2, "0")}:${String(nowBR.getMinutes()).padStart(2, "0")} BRT).
 ${leadNameInfo}
 
-═══════════════════════════════════════════════════════
+═══════════════════════════════════════
 🎯 SUA MISSÃO: MÁXIMO 5 PERGUNTAS
-═══════════════════════════════════════════════════════
+═══════════════════════════════════════
 Sua missão é entender o caso e AGENDAR uma conversa. Você deve perguntar o NOME do lead (se não souber) e fazer no MÁXIMO 5 perguntas totais de qualificação. Se o caso estiver dentro do perfil, convide IMEDIATAMENTE para a reunião.
 
-═══════════════════════════════════════════════════════
+═══════════════════════════════════════
 📋 FLUXO OBRIGATÓRIO (NUNCA PEÇA CPF)
-═══════════════════════════════════════════════════════
+═══════════════════════════════════════
 PASSO 1 — Saudação:
 "Oi! Tudo bem? 😊 Eu sou a Laura, aqui da equipe ${officeName}. Pode ficar tranquilo(a), me conta o que aconteceu que eu vou te ajudar a entender melhor o seu caso 🙂"
 
@@ -119,8 +140,6 @@ PASSO 2 — Após a primeira resposta, peça o NOME:
 
 PASSO 3 — Qualificação (Máximo 3-4 perguntas aqui):
 Faça apenas as perguntas essenciais para entender se o caso é viável. UMA por vez.
-- Exemplos INSS: "Há quanto tempo isso aconteceu?", "Já deu entrada no INSS?", "Foi negado ou está em análise?", "Tem documentos/laudos?"
-- Exemplos Trabalhista: "Ainda trabalha lá?", "Era carteira assinada?", "Tem provas como mensagens ou holerites?"
 
 PASSO 4 — Convite para Reunião (TOTALMENTE GRATUITA):
 "Pelo que você me contou, {nome}, faz total sentido você conversar rapidinho com o(a) advogado(a). Essa primeira conversa é TOTALMENTE GRATUITA. Posso já te encaixar?"
@@ -130,24 +149,21 @@ ${modalidadeBlock}
 
 PASSO 6 — Horário e Dados Finais:
 1. Pergunte o turno: "Qual horário é melhor pra você... manhã, tarde ou final do dia?"
-2. Use check_availability for the turno escolhido.
+2. Use check_availability para o turno escolhido.
 3. Ofereça UM horário específico: "Consegui esse horário: 📅 [dia] às [HH:MM]. Confirmo? 😊"
-    4. APÓS o lead aceitar o horário, peça o dado final: "Perfeito 🙂 Pra já deixar tudo organizado aqui pra equipe, me passa o seu *nome completo*, por favor?"
+4. APÓS o lead aceitar o horário, peça o dado final: "Perfeito 🙂 Pra já deixar tudo organizado aqui pra equipe, me passa o seu *nome completo*, por favor?"
 
-═══════════════════════════════════════════════════════
+═══════════════════════════════════════
 🚫 REGRAS INVIOLÁVEIS
-═══════════════════════════════════════════════════════
+═══════════════════════════════════════
 1. 🚫 NUNCA peça CPF, RG ou senha do Meu INSS.
 2. 🚫 NUNCA tire dúvidas técnicas. Responda: "Essa parte o(a) advogado(a) te explica com segurança 🙂 Posso te encaixar numa conversa rápida?"
-3. 🚫 NUNCA use listas numeradas ou menus.
-4. 🚫 MÁXIMO 5 PERGUNTAS totais para chegar no convite da reunião.
-5. 🚫 Se perguntarem sobre VALORES: "Essa nossa primeira conversa é TOTALMENTE GRATUITA para entender o seu caso. Valores de honorários são tratados somente com os advogados, mas o foco agora é resolver seu problema."
-
-${customPrompt ? `═══════════════════════════════════════════════════════\nINSTRUÇÕES ADICIONAIS DESTE ESCRITÓRIO\n═══════════════════════════════════════════════════════\n${customPrompt}\n` : ""}
+3. 🚫 MÁXIMO 5 PERGUNTAS totais para chegar no convite da reunião.
+4. 🚫 Se perguntarem sobre VALORES: "Essa nossa primeira conversa é TOTALMENTE GRATUITA para entender o seu caso. Valores de honorários são tratados somente com os advogados, mas o foco agora é resolver seu problema."
+${flowsSection}${triageSection}${customSection}
 
 Responda SEMPRE em português do Brasil.`;
 }
-
 
 function buildDocumentCollectorPrompt(agentConfig: any, config: any, leadName?: string, requiredDocs?: any[]) {
   const officeName = config.office_name || "o escritório";
@@ -260,12 +276,7 @@ Responda SEMPRE em português do Brasil.`;
 }
 
 // ====== UTILITY FUNCTIONS ======
-
 function getNowBrasilia(): Date {
-  // Retorna uma Date cujos getters locais (getFullYear, getMonth, getDate, getDay, getHours, getMinutes)
-  // representam EXATAMENTE o horário de Brasília (America/Sao_Paulo, UTC-3, sem horário de verão).
-  // Usamos Intl para extrair os componentes reais em SP, evitando o bug de toLocaleString +
-  // new Date() (que reinterpreta como fuso do servidor).
   const fmt = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Sao_Paulo",
     year: "numeric", month: "2-digit", day: "2-digit",
@@ -278,10 +289,9 @@ function getNowBrasilia(): Date {
   const mo = Number(get("month"));
   const d = Number(get("day"));
   let h = Number(get("hour"));
-  if (h === 24) h = 0; // alguns runtimes retornam 24 em vez de 0
+  if (h === 24) h = 0;
   const mi = Number(get("minute"));
   const s = Number(get("second"));
-  // new Date(y, mo-1, d, h, mi, s) cria uma data local cujos getters retornam exatamente esses valores.
   return new Date(y, mo - 1, d, h, mi, s);
 }
 
@@ -309,7 +319,7 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
   let slots: string[] = [];
 
   const dayConfig = businessHours[dayKey];
-  
+
   if (Array.isArray(dayConfig) && dayConfig.length > 0) {
     for (const shift of dayConfig) {
       const start = shift.open || shift.start;
@@ -376,12 +386,11 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
 
   const bookedTimes = new Set(
     (existing || []).map((r: any) => {
-      // Extrai HH:mm em America/Sao_Paulo de forma confiável (sem reinterpretar fuso).
       const fmt = new Intl.DateTimeFormat("en-GB", {
         timeZone: "America/Sao_Paulo",
         hour: "2-digit", minute: "2-digit", hour12: false,
       });
-      return fmt.format(new Date(r.due_at)); // "HH:mm"
+      return fmt.format(new Date(r.due_at));
     })
   );
 
@@ -409,22 +418,6 @@ function getNextAvailableDays(count: number, includeToday: boolean = true): stri
 }
 
 // ====== VALIDATORS ======
-function isValidCPF(raw: string): boolean {
-  const cpf = String(raw || "").replace(/\D/g, "");
-  if (cpf.length !== 11) return false;
-  if (/^(\d)\1{10}$/.test(cpf)) return false;
-  let sum = 0;
-  for (let i = 0; i < 9; i++) sum += parseInt(cpf[i]) * (10 - i);
-  let d1 = 11 - (sum % 11);
-  if (d1 >= 10) d1 = 0;
-  if (d1 !== parseInt(cpf[9])) return false;
-  sum = 0;
-  for (let i = 0; i < 10; i++) sum += parseInt(cpf[i]) * (11 - i);
-  let d2 = 11 - (sum % 11);
-  if (d2 >= 10) d2 = 0;
-  return d2 === parseInt(cpf[10]);
-}
-
 function isValidFullName(raw: string): boolean {
   if (!raw) return false;
   const parts = String(raw).trim().split(/\s+/).filter(p => p.length >= 2 && /^[A-Za-zÀ-ÿ'-]+$/.test(p));
@@ -445,24 +438,6 @@ const sdrTools = [
           period: { type: "string", enum: ["manha", "tarde", "qualquer"], description: "Turno preferido pelo lead. 'manha' = 08:00-11:59, 'tarde' = 12:00-17:00, 'qualquer' = primeiro do dia." }
         },
         required: ["date"],
-        additionalProperties: false
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "qualify_lead",
-      description: "Registra a qualificação do lead.",
-      parameters: {
-        type: "object",
-        properties: {
-          status: { type: "string", enum: ["qualified", "not_qualified", "needs_more_info"] },
-          reason: { type: "string" },
-          summary: { type: "string" },
-          lead_score: { type: "string", enum: ["quente", "morno", "frio"] }
-        },
-        required: ["status", "reason", "lead_score"],
         additionalProperties: false
       }
     }
@@ -643,7 +618,6 @@ const contractCloserTools = [
         type: "object",
         properties: {
           message_to_lead: { type: "string" },
-          
           client_full_name: { type: "string" },
           contract_value: { type: "number" },
           notes: { type: "string" }
@@ -669,8 +643,6 @@ const contractCloserTools = [
 ];
 
 // ====== REPLY SANITIZER ======
-// Remove linhas que vazaram instruções internas do prompt para o lead.
-// Se a resposta ficar vazia depois da limpeza, retorna fallback educado.
 function sanitizeReply(text: string | null | undefined): string | null {
   if (!text) return null;
   const leakPatterns = [
@@ -685,16 +657,11 @@ function sanitizeReply(text: string | null | undefined): string | null {
     /MODALIDADE\s+—/i,
     /Em\s+schedule_appointment/i,
   ];
-  // Remove linhas que casem com qualquer padrão de vazamento.
   const cleanedLines = text
     .split(/\r?\n/)
     .filter((line) => !leakPatterns.some((re) => re.test(line)));
-  let cleaned = cleanedLines.join("\n").trim();
-
-  // Se removeu praticamente tudo, descarta a resposta inteira.
-  if (cleaned.length < Math.min(20, text.length * 0.3)) {
-    return null;
-  }
+  const cleaned = cleanedLines.join("\n").trim();
+  if (cleaned.length < Math.min(20, text.length * 0.3)) return null;
   return cleaned;
 }
 
@@ -708,7 +675,9 @@ async function handleAgentPhase(
   leadId: string,
   supabase: any,
   leadName?: string,
-  cleanPhone?: string
+  cleanPhone?: string,
+  flowsBlock?: string,
+  triageBlock?: string,
 ): Promise<string | null> {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!LOVABLE_API_KEY) return null;
@@ -723,7 +692,6 @@ async function handleAgentPhase(
     tools = documentCollectorTools;
   } else if (phase === "viability_analyzer") {
     const agentCfg = agentConfigs["viability_analyzer"];
-    // Fetch lead data for analysis
     const { data: leadData } = await supabase.from("leads").select("*").eq("id", leadId).single();
     const { data: docs } = await supabase.from("lead_document_requests").select("*").eq("lead_id", leadId);
     systemPrompt = buildViabilityAnalyzerPrompt(agentCfg, config, leadName, { lead: leadData, documents: docs });
@@ -735,17 +703,23 @@ async function handleAgentPhase(
     tools = contractCloserTools;
   } else {
     // SDR phase (default)
-    const { data: companyOffices } = await supabase
+    const { data: companyOffices, error: officesError } = await supabase
       .from("company_offices")
       .select("name, address, complement, reference_point, maps_url, is_active, position")
       .eq("company_id", companyId)
       .eq("is_active", true)
       .order("position", { ascending: true });
-    systemPrompt = buildSDRPrompt(config, leadName, companyOffices || []);
+    if (officesError) console.error("[SDR] Erro ao buscar offices:", officesError.message);
+    systemPrompt = buildSDRPrompt(config, leadName, companyOffices || [], flowsBlock || "", triageBlock || "");
     tools = sdrTools;
+    console.log("[SDR PROMPT DEBUG]", JSON.stringify({
+      companyId,
+      flowsCount: flowsBlock ? flowsBlock.split("\n\n").length : 0,
+      hasTriageOptions: !!triageBlock,
+      promptLength: systemPrompt.length,
+    }));
   }
 
-  // Reforço de coerência — instrução INTERNA. Nunca deve aparecer na conversa com o lead.
   const coherenceGuard = `
 
 [INSTRUÇÃO INTERNA — NÃO MOSTRAR PRO LEAD, NÃO COPIAR PRO TEXTO DA RESPOSTA]
@@ -757,9 +731,8 @@ Antes de responder:
 - Responda em UMA mensagem curta (1-3 linhas), tom humano, usando o primeiro nome quando fizer sentido.
 - Sua resposta é APENAS o texto que vai pro WhatsApp do lead. Não inclua marcadores, listas de regras, nem mencione "instrução", "regra", "fluxo", "passo", "tool" ou nomes técnicos.`;
 
-
   try {
-    let aiMessages: any[] = [
+    const aiMessages: any[] = [
       { role: "system", content: systemPrompt + coherenceGuard },
       ...conversationHistory,
     ];
@@ -829,11 +802,10 @@ Antes de responder:
 
         if (fnName === "check_availability") {
           hasCheckAvailability = true;
-          let dateToCheck = args.date || getNextAvailableDays(1)[0];
+          const dateToCheck = args.date || getNextAvailableDays(1)[0];
           const period = String(args.period || "qualquer").toLowerCase();
           const availability = await getAvailableSlots(supabase, companyId, dateToCheck);
 
-          // Filtra por turno solicitado
           const filterByPeriod = (slots: string[]) => {
             if (period === "manha") return slots.filter(s => parseInt(s.split(":")[0], 10) < 12);
             if (period === "tarde") return slots.filter(s => parseInt(s.split(":")[0], 10) >= 12);
@@ -841,7 +813,6 @@ Antes de responder:
           };
 
           let filteredSlots = filterByPeriod(availability.slots);
-          // Fallback: se o turno pedido não tem slot, tenta o outro turno do mesmo dia
           if (filteredSlots.length === 0 && availability.slots.length > 0) filteredSlots = availability.slots;
 
           if (filteredSlots.length === 0) {
@@ -880,16 +851,6 @@ Antes de responder:
           }
         }
 
-        if (fnName === "qualify_lead") {
-          qualificationResult = {
-            status: args.status || "needs_more_info",
-            reason: args.reason || "",
-            summary: args.summary || "",
-            lead_score: args.lead_score || "morno",
-          };
-          toolResult = { success: true, status: args.status };
-        }
-
         if (fnName === "decide_lead") {
           try {
             const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -912,7 +873,6 @@ Antes de responder:
               }
             );
             toolResult = await decRes.json();
-            // Sincroniza qualificationResult para fluxo de pós-processamento
             if (toolResult?.classification) {
               qualificationResult = {
                 status:
@@ -931,16 +891,13 @@ Antes de responder:
         }
 
         if (fnName === "schedule_appointment") {
-          // 🔒 Verificar dados do lead — agendar SEMPRE, mas marcar pendência se faltar
-          let pendingItems: string[] = [];
-          let leadCheckRow: any = null;
+          const pendingItems: string[] = [];
           if (leadId) {
             const { data: leadCheck } = await supabase
               .from("leads")
               .select("name")
               .eq("id", leadId)
               .maybeSingle();
-            leadCheckRow = leadCheck;
             if (!isValidFullName(leadCheck?.name || "")) pendingItems.push("Nome completo");
           }
           const pendingWarning = pendingItems.length > 0 ? `${pendingItems.join(" + ")} pendente(s)` : null;
@@ -966,10 +923,8 @@ Antes de responder:
               reminder_type: "meeting", due_at: dueAt,
             });
 
-            // Marca pendência (ou limpa se estava marcado)
             await supabase.from("leads").update({ pending_data_warning: pendingWarning }).eq("id", leadId);
 
-            // Notify lawyer
             if (config.alert_whatsapp) {
               try {
                 const SERVER_URL = "https://ziondigital.uazapi.com";
@@ -992,7 +947,6 @@ Antes de responder:
               }
             }
 
-            // Check if document_collector agent is active — if so, advance phase
             const docAgent = agentConfigs["document_collector"];
             if (docAgent?.is_active) {
               await supabase.from("leads").update({ bot_agent_phase: "document_collector" }).eq("id", leadId);
@@ -1015,7 +969,6 @@ Antes de responder:
 
         if (fnName === "documents_complete") {
           replyText = args.message_to_lead || "Documentos completos! ✅";
-          // Advance to viability analyzer if active
           const viabilityAgent = agentConfigs["viability_analyzer"];
           if (viabilityAgent?.is_active) {
             await supabase.from("leads").update({ bot_agent_phase: "viability_analyzer" }).eq("id", leadId);
@@ -1053,7 +1006,6 @@ Antes de responder:
 
         // ===== CONTRACT CLOSER TOOLS =====
         if (fnName === "finalize_contract") {
-          // 🔒 CPF não é mais obrigatório
           const cpfFromArg = String(args.client_cpf || "").replace(/\D/g, "");
           let finalCpf = cpfFromArg.length === 11 ? cpfFromArg : "";
           if (!finalCpf && leadId) {
@@ -1077,14 +1029,12 @@ Antes de responder:
           }
           await supabase.from("leads").update(updates).eq("id", leadId);
 
-          // Buscar config de comissão para registrar contrato fechado
           const { data: commissionCfg } = await supabase
             .from("commission_settings")
             .select("commission_percentage")
             .eq("company_id", companyId)
             .maybeSingle();
 
-          // Criar registro imutável em closed_contracts
           await supabase.from("closed_contracts").insert({
             company_id: companyId,
             lead_id: leadId,
@@ -1099,7 +1049,6 @@ Antes de responder:
             created_by: "00000000-0000-0000-0000-000000000000",
           });
 
-          // Move to "Ganho" column
           const { data: wonCol } = await supabase.from("kanban_columns").select("id")
             .eq("company_id", companyId).eq("is_won", true).order("position", { ascending: false }).limit(1).maybeSingle();
           if (wonCol) {
@@ -1112,12 +1061,11 @@ Antes de responder:
             generated_by_ai: true, created_by: "00000000-0000-0000-0000-000000000000",
           });
 
-          // Notify lawyer about contract
           if (config.alert_whatsapp) {
             try {
               const SERVER_URL = "https://ziondigital.uazapi.com";
               const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
-              const alertPhone = config.alert_whatsapp.replace(/\D/g, "");
+              const alertPhone = String(config.alert_whatsapp).replace(/\D/g, "");
               const alertMessage = `🎉 *Contrato Fechado Automaticamente!*\n\n👤 Cliente: ${args.client_full_name || leadName || "N/A"}\n${args.contract_value ? `💰 Valor: R$ ${args.contract_value}\n` : ""}\n_Fechado automaticamente pelo bot de contrato_`;
               const alertHeaders: Record<string, string> = { "Content-Type": "application/json" };
               if (ADMIN_TOKEN) alertHeaders["admintoken"] = ADMIN_TOKEN;
@@ -1180,7 +1128,6 @@ Antes de responder:
           });
 
           if (!shouldSchedule) {
-            // Lead qualificado mas ainda não agendou: mantém em "Em Atendimento" (pos 0).
             const { data: emAtCol } = await supabase.from("kanban_columns").select("id")
               .eq("company_id", companyId).eq("position", 0).maybeSingle();
             if (emAtCol) {
@@ -1214,20 +1161,13 @@ Antes de responder:
   }
 }
 
+// ====== CADENCE ======
 async function enrollInCadence(supabase: any, companyId: string, leadId: string, phone: string) {
-  // Sempre que o bot envia uma mensagem, reagenda a cadência a partir de agora.
-  // Cancela qualquer cadência pendente anterior pra evitar duplicata.
   await supabase.from("cadence_messages").update({ status: "cancelled" })
     .eq("lead_id", leadId).eq("status", "pending");
 
-  // ⚠️ MUDANÇA: agora enfileira SÓ o próximo step (step 1).
-  // Quando ele for enviado pelo process-cadence, o próprio process-cadence
-  // enfileira o step 2 com base no delay configurado, e assim por diante.
-  // Isso garante a regra: "se ficar 30min sem responder após cada follow-up,
-  // o próximo é disparado" — e não 5 follow-ups agendados de uma vez.
-
   const delayMinutes = await getCadenceDelayForStep(supabase, companyId, 1);
-  if (delayMinutes === null) return; // step 1 desabilitado
+  if (delayMinutes === null) return;
 
   const scheduledAt = new Date(Date.now() + delayMinutes * 60 * 1000).toISOString();
 
@@ -1244,22 +1184,13 @@ async function enrollInCadence(supabase: any, companyId: string, leadId: string,
   else console.log(`Lead ${leadId} enrolled in cadence step 1 in ${delayMinutes}min`);
 }
 
-/**
- * Busca o delay_minutes configurado para um step específico.
- * Retorna null se o step estiver desabilitado.
- * Defaults: step 1 = 30min, demais = 1 dia (1440min).
- */
 async function getCadenceDelayForStep(
   supabase: any,
   companyId: string,
   stepNumber: number,
 ): Promise<number | null> {
   const defaults: Record<number, number> = {
-    1: 30,
-    2: 60 * 24,
-    3: 60 * 24,
-    4: 60 * 24,
-    5: 60 * 24,
+    1: 30, 2: 60 * 24, 3: 60 * 24, 4: 60 * 24, 5: 60 * 24,
   };
 
   const { data: customStep } = await supabase
@@ -1276,18 +1207,16 @@ async function getCadenceDelayForStep(
   return defaults[stepNumber] ?? null;
 }
 
+// ====== MESSAGE SPLITTER ======
 function splitIntoNaturalMessages(text: string): string[] {
   if (!text) return [text];
   const trimmed = text.trim();
   if (!trimmed) return [trimmed];
 
-  // 1) Primeiro quebra por parágrafos (\n\n) e quebras de linha simples (\n)
   const paragraphs = trimmed.split(/\n+/).map((p) => p.trim()).filter(Boolean);
   const rawSentences: string[] = [];
 
-  // 2) Dentro de cada parágrafo, quebra por frases (., ?, !) — cada pergunta vira mensagem própria
   for (const para of paragraphs) {
-    // Captura frases preservando pontuação final
     const matches = para.match(/[^.!?…]+[.!?…]+["')\]]*|[^.!?…]+$/g);
     if (!matches) { rawSentences.push(para); continue; }
     for (const m of matches) {
@@ -1296,10 +1225,6 @@ function splitIntoNaturalMessages(text: string): string[] {
     }
   }
 
-  // 3) Agrupamento inteligente:
-  //    - Toda frase terminada em "?" ou "!" fica SOZINHA (pergunta/exclamação destacada)
-  //    - Frases curtas afirmativas consecutivas (<60 chars) podem ser agrupadas até ~140 chars
-  //    - Saudações isoladas (Oi!, Olá 😊) ficam em mensagem própria
   const messages: string[] = [];
   let buffer = "";
 
@@ -1315,7 +1240,6 @@ function splitIntoNaturalMessages(text: string): string[] {
     const isShort = sentence.length < 60;
 
     if (isQuestion || isExclam) {
-      // pergunta/exclamação sempre vai sozinha
       flush();
       messages.push(sentence);
       continue;
@@ -1326,7 +1250,6 @@ function splitIntoNaturalMessages(text: string): string[] {
       continue;
     }
 
-    // tenta agrupar com a frase anterior se ambas curtas e cabem em ~140 chars
     if (isShort && buffer.length + sentence.length + 1 <= 140) {
       buffer = `${buffer} ${sentence}`;
     } else {
@@ -1369,12 +1292,33 @@ serve(async (req) => {
       });
     }
 
-    // Fetch agent configurations for this company
+    // FIX 1: buscar fluxos ativos uma única vez por request
+    const { data: flows, error: flowsError } = await supabase
+      .from("company_bot_flows")
+      .select("flow_key, label, custom_prompt_block, position")
+      .eq("company_id", companyId)
+      .eq("enabled", true)
+      .order("position", { ascending: true });
+    if (flowsError) console.error("[flows] Erro ao buscar fluxos:", flowsError.message);
+    const flowsBlock = flows?.length
+      ? flows.map((f: any) => (f.custom_prompt_block?.trim() || "").trim()).filter(Boolean).join("\n\n")
+      : "";
+
+    // FIX 2: montar bloco de triage_options uma única vez por request
+    const triageOptions = (config as any).triage_options || [];
+    const triageBlock = Array.isArray(triageOptions) && triageOptions.length
+      ? `Qualifique o lead APENAS se ele mencionar uma das situações abaixo:\n` +
+        triageOptions
+          .map((t: any) => `- ${t.label || t.name || ""}${t.keywords?.length ? ` (palavras-chave: ${t.keywords.join(", ")})` : ""}`)
+          .join("\n") +
+        `\n\nSe a demanda NÃO bater com nenhuma dessas situações, classifique como "not_qualified" e encerre com empatia.\nSe bater, classifique como "qualified" e convide para a reunião.`
+      : "";
+
     const { data: agentRows } = await supabase
       .from("company_bot_agents")
       .select("*")
       .eq("company_id", companyId);
-    
+
     const agentConfigs: Record<string, any> = {};
     (agentRows || []).forEach((a: any) => { agentConfigs[a.agent_type] = a; });
 
@@ -1413,7 +1357,6 @@ serve(async (req) => {
       messageIdExternal = msg.messageid || msg.id || "";
       isGroup = msg.isGroup || false;
       messageType = (msg.type || msg.messageType || "").toString().toLowerCase();
-      // UaZapi pode entregar URL de áudio em vários campos
       if (messageType.includes("audio") || messageType === "ptt" || messageType === "voice") {
         audioUrl = msg.audio?.url || msg.audio?.audioUrl || msg.mediaUrl || msg.fileURL || msg.url || msg.media?.url || null;
       }
@@ -1432,13 +1375,11 @@ serve(async (req) => {
     }
 
     // ===== TRANSCRIÇÃO DE ÁUDIO (Whisper) =====
-    // Se for áudio e tivermos URL, transcrevemos antes de seguir o fluxo normal.
-    // Mensagem fica como texto puro pra IA processar igual a qualquer outra.
     if (audioUrl) {
       try {
         const openaiKey = Deno.env.get("OPENAI_API_KEY");
         if (!openaiKey) {
-          console.error("[audio] OPENAI_API_KEY não configurada — não foi possível transcrever áudio");
+          console.error("[audio] OPENAI_API_KEY não configurada");
         } else {
           console.log(`[audio] Baixando áudio de: ${audioUrl}`);
           const audioResp = await fetch(audioUrl);
@@ -1450,7 +1391,7 @@ serve(async (req) => {
             console.log(`[audio] Áudio baixado: ${audioSize} bytes`);
 
             if (audioSize > 25 * 1024 * 1024) {
-              console.error("[audio] Áudio maior que 25MB, Whisper não suporta");
+              console.error("[audio] Áudio maior que 25MB");
               messageText = "[áudio muito longo — não transcrito]";
             } else {
               const fd = new FormData();
@@ -1458,7 +1399,6 @@ serve(async (req) => {
               fd.append("model", "whisper-1");
               fd.append("language", "pt");
               fd.append("response_format", "json");
-              // temperature 0 = mais determinístico, evita alucinação
               fd.append("temperature", "0");
 
               const whisperResp = await fetch("https://api.openai.com/v1/audio/transcriptions", {
@@ -1476,7 +1416,6 @@ serve(async (req) => {
                 const transcription = (whisperData.text || "").trim();
                 if (transcription) {
                   console.log(`[audio] Transcrição (${transcription.length} chars): ${transcription.substring(0, 120)}...`);
-                  // Marcamos como áudio pra histórico mas tratamos como texto
                   messageText = `🎤 [áudio transcrito]: ${transcription}`;
                 } else {
                   messageText = "[áudio sem fala detectada]";
@@ -1491,7 +1430,6 @@ serve(async (req) => {
       }
     }
 
-    // Garante que messageText sempre seja string (evita erros tipo .match is not a function)
     if (typeof messageText !== "string") {
       messageText = String(messageText ?? "");
     }
@@ -1513,18 +1451,17 @@ serve(async (req) => {
     if (codeMatch) {
       trackingCode = codeMatch[1].toUpperCase();
       console.log(`[tracking] Found tracking code: ${trackingCode}`);
-      
+
       const { data: click } = await supabase.from("tracking_clicks")
         .select("id, utm_source, utm_medium, utm_campaign, utm_content, utm_term")
         .eq("tracking_code", trackingCode)
         .maybeSingle();
 
       if (click) {
-        console.log(`[tracking] Click record found for ${trackingCode}:`, JSON.stringify(click));
         utmData = {
-          utm_source: click.utm_source || undefined, 
+          utm_source: click.utm_source || undefined,
           utm_medium: click.utm_medium || undefined,
-          utm_campaign: click.utm_campaign || undefined, 
+          utm_campaign: click.utm_campaign || undefined,
           utm_content: click.utm_content || undefined,
           utm_term: click.utm_term || undefined,
         };
@@ -1532,7 +1469,7 @@ serve(async (req) => {
         if (src.includes("google") || src === "gads" || src.includes("youtube")) {
           detectedSource = "google";
         } else if (
-          src.includes("meta") || src.includes("facebook") || src.includes("instagram") || 
+          src.includes("meta") || src.includes("facebook") || src.includes("instagram") ||
           src === "fb" || src === "ig" || src === "ads"
         ) {
           detectedSource = "meta";
@@ -1575,7 +1512,6 @@ serve(async (req) => {
         .eq("lead_id", leadId).eq("status", "pending");
 
       if (existingLead?.status === "new") {
-        // Novo funil: "Em Atendimento" agora é a posição 0 (entrada)
         const { data: emAtendimentoCol } = await supabase.from("kanban_columns").select("id")
           .eq("company_id", companyId).eq("position", 0).maybeSingle();
         if (emAtendimentoCol) {
@@ -1623,24 +1559,16 @@ serve(async (req) => {
     if (config.ai_enabled && config.ai_auto_reply && leadId && !existingLead?.bot_disabled) {
       try {
         const leadStatus = existingLead?.status;
-        // Bot continues for active phases, stops for completed
         const isCompleted = currentPhase === "completed";
         const isAlreadyHandled = leadStatus && !["new", "contacted", "qualified", "negotiating"].includes(leadStatus);
 
         if (!isCompleted && !isAlreadyHandled) {
-          // Determine effective phase: if agent for current phase is not active, use SDR
           let effectivePhase = currentPhase;
           if (effectivePhase !== "sdr" && !agentConfigs[effectivePhase]?.is_active) {
             effectivePhase = "sdr";
           }
 
-          // 🔒 DEBOUNCE / DEDUPLICAÇÃO POR LEAD
-          // Problema: lead manda 2-3 mensagens em rajada ("Oi", "Sim", "tô interessado").
-          // Cada webhook dispara uma execução paralela e a Laura responde 3 vezes a mesma coisa.
-          //
-          // Solução: aguarda 7s para "agrupar" rajada. Antes de chamar a IA, verifica se chegou
-          // mensagem MAIS NOVA do lead após esta. Se sim, desiste — a execução mais recente
-          // vai responder com o histórico completo (incluindo todas as mensagens da rajada).
+          // Debounce 7s para agrupar rajada
           await new Promise((r) => setTimeout(r, 7000));
 
           const { data: newerMsg } = await supabase.from("whatsapp_messages")
@@ -1654,7 +1582,7 @@ serve(async (req) => {
             .maybeSingle();
 
           if (newerMsg) {
-            console.log(`[debounce] Pulando resposta para ${cleanPhone}: chegou msg mais nova (${newerMsg.timestamp}) após esta (${incomingTimestamp}). A execução mais recente responderá.`);
+            console.log(`[debounce] Pulando resposta para ${cleanPhone}: chegou msg mais nova.`);
             return new Response(
               JSON.stringify({ ok: true, lead_id: leadId, debounced: true }),
               { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
@@ -1664,8 +1592,6 @@ serve(async (req) => {
           const { data: leadData } = await supabase.from("leads").select("name").eq("id", leadId).single();
           const currentLeadName = leadData?.name || senderName || undefined;
 
-          // Lê as últimas 30 mensagens (mesmo tamanho usado em process-cadence) para garantir
-          // que a IA tenha contexto completo da conversa antes de responder com coerência.
           const { data: recentMsgs } = await supabase.from("whatsapp_messages")
             .select("message_text, direction").eq("company_id", companyId)
             .eq("phone", cleanPhone).order("timestamp", { ascending: false }).limit(30);
@@ -1677,7 +1603,8 @@ serve(async (req) => {
 
           const aiReply = await handleAgentPhase(
             effectivePhase, config, agentConfigs, history,
-            companyId, leadId, supabase, currentLeadName, cleanPhone
+            companyId, leadId, supabase, currentLeadName, cleanPhone,
+            flowsBlock, triageBlock,
           );
 
           const SERVER_URL = "https://ziondigital.uazapi.com";
@@ -1697,9 +1624,7 @@ serve(async (req) => {
               const chunk = splitMessages[i].trim();
               if (!chunk) continue;
 
-              // Delay aleatório entre 4 e 8 segundos antes de cada mensagem (humaniza o bot)
               const delayMs = Math.floor(Math.random() * (8000 - 4000 + 1)) + 4000;
-              console.log(`[${effectivePhase}] Aguardando ${delayMs}ms antes de enviar msg ${i + 1}/${splitMessages.length}`);
               await new Promise((r) => setTimeout(r, delayMs));
 
               const sendResponse = await fetch(sendUrl, {
@@ -1719,15 +1644,11 @@ serve(async (req) => {
                 console.error("Failed to send AI reply:", sendResponse.status, await sendResponse.text());
               }
             }
-            // Bot acabou de responder → reagenda cadência baseada em agora.
-            // Se o lead ficar 30+ min sem responder, dispara o 1º Follow-UP.
             if (leadId) {
               await enrollInCadence(supabase, companyId, leadId, cleanPhone);
             }
           } else {
-            // 🆘 FALLBACK: IA falhou (timeout, rate-limit, loop sem texto). Envia ponte humana
-            // pra não deixar o lead em silêncio + alerta o gerente.
-            console.error(`[${effectivePhase}] AI returned null for lead ${leadId}. Sending fallback message + alerting manager.`);
+            console.error(`[${effectivePhase}] AI returned null for lead ${leadId}. Sending fallback.`);
             const fallbackText = "Deixa eu olhar isso aqui com calma e já te respondo, tá bom? 🙏";
             try {
               const fbResp = await fetch(sendUrl, {
@@ -1747,18 +1668,16 @@ serve(async (req) => {
               console.error("Fallback message send error:", fbErr);
             }
 
-            // Mesmo no fallback, reagenda cadência: bot enviou algo, relógio reinicia.
             if (leadId) {
               await enrollInCadence(supabase, companyId, leadId, cleanPhone);
             }
 
-            // Alerta gerente
             if (config.alert_whatsapp) {
               try {
                 const alertPhone = String(config.alert_whatsapp).replace(/\D/g, "");
                 const lastMsg = history.length > 0 ? history[history.length - 1].content : "(sem texto)";
                 const alertText = `⚠️ *Lead sem resposta da IA*\n\n👤 ${currentLeadName || "Lead"}\n📱 ${cleanPhone}\n\n💬 Última msg do lead:\n_"${String(lastMsg).substring(0, 300)}"_\n\nA IA não conseguiu responder. Por favor assumir manualmente.`;
-                await fetch(sendUrl.replace(`token=${tokenParam}`, `token=${tokenParam}`), {
+                await fetch(sendUrl, {
                   method: "POST", headers: sendHeaders,
                   body: JSON.stringify({ number: alertPhone, text: alertText }),
                 });
