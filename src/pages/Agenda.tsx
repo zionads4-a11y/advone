@@ -373,12 +373,29 @@ export default function Agenda() {
               </>
             )}
           </Button>
-          <Button onClick={() => { setEditEvent(null); setCreateDialogOpen(true); }} className="gap-2">
+          <Button 
+            variant="outline"
+            onClick={() => { 
+              setEditEvent(null); 
+              setDefaultEventType("block");
+              setCreateDialogOpen(true); 
+            }} 
+            className="gap-2 border-destructive/30 text-destructive hover:bg-destructive/5 hover:text-destructive"
+          >
+            <Lock className="h-4 w-4" />
+            Fechar Agenda
+          </Button>
+          <Button 
+            onClick={() => { 
+              setEditEvent(null); 
+              setDefaultEventType("reminder");
+              setCreateDialogOpen(true); 
+            }} 
+            className="gap-2"
+          >
             <Plus className="h-4 w-4" />
             Novo Evento
           </Button>
-        </div>
-      </div>
 
       {/* Reminder banner */}
       <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm">
