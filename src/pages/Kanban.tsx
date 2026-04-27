@@ -115,7 +115,7 @@ export default function Kanban() {
 
   const moveLeadToColumn = useCallback(async (leadId: string, columnId: string) => {
     const targetColumn = kanbanColumns.find(c => c.id === columnId);
-    let newStatus: string | undefined;
+    let newStatus: "won" | "lost" | "contacted" | undefined;
     
     if (targetColumn?.is_won) newStatus = "won";
     else if (targetColumn?.is_lost) newStatus = "lost";
