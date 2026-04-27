@@ -251,7 +251,7 @@ export default function Profile() {
 
           <Separator />
 
-          {/* Name & Phone */}
+          {/* Name & Email & Phone */}
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="fullName">Nome completo</Label>
@@ -260,6 +260,16 @@ export default function Profile() {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Seu nome"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">E-mail</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="seu@email.com"
               />
             </div>
             <div className="space-y-2">
