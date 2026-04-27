@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Loader2, CalendarPlus, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
-import { format, addDays, addWeeks, addMonths, addYears } from "date-fns";
+import { format, addDays, addWeeks, addMonths, addYears, addHours } from "date-fns";
 import { brtDateTimeToIso } from "@/lib/utils";
 import { RecurrenceSelector, type RecurrenceConfig } from "./RecurrenceSelector";
 import { getHolidayForDate } from "@/lib/brazilianHolidays";
