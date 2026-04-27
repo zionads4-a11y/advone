@@ -515,7 +515,7 @@ const sdrTools = [
         additionalProperties: false
       }
     }
-  }
+  },
   {
     type: "function",
     function: {
