@@ -370,10 +370,10 @@ export default function Conversations() {
               variant="outline" 
               size="sm" 
               onClick={exportAllConversationsToPdf}
-              className="hidden sm:flex items-center gap-2"
+              className="flex items-center gap-2"
             >
               <FileDown className="h-4 w-4" />
-              Exportar PDF
+              <span className="hidden sm:inline">Exportar PDF</span>
             </Button>
             {!isClient && companies.length > 1 && (
               <Select value={selectedCompanyId} onValueChange={(v) => { setSelectedCompanyId(v); setSelectedPhone(""); }}>
