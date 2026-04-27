@@ -1502,6 +1502,7 @@ export type Database = {
           created_by: string
           description: string | null
           due_at: string
+          google_event_id: string | null
           id: string
           lawyer_30m_sent: boolean
           lawyer_3h_sent: boolean
@@ -1526,6 +1527,7 @@ export type Database = {
           created_by: string
           description?: string | null
           due_at: string
+          google_event_id?: string | null
           id?: string
           lawyer_30m_sent?: boolean
           lawyer_3h_sent?: boolean
@@ -1550,6 +1552,7 @@ export type Database = {
           created_by?: string
           description?: string | null
           due_at?: string
+          google_event_id?: string | null
           id?: string
           lawyer_30m_sent?: boolean
           lawyer_3h_sent?: boolean
