@@ -1648,22 +1648,36 @@ serve(async (req) => {
     let utmData: any = {};
     let detectedSource: string | null = null;
 
-    const codeMatch = messageText.match(/\[([A-Z0-9]{6})\]/);
+    const codeMatch = messageText.match(/\[([a-zA-Z0-9]{6})\]/);
     if (codeMatch) {
-      trackingCode = codeMatch[1];
+      trackingCode = codeMatch[1].toUpperCase();
+      console.log(`[tracking] Found tracking code: ${trackingCode}`);
+      
       const { data: click } = await supabase.from("tracking_clicks")
         .select("id, utm_source, utm_medium, utm_campaign, utm_content, utm_term")
-        .eq("tracking_code", trackingCode).is("lead_id", null).maybeSingle();
+        .eq("tracking_code", trackingCode)
+        .maybeSingle();
 
       if (click) {
+        console.log(`[tracking] Click record found for ${trackingCode}:`, JSON.stringify(click));
         utmData = {
-          utm_source: click.utm_source || undefined, utm_medium: click.utm_medium || undefined,
-          utm_campaign: click.utm_campaign || undefined, utm_content: click.utm_content || undefined,
+          utm_source: click.utm_source || undefined, 
+          utm_medium: click.utm_medium || undefined,
+          utm_campaign: click.utm_campaign || undefined, 
+          utm_content: click.utm_content || undefined,
           utm_term: click.utm_term || undefined,
         };
         const src = (click.utm_source || "").toLowerCase();
-        if (src.includes("google") || src === "gads") detectedSource = "google";
-        else if (src.includes("meta") || src.includes("facebook") || src.includes("instagram")) detectedSource = "meta";
+        if (src.includes("google") || src === "gads" || src.includes("youtube")) {
+          detectedSource = "google";
+        } else if (
+          src.includes("meta") || src.includes("facebook") || src.includes("instagram") || 
+          src === "fb" || src === "ig" || src === "ads"
+        ) {
+          detectedSource = "meta";
+        }
+      } else {
+        console.log(`[tracking] No click record found for code: ${trackingCode}`);
       }
     }
 
