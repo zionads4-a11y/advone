@@ -516,6 +516,21 @@ const sdrTools = [
       }
     }
   }
+  {
+    type: "function",
+    function: {
+      name: "register_client_name",
+      description: "Registra o nome completo do lead no sistema.",
+      parameters: {
+        type: "object",
+        properties: {
+          full_name: { type: "string", description: "Nome completo do lead (mínimo 3 palavras)" }
+        },
+        required: ["full_name"],
+        additionalProperties: false
+      }
+    }
+  }
 ];
 
 // ====== DOCUMENT COLLECTOR TOOLS ======
