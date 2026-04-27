@@ -23,10 +23,10 @@ function buildSDRPrompt(config: any, leadName?: string, offices: any[] = []) {
   if (!hasOffices) {
     // Sem endereço cadastrado → SOMENTE ONLINE. Bot não pergunta nem oferece presencial.
     modalidadeBlock =
-      `🟢 MODALIDADE — SOMENTE ONLINE (este escritório NÃO atende presencial):\\n` +
-      `   • NÃO pergunte se o lead prefere online ou presencial.\\n` +
-      `   • NÃO ofereça atendimento presencial em hipótese alguma.\\n` +
-      `   • Apenas confirme: "A conversa vai ser online, por videochamada, tudo bem? 🙂" e siga direto pra perguntar o horário.\\n` +
+      `🟢 MODALIDADE — SOMENTE ONLINE (este escritório NÃO possui endereço cadastrado, atendimento é 100% online):\\n` +
+      `   • REGRA CRÍTICA: Você NÃO atende presencial. NÃO pergunte se o lead prefere online ou presencial.\\n` +
+      `   • REGRA CRÍTICA: NÃO ofereça atendimento presencial em hipótese alguma.\\n` +
+      `   • Apenas confirme: "Como o nosso atendimento para o seu caso é 100% online (por videochamada), podemos seguir com o agendamento? 🙂" e, após o "sim", pergunte o horário.\\n` +
       `   • Em schedule_appointment use sempre modality="online" e unit="Online".`;
     unitParamHint = `unit="Online"`;
   } else if (officesCount === 1) {
