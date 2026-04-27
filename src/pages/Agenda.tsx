@@ -61,6 +61,7 @@ export default function Agenda() {
   const [viewMode, setViewMode] = useState<"month" | "week" | "day">("month");
   const [isGoogleConnected, setIsGoogleConnected] = useState(false);
   const [syncLoading, setSyncLoading] = useState(false);
+  const [defaultEventType, setDefaultEventType] = useState<"meeting" | "reminder" | "block">("reminder");
 
   const handleSync = useCallback(async () => {
     if (!isGoogleConnected) return;
