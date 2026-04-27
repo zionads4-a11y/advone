@@ -1,0 +1,1 @@
+ALTER TABLE public.lead_reminders ALTER COLUMN lead_id DROP NOT NULL;
