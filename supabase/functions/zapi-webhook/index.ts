@@ -685,6 +685,15 @@ async function handleAgentPhase(
   let systemPrompt: string;
   let tools: any[];
 
+  // 🏢 Buscar offices para validação e prompts
+  const { data: companyOffices, error: officesError } = await supabase
+    .from("company_offices")
+    .select("name, address, complement, reference_point, maps_url, is_active, position")
+    .eq("company_id", companyId)
+    .eq("is_active", true)
+    .order("position", { ascending: true });
+  if (officesError) console.error("[SDR] Erro ao buscar offices:", officesError.message);
+
   if (phase === "document_collector") {
     const agentCfg = agentConfigs["document_collector"];
     const requiredDocs = agentCfg?.required_documents || [];
@@ -703,21 +712,16 @@ async function handleAgentPhase(
     tools = contractCloserTools;
   } else {
     // SDR phase (default)
-    const { data: companyOffices, error: officesError } = await supabase
-      .from("company_offices")
-      .select("name, address, complement, reference_point, maps_url, is_active, position")
-      .eq("company_id", companyId)
-      .eq("is_active", true)
-      .order("position", { ascending: true });
-    if (officesError) console.error("[SDR] Erro ao buscar offices:", officesError.message);
     systemPrompt = buildSDRPrompt(config, leadName, companyOffices || [], flowsBlock || "", triageBlock || "");
     tools = sdrTools;
-    console.log("[SDR PROMPT DEBUG]", JSON.stringify({
-      companyId,
-      flowsCount: flowsBlock ? flowsBlock.split("\n\n").length : 0,
-      hasTriageOptions: !!triageBlock,
-      promptLength: systemPrompt.length,
-    }));
+    if (config?.debug_mode) {
+      console.log("[SDR PROMPT DEBUG]", JSON.stringify({
+        companyId,
+        flowsCount: flowsBlock ? flowsBlock.split("\n\n").length : 0,
+        hasTriageOptions: !!triageBlock,
+        promptLength: systemPrompt.length,
+      }));
+    }
   }
 
   const coherenceGuard = `
@@ -852,7 +856,12 @@ Antes de responder:
         }
 
         if (fnName === "decide_lead") {
-          try {
+          // 🛡️ Prevenção de qualificação duplicada: se o lead já tiver um score definitivo e não for SDR, evitamos re-classificar
+          const { data: existingLead } = await supabase.from("leads").select("lead_score, bot_agent_phase").eq("id", leadId).maybeSingle();
+          if (existingLead?.lead_score && existingLead?.bot_agent_phase && existingLead.bot_agent_phase !== "sdr") {
+            toolResult = { success: true, classification: existingLead.lead_score, note: "O lead já foi classificado anteriormente." };
+          } else {
+            try {
             const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
             const decRes = await fetch(
               `${Deno.env.get("SUPABASE_URL")}/functions/v1/decision-engine`,
@@ -884,9 +893,10 @@ Antes de responder:
                 lead_score: toolResult.classification === "invalido" ? "frio" : toolResult.classification,
               };
             }
-          } catch (e) {
-            console.error("decide_lead error:", e);
-            toolResult = { error: "Falha ao chamar decision-engine" };
+            } catch (e) {
+              console.error("decide_lead error:", e);
+              toolResult = { error: "Falha ao chamar decision-engine" };
+            }
           }
         }
 
@@ -909,12 +919,31 @@ Antes de responder:
             const appointmentDate = args.date || getNextAvailableDays(1)[0];
             const appointmentTime = args.time || "10:00";
             const dueAt = `${appointmentDate}T${appointmentTime}:00-03:00`;
-            const modality = args.modality || "online";
+            let modality = args.modality || "online";
+            let unitName = args.unit || "";
+
+            // 🛡️ Validação de Modality e Unit (evita alucinação de endereços)
+            const activeOfficesList = companyOffices || [];
+            const hasOffices = activeOfficesList.length > 0;
+
+            if (!hasOffices) {
+              modality = "online";
+              unitName = "Online";
+            } else if (modality === "presencial") {
+              const matchedOffice = activeOfficesList.find((o: any) => o.name.toLowerCase().trim() === unitName.toLowerCase().trim());
+              if (matchedOffice) {
+                unitName = matchedOffice.name;
+              } else {
+                unitName = activeOfficesList[0].name;
+              }
+            } else {
+              modality = "online";
+              unitName = "Online";
+            }
 
             const { data: leadData } = await supabase.from("leads").select("name, phone, whatsapp").eq("id", leadId).single();
             const lName = leadData?.name || "Lead";
             const leadPhone = leadData?.whatsapp || leadData?.phone || cleanPhone || "Não informado";
-            const unitName = args.unit || "";
 
             await supabase.from("lead_reminders").insert({
               lead_id: leadId, company_id: companyId, created_by: "00000000-0000-0000-0000-000000000000",
@@ -1282,7 +1311,7 @@ serve(async (req) => {
 
     const { data: config } = await supabase
       .from("whatsapp_configs")
-      .select("id, company_id, zapi_instance_id, zapi_token, ai_enabled, ai_prompt, ai_auto_reply, office_name, practice_area, communication_tone, scheduling_link, consultation_duration, target_audience, alert_whatsapp, triage_options")
+      .select("id, company_id, zapi_instance_id, zapi_token, ai_enabled, ai_prompt, ai_auto_reply, office_name, practice_area, communication_tone, scheduling_link, consultation_duration, target_audience, alert_whatsapp, triage_options, debug_mode")
       .eq("company_id", companyId)
       .maybeSingle();
 

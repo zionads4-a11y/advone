@@ -1,0 +1,1 @@
+ALTER TABLE public.whatsapp_configs ADD COLUMN debug_mode BOOLEAN DEFAULT false;
