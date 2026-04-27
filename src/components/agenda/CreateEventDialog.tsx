@@ -219,8 +219,8 @@ export function CreateEventDialog({
               📅 Reunião
             </Button>
             <Button type="button" variant={eventType === "block" ? "default" : "outline"} size="sm"
-              onClick={() => { setEventType("block"); setTitle("BLOQUEADO"); }} className="gap-2 px-1">
-              🚫 Bloqueio
+              onClick={() => { setEventType("block"); setTitle("FECHADO"); }} className="gap-2 px-1">
+              🚫 Fechar Dia
             </Button>
           </div>
 
