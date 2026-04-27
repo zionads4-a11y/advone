@@ -187,7 +187,7 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
           <CardTitle className="flex items-center gap-2 text-base flex-wrap">
             <ListChecks className="h-5 w-5 text-primary" />
             Fluxos Atendidos pelo Escritório
-            <Badge variant="secondary" className="ml-auto">
+            <Badge variant="secondary">
               {enabledCount} ativos
             </Badge>
             {customCount > 0 && (
