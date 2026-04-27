@@ -262,6 +262,17 @@ export default function Agenda() {
       return prev;
     });
   };
+  
+  const handleSelectDateTime = (date: Date, hour?: number) => {
+    setSelectedDate(date);
+    if (hour !== undefined) {
+      setSelectedTime(`${String(hour).padStart(2, "0")}:00`);
+    } else {
+      setSelectedTime(undefined);
+    }
+    setEditEvent(null);
+    setCreateDialogOpen(true);
+  };
 
   const goToToday = () => {
     const today = new Date();
