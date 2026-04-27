@@ -117,7 +117,8 @@ export default function Agenda() {
           setRefreshKey(k => k + 1);
         } catch (error: any) {
           console.error("Erro ao conectar Google Agenda:", error);
-          toast.error("Erro ao conectar Google Agenda");
+          const errorMsg = error.message || (typeof error === 'string' ? error : "Erro desconhecido");
+          toast.error(`Erro ao conectar Google Agenda: ${errorMsg}`);
           window.history.replaceState({}, document.title, window.location.pathname);
         }
       };
@@ -340,8 +341,8 @@ export default function Agenda() {
               authUrl.searchParams.set("response_type", "code");
               authUrl.searchParams.set("scope", scopes);
               authUrl.searchParams.set("access_type", "offline");
-                authUrl.searchParams.set("prompt", "consent");
-                authUrl.searchParams.set("resource", "https://calendarmcp.googleapis.com/mcp/v1");
+              authUrl.searchParams.set("prompt", "consent");
+
 
               window.location.href = authUrl.toString();
             }}
