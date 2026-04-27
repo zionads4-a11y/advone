@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { jsPDF } from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserCompanies } from "@/hooks/useUserCompanies";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
