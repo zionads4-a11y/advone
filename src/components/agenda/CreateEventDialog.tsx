@@ -135,6 +135,9 @@ export function CreateEventDialog({
     setSaving(true);
     // SEMPRE assume horário de Brasília (UTC-3) — independente do fuso do navegador do operador.
     const dueAt = brtDateTimeToIso(dueDate, dueTime);
+    const endAt = eventType === "meeting" 
+      ? addHours(new Date(dueAt), 1).toISOString() 
+      : null;
 
     let finalLeadId = leadId !== "none" ? leadId : null;
     if (!finalLeadId) {
