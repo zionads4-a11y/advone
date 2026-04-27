@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, CalendarClock, Check, Clock, AlertTriangle, Plus, Repeat, Pencil, Trash2, ChevronLeft, ChevronRight, PartyPopper, Info, Settings2, RefreshCw } from "lucide-react";
+import { Loader2, CalendarClock, Check, Clock, AlertTriangle, Plus, Repeat, Pencil, Trash2, ChevronLeft, ChevronRight, PartyPopper, Info, Settings2, RefreshCw, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { format, isSameDay, isAfter, isBefore, addDays, addWeeks, addMonths, subDays, subWeeks, subMonths, startOfWeek, endOfWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -61,6 +61,7 @@ export default function Agenda() {
   const [viewMode, setViewMode] = useState<"month" | "week" | "day">("month");
   const [isGoogleConnected, setIsGoogleConnected] = useState(false);
   const [syncLoading, setSyncLoading] = useState(false);
+  const [defaultEventType, setDefaultEventType] = useState<"meeting" | "reminder" | "block">("reminder");
 
   const handleSync = useCallback(async () => {
     if (!isGoogleConnected) return;
@@ -270,6 +271,7 @@ export default function Agenda() {
     } else {
       setSelectedTime(undefined);
     }
+    setDefaultEventType("reminder");
     setEditEvent(null);
     setCreateDialogOpen(true);
   };
@@ -372,7 +374,26 @@ export default function Agenda() {
               </>
             )}
           </Button>
-          <Button onClick={() => { setEditEvent(null); setCreateDialogOpen(true); }} className="gap-2">
+          <Button 
+            variant="outline"
+            onClick={() => { 
+              setEditEvent(null); 
+              setDefaultEventType("block");
+              setCreateDialogOpen(true); 
+            }} 
+            className="gap-2 border-destructive/30 text-destructive hover:bg-destructive/5 hover:text-destructive"
+          >
+            <Lock className="h-4 w-4" />
+            Fechar Agenda
+          </Button>
+          <Button 
+            onClick={() => { 
+              setEditEvent(null); 
+              setDefaultEventType("reminder");
+              setCreateDialogOpen(true); 
+            }} 
+            className="gap-2"
+          >
             <Plus className="h-4 w-4" />
             Novo Evento
           </Button>
@@ -534,6 +555,7 @@ export default function Agenda() {
         onCreated={() => setRefreshKey((k) => k + 1)}
         defaultDate={selectedDate}
         defaultTime={selectedTime}
+        defaultType={defaultEventType}
         companies={companies}
         preselectedCompanyId={selectedCompany !== "all" ? selectedCompany : undefined}
         editEvent={editEvent}

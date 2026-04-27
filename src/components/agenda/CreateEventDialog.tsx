@@ -14,7 +14,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Loader2, CalendarPlus, AlertTriangle } from "lucide-react";
+import { Loader2, CalendarPlus, AlertTriangle, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { format, addDays, addWeeks, addMonths, addYears, addHours } from "date-fns";
 import { brtDateTimeToIso } from "@/lib/utils";
@@ -27,6 +27,7 @@ interface CreateEventDialogProps {
   onCreated: () => void;
   defaultDate?: Date;
   defaultTime?: string;
+  defaultType?: "meeting" | "reminder" | "block";
   companies: { id: string; name: string }[];
   leads?: { id: string; name: string; company_id: string }[];
   preselectedCompanyId?: string;
@@ -50,6 +51,7 @@ export function CreateEventDialog({
   onCreated,
   defaultDate,
   defaultTime,
+  defaultType,
   companies,
   leads,
   preselectedCompanyId,
@@ -71,7 +73,7 @@ export function CreateEventDialog({
   useEffect(() => {
     if (open) {
       if (editEvent) {
-        const cleanTitle = editEvent.title.replace(/^(📅|🔔)\s*/, "");
+        const cleanTitle = editEvent.title.replace(/^(📅|🔔|🚫)\s*/, "");
         setTitle(cleanTitle);
         setDescription(editEvent.description || "");
         setEventType(
@@ -88,9 +90,9 @@ export function CreateEventDialog({
           setRecurrence({ type: "none" });
         }
       } else {
-        setTitle("");
+        setTitle(defaultType === "block" ? "BLOQUEADO" : "");
         setDescription("");
-        setEventType("reminder");
+        setEventType(defaultType || "reminder");
         setDueDate(defaultDate ? format(defaultDate, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"));
         setDueTime(defaultTime || "10:00");
         setCompanyId(preselectedCompanyId || (companies.length === 1 ? companies[0].id : ""));
@@ -98,7 +100,7 @@ export function CreateEventDialog({
         setRecurrence({ type: "none" });
       }
     }
-  }, [open, defaultDate, defaultTime, companies, preselectedCompanyId, editEvent]);
+  }, [open, defaultDate, defaultTime, defaultType, companies, preselectedCompanyId, editEvent]);
 
   useEffect(() => {
     if (!companyId || leads) return;
@@ -133,7 +135,6 @@ export function CreateEventDialog({
     }
 
     setSaving(true);
-    // SEMPRE assume horário de Brasília (UTC-3) — independente do fuso do navegador do operador.
     const dueAt = brtDateTimeToIso(dueDate, dueTime);
     const endAt = eventType === "meeting" 
       ? addHours(new Date(dueAt), 1).toISOString() 
@@ -175,20 +176,18 @@ export function CreateEventDialog({
       if (error) { toast.error("Erro ao atualizar: " + error.message); }
       else { toast.success("Evento atualizado!"); onCreated(); onOpenChange(false); }
     } else {
-      // Create the main event
       const { data: mainEvent, error } = await supabase
         .from("lead_reminders").insert(eventData).select("id").single();
 
       if (error) {
         toast.error("Erro ao criar: " + error.message);
       } else if (recurrence.type !== "none") {
-        // Generate recurring instances
         await generateRecurringInstances(mainEvent.id, eventData, recurrence);
         toast.success("Evento recorrente criado!");
         onCreated();
         onOpenChange(false);
       } else {
-        toast.success(eventType === "meeting" ? "Reunião criada!" : "Tarefa criada!");
+        toast.success(eventType === "meeting" ? "Reunião criada!" : eventType === "block" ? "Horário bloqueado!" : "Tarefa criada!");
         onCreated();
         onOpenChange(false);
       }
@@ -201,16 +200,15 @@ export function CreateEventDialog({
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <CalendarPlus className="h-5 w-5 text-primary" />
-            {editEvent ? "Editar Evento" : "Novo Evento"}
+            {eventType === "block" ? <Lock className="h-5 w-5 text-destructive" /> : <CalendarPlus className="h-5 w-5 text-primary" />}
+            {editEvent ? "Editar Evento" : eventType === "block" ? "Fechar Horário" : "Novo Evento"}
           </DialogTitle>
           <DialogDescription>
-            {editEvent ? "Edite as informações do evento" : "Crie uma tarefa ou agende uma reunião"}
+            {editEvent ? "Edite as informações do evento" : eventType === "block" ? "Bloqueie um horário na agenda para não receber agendamentos" : "Crie uma tarefa ou agende uma reunião"}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 pt-2">
-          {/* Event Type */}
           <div className="grid grid-cols-3 gap-2">
             <Button type="button" variant={eventType === "reminder" ? "default" : "outline"} size="sm"
               onClick={() => { setEventType("reminder"); if (title === "BLOQUEADO") setTitle(""); }} className="gap-2 px-1">
@@ -226,14 +224,12 @@ export function CreateEventDialog({
             </Button>
           </div>
 
-          {/* Title */}
           <div className="space-y-1.5">
             <Label>Título *</Label>
             <Input value={title} onChange={(e) => setTitle(e.target.value)}
               placeholder={eventType === "meeting" ? "Reunião com cliente" : "Ligar para lead"} />
           </div>
 
-          {/* Date & Time */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>Data *</Label>
@@ -245,7 +241,6 @@ export function CreateEventDialog({
             </div>
           </div>
 
-          {/* Holiday warning */}
           {selectedHoliday && (
             <div className={`flex items-start gap-2 rounded-lg border p-3 text-xs ${
               isHolidayBlocked
@@ -266,10 +261,8 @@ export function CreateEventDialog({
             </div>
           )}
 
-          {/* Recurrence */}
           <RecurrenceSelector value={recurrence} onChange={setRecurrence} />
 
-          {/* Company */}
           <div className="space-y-1.5">
             <Label>Empresa *</Label>
             <Select value={companyId} onValueChange={(v) => { setCompanyId(v); setLeadId("none"); }}>
@@ -282,7 +275,6 @@ export function CreateEventDialog({
             </Select>
           </div>
 
-          {/* Lead */}
           {companyId && (
             <div className="space-y-1.5">
               <Label>Lead (opcional)</Label>
@@ -302,7 +294,6 @@ export function CreateEventDialog({
             </div>
           )}
 
-          {/* Description */}
           <div className="space-y-1.5">
             <Label>Descrição</Label>
             <Textarea value={description} onChange={(e) => setDescription(e.target.value)}
@@ -353,10 +344,10 @@ async function generateRecurringInstances(
 ) {
   const instances: any[] = [];
   const startDate = new Date(baseData.due_at);
-  const maxInstances = 52; // max 1 year of weekly or 52 instances
+  const maxInstances = 52;
   const endLimit = config.endDate
     ? new Date(`${config.endDate}T23:59:59`)
-    : addMonths(startDate, 3); // default 3 months
+    : addMonths(startDate, 3);
 
   let currentDate = startDate;
 
@@ -372,7 +363,6 @@ async function generateRecurringInstances(
   }
 
   if (instances.length > 0) {
-    // Insert in batches of 20
     for (let i = 0; i < instances.length; i += 20) {
       const batch = instances.slice(i, i + 20);
       await supabase.from("lead_reminders").insert(batch);
