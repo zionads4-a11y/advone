@@ -2387,6 +2387,7 @@ export type Database = {
           created_at: string | null
           expires_at: string | null
           id: string
+          last_google_sync: string | null
           provider: string
           refresh_token: string | null
           scopes: string[] | null
@@ -2399,6 +2400,7 @@ export type Database = {
           created_at?: string | null
           expires_at?: string | null
           id?: string
+          last_google_sync?: string | null
           provider: string
           refresh_token?: string | null
           scopes?: string[] | null
@@ -2411,6 +2413,7 @@ export type Database = {
           created_at?: string | null
           expires_at?: string | null
           id?: string
+          last_google_sync?: string | null
           provider?: string
           refresh_token?: string | null
           scopes?: string[] | null
