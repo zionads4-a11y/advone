@@ -40,6 +40,7 @@ interface CreateEventDialogProps {
     lead_id: string;
     recurrence_rule: string | null;
     recurrence_end: string | null;
+    end_at?: string | null;
   } | null;
 }
 
