@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  Bell, CalendarClock, Plus, Check, Trash2, Loader2,
+  Bell, CalendarClock, Plus, Check, Trash2, Loader2, CheckCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import { brtLocalInputToIso } from "@/lib/utils";
@@ -34,7 +34,8 @@ interface LeadRemindersProps {
 }
 
 export function LeadReminders({ leadId, companyId, leadName }: LeadRemindersProps) {
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
+  const isSuperAdmin = userRole === "admin" || userRole === "member";
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
@@ -246,6 +247,17 @@ export function LeadReminders({ leadId, companyId, leadName }: LeadRemindersProp
                   {formatDueAt(r.due_at)}
                   {r.reminder_type === "meeting" && r.end_at && ` - ${new Date(r.end_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`}
                 </p>
+                {isSuperAdmin && r.reminder_type === "meeting" && !r.meeting_held && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => markMeetingHeld(r)}
+                    className="mt-2 h-6 text-[10px] px-2 gap-1"
+                  >
+                    <CheckCheck className="h-3 w-3" />
+                    Reunião realizada (R$ 97)
+                  </Button>
+                )}
               </div>
               <button
                 onClick={() => handleDelete(r.id)}
