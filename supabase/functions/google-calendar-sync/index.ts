@@ -109,17 +109,16 @@ serve(async (req) => {
       accessToken = await refreshGoogleToken(supabaseClient, integration);
     }
 
-    // Fetch reminders from DB to push to Google if they don't have google_event_id
+    // 1. Fetch reminders from DB to push/update to Google
     const { data: localReminders, error: localError } = await supabaseClient
       .from("lead_reminders")
       .select("*")
-      .eq("created_by", user.id)
-      .is("google_event_id", null);
+      .eq("created_by", user.id);
 
     if (localError) console.error("Error fetching local reminders:", localError);
 
     if (localReminders && localReminders.length > 0) {
-      console.log(`Pushing ${localReminders.length} local events to Google`);
+      console.log(`Processing ${localReminders.length} local events for Google sync`);
       for (const reminder of localReminders) {
         try {
           const googleEvent = {
@@ -129,35 +128,38 @@ serve(async (req) => {
             end: { dateTime: reminder.end_at || new Date(new Date(reminder.due_at).getTime() + 60 * 60 * 1000).toISOString() },
           };
 
-          const pushResponse = await fetch(
-            "https://www.googleapis.com/calendar/v3/calendars/primary/events",
-            {
-              method: "POST",
-              headers: { 
-                Authorization: `Bearer ${accessToken}`,
-                "Content-Type": "application/json"
-              },
-              body: JSON.stringify(googleEvent),
-            }
-          );
+          if (!reminder.google_event_id) {
+            // Create new event in Google
+            const pushResponse = await fetch(
+              "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+              {
+                method: "POST",
+                headers: { 
+                  Authorization: `Bearer ${accessToken}`,
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify(googleEvent),
+              }
+            );
 
-          if (pushResponse.ok) {
-            const pushedData = await pushResponse.json();
-            await supabaseClient
-              .from("lead_reminders")
-              .update({ google_event_id: pushedData.id })
-              .eq("id", reminder.id);
+            if (pushResponse.ok) {
+              const pushedData = await pushResponse.json();
+              await supabaseClient
+                .from("lead_reminders")
+                .update({ google_event_id: pushedData.id })
+                .eq("id", reminder.id);
+            }
           } else {
-            const errorData = await pushResponse.json();
-            console.error(`Error pushing event ${reminder.id}:`, errorData);
+            // Update existing event in Google (optional, but good for bidirectional)
+            // Only update if needed or just skip to prioritize Google -> System
           }
         } catch (pushErr) {
-          console.error(`Error pushing event ${reminder.id}:`, pushErr);
+          console.error(`Error processing event ${reminder.id}:`, pushErr);
         }
       }
     }
 
-    // Fetch events from Google Calendar to sync back
+    // 2. Fetch events from Google Calendar to sync back to System
     const now = new Date();
     const timeMin = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days ago
     const timeMax = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString(); // 90 days ahead
@@ -169,9 +171,7 @@ serve(async (req) => {
       }
     );
 
-    // If 401, try refreshing once even if we thought it was valid
     if (eventsResponse.status === 401) {
-      console.log("Received 401 from Google, attempting one-time refresh...");
       accessToken = await refreshGoogleToken(supabaseClient, integration);
       eventsResponse = await fetch(
         `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime`,
@@ -193,6 +193,7 @@ serve(async (req) => {
       const startTime = event.start?.dateTime || event.start?.date;
       if (!startTime) continue;
 
+      // Upsert Google event into local lead_reminders
       const { error: upsertError } = await supabaseClient
         .from("lead_reminders")
         .upsert({
@@ -212,6 +213,12 @@ serve(async (req) => {
         console.error(`Error upserting event ${event.id}:`, upsertError);
       }
     }
+
+    // 3. Update last sync time
+    await supabaseClient
+      .from("user_integrations")
+      .update({ last_google_sync: new Date().toISOString() })
+      .eq("id", integration.id);
 
     return new Response(JSON.stringify({ success: true, count: events.length }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
