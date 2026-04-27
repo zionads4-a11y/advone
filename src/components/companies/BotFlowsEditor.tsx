@@ -117,46 +117,100 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
       return;
     }
 
-    const reportLines = [
-      `RELATÓRIO DE CONFIGURAÇÃO DO BOT - ${officeName.toUpperCase()}`,
-      `Data: ${new Date().toLocaleDateString("pt-BR")} ${new Date().toLocaleTimeString("pt-BR")}`,
-      `Nicho: ${niche.toUpperCase()}`,
-      `Fluxos Ativos: ${enabledFlows.length}`,
-      `═══════════════════════════════════════════════════════`,
-      ``,
-      `💰 SEÇÃO: REGRA DE VALORES`,
-      `"Pode ficar tranquilo(a) 🙂 Essa nossa primeira conversa aqui para entender o seu problema e te orientar é totalmente gratuita e feita diretamente com a nossa equipe jurídica. Assuntos relacionados a valores de honorários devem ser tratados somente com os advogados durante a reunião, mas pode ficar despreocupado, pois nesse momento o importante é entender o seu caso e resolver ele! Vamos agendar essa conversa?"`,
-      ``,
-      `═══════════════════════════════════════════════════════`,
-      ``,
-      `🔥 FLUXOS SELECIONADOS:`,
-      ``,
-    ];
+    const doc = new jsPDF();
+    const margin = 20;
+    let y = 20;
+
+    // Título
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.text(`RELATÓRIO DE CONFIGURAÇÃO DO BOT - ${officeName.toUpperCase()}`, margin, y);
+    y += 10;
+
+    // Metadados
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Data: ${new Date().toLocaleDateString("pt-BR")} ${new Date().toLocaleTimeString("pt-BR")}`, margin, y);
+    y += 6;
+    doc.text(`Nicho: ${niche.toUpperCase()}`, margin, y);
+    y += 6;
+    doc.text(`Fluxos Ativos: ${enabledFlows.length}`, margin, y);
+    y += 10;
+
+    // Linha divisória
+    doc.setLineWidth(0.5);
+    doc.line(margin, y, 190, y);
+    y += 10;
+
+    // REGRA DE VALORES - DESTACADA
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0, 102, 204); // Azul
+    doc.text("💰 SEÇÃO: REGRA DE VALORES E CONSULTA (DESTACADA)", margin, y);
+    y += 7;
+    
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(0, 0, 0); // Preto
+    const valorTexto = "Pode ficar tranquilo(a) 🙂 Essa nossa primeira conversa aqui para entender o seu problema e te orientar é totalmente gratuita e feita diretamente com a nossa equipe jurídica. Assuntos relacionados a valores de honorários devem ser tratados somente com os advogados durante a reunião, mas pode ficar despreocupado, pois nesse momento o importante é entender o seu caso e resolver ele! Vamos agendar essa conversa?";
+    const valorSplit = doc.splitTextToSize(valorTexto, 170);
+    doc.text(valorSplit, margin, y);
+    y += (valorSplit.length * 5) + 10;
+
+    doc.line(margin, y, 190, y);
+    y += 10;
+
+    // FLUXOS SELECIONADOS
+    doc.setFont("helvetica", "bold");
+    doc.text("🔥 FLUXOS SELECIONADOS:", margin, y);
+    y += 10;
 
     enabledFlows.forEach((f, idx) => {
+      // Check for page break
+      if (y > 250) {
+        doc.addPage();
+        y = 20;
+      }
+
       const caseType = f.case_type || f.flow_key;
-      reportLines.push(`${idx + 1}. [${f.icon_emoji}] ${f.label.toUpperCase()}`);
-      reportLines.push(`   case_type: ${caseType}`);
       
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(220, 50, 50); // Vermelho suave para destaque do fluxo
+      doc.text(`${idx + 1}. [${f.icon_emoji}] ${f.label.toUpperCase()}`, margin, y);
+      y += 6;
+      
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(100, 100, 100);
+      doc.setFontSize(9);
+      doc.text(`case_type: ${caseType}`, margin + 5, y);
+      y += 8;
+
+      doc.setFontSize(10);
+      doc.setTextColor(0, 0, 0);
+      doc.setFont("helvetica", "bold");
+      doc.text("--- CONTEÚDO DO PROMPT ---", margin + 5, y);
+      y += 6;
+
+      doc.setFont("helvetica", "normal");
       const block = f.custom_prompt_block || getFlowBlock(f.niche as any, f.flow_key)?.block || "Bloco não encontrado";
-      reportLines.push(`   --- CONTEÚDO DO PROMPT ---`);
-      reportLines.push(block.split('\n').map(line => `   ${line}`).join('\n'));
-      reportLines.push(``);
-      reportLines.push(`-------------------------------------------------------`);
-      reportLines.push(``);
+      const blockSplit = doc.splitTextToSize(block, 160);
+      
+      // Handle multiline prompt block with page breaks
+      blockSplit.forEach((line: string) => {
+        if (y > 270) {
+          doc.addPage();
+          y = 20;
+        }
+        doc.text(line, margin + 5, y);
+        y += 5;
+      });
+
+      y += 5;
+      doc.setDrawColor(200, 200, 200);
+      doc.line(margin + 5, y, 185, y);
+      y += 10;
     });
 
-    const reportText = reportLines.join('\n');
-    const blob = new Blob([reportText], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `relatorio-bot-${officeName.toLowerCase().replace(/\s+/g, '-')}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    toast.success("Relatório gerado com sucesso! (Formato TXT para auditoria)");
+    doc.save(`relatorio-bot-${officeName.toLowerCase().replace(/\s+/g, '-')}.pdf`);
+    toast.success("Relatório PDF gerado com sucesso!");
   };
 
   const handleDeleteConfirm = async () => {
