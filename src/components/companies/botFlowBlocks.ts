@@ -527,7 +527,7 @@ Este escritório NÃO possui endereço cadastrado no sistema. O atendimento é 1
 NÃO ofereça presencial. NÃO pergunte se prefere online ou presencial.
 Apenas confirme: "Como o nosso atendimento para o seu caso é 100% online (por videochamada), podemos seguir com o agendamento? 🙂" e siga para o horário.
 ${schedulingLink ? `Após confirmar, envie o link: ${schedulingLink}` : `A equipe enviará a confirmação e o link da reunião.`}`;
-  }
+  } else if (activeOffices.length === 1) {
     const o = activeOffices[0];
     modalidadeBlock = `MODALIDADE — pergunte uma única vez:
 "Você prefere que essa conversa seja online (por videochamada) ou presencial aqui no escritório? 🙂"
