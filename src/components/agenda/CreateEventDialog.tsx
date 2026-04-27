@@ -94,7 +94,7 @@ export function CreateEventDialog({
         setRecurrence({ type: "none" });
       }
     }
-  }, [open, defaultDate, companies, preselectedCompanyId, editEvent]);
+  }, [open, defaultDate, defaultTime, companies, preselectedCompanyId, editEvent]);
 
   useEffect(() => {
     if (!companyId || leads) return;
