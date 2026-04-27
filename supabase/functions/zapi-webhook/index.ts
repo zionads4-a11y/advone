@@ -159,7 +159,7 @@ function buildDocumentCollectorPrompt(agentConfig: any, config: any, leadName?: 
 
   const docs = requiredDocs && requiredDocs.length > 0
     ? requiredDocs.map((d: any) => `• ${d.name}${d.description ? ` (${d.description})` : ""}${d.required ? " ⚠️ obrigatório" : " (opcional)"}`).join("\n")
-    : "• Documento com foto (RG ou CNH)\n• CPF\n• Comprovante de endereço\n• Documentos do caso (laudos, negativas, etc.)";
+    : "• Documento com foto (RG ou CNH)\n• Comprovante de endereço\n• Documentos do caso (laudos, negativas, etc.)";
 
   const customPrompt = agentConfig?.prompt || "";
 
