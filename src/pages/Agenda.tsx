@@ -554,6 +554,7 @@ export default function Agenda() {
         onCreated={() => setRefreshKey((k) => k + 1)}
         defaultDate={selectedDate}
         defaultTime={selectedTime}
+        defaultType={defaultEventType}
         companies={companies}
         preselectedCompanyId={selectedCompany !== "all" ? selectedCompany : undefined}
         editEvent={editEvent}
