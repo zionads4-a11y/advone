@@ -10,6 +10,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   MessageSquare, User, ArrowDownLeft, ArrowUpRight, Send, Sparkles, Loader2, Bot, Paperclip, Video, Image, FileText, ArrowLeft,
+  FileDown
 } from "lucide-react";
 import { LeadBotToggle } from "@/components/leads/LeadBotToggle";
 import { toast } from "sonner";
