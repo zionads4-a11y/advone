@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import logoAdvOne from "@/assets/logo-advone-light.png";
 import heroBg from "@/assets/hero-bg-lp.jpg";
@@ -954,9 +954,11 @@ export default function LandingPage() {
           <p className="text-sm text-[hsl(220,10%,45%)]">
             © {new Date().getFullYear()} AdvOne. Todos os direitos reservados.
           </p>
-          <div className="flex gap-6">
+          <div className="flex flex-wrap items-center justify-center gap-6">
             <a href="#funcionalidades" className="text-sm text-[hsl(220,10%,55%)] hover:text-[hsl(153,60%,45%)]">Funcionalidades</a>
             <a href="#demo" className="text-sm text-[hsl(220,10%,55%)] hover:text-[hsl(153,60%,45%)]">Demo</a>
+            <Link to="/privacy" className="text-sm text-[hsl(220,10%,55%)] hover:text-[hsl(153,60%,45%)]">Política de Privacidade</Link>
+            <Link to="/terms" className="text-sm text-[hsl(220,10%,55%)] hover:text-[hsl(153,60%,45%)]">Termos de Uso</Link>
             <button onClick={() => navigate("/auth")} className="text-sm text-[hsl(220,10%,55%)] hover:text-[hsl(153,60%,45%)]">Login</button>
           </div>
         </div>
