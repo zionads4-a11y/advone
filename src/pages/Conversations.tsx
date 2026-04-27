@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { jsPDF } from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserCompanies } from "@/hooks/useUserCompanies";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +11,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   MessageSquare, User, ArrowDownLeft, ArrowUpRight, Send, Sparkles, Loader2, Bot, Paperclip, Video, Image, FileText, ArrowLeft,
+  FileDown
 } from "lucide-react";
 import { LeadBotToggle } from "@/components/leads/LeadBotToggle";
 import { toast } from "sonner";
@@ -157,6 +159,107 @@ export default function Conversations() {
     }
   };
 
+  const exportCurrentConversationToPdf = () => {
+    if (!selectedPhone || !conversations[selectedPhone]) {
+      toast.error("Selecione uma conversa para exportar");
+      return;
+    }
+
+    const doc = new jsPDF();
+    let y = 10;
+    const margin = 10;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const msgs = conversations[selectedPhone];
+    const lead = leads[selectedPhone];
+    const contactName = lead?.name || selectedPhone;
+
+    doc.setFontSize(16);
+    doc.text(`Conversa: ${contactName}`, margin, y);
+    y += 10;
+
+    doc.setFontSize(10);
+    msgs.forEach((msg) => {
+      const date = new Date(msg.timestamp).toLocaleString("pt-BR");
+      const sender = msg.direction === "incoming" ? "Lead" : (msg.sender_name || "Sistema");
+      const text = `${date} - [${sender}]: ${msg.message_text || "[midia]"}`;
+      
+      const splitText = doc.splitTextToSize(text, pageWidth - margin * 2);
+      
+      if (y + (splitText.length * 5) > 280) {
+        doc.addPage();
+        y = 10;
+      }
+
+      doc.text(splitText, margin, y);
+      y += (splitText.length * 5) + 2;
+    });
+
+    doc.save(`conversa_${selectedPhone}_${new Date().toISOString().split('T')[0]}.pdf`);
+    toast.success("Conversa exportada com sucesso!");
+  };
+
+  const exportAllConversationsToPdf = () => {
+    const doc = new jsPDF();
+    let y = 10;
+    const margin = 10;
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    doc.setFontSize(16);
+    doc.text("Relatorio de Conversas WhatsApp", margin, y);
+    y += 10;
+
+    const allPhones = Object.keys(conversations).sort((a, b) => {
+      const lastA = conversations[a][conversations[a].length - 1]?.timestamp || "";
+      const lastB = conversations[b][conversations[b].length - 1]?.timestamp || "";
+      return lastB.localeCompare(lastA);
+    });
+
+    if (allPhones.length === 0) {
+      toast.error("Nenhuma conversa para exportar");
+      return;
+    }
+
+    allPhones.forEach((phone) => {
+      const msgs = conversations[phone];
+      const lead = leads[phone];
+      const contactName = lead?.name || phone;
+
+      if (y > 270) {
+        doc.addPage();
+        y = 10;
+      }
+
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text(`Contato: ${contactName} (${phone})`, margin, y);
+      y += 7;
+
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+
+      msgs.forEach((msg) => {
+        const date = new Date(msg.timestamp).toLocaleString("pt-BR");
+        const sender = msg.direction === "incoming" ? "Lead" : (msg.sender_name || "Sistema");
+        const text = `${date} - [${sender}]: ${msg.message_text || "[midia]"}`;
+        
+        const splitText = doc.splitTextToSize(text, pageWidth - margin * 2);
+        
+        if (y + (splitText.length * 5) > 280) {
+          doc.addPage();
+          y = 10;
+        }
+
+        doc.text(splitText, margin, y);
+        y += (splitText.length * 5) + 2;
+      });
+
+      y += 5; // Space between contacts
+    });
+
+    doc.save(`conversas_whatsapp_${new Date().toISOString().split('T')[0]}.pdf`);
+    toast.success("PDF gerado com sucesso!");
+  };
+
   const handleSendMessage = async () => {
     if (!messageText.trim() || !selectedPhone || !selectedCompanyId) return;
 
@@ -262,18 +365,29 @@ export default function Conversations() {
             <h1 className="font-display text-xl sm:text-2xl font-bold text-foreground">Conversas</h1>
             <p className="text-xs sm:text-sm text-muted-foreground">Mensagens do WhatsApp dos seus leads</p>
           </div>
-          {!isClient && companies.length > 1 && (
-            <Select value={selectedCompanyId} onValueChange={(v) => { setSelectedCompanyId(v); setSelectedPhone(""); }}>
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="Selecione a empresa" />
-              </SelectTrigger>
-              <SelectContent>
-                {companies.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={exportAllConversationsToPdf}
+              className="flex items-center gap-2"
+            >
+              <FileDown className="h-4 w-4" />
+              <span className="hidden sm:inline">Exportar PDF</span>
+            </Button>
+            {!isClient && companies.length > 1 && (
+              <Select value={selectedCompanyId} onValueChange={(v) => { setSelectedCompanyId(v); setSelectedPhone(""); }}>
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Selecione a empresa" />
+                </SelectTrigger>
+                <SelectContent>
+                  {companies.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
         </div>
       )}
 
@@ -361,8 +475,26 @@ export default function Conversations() {
                     </CardTitle>
                     <p className="text-xs text-muted-foreground">{selectedPhone}</p>
                   </div>
-                  {selectedLead && (
-                    <div className="ml-auto flex items-center gap-2">
+                  <div className="ml-auto flex items-center gap-2">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={exportCurrentConversationToPdf}
+                            className="h-8 w-8"
+                          >
+                            <FileDown className="h-4 w-4 text-muted-foreground" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Exportar conversa para PDF</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    {selectedLead && (
+                      <div className="flex items-center gap-2">
                       <LeadBotToggle
                         leadId={selectedLead.id}
                         initialDisabled={!!selectedLead.bot_disabled}
@@ -375,7 +507,8 @@ export default function Conversations() {
                     </div>
                   )}
                 </div>
-              </CardHeader>
+              </div>
+            </CardHeader>
 
               {/* Messages area */}
               <CardContent className="p-0 flex-1 overflow-hidden">
