@@ -326,18 +326,29 @@ export default function Conversations() {
             <h1 className="font-display text-xl sm:text-2xl font-bold text-foreground">Conversas</h1>
             <p className="text-xs sm:text-sm text-muted-foreground">Mensagens do WhatsApp dos seus leads</p>
           </div>
-          {!isClient && companies.length > 1 && (
-            <Select value={selectedCompanyId} onValueChange={(v) => { setSelectedCompanyId(v); setSelectedPhone(""); }}>
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="Selecione a empresa" />
-              </SelectTrigger>
-              <SelectContent>
-                {companies.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={exportAllConversationsToPdf}
+              className="hidden sm:flex items-center gap-2"
+            >
+              <FileDown className="h-4 w-4" />
+              Exportar PDF
+            </Button>
+            {!isClient && companies.length > 1 && (
+              <Select value={selectedCompanyId} onValueChange={(v) => { setSelectedCompanyId(v); setSelectedPhone(""); }}>
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Selecione a empresa" />
+                </SelectTrigger>
+                <SelectContent>
+                  {companies.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
         </div>
       )}
 
