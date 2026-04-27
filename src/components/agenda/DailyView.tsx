@@ -184,7 +184,7 @@ function DayEventCard({
             : "bg-primary/20 text-primary hover:bg-primary/30"
         )}
       >
-        {event.completed ? <Check className="h-3 w-3" /> : isOverdue ? <AlertTriangle className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
+        {event.completed ? <Check className="h-3 w-3" /> : isOverdue ? <AlertTriangle className="h-3 w-3" /> : event.reminder_type === 'block' ? <AlertTriangle className="h-3 w-3 rotate-180" /> : <Clock className="h-3 w-3" />}
       </button>
 
       <div className="flex-1 min-w-0">
