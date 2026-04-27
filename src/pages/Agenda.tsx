@@ -285,11 +285,11 @@ export default function Agenda() {
             </SelectContent>
           </Select>
           <Button 
-            variant={isGoogleConnected ? "success" : "outline"}
-            className="gap-2"
+            variant={isGoogleConnected ? "secondary" : "outline"}
+            className={`gap-2 ${isGoogleConnected ? 'bg-green-100 text-green-700 hover:bg-green-200 border-green-200' : ''}`}
             disabled={isGoogleConnected}
             onClick={() => {
-              const clientId = "181481259367-kqbftmnd121er1dmpvss7l4bjfpt5c3n.apps.googleusercontent.com"; // O seu Client ID
+              const clientId = "181481259367-kqbftmnd121er1dmpvss7l4bjfpt5c3n.apps.googleusercontent.com";
               const redirectUri = `${window.location.origin}/agenda`;
               const scope = "https://www.googleapis.com/auth/calendar";
               window.open(`https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&access_type=offline&prompt=consent`, '_self');
