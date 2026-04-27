@@ -174,7 +174,7 @@ export function CreateEventDialog({
     if (editEvent) {
       const { error } = await supabase.from("lead_reminders").update(eventData).eq("id", editEvent.id);
       if (error) { toast.error("Erro ao atualizar: " + error.message); }
-      else { toast.success("Evento atualizado!"); onCreated(); onOpenChange(false); }
+      else { toast.success("Evento atualizado!"); onCreated(true); onOpenChange(false); }
     } else {
       const { data: mainEvent, error } = await supabase
         .from("lead_reminders").insert(eventData).select("id").single();
@@ -184,11 +184,11 @@ export function CreateEventDialog({
       } else if (recurrence.type !== "none") {
         await generateRecurringInstances(mainEvent.id, eventData, recurrence);
         toast.success("Evento recorrente criado!");
-        onCreated();
+        onCreated(true);
         onOpenChange(false);
       } else {
         toast.success(eventType === "meeting" ? "Reunião criada!" : eventType === "block" ? "Dia/Horário fechado!" : "Tarefa criada!");
-        onCreated();
+        onCreated(true);
         onOpenChange(false);
       }
     }
