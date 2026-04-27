@@ -28,7 +28,6 @@ import Documents from "./pages/Documents";
 import Cases from "./pages/Cases";
 import ProcessMonitoring from "./pages/ProcessMonitoring";
 import Subscription from "./pages/Subscription";
-import Commissions from "./pages/Commissions";
 import FraudAlerts from "./pages/FraudAlerts";
 import ExitoSchedules from "./pages/ExitoSchedules";
 import LeadsHistory from "./pages/LeadsHistory";
@@ -80,7 +79,6 @@ const App = () => (
               <Route path="/processos" element={<Cases />} />
               <Route path="/monitoramento" element={<ProcessMonitoring />} />
               <Route path="/assinatura" element={<Subscription />} />
-              <Route path="/comissoes" element={<Commissions />} />
               <Route path="/fraudes" element={<FraudAlerts />} />
               <Route path="/agendamentos-exito" element={<ExitoSchedules />} />
               <Route path="/historico-leads" element={<LeadsHistory />} />
