@@ -1,0 +1,1 @@
+UPDATE public.whatsapp_configs SET ai_prompt = '' WHERE ai_prompt IS NOT NULL AND ai_prompt <> '';
