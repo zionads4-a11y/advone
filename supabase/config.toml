@@ -21,3 +21,13 @@ verify_jwt = false
 [functions.notify-meeting-scheduled]
 verify_jwt = false
 
+[functions.google-calendar-auth]
+verify_jwt = true
+
+[functions.google-calendar-sync]
+verify_jwt = true
+
+[functions.google-calendar-background-sync]
+verify_jwt = false # This will be called via service role or cron
+
+
