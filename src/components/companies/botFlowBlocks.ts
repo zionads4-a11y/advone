@@ -522,11 +522,12 @@ Pode ficar tranquilo(a), me conta o que aconteceu que eu vou te ajudar a entende
 
   let modalidadeBlock: string;
   if (!hasOffices) {
-    modalidadeBlock = `MODALIDADE — IMPORTANTE:
-Este escritório atende SOMENTE ONLINE (videochamada). NÃO ofereça presencial. NÃO pergunte se prefere online ou presencial.
-Apenas confirme: "A conversa vai ser online, por videochamada, tudo bem? 🙂" e siga para o horário.
+    modalidadeBlock = `MODALIDADE — REGRA CRÍTICA:
+Este escritório NÃO possui endereço cadastrado no sistema. O atendimento é 100% ONLINE (videochamada).
+NÃO ofereça presencial. NÃO pergunte se prefere online ou presencial.
+Apenas confirme: "Como o nosso atendimento para o seu caso é 100% online (por videochamada), podemos seguir com o agendamento? 🙂" e siga para o horário.
 ${schedulingLink ? `Após confirmar, envie o link: ${schedulingLink}` : `A equipe enviará a confirmação e o link da reunião.`}`;
-  } else if (activeOffices.length === 1) {
+  }
     const o = activeOffices[0];
     modalidadeBlock = `MODALIDADE — pergunte uma única vez:
 "Você prefere que essa conversa seja online (por videochamada) ou presencial aqui no escritório? 🙂"
