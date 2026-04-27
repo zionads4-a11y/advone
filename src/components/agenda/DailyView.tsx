@@ -99,9 +99,10 @@ export function DailyView({ currentDate, reminders, onToggle, onEdit, onDelete }
             <div
               key={hour}
               className={cn(
-                "grid grid-cols-[60px_1fr] border-b border-border/50 min-h-[56px]",
+                "grid grid-cols-[60px_1fr] border-b border-border/50 min-h-[56px] hover:bg-muted/10 transition-colors cursor-pointer",
                 isCurrentHour && "bg-primary/5"
               )}
+              onClick={() => onSelectTime?.(currentDate, hour)}
             >
               <div className="p-2 text-xs text-muted-foreground text-right pr-3 pt-2 font-mono">
                 {String(hour).padStart(2, "0")}:00
