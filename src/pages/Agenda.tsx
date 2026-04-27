@@ -406,7 +406,8 @@ export default function Agenda() {
               const redirectUri = googleRedirectUri;
               const scopes = [
                 "openid",
-                "https://www.googleapis.com/auth/userinfo.email",
+                "email",
+                "profile",
                 "https://www.googleapis.com/auth/calendar",
                 "https://www.googleapis.com/auth/calendar.events"
               ].join(" ");
@@ -418,6 +419,8 @@ export default function Agenda() {
               authUrl.searchParams.set("scope", scopes);
               authUrl.searchParams.set("access_type", "offline");
               authUrl.searchParams.set("prompt", "consent");
+              
+              console.log("Iniciando OAuth com redirectUri:", redirectUri);
               window.location.href = authUrl.toString();
             }}
           >
