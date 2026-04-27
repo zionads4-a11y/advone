@@ -187,7 +187,7 @@ export default function LandingIA() {
     document.title = "Laura SDR — Secretária Virtual com IA para Advogados | AdvOne";
     const meta = document.querySelector('meta[name="description"]');
     const desc =
-      "Sua secretária virtual com IA atende, qualifica e agenda clientes pelo WhatsApp 24h por dia. Plano exclusivo para advogados: R$ 397/mês. Sem fidelidade.";
+      "Sua secretária virtual com IA atende, qualifica e agenda clientes pelo WhatsApp 24h por dia. Plano exclusivo para advogados: R$ 697/mês. Sem fidelidade.";
     if (meta) {
       meta.setAttribute("content", desc);
     } else {
@@ -457,7 +457,7 @@ export default function LandingIA() {
                   <li>✅ 5 follow-ups automáticos por lead</li>
                   <li>✅ Responde em até 30 segundos</li>
                   <li>✅ Qualifica e classifica viabilidade</li>
-                  <li>✅ Custo: R$ 397/mês — sem encargos</li>
+                  <li>✅ Custo: R$ 697/mês — sem encargos</li>
                 </ul>
               </CardContent>
             </Card>
@@ -496,7 +496,7 @@ export default function LandingIA() {
                   </div>
                   <div className="mt-2 flex items-baseline justify-center gap-1">
                     <span className="text-4xl font-bold">R$</span>
-                    <span className="font-display text-6xl font-bold">397</span>
+                    <span className="font-display text-6xl font-bold">697</span>
                     <span className="text-muted-foreground">/mês</span>
                   </div>
                   <div className="mt-1 text-xs text-muted-foreground">
