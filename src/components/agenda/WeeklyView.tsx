@@ -181,7 +181,9 @@ function WeekEventChip({
       onClick={(e) => { e.stopPropagation(); onEdit(event); }}
     >
       <div className="font-medium truncate pr-8">
-        {format(new Date(event.due_at), "HH:mm")} {event.title.replace(/^(📅|🔔)\s*/, "")}
+        {format(new Date(event.due_at), "HH:mm")}
+        {event.reminder_type === "meeting" && event.end_at && ` - ${format(new Date(event.end_at), "HH:mm")}`}
+        {" "}{event.title.replace(/^(📅|🔔)\s*/, "")}
       </div>
       {event.lead_name && event.lead_name !== "Agenda Geral" && (
         <div className="truncate text-[9px] opacity-70">{event.lead_name}</div>
