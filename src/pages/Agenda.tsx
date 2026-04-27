@@ -402,7 +402,7 @@ export default function Agenda() {
             )}
             onClick={() => {
               if (isGoogleConnected) return;
-              const clientId = "181481259367-kqbftmnd121er1dmpvss7l4bjfpt5c3n.apps.googleusercontent.com";
+              const clientId = "635678265603-ugt7glb1tnd3ogsetcj4tbuenu90iq6d.apps.googleusercontent.com";
               const redirectUri = googleRedirectUri;
               const scopes = [
                 "openid",
