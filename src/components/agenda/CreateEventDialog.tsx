@@ -90,7 +90,7 @@ export function CreateEventDialog({
           setRecurrence({ type: "none" });
         }
       } else {
-        setTitle(defaultType === "block" ? "BLOQUEADO" : "");
+        setTitle(defaultType === "block" ? "FECHADO" : "");
         setDescription("");
         setEventType(defaultType || "reminder");
         setDueDate(defaultDate ? format(defaultDate, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"));
@@ -187,7 +187,7 @@ export function CreateEventDialog({
         onCreated();
         onOpenChange(false);
       } else {
-        toast.success(eventType === "meeting" ? "Reunião criada!" : eventType === "block" ? "Horário bloqueado!" : "Tarefa criada!");
+        toast.success(eventType === "meeting" ? "Reunião criada!" : eventType === "block" ? "Dia/Horário fechado!" : "Tarefa criada!");
         onCreated();
         onOpenChange(false);
       }
@@ -201,10 +201,10 @@ export function CreateEventDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {eventType === "block" ? <Lock className="h-5 w-5 text-destructive" /> : <CalendarPlus className="h-5 w-5 text-primary" />}
-            {editEvent ? "Editar Evento" : eventType === "block" ? "Fechar Horário" : "Novo Evento"}
+            {editEvent ? "Editar Evento" : eventType === "block" ? "Fechar Dia/Horário" : "Novo Evento"}
           </DialogTitle>
           <DialogDescription>
-            {editEvent ? "Edite as informações do evento" : eventType === "block" ? "Bloqueie um horário na agenda para não receber agendamentos" : "Crie uma tarefa ou agende uma reunião"}
+            {editEvent ? "Edite as informações do evento" : eventType === "block" ? "Bloqueie um dia ou horário na agenda para não receber agendamentos" : "Crie uma tarefa ou agende uma reunião"}
           </DialogDescription>
         </DialogHeader>
 
@@ -219,8 +219,8 @@ export function CreateEventDialog({
               📅 Reunião
             </Button>
             <Button type="button" variant={eventType === "block" ? "default" : "outline"} size="sm"
-              onClick={() => { setEventType("block"); setTitle("BLOQUEADO"); }} className="gap-2 px-1">
-              🚫 Bloqueio
+              onClick={() => { setEventType("block"); setTitle("FECHADO"); }} className="gap-2 px-1">
+              🚫 Fechar Dia
             </Button>
           </div>
 
