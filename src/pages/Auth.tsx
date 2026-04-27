@@ -150,6 +150,13 @@ function LoginForm() {
           )}
           Entrar com Google
         </Button>
+
+        <p className="text-center text-sm text-muted-foreground mt-4">
+          Não tem uma conta?{" "}
+          <Link to="/signup" className="text-primary hover:underline font-medium">
+            Cadastre-se
+          </Link>
+        </p>
       </CardContent>
     </Card>
   );
