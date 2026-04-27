@@ -893,9 +893,10 @@ Antes de responder:
                 lead_score: toolResult.classification === "invalido" ? "frio" : toolResult.classification,
               };
             }
-          } catch (e) {
-            console.error("decide_lead error:", e);
-            toolResult = { error: "Falha ao chamar decision-engine" };
+            } catch (e) {
+              console.error("decide_lead error:", e);
+              toolResult = { error: "Falha ao chamar decision-engine" };
+            }
           }
         }
 
