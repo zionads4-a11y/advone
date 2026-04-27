@@ -18,7 +18,7 @@ import CompanyDetail from "./pages/CompanyDetail";
 import ClientUsers from "./pages/ClientUsers";
 import AccessManagement from "./pages/AccessManagement";
 import TrackingLinks from "./pages/TrackingLinks";
-import ConnectWhatsApp from "./pages/ConnectWhatsApp";
+import ConnectWhatsApp from "@/pages/ConnectWhatsApp";
 import Agenda from "./pages/Agenda";
 import Profile from "./pages/Profile";
 import BotConfig from "./pages/BotConfig";
