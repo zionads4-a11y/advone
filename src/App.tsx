@@ -35,6 +35,7 @@ import LeadsHistory from "./pages/LeadsHistory";
 import LegalAI from "./pages/LegalAI";
 import LandingIA from "./pages/LandingIA";
 import AppLayout from "./components/layout/AppLayout";
+import ProfileCheck from "./pages/ProfileCheck";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
