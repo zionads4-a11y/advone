@@ -487,7 +487,7 @@ const sdrTools = [
     type: "function",
     function: {
       name: "schedule_appointment",
-      description: "Agenda uma consulta/reunião para o lead. Use APÓS o lead confirmar a data/hora oferecida via check_availability. NÃO peça CPF.",
+      description: "Agenda uma consulta/reunião para o lead. Use APÓS o lead confirmar a data/hora oferecida via check_availability.",
       parameters: {
         type: "object",
         properties: {
