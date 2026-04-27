@@ -137,11 +137,10 @@ PASSO 6 — Horário e Dados Finais:
 ═══════════════════════════════════════════════════════
 🚫 REGRAS INVIOLÁVEIS
 ═══════════════════════════════════════════════════════
-1. 🚫 NUNCA peça o CPF em hipótese alguma. Peça apenas o NOME COMPLETO após o horário escolhido.
-2. 🚫 NUNCA peça RG ou senha do Meu INSS.
-3. 🚫 NUNCA tire dúvidas técnicas. Responda: "Essa parte o(a) advogado(a) te explica com segurança 🙂 Posso te encaixar numa conversa rápida?"
-4. 🚫 NUNCA use listas numeradas ou menus.
-5. 🚫 MÁXIMO 5 PERGUNTAS totais para chegar no convite da reunião.
+1. 🚫 NUNCA peça RG ou senha do Meu INSS.
+2. 🚫 NUNCA tire dúvidas técnicas. Responda: "Essa parte o(a) advogado(a) te explica com segurança 🙂 Posso te encaixar numa conversa rápida?"
+3. 🚫 NUNCA use listas numeradas ou menus.
+4. 🚫 MÁXIMO 5 PERGUNTAS totais para chegar no convite da reunião.
 
 ${customPrompt ? `═══════════════════════════════════════════════════════\nINSTRUÇÕES ADICIONAIS DESTE ESCRITÓRIO\n═══════════════════════════════════════════════════════\n${customPrompt}\n` : ""}
 
@@ -160,7 +159,7 @@ function buildDocumentCollectorPrompt(agentConfig: any, config: any, leadName?: 
 
   const docs = requiredDocs && requiredDocs.length > 0
     ? requiredDocs.map((d: any) => `• ${d.name}${d.description ? ` (${d.description})` : ""}${d.required ? " ⚠️ obrigatório" : " (opcional)"}`).join("\n")
-    : "• Documento com foto (RG ou CNH)\n• CPF\n• Comprovante de endereço\n• Documentos do caso (laudos, negativas, etc.)";
+    : "• Documento com foto (RG ou CNH)\n• Comprovante de endereço\n• Documentos do caso (laudos, negativas, etc.)";
 
   const customPrompt = agentConfig?.prompt || "";
 
@@ -246,7 +245,7 @@ FLUXO:
 1. Recapitule o caso e o resultado da análise com empatia
 2. Apresente os próximos passos para formalização
 3. Explique os termos do contrato de forma simples
-4. Confirme dados do cliente (nome completo, CPF, endereço)
+4. Confirme dados do cliente (nome completo, endereço)
 5. Quando o cliente confirmar, use "finalize_contract" para registrar
 6. Após fechar, envie mensagem de boas-vindas como cliente
 
@@ -488,7 +487,7 @@ const sdrTools = [
     type: "function",
     function: {
       name: "schedule_appointment",
-      description: "Agenda uma consulta/reunião para o lead. Use APÓS o lead confirmar a data/hora oferecida via check_availability. NÃO peça CPF.",
+      description: "Agenda uma consulta/reunião para o lead. Use APÓS o lead confirmar a data/hora oferecida via check_availability.",
       parameters: {
         type: "object",
         properties: {
@@ -516,6 +515,21 @@ const sdrTools = [
         additionalProperties: false
       }
     }
+  },
+  {
+    type: "function",
+    function: {
+      name: "register_client_name",
+      description: "Registra o nome completo do lead no sistema.",
+      parameters: {
+        type: "object",
+        properties: {
+          full_name: { type: "string", description: "Nome completo do lead (mínimo 3 palavras)" }
+        },
+        required: ["full_name"],
+        additionalProperties: false
+      }
+    }
   }
 ];
 
@@ -529,7 +543,7 @@ const documentCollectorTools = [
       parameters: {
         type: "object",
         properties: {
-          document_type: { type: "string", description: "Tipo do documento (ex: RG, CPF, comprovante_endereco, laudo_medico)" },
+          document_type: { type: "string", description: "Tipo do documento (ex: RG, comprovante_endereco, laudo_medico)" },
           notes: { type: "string", description: "Observações sobre o documento" }
         },
         required: ["document_type"],
@@ -628,7 +642,7 @@ const contractCloserTools = [
         type: "object",
         properties: {
           message_to_lead: { type: "string" },
-          client_cpf: { type: "string" },
+          
           client_full_name: { type: "string" },
           contract_value: { type: "number" },
           notes: { type: "string" }
@@ -662,7 +676,7 @@ function sanitizeReply(text: string | null | undefined): string | null {
     /REGRA\s+(CR[ÍI]TICA|DE\s+OURO|INVIOL[ÁA]VEL|FINAL|ABSOLUTA)/i,
     /\bPASSO\s*\d/i,
     /\bETAPA\s*\d/i,
-    /case_type|wants_help|decide_lead|schedule_appointment|check_availability|register_client_cpf|P\d+/i,
+    /case_type|wants_help|decide_lead|schedule_appointment|check_availability|register_client_name|P\d+/i,
     /\[INSTRU[ÇC][ÃA]O\s+INTERNA\]?/i,
     /^Releia\s+(o|todo)/im,
     /Identifique\s+INTERNAMENTE/i,
@@ -795,25 +809,18 @@ Antes de responder:
         let toolResult: any = {};
 
         // ===== SDR TOOLS =====
-        if (fnName === "register_client_cpf") {
-          const rawCpf = String(args.cpf || "").replace(/\D/g, "");
+        if (fnName === "register_client_name") {
           const fullName = String(args.full_name || "").trim();
-          const cpfOk = isValidCPF(rawCpf);
           const nameOk = isValidFullName(fullName);
 
-          if (!cpfOk && !nameOk) {
-            toolResult = { success: false, error: "CPF e nome inválidos. Peça novamente — CPF precisa ter 11 dígitos válidos e nome completo precisa ter pelo menos 3 palavras (nome + sobrenomes)." };
-          } else if (!cpfOk) {
-            toolResult = { success: false, error: "CPF inválido. Os dígitos não conferem — peça novamente, com calma." };
-          } else if (!nameOk) {
+          if (!nameOk) {
             toolResult = { success: false, error: "Nome incompleto. Peça o nome COMPLETO com sobrenomes (mínimo 3 palavras, ex: 'João da Silva Santos')." };
           } else if (leadId) {
             await supabase.from("leads").update({
-              cpf_cliente_final: rawCpf,
               name: fullName,
               pending_data_warning: null,
             }).eq("id", leadId);
-            toolResult = { success: true, cpf_registered: rawCpf, full_name: fullName, message: "CPF e nome completo registrados. Agora você já pode chamar check_availability e agendar." };
+            toolResult = { success: true, full_name: fullName, message: "Nome completo registrado. Agora você já pode chamar check_availability e agendar." };
           } else {
             toolResult = { success: false, error: "Lead não encontrado." };
           }
@@ -929,12 +936,10 @@ Antes de responder:
           if (leadId) {
             const { data: leadCheck } = await supabase
               .from("leads")
-              .select("cpf_cliente_final, name")
+              .select("name")
               .eq("id", leadId)
               .maybeSingle();
             leadCheckRow = leadCheck;
-            const cpfStored = String(leadCheck?.cpf_cliente_final || "").replace(/\D/g, "");
-            if (!isValidCPF(cpfStored)) pendingItems.push("CPF");
             if (!isValidFullName(leadCheck?.name || "")) pendingItems.push("Nome completo");
           }
           const pendingWarning = pendingItems.length > 0 ? `${pendingItems.join(" + ")} pendente(s)` : null;
@@ -1047,7 +1052,7 @@ Antes de responder:
 
         // ===== CONTRACT CLOSER TOOLS =====
         if (fnName === "finalize_contract") {
-          // 🔒 Validar CPF obrigatório também aqui
+          // 🔒 CPF não é mais obrigatório
           const cpfFromArg = String(args.client_cpf || "").replace(/\D/g, "");
           let finalCpf = cpfFromArg.length === 11 ? cpfFromArg : "";
           if (!finalCpf && leadId) {
@@ -1060,19 +1065,10 @@ Antes de responder:
             if (stored.length === 11) finalCpf = stored;
           }
 
-          if (!finalCpf) {
-            toolResult = {
-              success: false,
-              error: "CPF_REQUIRED",
-              message: "Não posso finalizar o contrato sem o CPF do cliente. Peça o CPF e use register_client_cpf antes.",
-            };
-            aiMessages.push({ role: "tool", tool_call_id: toolCall.id, content: JSON.stringify(toolResult) });
-            continue;
-          }
-
           replyText = args.message_to_lead || "Contrato finalizado! 🎉";
-          const updates: any = { contract_status: "signed", bot_agent_phase: "completed", cpf_cliente_final: finalCpf };
-          if (args.client_cpf) updates.cpf = finalCpf;
+          const updates: any = { contract_status: "signed", bot_agent_phase: "completed" };
+          if (finalCpf) updates.cpf_cliente_final = finalCpf;
+          if (args.client_cpf && finalCpf) updates.cpf = finalCpf;
           if (args.client_full_name) updates.name = args.client_full_name;
           if (args.contract_value) {
             updates.value = args.contract_value;
@@ -1092,7 +1088,7 @@ Antes de responder:
             company_id: companyId,
             lead_id: leadId,
             client_name: args.client_full_name || leadName || "Cliente",
-            client_cpf: finalCpf,
+            client_cpf: null,
             client_phone: cleanPhone || null,
             honorarios_estimados: Number(args.contract_value || 0),
             commission_percentage: Number(commissionCfg?.commission_percentage || 30),
@@ -1121,7 +1117,7 @@ Antes de responder:
               const SERVER_URL = "https://ziondigital.uazapi.com";
               const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
               const alertPhone = config.alert_whatsapp.replace(/\D/g, "");
-              const alertMessage = `🎉 *Contrato Fechado Automaticamente!*\n\n👤 Cliente: ${args.client_full_name || leadName || "N/A"}\n${args.client_cpf ? `📄 CPF: ${args.client_cpf}\n` : ""}${args.contract_value ? `💰 Valor: R$ ${args.contract_value}\n` : ""}\n_Fechado automaticamente pelo bot de contrato_`;
+              const alertMessage = `🎉 *Contrato Fechado Automaticamente!*\n\n👤 Cliente: ${args.client_full_name || leadName || "N/A"}\n${args.contract_value ? `💰 Valor: R$ ${args.contract_value}\n` : ""}\n_Fechado automaticamente pelo bot de contrato_`;
               const alertHeaders: Record<string, string> = { "Content-Type": "application/json" };
               if (ADMIN_TOKEN) alertHeaders["admintoken"] = ADMIN_TOKEN;
               const instanceParam = encodeURIComponent(config.zapi_instance_id || "");
