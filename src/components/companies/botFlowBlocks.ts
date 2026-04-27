@@ -543,7 +543,6 @@ Pode ficar tranquilo(a), me conta o que aconteceu que eu vou te ajudar a entende
 - Após confirmar o horário, peça o NOME COMPLETO.
 - Leve sempre para o agendamento com o(a) advogado(a).`;
   }
-  }
 
   const assistantName = niche === "trabalhista" || niche === "hibrido" ? "Julia" : "Laura";
 
