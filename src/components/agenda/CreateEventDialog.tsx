@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Loader2, CalendarPlus, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
-import { format, addDays, addWeeks, addMonths, addYears } from "date-fns";
+import { format, addDays, addWeeks, addMonths, addYears, addHours } from "date-fns";
 import { brtDateTimeToIso } from "@/lib/utils";
 import { RecurrenceSelector, type RecurrenceConfig } from "./RecurrenceSelector";
 import { getHolidayForDate } from "@/lib/brazilianHolidays";
@@ -40,6 +40,7 @@ interface CreateEventDialogProps {
     lead_id: string;
     recurrence_rule: string | null;
     recurrence_end: string | null;
+    end_at?: string | null;
   } | null;
 }
 
@@ -134,6 +135,9 @@ export function CreateEventDialog({
     setSaving(true);
     // SEMPRE assume horário de Brasília (UTC-3) — independente do fuso do navegador do operador.
     const dueAt = brtDateTimeToIso(dueDate, dueTime);
+    const endAt = eventType === "meeting" 
+      ? addHours(new Date(dueAt), 1).toISOString() 
+      : null;
 
     let finalLeadId = leadId !== "none" ? leadId : null;
     if (!finalLeadId) {
@@ -161,6 +165,7 @@ export function CreateEventDialog({
       description: description || null,
       reminder_type: eventType,
       due_at: dueAt,
+      end_at: endAt,
       recurrence_rule: recurrenceRule,
       recurrence_end: recurrenceEnd,
     };

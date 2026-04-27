@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { addHours } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ interface Reminder {
   due_at: string;
   completed: boolean;
   completed_at: string | null;
+  end_at?: string | null;
   created_at: string;
   meeting_held?: boolean;
   meeting_held_at?: string | null;
@@ -62,6 +64,11 @@ export function LeadReminders({ leadId, companyId, leadName }: LeadRemindersProp
   const handleAdd = async () => {
     if (!title.trim() || !dueAt || !user) return;
     setAdding(true);
+    const dueAtIso = brtLocalInputToIso(dueAt);
+    const endAt = reminderType === "meeting" 
+      ? addHours(new Date(dueAtIso), 1).toISOString() 
+      : null;
+    
     const { error } = await supabase.from("lead_reminders").insert({
       lead_id: leadId,
       company_id: companyId,
@@ -69,7 +76,8 @@ export function LeadReminders({ leadId, companyId, leadName }: LeadRemindersProp
       title: title.trim(),
       description: description.trim() || null,
       reminder_type: reminderType,
-      due_at: brtLocalInputToIso(dueAt),
+      due_at: dueAtIso,
+      end_at: endAt,
     });
     if (error) {
       toast.error("Erro ao criar lembrete");
@@ -283,6 +291,7 @@ export function LeadReminders({ leadId, companyId, leadName }: LeadRemindersProp
                 }`}>
                   {isOverdue(r.due_at, r.completed) ? "⚠️ Atrasado — " : ""}
                   {formatDueAt(r.due_at)}
+                  {r.reminder_type === "meeting" && r.end_at && ` - ${new Date(r.end_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`}
                 </p>
                 {r.reminder_type === "meeting" && !r.meeting_held && (
                   <Button

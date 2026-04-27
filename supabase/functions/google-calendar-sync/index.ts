@@ -142,6 +142,7 @@ serve(async (req) => {
           title: event.summary || "Sem título",
           description: event.description || null,
           due_at: startTime,
+          end_at: event.end?.dateTime || event.end?.date || new Date(new Date(startTime).getTime() + 60 * 60 * 1000).toISOString(),
           completed: false,
           reminder_type: "meeting",
           created_by: user.id,
