@@ -658,59 +658,92 @@ function ReminderItem({
 
   return (
     <div
-      className={`flex items-start gap-3 rounded-lg border p-3 transition-colors group ${
+      className={cn(
+        "group flex items-start gap-3 rounded-xl border p-4 transition-all hover:shadow-md",
         reminder.completed
           ? "border-border/50 bg-muted/20 opacity-60"
           : isOverdue
           ? "border-destructive/30 bg-destructive/5"
-          : "border-border bg-background"
-      }`}
+          : reminder.reminder_type === "meeting"
+          ? "border-primary/30 bg-primary/5"
+          : "border-border bg-card"
+      )}
+      onClick={() => onEdit?.(reminder)}
     >
-      <button
-        onClick={() => onToggle?.(reminder.id, !reminder.completed)}
-        title={reminder.completed ? "Marcar como pendente" : "Marcar como ocorrido"}
-        className={`mt-0.5 flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-medium cursor-pointer transition-colors ${
-          reminder.completed
-            ? "bg-success/20 text-success hover:bg-success/30 border border-success/30"
-            : isOverdue
-            ? "bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/30"
-            : "bg-primary/10 text-primary hover:bg-primary/20 border border-primary/30"
-        }`}
-      >
-        {reminder.completed ? <Check className="h-3 w-3" /> : isOverdue ? <AlertTriangle className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
-        {reminder.completed ? "Concluído" : isOverdue ? "Atrasado" : "Pendente"}
-      </button>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className={`text-sm font-medium ${reminder.completed ? "line-through text-muted-foreground" : "text-foreground"}`}>
-            {reminder.title}
-          </span>
-          <Badge variant="outline" className="text-[9px] px-1.5 py-0">
-            {reminder.reminder_type === "meeting" ? "📅 Reunião" : "🔔 Lembrete"}
-          </Badge>
-          {reminder.recurrence_rule && (
-            <Badge variant="secondary" className="text-[9px] px-1.5 py-0 gap-1">
-              <Repeat className="h-2.5 w-2.5" />
-              {getRecurrenceLabel(reminder.recurrence_rule)}
-            </Badge>
-          )}
-        </div>
-        {reminder.description && (
-          <p className="text-xs text-muted-foreground mt-0.5">{reminder.description}</p>
+      <div 
+        className={cn(
+          "w-1 self-stretch rounded-full",
+          reminder.completed ? "bg-muted-foreground/30" :
+          isOverdue ? "bg-destructive" :
+          reminder.reminder_type === "meeting" ? "bg-primary" :
+          "bg-accent"
         )}
-        <div className="flex items-center gap-3 mt-1 text-[11px] text-muted-foreground">
-          <span>{format(new Date(reminder.due_at), "dd/MM/yy HH:mm", { locale: ptBR })}</span>
-          {reminder.lead_name && <span className="text-primary/70">• {reminder.lead_name}</span>}
-          {reminder.company_name && <span className="text-muted-foreground/70">• {reminder.company_name}</span>}
+      />
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center gap-2">
+            <span className={cn(
+              "text-sm font-bold", 
+              reminder.completed ? "line-through text-muted-foreground" : "text-foreground"
+            )}>
+              {reminder.title}
+            </span>
+            {reminder.reminder_type === "meeting" && (
+              <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 border-primary/30 text-primary">
+                REUNIÃO
+              </Badge>
+            )}
+            {reminder.recurrence_rule && (
+              <span title={getRecurrenceLabel(reminder.recurrence_rule)}>
+                <Repeat className="h-3 w-3 text-muted-foreground" />
+              </span>
+            )}
+          </div>
+          <div className="text-[10px] font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded">
+            {format(new Date(reminder.due_at), "HH:mm")}
+            {reminder.reminder_type === "meeting" && reminder.end_at && ` - ${format(new Date(reminder.end_at), "HH:mm")}`}
+          </div>
         </div>
-      </div>
-      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button onClick={() => onEdit?.(reminder)} className="p-1 rounded hover:bg-muted" title="Editar">
-          <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
-        </button>
-        <button onClick={() => onDelete?.(reminder)} className="p-1 rounded hover:bg-destructive/10" title="Excluir">
-          <Trash2 className="h-3.5 w-3.5 text-destructive" />
-        </button>
+
+        {reminder.description && (
+          <p className="text-xs text-muted-foreground mb-2">{reminder.description}</p>
+        )}
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+            <span className="font-medium">{format(new Date(reminder.due_at), "dd/MM/yyyy", { locale: ptBR })}</span>
+            {reminder.lead_name && <span className="text-primary/70 font-semibold">• {reminder.lead_name}</span>}
+            {reminder.company_name && <span className="opacity-70">• {reminder.company_name}</span>}
+          </div>
+
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button
+              onClick={(e) => { e.stopPropagation(); onToggle?.(reminder.id, !reminder.completed); }}
+              className={cn(
+                "p-1.5 rounded-full transition-colors",
+                reminder.completed ? "bg-success/20 text-success" : "bg-muted text-muted-foreground hover:bg-success/10 hover:text-success"
+              )}
+              title={reminder.completed ? "Marcar como pendente" : "Marcar como concluído"}
+            >
+              <Check className="h-4 w-4" />
+            </button>
+            <button 
+              onClick={(e) => { e.stopPropagation(); onEdit?.(reminder); }} 
+              className="p-1.5 rounded-full hover:bg-muted text-muted-foreground"
+              title="Editar"
+            >
+              <Pencil className="h-4 w-4" />
+            </button>
+            <button 
+              onClick={(e) => { e.stopPropagation(); onDelete?.(reminder); }} 
+              className="p-1.5 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+              title="Excluir"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
