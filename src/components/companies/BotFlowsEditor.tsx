@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { jsPDF } from "jspdf";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Sparkles, ListChecks, Save, Plus, Trash2, Pencil, FileText } from "lucide-react";
