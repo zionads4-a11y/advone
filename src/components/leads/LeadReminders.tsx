@@ -63,6 +63,11 @@ export function LeadReminders({ leadId, companyId, leadName }: LeadRemindersProp
   const handleAdd = async () => {
     if (!title.trim() || !dueAt || !user) return;
     setAdding(true);
+    const dueAtIso = brtLocalInputToIso(dueAt);
+    const endAt = reminderType === "meeting" 
+      ? addHours(new Date(dueAtIso), 1).toISOString() 
+      : null;
+    
     const { error } = await supabase.from("lead_reminders").insert({
       lead_id: leadId,
       company_id: companyId,
@@ -70,7 +75,8 @@ export function LeadReminders({ leadId, companyId, leadName }: LeadRemindersProp
       title: title.trim(),
       description: description.trim() || null,
       reminder_type: reminderType,
-      due_at: brtLocalInputToIso(dueAt),
+      due_at: dueAtIso,
+      end_at: endAt,
     });
     if (error) {
       toast.error("Erro ao criar lembrete");
