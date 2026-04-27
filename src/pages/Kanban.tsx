@@ -276,7 +276,7 @@ export default function Kanban() {
                       lead={lead}
                       isInMeetingHeld={(col as any).is_meeting_held === true}
                       onClick={() => {
-                        setSelectedLead({ ...lead, status: "new", whatsapp: null, assigned_to: null });
+                        setSelectedLead(lead);
                         setDrawerOpen(true);
                       }}
                       onValueUpdate={(leadId, newValue) => {
