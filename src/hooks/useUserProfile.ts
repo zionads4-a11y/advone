@@ -22,11 +22,11 @@ export function useUserProfile() {
     const fetchProfile = async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("full_name, avatar_url, phone")
+        .select("full_name, email, avatar_url, phone")
         .eq("user_id", user.id)
         .maybeSingle();
 
-      if (data) setProfile(data);
+      if (data) setProfile(data as UserProfile);
     };
 
     fetchProfile();
