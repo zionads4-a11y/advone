@@ -157,7 +157,7 @@ export function CreateEventDialog({
       lead_id: finalLeadId,
       company_id: companyId,
       created_by: user?.id || "00000000-0000-0000-0000-000000000000",
-      title: `${eventType === "meeting" ? "📅" : "🔔"} ${title}`,
+      title: `${eventType === "meeting" ? "📅" : eventType === "block" ? "🚫" : "🔔"} ${title}`,
       description: description || null,
       reminder_type: eventType,
       due_at: dueAt,
