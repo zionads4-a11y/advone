@@ -206,14 +206,18 @@ export function CreateEventDialog({
 
         <div className="space-y-4 pt-2">
           {/* Event Type */}
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             <Button type="button" variant={eventType === "reminder" ? "default" : "outline"} size="sm"
-              onClick={() => setEventType("reminder")} className="gap-2">
+              onClick={() => { setEventType("reminder"); if (title === "BLOQUEADO") setTitle(""); }} className="gap-2 px-1">
               🔔 Tarefa
             </Button>
             <Button type="button" variant={eventType === "meeting" ? "default" : "outline"} size="sm"
-              onClick={() => setEventType("meeting")} className="gap-2">
+              onClick={() => { setEventType("meeting"); if (title === "BLOQUEADO") setTitle(""); }} className="gap-2 px-1">
               📅 Reunião
+            </Button>
+            <Button type="button" variant={eventType === "block" ? "default" : "outline"} size="sm"
+              onClick={() => { setEventType("block"); setTitle("BLOQUEADO"); }} className="gap-2 px-1">
+              🚫 Bloqueio
             </Button>
           </div>
 
