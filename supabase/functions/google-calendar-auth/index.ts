@@ -12,13 +12,17 @@ serve(async (req) => {
   }
 
   try {
-    const { code, redirectUri } = await req.json();
+    const body = await req.json();
+    console.log("Auth request body:", body);
+    const { code, redirectUri } = body;
 
     const clientId = Deno.env.get("GOOGLE_CLIENT_ID");
     const clientSecret = Deno.env.get("GOOGLE_CLIENT_SECRET");
 
+    console.log("Credentials check:", { hasClientId: !!clientId, hasClientSecret: !!clientSecret });
+
     if (!clientId || !clientSecret) {
-      throw new Error("Google credentials not configured");
+      throw new Error("Google credentials not configured in edge function environment variables (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET)");
     }
 
     // Exchange code for tokens
