@@ -20,6 +20,7 @@ interface Reminder {
   company_name?: string;
   recurrence_rule?: string | null;
   recurrence_end?: string | null;
+  end_at?: string | null;
   parent_event_id?: string | null;
 }
 
