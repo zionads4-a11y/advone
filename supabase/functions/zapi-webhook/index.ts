@@ -685,6 +685,15 @@ async function handleAgentPhase(
   let systemPrompt: string;
   let tools: any[];
 
+  // 🏢 Buscar offices para validação e prompts
+  const { data: companyOffices, error: officesError } = await supabase
+    .from("company_offices")
+    .select("name, address, complement, reference_point, maps_url, is_active, position")
+    .eq("company_id", companyId)
+    .eq("is_active", true)
+    .order("position", { ascending: true });
+  if (officesError) console.error("[SDR] Erro ao buscar offices:", officesError.message);
+
   if (phase === "document_collector") {
     const agentCfg = agentConfigs["document_collector"];
     const requiredDocs = agentCfg?.required_documents || [];
@@ -703,13 +712,6 @@ async function handleAgentPhase(
     tools = contractCloserTools;
   } else {
     // SDR phase (default)
-    const { data: companyOffices, error: officesError } = await supabase
-      .from("company_offices")
-      .select("name, address, complement, reference_point, maps_url, is_active, position")
-      .eq("company_id", companyId)
-      .eq("is_active", true)
-      .order("position", { ascending: true });
-    if (officesError) console.error("[SDR] Erro ao buscar offices:", officesError.message);
     systemPrompt = buildSDRPrompt(config, leadName, companyOffices || [], flowsBlock || "", triageBlock || "");
     tools = sdrTools;
     if (config?.debug_mode) {
