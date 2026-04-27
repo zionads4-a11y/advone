@@ -742,20 +742,18 @@ async function handleAgentPhase(
     tools = sdrTools;
   }
 
-  // Reforço de coerência: garantir que a IA leia TODO o histórico antes de responder.
-  // Importante quando o lead volta a falar depois de ter ficado em silêncio (cadência).
+  // Reforço de coerência — instrução INTERNA. Nunca deve aparecer na conversa com o lead.
   const coherenceGuard = `
 
-REGRA CRÍTICA DE COERÊNCIA (LEIA ANTES DE RESPONDER):
-1. Releia TODO o histórico de mensagens acima desta instrução, do início ao fim.
-2. Identifique:
-   - Qual foi a última pergunta SUA (assistant) que ficou em aberto.
-   - O que o lead acabou de responder agora.
-   - Quais informações o lead já te deu (nome, CPF, tipo de caso, preferência de horário/modalidade, etc.) — NÃO peça de novo.
-3. Se o lead estava em silêncio e voltou a falar, NÃO se reapresente, NÃO mande "olá novamente", NÃO repita perguntas já respondidas. Continue EXATAMENTE de onde parou.
-4. Se o lead respondeu sua última pergunta, avance para o próximo passo do fluxo. NÃO faça a mesma pergunta de novo só porque já passou um tempo.
-5. Se a resposta dele for vaga ("ok", "humm", "tá"), peça gentilmente o que faltou — mas reconheça o contexto anterior.
-6. Tom: humano, curto (1-3 linhas), usando o primeiro nome do lead quando fizer sentido.`;
+[INSTRUÇÃO INTERNA — NÃO MOSTRAR PRO LEAD, NÃO COPIAR PRO TEXTO DA RESPOSTA]
+Antes de responder:
+- Releia o histórico acima.
+- Veja qual foi sua última pergunta em aberto e o que o lead respondeu agora.
+- Se ele já te deu uma informação (nome, tipo de caso, modalidade, turno), NÃO peça de novo.
+- Se ele voltou depois de silêncio, continue de onde parou — NÃO se reapresente.
+- Responda em UMA mensagem curta (1-3 linhas), tom humano, usando o primeiro nome quando fizer sentido.
+- Sua resposta é APENAS o texto que vai pro WhatsApp do lead. Não inclua marcadores, listas de regras, nem mencione "instrução", "regra", "fluxo", "passo", "tool" ou nomes técnicos.`;
+
 
   try {
     let aiMessages: any[] = [
