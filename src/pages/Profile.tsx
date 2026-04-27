@@ -35,12 +35,13 @@ export default function Profile() {
     if (!user) return;
     const { data } = await supabase
       .from("profiles")
-      .select("full_name, phone, avatar_url")
+      .select("full_name, email, phone, avatar_url")
       .eq("user_id", user.id)
       .maybeSingle();
 
     if (data) {
       setFullName(data.full_name || "");
+      setEmail(data.email || "");
       setPhone(data.phone || "");
       setAvatarUrl(data.avatar_url);
     }
