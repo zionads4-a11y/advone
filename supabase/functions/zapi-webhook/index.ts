@@ -1046,7 +1046,7 @@ Antes de responder:
 
         // ===== CONTRACT CLOSER TOOLS =====
         if (fnName === "finalize_contract") {
-          // 🔒 Validar CPF obrigatório também aqui
+          // 🔒 CPF não é mais obrigatório
           const cpfFromArg = String(args.client_cpf || "").replace(/\D/g, "");
           let finalCpf = cpfFromArg.length === 11 ? cpfFromArg : "";
           if (!finalCpf && leadId) {
@@ -1059,19 +1059,10 @@ Antes de responder:
             if (stored.length === 11) finalCpf = stored;
           }
 
-          if (!finalCpf) {
-            toolResult = {
-              success: false,
-              error: "CPF_REQUIRED",
-              message: "Não posso finalizar o contrato sem o CPF do cliente. Peça o CPF e use register_client_cpf antes.",
-            };
-            aiMessages.push({ role: "tool", tool_call_id: toolCall.id, content: JSON.stringify(toolResult) });
-            continue;
-          }
-
           replyText = args.message_to_lead || "Contrato finalizado! 🎉";
-          const updates: any = { contract_status: "signed", bot_agent_phase: "completed", cpf_cliente_final: finalCpf };
-          if (args.client_cpf) updates.cpf = finalCpf;
+          const updates: any = { contract_status: "signed", bot_agent_phase: "completed" };
+          if (finalCpf) updates.cpf_cliente_final = finalCpf;
+          if (args.client_cpf && finalCpf) updates.cpf = finalCpf;
           if (args.client_full_name) updates.name = args.client_full_name;
           if (args.contract_value) {
             updates.value = args.contract_value;
