@@ -195,7 +195,9 @@ function DayEventCard({
               {event.title.replace(/^(📅|🔔)\s*/, "")}
             </span>
             {event.recurrence_rule && (
-              <Repeat className="h-3 w-3 text-muted-foreground" title={getRecurrenceLabel(event.recurrence_rule)} />
+              <span title={getRecurrenceLabel(event.recurrence_rule)}>
+                <Repeat className="h-3 w-3 text-muted-foreground" />
+              </span>
             )}
           </div>
           <div className="flex items-center gap-2">
