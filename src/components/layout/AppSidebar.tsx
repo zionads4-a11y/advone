@@ -61,6 +61,7 @@ const adminItems = [
   { title: "Usuários", url: "/client-users", icon: Users },
   { title: "Acessos", url: "/access-management", icon: KeyRound },
   { title: "Assinaturas", url: "/assinatura", icon: CreditCard },
+  { title: "Faturamento p/ Reunião", url: "/comissoes", icon: DollarSign },
   { title: "Agendamentos Êxito", url: "/agendamentos-exito", icon: Trophy },
   { title: "Histórico de Leads", url: "/historico-leads", icon: History },
   { title: "Alertas de Fraude", url: "/fraudes", icon: ShieldAlert },
