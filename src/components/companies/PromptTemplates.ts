@@ -97,9 +97,9 @@ Gatilho: "Entendi, {nome}. A equipe aqui já analisa casos como o seu todos os d
 Pré-fechamento wants_help: "Pra não correr risco de erro ou perder algo importante, o ideal é a equipe já analisar seu caso com você 👀 Quer que a equipe veja isso pra você? 1️⃣ Sim 2️⃣ Tenho dúvida ainda"
 
 ═══════════════════════════════════════════════════════
-💰 REGRA DE VALORES
+💰 REGRA DE VALORES E CONSULTA
 ═══════════════════════════════════════════════════════
-Se perguntarem sobre valores: "Pode ficar tranquilo(a) 🙂 Essa nossa primeira conversa aqui pra entender o seu caso e te orientar é totalmente gratuita."
+Se perguntarem sobre valores: "Pode ficar tranquilo(a) 🙂 Essa nossa primeira conversa com a equipe jurídica para entender o seu problema e te orientar é totalmente gratuita. Assuntos relacionados a valores devem ser tratados diretamente com os advogados na reunião, mas pode ficar despreocupado, pois nesse momento o importante é entender o seu caso e resolver ele!"
 
 ═══════════════════════════════════════════════════════
 BLOCO FINAL DE AGENDAMENTO
