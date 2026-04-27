@@ -91,12 +91,12 @@ export function WeeklyView({ currentDate, reminders, onToggle, onEdit, onDelete,
                 {format(day, "EEE", { locale: ptBR })}
               </div>
               <div className={cn(
-                "text-sm font-semibold mt-0.5 flex items-center justify-center gap-1",
-                isToday ? "text-primary" : "text-foreground",
-                isNationalHoliday && "text-amber-700 dark:text-amber-400"
+                "text-lg font-medium mt-1 w-9 h-9 flex items-center justify-center rounded-full mx-auto transition-colors",
+                isToday ? "bg-primary text-primary-foreground" : "text-foreground",
+                isNationalHoliday && !isToday && "text-amber-700 dark:text-amber-400"
               )}>
                 {format(day, "dd")}
-                {isNationalHoliday && <PartyPopper className="h-3 w-3" />}
+                {isNationalHoliday && !isToday && <PartyPopper className="ml-1 h-3 w-3" />}
               </div>
               {holiday && (
                 <div className="text-[8px] truncate text-amber-600 dark:text-amber-500 mt-0.5 leading-tight">
