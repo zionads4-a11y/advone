@@ -87,7 +87,7 @@ export function DailyView({ currentDate, reminders, onToggle, onEdit, onDelete, 
     <div className="rounded-xl border border-border bg-card overflow-hidden">
       {/* Header */}
       <div className={cn(
-        "p-4 border-b border-border",
+        "p-4 border-b border-border sticky top-0 z-20 backdrop-blur-sm",
         isNationalHoliday ? "bg-amber-500/10" : "bg-muted/30"
       )}>
         <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
