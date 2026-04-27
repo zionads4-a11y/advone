@@ -53,7 +53,13 @@ const App = () => (
             <Route path="/IA" element={<LandingIA />} />
             <Route path="/ia" element={<LandingIA />} />
             <Route path="/connect/:token" element={<ConnectWhatsApp />} />
-            <Route element={<AppLayout />}>
+            <Route
+              element={
+                <ProtectedRoute>
+                  <AppLayout />
+                </ProtectedRoute>
+              }
+            >
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/leads" element={<Leads />} />
               <Route path="/kanban" element={<Kanban />} />
