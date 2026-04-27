@@ -11,7 +11,13 @@ function buildSDRPrompt(config: any, leadName?: string, offices: any[] = []) {
   const officeName = config.office_name || "o escritório";
   const practiceArea = config.practice_area || "";
   const tone = config.communication_tone || "moderado";
-  const customPrompt = config.ai_prompt || "";
+  const customPrompt = (config.ai_prompt || "").trim();
+
+  // Se o prompt customizado começar com "Você é", assumimos que é o prompt completo
+  // gerado pelo construtor dinâmico e o usamos diretamente.
+  if (customPrompt.startsWith("Você é")) {
+    return customPrompt;
+  }
 
   // 🏢 Endereços DINÂMICOS — sem endereço cadastrado = SOMENTE online
   const activeOffices = (offices || []).filter((o: any) => o && o.is_active !== false);
@@ -92,7 +98,7 @@ IDENTIDADE E TOM
 - Regra de ouro: UMA pergunta por vez
 - Nunca dê parecer jurídico definitivo
 - Seu papel não é resolver tudo no chat; seu papel é qualificar, gerar confiança e conduzir para o próximo passo
-- ATENÇÃO: NÃO use listas numeradas (1, 2, 3…), NÃO peça pra escolher opções. Conduza por texto livre, com empatia ativa.
+- ATENÇÃO: Se houver instruções específicas de fluxos abaixo, siga-as fielmente, inclusive se elas solicitarem o uso de opções ou menus numerados.
 
 📆 HOJE: ${todayDayName}, ${todayDMY} (${String(nowBR.getHours()).padStart(2,"0")}:${String(nowBR.getMinutes()).padStart(2,"0")} BRT).
 ${leadNameInfo}
