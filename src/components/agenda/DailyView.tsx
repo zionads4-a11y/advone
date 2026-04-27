@@ -195,6 +195,7 @@ function DayEventCard({
           </span>
           <span className="text-[10px] text-muted-foreground font-mono">
             {format(new Date(event.due_at), "HH:mm")}
+            {event.reminder_type === "meeting" && event.end_at && ` - ${format(new Date(event.end_at), "HH:mm")}`}
           </span>
           <Badge variant="outline" className="text-[9px] px-1.5 py-0">
             {event.reminder_type === "meeting" ? "📅 Reunião" : event.reminder_type === "block" ? "🚫 Bloqueio" : "🔔 Tarefa"}
