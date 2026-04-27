@@ -26,6 +26,7 @@ interface CreateEventDialogProps {
   onOpenChange: (open: boolean) => void;
   onCreated: () => void;
   defaultDate?: Date;
+  defaultTime?: string;
   companies: { id: string; name: string }[];
   leads?: { id: string; name: string; company_id: string }[];
   preselectedCompanyId?: string;
