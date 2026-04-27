@@ -70,7 +70,7 @@ export function WeeklyView({ currentDate, reminders, onToggle, onEdit, onDelete,
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
       {/* Header */}
-      <div className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-border bg-muted/30">
+      <div className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-border bg-muted/30 sticky top-0 z-20">
         <div className="p-2 text-xs text-muted-foreground text-center">Hora</div>
         {weekDays.map((day) => {
           const isToday = format(day, "yyyy-MM-dd") === today;
