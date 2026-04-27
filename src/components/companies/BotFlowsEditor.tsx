@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useCompanyBotFlows, type CompanyBotFlow } from "@/hooks/useCompanyBotFlows";
 import { useCompanyOffices } from "@/hooks/useCompanyOffices";
-import { buildDynamicLauraPrompt, type EnabledFlow, type OfficeAddress } from "./botFlowBlocks";
+import { buildDynamicLauraPrompt, getFlowBlock, type EnabledFlow, type OfficeAddress } from "./botFlowBlocks";
 import type { Niche } from "./botFlowsCatalog";
 import { CustomFlowDialog } from "./CustomFlowDialog";
 import { EditFlowPromptDialog } from "./EditFlowPromptDialog";
