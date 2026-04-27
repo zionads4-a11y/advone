@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,8 +39,11 @@ export default function Auth() {
 }
 
 function LoginForm() {
-  const { signInWithGoogle } = useAuth();
+  const { signInWithGoogle, signIn } = useAuth();
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
@@ -51,19 +54,76 @@ function LoginForm() {
     }
   };
 
+  const handleEmailSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) {
+      toast.error("Por favor, preencha todos os campos");
+      return;
+    }
+    
+    setEmailLoading(true);
+    const { error } = await signIn(email, password);
+    if (error) {
+      toast.error("Erro ao entrar: " + error.message);
+      setEmailLoading(false);
+    }
+  };
+
   return (
     <Card className="border-border bg-card">
       <CardHeader>
         <CardTitle className="font-display text-foreground text-center text-2xl">Acesse sua conta</CardTitle>
-        <CardDescription className="text-center">Use sua conta Google para entrar no sistema</CardDescription>
+        <CardDescription className="text-center">Escolha sua forma de login preferida</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
+        <form onSubmit={handleEmailSignIn} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input 
+              id="email" 
+              type="email" 
+              placeholder="seu@email.com" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">Senha</Label>
+            <Input 
+              id="password" 
+              type="password" 
+              placeholder="••••••••" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <Button 
+            type="submit" 
+            className="w-full" 
+            disabled={emailLoading || googleLoading}
+          >
+            {emailLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            Entrar com Email
+          </Button>
+        </form>
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-border" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-card px-2 text-muted-foreground">ou continue com</span>
+          </div>
+        </div>
+
         <Button 
           type="button" 
           variant="outline" 
-          className="w-full py-6 text-lg shadow-sm transition-all hover:bg-accent/50 hover:shadow-md" 
+          className="w-full shadow-sm transition-all hover:bg-accent/50 hover:shadow-md" 
           onClick={handleGoogleSignIn}
-          disabled={googleLoading}
+          disabled={googleLoading || emailLoading}
         >
           {googleLoading ? (
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -90,6 +150,13 @@ function LoginForm() {
           )}
           Entrar com Google
         </Button>
+
+        <p className="text-center text-sm text-muted-foreground mt-4">
+          Não tem uma conta?{" "}
+          <Link to="/signup" className="text-primary hover:underline font-medium">
+            Cadastre-se
+          </Link>
+        </p>
       </CardContent>
     </Card>
   );
