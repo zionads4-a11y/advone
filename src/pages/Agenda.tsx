@@ -387,7 +387,7 @@ export default function Agenda() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={handleSync}
+              onClick={() => handleSync(false)}
               disabled={syncLoading}
               className="gap-2 text-xs h-9"
             >
