@@ -10,6 +10,8 @@ import Auth from "./pages/Auth";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import Leads from "./pages/Leads";
+import Clients from "./pages/Clients";
+import ClientDetail from "./pages/ClientDetail";
 import Kanban from "./pages/Kanban";
 import Conversations from "./pages/Conversations";
 import Campaigns from "./pages/Campaigns";
