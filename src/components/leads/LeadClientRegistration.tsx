@@ -220,6 +220,24 @@ export function LeadClientRegistration({ leadId, onUpdate }: LeadClientRegistrat
                 />
               </div>
             </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs">Profissão</Label>
+                <Input
+                  value={form.profissao || ""}
+                  onChange={(e) => set("profissao", e.target.value)}
+                  placeholder="Ex: Aposentado(a), Autônomo(a)"
+                />
+              </div>
+              <div>
+                <Label className="text-xs">Nacionalidade</Label>
+                <Input
+                  value={form.nacionalidade || ""}
+                  onChange={(e) => set("nacionalidade", e.target.value)}
+                  placeholder="brasileiro(a)"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="pt-2">
