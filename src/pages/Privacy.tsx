@@ -86,8 +86,11 @@ export default function Privacy() {
               <li>Sincronização bidirecional de reuniões agendadas via CRM.</li>
             </ul>
             <p>
-              <strong>Não usamos esses dados para:</strong> publicidade, treinamento de modelos de IA,
-              compartilhamento com terceiros ou qualquer finalidade diversa da sincronização de agenda.
+              <strong>Não usamos esses dados para:</strong> publicidade, remarketing, perfilização de usuários, treinamento de modelos de IA,
+              compartilhamento com terceiros ou qualquer finalidade não diretamente relacionada à funcionalidade principal da aplicação.
+            </p>
+            <p>
+              O AdvOne não compartilha dados do Google com terceiros, exceto quando estritamente necessário para a operação da funcionalidade solicitada pelo usuário (como a sincronização com o próprio Google Calendar).
             </p>
             <p>
               O AdvOne adere às{" "}
