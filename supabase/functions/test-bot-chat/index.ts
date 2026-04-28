@@ -543,7 +543,7 @@ serve(async (req) => {
 
         if (fnName === "schedule_appointment") {
           if (!cpfRegistered) {
-            toolResult = { success: false, error: "CPF_REQUIRED", message: "[TESTE] Bloqueado: registre o CPF do cliente primeiro via register_client_cpf." };
+            toolResult = { success: false, error: "NAME_REQUIRED", message: "[TESTE] Bloqueado: registre o nome completo do cliente primeiro via register_client_name." };
           } else {
             reply = args.message_to_lead || reply;
             toolResult = { success: true, message: "[TESTE] Agendamento simulado com sucesso", date: args.date, time: args.time, modality: args.modality || "online", unit: args.unit || "", cpf: cpfRegistered };
