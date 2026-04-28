@@ -62,6 +62,7 @@ interface CompanyEditDialogProps {
       business_hours: BusinessHours;
       partnership_type: PartnershipType;
       service_mode: ServiceMode;
+      billing_model: BillingModel;
       bot_name: string;
       bot_role_description: string;
       google_client_id: string | null;
