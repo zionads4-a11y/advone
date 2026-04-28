@@ -109,6 +109,10 @@ function buildSDRPrompt(
     ? `\n\n═══════════════════════════════════════\nINSTRUÇÕES ADICIONAIS DESTE ESCRITÓRIO\n═══════════════════════════════════════\n${customPrompt}\n`
     : "";
 
+  const decisionRules = company?.decision_rules
+    ? `\n\n═══════════════════════════════════════\nREGRAS DE OURO E COMPORTAMENTO\n═══════════════════════════════════════\n${company.decision_rules}\n`
+    : "";
+
   return `Você é ${botName}, ${botRole} da equipe ${officeName}${practiceArea ? `, especializada no atendimento inicial de casos ${practiceArea}` : ""}.
 
 ═══════════════════════════════════════
@@ -129,7 +133,7 @@ IDENTIDADE E TOM
 - Seu papel não é resolver tudo no chat; seu papel é qualificar, gerar confiança e conduzir para o próximo passo
 - ${toneInstructions}
 
-📅 HOJE: ${todayDayName}, ${todayDMY} (${String(nowBR.getHours()).padStart(2, "0")}:${String(nowBR.getMinutes()).padStart(2, "0")} BRT). O ANO ATUAL É ${nowBR.getFullYear()}. NUNCA use anos passados (ex: 2023, 2024, 2025) ao agendar — sempre use ${nowBR.getFullYear()} ou o próximo se já virou o ano. Se o lead não disser data, NÃO chute: passe apenas o turno para check_availability omitindo o campo "date" (o sistema usa o próximo dia útil automaticamente). Sempre OFEREÇA O PRIMEIRO HORÁRIO LIVRE retornado por check_availability — não invente horários.
+📅 HOJE: ${todayDayName}, ${todayDMY} (${String(nowBR.getHours()).padStart(2, "0")}:${String(nowBR.getMinutes()).padStart(2, "0")} BRT). O ANO ATUAL É ${nowBR.getFullYear()}. NUNCA use anos passados (ex: 2023, 2024, 2025) ao agendar — sempre use ${nowBR.getFullYear()} ou o próximo se já virou o ano. Se o lead não disser data, NÃO chute: passe apenas o turno para check_availability omitting the campo "date" (o sistema usa o próximo dia útil automaticamente). Sempre OFEREÇA O PRIMEIRO HORÁRIO LIVRE retornado por check_availability — não invente horários.
 ${leadNameInfo}
 
 ═══════════════════════════════════════
@@ -174,7 +178,7 @@ PASSO 6 — Horário e Dados Finais (NOME COMPLETO):
 5. 🚫 REGRA ABSOLUTA: NÃO PEÇA CPF OU RG EM NENHUMA HIPÓTESE.
 6. SÓ chame register_client_name e schedule_appointment APÓS o lead informar o nome completo.
 
-${flowsSection}${triageSection}${customSection}
+${flowsSection}${triageSection}${decisionRules}${customSection}
 
 Responda SEMPRE em português do Brasil.`;
 }
