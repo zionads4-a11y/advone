@@ -71,6 +71,7 @@ const adminItems = [
 const gerenteItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Kanban", url: "/kanban", icon: Kanban },
+  { title: "Clientes", url: "/clientes", icon: UserCheck },
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
   { title: "IA Jurídica", url: "/ia-juridica", icon: Scale, premium: true },
@@ -84,6 +85,7 @@ const gerenteItems = [
 
 const operadorItems = [
   { title: "Kanban", url: "/kanban", icon: Kanban },
+  { title: "Clientes", url: "/clientes", icon: UserCheck },
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
   { title: "IA Jurídica", url: "/ia-juridica", icon: Scale, premium: true },
