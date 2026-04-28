@@ -592,6 +592,7 @@ export type Database = {
       companies: {
         Row: {
           bot_name: string | null
+          bot_prompt: string | null
           bot_role_description: string | null
           business_hours: Json | null
           created_at: string
@@ -610,6 +611,7 @@ export type Database = {
         }
         Insert: {
           bot_name?: string | null
+          bot_prompt?: string | null
           bot_role_description?: string | null
           business_hours?: Json | null
           created_at?: string
@@ -628,6 +630,7 @@ export type Database = {
         }
         Update: {
           bot_name?: string | null
+          bot_prompt?: string | null
           bot_role_description?: string | null
           business_hours?: Json | null
           created_at?: string
