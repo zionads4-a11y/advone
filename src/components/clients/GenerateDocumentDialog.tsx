@@ -118,7 +118,7 @@ export function GenerateDocumentDialog({ open, onOpenChange, lead: leadProp, com
     setMissingManual(missing);
     const values = buildAutoValues({ lead, company: company || { name: companyName }, profile, manualValues });
     setPreview(renderTemplate(selected.content, values));
-  }, [selected, manualValues, lead, companyName]);
+  }, [selected, manualValues, lead, companyName, company, profile]);
 
   const save = async () => {
     if (!selected || !user) return;
