@@ -421,15 +421,14 @@ serve(async (req) => {
       {
         type: "function",
         function: {
-          name: "register_client_cpf",
-          description: "Registra CPF + nome completo. PREFERENCIALMENTE antes de schedule_appointment para evitar pendência.",
+          name: "register_client_name",
+          description: "Registra o nome completo do lead no sistema. Use apenas APÓS o lead aceitar o agendamento.",
           parameters: {
             type: "object",
             properties: {
-              cpf: { type: "string", description: "CPF apenas números (11 dígitos válidos)" },
               full_name: { type: "string", description: "Nome COMPLETO (mínimo 3 palavras: nome + sobrenomes)" }
             },
-            required: ["cpf", "full_name"],
+            required: ["full_name"],
             additionalProperties: false
           }
         }
