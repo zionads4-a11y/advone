@@ -113,27 +113,27 @@ export default function CompanySettings() {
         <p className="text-sm text-muted-foreground">{company.name}</p>
       </div>
 
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle className="font-display text-lg">Dados da Empresa</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Nome da Empresa</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} />
-          </div>
-          <div className="space-y-2">
-            <Label>Telefone / WhatsApp</Label>
-            <Input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="5511999999999" />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="glass-card">
+          <CardHeader>
+            <CardTitle className="font-display text-lg">Dados da Empresa</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Nome da Empresa</Label>
+              <Input value={name} onChange={(e) => setName(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Telefone / WhatsApp</Label>
+              <Input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="5511999999999" />
+            </div>
+          </CardContent>
+        </Card>
 
-      {userRole === "admin" && (
-        <>
+        {userRole === "admin" && (
           <Card className="glass-card">
             <CardHeader>
-              <CardTitle className="font-display text-lg">Personalização da Assistente Virtual (IA)</CardTitle>
+              <CardTitle className="font-display text-lg">Personalização do Bot SDR (IA)</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -159,6 +159,11 @@ export default function CompanySettings() {
               </p>
             </CardContent>
           </Card>
+        )}
+      </div>
+
+      {userRole === "admin" && (
+        <>
 
           <Card className="glass-card">
             <CardHeader>
