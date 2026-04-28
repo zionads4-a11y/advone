@@ -120,6 +120,8 @@ export function LeadClientRegistration({ leadId, onUpdate }: LeadClientRegistrat
         name: form.name.trim(),
         cpf_cliente_final: form.cpf_cliente_final || null,
         rg: form.rg || null,
+        nacionalidade: form.nacionalidade || null,
+        profissao: form.profissao || null,
         email: form.email || null,
         phone: form.phone || null,
         estado_civil: form.estado_civil || null,
