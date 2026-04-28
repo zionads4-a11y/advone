@@ -91,7 +91,13 @@ export default function Terms() {
             <p>
               Ao autorizar a integração com o Google Calendar, você concede ao AdvOne permissão para
               ler, criar e modificar eventos exclusivamente na agenda selecionada, com o propósito de
-              sincronizar reuniões agendadas pelo CRM. Você pode revogar essa permissão a qualquer momento
+              sincronizar reuniões agendadas pelo CRM. 
+            </p>
+            <p>
+              Os dados obtidos por meio das APIs do Google não são utilizados para fins de publicidade, remarketing, perfilização de usuários ou qualquer finalidade não diretamente relacionada à funcionalidade principal da aplicação. O AdvOne não compartilha dados do Google com terceiros, exceto quando estritamente necessário para a operação da funcionalidade solicitada pelo usuário.
+            </p>
+            <p>
+              Você pode revogar essa permissão a qualquer momento
               em <a href="https://myaccount.google.com/permissions" className="text-primary underline" target="_blank" rel="noreferrer">myaccount.google.com/permissions</a>.
             </p>
           </section>
