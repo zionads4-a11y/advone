@@ -79,7 +79,9 @@ export default function CompanySettings() {
         whatsapp: whatsapp || null, 
         business_hours: businessHours as any,
         google_client_id: googleClientId || null,
-        google_client_secret: googleClientSecret || null
+        google_client_secret: googleClientSecret || null,
+        bot_name: botName || 'Laura',
+        bot_role_description: botRoleDescription || 'atendente virtual'
       })
       .eq("id", company.id);
 
