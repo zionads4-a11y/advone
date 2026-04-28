@@ -36,6 +36,8 @@ export default function CompanySettings() {
   const [googleClientId, setGoogleClientId] = useState("");
   const [googleClientSecret, setGoogleClientSecret] = useState("");
   const [businessHours, setBusinessHours] = useState<BusinessHours>(getDefaultBusinessHours());
+  const [botName, setBotName] = useState("Laura");
+  const [botRoleDescription, setBotRoleDescription] = useState("atendente virtual");
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [hasMonitoring, setHasMonitoring] = useState(true);
