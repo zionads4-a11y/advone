@@ -138,7 +138,7 @@ export function LeadConversationDrawer({ open, onOpenChange, leadId, leadName, l
     doc.setFontSize(10);
     doc.setTextColor(80, 80, 80);
     doc.text(`Lead: ${leadName || "—"}`, margin, y); y += 5;
-    if (leadCpf) { doc.text(`CPF: ${leadCpf}`, margin, y); y += 5; }
+    
     if (leadPhone) { doc.text(`Telefone: ${leadPhone}`, margin, y); y += 5; }
     doc.text(`Exportado em: ${new Date().toLocaleString("pt-BR")}`, margin, y); y += 5;
     doc.text(`Total de mensagens até agendamento: ${messagesUntilSchedule.length}`, margin, y); y += 7;
