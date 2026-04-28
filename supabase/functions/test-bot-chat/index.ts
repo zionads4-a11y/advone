@@ -503,8 +503,15 @@ serve(async (req) => {
       } catch (e) {
         const msg = getErrorMessage(e);
         console.error("AI error:", msg);
-        return new Response(JSON.stringify({ error: "Erro ao processar resposta da IA" }), {
-          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        // Detecta status code embutido na mensagem (formato "AI lovable 429: ...")
+        const statusMatch = msg.match(/\b(\d{3})\b/);
+        const status = statusMatch ? Number(statusMatch[1]) : 500;
+        let userMsg = "Erro ao processar resposta da IA";
+        if (status === 429) userMsg = "Limite de requisições atingido. Aguarde alguns segundos e tente novamente.";
+        else if (status === 402) userMsg = "Créditos da IA esgotados. Adicione créditos no workspace para continuar.";
+        return new Response(JSON.stringify({ error: userMsg, detail: msg }), {
+          status: status === 429 || status === 402 ? status : 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
