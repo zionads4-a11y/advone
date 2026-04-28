@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { FileSignature, Send, Loader2, CheckCircle2, XCircle, Clock, FileText } from "lucide-react";
+import { FileSignature, Send, Loader2, CheckCircle2, XCircle, Clock, FileText, FilePlus2 } from "lucide-react";
 import { toast } from "sonner";
+import { GenerateDocumentDialog } from "@/components/clients/GenerateDocumentDialog";
 
 interface LeadContractProps {
   leadId: string;
@@ -41,6 +42,7 @@ export function LeadContract({ leadId, companyId, leadName, leadPhone, leadEmail
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [generateDocOpen, setGenerateDocOpen] = useState(false);
   const [hasConfig, setHasConfig] = useState(false);
 
   // Form state
@@ -142,12 +144,23 @@ export function LeadContract({ leadId, companyId, leadName, leadPhone, leadEmail
           <FileSignature className="h-3.5 w-3.5" />
           Contratos Digitais
         </h4>
-        {hasConfig && (
-          <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setDialogOpen(true)}>
-            <Send className="h-3 w-3 mr-1" />
-            Enviar contrato
+        <div className="flex gap-1.5">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 text-xs"
+            onClick={() => setGenerateDocOpen(true)}
+          >
+            <FilePlus2 className="h-3 w-3 mr-1" />
+            Gerar contrato
           </Button>
-        )}
+          {hasConfig && (
+            <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setDialogOpen(true)}>
+              <Send className="h-3 w-3 mr-1" />
+              Enviar p/ assinatura
+            </Button>
+          )}
+        </div>
       </div>
 
       {!hasConfig && (
@@ -245,6 +258,17 @@ export function LeadContract({ leadId, companyId, leadName, leadPhone, leadEmail
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Generate Document (saves to client folder) */}
+      <GenerateDocumentDialog
+        open={generateDocOpen}
+        onOpenChange={setGenerateDocOpen}
+        lead={{ id: leadId, name: leadName, phone: leadPhone, whatsapp: leadPhone, email: leadEmail }}
+        companyId={companyId}
+        onGenerated={() => {
+          toast.success("Contrato salvo na pasta do cliente!");
+        }}
+      />
     </div>
   );
 }
