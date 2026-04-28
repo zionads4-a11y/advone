@@ -126,8 +126,8 @@ FLUXO NATURAL DA CONVERSA:
 
 Turno 1: Cumprimente com calor humano + apresente-se brevemente
 ${hasTriagem ? "Turno 2: Envie o menu de opções (em mensagem separada)" : 'Turno 2: Pergunte "Me conta, o que tá acontecendo?"'}
-Turno 3+: Siga o script do assunto — UMA pergunta por turno
-Último: Conduza para agendamento enfatizando que é GRATUITO e personalizado.
+Turno 3+: Siga o script do assunto — UMA pergunta por turno.
+Último: Conduza para agendamento. APÓS o lead aceitar o horário, peça o NOME COMPLETO.
 
 📆 DATA E HORA ATUAL: Hoje é ${new Date(getNowBrasilia()).toLocaleDateString("pt-BR", { weekday: "long" })}, ${getTodayBrasilia()} (${String(getNowBrasilia().getHours()).padStart(2,"0")}:${String(getNowBrasilia().getMinutes()).padStart(2,"0")} horário de Brasília). USE ESTA DATA COMO REFERÊNCIA.
 
@@ -138,12 +138,11 @@ Turno 3+: Siga o script do assunto — UMA pergunta por turno
 - NUNCA diga "nosso atendimento é de segunda a sexta" ou mencione dias de funcionamento de forma genérica
 - Se já for depois das 17:00, NÃO ofereça horários para hoje — ofereça para o próximo dia útil
 
-🔒 CAPTURA OBRIGATÓRIA DE NOME COMPLETO + CPF (SEMPRE ANTES DE AGENDAR):
-- REGRA INVIOLÁVEL: ANTES de oferecer QUALQUER horário, peça SEMPRE de forma educada: NOME COMPLETO (mín. 3 palavras, ex: "João da Silva Santos") + CPF.
-- Use tom cordial e gentil. Mensagem padrão: "Que ótimo! 😊 Pra eu já deixar tudo certinho no nosso sistema antes de marcar, você poderia gentilmente me informar seu *nome completo* (com sobrenomes) e o seu *CPF*, por favor?\\n\\nFica registrado com total sigilo, só com a gente. 🔒"
+🔒 CAPTURA OBRIGATÓRIA DE NOME COMPLETO (SEMPRE ANTES DE AGENDAR):
+- REGRA INVIOLÁVEL: ANTES de oferecer QUALQUER horário, peça SEMPRE de forma educada: NOME COMPLETO (mín. 3 palavras, ex: "João da Silva Santos").
+- Use tom cordial e gentil. Mensagem padrão: "Que ótimo! 😊 Pra eu já deixar tudo certinho no nosso sistema antes de marcar, você poderia gentilmente me informar seu *nome completo* (com sobrenomes), por favor?\\n\\nFica registrado com total sigilo, só com a gente. 🔒"
 - Se vier nome incompleto, peça com educação: "Imagina, sem problemas! 😊 Você poderia me passar seu nome COMPLETO, com todos os sobrenomes, por gentileza?"
-- Se vier só um dos dois, peça o que falta cordialmente: "Perfeito! 🙂 Só falta seu *[nome / CPF]*, pode me passar por favor?"
-- Quando receber AMBOS, chame register_client_cpf passando cpf E full_name e agradeça.
+- Quando receber, chame register_client_name passando full_name e agradeça.
 - INSISTA educadamente até 2 vezes. Se o lead recusar firmemente, agende mesmo assim — schedule_appointment marcará o lead com pendência.
 
 📅 ABORDAGEM DE AGENDAMENTO (REGRA OBRIGATÓRIA):
@@ -174,8 +173,6 @@ Responda SEMPRE em português do Brasil.`;
 }
 
 function getNowBrasilia(): Date {
-  // Date cujos getters locais (getFullYear, getMonth, getDate, getDay, getHours, getMinutes)
-  // representam o horário real em America/Sao_Paulo. Confiável em qualquer fuso de servidor.
   const fmt = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Sao_Paulo",
     year: "numeric", month: "2-digit", day: "2-digit",
@@ -217,7 +214,6 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
 
   const dayConfig = businessHours[dayKey];
   
-  // Support both formats: array of {open,close} or {enabled, shifts:[{start,end}]}
   if (Array.isArray(dayConfig) && dayConfig.length > 0) {
     for (const shift of dayConfig) {
       const start = shift.open || shift.start;
@@ -251,32 +247,28 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
     }
   }
 
-  // Fallback only if NO business hours configured at all for the company
   const hasAnyConfig = Object.keys(businessHours).length > 0;
   if (slots.length === 0 && !hasAnyConfig && dayOfWeek >= 1 && dayOfWeek <= 5) {
     for (let h = 8; h < 12; h++) { slots.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`); }
     for (let h = 13; h < 17; h++) { slots.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`); }
   }
 
-  // Enforce 08:00-17:00 hard limit regardless of business hours config
   slots = slots.filter(s => {
     const [h, m] = s.split(":").map(Number);
     const mins = h * 60 + m;
-    return mins >= 480 && mins < 1020; // 08:00 to 17:00
+    return mins >= 480 && mins < 1020;
   });
 
-  // Filter out past slots + 2h minimum advance for today (Brasilia time)
   const todayBR = getTodayBrasilia();
   if (dateStr === todayBR) {
     const nowBR = getNowBrasilia();
-    const minMinutes = (nowBR.getHours() * 60 + nowBR.getMinutes()) + 120; // +2 hours
+    const minMinutes = (nowBR.getHours() * 60 + nowBR.getMinutes()) + 120;
     slots = slots.filter(s => {
       const [h, m] = s.split(":").map(Number);
       return h * 60 + m >= minMinutes;
     });
   }
 
-  // Query existing appointments for this Brasilia day (UTC-3: 03:00Z to next day 02:59Z)
   const nextDay = new Date(new Date(dateStr + "T12:00:00Z").getTime() + 86400000).toISOString().split("T")[0];
   const { data: existing } = await supabase
     .from("lead_reminders")
@@ -303,20 +295,6 @@ function formatDateDMY(dateStr: string): string {
   const parts = dateStr.split("-");
   if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
   return dateStr;
-}
-
-function isValidCPF(raw: string): boolean {
-  const cpf = String(raw || "").replace(/\D/g, "");
-  if (cpf.length !== 11) return false;
-  if (/^(\d)\1{10}$/.test(cpf)) return false;
-  let sum = 0;
-  for (let i = 0; i < 9; i++) sum += parseInt(cpf[i]) * (10 - i);
-  let d1 = 11 - (sum % 11); if (d1 >= 10) d1 = 0;
-  if (d1 !== parseInt(cpf[9])) return false;
-  sum = 0;
-  for (let i = 0; i < 10; i++) sum += parseInt(cpf[i]) * (11 - i);
-  let d2 = 11 - (sum % 11); if (d2 >= 10) d2 = 0;
-  return d2 === parseInt(cpf[10]);
 }
 
 function isValidFullName(raw: string): boolean {
@@ -415,10 +393,7 @@ serve(async (req) => {
       });
     }
 
-    // Carrega config de IA da empresa (provider + modelo + custom prompt opcional)
     const aiConfig = await getCompanyAIConfig(company_id);
-
-    // No ambiente de teste, se a empresa marcou "use_openai_for_testing", força OpenAI
     const forceProvider = aiConfig.use_openai_for_testing ? "openai" as const : undefined;
 
     let systemPrompt = buildSDRPrompt(config);
@@ -430,15 +405,29 @@ serve(async (req) => {
       {
         type: "function",
         function: {
-          name: "register_client_cpf",
-          description: "Registra CPF + nome completo. PREFERENCIALMENTE antes de schedule_appointment para evitar pendência.",
+          name: "register_client_name",
+          description: "Registra o nome completo do lead. Deve ser usado APÓS o lead aceitar um horário.",
           parameters: {
             type: "object",
             properties: {
-              cpf: { type: "string", description: "CPF apenas números (11 dígitos válidos)" },
               full_name: { type: "string", description: "Nome COMPLETO (mínimo 3 palavras: nome + sobrenomes)" }
             },
-            required: ["cpf", "full_name"],
+            required: ["full_name"],
+            additionalProperties: false
+          }
+        }
+      },
+      {
+        type: "function",
+        function: {
+          name: "register_client_name",
+          description: "Registra o nome completo do lead. Deve ser usado APÓS o lead aceitar um horário.",
+          parameters: {
+            type: "object",
+            properties: {
+              full_name: { type: "string", description: "Nome COMPLETO (mínimo 3 palavras: nome + sobrenomes)" }
+            },
+            required: ["full_name"],
             additionalProperties: false
           }
         }
@@ -447,7 +436,7 @@ serve(async (req) => {
         type: "function",
         function: {
           name: "check_availability",
-          description: "Verifica horários disponíveis. Só use APÓS register_client_cpf.",
+          description: "Verifica horários disponíveis.",
           parameters: {
             type: "object",
             properties: {
@@ -462,7 +451,7 @@ serve(async (req) => {
         type: "function",
         function: {
           name: "schedule_appointment",
-          description: "Agenda uma consulta. Use SOMENTE APÓS register_client_cpf + lead escolher horário.",
+          description: "Agenda uma consulta. Use SOMENTE APÓS register_client_name + lead escolher horário.",
           parameters: {
             type: "object",
             properties: {
@@ -504,7 +493,7 @@ serve(async (req) => {
             type: "object",
             properties: {
               niche: { type: "string", description: "Ex: 'previdenciario'" },
-              case_type: { type: "string", description: "Ex: 'desconto_indevido', 'bpc_loas', 'aposentadoria', etc." },
+              case_type: { type: "string", description: "Ex: 'desconto_indevido', 'bpc_loas', 'demora_inss', 'aposentadoria', 'auxilio_doenca', 'pensao_morte', 'revisao_beneficio'" },
               answers: { type: "object", description: "Respostas estruturadas do lead. Inclua sempre 'wants_help' (sim/nao) para o controle final de agendamento." }
             },
             required: ["niche", "answers"],
@@ -521,7 +510,7 @@ serve(async (req) => {
 
     let reply = "";
     let toolActions: any[] = [];
-    let cpfRegistered = "";
+    let nameRegistered = "";
     let maxIterations = 3;
 
     while (maxIterations > 0) {
@@ -571,22 +560,16 @@ serve(async (req) => {
 
         let toolResult: any = {};
 
-        if (fnName === "register_client_cpf") {
-          const rawCpf = String(args.cpf || "").replace(/\D/g, "");
+        if (fnName === "register_client_name") {
           const fullName = String(args.full_name || "").trim();
-          const cpfOk = isValidCPF(rawCpf);
           const nameOk = isValidFullName(fullName);
-          if (!cpfOk && !nameOk) {
-            toolResult = { success: false, error: "CPF e nome inválidos. CPF precisa ter 11 dígitos válidos e nome completo precisa ter ≥3 palavras." };
-          } else if (!cpfOk) {
-            toolResult = { success: false, error: "CPF inválido (dígitos não conferem). Peça novamente." };
-          } else if (!nameOk) {
+          if (!nameOk) {
             toolResult = { success: false, error: "Nome incompleto. Peça nome COMPLETO com sobrenomes (≥3 palavras)." };
           } else {
-            cpfRegistered = rawCpf;
-            toolResult = { success: true, cpf_registered: rawCpf, full_name: fullName, message: "[TESTE] CPF e nome completo registrados. Já pode agendar." };
+            nameRegistered = fullName;
+            toolResult = { success: true, full_name: fullName, message: "[TESTE] Nome completo registrado. Já pode agendar." };
           }
-          toolActions.push({ tool: "register_client_cpf", result: toolResult });
+          toolActions.push({ tool: "register_client_name", result: toolResult });
         }
 
         if (fnName === "check_availability") {
@@ -594,7 +577,6 @@ serve(async (req) => {
           const period = String(args.period || "qualquer").toLowerCase();
           const availability = await getAvailableSlots(adminClient, company_id, dateToCheck);
 
-          // Mesma lógica de filtragem por turno usada no zapi-webhook (produção)
           const filterByPeriod = (slots: string[]) => {
             if (period === "manha") return slots.filter(s => parseInt(s.split(":")[0], 10) < 12);
             if (period === "tarde") return slots.filter(s => parseInt(s.split(":")[0], 10) >= 12);
@@ -636,11 +618,11 @@ serve(async (req) => {
         }
 
         if (fnName === "schedule_appointment") {
-          if (!cpfRegistered) {
-            toolResult = { success: false, error: "CPF_REQUIRED", message: "[TESTE] Bloqueado: registre o CPF do cliente primeiro via register_client_cpf." };
+          if (!nameRegistered) {
+            toolResult = { success: false, error: "NAME_REQUIRED", message: "[TESTE] Bloqueado: registre o NOME completo do cliente primeiro via register_client_name." };
           } else {
             reply = args.message_to_lead || reply;
-            toolResult = { success: true, message: "[TESTE] Agendamento simulado com sucesso", date: args.date, time: args.time, modality: args.modality || "online", unit: args.unit || "", cpf: cpfRegistered };
+            toolResult = { success: true, message: "[TESTE] Agendamento simulado com sucesso", date: args.date, time: args.time, modality: args.modality || "online", unit: args.unit || "", name: nameRegistered };
           }
           toolActions.push({ tool: "schedule_appointment", result: toolResult });
         }
@@ -662,7 +644,7 @@ serve(async (req) => {
                   niche: args.niche,
                   case_type: args.case_type ?? null,
                   answers: args.answers || {},
-                  dry_run: true, // modo teste — não persiste
+                  dry_run: true,
                 }),
               }
             );
