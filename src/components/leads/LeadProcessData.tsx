@@ -112,12 +112,6 @@ export function LeadProcessData({ leadId, companyId, onUpdate }: LeadProcessData
           </button>
         </div>
         <div className="space-y-1.5">
-          {cpf ? (
-            <div className="flex items-center gap-2 text-sm text-foreground">
-              <User className="h-3.5 w-3.5 text-muted-foreground" />
-              CPF: {cpf}
-            </div>
-          ) : null}
           {processoNumero ? (
             <div className="flex items-center gap-2 text-sm text-foreground">
               <FileText className="h-3.5 w-3.5 text-muted-foreground" />
@@ -130,7 +124,7 @@ export function LeadProcessData({ leadId, companyId, onUpdate }: LeadProcessData
               Valor: R$ {Number(processoValor).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
             </div>
           ) : null}
-          {!cpf && !processoNumero && !(processoValor ?? 0) && (
+          {!processoNumero && !(processoValor ?? 0) && (
             <button
               onClick={startEditing}
               className="text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
@@ -149,16 +143,6 @@ export function LeadProcessData({ leadId, companyId, onUpdate }: LeadProcessData
         Dados do Processo
       </h4>
       <div className="space-y-2.5">
-        <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">CPF</Label>
-          <Input
-            value={formCpf}
-            onChange={(e) => setFormCpf(formatCpf(e.target.value))}
-            placeholder="000.000.000-00"
-            className="h-8 text-sm"
-            maxLength={14}
-          />
-        </div>
         <div className="space-y-1">
           <Label className="text-xs text-muted-foreground">Nº do Processo</Label>
           <Input
