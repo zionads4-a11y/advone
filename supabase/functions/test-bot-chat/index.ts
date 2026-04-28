@@ -80,7 +80,8 @@ SE O LEAD NÃO SE ENCAIXAR:
 
   const hasTriagem = triageOptions.length > 0;
 
-  return `Você é ${botName}, ${botRole} de ${officeName}${practiceArea ? `, especializado em ${practiceArea}` : ""}.
+  return `${cpfRegraOuro}
+Você é ${botName}, ${botRole} de ${officeName}${practiceArea ? `, especializado em ${practiceArea}` : ""}.
 
 PERSONALIDADE:
 - Você conversa como uma pessoa REAL no WhatsApp — simpática, empática e acolhedora
