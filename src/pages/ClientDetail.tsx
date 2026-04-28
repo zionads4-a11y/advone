@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, User, FileText, Briefcase, CalendarClock, Wallet, MessageSquare, StickyNote, Phone, Mail, MapPin } from "lucide-react";
+import { ArrowLeft, User, FileText, Briefcase, CalendarClock, Wallet, MessageSquare, StickyNote, Phone, Mail, MapPin, Bell } from "lucide-react";
 import { ClientPersonalDataForm, ClientData } from "@/components/clients/ClientPersonalDataForm";
 import { ClientGeneratedDocuments } from "@/components/clients/ClientGeneratedDocuments";
 import { ClientUploadedDocuments } from "@/components/clients/ClientUploadedDocuments";
