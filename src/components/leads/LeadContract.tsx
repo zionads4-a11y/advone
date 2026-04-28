@@ -258,6 +258,17 @@ export function LeadContract({ leadId, companyId, leadName, leadPhone, leadEmail
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Generate Document (saves to client folder) */}
+      <GenerateDocumentDialog
+        open={generateDocOpen}
+        onOpenChange={setGenerateDocOpen}
+        lead={{ id: leadId, name: leadName, phone: leadPhone, whatsapp: leadPhone, email: leadEmail }}
+        companyId={companyId}
+        onGenerated={() => {
+          toast.success("Contrato salvo na pasta do cliente!");
+        }}
+      />
     </div>
   );
 }
