@@ -28,7 +28,7 @@ interface Company {
 }
 
 export default function CompanySettings() {
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
   const { companyIds, loading: companiesLoading } = useUserCompanies();
   const [company, setCompany] = useState<Company | null>(null);
   const [name, setName] = useState("");
