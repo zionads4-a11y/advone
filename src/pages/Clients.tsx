@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, FolderOpen, UserCheck } from "lucide-react";
+import { Search, FolderOpen, UserCheck, Bell } from "lucide-react";
 
 interface Client {
   id: string;
