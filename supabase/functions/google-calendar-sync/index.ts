@@ -7,17 +7,10 @@ const corsHeaders = {
 };
 
 async function refreshGoogleToken(supabaseClient: any, integration: any) {
-  console.log("Refreshing Google token...");
   const clientId = Deno.env.get("GOOGLE_CLIENT_ID");
   const clientSecret = Deno.env.get("GOOGLE_CLIENT_SECRET");
-
-  if (!clientId || !clientSecret) {
-    throw new Error("Google credentials not configured");
-  }
-
-  if (!integration.refresh_token) {
-    throw new Error("No refresh token available");
-  }
+  if (!clientId || !clientSecret) throw new Error("Google credentials not configured");
+  if (!integration.refresh_token) throw new Error("No refresh token available");
 
   const response = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
@@ -31,33 +24,16 @@ async function refreshGoogleToken(supabaseClient: any, integration: any) {
   });
 
   const tokens = await response.json();
-  if (tokens.error) {
-    console.error("Error refreshing token:", tokens);
-    throw new Error(`Failed to refresh token: ${tokens.error_description || tokens.error}`);
-  }
+  if (tokens.error) throw new Error(`Failed to refresh token: ${tokens.error_description || tokens.error}`);
 
   const updateData: any = {
     access_token: tokens.access_token,
     expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
     updated_at: new Date().toISOString(),
   };
+  if (tokens.refresh_token) updateData.refresh_token = tokens.refresh_token;
 
-  // Google sometimes returns a new refresh token
-  if (tokens.refresh_token) {
-    updateData.refresh_token = tokens.refresh_token;
-  }
-
-  const { error: updateError } = await supabaseClient
-    .from("user_integrations")
-    .update(updateData)
-    .eq("id", integration.id);
-
-  if (updateError) {
-    console.error("Error updating tokens in DB:", updateError);
-    throw updateError;
-  }
-
-  console.log("Token refreshed successfully");
+  await supabaseClient.from("user_integrations").update(updateData).eq("id", integration.id);
   return tokens.access_token;
 }
 
@@ -72,17 +48,15 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Get user from Authorization header or body (for background sync)
     let user;
     const body = await req.json().catch(() => ({}));
     const authHeader = req.headers.get("Authorization");
-    
+
     if (authHeader) {
       const { data: { user: authUser }, error: userError } = await supabaseClient.auth.getUser(authHeader.replace("Bearer ", ""));
       if (userError || !authUser) throw new Error("Unauthorized");
       user = authUser;
     } else if (body.userId) {
-      // Internal call with userId
       const { data: userData, error: fetchUserError } = await supabaseClient.auth.admin.getUserById(body.userId);
       if (fetchUserError || !userData.user) throw new Error("User not found");
       user = userData.user;
@@ -90,7 +64,6 @@ serve(async (req) => {
       throw new Error("No authorization provided");
     }
 
-    // Get user integration
     const { data: integration, error: integrationError } = await supabaseClient
       .from("user_integrations")
       .select("*")
@@ -98,27 +71,33 @@ serve(async (req) => {
       .eq("provider", "google")
       .single();
 
-    if (integrationError || !integration) {
-      throw new Error("Google integration not found");
-    }
+    if (integrationError || !integration) throw new Error("Google integration not found");
 
     let accessToken = integration.access_token;
-
-    // Check if token is expired (with 5 min buffer)
     if (new Date(integration.expires_at) <= new Date(Date.now() + 5 * 60 * 1000)) {
       accessToken = await refreshGoogleToken(supabaseClient, integration);
     }
 
-    // 1. Fetch reminders from DB to push/update to Google
-    const { data: localReminders, error: localError } = await supabaseClient
+    // Resolve company_id do usuário (necessário para NOT NULL em lead_reminders)
+    const { data: clientCompanies } = await supabaseClient
+      .from("client_companies")
+      .select("company_id")
+      .eq("user_id", user.id)
+      .limit(1);
+    const companyId = clientCompanies?.[0]?.company_id ?? null;
+
+    if (!companyId) {
+      throw new Error("Usuário não está vinculado a nenhuma empresa — não é possível sincronizar.");
+    }
+
+    // 1. Push local -> Google (apenas eventos ainda não enviados)
+    const { data: localReminders } = await supabaseClient
       .from("lead_reminders")
       .select("*")
-      .eq("created_by", user.id);
-
-    if (localError) console.error("Error fetching local reminders:", localError);
+      .eq("created_by", user.id)
+      .is("google_event_id", null);
 
     if (localReminders && localReminders.length > 0) {
-      console.log(`Processing ${localReminders.length} local events for Google sync`);
       for (const reminder of localReminders) {
         try {
           const googleEvent = {
@@ -127,76 +106,69 @@ serve(async (req) => {
             start: { dateTime: reminder.due_at },
             end: { dateTime: reminder.end_at || new Date(new Date(reminder.due_at).getTime() + 60 * 60 * 1000).toISOString() },
           };
-
-          if (!reminder.google_event_id) {
-            // Create new event in Google
-            const pushResponse = await fetch(
-              "https://www.googleapis.com/calendar/v3/calendars/primary/events",
-              {
-                method: "POST",
-                headers: { 
-                  Authorization: `Bearer ${accessToken}`,
-                  "Content-Type": "application/json"
-                },
-                body: JSON.stringify(googleEvent),
-              }
-            );
-
-            if (pushResponse.ok) {
-              const pushedData = await pushResponse.json();
-              await supabaseClient
-                .from("lead_reminders")
-                .update({ google_event_id: pushedData.id })
-                .eq("id", reminder.id);
+          const pushResponse = await fetch(
+            "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+            {
+              method: "POST",
+              headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+              body: JSON.stringify(googleEvent),
             }
-          } else {
-            // Update existing event in Google (optional, but good for bidirectional)
-            // Only update if needed or just skip to prioritize Google -> System
+          );
+          if (pushResponse.ok) {
+            const pushedData = await pushResponse.json();
+            await supabaseClient
+              .from("lead_reminders")
+              .update({ google_event_id: pushedData.id })
+              .eq("id", reminder.id);
           }
         } catch (pushErr) {
-          console.error(`Error processing event ${reminder.id}:`, pushErr);
+          console.error(`Error pushing event ${reminder.id}:`, pushErr);
         }
       }
     }
 
-    // 2. Fetch events from Google Calendar to sync back to System
+    // 2. Pull Google -> local
     const now = new Date();
-    const timeMin = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days ago
-    const timeMax = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString(); // 90 days ahead
+    const timeMin = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const timeMax = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString();
 
-    let eventsResponse = await fetch(
-      `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime`,
-      {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      }
-    );
+    const fetchEvents = async (token: string) =>
+      fetch(
+        `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime&showDeleted=true`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
+    let eventsResponse = await fetchEvents(accessToken);
     if (eventsResponse.status === 401) {
       accessToken = await refreshGoogleToken(supabaseClient, integration);
-      eventsResponse = await fetch(
-        `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime`,
-        {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        }
-      );
+      eventsResponse = await fetchEvents(accessToken);
     }
 
     const eventsData = await eventsResponse.json();
-    if (eventsData.error) {
-      throw new Error(`Google Calendar error: ${eventsData.error.message}`);
-    }
+    if (eventsData.error) throw new Error(`Google Calendar error: ${eventsData.error.message}`);
 
     const events = eventsData.items || [];
-    console.log(`Found ${events.length} events from Google to sync`);
+    console.log(`Found ${events.length} events from Google`);
+
+    const seenGoogleIds: string[] = [];
+    const deletedGoogleIds: string[] = [];
 
     for (const event of events) {
+      // Eventos cancelados/excluídos no Google
+      if (event.status === "cancelled") {
+        if (event.id) deletedGoogleIds.push(event.id);
+        continue;
+      }
+
       const startTime = event.start?.dateTime || event.start?.date;
       if (!startTime) continue;
 
-      // Upsert Google event into local lead_reminders
+      seenGoogleIds.push(event.id);
+
       const { error: upsertError } = await supabaseClient
         .from("lead_reminders")
         .upsert({
+          company_id: companyId,
           google_event_id: event.id,
           title: event.summary || "Sem título",
           description: event.description || null,
@@ -205,16 +177,47 @@ serve(async (req) => {
           completed: false,
           reminder_type: "meeting",
           created_by: user.id,
-        }, {
-          onConflict: "google_event_id"
-        });
+        }, { onConflict: "google_event_id" });
 
-      if (upsertError) {
-        console.error(`Error upserting event ${event.id}:`, upsertError);
+      if (upsertError) console.error(`Error upserting event ${event.id}:`, upsertError);
+    }
+
+    // 3. Apagar no sistema o que foi apagado no Google
+    // (a) eventos com status=cancelled vindos da API
+    if (deletedGoogleIds.length > 0) {
+      const { error: delErr } = await supabaseClient
+        .from("lead_reminders")
+        .delete()
+        .eq("created_by", user.id)
+        .in("google_event_id", deletedGoogleIds);
+      if (delErr) console.error("Error deleting cancelled events:", delErr);
+      else console.log(`Deleted ${deletedGoogleIds.length} cancelled events`);
+    }
+
+    // (b) eventos locais que tinham google_event_id mas sumiram da janela do Google
+    const { data: localWithGoogle } = await supabaseClient
+      .from("lead_reminders")
+      .select("id, google_event_id, due_at")
+      .eq("created_by", user.id)
+      .not("google_event_id", "is", null)
+      .gte("due_at", timeMin)
+      .lte("due_at", timeMax);
+
+    if (localWithGoogle) {
+      const orphanIds = localWithGoogle
+        .filter((r: any) => !seenGoogleIds.includes(r.google_event_id))
+        .map((r: any) => r.id);
+
+      if (orphanIds.length > 0) {
+        const { error: orphanErr } = await supabaseClient
+          .from("lead_reminders")
+          .delete()
+          .in("id", orphanIds);
+        if (orphanErr) console.error("Error deleting orphan events:", orphanErr);
+        else console.log(`Deleted ${orphanIds.length} orphan events removed from Google`);
       }
     }
 
-    // 3. Update last sync time
     await supabaseClient
       .from("user_integrations")
       .update({ last_google_sync: new Date().toISOString() })
