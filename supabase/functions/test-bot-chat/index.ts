@@ -139,7 +139,7 @@ Turno 3+: Siga o script de qualificação — UMA pergunta por turno
 
 🚫 REGRA ABSOLUTA: NUNCA peça o CPF ou RG. Peça apenas o NOME COMPLETO no final, após o agendamento ser aceito. Se o cliente perguntar se precisa de CPF, diga que não é necessário agora.
 
-📆 DATA E HORA ATUAL: Hoje é ${new Date(getNowBrasilia()).toLocaleDateString("pt-BR", { weekday: "long" })}, ${getTodayBrasilia()} (${String(getNowBrasilia().getHours()).padStart(2,"0")}:${String(getNowBrasilia().getMinutes()).padStart(2,"0")} horário de Brasília). USE ESTA DATA COMO REFERÊNCIA.
+📆 DATA E HORA ATUAL: Hoje é ${new Date(getNowBrasilia()).toLocaleDateString("pt-BR", { weekday: "long" })}, ${getTodayBrasilia()} (${String(getNowBrasilia().getHours()).padStart(2,"0")}:${String(getNowBrasilia().getMinutes()).padStart(2,"0")} horário de Brasília). O ANO ATUAL É ${getNowBrasilia().getFullYear()}. NUNCA use anos passados ao agendar. Sempre OFEREÇA O PRIMEIRO HORÁRIO LIVRE retornado por check_availability — não invente horários. Se o lead não disser data, omita "date" em check_availability (o sistema usa o próximo dia útil).
 
 ⏰ HORÁRIO DE FUNCIONAMENTO (REGRA OBRIGATÓRIA):
 - Agendamentos SOMENTE entre 08:00 e 17:00 (horário de Brasília)
@@ -339,6 +339,23 @@ function getNextAvailableDays(count: number, includeToday: boolean = true): stri
     d = new Date(d.getTime() + 86400000);
   }
   return days;
+}
+
+function sanitizeDate(rawDate: string | undefined | null): string {
+  const fallback = getNextAvailableDays(1, false)[0];
+  if (!rawDate) return fallback;
+  let s = String(rawDate).trim();
+  const dmy = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (dmy) s = `${dmy[3]}-${dmy[2]}-${dmy[1]}`;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return fallback;
+  const [y, m, d] = s.split("-").map(Number);
+  const parsed = new Date(y, m - 1, d);
+  if (isNaN(parsed.getTime())) return fallback;
+  const nowBR = getNowBrasilia();
+  const todayMid = new Date(nowBR.getFullYear(), nowBR.getMonth(), nowBR.getDate()).getTime();
+  const oneYearAhead = todayMid + 365 * 86400000;
+  if (parsed.getTime() < todayMid || parsed.getTime() > oneYearAhead) return fallback;
+  return s;
 }
 
 function splitIntoNaturalMessages(text: string): string[] {
@@ -545,7 +562,7 @@ serve(async (req) => {
         }
 
         if (fnName === "check_availability") {
-          const dateToCheck = args.date || getNextAvailableDays(1)[0];
+          const dateToCheck = sanitizeDate(args.date);
           const availability = await getAvailableSlots(adminClient, company_id, dateToCheck);
           toolResult = {
             date: availability.date,
@@ -561,7 +578,7 @@ serve(async (req) => {
             toolResult = { success: false, error: "NAME_REQUIRED", message: "[TESTE] Bloqueado: registre o nome completo do cliente primeiro via register_client_name." };
           } else {
             reply = args.message_to_lead || reply;
-            toolResult = { success: true, message: "[TESTE] Agendamento simulado com sucesso", date: args.date, time: args.time, modality: args.modality || "online", unit: args.unit || "", cpf: cpfRegistered };
+            toolResult = { success: true, message: "[TESTE] Agendamento simulado com sucesso", date: sanitizeDate(args.date), time: args.time, modality: args.modality || "online", unit: args.unit || "", cpf: cpfRegistered };
           }
           toolActions.push({ tool: "schedule_appointment", result: toolResult });
         }

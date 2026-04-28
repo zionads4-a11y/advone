@@ -129,7 +129,7 @@ IDENTIDADE E TOM
 - Seu papel não é resolver tudo no chat; seu papel é qualificar, gerar confiança e conduzir para o próximo passo
 - ${toneInstructions}
 
-📅 HOJE: ${todayDayName}, ${todayDMY} (${String(nowBR.getHours()).padStart(2, "0")}:${String(nowBR.getMinutes()).padStart(2, "0")} BRT).
+📅 HOJE: ${todayDayName}, ${todayDMY} (${String(nowBR.getHours()).padStart(2, "0")}:${String(nowBR.getMinutes()).padStart(2, "0")} BRT). O ANO ATUAL É ${nowBR.getFullYear()}. NUNCA use anos passados (ex: 2023, 2024, 2025) ao agendar — sempre use ${nowBR.getFullYear()} ou o próximo se já virou o ano. Se o lead não disser data, NÃO chute: passe apenas o turno para check_availability omitindo o campo "date" (o sistema usa o próximo dia útil automaticamente). Sempre OFEREÇA O PRIMEIRO HORÁRIO LIVRE retornado por check_availability — não invente horários.
 ${leadNameInfo}
 
 ═══════════════════════════════════════
@@ -427,6 +427,28 @@ function getNextAvailableDays(count: number, includeToday: boolean = true): stri
     d = new Date(d.getTime() + 86400000);
   }
   return days;
+}
+
+/**
+ * Sanitiza data passada pela IA: se vier no passado, num ano errado, ou inválida,
+ * substitui pelo próximo dia útil. Aceita YYYY-MM-DD ou DD/MM/YYYY.
+ */
+function sanitizeDate(rawDate: string | undefined | null): string {
+  const fallback = getNextAvailableDays(1, false)[0];
+  if (!rawDate) return fallback;
+  let s = String(rawDate).trim();
+  const dmy = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (dmy) s = `${dmy[3]}-${dmy[2]}-${dmy[1]}`;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return fallback;
+  const [y, m, d] = s.split("-").map(Number);
+  const parsed = new Date(y, m - 1, d);
+  if (isNaN(parsed.getTime())) return fallback;
+  const nowBR = getNowBrasilia();
+  const todayMid = new Date(nowBR.getFullYear(), nowBR.getMonth(), nowBR.getDate()).getTime();
+  const oneYearAhead = todayMid + 365 * 86400000;
+  const parsedMid = parsed.getTime();
+  if (parsedMid < todayMid || parsedMid > oneYearAhead) return fallback;
+  return s;
 }
 
 // ====== VALIDATORS ======
@@ -818,7 +840,7 @@ Antes de responder:
 
         if (fnName === "check_availability") {
           hasCheckAvailability = true;
-          const dateToCheck = args.date || getNextAvailableDays(1)[0];
+          const dateToCheck = sanitizeDate(args.date);
           const period = String(args.period || "qualquer").toLowerCase();
           const availability = await getAvailableSlots(supabase, companyId, dateToCheck);
 
@@ -928,7 +950,7 @@ Antes de responder:
           replyText = args.message_to_lead || "";
 
           if (leadId) {
-            const appointmentDate = args.date || getNextAvailableDays(1)[0];
+            const appointmentDate = sanitizeDate(args.date);
             const appointmentTime = args.time || "10:00";
             const dueAt = `${appointmentDate}T${appointmentTime}:00-03:00`;
             let modality = args.modality || "online";
