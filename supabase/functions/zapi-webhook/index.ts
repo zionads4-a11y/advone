@@ -450,7 +450,7 @@ function sanitizeDate(rawDate: string | undefined | null, timezone: string = "Am
   const [y, m, d] = s.split("-").map(Number);
   const parsed = new Date(y, m - 1, d);
   if (isNaN(parsed.getTime())) return fallback;
-  const nowBR = getNowBrasilia();
+  const nowBR = getNowBrasilia(timezone);
   const todayMid = new Date(nowBR.getFullYear(), nowBR.getMonth(), nowBR.getDate()).getTime();
   const oneYearAhead = todayMid + 365 * 86400000;
   const parsedMid = parsed.getTime();
