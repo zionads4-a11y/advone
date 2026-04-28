@@ -445,7 +445,7 @@ serve(async (req) => {
         type: "function",
         function: {
           name: "check_availability",
-          description: "Verifica horários disponíveis. Só use APÓS register_client_cpf.",
+          description: "Verifica horários disponíveis.",
           parameters: {
             type: "object",
             properties: {
