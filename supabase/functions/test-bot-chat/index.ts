@@ -517,22 +517,16 @@ serve(async (req) => {
 
         let toolResult: any = {};
 
-        if (fnName === "register_client_cpf") {
-          const rawCpf = String(args.cpf || "").replace(/\D/g, "");
+        if (fnName === "register_client_name") {
           const fullName = String(args.full_name || "").trim();
-          const cpfOk = isValidCPF(rawCpf);
           const nameOk = isValidFullName(fullName);
-          if (!cpfOk && !nameOk) {
-            toolResult = { success: false, error: "CPF e nome inválidos. CPF precisa ter 11 dígitos válidos e nome completo precisa ter ≥3 palavras." };
-          } else if (!cpfOk) {
-            toolResult = { success: false, error: "CPF inválido (dígitos não conferem). Peça novamente." };
-          } else if (!nameOk) {
+          if (!nameOk) {
             toolResult = { success: false, error: "Nome incompleto. Peça nome COMPLETO com sobrenomes (≥3 palavras)." };
           } else {
-            cpfRegistered = rawCpf;
-            toolResult = { success: true, cpf_registered: rawCpf, full_name: fullName, message: "[TESTE] CPF e nome completo registrados. Já pode agendar." };
+            cpfRegistered = "NAME_REGISTERED"; // Reusing the variable to track name instead of CPF
+            toolResult = { success: true, full_name: fullName, message: "[TESTE] Nome completo registrado. Já pode agendar." };
           }
-          toolActions.push({ tool: "register_client_cpf", result: toolResult });
+          toolActions.push({ tool: "register_client_name", result: toolResult });
         }
 
         if (fnName === "check_availability") {
