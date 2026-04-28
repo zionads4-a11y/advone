@@ -81,6 +81,10 @@ export function CompanyEditDialog({
   const [businessHours, setBusinessHours] = useState<BusinessHours>(getDefaultBusinessHours());
   const [partnershipType, setPartnershipType] = useState<PartnershipType>("mensalidade_zionads");
   const [serviceMode, setServiceMode] = useState<ServiceMode>("full");
+  const [botName, setBotName] = useState("");
+  const [botRoleDescription, setBotRoleDescription] = useState("");
+  const [googleClientId, setGoogleClientId] = useState("");
+  const [googleClientSecret, setGoogleClientSecret] = useState("");
 
   useEffect(() => {
     if (company) {
@@ -89,6 +93,10 @@ export function CompanyEditDialog({
       setBusinessHours(parseBusinessHours(company.business_hours));
       setPartnershipType((company.partnership_type as PartnershipType) || "mensalidade_zionads");
       setServiceMode((company.service_mode as ServiceMode) || "full");
+      setBotName(company.bot_name || "");
+      setBotRoleDescription(company.bot_role_description || "");
+      setGoogleClientId(company.google_client_id || "");
+      setGoogleClientSecret(company.google_client_secret || "");
     }
   }, [company]);
 
@@ -109,6 +117,10 @@ export function CompanyEditDialog({
               business_hours: businessHours,
               partnership_type: partnershipType,
               service_mode: serviceMode,
+              bot_name: botName,
+              bot_role_description: botRoleDescription,
+              google_client_id: googleClientId || null,
+              google_client_secret: googleClientSecret || null,
             });
           }}
           className="space-y-4"
