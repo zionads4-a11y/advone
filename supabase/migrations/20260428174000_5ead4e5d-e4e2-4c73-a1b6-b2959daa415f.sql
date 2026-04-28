@@ -1,0 +1,2 @@
+INSERT INTO public.subscriptions (company_id, user_id, plan, status, value, asaas_customer_id, asaas_subscription_id)
+VALUES ('30991d3a-22fa-4035-9546-ed3163c041e5', 'd70f6ee5-1020-453c-9bb9-7257181e6e14', 'cortesia', 'active', 0, 'CORTESIA_GISELE', 'CORTESIA_GISELE');
