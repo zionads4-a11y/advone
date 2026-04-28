@@ -460,7 +460,7 @@ serve(async (req) => {
         type: "function",
         function: {
           name: "schedule_appointment",
-          description: "Agenda uma consulta. Use SOMENTE APÓS register_client_cpf + lead escolher horário.",
+          description: "Agenda uma consulta. Use SOMENTE APÓS register_client_name + lead escolher horário.",
           parameters: {
             type: "object",
             properties: {
