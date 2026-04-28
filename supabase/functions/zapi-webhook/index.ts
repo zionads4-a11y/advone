@@ -16,6 +16,7 @@ function buildSDRPrompt(
   offices: any[] = [],
   flowsBlock: string = "",
   triageBlock: string = "",
+  timezone: string = "America/Sao_Paulo",
 ): string {
   const company = config.companies;
   const officeName = config.office_name || company?.name || "o escritório";
@@ -92,7 +93,7 @@ function buildSDRPrompt(
     ? "Use linguagem leve e amigável com emojis 😊"
     : "Seja educada, próxima e acolhedora.";
 
-  const nowBR = getNowBrasilia();
+  const nowBR = getNowBrasilia(timezone);
   const dayNames = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
   const todayDayName = dayNames[nowBR.getDay()];
   const todayDMY = `${String(nowBR.getDate()).padStart(2, "0")}/${String(nowBR.getMonth() + 1).padStart(2, "0")}/${nowBR.getFullYear()}`;
@@ -133,7 +134,7 @@ IDENTIDADE E TOM
 - Seu papel não é resolver tudo no chat; seu papel é qualificar, gerar confiança e conduzir para o próximo passo
 - ${toneInstructions}
 
-📅 HOJE: ${todayDayName}, ${todayDMY} (${String(nowBR.getHours()).padStart(2, "0")}:${String(nowBR.getMinutes()).padStart(2, "0")} BRT). O ANO ATUAL É ${nowBR.getFullYear()}. NUNCA use anos passados (ex: 2023, 2024, 2025) ao agendar — sempre use ${nowBR.getFullYear()} ou o próximo se já virou o ano. Se o lead não disser data, NÃO chute: passe apenas o turno para check_availability omitting the campo "date" (o sistema usa o próximo dia útil automaticamente). Sempre OFEREÇA O PRIMEIRO HORÁRIO LIVRE retornado por check_availability — não invente horários.
+📅 HOJE: ${todayDayName}, ${todayDMY} (${String(nowBR.getHours()).padStart(2, "0")}:${String(nowBR.getMinutes()).padStart(2, "0")} ${timezone}). O ANO ATUAL É ${nowBR.getFullYear()}. NUNCA use anos passados (ex: 2023, 2024, 2025) ao agendar — sempre use ${nowBR.getFullYear()} ou o próximo se já virou o ano. Se o lead não disser data, NÃO chute: passe apenas o turno para check_availability omitting the campo "date" (o sistema usa o próximo dia útil automaticamente). Sempre OFEREÇA O PRIMEIRO HORÁRIO LIVRE retornado por check_availability — não invente horários.
 ${leadNameInfo}
 
 ═══════════════════════════════════════
@@ -294,9 +295,9 @@ Responda SEMPRE em português do Brasil.`;
 }
 
 // ====== UTILITY FUNCTIONS ======
-function getNowBrasilia(): Date {
+function getNowBrasilia(timeZone: string = "America/Sao_Paulo"): Date {
   const fmt = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Sao_Paulo",
+    timeZone: timeZone,
     year: "numeric", month: "2-digit", day: "2-digit",
     hour: "2-digit", minute: "2-digit", second: "2-digit",
     hour12: false,
@@ -313,12 +314,12 @@ function getNowBrasilia(): Date {
   return new Date(y, mo - 1, d, h, mi, s);
 }
 
-function getTodayBrasilia(): string {
-  const b = getNowBrasilia();
+function getTodayBrasilia(timeZone: string = "America/Sao_Paulo"): string {
+  const b = getNowBrasilia(timeZone);
   return `${b.getFullYear()}-${String(b.getMonth() + 1).padStart(2, "0")}-${String(b.getDate()).padStart(2, "0")}`;
 }
 
-async function getAvailableSlots(supabase: any, companyId: string, dateStr: string): Promise<{ date: string; dayName: string; slots: string[] }> {
+async function getAvailableSlots(supabase: any, companyId: string, dateStr: string, timezone: string = "America/Sao_Paulo"): Promise<{ date: string; dayName: string; slots: string[] }> {
   const dayNames = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
   const dayKeys = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
 
@@ -383,9 +384,9 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
     return mins >= 480 && mins < 1020;
   });
 
-  const todayBR = getTodayBrasilia();
+  const todayBR = getTodayBrasilia(timezone);
   if (dateStr === todayBR) {
-    const nowBR = getNowBrasilia();
+    const nowBR = getNowBrasilia(timezone);
     const minMinutes = (nowBR.getHours() * 60 + nowBR.getMinutes()) + 120;
     slots = slots.filter(s => {
       const [h, m] = s.split(":").map(Number);
@@ -405,7 +406,7 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
   const bookedTimes = new Set(
     (existing || []).map((r: any) => {
       const fmt = new Intl.DateTimeFormat("en-GB", {
-        timeZone: "America/Sao_Paulo",
+        timeZone: timezone,
         hour: "2-digit", minute: "2-digit", hour12: false,
       });
       return fmt.format(new Date(r.due_at));
@@ -421,9 +422,9 @@ function formatDateDMY(dateStr: string): string {
   return dateStr;
 }
 
-function getNextAvailableDays(count: number, includeToday: boolean = true): string[] {
+function getNextAvailableDays(count: number, includeToday: boolean = true, timezone: string = "America/Sao_Paulo"): string[] {
   const days: string[] = [];
-  const nowBR = getNowBrasilia();
+  const nowBR = getNowBrasilia(timezone);
   let d = includeToday ? new Date(nowBR) : new Date(nowBR.getTime() + 86400000);
   while (days.length < count) {
     const dow = d.getDay();
@@ -439,8 +440,8 @@ function getNextAvailableDays(count: number, includeToday: boolean = true): stri
  * Sanitiza data passada pela IA: se vier no passado, num ano errado, ou inválida,
  * substitui pelo próximo dia útil. Aceita YYYY-MM-DD ou DD/MM/YYYY.
  */
-function sanitizeDate(rawDate: string | undefined | null): string {
-  const fallback = getNextAvailableDays(1, false)[0];
+function sanitizeDate(rawDate: string | undefined | null, timezone: string = "America/Sao_Paulo"): string {
+  const fallback = getNextAvailableDays(1, false, timezone)[0];
   if (!rawDate) return fallback;
   let s = String(rawDate).trim();
   const dmy = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
@@ -449,7 +450,7 @@ function sanitizeDate(rawDate: string | undefined | null): string {
   const [y, m, d] = s.split("-").map(Number);
   const parsed = new Date(y, m - 1, d);
   if (isNaN(parsed.getTime())) return fallback;
-  const nowBR = getNowBrasilia();
+  const nowBR = getNowBrasilia(timezone);
   const todayMid = new Date(nowBR.getFullYear(), nowBR.getMonth(), nowBR.getDate()).getTime();
   const oneYearAhead = todayMid + 365 * 86400000;
   const parsedMid = parsed.getTime();
@@ -718,6 +719,7 @@ async function handleAgentPhase(
   cleanPhone?: string,
   flowsBlock?: string,
   triageBlock?: string,
+  timezone: string = "America/Sao_Paulo",
 ): Promise<string | null> {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!LOVABLE_API_KEY) return null;
@@ -752,7 +754,7 @@ async function handleAgentPhase(
     tools = contractCloserTools;
   } else {
     // SDR phase (default)
-    systemPrompt = buildSDRPrompt(config, leadName, companyOffices || [], flowsBlock || "", triageBlock || "");
+    systemPrompt = buildSDRPrompt(config, leadName, companyOffices || [], flowsBlock || "", triageBlock || "", timezone);
     tools = sdrTools;
     if (config?.debug_mode) {
       console.log("[SDR PROMPT DEBUG]", JSON.stringify({
@@ -846,9 +848,9 @@ Antes de responder:
 
         if (fnName === "check_availability") {
           hasCheckAvailability = true;
-          const dateToCheck = sanitizeDate(args.date);
+          const dateToCheck = sanitizeDate(args.date, timezone);
           const period = String(args.period || "qualquer").toLowerCase();
-          const availability = await getAvailableSlots(supabase, companyId, dateToCheck);
+          const availability = await getAvailableSlots(supabase, companyId, dateToCheck, timezone);
 
           const filterByPeriod = (slots: string[]) => {
             if (period === "manha") return slots.filter(s => parseInt(s.split(":")[0], 10) < 12);
@@ -860,11 +862,11 @@ Antes de responder:
           if (filteredSlots.length === 0 && availability.slots.length > 0) filteredSlots = availability.slots;
 
           if (filteredSlots.length === 0) {
-            const nextDays = getNextAvailableDays(3);
+            const nextDays = getNextAvailableDays(3, true, timezone);
             let firstAlt: { date: string; dayName: string; slot: string } | null = null;
             for (const nd of nextDays) {
               if (nd === dateToCheck) continue;
-              const alt = await getAvailableSlots(supabase, companyId, nd);
+              const alt = await getAvailableSlots(supabase, companyId, nd, timezone);
               const altFiltered = filterByPeriod(alt.slots);
               const finalAlt = altFiltered.length > 0 ? altFiltered : alt.slots;
               if (finalAlt.length > 0) {
@@ -956,7 +958,7 @@ Antes de responder:
           replyText = args.message_to_lead || "";
 
           if (leadId) {
-            const appointmentDate = sanitizeDate(args.date);
+            const appointmentDate = sanitizeDate(args.date, timezone);
             const appointmentTime = args.time || "10:00";
             const dueAt = `${appointmentDate}T${appointmentTime}:00-03:00`;
             let modality = args.modality || "online";
@@ -1341,7 +1343,7 @@ serve(async (req) => {
         id, company_id, zapi_instance_id, zapi_token, ai_enabled, ai_prompt, ai_auto_reply, 
         office_name, practice_area, communication_tone, scheduling_link, consultation_duration, 
         target_audience, alert_whatsapp, triage_options, debug_mode,
-        companies (name, bot_name, bot_role_description)
+        companies (name, bot_name, bot_role_description, timezone, decision_rules)
       `)
       .eq("company_id", companyId)
       .maybeSingle();
@@ -1665,6 +1667,7 @@ serve(async (req) => {
             effectivePhase, config, agentConfigs, history,
             companyId, leadId, supabase, currentLeadName, cleanPhone,
             flowsBlock, triageBlock,
+            (config.companies as any)?.timezone || "America/Sao_Paulo"
           );
 
           const SERVER_URL = "https://ziondigital.uazapi.com";
