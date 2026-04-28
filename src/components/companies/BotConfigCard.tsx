@@ -379,24 +379,39 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
         }}
       />
 
-      {/* Prompt Geral da Assistente (SDR) - antes do salvar para revisão final */}
+      {/* Bloco de Regras Claras (Prompt System) */}
       <Card className="border-border/50">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
-            <Sparkles className="h-5 w-5 text-primary" />
-            Prompt Geral da Assistente (SDR)
+            <ShieldCheck className="h-5 w-5 text-primary" />
+            Regras de Ouro e Instruções de Comportamento
           </CardTitle>
           <p className="text-xs text-muted-foreground">
-            Este é o prompt final que a IA utiliza. Ele é gerado pelos fluxos acima, mas você pode revisar e personalizá-lo manualmente antes de salvar.
+            Defina aqui as regras invioláveis que a IA deve seguir (ex: não pedir CPF, oferecer horários específicos). Estas regras têm prioridade sobre os fluxos.
           </p>
         </CardHeader>
         <CardContent>
           <Textarea
             value={aiPrompt}
             onChange={(e) => setAiPrompt(e.target.value)}
-            placeholder="O prompt será gerado aqui..."
-            className="min-h-[300px] text-sm font-mono bg-muted/20"
+            placeholder="Ex: NUNCA peça o CPF do cliente. Sempre ofereça dois horários: um de manhã e um de tarde..."
+            className="min-h-[250px] text-sm font-mono bg-muted/20"
           />
+          <div className="mt-4 flex items-center justify-between p-3 bg-primary/5 rounded-lg border border-primary/20">
+            <div className="flex items-center gap-2">
+              <Save className="h-4 w-4 text-primary" />
+              <span className="text-xs font-medium">Salvar alterações do prompt agora?</span>
+            </div>
+            <Button 
+              size="sm" 
+              onClick={handleSave} 
+              disabled={saving}
+              className="h-8 text-[10px]"
+            >
+              {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-3 w-3 mr-1" />}
+              Salvar Regras
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
