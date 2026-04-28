@@ -328,6 +328,52 @@ export default function Profile() {
         </CardContent>
       </Card>
 
+      {/* Dados profissionais para contratos (override individual) */}
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 font-display text-lg">
+            <Scale className="h-5 w-5 text-primary" />
+            Dados profissionais para contratos
+          </CardTitle>
+          <CardDescription>
+            Esses dados serão usados nas procurações e contratos que você gerar.
+            Quando preenchidos aqui, prevalecem sobre os do escritório.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="lawyerName">Nome do(a) advogado(a)</Label>
+              <Input id="lawyerName" value={lawyerName} onChange={(e) => setLawyerName(e.target.value)} placeholder="Ex: Dra. Gisele Torres" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lawyerCpf">CPF</Label>
+              <Input id="lawyerCpf" value={lawyerCpf} onChange={(e) => setLawyerCpf(e.target.value)} placeholder="000.000.000-00" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lawyerOab">Número da OAB</Label>
+              <Input id="lawyerOab" value={lawyerOab} onChange={(e) => setLawyerOab(e.target.value)} placeholder="Ex: 123.456" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lawyerOabUf">UF da OAB</Label>
+              <Input id="lawyerOabUf" maxLength={2} value={lawyerOabUf} onChange={(e) => setLawyerOabUf(e.target.value.toUpperCase())} placeholder="SP" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lawyerNationality">Nacionalidade</Label>
+              <Input id="lawyerNationality" value={lawyerNationality} onChange={(e) => setLawyerNationality(e.target.value)} placeholder="brasileiro(a)" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lawyerMaritalStatus">Estado civil</Label>
+              <Input id="lawyerMaritalStatus" value={lawyerMaritalStatus} onChange={(e) => setLawyerMaritalStatus(e.target.value)} placeholder="Ex: Casada" />
+            </div>
+          </div>
+          <Button onClick={handleSaveLawyer} disabled={savingLawyer} className="gradient-primary text-primary-foreground">
+            {savingLawyer ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            Salvar dados profissionais
+          </Button>
+        </CardContent>
+      </Card>
+
       {/* Change Password */}
       <Card className="glass-card">
         <CardHeader>
