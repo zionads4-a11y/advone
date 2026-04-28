@@ -12,13 +12,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import { FileText, Plus, Trash2, Edit, Sparkles, Copy } from "lucide-react";
+import { FileText, Plus, Trash2, Edit, Sparkles, Copy, Printer } from "lucide-react";
 import {
   ALL_VARIABLES,
   DOCUMENT_CATEGORIES,
   SAMPLE_TEMPLATES,
   extractPlaceholders,
 } from "@/lib/documentTemplates";
+import { QuickGenerateDocDialog } from "@/components/clients/QuickGenerateDocDialog";
 
 interface Template {
   id: string;
