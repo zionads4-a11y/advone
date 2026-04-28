@@ -718,8 +718,22 @@ export type Database = {
           google_client_id: string | null
           google_client_secret: string | null
           id: string
+          lawyer_cpf: string | null
+          lawyer_email: string | null
+          lawyer_marital_status: string | null
+          lawyer_name: string | null
+          lawyer_nationality: string | null
+          lawyer_oab: string | null
+          lawyer_oab_uf: string | null
+          lawyer_phone: string | null
           logo_url: string | null
           name: string
+          office_address: string | null
+          office_cep: string | null
+          office_city: string | null
+          office_cnpj: string | null
+          office_legal_name: string | null
+          office_state: string | null
           partnership_type: Database["public"]["Enums"]["partnership_type"]
           practice_specialty: string
           service_mode: string
@@ -740,8 +754,22 @@ export type Database = {
           google_client_id?: string | null
           google_client_secret?: string | null
           id?: string
+          lawyer_cpf?: string | null
+          lawyer_email?: string | null
+          lawyer_marital_status?: string | null
+          lawyer_name?: string | null
+          lawyer_nationality?: string | null
+          lawyer_oab?: string | null
+          lawyer_oab_uf?: string | null
+          lawyer_phone?: string | null
           logo_url?: string | null
           name: string
+          office_address?: string | null
+          office_cep?: string | null
+          office_city?: string | null
+          office_cnpj?: string | null
+          office_legal_name?: string | null
+          office_state?: string | null
           partnership_type?: Database["public"]["Enums"]["partnership_type"]
           practice_specialty?: string
           service_mode?: string
@@ -762,8 +790,22 @@ export type Database = {
           google_client_id?: string | null
           google_client_secret?: string | null
           id?: string
+          lawyer_cpf?: string | null
+          lawyer_email?: string | null
+          lawyer_marital_status?: string | null
+          lawyer_name?: string | null
+          lawyer_nationality?: string | null
+          lawyer_oab?: string | null
+          lawyer_oab_uf?: string | null
+          lawyer_phone?: string | null
           logo_url?: string | null
           name?: string
+          office_address?: string | null
+          office_cep?: string | null
+          office_city?: string | null
+          office_cnpj?: string | null
+          office_legal_name?: string | null
+          office_state?: string | null
           partnership_type?: Database["public"]["Enums"]["partnership_type"]
           practice_specialty?: string
           service_mode?: string
@@ -2482,6 +2524,12 @@ export type Database = {
           id: string
           job_title: string | null
           last_login: string | null
+          lawyer_cpf: string | null
+          lawyer_marital_status: string | null
+          lawyer_name: string | null
+          lawyer_nationality: string | null
+          lawyer_oab: string | null
+          lawyer_oab_uf: string | null
           phone: string | null
           updated_at: string
           user_id: string
@@ -2494,6 +2542,12 @@ export type Database = {
           id?: string
           job_title?: string | null
           last_login?: string | null
+          lawyer_cpf?: string | null
+          lawyer_marital_status?: string | null
+          lawyer_name?: string | null
+          lawyer_nationality?: string | null
+          lawyer_oab?: string | null
+          lawyer_oab_uf?: string | null
           phone?: string | null
           updated_at?: string
           user_id: string
@@ -2506,6 +2560,12 @@ export type Database = {
           id?: string
           job_title?: string | null
           last_login?: string | null
+          lawyer_cpf?: string | null
+          lawyer_marital_status?: string | null
+          lawyer_name?: string | null
+          lawyer_nationality?: string | null
+          lawyer_oab?: string | null
+          lawyer_oab_uf?: string | null
           phone?: string | null
           updated_at?: string
           user_id?: string
