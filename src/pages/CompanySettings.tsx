@@ -62,6 +62,8 @@ export default function CompanySettings() {
       setGoogleClientId(companyResult.data.google_client_id || "");
       setGoogleClientSecret(companyResult.data.google_client_secret || "");
       setBusinessHours(parseBusinessHours(companyResult.data.business_hours));
+      setBotName(companyResult.data.bot_name || "Laura");
+      setBotRoleDescription(companyResult.data.bot_role_description || "atendente virtual");
     }
     setHasMonitoring(!!planResult.data?.is_active);
     setLoading(false);
