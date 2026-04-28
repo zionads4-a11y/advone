@@ -399,7 +399,10 @@ serve(async (req) => {
 
     const { data: config } = await adminClient
       .from("whatsapp_configs")
-      .select("*")
+      .select(`
+        *,
+        companies (name, bot_name, bot_role_description)
+      `)
       .eq("company_id", company_id)
       .maybeSingle();
 
