@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { BILLING_MODELS } from "@/lib/billingModels";
 import { Plus } from "lucide-react";
 
 interface CompanyFormDialogProps {
