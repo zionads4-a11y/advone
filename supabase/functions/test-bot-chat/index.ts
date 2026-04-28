@@ -341,7 +341,22 @@ function getNextAvailableDays(count: number, includeToday: boolean = true): stri
   return days;
 }
 
-function splitIntoNaturalMessages(text: string): string[] {
+function sanitizeDate(rawDate: string | undefined | null): string {
+  const fallback = getNextAvailableDays(1, false)[0];
+  if (!rawDate) return fallback;
+  let s = String(rawDate).trim();
+  const dmy = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (dmy) s = `${dmy[3]}-${dmy[2]}-${dmy[1]}`;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return fallback;
+  const [y, m, d] = s.split("-").map(Number);
+  const parsed = new Date(y, m - 1, d);
+  if (isNaN(parsed.getTime())) return fallback;
+  const nowBR = getNowBrasilia();
+  const todayMid = new Date(nowBR.getFullYear(), nowBR.getMonth(), nowBR.getDate()).getTime();
+  const oneYearAhead = todayMid + 365 * 86400000;
+  if (parsed.getTime() < todayMid || parsed.getTime() > oneYearAhead) return fallback;
+  return s;
+}
   if (!text || text.length <= 120) return [text];
   const paragraphs = text.split(/\n\n+/).map((p) => p.trim()).filter(Boolean);
   const messages: string[] = [];
