@@ -591,6 +591,8 @@ export type Database = {
       }
       companies: {
         Row: {
+          bot_name: string | null
+          bot_role_description: string | null
           business_hours: Json | null
           created_at: string
           created_by: string
@@ -607,6 +609,8 @@ export type Database = {
           whatsapp: string | null
         }
         Insert: {
+          bot_name?: string | null
+          bot_role_description?: string | null
           business_hours?: Json | null
           created_at?: string
           created_by: string
@@ -623,6 +627,8 @@ export type Database = {
           whatsapp?: string | null
         }
         Update: {
+          bot_name?: string | null
+          bot_role_description?: string | null
           business_hours?: Json | null
           created_at?: string
           created_by?: string
