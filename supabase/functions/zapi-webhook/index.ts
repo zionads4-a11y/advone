@@ -17,10 +17,13 @@ function buildSDRPrompt(
   flowsBlock: string = "",
   triageBlock: string = "",
 ): string {
-  const officeName = config.office_name || "o escritório";
+  const company = config.companies;
+  const officeName = config.office_name || company?.name || "o escritório";
   const practiceArea = config.practice_area || "";
   const tone = config.communication_tone || "moderado";
   const customPrompt = (config.ai_prompt || "").trim();
+  const botName = company?.bot_name || "Laura";
+  const botRole = company?.bot_role_description || "atendente virtual";
 
   // Se o prompt customizado começar com "Você é", assumimos que é o prompt completo
   // gerado pelo construtor dinâmico — mas ainda injetamos fluxos e triage ao final.
@@ -106,14 +109,14 @@ function buildSDRPrompt(
     ? `\n\n═══════════════════════════════════════\nINSTRUÇÕES ADICIONAIS DESTE ESCRITÓRIO\n═══════════════════════════════════════\n${customPrompt}\n`
     : "";
 
-  return `Você é Laura, atendente virtual da equipe ${officeName}${practiceArea ? `, especializada no atendimento inicial de casos ${practiceArea}` : ""}.
+  return `Você é ${botName}, ${botRole} da equipe ${officeName}${practiceArea ? `, especializada no atendimento inicial de casos ${practiceArea}` : ""}.
 
 ═══════════════════════════════════════
 IDENTIDADE E TOM
 ═══════════════════════════════════════
-- Nome: Laura
+- Nome: ${botName}
 - Nunca diga que é IA ou robô
-- Papel: SDR humanizada, acolhedora, paciente e objetiva
+- Papel: ${botRole} humanizada, acolhedora, paciente e objetiva
 - Linguagem: simples, próxima, sem juridiquês, frases curtas
 - Emojis leves: 🙂 😊
 - Regra de ouro: UMA pergunta por vez
@@ -133,7 +136,7 @@ Sua missão é entender o caso e AGENDAR uma conversa. Você deve perguntar o NO
 📋 FLUXO OBRIGATÓRIO (NUNCA PEÇA CPF)
 ═══════════════════════════════════════
 PASSO 1 — Saudação:
-"Oi! Tudo bem? 😊 Eu sou a Laura, aqui da equipe ${officeName}. Pode ficar tranquilo(a), me conta o que aconteceu que eu vou te ajudar a entender melhor o seu caso 🙂"
+"Oi! Tudo bem? 😊 Eu sou a ${botName}, aqui da equipe ${officeName}. Pode ficar tranquilo(a), me conta o que aconteceu que eu vou te ajudar a entender melhor o seu caso 🙂"
 
 PASSO 2 — Após a primeira resposta, peça o NOME:
 "Entendi... Antes de continuar, como posso te chamar?" (Pule se já souber o nome).
@@ -1311,7 +1314,12 @@ serve(async (req) => {
 
     const { data: config } = await supabase
       .from("whatsapp_configs")
-      .select("id, company_id, zapi_instance_id, zapi_token, ai_enabled, ai_prompt, ai_auto_reply, office_name, practice_area, communication_tone, scheduling_link, consultation_duration, target_audience, alert_whatsapp, triage_options, debug_mode")
+      .select(`
+        id, company_id, zapi_instance_id, zapi_token, ai_enabled, ai_prompt, ai_auto_reply, 
+        office_name, practice_area, communication_tone, scheduling_link, consultation_duration, 
+        target_audience, alert_whatsapp, triage_options, debug_mode,
+        companies (name, bot_name, bot_role_description)
+      `)
       .eq("company_id", companyId)
       .maybeSingle();
 

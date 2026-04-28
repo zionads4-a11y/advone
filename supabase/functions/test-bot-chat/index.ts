@@ -9,9 +9,12 @@ const corsHeaders = {
 };
 
 function buildSDRPrompt(config: any) {
-  const officeName = config.office_name || "o escritório";
+  const company = config.companies;
+  const officeName = config.office_name || company?.name || "o escritório";
   const practiceArea = config.practice_area || "";
   const tone = config.communication_tone || "moderado";
+  const botName = company?.bot_name || "Laura";
+  const botRole = company?.bot_role_description || "atendente virtual";
   const consultationDuration = config.consultation_duration || "30 minutos";
   const targetAudience = config.target_audience || "";
   const customPrompt = config.ai_prompt || "";
@@ -70,7 +73,7 @@ SE O LEAD NÃO SE ENCAIXAR:
 
   const hasTriagem = triageOptions.length > 0;
 
-  return `Você é uma ATENDENTE HUMANA chamada assistente virtual de ${officeName}${practiceArea ? `, especializado em ${practiceArea}` : ""}.
+  return `Você é ${botName}, ${botRole} de ${officeName}${practiceArea ? `, especializado em ${practiceArea}` : ""}.
 
 PERSONALIDADE:
 - Você conversa como uma pessoa REAL no WhatsApp — simpática, empática e acolhedora
@@ -399,7 +402,10 @@ serve(async (req) => {
 
     const { data: config } = await adminClient
       .from("whatsapp_configs")
-      .select("*")
+      .select(`
+        *,
+        companies (name, bot_name, bot_role_description)
+      `)
       .eq("company_id", company_id)
       .maybeSingle();
 
