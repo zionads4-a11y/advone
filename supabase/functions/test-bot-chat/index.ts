@@ -578,7 +578,7 @@ serve(async (req) => {
             toolResult = { success: false, error: "NAME_REQUIRED", message: "[TESTE] Bloqueado: registre o nome completo do cliente primeiro via register_client_name." };
           } else {
             reply = args.message_to_lead || reply;
-            toolResult = { success: true, message: "[TESTE] Agendamento simulado com sucesso", date: args.date, time: args.time, modality: args.modality || "online", unit: args.unit || "", cpf: cpfRegistered };
+            toolResult = { success: true, message: "[TESTE] Agendamento simulado com sucesso", date: sanitizeDate(args.date), time: args.time, modality: args.modality || "online", unit: args.unit || "", cpf: cpfRegistered };
           }
           toolActions.push({ tool: "schedule_appointment", result: toolResult });
         }
