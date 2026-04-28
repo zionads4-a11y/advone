@@ -30,6 +30,7 @@ export default function Clients() {
   const navigate = useNavigate();
   const [clients, setClients] = useState<Client[]>([]);
   const [companies, setCompanies] = useState<Record<string, string>>({});
+  const [alertCounts, setAlertCounts] = useState<Record<string, number>>({});
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
