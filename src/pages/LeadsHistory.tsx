@@ -303,7 +303,6 @@ export default function LeadsHistory() {
                   </TableRow>
                 ) : (
                   filtered.map((r) => {
-                    const cpf = formatCpf(r.cpf_cliente_final || r.cpf);
                     return (
                       <TableRow key={r.id} className="border-border hover:bg-secondary/50">
                         <TableCell className="text-foreground">
@@ -316,9 +315,7 @@ export default function LeadsHistory() {
                           <div className="font-medium">{r.name}</div>
                           {r.email && <div className="text-xs text-muted-foreground">{r.email}</div>}
                         </TableCell>
-                        <TableCell className={cpf ? "text-foreground font-mono text-xs" : "text-muted-foreground"}>
-                          {cpf || "—"}
-                        </TableCell>
+
                         <TableCell className="text-muted-foreground text-xs">{r.phone || "—"}</TableCell>
                         <TableCell className="text-muted-foreground font-mono text-xs">
                           {r.processo_numero || "—"}
