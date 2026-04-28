@@ -16,6 +16,7 @@ function buildSDRPrompt(
   offices: any[] = [],
   flowsBlock: string = "",
   triageBlock: string = "",
+  timezone: string = "America/Sao_Paulo",
 ): string {
   const company = config.companies;
   const officeName = config.office_name || company?.name || "o escritório";
