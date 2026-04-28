@@ -93,7 +93,7 @@ function buildSDRPrompt(
     ? "Use linguagem leve e amigável com emojis 😊"
     : "Seja educada, próxima e acolhedora.";
 
-  const nowBR = getNowBrasilia();
+  const nowBR = getNowBrasilia(timezone);
   const dayNames = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
   const todayDayName = dayNames[nowBR.getDay()];
   const todayDMY = `${String(nowBR.getDate()).padStart(2, "0")}/${String(nowBR.getMonth() + 1).padStart(2, "0")}/${nowBR.getFullYear()}`;
