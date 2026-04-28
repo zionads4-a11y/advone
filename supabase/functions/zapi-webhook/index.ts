@@ -422,9 +422,9 @@ function formatDateDMY(dateStr: string): string {
   return dateStr;
 }
 
-function getNextAvailableDays(count: number, includeToday: boolean = true): string[] {
+function getNextAvailableDays(count: number, includeToday: boolean = true, timezone: string = "America/Sao_Paulo"): string[] {
   const days: string[] = [];
-  const nowBR = getNowBrasilia();
+  const nowBR = getNowBrasilia(timezone);
   let d = includeToday ? new Date(nowBR) : new Date(nowBR.getTime() + 86400000);
   while (days.length < count) {
     const dow = d.getDay();
