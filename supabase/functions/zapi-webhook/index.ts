@@ -406,7 +406,7 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
   const bookedTimes = new Set(
     (existing || []).map((r: any) => {
       const fmt = new Intl.DateTimeFormat("en-GB", {
-        timeZone: "America/Sao_Paulo",
+        timeZone: timezone,
         hour: "2-digit", minute: "2-digit", hour12: false,
       });
       return fmt.format(new Date(r.due_at));
