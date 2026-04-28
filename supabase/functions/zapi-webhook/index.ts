@@ -384,9 +384,9 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
     return mins >= 480 && mins < 1020;
   });
 
-  const todayBR = getTodayBrasilia();
+  const todayBR = getTodayBrasilia(timezone);
   if (dateStr === todayBR) {
-    const nowBR = getNowBrasilia();
+    const nowBR = getNowBrasilia(timezone);
     const minMinutes = (nowBR.getHours() * 60 + nowBR.getMinutes()) + 120;
     slots = slots.filter(s => {
       const [h, m] = s.split(":").map(Number);
