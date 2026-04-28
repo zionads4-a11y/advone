@@ -128,6 +128,11 @@ export function LeadDetailDrawer({ lead, open, onOpenChange, onLeadUpdate }: Lea
 
             <Separator />
 
+            {/* Cadastro do Cliente */}
+            <LeadClientRegistration leadId={lead.id} onUpdate={onLeadUpdate} />
+
+            <Separator />
+
             {/* Bot Toggle */}
             <LeadBotToggle
               leadId={lead.id}
