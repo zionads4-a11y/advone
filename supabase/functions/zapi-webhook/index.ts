@@ -848,9 +848,9 @@ Antes de responder:
 
         if (fnName === "check_availability") {
           hasCheckAvailability = true;
-          const dateToCheck = sanitizeDate(args.date);
+          const dateToCheck = sanitizeDate(args.date, timezone);
           const period = String(args.period || "qualquer").toLowerCase();
-          const availability = await getAvailableSlots(supabase, companyId, dateToCheck);
+          const availability = await getAvailableSlots(supabase, companyId, dateToCheck, timezone);
 
           const filterByPeriod = (slots: string[]) => {
             if (period === "manha") return slots.filter(s => parseInt(s.split(":")[0], 10) < 12);
