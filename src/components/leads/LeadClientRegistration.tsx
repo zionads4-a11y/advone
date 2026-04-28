@@ -22,6 +22,8 @@ interface ClientFields {
   name: string;
   cpf_cliente_final: string | null;
   rg: string | null;
+  nacionalidade: string | null;
+  profissao: string | null;
   email: string | null;
   phone: string | null;
   estado_civil: string | null;
@@ -46,6 +48,8 @@ const empty: ClientFields = {
   name: "",
   cpf_cliente_final: "",
   rg: "",
+  nacionalidade: "brasileiro(a)",
+  profissao: "",
   email: "",
   phone: "",
   estado_civil: "",
@@ -70,7 +74,7 @@ export function LeadClientRegistration({ leadId, onUpdate }: LeadClientRegistrat
       const { data } = await supabase
         .from("leads")
         .select(
-          "name, cpf_cliente_final, rg, email, phone, estado_civil, endereco_rua, endereco_numero, endereco_complemento, endereco_bairro, endereco_cidade, endereco_estado, endereco_cep"
+          "name, cpf_cliente_final, rg, nacionalidade, profissao, email, phone, estado_civil, endereco_rua, endereco_numero, endereco_complemento, endereco_bairro, endereco_cidade, endereco_estado, endereco_cep"
         )
         .eq("id", leadId)
         .maybeSingle();
@@ -79,6 +83,8 @@ export function LeadClientRegistration({ leadId, onUpdate }: LeadClientRegistrat
           name: data.name || "",
           cpf_cliente_final: data.cpf_cliente_final || "",
           rg: (data as any).rg || "",
+          nacionalidade: (data as any).nacionalidade || "brasileiro(a)",
+          profissao: (data as any).profissao || "",
           email: data.email || "",
           phone: data.phone || "",
           estado_civil: data.estado_civil || "",
