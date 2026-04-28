@@ -127,7 +127,7 @@ FLUXO NATURAL DA CONVERSA:
 Turno 1: Cumprimente com calor humano + apresente-se brevemente
 ${hasTriagem ? "Turno 2: Envie o menu de opções (em mensagem separada)" : 'Turno 2: Pergunte "Me conta, o que tá acontecendo?"'}
 Turno 3+: Siga o script do assunto — UMA pergunta por turno.
-Último: Conduza para agendamento. APÓS o lead aceitar o horário, peça o NOME COMPLETO.
+Último: Conduza para agendamento. APÓS o lead aceitar o horário, peça o NOME COMPLETO e CPF.
 
 📆 DATA E HORA ATUAL: Hoje é ${new Date(getNowBrasilia()).toLocaleDateString("pt-BR", { weekday: "long" })}, ${getTodayBrasilia()} (${String(getNowBrasilia().getHours()).padStart(2,"0")}:${String(getNowBrasilia().getMinutes()).padStart(2,"0")} horário de Brasília). USE ESTA DATA COMO REFERÊNCIA.
 
@@ -138,11 +138,11 @@ Turno 3+: Siga o script do assunto — UMA pergunta por turno.
 - NUNCA diga "nosso atendimento é de segunda a sexta" ou mencione dias de funcionamento de forma genérica
 - Se já for depois das 17:00, NÃO ofereça horários para hoje — ofereça para o próximo dia útil
 
-🔒 CAPTURA OBRIGATÓRIA DE NOME COMPLETO (SEMPRE ANTES DE AGENDAR):
-- REGRA INVIOLÁVEL: ANTES de oferecer QUALQUER horário, peça SEMPRE de forma educada: NOME COMPLETO (mín. 3 palavras, ex: "João da Silva Santos").
-- Use tom cordial e gentil. Mensagem padrão: "Que ótimo! 😊 Pra eu já deixar tudo certinho no nosso sistema antes de marcar, você poderia gentilmente me informar seu *nome completo* (com sobrenomes), por favor?\\n\\nFica registrado com total sigilo, só com a gente. 🔒"
-- Se vier nome incompleto, peça com educação: "Imagina, sem problemas! 😊 Você poderia me passar seu nome COMPLETO, com todos os sobrenomes, por gentileza?"
-- Quando receber, chame register_client_name passando full_name e agradeça.
+🔒 CAPTURA OBRIGATÓRIA DE NOME COMPLETO + CPF (SEMPRE ANTES DE AGENDAR):
+- REGRA INVIOLÁVEL: ANTES de oferecer QUALQUER horário, peça SEMPRE de forma educada: NOME COMPLETO (mín. 3 palavras, ex: "João da Silva Santos") + CPF.
+- Use tom cordial e gentil. Mensagem padrão: "Que ótimo! 😊 Pra eu já deixar tudo certinho no nosso sistema antes de marcar, você poderia gentilmente me informar seu *nome completo* (com sobrenomes) e seu *CPF*, por favor?\\n\\nFica registrado com total sigilo, só com a gente. 🔒"
+- Se vier nome incompleto ou CPF inválido, peça com educação: "Imagina, sem problemas! 😊 Você poderia me passar seu nome COMPLETO, com todos os sobrenomes, e o CPF, por gentileza?"
+- Quando receber, chame register_client_cpf passando full_name e cpf, e agradeça.
 - INSISTA educadamente até 2 vezes. Se o lead recusar firmemente, agende mesmo assim — schedule_appointment marcará o lead com pendência.
 
 📅 ABORDAGEM DE AGENDAMENTO (REGRA OBRIGATÓRIA):
@@ -303,6 +303,22 @@ function isValidFullName(raw: string): boolean {
   return parts.length >= 3;
 }
 
+function isValidCPF(cpf: string): boolean {
+  const str = String(cpf).replace(/\D/g, "");
+  if (str.length !== 11 || /^(\d)\1{10}$/.test(str)) return false;
+  let sum = 0;
+  for (let i = 0; i < 9; i++) sum += parseInt(str.charAt(i)) * (10 - i);
+  let rem = (sum * 10) % 11;
+  if (rem === 10 || rem === 11) rem = 0;
+  if (rem !== parseInt(str.charAt(9))) return false;
+  sum = 0;
+  for (let i = 0; i < 10; i++) sum += parseInt(str.charAt(i)) * (11 - i);
+  rem = (sum * 10) % 11;
+  if (rem === 10 || rem === 11) rem = 0;
+  if (rem !== parseInt(str.charAt(10))) return false;
+  return true;
+}
+
 function getNextAvailableDays(count: number, includeToday: boolean = true): string[] {
   const days: string[] = [];
   const nowBR = getNowBrasilia();
@@ -405,29 +421,15 @@ serve(async (req) => {
       {
         type: "function",
         function: {
-          name: "register_client_name",
-          description: "Registra o nome completo do lead. Deve ser usado APÓS o lead aceitar um horário.",
+          name: "register_client_cpf",
+          description: "Registra CPF + nome completo. PREFERENCIALMENTE antes de schedule_appointment para evitar pendência.",
           parameters: {
             type: "object",
             properties: {
+              cpf: { type: "string", description: "CPF apenas números (11 dígitos válidos)" },
               full_name: { type: "string", description: "Nome COMPLETO (mínimo 3 palavras: nome + sobrenomes)" }
             },
-            required: ["full_name"],
-            additionalProperties: false
-          }
-        }
-      },
-      {
-        type: "function",
-        function: {
-          name: "register_client_name",
-          description: "Registra o nome completo do lead. Deve ser usado APÓS o lead aceitar um horário.",
-          parameters: {
-            type: "object",
-            properties: {
-              full_name: { type: "string", description: "Nome COMPLETO (mínimo 3 palavras: nome + sobrenomes)" }
-            },
-            required: ["full_name"],
+            required: ["cpf", "full_name"],
             additionalProperties: false
           }
         }
@@ -436,7 +438,7 @@ serve(async (req) => {
         type: "function",
         function: {
           name: "check_availability",
-          description: "Verifica horários disponíveis.",
+          description: "Verifica horários disponíveis. Só use APÓS register_client_cpf.",
           parameters: {
             type: "object",
             properties: {
@@ -451,53 +453,19 @@ serve(async (req) => {
         type: "function",
         function: {
           name: "schedule_appointment",
-          description: "Agenda uma consulta. Use SOMENTE APÓS register_client_name + lead escolher horário.",
+          description: "Agenda uma consulta. Use SOMENTE APÓS register_client_cpf + lead escolher horário.",
           parameters: {
             type: "object",
             properties: {
               message_to_lead: { type: "string" },
-              date: { type: "string", description: "YYYY-MM-DD" },
-              time: { type: "string", description: "HH:MM" },
+              date: { type: "string" },
+              time: { type: "string" },
               summary: { type: "string" },
               modality: { type: "string", enum: ["presencial", "online"] },
               unit: { type: "string" }
             },
             required: ["message_to_lead", "date", "time"],
             additionalProperties: false
-          }
-        }
-      },
-      {
-        type: "function",
-        function: {
-          name: "qualify_lead",
-          description: "Registra qualificação do lead.",
-          parameters: {
-            type: "object",
-            properties: {
-              status: { type: "string", enum: ["qualified", "not_qualified", "needs_more_info"] },
-              reason: { type: "string" },
-              lead_score: { type: "string", enum: ["quente", "morno", "frio"] }
-            },
-            required: ["status", "reason", "lead_score"],
-            additionalProperties: false
-          }
-        }
-      },
-      {
-        type: "function",
-        function: {
-          name: "decide_lead",
-          description: "Chama o Decision Engine do AdvOne para classificar o lead e decidir a próxima ação com base nas respostas coletadas. Use quando tiver respostas suficientes para o nicho/case_type.",
-          parameters: {
-            type: "object",
-            properties: {
-              niche: { type: "string", description: "Ex: 'previdenciario'" },
-              case_type: { type: "string", description: "Ex: 'desconto_indevido', 'bpc_loas', 'demora_inss', 'aposentadoria', 'auxilio_doenca', 'pensao_morte', 'revisao_beneficio'" },
-              answers: { type: "object", description: "Respostas estruturadas do lead. Inclua sempre 'wants_help' (sim/nao) para o controle final de agendamento." }
-            },
-            required: ["niche", "answers"],
-            additionalProperties: true
           }
         }
       }
@@ -510,7 +478,7 @@ serve(async (req) => {
 
     let reply = "";
     let toolActions: any[] = [];
-    let nameRegistered = "";
+    let cpfRegistered = "";
     let maxIterations = 3;
 
     while (maxIterations > 0) {
@@ -528,16 +496,6 @@ serve(async (req) => {
       } catch (e) {
         const msg = getErrorMessage(e);
         console.error("AI error:", msg);
-        if (msg.includes(" 429")) {
-          return new Response(JSON.stringify({ error: "Limite de requisições excedido." }), {
-            status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-        if (msg.includes(" 402")) {
-          return new Response(JSON.stringify({ error: "Créditos da IA esgotados. Adicione saldo para continuar." }), {
-            status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
         return new Response(JSON.stringify({ error: "Erro ao processar resposta da IA" }), {
           status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -560,99 +518,44 @@ serve(async (req) => {
 
         let toolResult: any = {};
 
-        if (fnName === "register_client_name") {
+        if (fnName === "register_client_cpf") {
+          const rawCpf = String(args.cpf || "").replace(/\D/g, "");
           const fullName = String(args.full_name || "").trim();
+          const cpfOk = isValidCPF(rawCpf);
           const nameOk = isValidFullName(fullName);
-          if (!nameOk) {
+          if (!cpfOk && !nameOk) {
+            toolResult = { success: false, error: "CPF e nome inválidos. CPF precisa ter 11 dígitos válidos e nome completo precisa ter ≥3 palavras." };
+          } else if (!cpfOk) {
+            toolResult = { success: false, error: "CPF inválido (dígitos não conferem). Peça novamente." };
+          } else if (!nameOk) {
             toolResult = { success: false, error: "Nome incompleto. Peça nome COMPLETO com sobrenomes (≥3 palavras)." };
           } else {
-            nameRegistered = fullName;
-            toolResult = { success: true, full_name: fullName, message: "[TESTE] Nome completo registrado. Já pode agendar." };
+            cpfRegistered = rawCpf;
+            toolResult = { success: true, cpf_registered: rawCpf, full_name: fullName, message: "[TESTE] CPF e nome completo registrados. Já pode agendar." };
           }
-          toolActions.push({ tool: "register_client_name", result: toolResult });
+          toolActions.push({ tool: "register_client_cpf", result: toolResult });
         }
 
         if (fnName === "check_availability") {
-          let dateToCheck = args.date || getNextAvailableDays(1)[0];
-          const period = String(args.period || "qualquer").toLowerCase();
+          const dateToCheck = args.date || getNextAvailableDays(1)[0];
           const availability = await getAvailableSlots(adminClient, company_id, dateToCheck);
-
-          const filterByPeriod = (slots: string[]) => {
-            if (period === "manha") return slots.filter(s => parseInt(s.split(":")[0], 10) < 12);
-            if (period === "tarde") return slots.filter(s => parseInt(s.split(":")[0], 10) >= 12);
-            return slots;
+          toolResult = {
+            date: availability.date,
+            day_name: availability.dayName,
+            slots: availability.slots,
+            instruction: `Ofereça estes horários ao lead: ${availability.slots.slice(0, 5).join(", ")}...`,
           };
-          let filteredSlots = filterByPeriod(availability.slots);
-          if (filteredSlots.length === 0 && availability.slots.length > 0) filteredSlots = availability.slots;
-
-          if (filteredSlots.length === 0) {
-            const nextDays = getNextAvailableDays(3);
-            let firstAlt: { date: string; dayName: string; slot: string } | null = null;
-            for (const nd of nextDays) {
-              if (nd === dateToCheck) continue;
-              const alt = await getAvailableSlots(adminClient, company_id, nd);
-              const altFiltered = filterByPeriod(alt.slots);
-              const finalAlt = altFiltered.length > 0 ? altFiltered : alt.slots;
-              if (finalAlt.length > 0) { firstAlt = { date: formatDateDMY(nd), dayName: alt.dayName, slot: finalAlt[0] }; break; }
-            }
-            const formattedDate = formatDateDMY(dateToCheck);
-            toolResult = {
-              requested_date: formattedDate, requested_day: availability.dayName,
-              first_available_slot: null,
-              message: `Não há horários em ${availability.dayName} (${formattedDate}).`,
-              alternative: firstAlt,
-              instruction: firstAlt
-                ? `Ofereça APENAS este horário alternativo: ${firstAlt.dayName}, ${firstAlt.date} às ${firstAlt.slot}.`
-                : "Sem horários nos próximos dias úteis.",
-            };
-          } else {
-            const formattedDate = formatDateDMY(dateToCheck);
-            const firstSlot = filteredSlots[0];
-            toolResult = {
-              date: formattedDate, day_name: availability.dayName,
-              first_available_slot: firstSlot,
-              instruction: `Ofereça APENAS este horário ao lead: ${availability.dayName}, ${formattedDate} às ${firstSlot}. NÃO mencione outros horários.`,
-            };
-          }
           toolActions.push({ tool: "check_availability", result: toolResult });
         }
 
         if (fnName === "schedule_appointment") {
-          if (!nameRegistered) {
-            toolResult = { success: false, error: "NAME_REQUIRED", message: "[TESTE] Bloqueado: registre o NOME completo do cliente primeiro via register_client_name." };
+          if (!cpfRegistered) {
+            toolResult = { success: false, error: "CPF_REQUIRED", message: "[TESTE] Bloqueado: registre o CPF do cliente primeiro via register_client_cpf." };
           } else {
             reply = args.message_to_lead || reply;
-            toolResult = { success: true, message: "[TESTE] Agendamento simulado com sucesso", date: args.date, time: args.time, modality: args.modality || "online", unit: args.unit || "", name: nameRegistered };
+            toolResult = { success: true, message: "[TESTE] Agendamento simulado com sucesso", date: args.date, time: args.time, modality: args.modality || "online", unit: args.unit || "", cpf: cpfRegistered };
           }
           toolActions.push({ tool: "schedule_appointment", result: toolResult });
-        }
-
-        if (fnName === "qualify_lead") {
-          toolResult = { success: true, status: args.status };
-          toolActions.push({ tool: "qualify_lead", result: toolResult });
-        }
-
-        if (fnName === "decide_lead") {
-          try {
-            const decRes = await fetch(
-              `${Deno.env.get("SUPABASE_URL")}/functions/v1/decision-engine`,
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json", Authorization: authHeader },
-                body: JSON.stringify({
-                  company_id,
-                  niche: args.niche,
-                  case_type: args.case_type ?? null,
-                  answers: args.answers || {},
-                  dry_run: true,
-                }),
-              }
-            );
-            toolResult = await decRes.json();
-          } catch (e) {
-            toolResult = { error: "Falha ao chamar decision-engine", detail: String(e) };
-          }
-          toolActions.push({ tool: "decide_lead", result: toolResult });
         }
 
         aiMessages.push({
