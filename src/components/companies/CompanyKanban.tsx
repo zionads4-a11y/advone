@@ -87,7 +87,14 @@ export function CompanyKanban({ companyId, companyName }: CompanyKanbanProps) {
     setLeads((prev) => prev.map((l) => (l.id === leadId ? { ...l, kanban_column_id: columnId } : l)));
     const { error } = await supabase.from("leads").update({ kanban_column_id: columnId }).eq("id", leadId);
     if (error) {
-      toast.error("Erro ao mover lead");
+      const msg = error.message || "";
+      if (msg.includes("CPF_REQUIRED")) {
+        toast.error("Cadastre o CPF do cliente antes de mover para Ganho.");
+      } else if (msg.includes("CONTRACT_REQUIRED")) {
+        toast.error("Registre o contrato assinado (aba Contrato do lead) antes de mover para Ganho.");
+      } else {
+        toast.error(msg || "Erro ao mover lead");
+      }
       fetchColumnsAndLeads();
     }
   }, []);
