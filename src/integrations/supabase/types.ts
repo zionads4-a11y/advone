@@ -606,6 +606,7 @@ export type Database = {
           partnership_type: Database["public"]["Enums"]["partnership_type"]
           practice_specialty: string
           service_mode: string
+          timezone: string
           updated_at: string
           website: string | null
           whatsapp: string | null
@@ -626,6 +627,7 @@ export type Database = {
           partnership_type?: Database["public"]["Enums"]["partnership_type"]
           practice_specialty?: string
           service_mode?: string
+          timezone?: string
           updated_at?: string
           website?: string | null
           whatsapp?: string | null
@@ -646,6 +648,7 @@ export type Database = {
           partnership_type?: Database["public"]["Enums"]["partnership_type"]
           practice_specialty?: string
           service_mode?: string
+          timezone?: string
           updated_at?: string
           website?: string | null
           whatsapp?: string | null
