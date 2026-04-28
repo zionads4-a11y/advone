@@ -958,7 +958,7 @@ Antes de responder:
           replyText = args.message_to_lead || "";
 
           if (leadId) {
-            const appointmentDate = sanitizeDate(args.date);
+            const appointmentDate = sanitizeDate(args.date, timezone);
             const appointmentTime = args.time || "10:00";
             const dueAt = `${appointmentDate}T${appointmentTime}:00-03:00`;
             let modality = args.modality || "online";
