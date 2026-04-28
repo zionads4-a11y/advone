@@ -840,7 +840,7 @@ Antes de responder:
 
         if (fnName === "check_availability") {
           hasCheckAvailability = true;
-          const dateToCheck = args.date || getNextAvailableDays(1)[0];
+          const dateToCheck = sanitizeDate(args.date);
           const period = String(args.period || "qualquer").toLowerCase();
           const availability = await getAvailableSlots(supabase, companyId, dateToCheck);
 
