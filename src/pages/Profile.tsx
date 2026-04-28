@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { Camera, Loader2, Save, KeyRound, User } from "lucide-react";
+import { Camera, Loader2, Save, KeyRound, User, Scale } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Profile() {
@@ -27,6 +27,15 @@ export default function Profile() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
 
+  // Dados do(a) advogado(a) para contratos (override individual)
+  const [lawyerName, setLawyerName] = useState("");
+  const [lawyerOab, setLawyerOab] = useState("");
+  const [lawyerOabUf, setLawyerOabUf] = useState("");
+  const [lawyerCpf, setLawyerCpf] = useState("");
+  const [lawyerNationality, setLawyerNationality] = useState("");
+  const [lawyerMaritalStatus, setLawyerMaritalStatus] = useState("");
+  const [savingLawyer, setSavingLawyer] = useState(false);
+
   useEffect(() => {
     if (user) fetchProfile();
   }, [user]);
@@ -35,7 +44,7 @@ export default function Profile() {
     if (!user) return;
     const { data } = await supabase
       .from("profiles")
-      .select("full_name, email, phone, avatar_url")
+      .select("full_name, email, phone, avatar_url, lawyer_name, lawyer_oab, lawyer_oab_uf, lawyer_cpf, lawyer_nationality, lawyer_marital_status")
       .eq("user_id", user.id)
       .maybeSingle();
 
@@ -44,8 +53,33 @@ export default function Profile() {
       setEmail(data.email || "");
       setPhone(data.phone || "");
       setAvatarUrl(data.avatar_url);
+      setLawyerName((data as any).lawyer_name || "");
+      setLawyerOab((data as any).lawyer_oab || "");
+      setLawyerOabUf((data as any).lawyer_oab_uf || "");
+      setLawyerCpf((data as any).lawyer_cpf || "");
+      setLawyerNationality((data as any).lawyer_nationality || "");
+      setLawyerMaritalStatus((data as any).lawyer_marital_status || "");
     }
     setLoadingProfile(false);
+  };
+
+  const handleSaveLawyer = async () => {
+    if (!user) return;
+    setSavingLawyer(true);
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        lawyer_name: lawyerName.trim() || null,
+        lawyer_oab: lawyerOab.trim() || null,
+        lawyer_oab_uf: lawyerOabUf.trim().toUpperCase() || null,
+        lawyer_cpf: lawyerCpf.trim() || null,
+        lawyer_nationality: lawyerNationality.trim() || null,
+        lawyer_marital_status: lawyerMaritalStatus.trim() || null,
+      })
+      .eq("user_id", user.id);
+    setSavingLawyer(false);
+    if (error) toast.error("Erro ao salvar: " + error.message);
+    else toast.success("Dados profissionais salvos!");
   };
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -290,6 +324,52 @@ export default function Profile() {
           >
             {savingProfile ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
             Salvar Alterações
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Dados profissionais para contratos (override individual) */}
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 font-display text-lg">
+            <Scale className="h-5 w-5 text-primary" />
+            Dados profissionais para contratos
+          </CardTitle>
+          <CardDescription>
+            Esses dados serão usados nas procurações e contratos que você gerar.
+            Quando preenchidos aqui, prevalecem sobre os do escritório.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="lawyerName">Nome do(a) advogado(a)</Label>
+              <Input id="lawyerName" value={lawyerName} onChange={(e) => setLawyerName(e.target.value)} placeholder="Ex: Dra. Gisele Torres" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lawyerCpf">CPF</Label>
+              <Input id="lawyerCpf" value={lawyerCpf} onChange={(e) => setLawyerCpf(e.target.value)} placeholder="000.000.000-00" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lawyerOab">Número da OAB</Label>
+              <Input id="lawyerOab" value={lawyerOab} onChange={(e) => setLawyerOab(e.target.value)} placeholder="Ex: 123.456" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lawyerOabUf">UF da OAB</Label>
+              <Input id="lawyerOabUf" maxLength={2} value={lawyerOabUf} onChange={(e) => setLawyerOabUf(e.target.value.toUpperCase())} placeholder="SP" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lawyerNationality">Nacionalidade</Label>
+              <Input id="lawyerNationality" value={lawyerNationality} onChange={(e) => setLawyerNationality(e.target.value)} placeholder="brasileiro(a)" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lawyerMaritalStatus">Estado civil</Label>
+              <Input id="lawyerMaritalStatus" value={lawyerMaritalStatus} onChange={(e) => setLawyerMaritalStatus(e.target.value)} placeholder="Ex: Casada" />
+            </div>
+          </div>
+          <Button onClick={handleSaveLawyer} disabled={savingLawyer} className="gradient-primary text-primary-foreground">
+            {savingLawyer ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            Salvar dados profissionais
           </Button>
         </CardContent>
       </Card>

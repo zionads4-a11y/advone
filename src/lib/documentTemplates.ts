@@ -37,6 +37,21 @@ export const LEAD_VARIABLES: TemplateVariable[] = [
 
 export const COMPANY_VARIABLES: TemplateVariable[] = [
   { key: "empresa_nome", label: "Nome do escritório", source: "company" },
+  { key: "escritorio_razao_social", label: "Razão social do escritório", source: "company" },
+  { key: "escritorio_cnpj", label: "CNPJ do escritório", source: "company" },
+  { key: "escritorio_endereco", label: "Endereço do escritório", source: "company" },
+  { key: "escritorio_cidade", label: "Cidade do escritório", source: "company" },
+  { key: "escritorio_estado", label: "Estado do escritório", source: "company" },
+  { key: "escritorio_cep", label: "CEP do escritório", source: "company" },
+  { key: "advogado_nome", label: "Nome do(a) advogado(a)", source: "company" },
+  { key: "advogado_oab", label: "OAB", source: "company" },
+  { key: "advogado_oab_uf", label: "UF da OAB", source: "company" },
+  { key: "advogado_cpf", label: "CPF do(a) advogado(a)", source: "company" },
+  { key: "advogado_nacionalidade", label: "Nacionalidade do(a) advogado(a)", source: "company" },
+  { key: "advogado_estado_civil", label: "Estado civil do(a) advogado(a)", source: "company" },
+  { key: "advogado_email", label: "E-mail do(a) advogado(a)", source: "company" },
+  { key: "advogado_telefone", label: "Telefone do(a) advogado(a)", source: "company" },
+  { key: "advogado_qualificacao", label: "Qualificação completa do(a) advogado(a)", source: "company" },
 ];
 
 export const SYSTEM_VARIABLES: TemplateVariable[] = [
@@ -73,7 +88,8 @@ function formatDateCurta(d: Date) {
 
 export interface RenderContext {
   lead?: any;
-  company?: { name?: string };
+  company?: any;
+  profile?: any;
   manualValues?: Record<string, string>;
 }
 
@@ -115,8 +131,39 @@ export function buildAutoValues(ctx: RenderContext): Record<string, string> {
   out.tipo_caso_detalhado = lead.tipo_caso_detalhado ?? lead.case_type ?? "";
   out.numero_processo = lead.numero_processo ?? lead.process_number ?? "";
 
-  // Company
+  // Company / Office
   out.empresa_nome = company.name ?? "";
+  out.escritorio_razao_social = company.office_legal_name ?? company.name ?? "";
+  out.escritorio_cnpj = company.office_cnpj ?? "";
+  out.escritorio_endereco = company.office_address ?? "";
+  out.escritorio_cidade = company.office_city ?? "";
+  out.escritorio_estado = company.office_state ?? "";
+  out.escritorio_cep = company.office_cep ?? "";
+
+  // Lawyer (profile override -> company default)
+  const profile = ctx.profile || {};
+  const adv_nome = profile.lawyer_name ?? company.lawyer_name ?? "";
+  const adv_oab = profile.lawyer_oab ?? company.lawyer_oab ?? "";
+  const adv_oab_uf = profile.lawyer_oab_uf ?? company.lawyer_oab_uf ?? "";
+  const adv_cpf = profile.lawyer_cpf ?? company.lawyer_cpf ?? "";
+  const adv_nac = profile.lawyer_nationality ?? company.lawyer_nationality ?? "brasileiro(a)";
+  const adv_ec = profile.lawyer_marital_status ?? company.lawyer_marital_status ?? "";
+  out.advogado_nome = adv_nome;
+  out.advogado_oab = adv_oab;
+  out.advogado_oab_uf = adv_oab_uf;
+  out.advogado_cpf = adv_cpf;
+  out.advogado_nacionalidade = adv_nac;
+  out.advogado_estado_civil = adv_ec;
+  out.advogado_email = company.lawyer_email ?? "";
+  out.advogado_telefone = company.lawyer_phone ?? "";
+  out.advogado_qualificacao = [
+    adv_nome,
+    adv_nac,
+    adv_ec,
+    "advogado(a)",
+    adv_oab && adv_oab_uf ? `inscrito(a) na OAB/${adv_oab_uf} sob o nº ${adv_oab}` : (adv_oab ? `OAB nº ${adv_oab}` : ""),
+    adv_cpf ? `CPF nº ${adv_cpf}` : "",
+  ].filter(Boolean).join(", ");
 
   // System
   const hoje = new Date();
@@ -157,7 +204,7 @@ export const SAMPLE_TEMPLATES = [
 
 OUTORGANTE: {{nome}}, {{nacionalidade}}, {{estado_civil}}, {{profissao}}, portador(a) do RG nº {{rg}} e inscrito(a) no CPF sob o nº {{cpf}}, residente e domiciliado(a) à {{endereco_completo}}.
 
-OUTORGADO: {{empresa_nome}}, com endereço profissional conforme contrato.
+OUTORGADO(A): {{advogado_qualificacao}}, com escritório profissional em {{escritorio_endereco}}, {{escritorio_cidade}}/{{escritorio_estado}}.
 
 PODERES: Pelo presente instrumento particular de procuração, o(a) outorgante nomeia e constitui seu(sua) bastante procurador(a), o(a) outorgado(a) acima qualificado(a), para o fim especial de representá-lo(a) em juízo ou fora dele, podendo propor contra quem de direito as ações competentes e defendê-lo(a) nas contrárias, seguindo umas e outras até final decisão, usando dos recursos legais e acompanhando-os, conferindo-lhe, ainda, poderes especiais para confessar, reconhecer a procedência do pedido, transigir, desistir, renunciar ao direito sobre que se funda a ação, receber, dar quitação, firmar compromissos e assinar declarações.
 
@@ -176,7 +223,7 @@ CPF: {{cpf}}`,
 
 CONTRATANTE: {{nome}}, {{nacionalidade}}, {{estado_civil}}, {{profissao}}, RG nº {{rg}}, CPF nº {{cpf}}, residente em {{endereco_completo}}.
 
-CONTRATADO: {{empresa_nome}}.
+CONTRATADO(A): {{advogado_qualificacao}}, vinculado(a) ao escritório {{escritorio_razao_social}}, CNPJ {{escritorio_cnpj}}, situado em {{escritorio_endereco}}, {{escritorio_cidade}}/{{escritorio_estado}}.
 
 OBJETO: Prestação de serviços jurídicos relativos a causa de natureza {{area_direito}} - {{tipo_caso_detalhado}}.
 
@@ -190,8 +237,8 @@ CLÁUSULA 3ª — Despesas processuais: Custas, emolumentos e demais despesas pr
 
 
 _______________________________________      _______________________________________
-{{nome}}                                       {{empresa_nome}}
-CONTRATANTE                                    CONTRATADO`,
+{{nome}}                                       {{advogado_nome}} - OAB/{{advogado_oab_uf}} {{advogado_oab}}
+CONTRATANTE                                    CONTRATADO(A)`,
   },
   {
     name: "Declaração de Hipossuficiência",

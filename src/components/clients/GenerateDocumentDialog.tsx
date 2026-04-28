@@ -33,6 +33,8 @@ export function GenerateDocumentDialog({ open, onOpenChange, lead: leadProp, com
   const { user } = useAuth();
   const [templates, setTemplates] = useState<any[]>([]);
   const [companyName, setCompanyName] = useState("");
+  const [company, setCompany] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [selectedId, setSelectedId] = useState<string>("");
   const [manualValues, setManualValues] = useState<Record<string, string>>({});
   const [preview, setPreview] = useState("");
@@ -74,8 +76,19 @@ export function GenerateDocumentDialog({ open, onOpenChange, lead: leadProp, com
   };
 
   const load = async () => {
-    const { data: comp } = await supabase.from("companies").select("name").eq("id", companyId).maybeSingle();
+    const { data: comp } = await supabase.from("companies").select("*").eq("id", companyId).maybeSingle();
     setCompanyName(comp?.name || "");
+    setCompany(comp);
+
+    // Profile do usuário logado (override individual de dados do advogado)
+    if (user?.id) {
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      setProfile(prof);
+    }
 
     // Busca o lead completo (com cpf, rg, endereço, estado civil, etc.)
     if (leadProp?.id) {
@@ -103,9 +116,9 @@ export function GenerateDocumentDialog({ open, onOpenChange, lead: leadProp, com
     const knownKeys = new Set(ALL_VARIABLES.map((v) => v.key));
     const missing = placeholders.filter((p) => !knownKeys.has(p));
     setMissingManual(missing);
-    const values = buildAutoValues({ lead, company: { name: companyName }, manualValues });
+    const values = buildAutoValues({ lead, company: company || { name: companyName }, profile, manualValues });
     setPreview(renderTemplate(selected.content, values));
-  }, [selected, manualValues, lead, companyName]);
+  }, [selected, manualValues, lead, companyName, company, profile]);
 
   const save = async () => {
     if (!selected || !user) return;
@@ -144,7 +157,7 @@ export function GenerateDocumentDialog({ open, onOpenChange, lead: leadProp, com
     }
     setPackageRunning(true);
     try {
-      const values = buildAutoValues({ lead, company: { name: companyName }, manualValues });
+      const values = buildAutoValues({ lead, company: company || { name: companyName }, profile, manualValues });
 
       // 1) Renderiza e salva os 3 documentos
       const docs = PACKAGE_CATEGORIES

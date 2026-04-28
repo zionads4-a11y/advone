@@ -16,6 +16,7 @@ import { CompanyNicheAlertsCard } from "@/components/companies/CompanyNicheAlert
 import { CadenceConfigCard } from "@/components/companies/CadenceConfigCard";
 import { MeetingRemindersConfigCard } from "@/components/companies/MeetingRemindersConfigCard";
 import { BotConfigCard } from "@/components/companies/BotConfigCard";
+import { LawyerContractDataCard } from "@/components/companies/LawyerContractDataCard";
 
 
 interface Company {
@@ -230,6 +231,9 @@ export default function CompanySettings() {
       )}
 
       <CompanyOfficesEditor companyId={company.id} />
+
+      {/* Dados do escritório e do(a) advogado(a) para preencher contratos */}
+      <LawyerContractDataCard companyId={company.id} />
 
       <Card className="glass-card">
         <CardHeader>
