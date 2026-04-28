@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
 
           const totalProcesses = (allPackages || []).reduce(
             (sum, p) => sum + p.quantity * p.processes_per_package, 0
-          ) + monPkg.quantity * monPkg.processes_per_package;
+          );
 
           // Upsert company_monitoring_plans
           const { data: existingPlan } = await adminClient

@@ -119,7 +119,7 @@ function buildSDRPrompt(
 ═══════════════════════════════════════
 🚫 REGRA DE OURO (PRIORIDADE ABSOLUTA)
 ═══════════════════════════════════════
-NUNCA, em hipótese alguma, peça o CPF do cliente. Também não peça RG. Peça apenas o NOME COMPLETO no final do agendamento. Se o cliente perguntar se precisa de CPF, diga que não é necessário agora. Esta regra é inviolável.
+NUNCA, em hipótese alguma, peça o CPF ou RG do cliente. Se o cliente perguntar se precisa de algum dado assim, diga que não é necessário agora. Esta regra é inviolável. Peça apenas o NOME COMPLETO no final do agendamento.
 
 ═══════════════════════════════════════
 IDENTIDADE E TOM
