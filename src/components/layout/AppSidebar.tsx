@@ -90,7 +90,6 @@ const operadorItems = [
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
   { title: "IA Jurídica", url: "/ia-juridica", icon: Scale, premium: true },
   { title: "Documentos", url: "/documentos", icon: FileText },
-  { title: "Processos", url: "/processos", icon: Briefcase },
 ];
 
 const clientItems = [
