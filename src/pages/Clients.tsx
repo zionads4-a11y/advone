@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, FolderOpen, UserCheck } from "lucide-react";
+import { Search, FolderOpen, UserCheck, Bell } from "lucide-react";
 
 interface Client {
   id: string;
@@ -30,6 +30,7 @@ export default function Clients() {
   const navigate = useNavigate();
   const [clients, setClients] = useState<Client[]>([]);
   const [companies, setCompanies] = useState<Record<string, string>>({});
+  const [alertCounts, setAlertCounts] = useState<Record<string, number>>({});
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -47,7 +48,40 @@ export default function Clients() {
         .order("became_client_at", { ascending: false }),
       supabase.from("companies").select("id, name"),
     ]);
-    if (clientsRes.data) setClients(clientsRes.data as Client[]);
+    if (clientsRes.data) {
+      const list = clientsRes.data as Client[];
+      setClients(list);
+      // Para cada cliente, calcula movimentos novos
+      const counts: Record<string, number> = {};
+      await Promise.all(list.map(async (c) => {
+        const { data: cases } = await supabase
+          .from("cases")
+          .select("id, case_number")
+          .eq("lead_id", c.id)
+          .eq("company_id", c.company_id);
+        const caseIds = (cases || []).map((x) => x.id);
+        const cnjs = (cases || []).map((x) => x.case_number).filter(Boolean) as string[];
+        if (caseIds.length === 0 && cnjs.length === 0) return;
+        const filterParts = [
+          caseIds.length ? `case_id.in.(${caseIds.join(",")})` : "",
+          cnjs.length ? `numero_cnj.in.(${cnjs.map((x) => `"${x}"`).join(",")})` : "",
+        ].filter(Boolean).join(",");
+        const { data: procs } = await supabase
+          .from("monitored_processes")
+          .select("id")
+          .eq("company_id", c.company_id)
+          .or(filterParts);
+        const ids = (procs || []).map((p) => p.id);
+        if (ids.length === 0) return;
+        const { count } = await supabase
+          .from("process_movements")
+          .select("id", { count: "exact", head: true })
+          .in("monitored_process_id", ids)
+          .eq("is_new", true);
+        if (count && count > 0) counts[c.id] = count;
+      }));
+      setAlertCounts(counts);
+    }
     if (companiesRes.data) {
       const map: Record<string, string> = {};
       companiesRes.data.forEach((c: Company) => { map[c.id] = c.name; });
@@ -122,7 +156,17 @@ export default function Clients() {
                 <TableBody>
                   {filtered.map((c) => (
                     <TableRow key={c.id} className="cursor-pointer hover:bg-muted/40" onClick={() => navigate(`/clientes/${c.id}`)}>
-                      <TableCell className="font-medium">{c.name}</TableCell>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-2">
+                          {alertCounts[c.id] > 0 && (
+                            <span title={`${alertCounts[c.id]} novo(s) movimento(s) processual(is)`} className="inline-flex items-center justify-center h-5 min-w-5 px-1 rounded-full bg-amber-500 text-white text-[10px] font-semibold gap-0.5 animate-pulse">
+                              <Bell className="h-2.5 w-2.5" />
+                              {alertCounts[c.id]}
+                            </span>
+                          )}
+                          <span>{c.name}</span>
+                        </div>
+                      </TableCell>
                       <TableCell className="text-sm text-muted-foreground">{c.cpf_cliente_final || "—"}</TableCell>
                       <TableCell className="text-sm">
                         <div>{c.whatsapp || c.phone || "—"}</div>

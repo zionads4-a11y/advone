@@ -5,12 +5,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, User, FileText, Briefcase, CalendarClock, Wallet, MessageSquare, StickyNote, Phone, Mail, MapPin } from "lucide-react";
+import { ArrowLeft, User, FileText, Briefcase, CalendarClock, Wallet, MessageSquare, StickyNote, Phone, Mail, MapPin, Bell } from "lucide-react";
 import { ClientPersonalDataForm, ClientData } from "@/components/clients/ClientPersonalDataForm";
 import { ClientGeneratedDocuments } from "@/components/clients/ClientGeneratedDocuments";
 import { ClientUploadedDocuments } from "@/components/clients/ClientUploadedDocuments";
 import { ClientAgreements } from "@/components/clients/ClientAgreements";
-import { LeadCases } from "@/components/leads/LeadCases";
+import { ClientProcesses } from "@/components/clients/ClientProcesses";
 import { LeadReminders } from "@/components/leads/LeadReminders";
 import { LeadNotes } from "@/components/leads/LeadNotes";
 import { LeadConversationDrawer } from "@/components/leads/LeadConversationDrawer";
@@ -22,6 +22,42 @@ export default function ClientDetail() {
   const [companyId, setCompanyId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [convOpen, setConvOpen] = useState(false);
+  const [newMovementsCount, setNewMovementsCount] = useState(0);
+
+  const fetchNewMovements = async (cId: string, lId: string) => {
+    // Busca cases do lead
+    const { data: cases } = await supabase
+      .from("cases")
+      .select("id, case_number")
+      .eq("lead_id", lId)
+      .eq("company_id", cId);
+    const caseIds = (cases || []).map((c) => c.id);
+    const cnjs = (cases || []).map((c) => c.case_number).filter(Boolean) as string[];
+    if (caseIds.length === 0 && cnjs.length === 0) {
+      setNewMovementsCount(0);
+      return;
+    }
+    const filterParts = [
+      caseIds.length ? `case_id.in.(${caseIds.join(",")})` : "",
+      cnjs.length ? `numero_cnj.in.(${cnjs.map((c) => `"${c}"`).join(",")})` : "",
+    ].filter(Boolean).join(",");
+    const { data: procs } = await supabase
+      .from("monitored_processes")
+      .select("id")
+      .eq("company_id", cId)
+      .or(filterParts);
+    const procIds = (procs || []).map((p) => p.id);
+    if (procIds.length === 0) {
+      setNewMovementsCount(0);
+      return;
+    }
+    const { count } = await supabase
+      .from("process_movements")
+      .select("id", { count: "exact", head: true })
+      .in("monitored_process_id", procIds)
+      .eq("is_new", true);
+    setNewMovementsCount(count || 0);
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -38,6 +74,7 @@ export default function ClientDetail() {
     if (data) {
       setClient(data as ClientData);
       setCompanyId((data as any).company_id);
+      fetchNewMovements((data as any).company_id, data.id);
     }
     setLoading(false);
   };
@@ -66,10 +103,16 @@ export default function ClientDetail() {
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
                 <User className="h-5 w-5 text-primary" />
                 <h1 className="text-2xl font-bold">{client.name}</h1>
                 <Badge className="bg-success/15 text-success border-success/30 hover:bg-success/15">Cliente</Badge>
+                {newMovementsCount > 0 && (
+                  <Badge className="bg-amber-500 hover:bg-amber-500 text-white gap-1 animate-pulse">
+                    <Bell className="h-3 w-3" />
+                    {newMovementsCount} {newMovementsCount === 1 ? "novo movimento" : "novos movimentos"}
+                  </Badge>
+                )}
               </div>
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground mt-2">
                 {client.cpf_cliente_final && <span>CPF: {client.cpf_cliente_final}</span>}
@@ -132,7 +175,12 @@ export default function ClientDetail() {
         <TabsContent value="processos" className="mt-6">
           <Card>
             <CardContent className="pt-6">
-              <LeadCases leadId={client.id} companyId={companyId} />
+              <ClientProcesses
+                leadId={client.id}
+                leadName={client.name}
+                companyId={companyId}
+                onChanged={() => fetchNewMovements(companyId, client.id)}
+              />
             </CardContent>
           </Card>
         </TabsContent>
