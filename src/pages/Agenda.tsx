@@ -478,7 +478,17 @@ export default function Agenda() {
               <Check className="h-3 w-3" />
               Google conectado · Desconectar
             </Button>
-          ) : (
+          ) : null}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setClearAllOpen(true)}
+            className="gap-2 text-xs h-9 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
+          >
+            <Trash2 className="h-3 w-3" />
+            Apagar todos
+          </Button>
+          {!isGoogleConnected ? (
             <Button
               variant="outline"
               size="sm"
