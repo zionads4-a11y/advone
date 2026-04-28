@@ -116,7 +116,10 @@ export async function chatCompletion(params: ChatCompletionParams): Promise<any>
   };
   if (params.tools) body.tools = params.tools;
   if (params.tool_choice) body.tool_choice = params.tool_choice;
-  if (params.reasoning && provider === "openai" && model.startsWith("gpt-5")) {
+  const reasoningModels = ["o1", "o3", "o4"];
+  const isReasoningModel = reasoningModels.some(m => model.includes(m));
+
+  if (params.reasoning && provider === "openai" && isReasoningModel) {
     body.reasoning = params.reasoning;
   }
 
