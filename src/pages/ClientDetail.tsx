@@ -116,10 +116,15 @@ export default function ClientDetail() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="documentos" className="mt-6">
+        <TabsContent value="documentos" className="mt-6 space-y-6">
           <Card>
             <CardContent className="pt-6">
               <ClientGeneratedDocuments lead={client} companyId={companyId} />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <ClientUploadedDocuments lead={client} companyId={companyId} />
             </CardContent>
           </Card>
         </TabsContent>
