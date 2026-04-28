@@ -97,6 +97,47 @@ export default function Agenda() {
     }
   }, [isGoogleConnected]);
 
+  const [disconnectOpen, setDisconnectOpen] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
+
+  const handleDisconnectGoogle = useCallback(async () => {
+    if (!user) return;
+    setDisconnecting(true);
+    try {
+      // 1. Apagar eventos importados do Google (mantém os criados manualmente sem google_event_id)
+      const { error: delErr } = await supabase
+        .from("lead_reminders")
+        .delete()
+        .eq("created_by", user.id)
+        .not("google_event_id", "is", null);
+      if (delErr) throw delErr;
+
+      // 2. Limpar fila de sincronização do usuário
+      await supabase
+        .from("google_calendar_sync_queue")
+        .delete()
+        .eq("user_id", user.id);
+
+      // 3. Remover integração (revoga uso do refresh token salvo)
+      const { error: intErr } = await supabase
+        .from("user_integrations")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("provider", "google");
+      if (intErr) throw intErr;
+
+      toast.success("Google Agenda desconectada e eventos importados removidos.");
+      setIsGoogleConnected(false);
+      setDisconnectOpen(false);
+      setRefreshKey(k => k + 1);
+    } catch (e: any) {
+      console.error("Erro ao desconectar Google:", e);
+      toast.error(e.message || "Erro ao desconectar Google Agenda");
+    } finally {
+      setDisconnecting(false);
+    }
+  }, [user]);
+
   useEffect(() => {
     if (isGoogleConnected) {
       handleSync(true); // Sincronização silenciosa ao carregar
