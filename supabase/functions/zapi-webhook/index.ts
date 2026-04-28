@@ -440,8 +440,8 @@ function getNextAvailableDays(count: number, includeToday: boolean = true, timez
  * Sanitiza data passada pela IA: se vier no passado, num ano errado, ou inválida,
  * substitui pelo próximo dia útil. Aceita YYYY-MM-DD ou DD/MM/YYYY.
  */
-function sanitizeDate(rawDate: string | undefined | null): string {
-  const fallback = getNextAvailableDays(1, false)[0];
+function sanitizeDate(rawDate: string | undefined | null, timezone: string = "America/Sao_Paulo"): string {
+  const fallback = getNextAvailableDays(1, false, timezone)[0];
   if (!rawDate) return fallback;
   let s = String(rawDate).trim();
   const dmy = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
