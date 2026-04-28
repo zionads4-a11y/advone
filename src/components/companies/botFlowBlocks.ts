@@ -364,7 +364,9 @@ export function buildDynamicLauraPrompt(params: {
     .join("\n\n");
 
   const office = officeName ? `${officeName}` : "do escritório";
-  const assistantName = niche === "trabalhista" || niche === "hibrido" ? "Julia" : "Laura";
+  const defaultBotName = niche === "trabalhista" || niche === "hibrido" ? "Julia" : "Laura";
+  const finalBotName = botName || defaultBotName;
+  const finalBotRole = botRoleDescription || "atendente virtual";
   const hasOffices = activeOffices.length > 0;
 
   let modalidadeBlock: string;
