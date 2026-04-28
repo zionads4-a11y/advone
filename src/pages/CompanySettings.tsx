@@ -129,59 +129,63 @@ export default function CompanySettings() {
         </CardContent>
       </Card>
 
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle className="font-display text-lg">Personalização da Assistente Virtual (IA)</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Nome da Assistente</Label>
-              <Input 
-                value={botName} 
-                onChange={(e) => setBotName(e.target.value)} 
-                placeholder="Ex: Laura, Julia, Maria..."
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Como ela se apresenta (Cargo/Função)</Label>
-              <Input 
-                value={botRoleDescription} 
-                onChange={(e) => setBotRoleDescription(e.target.value)} 
-                placeholder="Ex: atendente virtual, secretária, assistente jurídica..."
-              />
-            </div>
-          </div>
-          <p className="text-xs text-muted-foreground italic">
-            Isso mudará a primeira frase do chat. Ex: "Você é {'{Nome}'}, {'{Cargo}'} da equipe..."
-          </p>
-        </CardContent>
-      </Card>
+      {userRole === "admin" && (
+        <>
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="font-display text-lg">Personalização da Assistente Virtual (IA)</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Nome da Assistente</Label>
+                  <Input 
+                    value={botName} 
+                    onChange={(e) => setBotName(e.target.value)} 
+                    placeholder="Ex: Laura, Julia, Maria..."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Como ela se apresenta (Cargo/Função)</Label>
+                  <Input 
+                    value={botRoleDescription} 
+                    onChange={(e) => setBotRoleDescription(e.target.value)} 
+                    placeholder="Ex: atendente virtual, secretária, assistente jurídica..."
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground italic">
+                Isso mudará a primeira frase do chat. Ex: "Você é {'{Nome}'}, {'{Cargo}'} da equipe..."
+              </p>
+            </CardContent>
+          </Card>
 
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle className="font-display text-lg">Google OAuth (Agenda)</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>ID do Cliente (OAuth)</Label>
-            <Input 
-              value={googleClientId} 
-              onChange={(e) => setGoogleClientId(e.target.value)} 
-              placeholder="123456-abcde.apps.googleusercontent.com"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Segredo do Cliente</Label>
-            <Input 
-              type="password"
-              value={googleClientSecret} 
-              onChange={(e) => setGoogleClientSecret(e.target.value)} 
-              placeholder="••••••••••••••••"
-            />
-          </div>
-        </CardContent>
-      </Card>
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="font-display text-lg">Google OAuth (Agenda)</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>ID do Cliente (OAuth)</Label>
+                <Input 
+                  value={googleClientId} 
+                  onChange={(e) => setGoogleClientId(e.target.value)} 
+                  placeholder="123456-abcde.apps.googleusercontent.com"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Segredo do Cliente</Label>
+                <Input 
+                  type="password"
+                  value={googleClientSecret} 
+                  onChange={(e) => setGoogleClientSecret(e.target.value)} 
+                  placeholder="••••••••••••••••"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </>
+      )}
 
       <CompanyOfficesEditor companyId={company.id} />
 
