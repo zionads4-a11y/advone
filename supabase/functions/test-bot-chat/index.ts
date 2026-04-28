@@ -562,7 +562,7 @@ serve(async (req) => {
         }
 
         if (fnName === "check_availability") {
-          const dateToCheck = args.date || getNextAvailableDays(1)[0];
+          const dateToCheck = sanitizeDate(args.date);
           const availability = await getAvailableSlots(adminClient, company_id, dateToCheck);
           toolResult = {
             date: availability.date,
