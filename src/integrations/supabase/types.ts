@@ -1703,7 +1703,14 @@ export type Database = {
       }
       leads: {
         Row: {
+          area_direito: string | null
           assigned_to: string | null
+          banco_agencia: string | null
+          banco_conta: string | null
+          banco_nome: string | null
+          banco_pix: string | null
+          banco_tipo_conta: string | null
+          became_client_at: string | null
           bot_agent_phase: string | null
           bot_disabled: boolean
           campaign_id: string | null
@@ -1713,19 +1720,32 @@ export type Database = {
           cpf_cliente_final: string | null
           created_at: string
           email: string | null
+          endereco_bairro: string | null
+          endereco_cep: string | null
+          endereco_cidade: string | null
+          endereco_complemento: string | null
+          endereco_estado: string | null
+          endereco_numero: string | null
+          endereco_rua: string | null
+          estado_civil: string | null
           honorarios_estimados: number | null
           id: string
+          is_client: boolean
           kanban_column_id: string | null
           lead_score: string | null
           message_count: number | null
+          nacionalidade: string | null
           name: string
           notes: string | null
           pending_data_warning: string | null
           phone: string | null
           processo_numero: string | null
           processo_valor: number | null
+          profissao: string | null
+          rg: string | null
           source: Database["public"]["Enums"]["campaign_source"] | null
           status: Database["public"]["Enums"]["lead_status"]
+          tipo_caso_detalhado: string | null
           updated_at: string
           utm_campaign: string | null
           utm_content: string | null
@@ -1737,7 +1757,14 @@ export type Database = {
           whatsapp: string | null
         }
         Insert: {
+          area_direito?: string | null
           assigned_to?: string | null
+          banco_agencia?: string | null
+          banco_conta?: string | null
+          banco_nome?: string | null
+          banco_pix?: string | null
+          banco_tipo_conta?: string | null
+          became_client_at?: string | null
           bot_agent_phase?: string | null
           bot_disabled?: boolean
           campaign_id?: string | null
@@ -1747,19 +1774,32 @@ export type Database = {
           cpf_cliente_final?: string | null
           created_at?: string
           email?: string | null
+          endereco_bairro?: string | null
+          endereco_cep?: string | null
+          endereco_cidade?: string | null
+          endereco_complemento?: string | null
+          endereco_estado?: string | null
+          endereco_numero?: string | null
+          endereco_rua?: string | null
+          estado_civil?: string | null
           honorarios_estimados?: number | null
           id?: string
+          is_client?: boolean
           kanban_column_id?: string | null
           lead_score?: string | null
           message_count?: number | null
+          nacionalidade?: string | null
           name: string
           notes?: string | null
           pending_data_warning?: string | null
           phone?: string | null
           processo_numero?: string | null
           processo_valor?: number | null
+          profissao?: string | null
+          rg?: string | null
           source?: Database["public"]["Enums"]["campaign_source"] | null
           status?: Database["public"]["Enums"]["lead_status"]
+          tipo_caso_detalhado?: string | null
           updated_at?: string
           utm_campaign?: string | null
           utm_content?: string | null
@@ -1771,7 +1811,14 @@ export type Database = {
           whatsapp?: string | null
         }
         Update: {
+          area_direito?: string | null
           assigned_to?: string | null
+          banco_agencia?: string | null
+          banco_conta?: string | null
+          banco_nome?: string | null
+          banco_pix?: string | null
+          banco_tipo_conta?: string | null
+          became_client_at?: string | null
           bot_agent_phase?: string | null
           bot_disabled?: boolean
           campaign_id?: string | null
@@ -1781,19 +1828,32 @@ export type Database = {
           cpf_cliente_final?: string | null
           created_at?: string
           email?: string | null
+          endereco_bairro?: string | null
+          endereco_cep?: string | null
+          endereco_cidade?: string | null
+          endereco_complemento?: string | null
+          endereco_estado?: string | null
+          endereco_numero?: string | null
+          endereco_rua?: string | null
+          estado_civil?: string | null
           honorarios_estimados?: number | null
           id?: string
+          is_client?: boolean
           kanban_column_id?: string | null
           lead_score?: string | null
           message_count?: number | null
+          nacionalidade?: string | null
           name?: string
           notes?: string | null
           pending_data_warning?: string | null
           phone?: string | null
           processo_numero?: string | null
           processo_valor?: number | null
+          profissao?: string | null
+          rg?: string | null
           source?: Database["public"]["Enums"]["campaign_source"] | null
           status?: Database["public"]["Enums"]["lead_status"]
+          tipo_caso_detalhado?: string | null
           updated_at?: string
           utm_campaign?: string | null
           utm_content?: string | null
