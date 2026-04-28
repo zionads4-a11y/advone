@@ -75,6 +75,7 @@ export default function ClientDetail() {
     if (data) {
       setClient(data as ClientData);
       setCompanyId((data as any).company_id);
+      fetchNewMovements((data as any).company_id, data.id);
     }
     setLoading(false);
   };
