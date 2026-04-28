@@ -15,6 +15,8 @@ import { CompanyOfficesEditor } from "@/components/companies/CompanyOfficesEdito
 import { CompanyNicheAlertsCard } from "@/components/companies/CompanyNicheAlertsCard";
 import { CadenceConfigCard } from "@/components/companies/CadenceConfigCard";
 import { MeetingRemindersConfigCard } from "@/components/companies/MeetingRemindersConfigCard";
+import { BotConfigCard } from "@/components/companies/BotConfigCard";
+
 
 interface Company {
   id: string;
@@ -161,15 +163,20 @@ export default function CompanySettings() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label>Prompt / Instruções do Bot (SDR)</Label>
+                  <div className="flex items-center justify-between">
+                    <Label>Prompt / Instruções do Bot (SDR)</Label>
+                    <p className="text-[10px] text-muted-foreground italic">
+                      Editável apenas pelo Super Admin
+                    </p>
+                  </div>
                   <textarea
-                    className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex min-h-[300px] w-full rounded-md border border-input bg-muted/20 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
                     value={botPrompt}
-                    onChange={(e) => setBotPrompt(e.target.value)}
-                    placeholder="Descreva detalhadamente como o bot deve se comportar, o tom de voz e as regras de negócio..."
+                    readOnly
+                    placeholder="O prompt completo será exibido aqui após ser gerado nos fluxos..."
                   />
-                  <p className="text-xs text-muted-foreground italic">
-                    Este campo define o comportamento e o conhecimento da IA.
+                  <p className="text-xs text-muted-foreground">
+                    Este campo mostra o prompt completo que a IA utiliza, incluindo todas as regras e fluxos selecionados. Para alterar estas instruções, utilize o seletor de fluxos abaixo.
                   </p>
                 </div>
               </div>
@@ -206,6 +213,10 @@ export default function CompanySettings() {
             </CardContent>
           </Card>
         </>
+      )}
+
+      {userRole === "admin" && (
+        <BotConfigCard companyId={company.id} hasWhatsappConfig={true} />
       )}
 
       <CompanyOfficesEditor companyId={company.id} />
