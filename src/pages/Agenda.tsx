@@ -99,17 +99,42 @@ export default function Agenda() {
 
   const [disconnectOpen, setDisconnectOpen] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
+  const [clearAllOpen, setClearAllOpen] = useState(false);
+  const [clearingAll, setClearingAll] = useState(false);
+
+  const handleClearAllEvents = useCallback(async () => {
+    if (!user) return;
+    setClearingAll(true);
+    try {
+      const { error } = await supabase
+        .from("lead_reminders")
+        .delete()
+        .eq("created_by", user.id);
+      if (error) throw error;
+      await supabase
+        .from("google_calendar_sync_queue")
+        .delete()
+        .eq("user_id", user.id);
+      toast.success("Todos os eventos da agenda foram apagados.");
+      setClearAllOpen(false);
+      setRefreshKey(k => k + 1);
+    } catch (e: any) {
+      console.error("Erro ao apagar eventos:", e);
+      toast.error(e.message || "Erro ao apagar eventos");
+    } finally {
+      setClearingAll(false);
+    }
+  }, [user]);
 
   const handleDisconnectGoogle = useCallback(async () => {
     if (!user) return;
     setDisconnecting(true);
     try {
-      // 1. Apagar eventos importados do Google (mantém os criados manualmente sem google_event_id)
+      // 1. Apagar TODOS os eventos do usuário (incluindo importados do Google e criados manualmente)
       const { error: delErr } = await supabase
         .from("lead_reminders")
         .delete()
-        .eq("created_by", user.id)
-        .not("google_event_id", "is", null);
+        .eq("created_by", user.id);
       if (delErr) throw delErr;
 
       // 2. Limpar fila de sincronização do usuário
@@ -126,7 +151,7 @@ export default function Agenda() {
         .eq("provider", "google");
       if (intErr) throw intErr;
 
-      toast.success("Google Agenda desconectada e eventos importados removidos.");
+      toast.success("Google Agenda desconectada e todos os eventos da agenda removidos.");
       setIsGoogleConnected(false);
       setDisconnectOpen(false);
       setRefreshKey(k => k + 1);
@@ -453,7 +478,17 @@ export default function Agenda() {
               <Check className="h-3 w-3" />
               Google conectado · Desconectar
             </Button>
-          ) : (
+          ) : null}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setClearAllOpen(true)}
+            className="gap-2 text-xs h-9 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
+          >
+            <Trash2 className="h-3 w-3" />
+            Apagar todos
+          </Button>
+          {!isGoogleConnected ? (
             <Button
               variant="outline"
               size="sm"
@@ -484,7 +519,7 @@ export default function Agenda() {
               <Settings2 className="h-3 w-3" />
               Conectar Google
             </Button>
-          )}
+          ) : null}
         </div>
       </div>
 
@@ -670,8 +705,8 @@ export default function Agenda() {
           <AlertDialogHeader>
             <AlertDialogTitle>Desconectar Google Agenda?</AlertDialogTitle>
             <AlertDialogDescription>
-              Sua conta do Google será desconectada e <strong>todos os eventos importados do Google serão removidos do sistema</strong>.
-              Eventos criados manualmente aqui (que ainda não foram para o Google) serão mantidos.
+              Sua conta do Google será desconectada e <strong>todos os eventos da sua agenda serão apagados do sistema</strong> (incluindo os criados manualmente).
+              Essa ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -681,7 +716,29 @@ export default function Agenda() {
               disabled={disconnecting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {disconnecting ? "Desconectando..." : "Desconectar e limpar"}
+              {disconnecting ? "Desconectando..." : "Desconectar e apagar tudo"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={clearAllOpen} onOpenChange={setClearAllOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Apagar todos os eventos da agenda?</AlertDialogTitle>
+            <AlertDialogDescription>
+              <strong>Todos os eventos, reuniões e lembretes da sua agenda serão apagados permanentemente.</strong>
+              Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={clearingAll}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); handleClearAllEvents(); }}
+              disabled={clearingAll}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {clearingAll ? "Apagando..." : "Apagar todos"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
