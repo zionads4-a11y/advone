@@ -144,47 +144,24 @@ export function CompanyEditDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label>Tipo de Parceria *</Label>
+            <Label>Modelo de Cobrança *</Label>
             <Select
-              value={partnershipType}
-              onValueChange={(v) => setPartnershipType(v as PartnershipType)}
+              value={billingModel}
+              onValueChange={(v) => setBillingModel(v as BillingModel)}
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="mensalidade_zionads">
-                  💼 Mensalidade ZionAds (cliente da agência)
-                </SelectItem>
-                <SelectItem value="exito">
-                  🏆 Êxito (comissão por contrato fechado)
-                </SelectItem>
+                {BILLING_MODELS.map((m) => (
+                  <SelectItem key={m.key} value={m.key}>
+                    {m.emoji} {m.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              Define como a parceria comercial é gerida com esta empresa.
-            </p>
-          </div>
-          <div className="space-y-2">
-            <Label>Modo de Serviço *</Label>
-            <Select
-              value={serviceMode}
-              onValueChange={(v) => setServiceMode(v as ServiceMode)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="full">
-                  🏢 CRM Completo (Kanban, Financeiro, Casos, etc.)
-                </SelectItem>
-                <SelectItem value="ai_only">
-                  🤖 Apenas IA (Secretária Virtual + Áreas de Atuação)
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground">
-              "Apenas IA" oculta módulos do CRM e libera só Conversas, Leads, Agenda e a configuração da IA.
+              {getBillingModel(billingModel).description}
             </p>
           </div>
           <BusinessHoursConfig value={businessHours} onChange={setBusinessHours} />
