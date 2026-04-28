@@ -1,0 +1,1 @@
+UPDATE public.companies SET service_mode = 'ai_only' WHERE billing_model = 'exito' AND service_mode IS DISTINCT FROM 'ai_only';
