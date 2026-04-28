@@ -329,8 +329,18 @@ export function buildDynamicLauraPrompt(params: {
   enabledFlows: EnabledFlow[];
   offices?: OfficeAddress[];
   schedulingLink?: string;
+  botName?: string;
+  botRoleDescription?: string;
 }): string {
-  const { niche, officeName, enabledFlows, offices = [], schedulingLink } = params;
+  const { 
+    niche, 
+    officeName, 
+    enabledFlows, 
+    offices = [], 
+    schedulingLink,
+    botName,
+    botRoleDescription 
+  } = params;
   const orderedFlows = [...enabledFlows].sort((a, b) => a.position - b.position);
   const activeOffices = offices.filter((o) => o.address);
   const officeNumberEmojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
@@ -354,7 +364,9 @@ export function buildDynamicLauraPrompt(params: {
     .join("\n\n");
 
   const office = officeName ? `${officeName}` : "do escritório";
-  const assistantName = niche === "trabalhista" || niche === "hibrido" ? "Julia" : "Laura";
+  const defaultBotName = niche === "trabalhista" || niche === "hibrido" ? "Julia" : "Laura";
+  const finalBotName = botName || defaultBotName;
+  const finalBotRole = botRoleDescription || "atendente virtual";
   const hasOffices = activeOffices.length > 0;
 
   let modalidadeBlock: string;
@@ -389,7 +401,7 @@ Após a resposta do horário, peça o NOME COMPLETO.
 Finalize com: "Perfeito! Já estou organizando tudo por aqui e a equipe já entra em contato com você 🙂"
 `;
 
-  return `Você é ${assistantName}, atendente virtual da equipe ${office}.
+  return `Você é ${finalBotName}, ${finalBotRole} da equipe ${office}.
 
 ═══════════════════════════════════════════════════════
 🎯 MISSÃO ÚNICA

@@ -23,6 +23,8 @@ interface Company {
   business_hours: unknown;
   google_client_id: string | null;
   google_client_secret: string | null;
+  bot_name: string | null;
+  bot_role_description: string | null;
 }
 
 export default function CompanySettings() {
@@ -34,6 +36,8 @@ export default function CompanySettings() {
   const [googleClientId, setGoogleClientId] = useState("");
   const [googleClientSecret, setGoogleClientSecret] = useState("");
   const [businessHours, setBusinessHours] = useState<BusinessHours>(getDefaultBusinessHours());
+  const [botName, setBotName] = useState("Laura");
+  const [botRoleDescription, setBotRoleDescription] = useState("atendente virtual");
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [hasMonitoring, setHasMonitoring] = useState(true);
@@ -48,7 +52,7 @@ export default function CompanySettings() {
 
   const fetchCompany = async (id: string) => {
     const [companyResult, planResult] = await Promise.all([
-      supabase.from("companies").select("id, name, whatsapp, business_hours, google_client_id, google_client_secret").eq("id", id).maybeSingle(),
+      supabase.from("companies").select("id, name, whatsapp, business_hours, google_client_id, google_client_secret, bot_name, bot_role_description").eq("id", id).maybeSingle(),
       supabase.from("company_monitoring_plans").select("is_active").eq("company_id", id).maybeSingle(),
     ]);
     if (companyResult.data) {
@@ -58,6 +62,8 @@ export default function CompanySettings() {
       setGoogleClientId(companyResult.data.google_client_id || "");
       setGoogleClientSecret(companyResult.data.google_client_secret || "");
       setBusinessHours(parseBusinessHours(companyResult.data.business_hours));
+      setBotName(companyResult.data.bot_name || "Laura");
+      setBotRoleDescription(companyResult.data.bot_role_description || "atendente virtual");
     }
     setHasMonitoring(!!planResult.data?.is_active);
     setLoading(false);
@@ -73,7 +79,9 @@ export default function CompanySettings() {
         whatsapp: whatsapp || null, 
         business_hours: businessHours as any,
         google_client_id: googleClientId || null,
-        google_client_secret: googleClientSecret || null
+        google_client_secret: googleClientSecret || null,
+        bot_name: botName || 'Laura',
+        bot_role_description: botRoleDescription || 'atendente virtual'
       })
       .eq("id", company.id);
 
@@ -118,6 +126,35 @@ export default function CompanySettings() {
             <Label>Telefone / WhatsApp</Label>
             <Input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="5511999999999" />
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="font-display text-lg">Personalização da Assistente Virtual (IA)</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Nome da Assistente</Label>
+              <Input 
+                value={botName} 
+                onChange={(e) => setBotName(e.target.value)} 
+                placeholder="Ex: Laura, Julia, Maria..."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Como ela se apresenta (Cargo/Função)</Label>
+              <Input 
+                value={botRoleDescription} 
+                onChange={(e) => setBotRoleDescription(e.target.value)} 
+                placeholder="Ex: atendente virtual, secretária, assistente jurídica..."
+              />
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground italic">
+            Isso mudará a primeira frase do chat. Ex: "Você é {'{Nome}'}, {'{Cargo}'} da equipe..."
+          </p>
         </CardContent>
       </Card>
 
