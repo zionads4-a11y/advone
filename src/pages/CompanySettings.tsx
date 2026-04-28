@@ -15,6 +15,8 @@ import { CompanyOfficesEditor } from "@/components/companies/CompanyOfficesEdito
 import { CompanyNicheAlertsCard } from "@/components/companies/CompanyNicheAlertsCard";
 import { CadenceConfigCard } from "@/components/companies/CadenceConfigCard";
 import { MeetingRemindersConfigCard } from "@/components/companies/MeetingRemindersConfigCard";
+import { BotConfigCard } from "@/components/companies/BotConfigCard";
+
 
 interface Company {
   id: string;
