@@ -130,8 +130,9 @@ wants_help: "Pra não correr risco de erro ou perder algo importante, o ideal é
     case_type: "fallback_outros",
     block: `▸ OUTRO ASSUNTO INSS (case_type: fallback_outros)
 "Entendi 😊 Para eu te direcionar melhor, me fala seu nome primeiro."
-Qualificação livre: "Prazer, {nome}. Me conta com suas palavras o que está acontecendo no seu caso no INSS."
-Transição: "Entendi, {nome}. A equipe aqui já analisa casos como o seu todos os dias. Pra não correr risco de erro ou perder algo importante, o ideal é a equipe já analisar seu caso com você 👀"
+P1 descricao_caso: "Prazer, {nome}. Me conta com suas palavras o que está acontecendo no seu caso no INSS."
+P2 tem_docs: "Você tem algum documento, carta do INSS ou print do aplicativo? 1️⃣ Sim 2️⃣ Não 3️⃣ Posso conseguir" → sim | nao | posso_conseguir
+Gatilho: "Entendi, {nome}. A equipe aqui já analisa casos como o seu todos os dias. Pra não correr risco de erro ou perder algo importante, o ideal é a equipe já analisar seu caso com você 👀"
 wants_help: "Você quer que a equipe analise melhor seu caso? 1️⃣ Sim 2️⃣ Tenho dúvida ainda" → sim | duvida`,
   },
 ];
