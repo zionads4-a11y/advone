@@ -48,7 +48,40 @@ export default function Clients() {
         .order("became_client_at", { ascending: false }),
       supabase.from("companies").select("id, name"),
     ]);
-    if (clientsRes.data) setClients(clientsRes.data as Client[]);
+    if (clientsRes.data) {
+      const list = clientsRes.data as Client[];
+      setClients(list);
+      // Para cada cliente, calcula movimentos novos
+      const counts: Record<string, number> = {};
+      await Promise.all(list.map(async (c) => {
+        const { data: cases } = await supabase
+          .from("cases")
+          .select("id, case_number")
+          .eq("lead_id", c.id)
+          .eq("company_id", c.company_id);
+        const caseIds = (cases || []).map((x) => x.id);
+        const cnjs = (cases || []).map((x) => x.case_number).filter(Boolean) as string[];
+        if (caseIds.length === 0 && cnjs.length === 0) return;
+        const filterParts = [
+          caseIds.length ? `case_id.in.(${caseIds.join(",")})` : "",
+          cnjs.length ? `numero_cnj.in.(${cnjs.map((x) => `"${x}"`).join(",")})` : "",
+        ].filter(Boolean).join(",");
+        const { data: procs } = await supabase
+          .from("monitored_processes")
+          .select("id")
+          .eq("company_id", c.company_id)
+          .or(filterParts);
+        const ids = (procs || []).map((p) => p.id);
+        if (ids.length === 0) return;
+        const { count } = await supabase
+          .from("process_movements")
+          .select("id", { count: "exact", head: true })
+          .in("monitored_process_id", ids)
+          .eq("is_new", true);
+        if (count && count > 0) counts[c.id] = count;
+      }));
+      setAlertCounts(counts);
+    }
     if (companiesRes.data) {
       const map: Record<string, string> = {};
       companiesRes.data.forEach((c: Company) => { map[c.id] = c.name; });
