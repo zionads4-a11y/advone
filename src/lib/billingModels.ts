@@ -22,9 +22,9 @@ export const BILLING_MODELS: BillingModelOption[] = [
     emoji: "🏆",
     label: "Êxito (IA + R$97 por reunião realizada)",
     description:
-      "Liberamos a IA Laura para atender os leads e cobramos R$97 por reunião realizada. Sem mensalidade.",
+      "Mesma visualização da IA Laura (Kanban, Agenda, Conversas e Configuração do Escritório). Cobramos R$97 por reunião realizada. Sem mensalidade.",
     partnership_type: "exito",
-    service_mode: "full",
+    service_mode: "ai_only",
   },
   {
     key: "ia_only",
