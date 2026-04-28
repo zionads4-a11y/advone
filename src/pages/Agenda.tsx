@@ -519,7 +519,7 @@ export default function Agenda() {
               <Settings2 className="h-3 w-3" />
               Conectar Google
             </Button>
-          )}
+          ) : null}
         </div>
       </div>
 
