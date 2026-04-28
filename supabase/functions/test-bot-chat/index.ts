@@ -18,6 +18,13 @@ function buildSDRPrompt(config: any) {
   const consultationDuration = config.consultation_duration || "30 minutos";
   const targetAudience = config.target_audience || "";
   const customPrompt = config.ai_prompt || "";
+
+  const cpfRegraOuro = `
+═══════════════════════════════════════
+🚫 REGRA DE OURO (MUITO IMPORTANTE)
+═══════════════════════════════════════
+NUNCA, JAMAIS, peça o CPF do cliente. Nem o RG. Peça apenas o NOME COMPLETO no final do agendamento. Se o cliente perguntar se precisa de CPF, diga que não é necessário agora. Esta regra é absoluta.
+`;
   const triageOptions: any[] = Array.isArray(config.triage_options) ? config.triage_options : [];
 
   const toneInstructions = tone === "formal"
