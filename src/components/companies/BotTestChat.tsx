@@ -62,7 +62,9 @@ export function BotTestChat({ companyId }: BotTestChatProps) {
 
       if (!resp.ok) {
         const err = await resp.json().catch(() => ({ error: "Erro desconhecido" }));
-        toast.error(err.error || "Erro ao comunicar com o bot");
+        toast.error(err.error || "Erro ao comunicar com o bot", {
+          description: err.detail ? String(err.detail).slice(0, 300) : undefined,
+        });
         setLoading(false);
         return;
       }
