@@ -76,6 +76,12 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
       .eq("company_id", companyId)
       .maybeSingle();
 
+    const { data: companyData } = await supabase
+      .from("companies")
+      .select("bot_name, bot_role_description")
+      .eq("id", companyId)
+      .maybeSingle();
+
     const activeOffices: OfficeAddress[] = offices
       .filter((o) => o.is_active)
       .map((o) => ({
