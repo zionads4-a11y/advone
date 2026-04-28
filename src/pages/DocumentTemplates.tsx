@@ -302,6 +302,13 @@ export default function DocumentTemplates() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <QuickGenerateDocDialog
+        open={!!quickGenTemplate}
+        onOpenChange={(v) => !v && setQuickGenTemplate(null)}
+        template={quickGenTemplate}
+        companyId={companyId}
+      />
     </div>
   );
 }
