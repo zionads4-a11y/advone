@@ -82,8 +82,7 @@ export function CompanyEditDialog({
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [businessHours, setBusinessHours] = useState<BusinessHours>(getDefaultBusinessHours());
-  const [partnershipType, setPartnershipType] = useState<PartnershipType>("mensalidade_zionads");
-  const [serviceMode, setServiceMode] = useState<ServiceMode>("full");
+  const [billingModel, setBillingModel] = useState<BillingModel>("exito");
   const [botName, setBotName] = useState("");
   const [botRoleDescription, setBotRoleDescription] = useState("");
   const [googleClientId, setGoogleClientId] = useState("");
@@ -94,8 +93,10 @@ export function CompanyEditDialog({
       setName(company.name);
       setWhatsapp(company.whatsapp || "");
       setBusinessHours(parseBusinessHours(company.business_hours));
-      setPartnershipType((company.partnership_type as PartnershipType) || "mensalidade_zionads");
-      setServiceMode((company.service_mode as ServiceMode) || "full");
+      setBillingModel(
+        (company.billing_model as BillingModel) ||
+          inferBillingModel(company.partnership_type, company.service_mode),
+      );
       setBotName(company.bot_name || "");
       setBotRoleDescription(company.bot_role_description || "");
       setGoogleClientId(company.google_client_id || "");
@@ -114,12 +115,14 @@ export function CompanyEditDialog({
         <form
           onSubmit={(e) => {
             e.preventDefault();
+            const model = getBillingModel(billingModel);
             onUpdate(company.id, {
               name,
               whatsapp: whatsapp || null,
               business_hours: businessHours,
-              partnership_type: partnershipType,
-              service_mode: serviceMode,
+              partnership_type: model.partnership_type,
+              service_mode: model.service_mode,
+              billing_model: model.key,
               bot_name: botName,
               bot_role_description: botRoleDescription,
               google_client_id: googleClientId || null,
