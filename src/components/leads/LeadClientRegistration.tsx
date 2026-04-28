@@ -21,6 +21,7 @@ interface LeadClientRegistrationProps {
 interface ClientFields {
   name: string;
   cpf_cliente_final: string | null;
+  rg: string | null;
   email: string | null;
   phone: string | null;
   estado_civil: string | null;
@@ -44,6 +45,7 @@ const ESTADOS_CIVIS = [
 const empty: ClientFields = {
   name: "",
   cpf_cliente_final: "",
+  rg: "",
   email: "",
   phone: "",
   estado_civil: "",
@@ -68,7 +70,7 @@ export function LeadClientRegistration({ leadId, onUpdate }: LeadClientRegistrat
       const { data } = await supabase
         .from("leads")
         .select(
-          "name, cpf_cliente_final, email, phone, estado_civil, endereco_rua, endereco_numero, endereco_complemento, endereco_bairro, endereco_cidade, endereco_estado, endereco_cep"
+          "name, cpf_cliente_final, rg, email, phone, estado_civil, endereco_rua, endereco_numero, endereco_complemento, endereco_bairro, endereco_cidade, endereco_estado, endereco_cep"
         )
         .eq("id", leadId)
         .maybeSingle();
@@ -76,6 +78,7 @@ export function LeadClientRegistration({ leadId, onUpdate }: LeadClientRegistrat
         setForm({
           name: data.name || "",
           cpf_cliente_final: data.cpf_cliente_final || "",
+          rg: (data as any).rg || "",
           email: data.email || "",
           phone: data.phone || "",
           estado_civil: data.estado_civil || "",
@@ -110,6 +113,7 @@ export function LeadClientRegistration({ leadId, onUpdate }: LeadClientRegistrat
       .update({
         name: form.name.trim(),
         cpf_cliente_final: form.cpf_cliente_final || null,
+        rg: form.rg || null,
         email: form.email || null,
         phone: form.phone || null,
         estado_civil: form.estado_civil || null,
@@ -153,13 +157,21 @@ export function LeadClientRegistration({ leadId, onUpdate }: LeadClientRegistrat
                 placeholder="Nome completo"
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <div>
                 <Label className="text-xs">CPF</Label>
                 <Input
                   value={form.cpf_cliente_final || ""}
                   onChange={(e) => set("cpf_cliente_final", e.target.value)}
                   placeholder="000.000.000-00"
+                />
+              </div>
+              <div>
+                <Label className="text-xs">RG</Label>
+                <Input
+                  value={form.rg || ""}
+                  onChange={(e) => set("rg", e.target.value)}
+                  placeholder="00.000.000-0"
                 />
               </div>
               <div>
