@@ -295,9 +295,9 @@ Responda SEMPRE em português do Brasil.`;
 }
 
 // ====== UTILITY FUNCTIONS ======
-function getNowBrasilia(): Date {
+function getNowBrasilia(timeZone: string = "America/Sao_Paulo"): Date {
   const fmt = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Sao_Paulo",
+    timeZone: timeZone,
     year: "numeric", month: "2-digit", day: "2-digit",
     hour: "2-digit", minute: "2-digit", second: "2-digit",
     hour12: false,
@@ -314,8 +314,8 @@ function getNowBrasilia(): Date {
   return new Date(y, mo - 1, d, h, mi, s);
 }
 
-function getTodayBrasilia(): string {
-  const b = getNowBrasilia();
+function getTodayBrasilia(timeZone: string = "America/Sao_Paulo"): string {
+  const b = getNowBrasilia(timeZone);
   return `${b.getFullYear()}-${String(b.getMonth() + 1).padStart(2, "0")}-${String(b.getDate()).padStart(2, "0")}`;
 }
 
