@@ -10,6 +10,7 @@ import { CompanyCard } from "@/components/companies/CompanyCard";
 import { CompanyFormDialog } from "@/components/companies/CompanyFormDialog";
 import { CompanyEditDialog } from "@/components/companies/CompanyEditDialog";
 import { WhatsAppConfigDialog } from "@/components/companies/WhatsAppConfigDialog";
+import { getBillingModel, type BillingModel } from "@/lib/billingModels";
 
 interface Company {
   id: string;
@@ -20,6 +21,7 @@ interface Company {
   created_at: string;
   partnership_type: "exito" | "mensalidade_zionads" | null;
   service_mode: "full" | "ai_only" | null;
+  billing_model: BillingModel | null;
 }
 
 interface WhatsAppConfig {
@@ -64,14 +66,15 @@ export default function Companies() {
   const handleAdd = async (formData: FormData) => {
     if (!user) return;
 
-    const partnership = (formData.get("partnership_type") as string) || "mensalidade_zionads";
-    const serviceMode = (formData.get("service_mode") as string) || "full";
+    const billingKey = (formData.get("billing_model") as BillingModel) || "exito";
+    const model = getBillingModel(billingKey);
 
     const { error } = await supabase.from("companies").insert({
       name: formData.get("name") as string,
       whatsapp: (formData.get("whatsapp") as string) || null,
-      partnership_type: partnership as "exito" | "mensalidade_zionads",
-      service_mode: serviceMode as "full" | "ai_only",
+      partnership_type: model.partnership_type,
+      service_mode: model.service_mode,
+      billing_model: model.key,
       created_by: user.id,
     } as any);
 
@@ -85,7 +88,7 @@ export default function Companies() {
     fetchData();
   };
 
-  const handleUpdate = async (id: string, data: { name: string; whatsapp: string | null; business_hours?: Record<string, unknown[]>; partnership_type?: "exito" | "mensalidade_zionads"; service_mode?: "full" | "ai_only" }) => {
+  const handleUpdate = async (id: string, data: { name: string; whatsapp: string | null; business_hours?: Record<string, unknown[]>; partnership_type?: "exito" | "mensalidade_zionads"; service_mode?: "full" | "ai_only"; billing_model?: BillingModel }) => {
     const { error } = await supabase.from("companies").update(data as any).eq("id", id);
 
     if (error) {

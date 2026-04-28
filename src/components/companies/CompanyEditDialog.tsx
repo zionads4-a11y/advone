@@ -30,6 +30,7 @@ import { Trash2 } from "lucide-react";
 import { BusinessHoursConfig, type BusinessHours, parseBusinessHours, getDefaultBusinessHours } from "./BusinessHoursConfig";
 import { CompanyOfficesEditor } from "./CompanyOfficesEditor";
 import { Separator } from "@/components/ui/separator";
+import { BILLING_MODELS, getBillingModel, inferBillingModel, type BillingModel } from "@/lib/billingModels";
 
 export type PartnershipType = "exito" | "mensalidade_zionads";
 export type ServiceMode = "full" | "ai_only";
@@ -42,6 +43,7 @@ interface Company {
   business_hours?: unknown;
   partnership_type?: PartnershipType | null;
   service_mode?: ServiceMode | null;
+  billing_model?: BillingModel | null;
   bot_name?: string | null;
   bot_role_description?: string | null;
   google_client_id?: string | null;
@@ -60,6 +62,7 @@ interface CompanyEditDialogProps {
       business_hours: BusinessHours;
       partnership_type: PartnershipType;
       service_mode: ServiceMode;
+      billing_model: BillingModel;
       bot_name: string;
       bot_role_description: string;
       google_client_id: string | null;
@@ -79,8 +82,7 @@ export function CompanyEditDialog({
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [businessHours, setBusinessHours] = useState<BusinessHours>(getDefaultBusinessHours());
-  const [partnershipType, setPartnershipType] = useState<PartnershipType>("mensalidade_zionads");
-  const [serviceMode, setServiceMode] = useState<ServiceMode>("full");
+  const [billingModel, setBillingModel] = useState<BillingModel>("exito");
   const [botName, setBotName] = useState("");
   const [botRoleDescription, setBotRoleDescription] = useState("");
   const [googleClientId, setGoogleClientId] = useState("");
@@ -91,8 +93,10 @@ export function CompanyEditDialog({
       setName(company.name);
       setWhatsapp(company.whatsapp || "");
       setBusinessHours(parseBusinessHours(company.business_hours));
-      setPartnershipType((company.partnership_type as PartnershipType) || "mensalidade_zionads");
-      setServiceMode((company.service_mode as ServiceMode) || "full");
+      setBillingModel(
+        (company.billing_model as BillingModel) ||
+          inferBillingModel(company.partnership_type, company.service_mode),
+      );
       setBotName(company.bot_name || "");
       setBotRoleDescription(company.bot_role_description || "");
       setGoogleClientId(company.google_client_id || "");
@@ -111,12 +115,14 @@ export function CompanyEditDialog({
         <form
           onSubmit={(e) => {
             e.preventDefault();
+            const model = getBillingModel(billingModel);
             onUpdate(company.id, {
               name,
               whatsapp: whatsapp || null,
               business_hours: businessHours,
-              partnership_type: partnershipType,
-              service_mode: serviceMode,
+              partnership_type: model.partnership_type,
+              service_mode: model.service_mode,
+              billing_model: model.key,
               bot_name: botName,
               bot_role_description: botRoleDescription,
               google_client_id: googleClientId || null,
@@ -138,47 +144,24 @@ export function CompanyEditDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label>Tipo de Parceria *</Label>
+            <Label>Modelo de Cobrança *</Label>
             <Select
-              value={partnershipType}
-              onValueChange={(v) => setPartnershipType(v as PartnershipType)}
+              value={billingModel}
+              onValueChange={(v) => setBillingModel(v as BillingModel)}
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="mensalidade_zionads">
-                  💼 Mensalidade ZionAds (cliente da agência)
-                </SelectItem>
-                <SelectItem value="exito">
-                  🏆 Êxito (comissão por contrato fechado)
-                </SelectItem>
+                {BILLING_MODELS.map((m) => (
+                  <SelectItem key={m.key} value={m.key}>
+                    {m.emoji} {m.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              Define como a parceria comercial é gerida com esta empresa.
-            </p>
-          </div>
-          <div className="space-y-2">
-            <Label>Modo de Serviço *</Label>
-            <Select
-              value={serviceMode}
-              onValueChange={(v) => setServiceMode(v as ServiceMode)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="full">
-                  🏢 CRM Completo (Kanban, Financeiro, Casos, etc.)
-                </SelectItem>
-                <SelectItem value="ai_only">
-                  🤖 Apenas IA (Secretária Virtual + Áreas de Atuação)
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground">
-              "Apenas IA" oculta módulos do CRM e libera só Conversas, Leads, Agenda e a configuração da IA.
+              {getBillingModel(billingModel).description}
             </p>
           </div>
           <BusinessHoursConfig value={businessHours} onChange={setBusinessHours} />

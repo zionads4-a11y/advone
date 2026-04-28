@@ -707,6 +707,7 @@ export type Database = {
       }
       companies: {
         Row: {
+          billing_model: Database["public"]["Enums"]["billing_model"]
           bot_name: string | null
           bot_prompt: string | null
           bot_role_description: string | null
@@ -728,6 +729,7 @@ export type Database = {
           whatsapp: string | null
         }
         Insert: {
+          billing_model?: Database["public"]["Enums"]["billing_model"]
           bot_name?: string | null
           bot_prompt?: string | null
           bot_role_description?: string | null
@@ -749,6 +751,7 @@ export type Database = {
           whatsapp?: string | null
         }
         Update: {
+          billing_model?: Database["public"]["Enums"]["billing_model"]
           bot_name?: string | null
           bot_prompt?: string | null
           bot_role_description?: string | null
@@ -3128,6 +3131,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "member" | "client" | "gerente" | "operador"
+      billing_model: "exito" | "ia_only" | "crm_full"
       bot_agent_type:
         | "document_collector"
         | "viability_analyzer"
@@ -3274,6 +3278,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "member", "client", "gerente", "operador"],
+      billing_model: ["exito", "ia_only", "crm_full"],
       bot_agent_type: [
         "document_collector",
         "viability_analyzer",
