@@ -9,9 +9,12 @@ const corsHeaders = {
 };
 
 function buildSDRPrompt(config: any) {
-  const officeName = config.office_name || "o escritório";
+  const company = config.companies;
+  const officeName = config.office_name || company?.name || "o escritório";
   const practiceArea = config.practice_area || "";
   const tone = config.communication_tone || "moderado";
+  const botName = company?.bot_name || "Laura";
+  const botRole = company?.bot_role_description || "atendente virtual";
   const consultationDuration = config.consultation_duration || "30 minutos";
   const targetAudience = config.target_audience || "";
   const customPrompt = config.ai_prompt || "";
