@@ -144,12 +144,23 @@ export function LeadContract({ leadId, companyId, leadName, leadPhone, leadEmail
           <FileSignature className="h-3.5 w-3.5" />
           Contratos Digitais
         </h4>
-        {hasConfig && (
-          <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setDialogOpen(true)}>
-            <Send className="h-3 w-3 mr-1" />
-            Enviar contrato
+        <div className="flex gap-1.5">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 text-xs"
+            onClick={() => setGenerateDocOpen(true)}
+          >
+            <FilePlus2 className="h-3 w-3 mr-1" />
+            Gerar contrato
           </Button>
-        )}
+          {hasConfig && (
+            <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setDialogOpen(true)}>
+              <Send className="h-3 w-3 mr-1" />
+              Enviar p/ assinatura
+            </Button>
+          )}
+        </div>
       </div>
 
       {!hasConfig && (
