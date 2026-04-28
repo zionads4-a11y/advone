@@ -20,6 +20,10 @@ interface DraggableLeadCardProps {
     source: string | null;
     lead_score?: string | null;
     pending_data_warning?: string | null;
+    case_area?: string | null;
+    case_subtype?: string | null;
+    case_urgency?: string | null;
+    case_summary_short?: string | null;
   };
   onClick?: () => void;
   isDragOverlay?: boolean;
@@ -159,6 +163,32 @@ function LeadCardContent({ lead, onValueUpdate, isInMeetingHeld }: { lead: Dragg
           {lead.lead_score && <LeadScoreBadge score={lead.lead_score} />}
         </div>
       </div>
+      {(lead.case_area || lead.case_summary_short) && (
+        <div className="mb-2 rounded-md bg-primary/5 border border-primary/15 px-2 py-1.5 space-y-1">
+          {lead.case_summary_short && (
+            <p className="text-[11px] leading-snug text-foreground line-clamp-2">
+              {lead.case_summary_short}
+            </p>
+          )}
+          <div className="flex flex-wrap gap-1">
+            {lead.case_area && (
+              <span className="text-[9px] uppercase tracking-wide font-semibold px-1.5 py-0.5 rounded bg-primary/15 text-primary">
+                {lead.case_area}
+              </span>
+            )}
+            {lead.case_subtype && (
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-background border border-border text-muted-foreground line-clamp-1">
+                {lead.case_subtype}
+              </span>
+            )}
+            {lead.case_urgency === "alta" && (
+              <span className="text-[9px] uppercase font-semibold px-1.5 py-0.5 rounded bg-destructive/15 text-destructive border border-destructive/30">
+                ⚠ urgente
+              </span>
+            )}
+          </div>
+        </div>
+      )}
       <div className="space-y-1">
         {lead.phone && (
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">

@@ -9,6 +9,7 @@ import { LeadScoreBadge } from "@/components/leads/LeadScoreBadge";
 import { SourceBadge } from "@/components/leads/SourceBadge";
 import { LeadReminders } from "@/components/leads/LeadReminders";
 import { LeadSummary } from "@/components/leads/LeadSummary";
+import { LeadCaseInsights } from "@/components/leads/LeadCaseInsights";
 import { LeadAssignment } from "@/components/leads/LeadAssignment";
 import { LeadProcessData } from "@/components/leads/LeadProcessData";
 import { LeadNotes } from "@/components/leads/LeadNotes";
@@ -159,6 +160,11 @@ export function LeadDetailDrawer({ lead, open, onOpenChange, onLeadUpdate }: Lea
 
             {/* Notes */}
             <LeadNotes leadId={lead.id} companyId={lead.company_id} onUpdate={onLeadUpdate} />
+
+            <Separator />
+
+            {/* Case Insights (IA) */}
+            <LeadCaseInsights leadId={lead.id} companyId={lead.company_id} />
 
             <Separator />
 
