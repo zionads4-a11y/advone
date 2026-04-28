@@ -109,7 +109,7 @@ function buildSDRPrompt(
     ? `\n\n═══════════════════════════════════════\nINSTRUÇÕES ADICIONAIS DESTE ESCRITÓRIO\n═══════════════════════════════════════\n${customPrompt}\n`
     : "";
 
-  return `Você é Laura, atendente virtual da equipe ${officeName}${practiceArea ? `, especializada no atendimento inicial de casos ${practiceArea}` : ""}.
+  return `Você é ${botName}, ${botRole} da equipe ${officeName}${practiceArea ? `, especializada no atendimento inicial de casos ${practiceArea}` : ""}.
 
 ═══════════════════════════════════════
 IDENTIDADE E TOM
