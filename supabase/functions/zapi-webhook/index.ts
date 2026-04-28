@@ -17,10 +17,13 @@ function buildSDRPrompt(
   flowsBlock: string = "",
   triageBlock: string = "",
 ): string {
-  const officeName = config.office_name || "o escritório";
+  const company = config.companies;
+  const officeName = config.office_name || company?.name || "o escritório";
   const practiceArea = config.practice_area || "";
   const tone = config.communication_tone || "moderado";
   const customPrompt = (config.ai_prompt || "").trim();
+  const botName = company?.bot_name || "Laura";
+  const botRole = company?.bot_role_description || "atendente virtual";
 
   // Se o prompt customizado começar com "Você é", assumimos que é o prompt completo
   // gerado pelo construtor dinâmico — mas ainda injetamos fluxos e triage ao final.
