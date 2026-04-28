@@ -55,7 +55,7 @@ export function inferBillingModel(
   partnership_type?: string | null,
   service_mode?: string | null,
 ): BillingModel {
-  if (service_mode === "ai_only") return "ia_only";
   if (partnership_type === "exito") return "exito";
+  if (service_mode === "ai_only") return "ia_only";
   return "crm_full";
 }
