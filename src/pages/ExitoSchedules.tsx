@@ -117,7 +117,7 @@ export default function ExitoSchedules() {
         (r.cpf?.includes(search) ?? false) ||
         (r.phone?.includes(search) ?? false);
       const matchCompany = filterCompany === "all" || r.company_id === filterCompany;
-      const isPending = !r.cpf_cliente_final || !!r.pending_data_warning;
+      const isPending = !!r.pending_data_warning;
       const matchPending =
         filterPending === "all" ||
         (filterPending === "pending" && isPending) ||
@@ -127,14 +127,12 @@ export default function ExitoSchedules() {
   }, [rows, search, filterCompany, filterPending]);
 
   const exportCsv = () => {
-    const header = ["Empresa", "Nome", "CPF", "Telefone", "Etapa", "Status", "Data"];
+    const header = ["Empresa", "Nome", "Telefone", "Etapa", "Status", "Data"];
     const lines = filtered.map((r) => {
-      const cpf = formatCpf(r.cpf_cliente_final || r.cpf) || "";
-      const status = !r.cpf_cliente_final || r.pending_data_warning ? "Pendente" : "Completo";
+      const status = r.pending_data_warning ? "Pendente" : "Completo";
       return [
         r.company_name,
         r.lead_name,
-        cpf,
         r.phone || "",
         r.column_name,
         status,
