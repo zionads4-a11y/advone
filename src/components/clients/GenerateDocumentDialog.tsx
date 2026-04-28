@@ -33,6 +33,8 @@ export function GenerateDocumentDialog({ open, onOpenChange, lead: leadProp, com
   const { user } = useAuth();
   const [templates, setTemplates] = useState<any[]>([]);
   const [companyName, setCompanyName] = useState("");
+  const [company, setCompany] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [selectedId, setSelectedId] = useState<string>("");
   const [manualValues, setManualValues] = useState<Record<string, string>>({});
   const [preview, setPreview] = useState("");
@@ -74,8 +76,19 @@ export function GenerateDocumentDialog({ open, onOpenChange, lead: leadProp, com
   };
 
   const load = async () => {
-    const { data: comp } = await supabase.from("companies").select("name").eq("id", companyId).maybeSingle();
+    const { data: comp } = await supabase.from("companies").select("*").eq("id", companyId).maybeSingle();
     setCompanyName(comp?.name || "");
+    setCompany(comp);
+
+    // Profile do usuário logado (override individual de dados do advogado)
+    if (user?.id) {
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      setProfile(prof);
+    }
 
     // Busca o lead completo (com cpf, rg, endereço, estado civil, etc.)
     if (leadProp?.id) {
