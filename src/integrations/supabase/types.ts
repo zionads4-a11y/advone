@@ -1908,6 +1908,16 @@ export type Database = {
           bot_agent_phase: string | null
           bot_disabled: boolean
           campaign_id: string | null
+          case_area: string | null
+          case_classified_at: string | null
+          case_classified_by: string | null
+          case_confidence: number | null
+          case_estimated_value: number | null
+          case_keywords: string[] | null
+          case_next_action: string | null
+          case_subtype: string | null
+          case_summary_short: string | null
+          case_urgency: string | null
           company_id: string
           contract_status: string | null
           cpf: string | null
@@ -1962,6 +1972,16 @@ export type Database = {
           bot_agent_phase?: string | null
           bot_disabled?: boolean
           campaign_id?: string | null
+          case_area?: string | null
+          case_classified_at?: string | null
+          case_classified_by?: string | null
+          case_confidence?: number | null
+          case_estimated_value?: number | null
+          case_keywords?: string[] | null
+          case_next_action?: string | null
+          case_subtype?: string | null
+          case_summary_short?: string | null
+          case_urgency?: string | null
           company_id: string
           contract_status?: string | null
           cpf?: string | null
@@ -2016,6 +2036,16 @@ export type Database = {
           bot_agent_phase?: string | null
           bot_disabled?: boolean
           campaign_id?: string | null
+          case_area?: string | null
+          case_classified_at?: string | null
+          case_classified_by?: string | null
+          case_confidence?: number | null
+          case_estimated_value?: number | null
+          case_keywords?: string[] | null
+          case_next_action?: string | null
+          case_subtype?: string | null
+          case_summary_short?: string | null
+          case_urgency?: string | null
           company_id?: string
           contract_status?: string | null
           cpf?: string | null
