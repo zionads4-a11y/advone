@@ -12,26 +12,16 @@ interface LeadProcessDataProps {
   onUpdate?: () => void;
 }
 
-function formatCpf(value: string): string {
-  const digits = value.replace(/\D/g, "").slice(0, 11);
-  if (digits.length <= 3) return digits;
-  if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
-  if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
-  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
-}
-
 export function LeadProcessData({ leadId, companyId, onUpdate }: LeadProcessDataProps) {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   
   // Stored values (from DB)
-  const [cpf, setCpf] = useState<string | null>(null);
   const [processoNumero, setProcessoNumero] = useState<string | null>(null);
   const [processoValor, setProcessoValor] = useState<number | null>(null);
   
   // Form values (editing)
-  const [formCpf, setFormCpf] = useState("");
   const [formProcesso, setFormProcesso] = useState("");
   const [formValor, setFormValor] = useState("");
 
@@ -39,13 +29,12 @@ export function LeadProcessData({ leadId, companyId, onUpdate }: LeadProcessData
     setLoading(true);
     const { data, error } = await supabase
       .from("leads")
-      .select("cpf, processo_numero, processo_valor")
+      .select("processo_numero, processo_valor")
       .eq("id", leadId)
       .maybeSingle();
     
     if (data) {
       const d = data as any;
-      setCpf(d.cpf || null);
       setProcessoNumero(d.processo_numero || null);
       setProcessoValor(d.processo_valor || null);
     }
@@ -57,7 +46,6 @@ export function LeadProcessData({ leadId, companyId, onUpdate }: LeadProcessData
   }, [leadId]);
 
   const startEditing = () => {
-    setFormCpf(cpf || "");
     setFormProcesso(processoNumero || "");
     setFormValor(processoValor ? String(processoValor) : "");
     setEditing(true);
@@ -65,14 +53,12 @@ export function LeadProcessData({ leadId, companyId, onUpdate }: LeadProcessData
 
   const handleSave = async () => {
     setSaving(true);
-    const cleanCpf = formCpf.trim().slice(0, 14);
     const cleanProcesso = formProcesso.trim().slice(0, 50);
     const parsedValor = parseFloat(formValor.replace(",", ".")) || 0;
 
     const { error } = await supabase
       .from("leads")
       .update({
-        cpf: cleanCpf || null,
         processo_numero: cleanProcesso || null,
         processo_valor: parsedValor,
       } as any)
@@ -83,7 +69,6 @@ export function LeadProcessData({ leadId, companyId, onUpdate }: LeadProcessData
       toast.error("Erro ao salvar: " + error.message);
     } else {
       // Update local state immediately
-      setCpf(cleanCpf || null);
       setProcessoNumero(cleanProcesso || null);
       setProcessoValor(parsedValor);
       toast.success("Dados do processo atualizados!");
@@ -127,12 +112,6 @@ export function LeadProcessData({ leadId, companyId, onUpdate }: LeadProcessData
           </button>
         </div>
         <div className="space-y-1.5">
-          {cpf ? (
-            <div className="flex items-center gap-2 text-sm text-foreground">
-              <User className="h-3.5 w-3.5 text-muted-foreground" />
-              CPF: {cpf}
-            </div>
-          ) : null}
           {processoNumero ? (
             <div className="flex items-center gap-2 text-sm text-foreground">
               <FileText className="h-3.5 w-3.5 text-muted-foreground" />
@@ -145,7 +124,7 @@ export function LeadProcessData({ leadId, companyId, onUpdate }: LeadProcessData
               Valor: R$ {Number(processoValor).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
             </div>
           ) : null}
-          {!cpf && !processoNumero && !(processoValor ?? 0) && (
+          {!processoNumero && !(processoValor ?? 0) && (
             <button
               onClick={startEditing}
               className="text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
@@ -164,16 +143,6 @@ export function LeadProcessData({ leadId, companyId, onUpdate }: LeadProcessData
         Dados do Processo
       </h4>
       <div className="space-y-2.5">
-        <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">CPF</Label>
-          <Input
-            value={formCpf}
-            onChange={(e) => setFormCpf(formatCpf(e.target.value))}
-            placeholder="000.000.000-00"
-            className="h-8 text-sm"
-            maxLength={14}
-          />
-        </div>
         <div className="space-y-1">
           <Label className="text-xs text-muted-foreground">Nº do Processo</Label>
           <Input

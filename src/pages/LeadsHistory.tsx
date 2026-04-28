@@ -160,7 +160,6 @@ export default function LeadsHistory() {
       "Empresa",
       "Tipo Parceria",
       "Nome",
-      "CPF",
       "Telefone",
       "E-mail",
       "Processo",
@@ -174,12 +173,10 @@ export default function LeadsHistory() {
       "Atualizado",
     ];
     const lines = filtered.map((r) => {
-      const cpf = formatCpf(r.cpf_cliente_final || r.cpf) || "";
       return [
         r.company_name,
         r.partnership_type,
         r.name,
-        cpf,
         r.phone || "",
         r.email || "",
         r.processo_numero || "",
@@ -233,7 +230,7 @@ export default function LeadsHistory() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Buscar por nome, CPF, telefone, processo, e-mail..."
+                placeholder="Buscar por nome, telefone, processo, e-mail..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9"
@@ -282,7 +279,7 @@ export default function LeadsHistory() {
                 <TableRow className="border-border hover:bg-transparent">
                   <TableHead className="text-muted-foreground">Empresa</TableHead>
                   <TableHead className="text-muted-foreground">Lead</TableHead>
-                  <TableHead className="text-muted-foreground">CPF</TableHead>
+                  
                   <TableHead className="text-muted-foreground">Telefone</TableHead>
                   <TableHead className="text-muted-foreground">Processo</TableHead>
                   <TableHead className="text-muted-foreground">Valor</TableHead>
@@ -306,7 +303,6 @@ export default function LeadsHistory() {
                   </TableRow>
                 ) : (
                   filtered.map((r) => {
-                    const cpf = formatCpf(r.cpf_cliente_final || r.cpf);
                     return (
                       <TableRow key={r.id} className="border-border hover:bg-secondary/50">
                         <TableCell className="text-foreground">
@@ -319,9 +315,7 @@ export default function LeadsHistory() {
                           <div className="font-medium">{r.name}</div>
                           {r.email && <div className="text-xs text-muted-foreground">{r.email}</div>}
                         </TableCell>
-                        <TableCell className={cpf ? "text-foreground font-mono text-xs" : "text-muted-foreground"}>
-                          {cpf || "—"}
-                        </TableCell>
+
                         <TableCell className="text-muted-foreground text-xs">{r.phone || "—"}</TableCell>
                         <TableCell className="text-muted-foreground font-mono text-xs">
                           {r.processo_numero || "—"}

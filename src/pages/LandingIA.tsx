@@ -47,7 +47,7 @@ const features = [
   {
     icon: Brain,
     title: "Qualifica como uma humana",
-    desc: "Identifica nicho (previdenciário, trabalhista, cível…), coleta CPF, dados do caso e avalia viabilidade.",
+    desc: "Identifica nicho (previdenciário, trabalhista, cível…), coleta dados do caso e avalia viabilidade.",
   },
   {
     icon: CalendarDays,

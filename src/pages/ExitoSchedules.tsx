@@ -117,7 +117,7 @@ export default function ExitoSchedules() {
         (r.cpf?.includes(search) ?? false) ||
         (r.phone?.includes(search) ?? false);
       const matchCompany = filterCompany === "all" || r.company_id === filterCompany;
-      const isPending = !r.cpf_cliente_final || !!r.pending_data_warning;
+      const isPending = !!r.pending_data_warning;
       const matchPending =
         filterPending === "all" ||
         (filterPending === "pending" && isPending) ||
@@ -127,14 +127,12 @@ export default function ExitoSchedules() {
   }, [rows, search, filterCompany, filterPending]);
 
   const exportCsv = () => {
-    const header = ["Empresa", "Nome", "CPF", "Telefone", "Etapa", "Status", "Data"];
+    const header = ["Empresa", "Nome", "Telefone", "Etapa", "Status", "Data"];
     const lines = filtered.map((r) => {
-      const cpf = formatCpf(r.cpf_cliente_final || r.cpf) || "";
-      const status = !r.cpf_cliente_final || r.pending_data_warning ? "Pendente" : "Completo";
+      const status = r.pending_data_warning ? "Pendente" : "Completo";
       return [
         r.company_name,
         r.lead_name,
-        cpf,
         r.phone || "",
         r.column_name,
         status,
@@ -153,7 +151,7 @@ export default function ExitoSchedules() {
     URL.revokeObjectURL(url);
   };
 
-  const pendingCount = rows.filter((r) => !r.cpf_cliente_final || r.pending_data_warning).length;
+  const pendingCount = rows.filter((r) => r.pending_data_warning).length;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -184,7 +182,7 @@ export default function ExitoSchedules() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Buscar por nome, CPF ou telefone..."
+                placeholder="Buscar por nome ou telefone..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9"
@@ -221,7 +219,7 @@ export default function ExitoSchedules() {
                 <TableRow className="border-border hover:bg-transparent">
                   <TableHead className="text-muted-foreground">Empresa</TableHead>
                   <TableHead className="text-muted-foreground">Nome do Cliente</TableHead>
-                  <TableHead className="text-muted-foreground">CPF</TableHead>
+                  
                   <TableHead className="text-muted-foreground">Telefone</TableHead>
                   <TableHead className="text-muted-foreground">Etapa</TableHead>
                   <TableHead className="text-muted-foreground">Status</TableHead>
@@ -243,15 +241,12 @@ export default function ExitoSchedules() {
                   </TableRow>
                 ) : (
                   filtered.map((r) => {
-                    const cpf = formatCpf(r.cpf_cliente_final || r.cpf);
-                    const isPending = !r.cpf_cliente_final || !!r.pending_data_warning;
+                    const isPending = !!r.pending_data_warning;
                     return (
                       <TableRow key={r.lead_id} className="border-border hover:bg-secondary/50">
                         <TableCell className="font-medium text-foreground">{r.company_name}</TableCell>
                         <TableCell className="text-foreground">{r.lead_name}</TableCell>
-                        <TableCell className={cpf ? "text-foreground font-mono text-xs" : "text-muted-foreground"}>
-                          {cpf || "—"}
-                        </TableCell>
+
                         <TableCell className="text-muted-foreground">{r.phone || "—"}</TableCell>
                         <TableCell>
                           <Badge variant="outline" className="bg-success/10 text-success border-success/30">
