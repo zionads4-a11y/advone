@@ -18,6 +18,13 @@ function buildSDRPrompt(config: any) {
   const consultationDuration = config.consultation_duration || "30 minutos";
   const targetAudience = config.target_audience || "";
   const customPrompt = config.ai_prompt || "";
+
+  const cpfRegraOuro = `
+═══════════════════════════════════════
+🚫 REGRA DE OURO (MUITO IMPORTANTE)
+═══════════════════════════════════════
+NUNCA, JAMAIS, peça o CPF do cliente. Nem o RG. Peça apenas o NOME COMPLETO no final do agendamento. Se o cliente perguntar se precisa de CPF, diga que não é necessário agora. Esta regra é absoluta.
+`;
   const triageOptions: any[] = Array.isArray(config.triage_options) ? config.triage_options : [];
 
   const toneInstructions = tone === "formal"
@@ -73,7 +80,8 @@ SE O LEAD NÃO SE ENCAIXAR:
 
   const hasTriagem = triageOptions.length > 0;
 
-  return `Você é ${botName}, ${botRole} de ${officeName}${practiceArea ? `, especializado em ${practiceArea}` : ""}.
+  return `${cpfRegraOuro}
+Você é ${botName}, ${botRole} de ${officeName}${practiceArea ? `, especializado em ${practiceArea}` : ""}.
 
 PERSONALIDADE:
 - Você conversa como uma pessoa REAL no WhatsApp — simpática, empática e acolhedora
@@ -125,9 +133,11 @@ ${triagemBlock}
 FLUXO NATURAL DA CONVERSA:
 
 Turno 1: Cumprimente com calor humano + apresente-se brevemente
-${hasTriagem ? "Turno 2: Envie o menu de opções (em mensagem separada)" : 'Turno 2: Pergunte "Me conta, o que tá acontecendo?"'}
-Turno 3+: Siga o script do assunto — UMA pergunta por turno
-Último: Conduza para agendamento enfatizando que é GRATUITO e personalizado.
+Turno 2: Pergunte "Me conta, o que tá acontecendo?" (NÃO peça o nome agora)
+Turno 3+: Siga o script de qualificação — UMA pergunta por turno
+Último: Conduza para agendamento. APÓS o lead aceitar o horário sugerido, peça o NOME COMPLETO.
+
+🚫 REGRA ABSOLUTA: NUNCA peça o CPF ou RG. Peça apenas o NOME COMPLETO no final, após o agendamento ser aceito. Se o cliente perguntar se precisa de CPF, diga que não é necessário agora.
 
 📆 DATA E HORA ATUAL: Hoje é ${new Date(getNowBrasilia()).toLocaleDateString("pt-BR", { weekday: "long" })}, ${getTodayBrasilia()} (${String(getNowBrasilia().getHours()).padStart(2,"0")}:${String(getNowBrasilia().getMinutes()).padStart(2,"0")} horário de Brasília). USE ESTA DATA COMO REFERÊNCIA.
 
@@ -135,15 +145,13 @@ Turno 3+: Siga o script do assunto — UMA pergunta por turno
 - Agendamentos SOMENTE entre 08:00 e 17:00 (horário de Brasília)
 - NUNCA sugira horários antes das 08:00 ou após as 17:00
 - NUNCA mencione "início da noite" ou "noite" como opção — o escritório NÃO funciona à noite
-- NUNCA diga "nosso atendimento é de segunda a sexta" ou mencione dias de funcionamento de forma genérica
 - Se já for depois das 17:00, NÃO ofereça horários para hoje — ofereça para o próximo dia útil
 
-🔒 CAPTURA OBRIGATÓRIA DE NOME COMPLETO + CPF (SEMPRE ANTES DE AGENDAR):
-- REGRA INVIOLÁVEL: ANTES de oferecer QUALQUER horário, peça SEMPRE de forma educada: NOME COMPLETO (mín. 3 palavras, ex: "João da Silva Santos") + CPF.
-- Use tom cordial e gentil. Mensagem padrão: "Que ótimo! 😊 Pra eu já deixar tudo certinho no nosso sistema antes de marcar, você poderia gentilmente me informar seu *nome completo* (com sobrenomes) e seu *CPF*, por favor?\\n\\nFica registrado com total sigilo, só com a gente. 🔒"
-- Se vier nome incompleto ou CPF inválido, peça com educação: "Imagina, sem problemas! 😊 Você poderia me passar seu nome COMPLETO, com todos os sobrenomes, e o CPF, por gentileza?"
-- Quando receber, chame register_client_cpf passando full_name e cpf, e agradeça.
-- INSISTA educadamente até 2 vezes. Se o lead recusar firmemente, agende mesmo assim — schedule_appointment marcará o lead com pendência.
+🔒 CAPTURA OBRIGATÓRIA DE NOME COMPLETO (SOMENTE APÓS ACEITE DO HORÁRIO):
+- APÓS o lead aceitar o horário sugerido, peça o NOME COMPLETO (mín. 3 palavras).
+- Use tom cordial: "Perfeito! 🙂 Pra já deixar tudo certinho no nosso sistema antes de finalizar, você poderia gentilmente me informar seu *nome completo*, por favor?"
+- Quando receber, chame register_client_name passando full_name e agradeça.
+- 🚫 NUNCA PEÇA CPF.
 
 📅 ABORDAGEM DE AGENDAMENTO (REGRA OBRIGATÓRIA):
 - Quando for agendar, SEMPRE transmita URGÊNCIA e IMPORTÂNCIA: "Como o seu caso é urgente, podemos agendar já pra amanhã!"
@@ -421,15 +429,14 @@ serve(async (req) => {
       {
         type: "function",
         function: {
-          name: "register_client_cpf",
-          description: "Registra CPF + nome completo. PREFERENCIALMENTE antes de schedule_appointment para evitar pendência.",
+          name: "register_client_name",
+          description: "Registra o nome completo do lead no sistema. Use apenas APÓS o lead aceitar o agendamento.",
           parameters: {
             type: "object",
             properties: {
-              cpf: { type: "string", description: "CPF apenas números (11 dígitos válidos)" },
               full_name: { type: "string", description: "Nome COMPLETO (mínimo 3 palavras: nome + sobrenomes)" }
             },
-            required: ["cpf", "full_name"],
+            required: ["full_name"],
             additionalProperties: false
           }
         }
@@ -438,7 +445,7 @@ serve(async (req) => {
         type: "function",
         function: {
           name: "check_availability",
-          description: "Verifica horários disponíveis. Só use APÓS register_client_cpf.",
+          description: "Verifica horários disponíveis.",
           parameters: {
             type: "object",
             properties: {
@@ -453,7 +460,7 @@ serve(async (req) => {
         type: "function",
         function: {
           name: "schedule_appointment",
-          description: "Agenda uma consulta. Use SOMENTE APÓS register_client_cpf + lead escolher horário.",
+          description: "Agenda uma consulta. Use SOMENTE APÓS register_client_name + lead escolher horário.",
           parameters: {
             type: "object",
             properties: {
@@ -518,22 +525,16 @@ serve(async (req) => {
 
         let toolResult: any = {};
 
-        if (fnName === "register_client_cpf") {
-          const rawCpf = String(args.cpf || "").replace(/\D/g, "");
+        if (fnName === "register_client_name") {
           const fullName = String(args.full_name || "").trim();
-          const cpfOk = isValidCPF(rawCpf);
           const nameOk = isValidFullName(fullName);
-          if (!cpfOk && !nameOk) {
-            toolResult = { success: false, error: "CPF e nome inválidos. CPF precisa ter 11 dígitos válidos e nome completo precisa ter ≥3 palavras." };
-          } else if (!cpfOk) {
-            toolResult = { success: false, error: "CPF inválido (dígitos não conferem). Peça novamente." };
-          } else if (!nameOk) {
+          if (!nameOk) {
             toolResult = { success: false, error: "Nome incompleto. Peça nome COMPLETO com sobrenomes (≥3 palavras)." };
           } else {
-            cpfRegistered = rawCpf;
-            toolResult = { success: true, cpf_registered: rawCpf, full_name: fullName, message: "[TESTE] CPF e nome completo registrados. Já pode agendar." };
+            cpfRegistered = "NAME_REGISTERED"; // Reusing the variable to track name instead of CPF
+            toolResult = { success: true, full_name: fullName, message: "[TESTE] Nome completo registrado. Já pode agendar." };
           }
-          toolActions.push({ tool: "register_client_cpf", result: toolResult });
+          toolActions.push({ tool: "register_client_name", result: toolResult });
         }
 
         if (fnName === "check_availability") {
@@ -550,7 +551,7 @@ serve(async (req) => {
 
         if (fnName === "schedule_appointment") {
           if (!cpfRegistered) {
-            toolResult = { success: false, error: "CPF_REQUIRED", message: "[TESTE] Bloqueado: registre o CPF do cliente primeiro via register_client_cpf." };
+            toolResult = { success: false, error: "NAME_REQUIRED", message: "[TESTE] Bloqueado: registre o nome completo do cliente primeiro via register_client_name." };
           } else {
             reply = args.message_to_lead || reply;
             toolResult = { success: true, message: "[TESTE] Agendamento simulado com sucesso", date: args.date, time: args.time, modality: args.modality || "online", unit: args.unit || "", cpf: cpfRegistered };
