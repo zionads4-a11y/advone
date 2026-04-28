@@ -189,8 +189,11 @@ export default function DocumentTemplates() {
                   )}
                 </div>
                 <div className="flex gap-1">
-                  <Button size="sm" variant="outline" onClick={() => openEdit(t)} className="flex-1">
-                    <Edit className="h-3 w-3 mr-1" />Editar
+                  <Button size="sm" onClick={() => setQuickGenTemplate(t)} className="flex-1">
+                    <Printer className="h-3 w-3 mr-1" />Gerar
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => openEdit(t)}>
+                    <Edit className="h-3 w-3" />
                   </Button>
                   <Button size="sm" variant="ghost" onClick={() => remove(t.id)}>
                     <Trash2 className="h-3 w-3 text-destructive" />
