@@ -65,14 +65,15 @@ export default function Companies() {
   const handleAdd = async (formData: FormData) => {
     if (!user) return;
 
-    const partnership = (formData.get("partnership_type") as string) || "mensalidade_zionads";
-    const serviceMode = (formData.get("service_mode") as string) || "full";
+    const billingKey = (formData.get("billing_model") as BillingModel) || "exito";
+    const model = getBillingModel(billingKey);
 
     const { error } = await supabase.from("companies").insert({
       name: formData.get("name") as string,
       whatsapp: (formData.get("whatsapp") as string) || null,
-      partnership_type: partnership as "exito" | "mensalidade_zionads",
-      service_mode: serviceMode as "full" | "ai_only",
+      partnership_type: model.partnership_type,
+      service_mode: model.service_mode,
+      billing_model: model.key,
       created_by: user.id,
     } as any);
 
