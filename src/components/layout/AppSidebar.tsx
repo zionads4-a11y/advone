@@ -87,7 +87,7 @@ const operadorItems = [
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
   { title: "IA Jurídica", url: "/ia-juridica", icon: Scale, premium: true },
-  { title: "Documentos", url: "/documentos", icon: FileText },
+  
 ];
 
 const clientItems = [
