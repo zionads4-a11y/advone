@@ -118,9 +118,10 @@ REGRA INTERNA DEMORA (use no Gatilho conforme dias_desde_der):
     case_type: "salario_maternidade",
     block: `▸ SALÁRIO-MATERNIDADE (case_type: salario_maternidade)
 "Que momento importante 🤰😊 Antes de continuar, como posso te chamar?"
-P1 situacao: "{nome}, qual é a sua situação hoje? 1️⃣ Estou grávida 2️⃣ O bebê já nasceu 3️⃣ Adotei ou estou em processo de adoção 4️⃣ Tive aborto espontâneo / natimorto" → gravida | nasceu | adocao | aborto
-P2 vinculo: "Como você trabalha ou trabalhava? 1️⃣ CLT (carteira assinada) 2️⃣ MEI / Autônoma 3️⃣ Desempregada (mas já trabalhou) 4️⃣ Nunca trabalhou" → clt | mei | desempregada | nunca
-P3 data_evento: "Há quanto tempo aconteceu (ou para quando está previsto)? 1️⃣ Menos de 5 anos 2️⃣ Mais de 5 anos 3️⃣ Ainda vai acontecer" → menos_5a | mais_5a | futuro
+⚠️ REGRA ANTI-REPETIÇÃO: Antes de cada pergunta abaixo, RELEIA o histórico da conversa. Se a informação JÁ foi dada pelo lead (ex: ele já disse "estou grávida", "o bebê já nasceu", "trabalho de carteira assinada"), NÃO pergunte de novo — registre internamente e PULE direto para a próxima pergunta ainda não respondida. NUNCA pergunte a mesma coisa duas vezes.
+P1 situacao (PULAR se o lead já contou): "{nome}, qual é a sua situação hoje? 1️⃣ Estou grávida 2️⃣ O bebê já nasceu 3️⃣ Adotei ou estou em processo de adoção 4️⃣ Tive aborto espontâneo / natimorto" → gravida | nasceu | adocao | aborto
+P2 vinculo (PULAR se já informado): "Como você trabalha ou trabalhava? 1️⃣ CLT (carteira assinada) 2️⃣ MEI / Autônoma 3️⃣ Desempregada (mas já trabalhou) 4️⃣ Nunca trabalhou" → clt | mei | desempregada | nunca
+P3 data_evento (PULAR se já informado): "Há quanto tempo aconteceu (ou para quando está previsto)? 1️⃣ Menos de 5 anos 2️⃣ Mais de 5 anos 3️⃣ Ainda vai acontecer" → menos_5a | mais_5a | futuro
 Gatilho: "Entendi, {nome}. A equipe aqui já analisa casos de salário-maternidade todos os dias e sabe como as regras do INSS podem ser complexas."
 wants_help: "Para garantir que você não perca esse benefício, o ideal é a equipe jurídica já analisar seu caso 👀 Quer que a equipe veja isso pra você? 1️⃣ Sim 2️⃣ Tenho dúvida ainda" → sim | duvida`,
   },
