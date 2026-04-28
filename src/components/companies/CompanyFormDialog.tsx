@@ -52,41 +52,21 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
             <Input name="whatsapp" placeholder="5511999999999" />
           </div>
           <div className="space-y-2">
-            <Label>Tipo de Parceria *</Label>
-            <Select name="partnership_type" defaultValue="mensalidade_zionads">
+            <Label>Modelo de Cobrança *</Label>
+            <Select name="billing_model" defaultValue="exito">
               <SelectTrigger>
-                <SelectValue placeholder="Selecione o tipo de parceria" />
+                <SelectValue placeholder="Selecione o modelo de cobrança" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="mensalidade_zionads">
-                  💼 Mensalidade ZionAds (cliente da agência)
-                </SelectItem>
-                <SelectItem value="exito">
-                  🏆 Êxito (comissão por contrato fechado)
-                </SelectItem>
+                {BILLING_MODELS.map((m) => (
+                  <SelectItem key={m.key} value={m.key}>
+                    {m.emoji} {m.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              Define como a parceria comercial é gerida com esta empresa.
-            </p>
-          </div>
-          <div className="space-y-2">
-            <Label>Modo de Serviço *</Label>
-            <Select name="service_mode" defaultValue="full">
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="full">
-                  🏢 CRM Completo (Kanban, Financeiro, Casos, etc.)
-                </SelectItem>
-                <SelectItem value="ai_only">
-                  🤖 Apenas IA (Secretária Virtual + Áreas de Atuação)
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground">
-              "Apenas IA" oculta módulos do CRM e libera só Conversas, Leads, Agenda e a configuração da IA.
+              Define como a empresa será cobrada e quais módulos ela enxerga no sistema.
             </p>
           </div>
           <Button type="submit" className="w-full gradient-primary text-primary-foreground">
