@@ -10,6 +10,7 @@ import { ClientPersonalDataForm, ClientData } from "@/components/clients/ClientP
 import { ClientGeneratedDocuments } from "@/components/clients/ClientGeneratedDocuments";
 import { ClientUploadedDocuments } from "@/components/clients/ClientUploadedDocuments";
 import { ClientAgreements } from "@/components/clients/ClientAgreements";
+import { ClientProcesses } from "@/components/clients/ClientProcesses";
 import { LeadCases } from "@/components/leads/LeadCases";
 import { LeadReminders } from "@/components/leads/LeadReminders";
 import { LeadNotes } from "@/components/leads/LeadNotes";
