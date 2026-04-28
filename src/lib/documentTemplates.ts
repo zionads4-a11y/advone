@@ -204,7 +204,7 @@ export const SAMPLE_TEMPLATES = [
 
 OUTORGANTE: {{nome}}, {{nacionalidade}}, {{estado_civil}}, {{profissao}}, portador(a) do RG nº {{rg}} e inscrito(a) no CPF sob o nº {{cpf}}, residente e domiciliado(a) à {{endereco_completo}}.
 
-OUTORGADO: {{empresa_nome}}, com endereço profissional conforme contrato.
+OUTORGADO(A): {{advogado_qualificacao}}, com escritório profissional em {{escritorio_endereco}}, {{escritorio_cidade}}/{{escritorio_estado}}.
 
 PODERES: Pelo presente instrumento particular de procuração, o(a) outorgante nomeia e constitui seu(sua) bastante procurador(a), o(a) outorgado(a) acima qualificado(a), para o fim especial de representá-lo(a) em juízo ou fora dele, podendo propor contra quem de direito as ações competentes e defendê-lo(a) nas contrárias, seguindo umas e outras até final decisão, usando dos recursos legais e acompanhando-os, conferindo-lhe, ainda, poderes especiais para confessar, reconhecer a procedência do pedido, transigir, desistir, renunciar ao direito sobre que se funda a ação, receber, dar quitação, firmar compromissos e assinar declarações.
 
@@ -223,7 +223,7 @@ CPF: {{cpf}}`,
 
 CONTRATANTE: {{nome}}, {{nacionalidade}}, {{estado_civil}}, {{profissao}}, RG nº {{rg}}, CPF nº {{cpf}}, residente em {{endereco_completo}}.
 
-CONTRATADO: {{empresa_nome}}.
+CONTRATADO(A): {{advogado_qualificacao}}, vinculado(a) ao escritório {{escritorio_razao_social}}, CNPJ {{escritorio_cnpj}}, situado em {{escritorio_endereco}}, {{escritorio_cidade}}/{{escritorio_estado}}.
 
 OBJETO: Prestação de serviços jurídicos relativos a causa de natureza {{area_direito}} - {{tipo_caso_detalhado}}.
 
@@ -237,8 +237,8 @@ CLÁUSULA 3ª — Despesas processuais: Custas, emolumentos e demais despesas pr
 
 
 _______________________________________      _______________________________________
-{{nome}}                                       {{empresa_nome}}
-CONTRATANTE                                    CONTRATADO`,
+{{nome}}                                       {{advogado_nome}} - OAB/{{advogado_oab_uf}} {{advogado_oab}}
+CONTRATANTE                                    CONTRATADO(A)`,
   },
   {
     name: "Declaração de Hipossuficiência",
