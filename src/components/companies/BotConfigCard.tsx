@@ -45,27 +45,39 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
 
   useEffect(() => {
     const load = async () => {
-      const { data } = await supabase
+      const { data: whatsappData } = await supabase
         .from("whatsapp_configs")
         .select("ai_enabled, ai_auto_reply, ai_prompt, office_name, practice_area, communication_tone, scheduling_link, consultation_duration, target_audience, triage_options")
         .eq("company_id", companyId)
         .maybeSingle();
 
-      if (data) {
-        setAiEnabled(data.ai_enabled || false);
-        setAiAutoReply(data.ai_auto_reply || false);
+      const { data: companyData } = await supabase
+        .from("companies")
+        .select("bot_name, bot_role_description")
+        .eq("id", companyId)
+        .maybeSingle();
+
+      if (whatsappData) {
+        setAiEnabled(whatsappData.ai_enabled || false);
+        setAiAutoReply(whatsappData.ai_auto_reply || false);
         setAiPrompt(
-          data.ai_prompt ||
+          whatsappData.ai_prompt ||
             "Você é um atendente virtual da empresa. Seja cordial, responda dúvidas dos clientes de forma clara e objetiva."
         );
-        setOfficeName((data as any).office_name || "");
-        setPracticeArea((data as any).practice_area || "");
-        setCommunicationTone((data as any).communication_tone || "moderado");
-        setSchedulingLink((data as any).scheduling_link || "");
-        setConsultationDuration((data as any).consultation_duration || "30 minutos");
-        setTargetAudience((data as any).target_audience || "");
-        setTriageOptions(Array.isArray((data as any).triage_options) ? (data as any).triage_options : []);
+        setOfficeName((whatsappData as any).office_name || "");
+        setPracticeArea((whatsappData as any).practice_area || "");
+        setCommunicationTone((whatsappData as any).communication_tone || "moderado");
+        setSchedulingLink((whatsappData as any).scheduling_link || "");
+        setConsultationDuration((whatsappData as any).consultation_duration || "30 minutos");
+        setTargetAudience((whatsappData as any).target_audience || "");
+        setTriageOptions(Array.isArray((whatsappData as any).triage_options) ? (whatsappData as any).triage_options : []);
       }
+
+      if (companyData) {
+        setBotName(companyData.bot_name || "");
+        setBotRoleDescription(companyData.bot_role_description || "");
+      }
+
       setLoading(false);
     };
     load();
