@@ -77,6 +77,7 @@ const gerenteItems = [
   { title: "IA Jurídica", url: "/ia-juridica", icon: Scale, premium: true },
   { title: "Financeiro", url: "/financeiro", icon: Wallet },
   { title: "Documentos", url: "/documentos", icon: FileText },
+  { title: "Modelos de Documentos", url: "/modelos-documentos", icon: FileText },
   { title: "Processos", url: "/processos", icon: Briefcase },
   { title: "Monitoramento", url: "/monitoramento", icon: Radar },
   { title: "Equipe", url: "/client-users", icon: Users },

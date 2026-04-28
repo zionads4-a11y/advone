@@ -27,6 +27,7 @@ import BotConfig from "./pages/BotConfig";
 import CompanySettings from "./pages/CompanySettings";
 import Financial from "./pages/Financial";
 import Documents from "./pages/Documents";
+import DocumentTemplates from "./pages/DocumentTemplates";
 import Cases from "./pages/Cases";
 import ProcessMonitoring from "./pages/ProcessMonitoring";
 import Subscription from "./pages/Subscription";
@@ -85,6 +86,7 @@ const App = () => (
               <Route path="/company-settings" element={<CompanySettings />} />
               <Route path="/financeiro" element={<Financial />} />
               <Route path="/documentos" element={<Documents />} />
+              <Route path="/modelos-documentos" element={<DocumentTemplates />} />
               <Route path="/processos" element={<Cases />} />
               <Route path="/monitoramento" element={<ProcessMonitoring />} />
               <Route path="/assinatura" element={<Subscription />} />
