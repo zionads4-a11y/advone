@@ -27,13 +27,16 @@ export default function Privacy() {
             Última atualização: 27 de abril de 2026
           </p>
 
-          <section className="space-y-3">
+          <section className="space-y-3" id="introduction">
             <h2 className="text-2xl font-bold">1. Introdução</h2>
             <p>
-              A <strong>AdvOne</strong> ("nós", "nosso") está comprometida com a proteção da sua privacidade
+              A <strong>AdvOne</strong> ("nós", "nosso", "Plataforma"), operando através do domínio <strong>advone.online</strong>, está comprometida com a proteção da sua privacidade
               e dos dados pessoais tratados em nossa Plataforma, em conformidade com a Lei Geral de Proteção
               de Dados (LGPD - Lei 13.709/2018) e demais normas aplicáveis. Esta Política descreve como
               coletamos, usamos, armazenamos e protegemos suas informações.
+            </p>
+            <p>
+              O domínio oficial do nosso serviço é <strong>https://advone.online</strong>. Qualquer comunicação ou serviço prestado fora deste domínio não é de nossa responsabilidade direta, a menos que explicitamente indicado.
             </p>
           </section>
 
