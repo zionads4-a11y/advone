@@ -32,6 +32,8 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
   const [schedulingLink, setSchedulingLink] = useState("");
   const [consultationDuration, setConsultationDuration] = useState("30 minutos");
   const [targetAudience, setTargetAudience] = useState("");
+  const [botName, setBotName] = useState("");
+  const [botRoleDescription, setBotRoleDescription] = useState("");
   const [triageOptions, setTriageOptions] = useState<TriageOption[]>([]);
   const [specialty, setSpecialty] = useState<PracticeSpecialty>("previdenciario");
   const [loading, setLoading] = useState(true);
@@ -43,27 +45,39 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
 
   useEffect(() => {
     const load = async () => {
-      const { data } = await supabase
+      const { data: whatsappData } = await supabase
         .from("whatsapp_configs")
         .select("ai_enabled, ai_auto_reply, ai_prompt, office_name, practice_area, communication_tone, scheduling_link, consultation_duration, target_audience, triage_options")
         .eq("company_id", companyId)
         .maybeSingle();
 
-      if (data) {
-        setAiEnabled(data.ai_enabled || false);
-        setAiAutoReply(data.ai_auto_reply || false);
+      const { data: companyData } = await supabase
+        .from("companies")
+        .select("bot_name, bot_role_description")
+        .eq("id", companyId)
+        .maybeSingle();
+
+      if (whatsappData) {
+        setAiEnabled(whatsappData.ai_enabled || false);
+        setAiAutoReply(whatsappData.ai_auto_reply || false);
         setAiPrompt(
-          data.ai_prompt ||
+          whatsappData.ai_prompt ||
             "Você é um atendente virtual da empresa. Seja cordial, responda dúvidas dos clientes de forma clara e objetiva."
         );
-        setOfficeName((data as any).office_name || "");
-        setPracticeArea((data as any).practice_area || "");
-        setCommunicationTone((data as any).communication_tone || "moderado");
-        setSchedulingLink((data as any).scheduling_link || "");
-        setConsultationDuration((data as any).consultation_duration || "30 minutos");
-        setTargetAudience((data as any).target_audience || "");
-        setTriageOptions(Array.isArray((data as any).triage_options) ? (data as any).triage_options : []);
+        setOfficeName((whatsappData as any).office_name || "");
+        setPracticeArea((whatsappData as any).practice_area || "");
+        setCommunicationTone((whatsappData as any).communication_tone || "moderado");
+        setSchedulingLink((whatsappData as any).scheduling_link || "");
+        setConsultationDuration((whatsappData as any).consultation_duration || "30 minutos");
+        setTargetAudience((whatsappData as any).target_audience || "");
+        setTriageOptions(Array.isArray((whatsappData as any).triage_options) ? (whatsappData as any).triage_options : []);
       }
+
+      if (companyData) {
+        setBotName(companyData.bot_name || "");
+        setBotRoleDescription(companyData.bot_role_description || "");
+      }
+
       setLoading(false);
     };
     load();
@@ -95,6 +109,16 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
       .from("whatsapp_configs")
       .update(newValues)
       .eq("company_id", companyId);
+
+    if (!error) {
+      await supabase
+        .from("companies")
+        .update({
+          bot_name: botName || null,
+          bot_role_description: botRoleDescription || null,
+        })
+        .eq("id", companyId);
+    }
 
     if (error) {
       toast.error("Erro ao salvar: " + error.message);
@@ -227,6 +251,33 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5 text-xs">
+                <Bot className="h-3.5 w-3.5 text-muted-foreground" />
+                Nome do Bot
+              </Label>
+              <Input
+                value={botName}
+                onChange={(e) => setBotName(e.target.value)}
+                placeholder="Ex: Laura"
+                disabled={!aiEnabled}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5 text-xs">
+                <Sparkles className="h-3.5 w-3.5 text-muted-foreground" />
+                Descrição da Função
+              </Label>
+              <Input
+                value={botRoleDescription}
+                onChange={(e) => setBotRoleDescription(e.target.value)}
+                placeholder="Ex: Assistente Jurídica Especialista"
+                disabled={!aiEnabled}
+              />
+            </div>
+          </div>
+
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label className="flex items-center gap-1.5 text-xs">
