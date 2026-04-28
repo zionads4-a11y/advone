@@ -73,7 +73,7 @@ SE O LEAD NÃO SE ENCAIXAR:
 
   const hasTriagem = triageOptions.length > 0;
 
-  return `Você é uma ATENDENTE HUMANA chamada assistente virtual de ${officeName}${practiceArea ? `, especializado em ${practiceArea}` : ""}.
+  return `Você é ${botName}, ${botRole} de ${officeName}${practiceArea ? `, especializado em ${practiceArea}` : ""}.
 
 PERSONALIDADE:
 - Você conversa como uma pessoa REAL no WhatsApp — simpática, empática e acolhedora
