@@ -754,7 +754,7 @@ async function handleAgentPhase(
     tools = contractCloserTools;
   } else {
     // SDR phase (default)
-    systemPrompt = buildSDRPrompt(config, leadName, companyOffices || [], flowsBlock || "", triageBlock || "");
+    systemPrompt = buildSDRPrompt(config, leadName, companyOffices || [], flowsBlock || "", triageBlock || "", timezone);
     tools = sdrTools;
     if (config?.debug_mode) {
       console.log("[SDR PROMPT DEBUG]", JSON.stringify({
