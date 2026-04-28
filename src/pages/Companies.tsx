@@ -88,7 +88,7 @@ export default function Companies() {
     fetchData();
   };
 
-  const handleUpdate = async (id: string, data: { name: string; whatsapp: string | null; business_hours?: Record<string, unknown[]>; partnership_type?: "exito" | "mensalidade_zionads"; service_mode?: "full" | "ai_only" }) => {
+  const handleUpdate = async (id: string, data: { name: string; whatsapp: string | null; business_hours?: Record<string, unknown[]>; partnership_type?: "exito" | "mensalidade_zionads"; service_mode?: "full" | "ai_only"; billing_model?: BillingModel }) => {
     const { error } = await supabase.from("companies").update(data as any).eq("id", id);
 
     if (error) {
