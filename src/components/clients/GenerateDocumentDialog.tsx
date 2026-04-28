@@ -116,7 +116,7 @@ export function GenerateDocumentDialog({ open, onOpenChange, lead: leadProp, com
     const knownKeys = new Set(ALL_VARIABLES.map((v) => v.key));
     const missing = placeholders.filter((p) => !knownKeys.has(p));
     setMissingManual(missing);
-    const values = buildAutoValues({ lead, company: { name: companyName }, manualValues });
+    const values = buildAutoValues({ lead, company: company || { name: companyName }, profile, manualValues });
     setPreview(renderTemplate(selected.content, values));
   }, [selected, manualValues, lead, companyName]);
 
@@ -157,7 +157,7 @@ export function GenerateDocumentDialog({ open, onOpenChange, lead: leadProp, com
     }
     setPackageRunning(true);
     try {
-      const values = buildAutoValues({ lead, company: { name: companyName }, manualValues });
+      const values = buildAutoValues({ lead, company: company || { name: companyName }, profile, manualValues });
 
       // 1) Renderiza e salva os 3 documentos
       const docs = PACKAGE_CATEGORIES
