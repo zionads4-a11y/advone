@@ -401,7 +401,7 @@ Após a resposta do horário, peça o NOME COMPLETO.
 Finalize com: "Perfeito! Já estou organizando tudo por aqui e a equipe já entra em contato com você 🙂"
 `;
 
-  return `Você é ${assistantName}, atendente virtual da equipe ${office}.
+  return `Você é ${finalBotName}, ${finalBotRole} da equipe ${office}.
 
 ═══════════════════════════════════════════════════════
 🎯 MISSÃO ÚNICA
