@@ -148,9 +148,16 @@ export function AppSidebar() {
   const { isAiOnly } = useCompanyServiceMode();
   const { can, isUnrestricted } = useModulePermissions();
   const baseItems = getMenuItems(userRole);
-  const aiFiltered = isAiOnly
-    ? baseItems.filter((item) => AI_ONLY_ROUTES.has(item.url))
+  
+  // Se for gerente, mas NÃO for o super_admin (zionads4@gmail.com), remove o item de Configurações
+  const filteredBaseItems = userRole === "gerente" && user?.email !== "zionads4@gmail.com"
+    ? baseItems.filter(item => item.url !== "/company-settings")
     : baseItems;
+
+  const aiFiltered = isAiOnly
+    ? filteredBaseItems.filter((item) => AI_ONLY_ROUTES.has(item.url))
+    : filteredBaseItems;
+    
   // Para operador, filtra também pelos módulos liberados pelo gerente
   const menuItems =
     userRole === "operador" && !isUnrestricted
