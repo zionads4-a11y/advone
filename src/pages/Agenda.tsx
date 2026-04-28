@@ -705,8 +705,8 @@ export default function Agenda() {
           <AlertDialogHeader>
             <AlertDialogTitle>Desconectar Google Agenda?</AlertDialogTitle>
             <AlertDialogDescription>
-              Sua conta do Google será desconectada e <strong>todos os eventos importados do Google serão removidos do sistema</strong>.
-              Eventos criados manualmente aqui (que ainda não foram para o Google) serão mantidos.
+              Sua conta do Google será desconectada e <strong>todos os eventos da sua agenda serão apagados do sistema</strong> (incluindo os criados manualmente).
+              Essa ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -716,7 +716,29 @@ export default function Agenda() {
               disabled={disconnecting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {disconnecting ? "Desconectando..." : "Desconectar e limpar"}
+              {disconnecting ? "Desconectando..." : "Desconectar e apagar tudo"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={clearAllOpen} onOpenChange={setClearAllOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Apagar todos os eventos da agenda?</AlertDialogTitle>
+            <AlertDialogDescription>
+              <strong>Todos os eventos, reuniões e lembretes da sua agenda serão apagados permanentemente.</strong>
+              Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={clearingAll}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); handleClearAllEvents(); }}
+              disabled={clearingAll}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {clearingAll ? "Apagando..." : "Apagar todos"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
