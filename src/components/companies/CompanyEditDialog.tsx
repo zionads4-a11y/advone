@@ -42,6 +42,10 @@ interface Company {
   business_hours?: unknown;
   partnership_type?: PartnershipType | null;
   service_mode?: ServiceMode | null;
+  bot_name?: string | null;
+  bot_role_description?: string | null;
+  google_client_id?: string | null;
+  google_client_secret?: string | null;
 }
 
 interface CompanyEditDialogProps {
@@ -56,6 +60,10 @@ interface CompanyEditDialogProps {
       business_hours: BusinessHours;
       partnership_type: PartnershipType;
       service_mode: ServiceMode;
+      bot_name: string;
+      bot_role_description: string;
+      google_client_id: string | null;
+      google_client_secret: string | null;
     }
   ) => void;
   onDelete: (id: string) => void;
