@@ -119,10 +119,10 @@ REGRA INTERNA DEMORA (use no Gatilho conforme dias_desde_der):
     block: `▸ SALÁRIO-MATERNIDADE (case_type: salario_maternidade)
 "Que momento importante 🤰😊 Antes de continuar, como posso te chamar?"
 P1 situacao: "{nome}, qual é a sua situação hoje? 1️⃣ Estou grávida 2️⃣ O bebê já nasceu 3️⃣ Adotei ou estou em processo de adoção 4️⃣ Tive aborto espontâneo / natimorto" → gravida | nasceu | adocao | aborto
-P2 vinculo: "Como você trabalha ou trabalhava? 1️⃣ CLT 2️⃣ MEI 3️⃣ Contribuinte individual / autônoma 4️⃣ Desempregada, mas já contribuía antes 5️⃣ Nunca contribui" → clt | mei | individual | desempregada | nunca
-P3 data_parto: "Quando aconteceu ou vai acontecer? 1️⃣ Já aconteceu há menos de 5 anos 2️⃣ Já aconteceu há mais de 5 anos 3️⃣ Ainda vai acontecer 4️⃣ Não lembro a data exata" → menos_5a | mais_5a | futuro | nao_lembro
-Gatilho: "Entendi, {nome}. A equipe aqui já analisa casos como o seu todos os dias. O salário-maternidade muda bastante conforme a situação da pessoa — e deixar pra depois pode até fazer você perder esse direito se passar o prazo."
-wants_help: "Pra não correr risco de erro ou perder algo importante, o ideal é a equipe já analisar seu caso com você 👀 Você quer que a equipe analise se você tem direito? 1️⃣ Sim 2️⃣ Tenho dúvida ainda" → sim | duvida`,
+P2 vinculo: "Como você trabalha ou trabalhava? 1️⃣ CLT (carteira assinada) 2️⃣ MEI / Autônoma 3️⃣ Desempregada (mas já trabalhou) 4️⃣ Nunca trabalhou" → clt | mei | desempregada | nunca
+P3 data_evento: "Há quanto tempo aconteceu (ou para quando está previsto)? 1️⃣ Menos de 5 anos 2️⃣ Mais de 5 anos 3️⃣ Ainda vai acontecer" → menos_5a | mais_5a | futuro
+Gatilho: "Entendi, {nome}. A equipe aqui já analisa casos de salário-maternidade todos os dias e sabe como as regras do INSS podem ser complexas."
+wants_help: "Para garantir que você não perca esse benefício, o ideal é a equipe jurídica já analisar seu caso 👀 Quer que a equipe veja isso pra você? 1️⃣ Sim 2️⃣ Tenho dúvida ainda" → sim | duvida`,
   },
   {
     flow_key: "fallback_outros",
