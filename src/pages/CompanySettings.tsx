@@ -25,6 +25,7 @@ interface Company {
   google_client_secret: string | null;
   bot_name: string | null;
   bot_role_description: string | null;
+  bot_prompt: string | null;
 }
 
 export default function CompanySettings() {
@@ -38,6 +39,7 @@ export default function CompanySettings() {
   const [businessHours, setBusinessHours] = useState<BusinessHours>(getDefaultBusinessHours());
   const [botName, setBotName] = useState("Laura");
   const [botRoleDescription, setBotRoleDescription] = useState("atendente virtual");
+  const [botPrompt, setBotPrompt] = useState("");
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [hasMonitoring, setHasMonitoring] = useState(true);
@@ -52,7 +54,7 @@ export default function CompanySettings() {
 
   const fetchCompany = async (id: string) => {
     const [companyResult, planResult] = await Promise.all([
-      supabase.from("companies").select("id, name, whatsapp, business_hours, google_client_id, google_client_secret, bot_name, bot_role_description").eq("id", id).maybeSingle(),
+      supabase.from("companies").select("id, name, whatsapp, business_hours, google_client_id, google_client_secret, bot_name, bot_role_description, bot_prompt").eq("id", id).maybeSingle(),
       supabase.from("company_monitoring_plans").select("is_active").eq("company_id", id).maybeSingle(),
     ]);
     if (companyResult.data) {
@@ -64,6 +66,7 @@ export default function CompanySettings() {
       setBusinessHours(parseBusinessHours(companyResult.data.business_hours));
       setBotName(companyResult.data.bot_name || "Laura");
       setBotRoleDescription(companyResult.data.bot_role_description || "atendente virtual");
+      setBotPrompt(companyResult.data.bot_prompt || "");
     }
     setHasMonitoring(!!planResult.data?.is_active);
     setLoading(false);
@@ -81,7 +84,8 @@ export default function CompanySettings() {
         google_client_id: googleClientId || null,
         google_client_secret: googleClientSecret || null,
         bot_name: botName || 'Laura',
-        bot_role_description: botRoleDescription || 'atendente virtual'
+        bot_role_description: botRoleDescription || 'atendente virtual',
+        bot_prompt: botPrompt || null
       })
       .eq("id", company.id);
 
@@ -160,8 +164,8 @@ export default function CompanySettings() {
                   <Label>Prompt / Instruções do Bot (SDR)</Label>
                   <textarea
                     className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    value={botRoleDescription}
-                    onChange={(e) => setBotRoleDescription(e.target.value)}
+                    value={botPrompt}
+                    onChange={(e) => setBotPrompt(e.target.value)}
                     placeholder="Descreva detalhadamente como o bot deve se comportar, o tom de voz e as regras de negócio..."
                   />
                   <p className="text-xs text-muted-foreground italic">
