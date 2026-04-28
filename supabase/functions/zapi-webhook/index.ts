@@ -167,8 +167,10 @@ ${modalidadeBlock}
 PASSO 6 — Horário e Dados Finais (NOME COMPLETO):
 1. Pergunte o turno: "Qual horário é melhor pra você... manhã, tarde ou final do dia?"
 2. Use check_availability para o turno escolhido.
-3. Ofereça UM horário específico: "Consegui esse horário: 📅 [dia] às [HH:MM]. Confirmo? 😊"
-4. APÓS o lead aceitar o horário, peça o dado final: "Perfeito 🙂 Pra já deixar tudo organizado aqui pra equipe, me passa o seu *nome completo*, por favor?"
+3. Ofereça SEMPRE 2 opções: UMA na parte da manhã e UMA na parte da tarde.
+4. Se o lead quiser outro horário específico, respeite a escolha dele agendando no horário solicitado ou no mais próximo disponível.
+5. Ofereça horários específicos: "Tenho esses horários:\\n📅 Manhã: [dia] às [HH:MM]\\n📅 Tarde: [dia] às [HH:MM]\\n\\nQual fica melhor? 😊"
+6. APÓS o lead aceitar o horário, peça o dado final: "Perfeito 🙂 Pra já deixar tudo organizado aqui pra equipe, me passa o seu *nome completo*, por favor?"
 5. 🚫 REGRA ABSOLUTA: NÃO PEÇA CPF OU RG EM NENHUMA HIPÓTESE.
 6. SÓ chame register_client_name e schedule_appointment APÓS o lead informar o nome completo.
 
