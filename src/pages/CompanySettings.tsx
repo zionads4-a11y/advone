@@ -213,6 +213,10 @@ export default function CompanySettings() {
         </>
       )}
 
+      {userRole === "admin" && (
+        <BotConfigCard companyId={company.id} hasWhatsappConfig={true} />
+      )}
+
       <CompanyOfficesEditor companyId={company.id} />
 
       <Card className="glass-card">
