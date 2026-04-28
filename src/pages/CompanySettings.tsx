@@ -172,11 +172,11 @@ export default function CompanySettings() {
                   <textarea
                     className="flex min-h-[300px] w-full rounded-md border border-input bg-muted/20 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
                     value={botPrompt}
-                    readOnly
-                    placeholder="O prompt completo será exibido aqui após ser gerado nos fluxos..."
+                    onChange={(e) => setBotPrompt(e.target.value)}
+                    placeholder="Cole aqui as instruções personalizadas do robô ou utilize o gerador de fluxos abaixo..."
                   />
                   <p className="text-xs text-muted-foreground">
-                    Este campo mostra o prompt completo que a IA utiliza, incluindo todas as regras e fluxos selecionados. Para alterar estas instruções, utilize o seletor de fluxos abaixo.
+                    Este campo permite personalizar as instruções da IA. Você pode editar manualmente ou utilizar o seletor de fluxos abaixo para gerar uma base estruturada.
                   </p>
                 </div>
               </div>
