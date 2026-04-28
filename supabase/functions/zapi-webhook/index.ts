@@ -429,6 +429,28 @@ function getNextAvailableDays(count: number, includeToday: boolean = true): stri
   return days;
 }
 
+/**
+ * Sanitiza data passada pela IA: se vier no passado, num ano errado, ou inválida,
+ * substitui pelo próximo dia útil. Aceita YYYY-MM-DD ou DD/MM/YYYY.
+ */
+function sanitizeDate(rawDate: string | undefined | null): string {
+  const fallback = getNextAvailableDays(1, false)[0];
+  if (!rawDate) return fallback;
+  let s = String(rawDate).trim();
+  const dmy = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (dmy) s = `${dmy[3]}-${dmy[2]}-${dmy[1]}`;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return fallback;
+  const [y, m, d] = s.split("-").map(Number);
+  const parsed = new Date(y, m - 1, d);
+  if (isNaN(parsed.getTime())) return fallback;
+  const nowBR = getNowBrasilia();
+  const todayMid = new Date(nowBR.getFullYear(), nowBR.getMonth(), nowBR.getDate()).getTime();
+  const oneYearAhead = todayMid + 365 * 86400000;
+  const parsedMid = parsed.getTime();
+  if (parsedMid < todayMid || parsedMid > oneYearAhead) return fallback;
+  return s;
+}
+
 // ====== VALIDATORS ======
 function isValidFullName(raw: string): boolean {
   if (!raw) return false;
