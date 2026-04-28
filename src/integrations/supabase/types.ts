@@ -14,6 +14,62 @@ export type Database = {
   }
   public: {
     Tables: {
+      agreement_installments: {
+        Row: {
+          agreement_id: string
+          amount: number
+          asaas_invoice_url: string | null
+          asaas_payment_id: string | null
+          company_id: string
+          created_at: string
+          due_date: string
+          financial_transaction_id: string | null
+          id: string
+          installment_number: number
+          paid_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          agreement_id: string
+          amount?: number
+          asaas_invoice_url?: string | null
+          asaas_payment_id?: string | null
+          company_id: string
+          created_at?: string
+          due_date: string
+          financial_transaction_id?: string | null
+          id?: string
+          installment_number: number
+          paid_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          agreement_id?: string
+          amount?: number
+          asaas_invoice_url?: string | null
+          asaas_payment_id?: string | null
+          company_id?: string
+          created_at?: string
+          due_date?: string
+          financial_transaction_id?: string | null
+          id?: string
+          installment_number?: number
+          paid_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agreement_installments_agreement_id_fkey"
+            columns: ["agreement_id"]
+            isOneToOne: false
+            referencedRelation: "client_agreements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_followup_audit: {
         Row: {
           company_id: string
@@ -364,6 +420,66 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      client_agreements: {
+        Row: {
+          client_amount: number
+          company_id: string
+          created_at: string
+          created_by: string
+          description: string | null
+          fee_amount: number
+          fee_percentage: number
+          first_due_date: string | null
+          id: string
+          installments_count: number
+          lead_id: string
+          notes: string | null
+          payment_type: string
+          status: string
+          title: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          client_amount?: number
+          company_id: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          fee_amount?: number
+          fee_percentage?: number
+          first_due_date?: string | null
+          id?: string
+          installments_count?: number
+          lead_id: string
+          notes?: string | null
+          payment_type?: string
+          status?: string
+          title?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          client_amount?: number
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          fee_amount?: number
+          fee_percentage?: number
+          first_due_date?: string | null
+          id?: string
+          installments_count?: number
+          lead_id?: string
+          notes?: string | null
+          payment_type?: string
+          status?: string
+          title?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       client_companies: {
         Row: {
