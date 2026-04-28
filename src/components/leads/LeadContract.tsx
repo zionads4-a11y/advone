@@ -42,6 +42,7 @@ export function LeadContract({ leadId, companyId, leadName, leadPhone, leadEmail
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [generateDocOpen, setGenerateDocOpen] = useState(false);
   const [hasConfig, setHasConfig] = useState(false);
 
   // Form state
