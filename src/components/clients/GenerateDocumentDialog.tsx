@@ -243,22 +243,12 @@ export function GenerateDocumentDialog({ open, onOpenChange, lead: leadProp, com
       const { error: docErr } = await supabase.from("generated_documents").insert(rows);
       if (docErr) throw docErr;
 
-      // 2) Move lead p/ coluna "Ganho" + marca como cliente
-      const { data: cols } = await supabase
-        .from("kanban_columns")
-        .select("id, is_won")
-        .eq("company_id", companyId);
-      const wonCol = cols?.find((c: any) => c.is_won);
-
-      const update: any = {
-        status: "won",
-        is_client: true,
-        became_client_at: new Date().toISOString(),
-      };
-      if (wonCol?.id) update.kanban_column_id = wonCol.id;
-
-      const { error: leadErr } = await supabase.from("leads").update(update).eq("id", lead.id);
-      if (leadErr) throw leadErr;
+      // 2) Marca como cliente (cria closed_contract + move kanban)
+      const ok = await markLeadAsClient();
+      if (!ok) {
+        setPackageRunning(false);
+        return;
+      }
 
       // 3) Imprime os 3 numa única janela (sequencial)
       const w = window.open("", "_blank");
