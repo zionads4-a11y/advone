@@ -81,7 +81,7 @@ export function LeadConversationDrawer({ open, onOpenChange, leadId, leadName, l
   const exportTranscript = () => {
     const lines: string[] = [];
     lines.push(`HISTÓRICO DE CONVERSA - ${leadName || "Lead"}`);
-    if (leadCpf) lines.push(`CPF: ${leadCpf}`);
+    
     if (leadPhone) lines.push(`Telefone: ${leadPhone}`);
     lines.push(`Exportado em: ${new Date().toLocaleString("pt-BR")}`);
     lines.push("=".repeat(60));
