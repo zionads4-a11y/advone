@@ -254,6 +254,33 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label className="flex items-center gap-1.5 text-xs">
+                <Bot className="h-3.5 w-3.5 text-muted-foreground" />
+                Nome do Bot
+              </Label>
+              <Input
+                value={botName}
+                onChange={(e) => setBotName(e.target.value)}
+                placeholder="Ex: Laura"
+                disabled={!aiEnabled}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5 text-xs">
+                <Sparkles className="h-3.5 w-3.5 text-muted-foreground" />
+                Descrição da Função
+              </Label>
+              <Input
+                value={botRoleDescription}
+                onChange={(e) => setBotRoleDescription(e.target.value)}
+                placeholder="Ex: Assistente Jurídica Especialista"
+                disabled={!aiEnabled}
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5 text-xs">
                 <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
                 Nome do escritório
               </Label>
