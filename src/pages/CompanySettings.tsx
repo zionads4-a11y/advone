@@ -52,7 +52,7 @@ export default function CompanySettings() {
 
   const fetchCompany = async (id: string) => {
     const [companyResult, planResult] = await Promise.all([
-      supabase.from("companies").select("id, name, whatsapp, business_hours, google_client_id, google_client_secret").eq("id", id).maybeSingle(),
+      supabase.from("companies").select("id, name, whatsapp, business_hours, google_client_id, google_client_secret, bot_name, bot_role_description").eq("id", id).maybeSingle(),
       supabase.from("company_monitoring_plans").select("is_active").eq("company_id", id).maybeSingle(),
     ]);
     if (companyResult.data) {
