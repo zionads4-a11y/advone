@@ -420,6 +420,21 @@ serve(async (req) => {
       {
         type: "function",
         function: {
+          name: "register_client_name",
+          description: "Registra o nome completo do lead. Deve ser usado APÓS o lead aceitar um horário.",
+          parameters: {
+            type: "object",
+            properties: {
+              full_name: { type: "string", description: "Nome COMPLETO (mínimo 3 palavras: nome + sobrenomes)" }
+            },
+            required: ["full_name"],
+            additionalProperties: false
+          }
+        }
+      },
+      {
+        type: "function",
+        function: {
           name: "check_availability",
           description: "Verifica horários disponíveis.",
           parameters: {
