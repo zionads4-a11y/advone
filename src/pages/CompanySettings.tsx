@@ -112,6 +112,16 @@ export default function CompanySettings() {
     );
   }
 
+  if (userRole !== "super_admin") {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+        <Building2 className="mb-3 h-10 w-10" />
+        <p className="font-medium">Acesso restrito</p>
+        <p className="text-sm">Estas configurações só podem ser acessadas pelo Super Admin.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
