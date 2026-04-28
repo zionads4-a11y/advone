@@ -10,6 +10,7 @@ import { CompanyCard } from "@/components/companies/CompanyCard";
 import { CompanyFormDialog } from "@/components/companies/CompanyFormDialog";
 import { CompanyEditDialog } from "@/components/companies/CompanyEditDialog";
 import { WhatsAppConfigDialog } from "@/components/companies/WhatsAppConfigDialog";
+import { getBillingModel, type BillingModel } from "@/lib/billingModels";
 
 interface Company {
   id: string;
