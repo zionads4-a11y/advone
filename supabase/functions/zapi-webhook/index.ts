@@ -866,7 +866,7 @@ Antes de responder:
             let firstAlt: { date: string; dayName: string; slot: string } | null = null;
             for (const nd of nextDays) {
               if (nd === dateToCheck) continue;
-              const alt = await getAvailableSlots(supabase, companyId, nd);
+              const alt = await getAvailableSlots(supabase, companyId, nd, timezone);
               const altFiltered = filterByPeriod(alt.slots);
               const finalAlt = altFiltered.length > 0 ? altFiltered : alt.slots;
               if (finalAlt.length > 0) {
