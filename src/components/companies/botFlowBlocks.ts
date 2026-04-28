@@ -329,8 +329,18 @@ export function buildDynamicLauraPrompt(params: {
   enabledFlows: EnabledFlow[];
   offices?: OfficeAddress[];
   schedulingLink?: string;
+  botName?: string;
+  botRoleDescription?: string;
 }): string {
-  const { niche, officeName, enabledFlows, offices = [], schedulingLink } = params;
+  const { 
+    niche, 
+    officeName, 
+    enabledFlows, 
+    offices = [], 
+    schedulingLink,
+    botName,
+    botRoleDescription 
+  } = params;
   const orderedFlows = [...enabledFlows].sort((a, b) => a.position - b.position);
   const activeOffices = offices.filter((o) => o.address);
   const officeNumberEmojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
