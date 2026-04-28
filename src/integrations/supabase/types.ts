@@ -1055,6 +1055,48 @@ export type Database = {
           },
         ]
       }
+      document_templates: {
+        Row: {
+          category: string
+          company_id: string
+          content: string
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+          variables: Json
+        }
+        Insert: {
+          category?: string
+          company_id: string
+          content?: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+          variables?: Json
+        }
+        Update: {
+          category?: string
+          company_id?: string
+          content?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+          variables?: Json
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           case_id: string | null
@@ -1256,6 +1298,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      generated_documents: {
+        Row: {
+          company_id: string
+          content: string
+          file_name: string
+          generated_at: string
+          generated_by: string
+          id: string
+          lead_id: string
+          template_id: string | null
+          variables_used: Json
+        }
+        Insert: {
+          company_id: string
+          content?: string
+          file_name: string
+          generated_at?: string
+          generated_by: string
+          id?: string
+          lead_id: string
+          template_id?: string | null
+          variables_used?: Json
+        }
+        Update: {
+          company_id?: string
+          content?: string
+          file_name?: string
+          generated_at?: string
+          generated_by?: string
+          id?: string
+          lead_id?: string
+          template_id?: string | null
+          variables_used?: Json
+        }
+        Relationships: []
       }
       google_calendar_sync_queue: {
         Row: {
