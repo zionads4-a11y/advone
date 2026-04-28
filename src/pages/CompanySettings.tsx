@@ -136,7 +136,7 @@ export default function CompanySettings() {
           </CardContent>
         </Card>
 
-        {userRole === "admin" && (
+        {userRole === "super_admin" && (
           <Card className="glass-card">
             <CardHeader>
               <CardTitle className="font-display text-lg">Personalização do Bot SDR (IA)</CardTitle>
@@ -185,7 +185,7 @@ export default function CompanySettings() {
         )}
       </div>
 
-      {userRole === "admin" && (
+      {userRole === "super_admin" && (
         <>
 
           <Card className="glass-card">
@@ -215,7 +215,7 @@ export default function CompanySettings() {
         </>
       )}
 
-      {userRole === "admin" && (
+      {userRole === "super_admin" && (
         <BotConfigCard companyId={company.id} hasWhatsappConfig={true} />
       )}
 
