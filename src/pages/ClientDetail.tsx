@@ -23,6 +23,42 @@ export default function ClientDetail() {
   const [companyId, setCompanyId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [convOpen, setConvOpen] = useState(false);
+  const [newMovementsCount, setNewMovementsCount] = useState(0);
+
+  const fetchNewMovements = async (cId: string, lId: string) => {
+    // Busca cases do lead
+    const { data: cases } = await supabase
+      .from("cases")
+      .select("id, case_number")
+      .eq("lead_id", lId)
+      .eq("company_id", cId);
+    const caseIds = (cases || []).map((c) => c.id);
+    const cnjs = (cases || []).map((c) => c.case_number).filter(Boolean) as string[];
+    if (caseIds.length === 0 && cnjs.length === 0) {
+      setNewMovementsCount(0);
+      return;
+    }
+    const filterParts = [
+      caseIds.length ? `case_id.in.(${caseIds.join(",")})` : "",
+      cnjs.length ? `numero_cnj.in.(${cnjs.map((c) => `"${c}"`).join(",")})` : "",
+    ].filter(Boolean).join(",");
+    const { data: procs } = await supabase
+      .from("monitored_processes")
+      .select("id")
+      .eq("company_id", cId)
+      .or(filterParts);
+    const procIds = (procs || []).map((p) => p.id);
+    if (procIds.length === 0) {
+      setNewMovementsCount(0);
+      return;
+    }
+    const { count } = await supabase
+      .from("process_movements")
+      .select("id", { count: "exact", head: true })
+      .in("monitored_process_id", procIds)
+      .eq("is_new", true);
+    setNewMovementsCount(count || 0);
+  };
 
   useEffect(() => {
     if (!id) return;
