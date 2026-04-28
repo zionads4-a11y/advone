@@ -357,6 +357,8 @@ function sanitizeDate(rawDate: string | undefined | null): string {
   if (parsed.getTime() < todayMid || parsed.getTime() > oneYearAhead) return fallback;
   return s;
 }
+
+function splitIntoNaturalMessages(text: string): string[] {
   if (!text || text.length <= 120) return [text];
   const paragraphs = text.split(/\n\n+/).map((p) => p.trim()).filter(Boolean);
   const messages: string[] = [];
