@@ -81,7 +81,7 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
     const newValues = {
       ai_enabled: aiEnabled,
       ai_auto_reply: aiAutoReply,
-      ai_prompt: "", // Removido da UI: prompt montado pelo Bot Flows Editor
+      ai_prompt: aiPrompt, // Restaurado: permite salvar o prompt editado manualmente
       office_name: officeName || null,
       practice_area: practiceArea || null,
       communication_tone: communicationTone,
