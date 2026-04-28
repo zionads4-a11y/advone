@@ -9,12 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { FileDown, Printer } from "lucide-react";
+import { FileDown, Printer, Sparkles, Loader2 } from "lucide-react";
 import {
   buildAutoValues,
   renderTemplate,
   extractPlaceholders,
   ALL_VARIABLES,
+  SAMPLE_TEMPLATES,
 } from "@/lib/documentTemplates";
 
 interface Props {
@@ -25,6 +26,9 @@ interface Props {
   onGenerated?: () => void;
 }
 
+// Categorias do "pacote completo"
+const PACKAGE_CATEGORIES = ["procuracao", "contrato", "declaracao"] as const;
+
 export function GenerateDocumentDialog({ open, onOpenChange, lead, companyId, onGenerated }: Props) {
   const { user } = useAuth();
   const [templates, setTemplates] = useState<any[]>([]);
@@ -33,12 +37,40 @@ export function GenerateDocumentDialog({ open, onOpenChange, lead, companyId, on
   const [manualValues, setManualValues] = useState<Record<string, string>>({});
   const [preview, setPreview] = useState("");
   const [missingManual, setMissingManual] = useState<string[]>([]);
+  const [packageRunning, setPackageRunning] = useState(false);
 
   const selected = templates.find((t) => t.id === selectedId);
 
   useEffect(() => {
     if (open) load();
   }, [open]);
+
+  // Garante que os 3 modelos do pacote (procuração / contrato / declaração) existam.
+  const ensurePackageTemplates = async (existing: any[]) => {
+    if (!user) return existing;
+    const haveCategories = new Set(existing.map((t) => t.category));
+    const missing = SAMPLE_TEMPLATES.filter(
+      (s) =>
+        (PACKAGE_CATEGORIES as readonly string[]).includes(s.category) &&
+        !haveCategories.has(s.category)
+    );
+    if (missing.length === 0) return existing;
+
+    const rows = missing.map((s) => ({
+      company_id: companyId,
+      name: s.name,
+      description: s.description,
+      category: s.category,
+      content: s.content,
+      variables: extractPlaceholders(s.content) as any,
+      created_by: user.id,
+    }));
+    const { data: inserted } = await supabase
+      .from("document_templates")
+      .insert(rows)
+      .select("*");
+    return [...existing, ...(inserted || [])];
+  };
 
   const load = async () => {
     const { data: comp } = await supabase.from("companies").select("name").eq("id", companyId).maybeSingle();
@@ -49,7 +81,8 @@ export function GenerateDocumentDialog({ open, onOpenChange, lead, companyId, on
       .eq("company_id", companyId)
       .eq("is_active", true)
       .order("name");
-    setTemplates(data || []);
+    const withPackage = await ensurePackageTemplates(data || []);
+    setTemplates(withPackage);
   };
 
   useEffect(() => {
@@ -90,6 +123,86 @@ export function GenerateDocumentDialog({ open, onOpenChange, lead, companyId, on
     setTimeout(() => w.print(), 300);
   };
 
+  // Gera Procuração + Contrato + Declaração e marca lead como ganho/cliente.
+  const generateFullPackage = async () => {
+    if (!user) return;
+    if (!lead?.cpf_cliente_final && !lead?.cpf) {
+      toast.error("Cadastre o CPF do cliente antes de gerar o pacote.");
+      return;
+    }
+    setPackageRunning(true);
+    try {
+      const values = buildAutoValues({ lead, company: { name: companyName }, manualValues });
+
+      // 1) Renderiza e salva os 3 documentos
+      const docs = PACKAGE_CATEGORIES
+        .map((cat) => templates.find((t) => t.category === cat))
+        .filter(Boolean);
+
+      if (docs.length < 3) {
+        toast.error("Modelos do pacote não foram encontrados. Tente novamente.");
+        setPackageRunning(false);
+        return;
+      }
+
+      const rows = docs.map((t: any) => ({
+        company_id: companyId,
+        template_id: t.id,
+        lead_id: lead.id,
+        file_name: `${t.name} - ${lead.name}.txt`,
+        content: renderTemplate(t.content, values),
+        variables_used: manualValues as any,
+        generated_by: user.id,
+      }));
+      const { error: docErr } = await supabase.from("generated_documents").insert(rows);
+      if (docErr) throw docErr;
+
+      // 2) Move lead p/ coluna "Ganho" + marca como cliente
+      const { data: cols } = await supabase
+        .from("kanban_columns")
+        .select("id, is_won")
+        .eq("company_id", companyId);
+      const wonCol = cols?.find((c: any) => c.is_won);
+
+      const update: any = {
+        status: "won",
+        is_client: true,
+        became_client_at: new Date().toISOString(),
+      };
+      if (wonCol?.id) update.kanban_column_id = wonCol.id;
+
+      const { error: leadErr } = await supabase.from("leads").update(update).eq("id", lead.id);
+      if (leadErr) throw leadErr;
+
+      // 3) Imprime os 3 numa única janela (sequencial)
+      const w = window.open("", "_blank");
+      if (w) {
+        const html = rows.map((r) => `
+          <section style="page-break-after:always">
+            <h2 style="font-family:Georgia,serif;color:#111;margin-bottom:8px">${r.file_name.replace(/\.txt$/, "")}</h2>
+            <pre style="font-family:Georgia,serif;white-space:pre-wrap;line-height:1.6;color:#111">${r.content.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</pre>
+          </section>
+        `).join("");
+        w.document.write(`<html><head><title>Pacote - ${lead.name}</title>
+          <style>body{max-width:720px;margin:40px auto;padding:0 20px}</style>
+          </head><body>${html}</body></html>`);
+        w.document.close();
+        setTimeout(() => w.print(), 400);
+      }
+
+      toast.success("Pacote gerado! Lead movido para Ganho e listado em Clientes.");
+      onGenerated?.();
+      onOpenChange(false);
+    } catch (e: any) {
+      toast.error("Erro ao gerar pacote: " + (e.message || e));
+    }
+    setPackageRunning(false);
+  };
+
+  const hasFullPackage = PACKAGE_CATEGORIES.every((cat) =>
+    templates.some((t) => t.category === cat)
+  );
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -98,8 +211,27 @@ export function GenerateDocumentDialog({ open, onOpenChange, lead, companyId, on
         </DialogHeader>
 
         <div className="space-y-3 overflow-hidden flex-1 flex flex-col">
+          {/* Pacote completo */}
+          {hasFullPackage && (
+            <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold flex items-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5 text-primary" />
+                  Fechar cliente: gerar Procuração + Contrato + Declaração
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Salva os 3 documentos na pasta do cliente, marca o lead como <strong>Ganho</strong> e envia para a página de Clientes.
+                </p>
+              </div>
+              <Button onClick={generateFullPackage} disabled={packageRunning} className="shrink-0">
+                {packageRunning ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}
+                Gerar pacote
+              </Button>
+            </div>
+          )}
+
           <div>
-            <Label>Modelo</Label>
+            <Label>Modelo individual</Label>
             <Select value={selectedId} onValueChange={setSelectedId}>
               <SelectTrigger><SelectValue placeholder="Escolha um modelo..." /></SelectTrigger>
               <SelectContent>
