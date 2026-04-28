@@ -229,7 +229,7 @@ export function LeadConversationDrawer({ open, onOpenChange, leadId, leadName, l
           <SheetDescription>
             <div className="flex flex-col gap-1">
               <span><strong>{leadName}</strong> · {leadPhone || "sem telefone"}</span>
-              {leadCpf && <span className="font-mono text-xs">CPF: {leadCpf}</span>}
+              
             </div>
           </SheetDescription>
         </SheetHeader>
