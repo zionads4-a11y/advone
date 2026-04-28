@@ -134,7 +134,14 @@ export default function Kanban() {
     }).eq("id", leadId);
 
     if (error) {
-      toast.error("Erro ao mover lead");
+      const msg = error.message || "";
+      if (msg.includes("CPF_REQUIRED")) {
+        toast.error("Cadastre o CPF do cliente antes de mover para Ganho.");
+      } else if (msg.includes("CONTRACT_REQUIRED")) {
+        toast.error("Registre o contrato assinado (aba Contrato do lead) antes de mover para Ganho.");
+      } else {
+        toast.error(msg || "Erro ao mover lead");
+      }
       fetchColumnsAndLeads(); // Revert
     }
   }, [kanbanColumns]);
