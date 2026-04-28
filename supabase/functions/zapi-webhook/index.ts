@@ -862,7 +862,7 @@ Antes de responder:
           if (filteredSlots.length === 0 && availability.slots.length > 0) filteredSlots = availability.slots;
 
           if (filteredSlots.length === 0) {
-            const nextDays = getNextAvailableDays(3);
+            const nextDays = getNextAvailableDays(3, true, timezone);
             let firstAlt: { date: string; dayName: string; slot: string } | null = null;
             for (const nd of nextDays) {
               if (nd === dateToCheck) continue;
