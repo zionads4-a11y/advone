@@ -45,14 +45,14 @@ import { MODULE_BY_ROUTE, type ModuleKey } from "@/lib/modulePermissions";
 
 import { LayoutDashboard, Kanban, MessageSquare } from "lucide-react";
 
-// Rotas permitidas no modo "Apenas IA" (Secretária Virtual)
+// Rotas permitidas no modo "Apenas IA Laura" (cliente compra só o uso da IA)
+// Acesso: Kanban, Agenda, Conversas e Configuração do Escritório (endereço/horário).
 const AI_ONLY_ROUTES = new Set([
   "/dashboard",
   "/conversations",
-  "/historico-leads",
+  "/kanban",
   "/agenda",
   "/company-settings",
-  "/client-users",
 ]);
 
 const adminItems = [
