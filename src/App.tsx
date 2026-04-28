@@ -10,6 +10,8 @@ import Auth from "./pages/Auth";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import Leads from "./pages/Leads";
+import Clients from "./pages/Clients";
+import ClientDetail from "./pages/ClientDetail";
 import Kanban from "./pages/Kanban";
 import Conversations from "./pages/Conversations";
 import Campaigns from "./pages/Campaigns";
@@ -67,6 +69,8 @@ const App = () => (
             >
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/leads" element={<Leads />} />
+              <Route path="/clientes" element={<Clients />} />
+              <Route path="/clientes/:id" element={<ClientDetail />} />
               <Route path="/kanban" element={<Kanban />} />
               <Route path="/conversations" element={<Conversations />} />
               <Route path="/campaigns" element={<Campaigns />} />
