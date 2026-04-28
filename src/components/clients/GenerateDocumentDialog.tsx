@@ -29,7 +29,7 @@ interface Props {
 // Categorias do "pacote completo"
 const PACKAGE_CATEGORIES = ["procuracao", "contrato", "declaracao"] as const;
 
-export function GenerateDocumentDialog({ open, onOpenChange, lead, companyId, onGenerated }: Props) {
+export function GenerateDocumentDialog({ open, onOpenChange, lead: leadProp, companyId, onGenerated }: Props) {
   const { user } = useAuth();
   const [templates, setTemplates] = useState<any[]>([]);
   const [companyName, setCompanyName] = useState("");
@@ -38,6 +38,7 @@ export function GenerateDocumentDialog({ open, onOpenChange, lead, companyId, on
   const [preview, setPreview] = useState("");
   const [missingManual, setMissingManual] = useState<string[]>([]);
   const [packageRunning, setPackageRunning] = useState(false);
+  const [lead, setLead] = useState<any>(leadProp);
 
   const selected = templates.find((t) => t.id === selectedId);
 
@@ -75,6 +76,17 @@ export function GenerateDocumentDialog({ open, onOpenChange, lead, companyId, on
   const load = async () => {
     const { data: comp } = await supabase.from("companies").select("name").eq("id", companyId).maybeSingle();
     setCompanyName(comp?.name || "");
+
+    // Busca o lead completo (com cpf, rg, endereço, estado civil, etc.)
+    if (leadProp?.id) {
+      const { data: full } = await supabase
+        .from("leads")
+        .select("*")
+        .eq("id", leadProp.id)
+        .maybeSingle();
+      if (full) setLead({ ...leadProp, ...full });
+    }
+
     const { data } = await supabase
       .from("document_templates")
       .select("*")
