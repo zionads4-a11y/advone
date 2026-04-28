@@ -323,13 +323,8 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
         niche={specialty}
         officeName={officeName}
         disabled={!aiEnabled}
-        onApplyPrompt={async (p) => {
+        onApplyPrompt={(p) => {
           setAiPrompt(p);
-          // Também atualiza o prompt na tabela de empresas para que apareça no topo da página de configurações
-          await supabase
-            .from("companies")
-            .update({ bot_prompt: p })
-            .eq("id", companyId);
         }}
       />
 
