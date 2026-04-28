@@ -23,6 +23,8 @@ interface Company {
   business_hours: unknown;
   google_client_id: string | null;
   google_client_secret: string | null;
+  bot_name: string | null;
+  bot_role_description: string | null;
 }
 
 export default function CompanySettings() {
