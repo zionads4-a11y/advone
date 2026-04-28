@@ -163,6 +163,11 @@ export function LeadDetailDrawer({ lead, open, onOpenChange, onLeadUpdate }: Lea
 
             <Separator />
 
+            {/* Case Insights (IA) */}
+            <LeadCaseInsights leadId={lead.id} companyId={lead.company_id} />
+
+            <Separator />
+
             {/* Summary */}
             <LeadSummary leadId={lead.id} companyId={lead.company_id} />
 
