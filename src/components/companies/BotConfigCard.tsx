@@ -110,6 +110,16 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
       .update(newValues)
       .eq("company_id", companyId);
 
+    if (!error) {
+      await supabase
+        .from("companies")
+        .update({
+          bot_name: botName || null,
+          bot_role_description: botRoleDescription || null,
+        })
+        .eq("id", companyId);
+    }
+
     if (error) {
       toast.error("Erro ao salvar: " + error.message);
     } else {
