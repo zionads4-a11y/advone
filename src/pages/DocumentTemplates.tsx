@@ -12,13 +12,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import { FileText, Plus, Trash2, Edit, Sparkles, Copy } from "lucide-react";
+import { FileText, Plus, Trash2, Edit, Sparkles, Copy, Printer } from "lucide-react";
 import {
   ALL_VARIABLES,
   DOCUMENT_CATEGORIES,
   SAMPLE_TEMPLATES,
   extractPlaceholders,
 } from "@/lib/documentTemplates";
+import { QuickGenerateDocDialog } from "@/components/clients/QuickGenerateDocDialog";
 
 interface Template {
   id: string;
@@ -39,6 +40,7 @@ export default function DocumentTemplates() {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Template | null>(null);
+  const [quickGenTemplate, setQuickGenTemplate] = useState<Template | null>(null);
 
   // form
   const [name, setName] = useState("");
@@ -187,8 +189,11 @@ export default function DocumentTemplates() {
                   )}
                 </div>
                 <div className="flex gap-1">
-                  <Button size="sm" variant="outline" onClick={() => openEdit(t)} className="flex-1">
-                    <Edit className="h-3 w-3 mr-1" />Editar
+                  <Button size="sm" onClick={() => setQuickGenTemplate(t)} className="flex-1">
+                    <Printer className="h-3 w-3 mr-1" />Gerar
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => openEdit(t)}>
+                    <Edit className="h-3 w-3" />
                   </Button>
                   <Button size="sm" variant="ghost" onClick={() => remove(t.id)}>
                     <Trash2 className="h-3 w-3 text-destructive" />
@@ -297,6 +302,13 @@ export default function DocumentTemplates() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <QuickGenerateDocDialog
+        open={!!quickGenTemplate}
+        onOpenChange={(v) => !v && setQuickGenTemplate(null)}
+        template={quickGenTemplate}
+        companyId={companyId}
+      />
     </div>
   );
 }
