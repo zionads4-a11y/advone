@@ -151,7 +151,7 @@ export default function Agenda() {
         .eq("provider", "google");
       if (intErr) throw intErr;
 
-      toast.success("Google Agenda desconectada e eventos importados removidos.");
+      toast.success("Google Agenda desconectada e todos os eventos da agenda removidos.");
       setIsGoogleConnected(false);
       setDisconnectOpen(false);
       setRefreshKey(k => k + 1);
