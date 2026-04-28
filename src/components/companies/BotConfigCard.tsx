@@ -81,7 +81,7 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
     const newValues = {
       ai_enabled: aiEnabled,
       ai_auto_reply: aiAutoReply,
-      ai_prompt: "", // Removido da UI: prompt montado pelo Bot Flows Editor
+      ai_prompt: aiPrompt, // Restaurado: permite salvar o prompt editado manualmente
       office_name: officeName || null,
       practice_area: practiceArea || null,
       communication_tone: communicationTone,
@@ -151,6 +151,26 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr,400px]">
       <div className="space-y-6">
+        {/* Campo de Prompt Geral (SDR) - Adicionado de volta */}
+        <Card className="border-border/50">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Sparkles className="h-5 w-5 text-primary" />
+              Prompt Geral da Assistente (SDR)
+            </CardTitle>
+            <p className="text-xs text-muted-foreground">
+              Este é o prompt final que a IA utiliza. Ele é gerado pelos fluxos abaixo, mas você pode personalizá-lo manualmente aqui.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <Textarea
+              value={aiPrompt}
+              onChange={(e) => setAiPrompt(e.target.value)}
+              placeholder="O prompt será gerado aqui..."
+              className="min-h-[300px] text-sm font-mono bg-muted/20"
+            />
+          </CardContent>
+        </Card>
       {/* Practice specialty selector */}
       <Card className="border-border/50">
         <CardHeader className="pb-3">
