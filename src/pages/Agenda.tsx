@@ -443,49 +443,48 @@ export default function Agenda() {
               Sincronizar
             </Button>
           )}
-          <Button 
-            variant="outline"
-            size="sm"
-            className={cn(
-              "gap-2 text-xs h-9",
-              isGoogleConnected ? 'bg-green-50 text-green-700 border-green-100 hover:bg-green-100 hover:text-green-800' : ''
-            )}
-            onClick={() => {
-              if (isGoogleConnected) return;
-              const clientId = "635678265603-ugt7glb1tnd3ogsetcj4tbuenu90iq6d.apps.googleusercontent.com";
-              const redirectUri = googleRedirectUri;
-              const scopes = [
-                "openid",
-                "email",
-                "profile",
-                "https://www.googleapis.com/auth/calendar",
-                "https://www.googleapis.com/auth/calendar.events"
-              ].join(" ");
-              
-              const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
-              authUrl.searchParams.set("client_id", clientId);
-              authUrl.searchParams.set("redirect_uri", redirectUri);
-              authUrl.searchParams.set("response_type", "code");
-              authUrl.searchParams.set("scope", scopes);
-              authUrl.searchParams.set("access_type", "offline");
-              authUrl.searchParams.set("prompt", "consent");
-              
-              console.log("Iniciando OAuth com redirectUri:", redirectUri);
-              window.location.href = authUrl.toString();
-            }}
-          >
-            {isGoogleConnected ? (
-              <>
-                <Check className="h-3 w-3" />
-                Google OK
-              </>
-            ) : (
-              <>
-                <Settings2 className="h-3 w-3" />
-                Conectar Google
-              </>
-            )}
-          </Button>
+          {isGoogleConnected ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setDisconnectOpen(true)}
+              className="gap-2 text-xs h-9 bg-green-50 text-green-700 border-green-100 hover:bg-red-50 hover:text-red-700 hover:border-red-200"
+            >
+              <Check className="h-3 w-3" />
+              Google conectado · Desconectar
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 text-xs h-9"
+              onClick={() => {
+                const clientId = "635678265603-ugt7glb1tnd3ogsetcj4tbuenu90iq6d.apps.googleusercontent.com";
+                const redirectUri = googleRedirectUri;
+                const scopes = [
+                  "openid",
+                  "email",
+                  "profile",
+                  "https://www.googleapis.com/auth/calendar",
+                  "https://www.googleapis.com/auth/calendar.events"
+                ].join(" ");
+
+                const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+                authUrl.searchParams.set("client_id", clientId);
+                authUrl.searchParams.set("redirect_uri", redirectUri);
+                authUrl.searchParams.set("response_type", "code");
+                authUrl.searchParams.set("scope", scopes);
+                authUrl.searchParams.set("access_type", "offline");
+                authUrl.searchParams.set("prompt", "consent");
+
+                console.log("Iniciando OAuth com redirectUri:", redirectUri);
+                window.location.href = authUrl.toString();
+              }}
+            >
+              <Settings2 className="h-3 w-3" />
+              Conectar Google
+            </Button>
+          )}
         </div>
       </div>
 
