@@ -104,10 +104,16 @@ export default function ClientDetail() {
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
                 <User className="h-5 w-5 text-primary" />
                 <h1 className="text-2xl font-bold">{client.name}</h1>
                 <Badge className="bg-success/15 text-success border-success/30 hover:bg-success/15">Cliente</Badge>
+                {newMovementsCount > 0 && (
+                  <Badge className="bg-amber-500 hover:bg-amber-500 text-white gap-1 animate-pulse">
+                    <Bell className="h-3 w-3" />
+                    {newMovementsCount} {newMovementsCount === 1 ? "novo movimento" : "novos movimentos"}
+                  </Badge>
+                )}
               </div>
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground mt-2">
                 {client.cpf_cliente_final && <span>CPF: {client.cpf_cliente_final}</span>}
