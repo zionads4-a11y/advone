@@ -21,6 +21,7 @@ interface Company {
   created_at: string;
   partnership_type: "exito" | "mensalidade_zionads" | null;
   service_mode: "full" | "ai_only" | null;
+  billing_model: BillingModel | null;
 }
 
 interface WhatsAppConfig {
