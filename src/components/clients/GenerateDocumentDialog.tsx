@@ -133,9 +133,70 @@ export function GenerateDocumentDialog({ open, onOpenChange, lead: leadProp, com
       generated_by: user.id,
     });
     if (error) return toast.error(error.message);
-    toast.success("Documento gerado e salvo");
+
+    // Se o doc salvo for procuração / contrato / declaração, marca como cliente
+    if ((PACKAGE_CATEGORIES as readonly string[]).includes(selected.category)) {
+      await markLeadAsClient();
+      toast.success("Documento salvo na pasta do cliente. Lead enviado para Clientes.");
+    } else {
+      toast.success("Documento gerado e salvo");
+    }
     onGenerated?.();
     onOpenChange(false);
+  };
+
+  // Cria closed_contract (se ainda não existir) e move o lead para Ganho/Cliente
+  const markLeadAsClient = async () => {
+    const cpf = lead?.cpf_cliente_final || lead?.cpf || "";
+    if (!cpf || cpf.replace(/\D/g, "").length < 11) {
+      toast.error("Cadastre o CPF do cliente antes de fechar.");
+      return false;
+    }
+
+    // 1) Garante closed_contract (satisfaz o trigger enforce_won_requires_contract)
+    const { data: existing } = await supabase
+      .from("closed_contracts")
+      .select("id")
+      .eq("lead_id", lead.id)
+      .maybeSingle();
+
+    if (!existing) {
+      const { error: ccErr } = await supabase.from("closed_contracts").insert({
+        company_id: companyId,
+        lead_id: lead.id,
+        client_name: lead.name,
+        client_cpf: cpf,
+        client_phone: lead.whatsapp || lead.phone || null,
+        signed_at: new Date().toISOString(),
+        created_by: user!.id,
+      });
+      if (ccErr) {
+        toast.error("Erro ao registrar contrato: " + ccErr.message);
+        return false;
+      }
+    }
+
+    // 2) Move lead para coluna Ganho + marca como cliente
+    const { data: cols } = await supabase
+      .from("kanban_columns")
+      .select("id, is_won")
+      .eq("company_id", companyId);
+    const wonCol = cols?.find((c: any) => c.is_won);
+
+    const update: any = {
+      status: "won",
+      is_client: true,
+      became_client_at: new Date().toISOString(),
+      cpf_cliente_final: cpf,
+    };
+    if (wonCol?.id) update.kanban_column_id = wonCol.id;
+
+    const { error: leadErr } = await supabase.from("leads").update(update).eq("id", lead.id);
+    if (leadErr) {
+      toast.error("Erro ao mover lead: " + leadErr.message);
+      return false;
+    }
+    return true;
   };
 
   const printPdf = () => {
@@ -182,22 +243,12 @@ export function GenerateDocumentDialog({ open, onOpenChange, lead: leadProp, com
       const { error: docErr } = await supabase.from("generated_documents").insert(rows);
       if (docErr) throw docErr;
 
-      // 2) Move lead p/ coluna "Ganho" + marca como cliente
-      const { data: cols } = await supabase
-        .from("kanban_columns")
-        .select("id, is_won")
-        .eq("company_id", companyId);
-      const wonCol = cols?.find((c: any) => c.is_won);
-
-      const update: any = {
-        status: "won",
-        is_client: true,
-        became_client_at: new Date().toISOString(),
-      };
-      if (wonCol?.id) update.kanban_column_id = wonCol.id;
-
-      const { error: leadErr } = await supabase.from("leads").update(update).eq("id", lead.id);
-      if (leadErr) throw leadErr;
+      // 2) Marca como cliente (cria closed_contract + move kanban)
+      const ok = await markLeadAsClient();
+      if (!ok) {
+        setPackageRunning(false);
+        return;
+      }
 
       // 3) Imprime os 3 numa única janela (sequencial)
       const w = window.open("", "_blank");
