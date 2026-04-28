@@ -219,7 +219,7 @@ export default function ExitoSchedules() {
                 <TableRow className="border-border hover:bg-transparent">
                   <TableHead className="text-muted-foreground">Empresa</TableHead>
                   <TableHead className="text-muted-foreground">Nome do Cliente</TableHead>
-                  <TableHead className="text-muted-foreground">CPF</TableHead>
+                  
                   <TableHead className="text-muted-foreground">Telefone</TableHead>
                   <TableHead className="text-muted-foreground">Etapa</TableHead>
                   <TableHead className="text-muted-foreground">Status</TableHead>
