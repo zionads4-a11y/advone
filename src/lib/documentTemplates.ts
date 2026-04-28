@@ -37,6 +37,21 @@ export const LEAD_VARIABLES: TemplateVariable[] = [
 
 export const COMPANY_VARIABLES: TemplateVariable[] = [
   { key: "empresa_nome", label: "Nome do escritório", source: "company" },
+  { key: "escritorio_razao_social", label: "Razão social do escritório", source: "company" },
+  { key: "escritorio_cnpj", label: "CNPJ do escritório", source: "company" },
+  { key: "escritorio_endereco", label: "Endereço do escritório", source: "company" },
+  { key: "escritorio_cidade", label: "Cidade do escritório", source: "company" },
+  { key: "escritorio_estado", label: "Estado do escritório", source: "company" },
+  { key: "escritorio_cep", label: "CEP do escritório", source: "company" },
+  { key: "advogado_nome", label: "Nome do(a) advogado(a)", source: "company" },
+  { key: "advogado_oab", label: "OAB", source: "company" },
+  { key: "advogado_oab_uf", label: "UF da OAB", source: "company" },
+  { key: "advogado_cpf", label: "CPF do(a) advogado(a)", source: "company" },
+  { key: "advogado_nacionalidade", label: "Nacionalidade do(a) advogado(a)", source: "company" },
+  { key: "advogado_estado_civil", label: "Estado civil do(a) advogado(a)", source: "company" },
+  { key: "advogado_email", label: "E-mail do(a) advogado(a)", source: "company" },
+  { key: "advogado_telefone", label: "Telefone do(a) advogado(a)", source: "company" },
+  { key: "advogado_qualificacao", label: "Qualificação completa do(a) advogado(a)", source: "company" },
 ];
 
 export const SYSTEM_VARIABLES: TemplateVariable[] = [
@@ -73,7 +88,8 @@ function formatDateCurta(d: Date) {
 
 export interface RenderContext {
   lead?: any;
-  company?: { name?: string };
+  company?: any;
+  profile?: any;
   manualValues?: Record<string, string>;
 }
 
@@ -115,8 +131,39 @@ export function buildAutoValues(ctx: RenderContext): Record<string, string> {
   out.tipo_caso_detalhado = lead.tipo_caso_detalhado ?? lead.case_type ?? "";
   out.numero_processo = lead.numero_processo ?? lead.process_number ?? "";
 
-  // Company
+  // Company / Office
   out.empresa_nome = company.name ?? "";
+  out.escritorio_razao_social = company.office_legal_name ?? company.name ?? "";
+  out.escritorio_cnpj = company.office_cnpj ?? "";
+  out.escritorio_endereco = company.office_address ?? "";
+  out.escritorio_cidade = company.office_city ?? "";
+  out.escritorio_estado = company.office_state ?? "";
+  out.escritorio_cep = company.office_cep ?? "";
+
+  // Lawyer (profile override -> company default)
+  const profile = ctx.profile || {};
+  const adv_nome = profile.lawyer_name ?? company.lawyer_name ?? "";
+  const adv_oab = profile.lawyer_oab ?? company.lawyer_oab ?? "";
+  const adv_oab_uf = profile.lawyer_oab_uf ?? company.lawyer_oab_uf ?? "";
+  const adv_cpf = profile.lawyer_cpf ?? company.lawyer_cpf ?? "";
+  const adv_nac = profile.lawyer_nationality ?? company.lawyer_nationality ?? "brasileiro(a)";
+  const adv_ec = profile.lawyer_marital_status ?? company.lawyer_marital_status ?? "";
+  out.advogado_nome = adv_nome;
+  out.advogado_oab = adv_oab;
+  out.advogado_oab_uf = adv_oab_uf;
+  out.advogado_cpf = adv_cpf;
+  out.advogado_nacionalidade = adv_nac;
+  out.advogado_estado_civil = adv_ec;
+  out.advogado_email = company.lawyer_email ?? "";
+  out.advogado_telefone = company.lawyer_phone ?? "";
+  out.advogado_qualificacao = [
+    adv_nome,
+    adv_nac,
+    adv_ec,
+    "advogado(a)",
+    adv_oab && adv_oab_uf ? `inscrito(a) na OAB/${adv_oab_uf} sob o nº ${adv_oab}` : (adv_oab ? `OAB nº ${adv_oab}` : ""),
+    adv_cpf ? `CPF nº ${adv_cpf}` : "",
+  ].filter(Boolean).join(", ");
 
   // System
   const hoje = new Date();
