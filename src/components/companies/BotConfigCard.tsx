@@ -151,26 +151,6 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr,400px]">
       <div className="space-y-6">
-        {/* Campo de Prompt Geral (SDR) - Adicionado de volta */}
-        <Card className="border-border/50">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Sparkles className="h-5 w-5 text-primary" />
-              Prompt Geral da Assistente (SDR)
-            </CardTitle>
-            <p className="text-xs text-muted-foreground">
-              Este é o prompt final que a IA utiliza. Ele é gerado pelos fluxos abaixo, mas você pode personalizá-lo manualmente aqui.
-            </p>
-          </CardHeader>
-          <CardContent>
-            <Textarea
-              value={aiPrompt}
-              onChange={(e) => setAiPrompt(e.target.value)}
-              placeholder="O prompt será gerado aqui..."
-              className="min-h-[300px] text-sm font-mono bg-muted/20"
-            />
-          </CardContent>
-        </Card>
       {/* Practice specialty selector */}
       <Card className="border-border/50">
         <CardHeader className="pb-3">
@@ -352,6 +332,27 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
             .eq("id", companyId);
         }}
       />
+
+      {/* Prompt Geral da Assistente (SDR) - antes do salvar para revisão final */}
+      <Card className="border-border/50">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Sparkles className="h-5 w-5 text-primary" />
+            Prompt Geral da Assistente (SDR)
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">
+            Este é o prompt final que a IA utiliza. Ele é gerado pelos fluxos acima, mas você pode revisar e personalizá-lo manualmente antes de salvar.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <Textarea
+            value={aiPrompt}
+            onChange={(e) => setAiPrompt(e.target.value)}
+            placeholder="O prompt será gerado aqui..."
+            className="min-h-[300px] text-sm font-mono bg-muted/20"
+          />
+        </CardContent>
+      </Card>
 
       {/* Botão de salvar (prompt agora é montado pelo Bot Flows Editor) */}
       <Card className="border-border/50">
