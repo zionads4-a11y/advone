@@ -20,6 +20,10 @@ interface DraggableLeadCardProps {
     source: string | null;
     lead_score?: string | null;
     pending_data_warning?: string | null;
+    case_area?: string | null;
+    case_subtype?: string | null;
+    case_urgency?: string | null;
+    case_summary_short?: string | null;
   };
   onClick?: () => void;
   isDragOverlay?: boolean;
