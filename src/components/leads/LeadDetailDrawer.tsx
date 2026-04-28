@@ -12,6 +12,7 @@ import { LeadSummary } from "@/components/leads/LeadSummary";
 import { LeadCaseInsights } from "@/components/leads/LeadCaseInsights";
 import { LeadAssignment } from "@/components/leads/LeadAssignment";
 import { LeadProcessData } from "@/components/leads/LeadProcessData";
+import { LeadClientRegistration } from "@/components/leads/LeadClientRegistration";
 import { LeadNotes } from "@/components/leads/LeadNotes";
 import { LeadCases } from "@/components/leads/LeadCases";
 import { LeadContract } from "@/components/leads/LeadContract";
