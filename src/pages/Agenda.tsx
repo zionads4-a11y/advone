@@ -99,17 +99,42 @@ export default function Agenda() {
 
   const [disconnectOpen, setDisconnectOpen] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
+  const [clearAllOpen, setClearAllOpen] = useState(false);
+  const [clearingAll, setClearingAll] = useState(false);
+
+  const handleClearAllEvents = useCallback(async () => {
+    if (!user) return;
+    setClearingAll(true);
+    try {
+      const { error } = await supabase
+        .from("lead_reminders")
+        .delete()
+        .eq("created_by", user.id);
+      if (error) throw error;
+      await supabase
+        .from("google_calendar_sync_queue")
+        .delete()
+        .eq("user_id", user.id);
+      toast.success("Todos os eventos da agenda foram apagados.");
+      setClearAllOpen(false);
+      setRefreshKey(k => k + 1);
+    } catch (e: any) {
+      console.error("Erro ao apagar eventos:", e);
+      toast.error(e.message || "Erro ao apagar eventos");
+    } finally {
+      setClearingAll(false);
+    }
+  }, [user]);
 
   const handleDisconnectGoogle = useCallback(async () => {
     if (!user) return;
     setDisconnecting(true);
     try {
-      // 1. Apagar eventos importados do Google (mantém os criados manualmente sem google_event_id)
+      // 1. Apagar TODOS os eventos do usuário (incluindo importados do Google e criados manualmente)
       const { error: delErr } = await supabase
         .from("lead_reminders")
         .delete()
-        .eq("created_by", user.id)
-        .not("google_event_id", "is", null);
+        .eq("created_by", user.id);
       if (delErr) throw delErr;
 
       // 2. Limpar fila de sincronização do usuário
