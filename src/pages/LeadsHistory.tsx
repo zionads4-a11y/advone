@@ -160,7 +160,6 @@ export default function LeadsHistory() {
       "Empresa",
       "Tipo Parceria",
       "Nome",
-      "CPF",
       "Telefone",
       "E-mail",
       "Processo",
@@ -174,12 +173,10 @@ export default function LeadsHistory() {
       "Atualizado",
     ];
     const lines = filtered.map((r) => {
-      const cpf = formatCpf(r.cpf_cliente_final || r.cpf) || "";
       return [
         r.company_name,
         r.partnership_type,
         r.name,
-        cpf,
         r.phone || "",
         r.email || "",
         r.processo_numero || "",
