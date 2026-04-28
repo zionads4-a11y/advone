@@ -126,8 +126,8 @@ FLUXO NATURAL DA CONVERSA:
 
 Turno 1: Cumprimente com calor humano + apresente-se brevemente
 ${hasTriagem ? "Turno 2: Envie o menu de opções (em mensagem separada)" : 'Turno 2: Pergunte "Me conta, o que tá acontecendo?"'}
-Turno 3+: Siga o script do assunto — UMA pergunta por turno
-Último: Conduza para agendamento enfatizando que é GRATUITO e personalizado.
+Turno 3+: Siga o script do assunto — UMA pergunta por turno (não peça o nome aqui)
+Último: Conduza para agendamento. APÓS o lead aceitar o horário, peça o NOME COMPLETO.
 
 📆 DATA E HORA ATUAL: Hoje é ${new Date(getNowBrasilia()).toLocaleDateString("pt-BR", { weekday: "long" })}, ${getTodayBrasilia()} (${String(getNowBrasilia().getHours()).padStart(2,"0")}:${String(getNowBrasilia().getMinutes()).padStart(2,"0")} horário de Brasília). USE ESTA DATA COMO REFERÊNCIA.
 
@@ -430,16 +430,25 @@ serve(async (req) => {
       {
         type: "function",
         function: {
-          name: "register_client_cpf",
-          description: "Registra CPF + nome completo. PREFERENCIALMENTE antes de schedule_appointment para evitar pendência.",
+          name: "register_client_name",
+          description: "Registra o nome completo do lead. Deve ser usado APÓS o lead aceitar um horário.",
           parameters: {
             type: "object",
             properties: {
-              cpf: { type: "string", description: "CPF apenas números (11 dígitos válidos)" },
               full_name: { type: "string", description: "Nome COMPLETO (mínimo 3 palavras: nome + sobrenomes)" }
             },
-            required: ["cpf", "full_name"],
+            required: ["full_name"],
             additionalProperties: false
+          }
+        }
+      },
+      {
+        type: "function",
+        function: {
+          name: "check_availability",
+          description: "Verifica horários disponíveis.",
+          parameters: {
+...
           }
         }
       },
@@ -462,7 +471,7 @@ serve(async (req) => {
         type: "function",
         function: {
           name: "schedule_appointment",
-          description: "Agenda uma consulta. Use SOMENTE APÓS register_client_cpf + lead escolher horário.",
+          description: "Agenda uma consulta. Use SOMENTE APÓS register_client_name + lead escolher horário.",
           parameters: {
             type: "object",
             properties: {
@@ -571,22 +580,16 @@ serve(async (req) => {
 
         let toolResult: any = {};
 
-        if (fnName === "register_client_cpf") {
-          const rawCpf = String(args.cpf || "").replace(/\D/g, "");
+        if (fnName === "register_client_name") {
           const fullName = String(args.full_name || "").trim();
-          const cpfOk = isValidCPF(rawCpf);
           const nameOk = isValidFullName(fullName);
-          if (!cpfOk && !nameOk) {
-            toolResult = { success: false, error: "CPF e nome inválidos. CPF precisa ter 11 dígitos válidos e nome completo precisa ter ≥3 palavras." };
-          } else if (!cpfOk) {
-            toolResult = { success: false, error: "CPF inválido (dígitos não conferem). Peça novamente." };
-          } else if (!nameOk) {
+          if (!nameOk) {
             toolResult = { success: false, error: "Nome incompleto. Peça nome COMPLETO com sobrenomes (≥3 palavras)." };
           } else {
-            cpfRegistered = rawCpf;
-            toolResult = { success: true, cpf_registered: rawCpf, full_name: fullName, message: "[TESTE] CPF e nome completo registrados. Já pode agendar." };
+            cpfRegistered = "NAME_ONLY"; // Usando a variável existente para marcar que o nome foi pego
+            toolResult = { success: true, full_name: fullName, message: "[TESTE] Nome completo registrado. Já pode agendar." };
           }
-          toolActions.push({ tool: "register_client_cpf", result: toolResult });
+          toolActions.push({ tool: "register_client_name", result: toolResult });
         }
 
         if (fnName === "check_availability") {
@@ -637,7 +640,7 @@ serve(async (req) => {
 
         if (fnName === "schedule_appointment") {
           if (!cpfRegistered) {
-            toolResult = { success: false, error: "CPF_REQUIRED", message: "[TESTE] Bloqueado: registre o CPF do cliente primeiro via register_client_cpf." };
+            toolResult = { success: false, error: "NAME_REQUIRED", message: "[TESTE] Bloqueado: registre o NOME completo do cliente primeiro via register_client_name." };
           } else {
             reply = args.message_to_lead || reply;
             toolResult = { success: true, message: "[TESTE] Agendamento simulado com sucesso", date: args.date, time: args.time, modality: args.modality || "online", unit: args.unit || "", cpf: cpfRegistered };
