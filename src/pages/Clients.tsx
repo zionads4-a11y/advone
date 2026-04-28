@@ -156,7 +156,17 @@ export default function Clients() {
                 <TableBody>
                   {filtered.map((c) => (
                     <TableRow key={c.id} className="cursor-pointer hover:bg-muted/40" onClick={() => navigate(`/clientes/${c.id}`)}>
-                      <TableCell className="font-medium">{c.name}</TableCell>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-2">
+                          {alertCounts[c.id] > 0 && (
+                            <span title={`${alertCounts[c.id]} novo(s) movimento(s) processual(is)`} className="inline-flex items-center justify-center h-5 min-w-5 px-1 rounded-full bg-amber-500 text-white text-[10px] font-semibold gap-0.5 animate-pulse">
+                              <Bell className="h-2.5 w-2.5" />
+                              {alertCounts[c.id]}
+                            </span>
+                          )}
+                          <span>{c.name}</span>
+                        </div>
+                      </TableCell>
                       <TableCell className="text-sm text-muted-foreground">{c.cpf_cliente_final || "—"}</TableCell>
                       <TableCell className="text-sm">
                         <div>{c.whatsapp || c.phone || "—"}</div>
