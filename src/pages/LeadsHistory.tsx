@@ -279,7 +279,7 @@ export default function LeadsHistory() {
                 <TableRow className="border-border hover:bg-transparent">
                   <TableHead className="text-muted-foreground">Empresa</TableHead>
                   <TableHead className="text-muted-foreground">Lead</TableHead>
-                  <TableHead className="text-muted-foreground">CPF</TableHead>
+                  
                   <TableHead className="text-muted-foreground">Telefone</TableHead>
                   <TableHead className="text-muted-foreground">Processo</TableHead>
                   <TableHead className="text-muted-foreground">Valor</TableHead>
