@@ -241,15 +241,12 @@ export default function ExitoSchedules() {
                   </TableRow>
                 ) : (
                   filtered.map((r) => {
-                    const cpf = formatCpf(r.cpf_cliente_final || r.cpf);
-                    const isPending = !r.cpf_cliente_final || !!r.pending_data_warning;
+                    const isPending = !!r.pending_data_warning;
                     return (
                       <TableRow key={r.lead_id} className="border-border hover:bg-secondary/50">
                         <TableCell className="font-medium text-foreground">{r.company_name}</TableCell>
                         <TableCell className="text-foreground">{r.lead_name}</TableCell>
-                        <TableCell className={cpf ? "text-foreground font-mono text-xs" : "text-muted-foreground"}>
-                          {cpf || "—"}
-                        </TableCell>
+
                         <TableCell className="text-muted-foreground">{r.phone || "—"}</TableCell>
                         <TableCell>
                           <Badge variant="outline" className="bg-success/10 text-success border-success/30">
