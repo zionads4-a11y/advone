@@ -151,7 +151,7 @@ export default function ExitoSchedules() {
     URL.revokeObjectURL(url);
   };
 
-  const pendingCount = rows.filter((r) => !r.cpf_cliente_final || r.pending_data_warning).length;
+  const pendingCount = rows.filter((r) => r.pending_data_warning).length;
 
   return (
     <div className="space-y-6 animate-fade-in">
