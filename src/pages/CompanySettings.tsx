@@ -136,27 +136,39 @@ export default function CompanySettings() {
               <CardTitle className="font-display text-lg">Personalização do Bot SDR (IA)</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Nome da Assistente</Label>
-                  <Input 
-                    value={botName} 
-                    onChange={(e) => setBotName(e.target.value)} 
-                    placeholder="Ex: Laura, Julia, Maria..."
-                  />
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Nome da Assistente</Label>
+                    <Input 
+                      value={botName} 
+                      onChange={(e) => setBotName(e.target.value)} 
+                      placeholder="Ex: Laura, Julia, Maria..."
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Como ela se apresenta (Cargo/Função)</Label>
+                    <Input 
+                      value={botRoleDescription} 
+                      onChange={(e) => setBotRoleDescription(e.target.value)} 
+                      placeholder="Ex: atendente virtual, secretária, assistente jurídica..."
+                    />
+                  </div>
                 </div>
+                
                 <div className="space-y-2">
-                  <Label>Como ela se apresenta (Cargo/Função)</Label>
-                  <Input 
-                    value={botRoleDescription} 
-                    onChange={(e) => setBotRoleDescription(e.target.value)} 
-                    placeholder="Ex: atendente virtual, secretária, assistente jurídica..."
+                  <Label>Prompt / Instruções do Bot (SDR)</Label>
+                  <textarea
+                    className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={botRoleDescription}
+                    onChange={(e) => setBotRoleDescription(e.target.value)}
+                    placeholder="Descreva detalhadamente como o bot deve se comportar, o tom de voz e as regras de negócio..."
                   />
+                  <p className="text-xs text-muted-foreground italic">
+                    Este campo define o comportamento e o conhecimento da IA.
+                  </p>
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground italic">
-                Isso mudará a primeira frase do chat. Ex: "Você é {'{Nome}'}, {'{Cargo}'} da equipe..."
-              </p>
             </CardContent>
           </Card>
         )}
