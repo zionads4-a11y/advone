@@ -176,7 +176,12 @@ export default function ClientDetail() {
         <TabsContent value="processos" className="mt-6">
           <Card>
             <CardContent className="pt-6">
-              <LeadCases leadId={client.id} companyId={companyId} />
+              <ClientProcesses
+                leadId={client.id}
+                leadName={client.name}
+                companyId={companyId}
+                onChanged={() => fetchNewMovements(companyId, client.id)}
+              />
             </CardContent>
           </Card>
         </TabsContent>
