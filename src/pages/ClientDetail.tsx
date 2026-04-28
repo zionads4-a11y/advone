@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, User, FileText, Briefcase, CalendarClock, Wallet, MessageSquare, StickyNote, Phone, Mail, MapPin } from "lucide-react";
 import { ClientPersonalDataForm, ClientData } from "@/components/clients/ClientPersonalDataForm";
 import { ClientGeneratedDocuments } from "@/components/clients/ClientGeneratedDocuments";
+import { ClientUploadedDocuments } from "@/components/clients/ClientUploadedDocuments";
 import { ClientAgreements } from "@/components/clients/ClientAgreements";
 import { LeadCases } from "@/components/leads/LeadCases";
 import { LeadReminders } from "@/components/leads/LeadReminders";
@@ -115,10 +116,15 @@ export default function ClientDetail() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="documentos" className="mt-6">
+        <TabsContent value="documentos" className="mt-6 space-y-6">
           <Card>
             <CardContent className="pt-6">
               <ClientGeneratedDocuments lead={client} companyId={companyId} />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <ClientUploadedDocuments lead={client} companyId={companyId} />
             </CardContent>
           </Card>
         </TabsContent>
