@@ -83,8 +83,8 @@ function buildSDRPrompt(
   }
 
   const leadNameInfo = leadName
-    ? `\n\nNOME DO LEAD: O nome do lead é "${leadName}". Use esse nome quando se referir a ele.\n`
-    : "\n\nNOME DO LEAD: Você ainda não sabe o nome. Peça o NOME COMPLETO somente no final do agendamento, conforme o PASSO 6.\n";
+    ? `\n\nNOME DO LEAD: O nome do lead é "${leadName}". Use esse nome quando se referir a ele. NUNCA escreva {nome} literalmente.\n`
+    : "\n\nNOME DO LEAD: Você ainda não sabe o nome. Pergunte uma única vez de forma natural.\n";
 
   const toneInstructions = tone === "formal"
     ? "Use linguagem cordial e respeitosa."
