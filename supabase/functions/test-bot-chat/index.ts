@@ -139,7 +139,7 @@ Turno 3+: Siga o script de qualificação — UMA pergunta por turno
 
 🚫 REGRA ABSOLUTA: NUNCA peça o CPF ou RG. Peça apenas o NOME COMPLETO no final, após o agendamento ser aceito. Se o cliente perguntar se precisa de CPF, diga que não é necessário agora.
 
-📆 DATA E HORA ATUAL: Hoje é ${new Date(getNowBrasilia()).toLocaleDateString("pt-BR", { weekday: "long" })}, ${getTodayBrasilia()} (${String(getNowBrasilia().getHours()).padStart(2,"0")}:${String(getNowBrasilia().getMinutes()).padStart(2,"0")} horário de Brasília). USE ESTA DATA COMO REFERÊNCIA.
+📆 DATA E HORA ATUAL: Hoje é ${new Date(getNowBrasilia()).toLocaleDateString("pt-BR", { weekday: "long" })}, ${getTodayBrasilia()} (${String(getNowBrasilia().getHours()).padStart(2,"0")}:${String(getNowBrasilia().getMinutes()).padStart(2,"0")} horário de Brasília). O ANO ATUAL É ${getNowBrasilia().getFullYear()}. NUNCA use anos passados ao agendar. Sempre OFEREÇA O PRIMEIRO HORÁRIO LIVRE retornado por check_availability — não invente horários. Se o lead não disser data, omita "date" em check_availability (o sistema usa o próximo dia útil).
 
 ⏰ HORÁRIO DE FUNCIONAMENTO (REGRA OBRIGATÓRIA):
 - Agendamentos SOMENTE entre 08:00 e 17:00 (horário de Brasília)
