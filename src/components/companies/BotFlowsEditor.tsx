@@ -98,6 +98,8 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
       enabledFlows: renumbered,
       offices: activeOffices,
       schedulingLink: cfg?.scheduling_link || undefined,
+      botName: companyData?.bot_name || undefined,
+      botRoleDescription: companyData?.bot_role_description || undefined,
     });
 
     const { error } = await supabase
