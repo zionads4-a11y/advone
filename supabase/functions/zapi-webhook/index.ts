@@ -1207,6 +1207,28 @@ Antes de responder:
           toolResult = { success: true };
         }
 
+        if (fnName === "mark_lead_lost") {
+          replyText = args.message_to_lead || "Sem problemas, agradeço o contato. Fico à disposição se precisar! 🙂";
+          const reason = args.reason || "Lead manifestou desinteresse";
+          qualificationResult = {
+            status: "not_qualified",
+            reason,
+            summary: `Lead encerrado pelo bot (mark_lead_lost): ${reason}`,
+            lead_score: "frio",
+          };
+          // Desativa o bot para este lead — evita novas mensagens automáticas
+          if (leadId) {
+            try {
+              await supabase.from("leads").update({
+                bot_enabled: false,
+                bot_disabled_reason: `IA encerrou: ${reason}`,
+                bot_disabled_at: new Date().toISOString(),
+              }).eq("id", leadId);
+            } catch (e) { console.error("mark_lead_lost: failed disabling bot", e); }
+          }
+          toolResult = { success: true, lead_marked_lost: true };
+        }
+
         aiMessages.push({ role: "tool", tool_call_id: toolCall.id, content: JSON.stringify(toolResult) });
       }
 
