@@ -88,7 +88,7 @@ export function ClientProcesses({ leadId, leadName, companyId, onChanged }: Prop
     if (caseIds.length > 0 || cnjs.length > 0) {
       const { data: byCase } = await supabase
         .from("monitored_processes")
-        .select("id, case_id, numero_cnj, classe, tribunal_sigla, data_ultima_movimentacao, last_checked_at")
+        .select("id, case_id, numero_cnj, classe, tribunal_sigla, data_ultima_movimentacao, last_checked_at, polo_ativo, polo_passivo, escavador_data")
         .eq("company_id", companyId)
         .or(
           [
