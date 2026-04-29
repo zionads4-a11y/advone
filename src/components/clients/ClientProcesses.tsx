@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Briefcase, Plus, Bell, Loader2, Trash2, RefreshCw, ChevronDown, ChevronUp, AlertTriangle, Clock, FileText } from "lucide-react";
+import { Briefcase, Plus, Bell, Loader2, Trash2, RefreshCw, ChevronDown, ChevronUp, AlertTriangle, Clock, FileText, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -48,6 +48,25 @@ export function ClientProcesses({ leadId, leadName, companyId, onChanged }: Prop
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [newCounts, setNewCounts] = useState<Record<string, number>>({});
   const [refreshing, setRefreshing] = useState<string | null>(null);
+  const [summaries, setSummaries] = useState<Record<string, string>>({});
+  const [summarizing, setSummarizing] = useState<string | null>(null);
+
+  const generateSummary = async (p: ProcessItem) => {
+    setSummarizing(p.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-process-summary", {
+        body: { monitored_process_id: p.id },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setSummaries((s) => ({ ...s, [p.id]: data.summary }));
+      setExpanded((s) => ({ ...s, [p.id]: true }));
+      toast.success("Resumo gerado");
+    } catch (e: any) {
+      toast.error("Erro ao gerar resumo: " + (e.message || e));
+    }
+    setSummarizing(null);
+  };
 
   const load = async () => {
     setLoading(true);
@@ -350,6 +369,19 @@ export function ClientProcesses({ leadId, leadName, companyId, onChanged }: Prop
                       </p>
                     </div>
                     <div className="flex gap-1 shrink-0">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => generateSummary(p)}
+                        disabled={summarizing === p.id}
+                        title="Gerar resumo IA"
+                        className="gap-1"
+                      >
+                        {summarizing === p.id
+                          ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          : <Sparkles className="h-3.5 w-3.5 text-primary" />}
+                        <span className="hidden sm:inline text-xs">Resumo IA</span>
+                      </Button>
                       <Button size="sm" variant="ghost" onClick={() => checkNow(p)} disabled={refreshing === p.id} title="Verificar agora">
                         {refreshing === p.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
                       </Button>
@@ -361,6 +393,29 @@ export function ClientProcesses({ leadId, leadName, companyId, onChanged }: Prop
                       </Button>
                     </div>
                   </div>
+
+                  {summaries[p.id] && (
+                    <div className="mt-3 border-2 border-primary/30 bg-primary/5 rounded-lg p-3">
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <p className="text-xs font-semibold flex items-center gap-1.5 text-primary">
+                          <Sparkles className="h-3.5 w-3.5" />
+                          Resumo gerado por IA
+                        </p>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => generateSummary(p)}
+                          disabled={summarizing === p.id}
+                          className="h-6 text-[10px]"
+                        >
+                          {summarizing === p.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Regerar"}
+                        </Button>
+                      </div>
+                      <div className="text-xs whitespace-pre-wrap leading-relaxed text-foreground/90">
+                        {summaries[p.id]}
+                      </div>
+                    </div>
+                  )}
 
                   {isOpen && (
                     <div className="mt-3 border-t pt-3 space-y-2">
