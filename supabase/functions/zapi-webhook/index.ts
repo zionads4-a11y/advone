@@ -1363,7 +1363,8 @@ function splitIntoNaturalMessages(text: string): string[] {
   }
   flush();
 
-  return messages.length > 0 ? messages : [trimmed];
+  const final = messages.length > 0 ? dedupeChunks(messages) : [trimmed];
+  return final;
 }
 
 // ====== MAIN HANDLER ======
