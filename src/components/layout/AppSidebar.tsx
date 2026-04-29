@@ -80,6 +80,7 @@ const gerenteItems = [
   { title: "IA Jurídica", url: "/ia-juridica", icon: Scale, premium: true },
   { title: "Financeiro", url: "/financeiro", icon: Wallet },
   { title: "Modelos de Documentos", url: "/modelos-documentos", icon: FileText },
+  { title: "Busca de Processos", url: "/busca-processos", icon: Search },
   { title: "Equipe", url: "/client-users", icon: Users },
   { title: "Configurações", url: "/company-settings", icon: Settings },
 ];
