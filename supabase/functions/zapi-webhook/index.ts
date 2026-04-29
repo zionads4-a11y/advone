@@ -951,18 +951,36 @@ Antes de responder:
 
         if (fnName === "schedule_appointment") {
           const pendingItems: string[] = [];
+          let leadCurrentName = "";
           if (leadId) {
             const { data: leadCheck } = await supabase
               .from("leads")
               .select("name")
               .eq("id", leadId)
               .maybeSingle();
-            if (!isValidFullName(leadCheck?.name || "")) pendingItems.push("Nome completo");
+            leadCurrentName = leadCheck?.name || "";
+            if (!isValidFullName(leadCurrentName)) pendingItems.push("Nome completo");
           }
           const pendingWarning = pendingItems.length > 0 ? `${pendingItems.join(" + ")} pendente(s)` : null;
 
+          // 🛑 BLOQUEIO: nunca agendar sem NOME COMPLETO. Força o bot a pedir antes.
+          if (!isValidFullName(leadCurrentName)) {
+            toolResult = {
+              success: false,
+              error: "NOME_COMPLETO_OBRIGATORIO",
+              instruction: "Antes de agendar, peça o NOME COMPLETO do lead (nome + sobrenome, mínimo 3 palavras). Use exatamente: \"Perfeito 🙂 Pra já deixar tudo organizado aqui pra equipe, me passa o seu *nome completo*, por favor?\". Quando receber, chame register_client_name e SÓ DEPOIS chame schedule_appointment de novo."
+            };
+            // não seta shouldSchedule, não cria reminder
+            aiMessages.push({ role: "tool", tool_call_id: toolCall.id, content: JSON.stringify(toolResult) });
+            continue;
+          }
+
           shouldSchedule = true;
-          replyText = args.message_to_lead || "";
+          // Mensagem padronizada de confirmação (data/hora/nome) — substitui qualquer texto do modelo
+          const _confirmDate = sanitizeDate(args.date, timezone);
+          const _confirmTime = args.time || "10:00";
+          const _confirmDateBR = formatDateDMY(_confirmDate);
+          replyText = `Perfeito, ${leadCurrentName.split(" ")[0]} 🙂\n\nAgendamento confirmado:\n📅 ${_confirmDateBR}\n⏰ ${_confirmTime}\n👤 ${leadCurrentName}\n\nA equipe já entra em contato com você no horário marcado. Qualquer coisa, é só me chamar por aqui 💙`;
 
           if (leadId) {
             const appointmentDate = sanitizeDate(args.date, timezone);
