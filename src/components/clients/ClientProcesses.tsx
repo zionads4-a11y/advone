@@ -339,23 +339,27 @@ export function ClientProcesses({ leadId, leadName, companyId, onChanged }: Prop
         </p>
       </div>
 
-      <Card>
+      <Card className="border-primary/30 bg-primary/5">
         <CardContent className="pt-4">
-          <Label className="text-xs">Número do processo (CNJ)</Label>
-          <div className="flex gap-2 mt-1">
+          <Label className="text-sm font-semibold flex items-center gap-1.5">
+            <Bell className="h-4 w-4 text-primary" />
+            Monitorar processo
+          </Label>
+          <div className="flex gap-2 mt-2">
             <Input
-              placeholder="0000000-00.0000.0.00.0000"
+              placeholder="Cole o número do processo (CNJ)"
               value={cnj}
               onChange={(e) => setCnj(e.target.value)}
               onBlur={() => setCnj((v) => formatCnj(v))}
+              onKeyDown={(e) => { if (e.key === "Enter" && !adding) addProcess(); }}
             />
             <Button onClick={addProcess} disabled={adding}>
               {adding ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Plus className="h-4 w-4 mr-1" />}
-              Adicionar
+              Monitorar
             </Button>
           </div>
-          <p className="text-[11px] text-muted-foreground mt-1">
-            Cole o número e clique em Adicionar. Aceita com ou sem máscara.
+          <p className="text-[11px] text-muted-foreground mt-2">
+            Basta colar o número — o sistema avisa automaticamente sobre cada nova movimentação.
           </p>
         </CardContent>
       </Card>
