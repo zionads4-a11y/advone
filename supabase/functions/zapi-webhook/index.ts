@@ -26,10 +26,28 @@ function buildSDRPrompt(
   const botName = company?.bot_name || "Laura";
   const botRole = company?.bot_role_description || "atendente virtual";
 
+  // Bloco universal de detecção de desistência — injetado em TODOS os prompts SDR
+  const lostBlock =
+    `\n\n═══════════════════════════════════════\n` +
+    `🛑 REGRA DE DESISTÊNCIA / DESINTERESSE (PRIORIDADE MÁXIMA)\n` +
+    `═══════════════════════════════════════\n` +
+    `Se o lead, em QUALQUER momento, manifestar desinteresse, recusa ou desistência — explícita ou implícita —, ` +
+    `você DEVE chamar IMEDIATAMENTE a tool \`mark_lead_lost\` e responder com UMA única mensagem curta de despedida cordial. ` +
+    `NÃO insista, NÃO ofereça nada, NÃO faça nova pergunta, NÃO mande "Como posso te ajudar?".\n\n` +
+    `Exemplos que DEVEM disparar mark_lead_lost:\n` +
+    `• "não quero mais" / "vou querer não" / "não vou querer"\n` +
+    `• "não tenho interesse" / "perdi o interesse"\n` +
+    `• "desisti" / "mudei de ideia" / "deixa pra lá"\n` +
+    `• "não preciso mais" / "já resolvi" / "já contratei outro advogado"\n` +
+    `• "pode parar" / "para de mandar mensagem" / "não me mande mais nada"\n` +
+    `• "obrigado, mas não" / "agradeço, mas não vou seguir"\n\n` +
+    `Após chamar mark_lead_lost, o atendimento é ENCERRADO. Não envie mais nada além da despedida.`;
+
   // Se o prompt customizado começar com "Você é", assumimos que é o prompt completo
   // gerado pelo construtor dinâmico — mas ainda injetamos fluxos e triage ao final.
   if (customPrompt.startsWith("Você é")) {
     const extras = [
+      lostBlock,
       flowsBlock
         ? `\n\n═══════════════════════════════════════\nFLUXOS ATIVOS DESTE ESCRITÓRIO\n═══════════════════════════════════════\n${flowsBlock}`
         : "",
@@ -186,7 +204,7 @@ PASSO 6 — Horário e Dados Finais (NOME COMPLETO):
 5. APÓS o lead aceitar o horário, peça o dado final: "Perfeito 🙂 Pra já deixar tudo organizado aqui pra equipe, me passa o seu *nome completo*, por favor?"
 6. SÓ chame register_client_name e schedule_appointment APÓS o lead informar o nome completo.
 
-${flowsSection}${triageSection}${decisionRules}${customSection}
+${lostBlock}${flowsSection}${triageSection}${decisionRules}${customSection}
 
 Responda SEMPRE em português do Brasil.`;
 }
@@ -551,6 +569,30 @@ const sdrTools = [
           full_name: { type: "string", description: "Nome completo do lead (mínimo 3 palavras)" }
         },
         required: ["full_name"],
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "mark_lead_lost",
+      description:
+        "Marca o lead como PERDIDO e ENCERRA o atendimento automaticamente. Use SEMPRE que o lead manifestar desinteresse, desistência ou recusa explícita ou implícita, como por exemplo: 'não quero mais', 'não tenho interesse', 'desisti', 'vou querer não', 'pode parar', 'não preciso mais', 'mudei de ideia', 'já resolvi', 'já contratei outro advogado', 'não vou seguir', 'obrigado, mas não', 'estou só pesquisando' ou qualquer variação semelhante. Após chamar esta tool, envie UMA única mensagem curta de despedida cordial (sem perguntar mais nada, sem oferecer ajuda futura como pergunta) e o bot ficará desativado para este lead.",
+      parameters: {
+        type: "object",
+        properties: {
+          message_to_lead: {
+            type: "string",
+            description:
+              "Mensagem curta e cordial de despedida (1 frase). Ex: 'Sem problemas, fico à disposição se precisar 🙂' ou 'Tudo bem, agradeço o contato. Tenha um ótimo dia!'"
+          },
+          reason: {
+            type: "string",
+            description: "Motivo curto da perda. Ex: 'Lead disse que não quer mais', 'Já contratou outro advogado', 'Mudou de ideia'."
+          }
+        },
+        required: ["message_to_lead", "reason"],
         additionalProperties: false
       }
     }
@@ -1181,6 +1223,24 @@ Antes de responder:
         if (fnName === "transfer_to_human") {
           replyText = args.message_to_lead || "Um especialista irá atendê-lo em breve!";
           toolResult = { success: true };
+        }
+
+        if (fnName === "mark_lead_lost") {
+          replyText = args.message_to_lead || "Sem problemas, agradeço o contato. Fico à disposição se precisar! 🙂";
+          const reason = args.reason || "Lead manifestou desinteresse";
+          qualificationResult = {
+            status: "not_qualified",
+            reason,
+            summary: `Lead encerrado pelo bot (mark_lead_lost): ${reason}`,
+            lead_score: "frio",
+          };
+          // Desativa o bot para este lead — evita novas mensagens automáticas
+          if (leadId) {
+            try {
+              await supabase.from("leads").update({ bot_disabled: true }).eq("id", leadId);
+            } catch (e) { console.error("mark_lead_lost: failed disabling bot", e); }
+          }
+          toolResult = { success: true, lead_marked_lost: true };
         }
 
         aiMessages.push({ role: "tool", tool_call_id: toolCall.id, content: JSON.stringify(toolResult) });
