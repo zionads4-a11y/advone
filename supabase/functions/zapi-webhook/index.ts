@@ -1219,11 +1219,7 @@ Antes de responder:
           // Desativa o bot para este lead — evita novas mensagens automáticas
           if (leadId) {
             try {
-              await supabase.from("leads").update({
-                bot_enabled: false,
-                bot_disabled_reason: `IA encerrou: ${reason}`,
-                bot_disabled_at: new Date().toISOString(),
-              }).eq("id", leadId);
+              await supabase.from("leads").update({ bot_disabled: true }).eq("id", leadId);
             } catch (e) { console.error("mark_lead_lost: failed disabling bot", e); }
           }
           toolResult = { success: true, lead_marked_lost: true };
