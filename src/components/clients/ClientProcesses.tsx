@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Briefcase, Plus, Bell, Loader2, Trash2, RefreshCw, ChevronDown, ChevronUp, AlertTriangle, Clock, FileText, Sparkles } from "lucide-react";
+import { Briefcase, Plus, Bell, Loader2, Trash2, RefreshCw, ChevronDown, ChevronUp, AlertTriangle, Clock, FileText, Sparkles, Users } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -26,6 +26,9 @@ interface ProcessItem {
   tribunal_sigla: string | null;
   data_ultima_movimentacao: string | null;
   last_checked_at: string | null;
+  polo_ativo: string | null;
+  polo_passivo: string | null;
+  escavador_data: any;
 }
 
 interface Movement {
@@ -36,6 +39,50 @@ interface Movement {
   source_name: string | null;
   is_new: boolean;
   created_at: string;
+}
+
+interface Party {
+  name: string;
+  document?: string | null;
+  role?: string | null;
+}
+
+function extractParties(p: ProcessItem): Party[] {
+  const parties: Party[] = [];
+  const seen = new Set<string>();
+  const add = (name: string, doc?: string | null, role?: string | null) => {
+    const key = `${name.trim().toUpperCase()}|${(doc || "").trim()}`;
+    if (!name || seen.has(key)) return;
+    seen.add(key);
+    parties.push({ name: name.trim(), document: doc || null, role: role || null });
+  };
+
+  // 1) tenta usar escavador_data.envolvidos / partes (estrutura rica)
+  const envolvidos: any[] = Array.isArray(p.escavador_data?.envolvidos)
+    ? p.escavador_data.envolvidos
+    : Array.isArray(p.escavador_data?.partes)
+    ? p.escavador_data.partes
+    : [];
+
+  for (const e of envolvidos) {
+    const name = e?.nome || e?.name;
+    const doc = e?.cpf || e?.cnpj || e?.cpf_cnpj || e?.documento || null;
+    const role = e?.polo || e?.tipo || e?.role || null;
+    if (name) add(String(name), doc ? String(doc) : null, role ? String(role) : null);
+  }
+
+  // 2) fallback: polo_ativo / polo_passivo (texto livre, separado por ; , | / ou \n)
+  if (parties.length === 0) {
+    const split = (s: string | null) =>
+      (s || "")
+        .split(/[\n;|]|(?:,(?=\s*[A-ZÁ-Ú]))/)
+        .map((x) => x.trim())
+        .filter(Boolean);
+    split(p.polo_ativo).forEach((n) => add(n, null, "Polo Ativo"));
+    split(p.polo_passivo).forEach((n) => add(n, null, "Polo Passivo"));
+  }
+
+  return parties;
 }
 
 export function ClientProcesses({ leadId, leadName, companyId, onChanged }: Props) {
@@ -85,7 +132,7 @@ export function ClientProcesses({ leadId, leadName, companyId, onChanged }: Prop
     if (caseIds.length > 0 || cnjs.length > 0) {
       const { data: byCase } = await supabase
         .from("monitored_processes")
-        .select("id, case_id, numero_cnj, classe, tribunal_sigla, data_ultima_movimentacao, last_checked_at")
+        .select("id, case_id, numero_cnj, classe, tribunal_sigla, data_ultima_movimentacao, last_checked_at, polo_ativo, polo_passivo, escavador_data")
         .eq("company_id", companyId)
         .or(
           [
@@ -416,6 +463,40 @@ export function ClientProcesses({ leadId, leadName, companyId, onChanged }: Prop
                       </div>
                     </div>
                   )}
+
+                  {(() => {
+                    const parties = extractParties(p);
+                    if (parties.length === 0) return null;
+                    return (
+                      <div className="mt-3 border rounded-lg p-3 bg-muted/20">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-xs font-semibold flex items-center gap-1.5">
+                            <Users className="h-3.5 w-3.5 text-primary" />
+                            Partes do Processo
+                          </p>
+                          <Badge variant="outline" className="text-[10px] border-primary/40 text-primary">
+                            {parties.length} {parties.length === 1 ? "parte" : "partes"}
+                          </Badge>
+                        </div>
+                        <div className="space-y-1.5">
+                          {parties.map((party, idx) => (
+                            <div key={`${party.name}-${idx}`} className="flex items-center gap-2 p-2 rounded border bg-background">
+                              <div className="flex items-center justify-center w-6 h-6 rounded bg-primary/10 text-primary text-[11px] font-semibold shrink-0">
+                                {idx + 1}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-medium truncate">{party.name}</p>
+                                <p className="text-[10px] text-muted-foreground">
+                                  {party.role && <span className="mr-2">{party.role}</span>}
+                                  {party.document && <span>CPF/CNPJ: {party.document}</span>}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   {isOpen && (
                     <div className="mt-3 border-t pt-3 space-y-2">
