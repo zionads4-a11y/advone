@@ -294,6 +294,29 @@ export function ClientProcesses({ leadId, leadName, companyId, onChanged }: Prop
         </CardContent>
       </Card>
 
+      {(() => {
+        const totalNew = Object.values(newCounts).reduce((a, b) => a + b, 0);
+        if (totalNew === 0) return null;
+        return (
+          <div className="border-2 border-amber-500 bg-amber-50 dark:bg-amber-950/20 rounded-lg p-3 flex items-center justify-between gap-3 animate-pulse">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-amber-900 dark:text-amber-100">
+                  {totalNew} {totalNew === 1 ? "nova movimentação detectada" : "novas movimentações detectadas"}
+                </p>
+                <p className="text-xs text-amber-700 dark:text-amber-300">
+                  Veja abaixo o histórico atualizado dos processos deste cliente.
+                </p>
+              </div>
+            </div>
+            <Button size="sm" variant="outline" onClick={markAllRead} className="shrink-0">
+              Marcar tudo como lido
+            </Button>
+          </div>
+        );
+      })()}
+
       {loading ? (
         <p className="text-sm text-muted-foreground">Carregando...</p>
       ) : items.length === 0 ? (
