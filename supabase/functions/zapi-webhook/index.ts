@@ -1272,6 +1272,46 @@ async function getCadenceDelayForStep(
 }
 
 // ====== MESSAGE SPLITTER ======
+// Normaliza texto para comparação de similaridade (remove acentos/pontuação/case)
+function normalizeForCompare(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\w\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// Similaridade simples baseada em palavras compartilhadas (Jaccard)
+function similarityRatio(a: string, b: string): number {
+  const wa = new Set(normalizeForCompare(a).split(" ").filter(w => w.length > 2));
+  const wb = new Set(normalizeForCompare(b).split(" ").filter(w => w.length > 2));
+  if (wa.size === 0 || wb.size === 0) return 0;
+  let inter = 0;
+  for (const w of wa) if (wb.has(w)) inter++;
+  const union = wa.size + wb.size - inter;
+  return inter / union;
+}
+
+// Remove chunks muito parecidos entre si (>= 65% similaridade) mantendo o primeiro
+function dedupeChunks(chunks: string[]): string[] {
+  const out: string[] = [];
+  for (const c of chunks) {
+    const norm = normalizeForCompare(c);
+    if (!norm) continue;
+    const isDup = out.some(prev => {
+      const pNorm = normalizeForCompare(prev);
+      if (pNorm === norm) return true;
+      // Frases curtas viram duplicata se compartilham >70% das palavras
+      if (similarityRatio(prev, c) >= 0.65) return true;
+      return false;
+    });
+    if (!isDup) out.push(c);
+  }
+  return out;
+}
+
 function splitIntoNaturalMessages(text: string): string[] {
   if (!text) return [text];
   const trimmed = text.trim();
