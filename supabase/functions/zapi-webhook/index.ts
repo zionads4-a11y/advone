@@ -1047,7 +1047,8 @@ Antes de responder:
               console.log(`Lead ${leadId} advanced to document_collector phase`);
             }
           }
-          toolResult = { success: true, message: pendingWarning ? `Agendamento criado, mas marcado com pendência: ${pendingWarning}` : "Agendamento criado com sucesso", pending: pendingWarning };
+          toolResult = { success: true, message: "Agendamento criado com sucesso", pending: null };
+          }
         }
 
         // ===== DOCUMENT COLLECTOR TOOLS =====
