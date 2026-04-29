@@ -83,21 +83,34 @@ export function ClientProcesses({ leadId, leadName, companyId, onChanged }: Prop
 
     setItems(procs);
 
-    // Conta movimentos novos por processo
+    // Conta movimentos novos por processo + carrega TODOS os movimentos automaticamente
     if (procs.length > 0) {
       const ids = procs.map((p) => p.id);
-      const { data: news } = await supabase
+      const { data: allMovs } = await supabase
         .from("process_movements")
-        .select("monitored_process_id")
+        .select("*")
         .in("monitored_process_id", ids)
-        .eq("is_new", true);
+        .order("movement_date", { ascending: false })
+        .limit(500);
+
+      const movsByProc: Record<string, Movement[]> = {};
       const counts: Record<string, number> = {};
-      (news || []).forEach((m: any) => {
-        counts[m.monitored_process_id] = (counts[m.monitored_process_id] || 0) + 1;
+      const autoExpand: Record<string, boolean> = {};
+      (allMovs || []).forEach((m: any) => {
+        const pid = m.monitored_process_id;
+        if (!movsByProc[pid]) movsByProc[pid] = [];
+        movsByProc[pid].push(m as Movement);
+        if (m.is_new) {
+          counts[pid] = (counts[pid] || 0) + 1;
+          autoExpand[pid] = true; // expande automaticamente quando há novidade
+        }
       });
+      setMovements(movsByProc);
       setNewCounts(counts);
+      setExpanded((prev) => ({ ...autoExpand, ...prev }));
     } else {
       setNewCounts({});
+      setMovements({});
     }
     setLoading(false);
   };
