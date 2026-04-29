@@ -306,8 +306,44 @@ Deno.serve(async (req) => {
         return jsonResponse({ success: true });
       }
 
+      // Backfill: registra callback V2 para processos já existentes que ainda
+      // não têm escavador_monitoring_id (re-registra monitoramento com URL de callback).
+      case "register_callbacks": {
+        const callbackUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/escavador-webhook`;
+        const { data: pending } = await admin
+          .from("monitored_processes")
+          .select("id, numero_cnj, tribunal_sigla")
+          .eq("is_active", true)
+          .is("escavador_monitoring_id", null);
+
+        let registered = 0;
+        let failed = 0;
+        for (const p of pending || []) {
+          try {
+            const monitoringBody: any = {
+              numero_cnj: p.numero_cnj,
+              frequencia: "DIARIA",
+              urls_de_callback: [callbackUrl],
+            };
+            if (p.tribunal_sigla) monitoringBody.tribunal = p.tribunal_sigla;
+
+            const r = await escavadorFetch("/processos/monitorar", "POST", monitoringBody);
+            const monId = r?.id || r?.monitoramento?.id || r?.data?.id || null;
+            await admin.from("monitored_processes").update({
+              escavador_monitoring_id: monId,
+              callback_registered_at: new Date().toISOString(),
+            }).eq("id", p.id);
+            registered++;
+          } catch (e) {
+            console.error("Failed to register callback for", p.numero_cnj, getErrorMessage(e));
+            failed++;
+          }
+        }
+        return jsonResponse({ success: true, registered, failed, total: pending?.length || 0 });
+      }
+
       default:
-        throw new Error("Ação inválida. Use: search, movements, add_process, refresh, remove");
+        throw new Error("Ação inválida. Use: search, movements, add_process, refresh, remove, register_callbacks");
     }
   } catch (error) {
     return new Response(
