@@ -41,7 +41,51 @@ interface Movement {
   created_at: string;
 }
 
-export function ClientProcesses({ leadId, leadName, companyId, onChanged }: Props) {
+interface Party {
+  name: string;
+  document?: string | null;
+  role?: string | null;
+}
+
+function extractParties(p: ProcessItem): Party[] {
+  const parties: Party[] = [];
+  const seen = new Set<string>();
+  const add = (name: string, doc?: string | null, role?: string | null) => {
+    const key = `${name.trim().toUpperCase()}|${(doc || "").trim()}`;
+    if (!name || seen.has(key)) return;
+    seen.add(key);
+    parties.push({ name: name.trim(), document: doc || null, role: role || null });
+  };
+
+  // 1) tenta usar escavador_data.envolvidos / partes (estrutura rica)
+  const envolvidos: any[] = Array.isArray(p.escavador_data?.envolvidos)
+    ? p.escavador_data.envolvidos
+    : Array.isArray(p.escavador_data?.partes)
+    ? p.escavador_data.partes
+    : [];
+
+  for (const e of envolvidos) {
+    const name = e?.nome || e?.name;
+    const doc = e?.cpf || e?.cnpj || e?.cpf_cnpj || e?.documento || null;
+    const role = e?.polo || e?.tipo || e?.role || null;
+    if (name) add(String(name), doc ? String(doc) : null, role ? String(role) : null);
+  }
+
+  // 2) fallback: polo_ativo / polo_passivo (texto livre, separado por ; , | / ou \n)
+  if (parties.length === 0) {
+    const split = (s: string | null) =>
+      (s || "")
+        .split(/[\n;|]|(?:,(?=\s*[A-ZÁ-Ú]))/)
+        .map((x) => x.trim())
+        .filter(Boolean);
+    split(p.polo_ativo).forEach((n) => add(n, null, "Polo Ativo"));
+    split(p.polo_passivo).forEach((n) => add(n, null, "Polo Passivo"));
+  }
+
+  return parties;
+}
+
+
   const { user } = useAuth();
   const [items, setItems] = useState<ProcessItem[]>([]);
   const [loading, setLoading] = useState(true);
