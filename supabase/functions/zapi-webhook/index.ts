@@ -26,10 +26,28 @@ function buildSDRPrompt(
   const botName = company?.bot_name || "Laura";
   const botRole = company?.bot_role_description || "atendente virtual";
 
+  // Bloco universal de detecção de desistência — injetado em TODOS os prompts SDR
+  const lostBlock =
+    `\n\n═══════════════════════════════════════\n` +
+    `🛑 REGRA DE DESISTÊNCIA / DESINTERESSE (PRIORIDADE MÁXIMA)\n` +
+    `═══════════════════════════════════════\n` +
+    `Se o lead, em QUALQUER momento, manifestar desinteresse, recusa ou desistência — explícita ou implícita —, ` +
+    `você DEVE chamar IMEDIATAMENTE a tool \`mark_lead_lost\` e responder com UMA única mensagem curta de despedida cordial. ` +
+    `NÃO insista, NÃO ofereça nada, NÃO faça nova pergunta, NÃO mande "Como posso te ajudar?".\n\n` +
+    `Exemplos que DEVEM disparar mark_lead_lost:\n` +
+    `• "não quero mais" / "vou querer não" / "não vou querer"\n` +
+    `• "não tenho interesse" / "perdi o interesse"\n` +
+    `• "desisti" / "mudei de ideia" / "deixa pra lá"\n` +
+    `• "não preciso mais" / "já resolvi" / "já contratei outro advogado"\n` +
+    `• "pode parar" / "para de mandar mensagem" / "não me mande mais nada"\n` +
+    `• "obrigado, mas não" / "agradeço, mas não vou seguir"\n\n` +
+    `Após chamar mark_lead_lost, o atendimento é ENCERRADO. Não envie mais nada além da despedida.`;
+
   // Se o prompt customizado começar com "Você é", assumimos que é o prompt completo
   // gerado pelo construtor dinâmico — mas ainda injetamos fluxos e triage ao final.
   if (customPrompt.startsWith("Você é")) {
     const extras = [
+      lostBlock,
       flowsBlock
         ? `\n\n═══════════════════════════════════════\nFLUXOS ATIVOS DESTE ESCRITÓRIO\n═══════════════════════════════════════\n${flowsBlock}`
         : "",
