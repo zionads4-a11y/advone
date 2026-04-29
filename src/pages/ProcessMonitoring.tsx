@@ -200,7 +200,7 @@ export default function ProcessMonitoring() {
             Monitoramento de Processos
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Acompanhe movimentações processuais semanalmente via Escavador
+            Acompanhe movimentações processuais diariamente via Escavador • <span className="font-medium text-foreground">R$ 3,50/mês por processo ativo</span>
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -217,14 +217,12 @@ export default function ProcessMonitoring() {
               </SelectContent>
             </Select>
           )}
-          {plan && (
-            <Badge variant="outline" className="text-xs">
-              {processes.length}/{plan.max_processes} processos
-            </Badge>
-          )}
+          <Badge variant="outline" className="text-xs">
+            {processes.length} processo{processes.length !== 1 ? "s" : ""} ativo{processes.length !== 1 ? "s" : ""}
+          </Badge>
           <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
             <DialogTrigger asChild>
-              <Button size="sm" disabled={!plan?.is_active && selectedCompanyId !== "all"}>
+              <Button size="sm">
                 <Plus className="h-4 w-4 mr-1" /> Adicionar
               </Button>
             </DialogTrigger>
