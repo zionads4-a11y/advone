@@ -2322,6 +2322,7 @@ export type Database = {
         Row: {
           area: string | null
           assunto: string | null
+          callback_registered_at: string | null
           case_id: string | null
           classe: string | null
           client_name: string
@@ -2330,6 +2331,7 @@ export type Database = {
           data_inicio: string | null
           data_ultima_movimentacao: string | null
           escavador_data: Json | null
+          escavador_monitoring_id: number | null
           id: string
           is_active: boolean
           last_checked_at: string | null
@@ -2344,6 +2346,7 @@ export type Database = {
         Insert: {
           area?: string | null
           assunto?: string | null
+          callback_registered_at?: string | null
           case_id?: string | null
           classe?: string | null
           client_name: string
@@ -2352,6 +2355,7 @@ export type Database = {
           data_inicio?: string | null
           data_ultima_movimentacao?: string | null
           escavador_data?: Json | null
+          escavador_monitoring_id?: number | null
           id?: string
           is_active?: boolean
           last_checked_at?: string | null
@@ -2366,6 +2370,7 @@ export type Database = {
         Update: {
           area?: string | null
           assunto?: string | null
+          callback_registered_at?: string | null
           case_id?: string | null
           classe?: string | null
           client_name?: string
@@ -2374,6 +2379,7 @@ export type Database = {
           data_inicio?: string | null
           data_ultima_movimentacao?: string | null
           escavador_data?: Json | null
+          escavador_monitoring_id?: number | null
           id?: string
           is_active?: boolean
           last_checked_at?: string | null
