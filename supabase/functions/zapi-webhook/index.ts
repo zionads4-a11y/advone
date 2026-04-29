@@ -204,7 +204,7 @@ PASSO 6 — Horário e Dados Finais (NOME COMPLETO):
 5. APÓS o lead aceitar o horário, peça o dado final: "Perfeito 🙂 Pra já deixar tudo organizado aqui pra equipe, me passa o seu *nome completo*, por favor?"
 6. SÓ chame register_client_name e schedule_appointment APÓS o lead informar o nome completo.
 
-${flowsSection}${triageSection}${decisionRules}${customSection}
+${lostBlock}${flowsSection}${triageSection}${decisionRules}${customSection}
 
 Responda SEMPRE em português do Brasil.`;
 }
