@@ -46,11 +46,11 @@ Deno.serve(async (req) => {
     const movList = movs
       .map((m: any, i: number) => {
         const d = m.movement_date ? new Date(m.movement_date).toLocaleDateString("pt-BR") : "—";
-        return `${i + 1}. [${d}] ${m.movement_type || "Andamento"}: ${(m.content || "").slice(0, 400)}`;
+        return `${i + 1}. [${d}] ${m.movement_type || "Andamento"}: ${(m.content || "").slice(0, 600)}`;
       })
       .join("\n");
 
-    const prompt = `Você é assistente jurídico. Resuma o estado atual deste processo para um advogado em português, de forma objetiva e prática.
+    const prompt = `Você é assistente jurídico brasileiro. Gere um resumo claro e objetivo deste processo, em português simples (sem juridiquês), para um advogado leigo entender rapidamente.
 
 DADOS DO PROCESSO
 CNJ: ${proc.numero_cnj}
@@ -61,20 +61,39 @@ Assunto: ${proc.assunto || "—"}
 Área: ${proc.area || "—"}
 Polo ativo: ${proc.polo_ativo || "—"}
 Polo passivo: ${proc.polo_passivo || "—"}
-Status predito: ${proc.status_predito || "—"}
+Status: ${proc.status_predito || "—"}
 Data de início: ${proc.data_inicio || "—"}
 Última movimentação: ${proc.data_ultima_movimentacao || "—"}
 
 MOVIMENTAÇÕES (mais recentes primeiro):
 ${movList}
 
-Responda em markdown com EXATAMENTE estas seções:
-**📌 Situação atual** – 1 parágrafo curto sobre em que fase o processo está.
-**🕒 Últimos andamentos relevantes** – bullets com 3 a 5 itens (data + o que aconteceu, sem juridiquês).
-**⚖️ Próximos passos sugeridos** – bullets com 2 a 4 ações práticas para o advogado.
-**🚩 Pontos de atenção** – bullets com prazos, intimações ou riscos. Se nada relevante, escreva "Nenhum no momento".
+FORMATO DA RESPOSTA (siga EXATAMENTE este modelo, em texto puro, sem markdown, sem títulos em negrito, sem emojis):
 
-Seja conciso. Não invente fatos que não estejam nas movimentações.`;
+Últimas atualizações do processo ${proc.numero_cnj}:
+
+1. Data: DD/MM/AAAA - <explicação em 1-2 linhas, em português simples, do que aconteceu nesta movimentação>
+
+2. Data: DD/MM/AAAA - <explicação...>
+
+3. Data: DD/MM/AAAA - <explicação...>
+
+(continue numerando até cobrir as movimentações mais relevantes — entre 5 e 10 itens, da mais recente para a mais antiga)
+
+Resumo geral do processo:
+
+- Trata-se de <classe/assunto> em <vara/tribunal>, área <área>.
+- Partes: autor(es) <polo ativo> x réu(s) <polo passivo>.
+- Valor da causa / pedido principal (se mencionado nas movimentações).
+- Fase atual: <em que ponto o processo está hoje>.
+- Próximo passo esperado: <o que deve acontecer a seguir>.
+- Pontos de atenção: <prazos, intimações, riscos — ou "nenhum no momento">.
+
+REGRAS:
+- Use SEMPRE o formato "Data: DD/MM/AAAA - descrição" (com hífen, exatamente assim).
+- NÃO use markdown (nada de **, ##, *, emojis).
+- NÃO invente fatos que não estejam nas movimentações.
+- Linguagem clara, como se explicasse para o cliente.`;
 
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
     if (!apiKey) throw new Error("LOVABLE_API_KEY não configurada");
