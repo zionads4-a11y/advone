@@ -951,18 +951,34 @@ Antes de responder:
 
         if (fnName === "schedule_appointment") {
           const pendingItems: string[] = [];
+          let leadCurrentName = "";
           if (leadId) {
             const { data: leadCheck } = await supabase
               .from("leads")
               .select("name")
               .eq("id", leadId)
               .maybeSingle();
-            if (!isValidFullName(leadCheck?.name || "")) pendingItems.push("Nome completo");
+            leadCurrentName = leadCheck?.name || "";
+            if (!isValidFullName(leadCurrentName)) pendingItems.push("Nome completo");
           }
           const pendingWarning = pendingItems.length > 0 ? `${pendingItems.join(" + ")} pendente(s)` : null;
 
+          // 🛑 BLOQUEIO: nunca agendar sem NOME COMPLETO. Força o bot a pedir antes.
+          if (!isValidFullName(leadCurrentName)) {
+            toolResult = {
+              success: false,
+              error: "NOME_COMPLETO_OBRIGATORIO",
+              instruction: "Antes de agendar, peça o NOME COMPLETO do lead (nome + sobrenome, mínimo 3 palavras). Use exatamente: \"Perfeito 🙂 Pra já deixar tudo organizado aqui pra equipe, me passa o seu *nome completo*, por favor?\". Quando receber, chame register_client_name e SÓ DEPOIS chame schedule_appointment de novo."
+            };
+            // não seta shouldSchedule, não cria reminder — deixa o loop seguir e o modelo gerar a pergunta do nome
+          } else {
+
           shouldSchedule = true;
-          replyText = args.message_to_lead || "";
+          // Mensagem padronizada de confirmação (data/hora/nome) — substitui qualquer texto do modelo
+          const _confirmDate = sanitizeDate(args.date, timezone);
+          const _confirmTime = args.time || "10:00";
+          const _confirmDateBR = formatDateDMY(_confirmDate);
+          replyText = `Perfeito, ${leadCurrentName.split(" ")[0]} 🙂\n\nAgendamento confirmado:\n📅 ${_confirmDateBR}\n⏰ ${_confirmTime}\n👤 ${leadCurrentName}\n\nA equipe já entra em contato com você no horário marcado. Qualquer coisa, é só me chamar por aqui 💙`;
 
           if (leadId) {
             const appointmentDate = sanitizeDate(args.date, timezone);
@@ -994,12 +1010,29 @@ Antes de responder:
             const lName = leadData?.name || "Lead";
             const leadPhone = leadData?.whatsapp || leadData?.phone || cleanPhone || "Não informado";
 
-            await supabase.from("lead_reminders").insert({
-              lead_id: leadId, company_id: companyId, created_by: "00000000-0000-0000-0000-000000000000",
-              title: `📅 Consulta ${modality === "presencial" ? "presencial" : "online"}: ${lName}${pendingWarning ? " ⚠️" : ""}`,
-              description: `${args.summary || `Agendamento automático via bot IA (${modality})${unitName ? ` - Unidade: ${unitName}` : ""}`}${pendingWarning ? `\n\n⚠️ DADOS PENDENTES: ${pendingWarning}. Solicitar na reunião.` : ""}`,
-              reminder_type: "meeting", due_at: dueAt,
-            });
+            // 🛡️ Anti-duplicata: não cria 2 reminders pro mesmo lead no mesmo horário (±5min)
+            const dueAtMs = new Date(dueAt).getTime();
+            const fromIso = new Date(dueAtMs - 5 * 60 * 1000).toISOString();
+            const toIso = new Date(dueAtMs + 5 * 60 * 1000).toISOString();
+            const { data: existingReminder } = await supabase
+              .from("lead_reminders")
+              .select("id")
+              .eq("lead_id", leadId)
+              .eq("reminder_type", "meeting")
+              .gte("due_at", fromIso)
+              .lte("due_at", toIso)
+              .maybeSingle();
+
+            if (!existingReminder) {
+              await supabase.from("lead_reminders").insert({
+                lead_id: leadId, company_id: companyId, created_by: "00000000-0000-0000-0000-000000000000",
+                title: `📅 Consulta ${modality === "presencial" ? "presencial" : "online"}: ${lName}`,
+                description: `${args.summary || `Agendamento automático via bot IA (${modality})${unitName ? ` - Unidade: ${unitName}` : ""}`}`,
+                reminder_type: "meeting", due_at: dueAt,
+              });
+            } else {
+              console.log(`[SCHEDULE] Skipped duplicate reminder for lead ${leadId} at ${dueAt}`);
+            }
 
             await supabase.from("leads").update({ pending_data_warning: pendingWarning }).eq("id", leadId);
 
@@ -1031,7 +1064,8 @@ Antes de responder:
               console.log(`Lead ${leadId} advanced to document_collector phase`);
             }
           }
-          toolResult = { success: true, message: pendingWarning ? `Agendamento criado, mas marcado com pendência: ${pendingWarning}` : "Agendamento criado com sucesso", pending: pendingWarning };
+          toolResult = { success: true, message: "Agendamento criado com sucesso", pending: null };
+          }
         }
 
         // ===== DOCUMENT COLLECTOR TOOLS =====
@@ -1272,6 +1306,46 @@ async function getCadenceDelayForStep(
 }
 
 // ====== MESSAGE SPLITTER ======
+// Normaliza texto para comparação de similaridade (remove acentos/pontuação/case)
+function normalizeForCompare(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\w\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// Similaridade simples baseada em palavras compartilhadas (Jaccard)
+function similarityRatio(a: string, b: string): number {
+  const wa = new Set(normalizeForCompare(a).split(" ").filter(w => w.length > 2));
+  const wb = new Set(normalizeForCompare(b).split(" ").filter(w => w.length > 2));
+  if (wa.size === 0 || wb.size === 0) return 0;
+  let inter = 0;
+  for (const w of wa) if (wb.has(w)) inter++;
+  const union = wa.size + wb.size - inter;
+  return inter / union;
+}
+
+// Remove chunks muito parecidos entre si (>= 65% similaridade) mantendo o primeiro
+function dedupeChunks(chunks: string[]): string[] {
+  const out: string[] = [];
+  for (const c of chunks) {
+    const norm = normalizeForCompare(c);
+    if (!norm) continue;
+    const isDup = out.some(prev => {
+      const pNorm = normalizeForCompare(prev);
+      if (pNorm === norm) return true;
+      // Frases curtas viram duplicata se compartilham >70% das palavras
+      if (similarityRatio(prev, c) >= 0.65) return true;
+      return false;
+    });
+    if (!isDup) out.push(c);
+  }
+  return out;
+}
+
 function splitIntoNaturalMessages(text: string): string[] {
   if (!text) return [text];
   const trimmed = text.trim();
@@ -1323,7 +1397,8 @@ function splitIntoNaturalMessages(text: string): string[] {
   }
   flush();
 
-  return messages.length > 0 ? messages : [trimmed];
+  const final = messages.length > 0 ? dedupeChunks(messages) : [trimmed];
+  return final;
 }
 
 // ====== MAIN HANDLER ======
