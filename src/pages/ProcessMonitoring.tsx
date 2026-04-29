@@ -57,7 +57,6 @@ export default function ProcessMonitoring() {
   const isAdmin = userRole === "admin" || userRole === "member";
 
   const [processes, setProcesses] = useState<MonitoredProcess[]>([]);
-  const [plan, setPlan] = useState<MonitoringPlan | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedProcess, setSelectedProcess] = useState<MonitoredProcess | null>(null);
   const [movements, setMovements] = useState<Movement[]>([]);
@@ -89,31 +88,18 @@ export default function ProcessMonitoring() {
     if (!selectedCompanyId) return;
     setLoading(true);
 
-    if (isAdmin && selectedCompanyId === "all") {
-      const { data } = await supabase
-        .from("monitored_processes")
-        .select("*")
-        .eq("is_active", true)
-        .order("created_at", { ascending: false });
-      setProcesses((data || []) as any);
-      setPlan(null);
-    } else {
-      const [procResult, planResult] = await Promise.all([
-        supabase
-          .from("monitored_processes")
-          .select("*")
-          .eq("company_id", selectedCompanyId)
-          .eq("is_active", true)
-          .order("created_at", { ascending: false }),
-        supabase
-          .from("company_monitoring_plans")
-          .select("plan_type, max_processes, is_active")
-          .eq("company_id", selectedCompanyId)
-          .maybeSingle(),
-      ]);
-      setProcesses((procResult.data || []) as any);
-      setPlan(planResult.data as any);
+    let query = supabase
+      .from("monitored_processes")
+      .select("*")
+      .eq("is_active", true)
+      .order("created_at", { ascending: false });
+
+    if (!(isAdmin && selectedCompanyId === "all")) {
+      query = query.eq("company_id", selectedCompanyId);
     }
+
+    const { data } = await query;
+    setProcesses((data || []) as any);
     setLoading(false);
   }, [selectedCompanyId, isAdmin]);
 
