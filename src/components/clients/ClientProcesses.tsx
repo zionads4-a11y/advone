@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Briefcase, Plus, Bell, Loader2, Trash2, RefreshCw, ChevronDown, ChevronUp, AlertTriangle, Clock, FileText } from "lucide-react";
+import { Briefcase, Plus, Bell, Loader2, Trash2, RefreshCw, ChevronDown, ChevronUp, AlertTriangle, Clock, FileText, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -48,6 +48,25 @@ export function ClientProcesses({ leadId, leadName, companyId, onChanged }: Prop
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [newCounts, setNewCounts] = useState<Record<string, number>>({});
   const [refreshing, setRefreshing] = useState<string | null>(null);
+  const [summaries, setSummaries] = useState<Record<string, string>>({});
+  const [summarizing, setSummarizing] = useState<string | null>(null);
+
+  const generateSummary = async (p: ProcessItem) => {
+    setSummarizing(p.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-process-summary", {
+        body: { monitored_process_id: p.id },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setSummaries((s) => ({ ...s, [p.id]: data.summary }));
+      setExpanded((s) => ({ ...s, [p.id]: true }));
+      toast.success("Resumo gerado");
+    } catch (e: any) {
+      toast.error("Erro ao gerar resumo: " + (e.message || e));
+    }
+    setSummarizing(null);
+  };
 
   const load = async () => {
     setLoading(true);
