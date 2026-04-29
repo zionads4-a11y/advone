@@ -970,10 +970,8 @@ Antes de responder:
               error: "NOME_COMPLETO_OBRIGATORIO",
               instruction: "Antes de agendar, peça o NOME COMPLETO do lead (nome + sobrenome, mínimo 3 palavras). Use exatamente: \"Perfeito 🙂 Pra já deixar tudo organizado aqui pra equipe, me passa o seu *nome completo*, por favor?\". Quando receber, chame register_client_name e SÓ DEPOIS chame schedule_appointment de novo."
             };
-            // não seta shouldSchedule, não cria reminder
-            aiMessages.push({ role: "tool", tool_call_id: toolCall.id, content: JSON.stringify(toolResult) });
-            continue;
-          }
+            // não seta shouldSchedule, não cria reminder — deixa o loop seguir e o modelo gerar a pergunta do nome
+          } else {
 
           shouldSchedule = true;
           // Mensagem padronizada de confirmação (data/hora/nome) — substitui qualquer texto do modelo
