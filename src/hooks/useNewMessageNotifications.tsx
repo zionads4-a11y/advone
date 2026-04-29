@@ -136,6 +136,20 @@ export function NewMessageNotificationProvider({ children }: { children: ReactNo
   }, [user, loading, isClient, companyIds]);
 
   const handleNewMessage = (msg: { sender_name: string | null; phone: string; message_text: string | null }) => {
+    // 🚫 Ignora mensagens de operadoras / SMS broadcast / short codes
+    const senderRaw = (msg.sender_name || "").toString().trim();
+    const phoneDigits = (msg.phone || "").replace(/\D/g, "");
+    const blockedSenders = [
+      "tim", "tim brasil", "vivo", "claro", "oi", "nextel", "algar",
+      "correios", "nubank", "itau", "bradesco", "santander", "caixa",
+      "ifood", "mercado livre", "magalu", "americanas",
+    ];
+    const senderLower = senderRaw.toLowerCase();
+    const isBlockedSender = blockedSenders.some((b) => senderLower.includes(b));
+    // short code (menos de 8 dígitos) costuma ser SMS de operadora/empresa, não cliente
+    const isShortCode = phoneDigits.length > 0 && phoneDigits.length < 8;
+    if (isBlockedSender || isShortCode) return;
+
     // Increment unread count (only if not on conversations page)
     setUnreadCount((prev) => {
       if (window.location.pathname === "/conversations") return prev;
@@ -147,9 +161,12 @@ export function NewMessageNotificationProvider({ children }: { children: ReactNo
       playNotificationSound();
     }
 
-    // Show toast notification
-    const senderName = msg.sender_name || msg.phone;
-    const text = msg.message_text || "[mídia]";
+    // Show toast notification — garante string (evita [object Object])
+    const senderName = senderRaw || msg.phone || "Nova mensagem";
+    const rawText = msg.message_text;
+    const text = typeof rawText === "string" && rawText.trim().length > 0
+      ? rawText
+      : "[mídia]";
     toast.info(`💬 ${senderName}`, {
       description: text.length > 60 ? text.slice(0, 60) + "…" : text,
       duration: 5000,
