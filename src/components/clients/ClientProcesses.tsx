@@ -26,6 +26,9 @@ interface ProcessItem {
   tribunal_sigla: string | null;
   data_ultima_movimentacao: string | null;
   last_checked_at: string | null;
+  polo_ativo: string | null;
+  polo_passivo: string | null;
+  escavador_data: any;
 }
 
 interface Movement {
