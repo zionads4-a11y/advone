@@ -369,6 +369,19 @@ export function ClientProcesses({ leadId, leadName, companyId, onChanged }: Prop
                       </p>
                     </div>
                     <div className="flex gap-1 shrink-0">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => generateSummary(p)}
+                        disabled={summarizing === p.id}
+                        title="Gerar resumo IA"
+                        className="gap-1"
+                      >
+                        {summarizing === p.id
+                          ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          : <Sparkles className="h-3.5 w-3.5 text-primary" />}
+                        <span className="hidden sm:inline text-xs">Resumo IA</span>
+                      </Button>
                       <Button size="sm" variant="ghost" onClick={() => checkNow(p)} disabled={refreshing === p.id} title="Verificar agora">
                         {refreshing === p.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
                       </Button>
@@ -380,6 +393,29 @@ export function ClientProcesses({ leadId, leadName, companyId, onChanged }: Prop
                       </Button>
                     </div>
                   </div>
+
+                  {summaries[p.id] && (
+                    <div className="mt-3 border-2 border-primary/30 bg-primary/5 rounded-lg p-3">
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <p className="text-xs font-semibold flex items-center gap-1.5 text-primary">
+                          <Sparkles className="h-3.5 w-3.5" />
+                          Resumo gerado por IA
+                        </p>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => generateSummary(p)}
+                          disabled={summarizing === p.id}
+                          className="h-6 text-[10px]"
+                        >
+                          {summarizing === p.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Regerar"}
+                        </Button>
+                      </div>
+                      <div className="text-xs whitespace-pre-wrap leading-relaxed text-foreground/90">
+                        {summaries[p.id]}
+                      </div>
+                    </div>
+                  )}
 
                   {isOpen && (
                     <div className="mt-3 border-t pt-3 space-y-2">
