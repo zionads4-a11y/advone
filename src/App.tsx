@@ -30,6 +30,7 @@ import Documents from "./pages/Documents";
 import DocumentTemplates from "./pages/DocumentTemplates";
 import Cases from "./pages/Cases";
 import ProcessMonitoring from "./pages/ProcessMonitoring";
+import ProcessSearch from "./pages/ProcessSearch";
 import Subscription from "./pages/Subscription";
 import Commissions from "./pages/Commissions";
 import FraudAlerts from "./pages/FraudAlerts";
@@ -89,6 +90,7 @@ const App = () => (
               <Route path="/modelos-documentos" element={<DocumentTemplates />} />
               <Route path="/processos" element={<Cases />} />
               <Route path="/monitoramento" element={<ProcessMonitoring />} />
+              <Route path="/busca-processos" element={<ProcessSearch />} />
               <Route path="/assinatura" element={<Subscription />} />
               <Route path="/comissoes" element={<Commissions />} />
               <Route path="/fraudes" element={<FraudAlerts />} />
