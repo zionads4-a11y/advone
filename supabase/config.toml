@@ -42,4 +42,7 @@ verify_jwt = false # Called via cron
 [functions.google-calendar-poll-all]
 verify_jwt = false # Called via cron
 
+[functions.escavador-webhook]
+verify_jwt = false # Called by Escavador callback
+
 
