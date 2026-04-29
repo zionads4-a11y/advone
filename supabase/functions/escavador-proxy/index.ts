@@ -87,32 +87,11 @@ Deno.serve(async (req) => {
         return jsonResponse(data);
       }
 
-      // Add process to monitoring
+      // Add process to monitoring (cobrança R$3,50/mês por processo ativo, sem limite)
       case "add_process": {
         const { company_id, numero_cnj, client_name, tribunal } = body;
         if (!company_id || !numero_cnj || !client_name) {
           throw new Error("company_id, numero_cnj e client_name obrigatórios");
-        }
-
-        // Check plan limits
-        const { data: plan } = await admin
-          .from("company_monitoring_plans")
-          .select("max_processes, is_active")
-          .eq("company_id", company_id)
-          .maybeSingle();
-
-        if (!plan || !plan.is_active) {
-          throw new Error("Empresa não possui plano de monitoramento ativo");
-        }
-
-        const { count } = await admin
-          .from("monitored_processes")
-          .select("id", { count: "exact", head: true })
-          .eq("company_id", company_id)
-          .eq("is_active", true);
-
-        if ((count || 0) >= plan.max_processes) {
-          throw new Error(`Limite de ${plan.max_processes} processos atingido`);
         }
 
         // Register monitoring on Escavador API (DIARIA frequency)

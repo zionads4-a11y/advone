@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import MonitoringPackagePurchase from "@/components/monitoring/MonitoringPackagePurchase";
+
 import { useAuth } from "@/hooks/useAuth";
 import { useUserCompanies } from "@/hooks/useUserCompanies";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -50,11 +50,6 @@ interface Movement {
   is_new: boolean;
 }
 
-interface MonitoringPlan {
-  plan_type: string;
-  max_processes: number;
-  is_active: boolean;
-}
 
 export default function ProcessMonitoring() {
   const { user, userRole } = useAuth();
@@ -62,7 +57,6 @@ export default function ProcessMonitoring() {
   const isAdmin = userRole === "admin" || userRole === "member";
 
   const [processes, setProcesses] = useState<MonitoredProcess[]>([]);
-  const [plan, setPlan] = useState<MonitoringPlan | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedProcess, setSelectedProcess] = useState<MonitoredProcess | null>(null);
   const [movements, setMovements] = useState<Movement[]>([]);
@@ -94,31 +88,18 @@ export default function ProcessMonitoring() {
     if (!selectedCompanyId) return;
     setLoading(true);
 
-    if (isAdmin && selectedCompanyId === "all") {
-      const { data } = await supabase
-        .from("monitored_processes")
-        .select("*")
-        .eq("is_active", true)
-        .order("created_at", { ascending: false });
-      setProcesses((data || []) as any);
-      setPlan(null);
-    } else {
-      const [procResult, planResult] = await Promise.all([
-        supabase
-          .from("monitored_processes")
-          .select("*")
-          .eq("company_id", selectedCompanyId)
-          .eq("is_active", true)
-          .order("created_at", { ascending: false }),
-        supabase
-          .from("company_monitoring_plans")
-          .select("plan_type, max_processes, is_active")
-          .eq("company_id", selectedCompanyId)
-          .maybeSingle(),
-      ]);
-      setProcesses((procResult.data || []) as any);
-      setPlan(planResult.data as any);
+    let query = supabase
+      .from("monitored_processes")
+      .select("*")
+      .eq("is_active", true)
+      .order("created_at", { ascending: false });
+
+    if (!(isAdmin && selectedCompanyId === "all")) {
+      query = query.eq("company_id", selectedCompanyId);
     }
+
+    const { data } = await query;
+    setProcesses((data || []) as any);
     setLoading(false);
   }, [selectedCompanyId, isAdmin]);
 
@@ -219,7 +200,7 @@ export default function ProcessMonitoring() {
             Monitoramento de Processos
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Acompanhe movimentações processuais semanalmente via Escavador
+            Acompanhe movimentações processuais diariamente via Escavador • <span className="font-medium text-foreground">R$ 3,50/mês por processo ativo</span>
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -236,14 +217,12 @@ export default function ProcessMonitoring() {
               </SelectContent>
             </Select>
           )}
-          {plan && (
-            <Badge variant="outline" className="text-xs">
-              {processes.length}/{plan.max_processes} processos
-            </Badge>
-          )}
+          <Badge variant="outline" className="text-xs">
+            {processes.length} processo{processes.length !== 1 ? "s" : ""} ativo{processes.length !== 1 ? "s" : ""}
+          </Badge>
           <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
             <DialogTrigger asChild>
-              <Button size="sm" disabled={!plan?.is_active && selectedCompanyId !== "all"}>
+              <Button size="sm">
                 <Plus className="h-4 w-4 mr-1" /> Adicionar
               </Button>
             </DialogTrigger>
@@ -304,22 +283,6 @@ export default function ProcessMonitoring() {
         </div>
       </div>
 
-      {!plan?.is_active && selectedCompanyId !== "all" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="border-warning/30 bg-warning/5">
-            <CardContent className="flex items-center gap-3 py-4">
-              <AlertCircle className="h-5 w-5 text-warning shrink-0" />
-              <div>
-                <p className="text-sm font-medium text-foreground">Plano de monitoramento não ativo</p>
-                <p className="text-xs text-muted-foreground">
-                  Contrate um pacote de monitoramento para acompanhar seus processos
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-          <MonitoringPackagePurchase companyId={selectedCompanyId} onPurchaseComplete={fetchData} />
-        </div>
-      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Process List */}
