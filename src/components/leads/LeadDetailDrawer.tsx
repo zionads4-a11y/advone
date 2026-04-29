@@ -69,7 +69,7 @@ export function LeadDetailDrawer({ lead, open, onOpenChange, onLeadUpdate }: Lea
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-[440px] p-0 flex flex-col">
+      <SheetContent className="w-full sm:max-w-[720px] lg:max-w-[900px] p-0 flex flex-col">
         <SheetHeader className="px-6 pt-6 pb-4 border-b border-border">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
