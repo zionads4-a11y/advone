@@ -2455,6 +2455,51 @@ export type Database = {
           },
         ]
       }
+      process_billing_audit_logs: {
+        Row: {
+          asaas_payment_id: string | null
+          company_id: string | null
+          created_at: string
+          details: Json | null
+          error_message: string | null
+          id: string
+          invoice_month: string
+          run_id: string
+          status: string
+          total_amount: number | null
+          total_processes: number | null
+          triggered_by: string | null
+        }
+        Insert: {
+          asaas_payment_id?: string | null
+          company_id?: string | null
+          created_at?: string
+          details?: Json | null
+          error_message?: string | null
+          id?: string
+          invoice_month: string
+          run_id: string
+          status: string
+          total_amount?: number | null
+          total_processes?: number | null
+          triggered_by?: string | null
+        }
+        Update: {
+          asaas_payment_id?: string | null
+          company_id?: string | null
+          created_at?: string
+          details?: Json | null
+          error_message?: string | null
+          id?: string
+          invoice_month?: string
+          run_id?: string
+          status?: string
+          total_amount?: number | null
+          total_processes?: number | null
+          triggered_by?: string | null
+        }
+        Relationships: []
+      }
       process_monitoring_charges: {
         Row: {
           asaas_invoice_url: string | null

@@ -64,8 +64,19 @@ Deno.serve(async (req) => {
     const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
     const month: string = body.month || currentMonth();
     const onlyCompany: string | undefined = body.company_id;
+    const triggeredBy: string = body.triggered_by || (req.headers.get("x-trigger-source") ?? "manual");
+    const runId: string = crypto.randomUUID();
 
-    console.log(`[invoice-processes] mês=${month}${onlyCompany ? ` empresa=${onlyCompany}` : ""}`);
+    console.log(`[invoice-processes] run=${runId} mês=${month}${onlyCompany ? ` empresa=${onlyCompany}` : ""} trigger=${triggeredBy}`);
+
+    // Log de início da execução
+    await admin.from("process_billing_audit_logs").insert({
+      run_id: runId,
+      invoice_month: month,
+      status: "run_started",
+      triggered_by: triggeredBy,
+      details: { only_company: onlyCompany ?? null },
+    });
 
     // Conta processos ativos por empresa
     let q = admin
@@ -95,6 +106,16 @@ Deno.serve(async (req) => {
           .eq("invoice_month", month)
           .maybeSingle();
         if (existing) {
+          console.log(`[invoice-processes] skip company=${companyId} mês=${month} (já cobrado)`);
+          await admin.from("process_billing_audit_logs").insert({
+            run_id: runId,
+            company_id: companyId,
+            invoice_month: month,
+            total_processes: count,
+            status: "skipped_duplicate",
+            triggered_by: triggeredBy,
+            details: { reason: "charge already exists for company+month" },
+          });
           results.push({ company_id: companyId, ok: true, skipped: "já cobrado" });
           continue;
         }
@@ -105,6 +126,15 @@ Deno.serve(async (req) => {
           .eq("id", companyId)
           .maybeSingle();
         if (!company) {
+          await admin.from("process_billing_audit_logs").insert({
+            run_id: runId,
+            company_id: companyId,
+            invoice_month: month,
+            total_processes: count,
+            status: "failed",
+            error_message: "company not found",
+            triggered_by: triggeredBy,
+          });
           results.push({ company_id: companyId, ok: false, error: "company not found" });
           continue;
         }
@@ -153,6 +183,25 @@ Deno.serve(async (req) => {
           status: "invoiced",
         });
 
+        console.log(`[invoice-processes] OK company=${companyId} (${company.name}) processos=${count} total=R$${total} payment=${payment.id}`);
+        await admin.from("process_billing_audit_logs").insert({
+          run_id: runId,
+          company_id: companyId,
+          invoice_month: month,
+          total_processes: count,
+          total_amount: total,
+          status: "invoiced",
+          asaas_payment_id: payment.id,
+          triggered_by: triggeredBy,
+          details: {
+            company_name: company.name,
+            unit_price: PRICE_PER_PROCESS,
+            due_date: dueDate(month),
+            invoice_url: payment.invoiceUrl,
+            asaas_customer_id: customerId,
+          },
+        });
+
         results.push({
           company_id: companyId,
           company_name: company.name,
@@ -163,12 +212,38 @@ Deno.serve(async (req) => {
           invoice_url: payment.invoiceUrl,
         });
       } catch (err) {
-        console.error(`Erro empresa ${companyId}:`, err);
+        console.error(`[invoice-processes] erro company=${companyId}:`, err);
+        await admin.from("process_billing_audit_logs").insert({
+          run_id: runId,
+          company_id: companyId,
+          invoice_month: month,
+          total_processes: count,
+          status: "failed",
+          error_message: String(err),
+          triggered_by: triggeredBy,
+        });
         results.push({ company_id: companyId, ok: false, error: String(err) });
       }
     }
 
-    return new Response(JSON.stringify({ ok: true, month, results }), {
+    const summary = {
+      total_companies: results.length,
+      invoiced: results.filter((r) => r.ok && !r.skipped).length,
+      skipped: results.filter((r) => r.skipped).length,
+      failed: results.filter((r) => !r.ok).length,
+    };
+
+    await admin.from("process_billing_audit_logs").insert({
+      run_id: runId,
+      invoice_month: month,
+      status: "run_completed",
+      triggered_by: triggeredBy,
+      details: summary,
+    });
+
+    console.log(`[invoice-processes] run=${runId} concluído:`, summary);
+
+    return new Response(JSON.stringify({ ok: true, run_id: runId, month, summary, results }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
