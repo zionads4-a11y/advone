@@ -85,8 +85,7 @@ function extractParties(p: ProcessItem): Party[] {
   return parties;
 }
 
-
-  const { user } = useAuth();
+export function ClientProcesses({ leadId, leadName, companyId, onChanged }: Props) {
   const [items, setItems] = useState<ProcessItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
