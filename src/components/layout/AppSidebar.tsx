@@ -61,7 +61,6 @@ const adminItems = [
   { title: "Empresas", url: "/companies", icon: Building2 },
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Monitoramento", url: "/monitoramento", icon: Radar },
-  { title: "Busca de Processos", url: "/busca-processos", icon: Search },
   { title: "Usuários", url: "/client-users", icon: Users },
   { title: "Acessos", url: "/access-management", icon: KeyRound },
   { title: "Assinaturas", url: "/assinatura", icon: CreditCard },
@@ -80,7 +79,6 @@ const gerenteItems = [
   { title: "IA Jurídica", url: "/ia-juridica", icon: Scale, premium: true },
   { title: "Financeiro", url: "/financeiro", icon: Wallet },
   { title: "Modelos de Documentos", url: "/modelos-documentos", icon: FileText },
-  { title: "Busca de Processos", url: "/busca-processos", icon: Search },
   { title: "Equipe", url: "/client-users", icon: Users },
   { title: "Configurações", url: "/company-settings", icon: Settings },
 ];
