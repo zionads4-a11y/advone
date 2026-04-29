@@ -2455,6 +2455,54 @@ export type Database = {
           },
         ]
       }
+      process_monitoring_charges: {
+        Row: {
+          asaas_invoice_url: string | null
+          asaas_payment_id: string | null
+          company_id: string
+          created_at: string
+          id: string
+          invoice_month: string
+          notes: string | null
+          paid_at: string | null
+          process_count: number
+          status: string
+          total_amount: number
+          unit_price: number
+          updated_at: string
+        }
+        Insert: {
+          asaas_invoice_url?: string | null
+          asaas_payment_id?: string | null
+          company_id: string
+          created_at?: string
+          id?: string
+          invoice_month: string
+          notes?: string | null
+          paid_at?: string | null
+          process_count?: number
+          status?: string
+          total_amount?: number
+          unit_price?: number
+          updated_at?: string
+        }
+        Update: {
+          asaas_invoice_url?: string | null
+          asaas_payment_id?: string | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          invoice_month?: string
+          notes?: string | null
+          paid_at?: string | null
+          process_count?: number
+          status?: string
+          total_amount?: number
+          unit_price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       process_movements: {
         Row: {
           company_id: string
