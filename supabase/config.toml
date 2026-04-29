@@ -39,4 +39,7 @@ verify_jwt = false # This will be called via service role or cron
 [functions.invoice-monthly-processes]
 verify_jwt = false # Called via cron
 
+[functions.google-calendar-poll-all]
+verify_jwt = false # Called via cron
+
 
