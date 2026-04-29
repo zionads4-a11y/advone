@@ -45,4 +45,7 @@ verify_jwt = false # Called via cron
 [functions.escavador-webhook]
 verify_jwt = false # Called by Escavador callback
 
+[functions.escavador-webhook-retry]
+verify_jwt = false # Called by cron / admins
+
 
