@@ -64,8 +64,19 @@ Deno.serve(async (req) => {
     const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
     const month: string = body.month || currentMonth();
     const onlyCompany: string | undefined = body.company_id;
+    const triggeredBy: string = body.triggered_by || (req.headers.get("x-trigger-source") ?? "manual");
+    const runId: string = crypto.randomUUID();
 
-    console.log(`[invoice-processes] mês=${month}${onlyCompany ? ` empresa=${onlyCompany}` : ""}`);
+    console.log(`[invoice-processes] run=${runId} mês=${month}${onlyCompany ? ` empresa=${onlyCompany}` : ""} trigger=${triggeredBy}`);
+
+    // Log de início da execução
+    await admin.from("process_billing_audit_logs").insert({
+      run_id: runId,
+      invoice_month: month,
+      status: "run_started",
+      triggered_by: triggeredBy,
+      details: { only_company: onlyCompany ?? null },
+    });
 
     // Conta processos ativos por empresa
     let q = admin
