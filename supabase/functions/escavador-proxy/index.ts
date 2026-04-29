@@ -94,19 +94,31 @@ Deno.serve(async (req) => {
           throw new Error("company_id, numero_cnj e client_name obrigatórios");
         }
 
-        // Register monitoring on Escavador API (DIARIA frequency)
+        // URL pública do nosso webhook que o Escavador irá chamar a cada movimentação
+        const callbackUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/escavador-webhook`;
+
+        // Register monitoring on Escavador V2 with real-time callback
         const monitoringBody: any = {
-          numero: numero_cnj.trim(),
+          numero_cnj: numero_cnj.trim(),
           frequencia: "DIARIA",
+          urls_de_callback: [callbackUrl],
         };
         if (tribunal) {
           monitoringBody.tribunal = tribunal;
         }
 
         let escavadorMonitoring: any = null;
+        let escavadorMonitoringId: number | null = null;
+        let callbackRegisteredAt: string | null = null;
         try {
           escavadorMonitoring = await escavadorFetch("/processos/monitorar", "POST", monitoringBody);
           console.log("Escavador monitoring registered:", JSON.stringify(escavadorMonitoring));
+          escavadorMonitoringId =
+            escavadorMonitoring?.id ||
+            escavadorMonitoring?.monitoramento?.id ||
+            escavadorMonitoring?.data?.id ||
+            null;
+          callbackRegisteredAt = new Date().toISOString();
         } catch (e) {
           console.error("Error registering monitoring on Escavador:", getErrorMessage(e));
           // Continue - save locally even if Escavador registration fails
@@ -139,6 +151,8 @@ Deno.serve(async (req) => {
           quantidade_movimentacoes: processData?.quantidade_movimentacoes || 0,
           last_checked_at: new Date().toISOString(),
           escavador_data: processData || null,
+          escavador_monitoring_id: escavadorMonitoringId,
+          callback_registered_at: callbackRegisteredAt,
         };
 
         const { data: inserted, error: insertError } = await admin
