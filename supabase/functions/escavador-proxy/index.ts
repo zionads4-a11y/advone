@@ -115,10 +115,10 @@ Deno.serve(async (req) => {
           throw new Error(`Limite de ${plan.max_processes} processos atingido`);
         }
 
-        // Register monitoring on Escavador API (SEMANAL frequency)
+        // Register monitoring on Escavador API (DIARIA frequency)
         const monitoringBody: any = {
           numero: numero_cnj.trim(),
-          frequencia: "SEMANAL",
+          frequencia: "DIARIA",
         };
         if (tribunal) {
           monitoringBody.tribunal = tribunal;
