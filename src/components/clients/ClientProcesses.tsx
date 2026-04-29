@@ -464,6 +464,40 @@ export function ClientProcesses({ leadId, leadName, companyId, onChanged }: Prop
                     </div>
                   )}
 
+                  {(() => {
+                    const parties = extractParties(p);
+                    if (parties.length === 0) return null;
+                    return (
+                      <div className="mt-3 border rounded-lg p-3 bg-muted/20">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-xs font-semibold flex items-center gap-1.5">
+                            <Users className="h-3.5 w-3.5 text-primary" />
+                            Partes do Processo
+                          </p>
+                          <Badge variant="outline" className="text-[10px] border-primary/40 text-primary">
+                            {parties.length} {parties.length === 1 ? "parte" : "partes"}
+                          </Badge>
+                        </div>
+                        <div className="space-y-1.5">
+                          {parties.map((party, idx) => (
+                            <div key={`${party.name}-${idx}`} className="flex items-center gap-2 p-2 rounded border bg-background">
+                              <div className="flex items-center justify-center w-6 h-6 rounded bg-primary/10 text-primary text-[11px] font-semibold shrink-0">
+                                {idx + 1}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-medium truncate">{party.name}</p>
+                                <p className="text-[10px] text-muted-foreground">
+                                  {party.role && <span className="mr-2">{party.role}</span>}
+                                  {party.document && <span>CPF/CNPJ: {party.document}</span>}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
                   {isOpen && (
                     <div className="mt-3 border-t pt-3 space-y-2">
                       <div className="flex justify-between items-center">
