@@ -1325,6 +1325,48 @@ export type Database = {
           },
         ]
       }
+      escavador_webhook_events: {
+        Row: {
+          attempts: number
+          id: string
+          last_error: string | null
+          monitoramento_id: number | null
+          movements_inserted: number
+          next_retry_at: string | null
+          numero_cnj: string | null
+          payload: Json
+          processed_at: string | null
+          received_at: string
+          status: string
+        }
+        Insert: {
+          attempts?: number
+          id?: string
+          last_error?: string | null
+          monitoramento_id?: number | null
+          movements_inserted?: number
+          next_retry_at?: string | null
+          numero_cnj?: string | null
+          payload: Json
+          processed_at?: string | null
+          received_at?: string
+          status?: string
+        }
+        Update: {
+          attempts?: number
+          id?: string
+          last_error?: string | null
+          monitoramento_id?: number | null
+          movements_inserted?: number
+          next_retry_at?: string | null
+          numero_cnj?: string | null
+          payload?: Json
+          processed_at?: string | null
+          received_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
       financial_transactions: {
         Row: {
           amount: number
