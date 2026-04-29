@@ -1010,12 +1010,29 @@ Antes de responder:
             const lName = leadData?.name || "Lead";
             const leadPhone = leadData?.whatsapp || leadData?.phone || cleanPhone || "Não informado";
 
-            await supabase.from("lead_reminders").insert({
-              lead_id: leadId, company_id: companyId, created_by: "00000000-0000-0000-0000-000000000000",
-              title: `📅 Consulta ${modality === "presencial" ? "presencial" : "online"}: ${lName}${pendingWarning ? " ⚠️" : ""}`,
-              description: `${args.summary || `Agendamento automático via bot IA (${modality})${unitName ? ` - Unidade: ${unitName}` : ""}`}${pendingWarning ? `\n\n⚠️ DADOS PENDENTES: ${pendingWarning}. Solicitar na reunião.` : ""}`,
-              reminder_type: "meeting", due_at: dueAt,
-            });
+            // 🛡️ Anti-duplicata: não cria 2 reminders pro mesmo lead no mesmo horário (±5min)
+            const dueAtMs = new Date(dueAt).getTime();
+            const fromIso = new Date(dueAtMs - 5 * 60 * 1000).toISOString();
+            const toIso = new Date(dueAtMs + 5 * 60 * 1000).toISOString();
+            const { data: existingReminder } = await supabase
+              .from("lead_reminders")
+              .select("id")
+              .eq("lead_id", leadId)
+              .eq("reminder_type", "meeting")
+              .gte("due_at", fromIso)
+              .lte("due_at", toIso)
+              .maybeSingle();
+
+            if (!existingReminder) {
+              await supabase.from("lead_reminders").insert({
+                lead_id: leadId, company_id: companyId, created_by: "00000000-0000-0000-0000-000000000000",
+                title: `📅 Consulta ${modality === "presencial" ? "presencial" : "online"}: ${lName}`,
+                description: `${args.summary || `Agendamento automático via bot IA (${modality})${unitName ? ` - Unidade: ${unitName}` : ""}`}`,
+                reminder_type: "meeting", due_at: dueAt,
+              });
+            } else {
+              console.log(`[SCHEDULE] Skipped duplicate reminder for lead ${leadId} at ${dueAt}`);
+            }
 
             await supabase.from("leads").update({ pending_data_warning: pendingWarning }).eq("id", leadId);
 
