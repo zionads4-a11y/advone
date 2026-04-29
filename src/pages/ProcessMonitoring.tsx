@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import MonitoringPackagePurchase from "@/components/monitoring/MonitoringPackagePurchase";
+
 import { useAuth } from "@/hooks/useAuth";
 import { useUserCompanies } from "@/hooks/useUserCompanies";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -50,11 +50,6 @@ interface Movement {
   is_new: boolean;
 }
 
-interface MonitoringPlan {
-  plan_type: string;
-  max_processes: number;
-  is_active: boolean;
-}
 
 export default function ProcessMonitoring() {
   const { user, userRole } = useAuth();
