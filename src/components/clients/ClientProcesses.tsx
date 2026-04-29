@@ -365,7 +365,13 @@ export function ClientProcesses({ leadId, leadName, companyId, onChanged }: Prop
                   {isOpen && (
                     <div className="mt-3 border-t pt-3 space-y-2">
                       <div className="flex justify-between items-center">
-                        <p className="text-xs font-medium">Movimentos</p>
+                        <p className="text-xs font-semibold flex items-center gap-1.5">
+                          <Clock className="h-3.5 w-3.5" />
+                          Histórico de movimentações
+                          <Badge variant="secondary" className="text-[10px] ml-1">
+                            {(movements[p.id] || []).length}
+                          </Badge>
+                        </p>
                         {newCount > 0 && (
                           <Button size="sm" variant="outline" onClick={() => markRead(p)}>
                             Marcar como lidos
@@ -373,22 +379,37 @@ export function ClientProcesses({ leadId, leadName, companyId, onChanged }: Prop
                         )}
                       </div>
                       {(movements[p.id] || []).length === 0 ? (
-                        <p className="text-xs text-muted-foreground">Nenhum movimento registrado ainda.</p>
+                        <div className="text-xs text-muted-foreground text-center py-4 border border-dashed rounded">
+                          <FileText className="h-4 w-4 mx-auto mb-1 opacity-50" />
+                          Nenhum movimento registrado ainda. Aguardando próxima verificação.
+                        </div>
                       ) : (
-                        <div className="space-y-1.5 max-h-80 overflow-y-auto">
-                          {(movements[p.id] || []).map((m) => (
-                            <div
-                              key={m.id}
-                              className={`text-xs p-2 rounded border ${m.is_new ? "border-amber-400 bg-amber-50/60 dark:bg-amber-950/10" : "border-border bg-muted/30"}`}
-                            >
-                              <div className="flex justify-between gap-2 mb-1">
-                                <span className="font-medium">{m.movement_type || "Movimento"}</span>
-                                <span className="text-muted-foreground">
-                                  {m.movement_date ? format(new Date(m.movement_date), "dd/MM/yyyy", { locale: ptBR }) : ""}
-                                </span>
+                        <div className="space-y-2 max-h-96 overflow-y-auto pr-1 relative">
+                          {(movements[p.id] || []).map((m, idx) => (
+                            <div key={m.id} className="flex gap-2">
+                              <div className="flex flex-col items-center shrink-0">
+                                <div className={`w-2.5 h-2.5 rounded-full mt-1.5 ${m.is_new ? "bg-amber-500 ring-2 ring-amber-300 animate-pulse" : "bg-muted-foreground/40"}`} />
+                                {idx < (movements[p.id] || []).length - 1 && (
+                                  <div className="w-px flex-1 bg-border mt-0.5" />
+                                )}
                               </div>
-                              {m.content && <p className="whitespace-pre-wrap text-muted-foreground">{m.content}</p>}
-                              {m.source_name && <p className="text-[10px] text-muted-foreground mt-1">{m.source_name}</p>}
+                              <div
+                                className={`flex-1 text-xs p-2 rounded border ${m.is_new ? "border-amber-400 bg-amber-50/60 dark:bg-amber-950/10" : "border-border bg-muted/30"}`}
+                              >
+                                <div className="flex justify-between gap-2 mb-1 flex-wrap">
+                                  <span className="font-medium flex items-center gap-1">
+                                    {m.movement_type || "Movimento"}
+                                    {m.is_new && (
+                                      <Badge className="bg-amber-500 hover:bg-amber-500 text-white text-[9px] px-1 py-0 h-auto">NOVO</Badge>
+                                    )}
+                                  </span>
+                                  <span className="text-muted-foreground">
+                                    {m.movement_date ? format(new Date(m.movement_date), "dd/MM/yyyy", { locale: ptBR }) : ""}
+                                  </span>
+                                </div>
+                                {m.content && <p className="whitespace-pre-wrap text-muted-foreground">{m.content}</p>}
+                                {m.source_name && <p className="text-[10px] text-muted-foreground mt-1 italic">Fonte: {m.source_name}</p>}
+                              </div>
                             </div>
                           ))}
                         </div>
