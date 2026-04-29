@@ -217,18 +217,21 @@ export function ClientProcesses({ leadId, leadName, companyId, onChanged }: Prop
     onChanged?.();
   };
 
-  const toggleMovements = async (p: ProcessItem) => {
-    const isOpen = expanded[p.id];
-    setExpanded((s) => ({ ...s, [p.id]: !isOpen }));
-    if (!isOpen && !movements[p.id]) {
-      const { data } = await supabase
-        .from("process_movements")
-        .select("*")
-        .eq("monitored_process_id", p.id)
-        .order("movement_date", { ascending: false })
-        .limit(50);
-      setMovements((s) => ({ ...s, [p.id]: (data || []) as Movement[] }));
-    }
+  const toggleMovements = (p: ProcessItem) => {
+    setExpanded((s) => ({ ...s, [p.id]: !s[p.id] }));
+  };
+
+  const markAllRead = async () => {
+    const ids = items.map((p) => p.id);
+    if (ids.length === 0) return;
+    await supabase
+      .from("process_movements")
+      .update({ is_new: false })
+      .in("monitored_process_id", ids)
+      .eq("is_new", true);
+    setNewCounts({});
+    toast.success("Todos os movimentos marcados como lidos");
+    onChanged?.();
   };
 
   const markRead = async (p: ProcessItem) => {
