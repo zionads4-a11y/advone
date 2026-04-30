@@ -26,10 +26,13 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const token = authHeader.replace("Bearer ", "");
-    const anonClient = createClient(supabaseUrl, anonKey);
-    const { data: userData } = await anonClient.auth.getUser(token);
-    if (!userData?.user) {
+    const token = authHeader.replace("Bearer ", "").trim();
+    const anonClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: claimsData, error: claimsError } = await anonClient.auth.getClaims(token);
+    const userId = claimsData?.claims?.sub;
+    if (claimsError || !userId || typeof userId !== "string") {
       return new Response(JSON.stringify({ error: "Token inválido" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -48,10 +51,10 @@ serve(async (req) => {
     // ---- Authorization: verifica se usuário pertence à empresa (ou é admin) ----
     const admin = createClient(supabaseUrl, supabaseKey);
     const [{ data: membership }, { data: roleRow }] = await Promise.all([
-      admin.from("client_companies").select("company_id").eq("user_id", userData.user.id).eq("company_id", company_id).maybeSingle(),
-      admin.from("user_roles").select("role").eq("user_id", userData.user.id).maybeSingle(),
+      admin.from("client_companies").select("company_id").eq("user_id", userId).eq("company_id", company_id).maybeSingle(),
+      admin.from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").maybeSingle(),
     ]);
-    const isAdmin = roleRow?.role === "admin" || roleRow?.role === "member";
+    const isAdmin = roleRow?.role === "admin";
     if (!isAdmin && !membership) {
       return new Response(JSON.stringify({ error: "Acesso negado a esta empresa" }), {
         status: 403,
@@ -59,14 +62,14 @@ serve(async (req) => {
       });
     }
 
+    const { data: lead, error: leadError } = await admin
+      .from("leads")
+      .select("*")
+      .eq("id", lead_id)
+      .eq("company_id", company_id)
+      .maybeSingle();
 
-    const leadRes = await fetch(`${supabaseUrl}/rest/v1/leads?id=eq.${lead_id}&select=*`, {
-      headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` },
-    });
-    const leads = await leadRes.json();
-    const lead = leads[0];
-
-    if (!lead) {
+    if (leadError || !lead) {
       return new Response(
         JSON.stringify({ error: "Lead não encontrado" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -77,13 +80,14 @@ serve(async (req) => {
     let messages: any[] = [];
     if (lead.phone || lead.whatsapp) {
       const phone = lead.phone || lead.whatsapp;
-      const msgRes = await fetch(
-        `${supabaseUrl}/rest/v1/whatsapp_messages?company_id=eq.${company_id}&phone=eq.${encodeURIComponent(phone)}&order=timestamp.asc&limit=50`,
-        {
-          headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` },
-        }
-      );
-      messages = await msgRes.json();
+      const { data: messageRows } = await admin
+        .from("whatsapp_messages")
+        .select("direction, sender_name, message_text, timestamp")
+        .eq("company_id", company_id)
+        .eq("phone", phone)
+        .order("timestamp", { ascending: true })
+        .limit(50);
+      messages = messageRows ?? [];
     }
 
     // Build context for AI
