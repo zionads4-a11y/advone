@@ -152,7 +152,6 @@ export default function ClientUsers() {
     const { data, error } = await supabase.functions.invoke("create-client-user", {
       body: {
         email,
-        password: "123456",
         full_name: fullName,
         company_id: companyId,
         role,
@@ -167,7 +166,13 @@ export default function ClientUsers() {
       toast.error(errorMsg);
     } else {
       const jobLabel = getJobTitleLabel(jobTitle) ?? "Usuário";
-      toast.success(`${jobLabel} criado com sucesso! Email: ${email} | Senha padrão: 123456`);
+      const tempPwd = data?.temp_password;
+      toast.success(
+        tempPwd
+          ? `${jobLabel} criado! Email: ${email} | Senha temporária: ${tempPwd} (anote e compartilhe com segurança)`
+          : `${jobLabel} criado com sucesso! Email: ${email}`,
+        { duration: 15000 }
+      );
       setDialogOpen(false);
       fetchData();
     }
