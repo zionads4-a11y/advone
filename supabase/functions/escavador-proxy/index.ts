@@ -38,15 +38,19 @@ function getSupabaseAdmin() {
 }
 
 async function getUserFromRequest(req: Request) {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) return null;
+
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_ANON_KEY")!
+    Deno.env.get("SUPABASE_ANON_KEY")!,
+    { global: { headers: { Authorization: authHeader } } }
   );
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader) return null;
-  const token = authHeader.replace("Bearer ", "");
-  const { data } = await supabase.auth.getUser(token);
-  return data?.user ?? null;
+  const token = authHeader.replace("Bearer ", "").trim();
+  const { data, error } = await supabase.auth.getClaims(token);
+  const userId = data?.claims?.sub;
+  if (error || !userId || typeof userId !== "string") return null;
+  return { id: userId };
 }
 
 Deno.serve(async (req) => {
@@ -69,8 +73,8 @@ Deno.serve(async (req) => {
     const admin = getSupabaseAdmin();
 
     // ---- Authorization helpers ----
-    const { data: roleRow } = await admin.from("user_roles").select("role").eq("user_id", user.id).maybeSingle();
-    const isAdmin = roleRow?.role === "admin" || roleRow?.role === "member";
+    const { data: roleRow } = await admin.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").maybeSingle();
+    const isAdmin = roleRow?.role === "admin";
     const { data: memberships } = await admin.from("client_companies").select("company_id").eq("user_id", user.id);
     const userCompanyIds = new Set((memberships || []).map((m: any) => m.company_id));
 
