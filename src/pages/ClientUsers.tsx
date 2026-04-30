@@ -331,8 +331,8 @@ export default function ClientUsers() {
                       do advogado para liberar os módulos (Conversas, Kanban, Agenda,
                       Casos, Documentos, IA Jurídica, Monitoramento e Financeiro).
                       <br />
-                      <strong className="text-foreground">Senha padrão: 123456</strong>{" "}
-                      — peça para o advogado alterar no primeiro login.
+                      <strong className="text-foreground">Uma senha temporária aleatória será gerada e exibida ao criar</strong>{" "}
+                      — copie e envie ao advogado por canal seguro; peça para alterar no primeiro login.
                     </>
                   ) : (
                     <>
