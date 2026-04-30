@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { getErrorMessage } from "../_shared/errors.ts";
 
 const corsHeaders = {
@@ -13,6 +14,28 @@ serve(async (req) => {
   }
 
   try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+
+    // ---- Authentication ----
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Não autenticado" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const token = authHeader.replace("Bearer ", "");
+    const anonClient = createClient(supabaseUrl, anonKey);
+    const { data: userData } = await anonClient.auth.getUser(token);
+    if (!userData?.user) {
+      return new Response(JSON.stringify({ error: "Token inválido" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { lead_id, company_id } = await req.json();
 
     if (!lead_id || !company_id) {
@@ -22,9 +45,20 @@ serve(async (req) => {
       );
     }
 
-    // Fetch lead info
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    // ---- Authorization: verifica se usuário pertence à empresa (ou é admin) ----
+    const admin = createClient(supabaseUrl, supabaseKey);
+    const [{ data: membership }, { data: roleRow }] = await Promise.all([
+      admin.from("client_companies").select("company_id").eq("user_id", userData.user.id).eq("company_id", company_id).maybeSingle(),
+      admin.from("user_roles").select("role").eq("user_id", userData.user.id).maybeSingle(),
+    ]);
+    const isAdmin = roleRow?.role === "admin" || roleRow?.role === "member";
+    if (!isAdmin && !membership) {
+      return new Response(JSON.stringify({ error: "Acesso negado a esta empresa" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
 
     const leadRes = await fetch(`${supabaseUrl}/rest/v1/leads?id=eq.${lead_id}&select=*`, {
       headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` },

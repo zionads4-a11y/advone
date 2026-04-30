@@ -68,6 +68,32 @@ Deno.serve(async (req) => {
     const body = req.method === "POST" ? await req.json() : null;
     const admin = getSupabaseAdmin();
 
+    // ---- Authorization helpers ----
+    const { data: roleRow } = await admin.from("user_roles").select("role").eq("user_id", user.id).maybeSingle();
+    const isAdmin = roleRow?.role === "admin" || roleRow?.role === "member";
+    const { data: memberships } = await admin.from("client_companies").select("company_id").eq("user_id", user.id);
+    const userCompanyIds = new Set((memberships || []).map((m: any) => m.company_id));
+
+    const assertCompanyAccess = (cid: string | null | undefined) => {
+      if (!cid) throw new Error("company_id obrigatório");
+      if (!isAdmin && !userCompanyIds.has(cid)) {
+        throw new Error("Acesso negado a esta empresa");
+      }
+    };
+    const assertProcessAccess = async (pid: string) => {
+      if (!pid) throw new Error("process_id obrigatório");
+      const { data: proc } = await admin.from("monitored_processes").select("company_id").eq("id", pid).maybeSingle();
+      if (!proc) throw new Error("Processo não encontrado");
+      assertCompanyAccess(proc.company_id);
+    };
+
+    if (action === "add_process") assertCompanyAccess(body?.company_id);
+    if (action === "refresh") await assertProcessAccess(body?.process_id);
+    if (action === "remove") await assertProcessAccess(body?.process_id);
+    if (action === "register_callbacks" && !isAdmin) {
+      throw new Error("Apenas admins podem executar register_callbacks");
+    }
+
     switch (action) {
       // Search process by CNJ
       case "search": {
