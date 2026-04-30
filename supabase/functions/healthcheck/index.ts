@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
         timestamp: new Date().toISOString(),
         durationMs,
         checks,
-        optional_secrets: optionalStatus,
+        optional_configured_count: optionalConfiguredCount,
       },
       null,
       2
