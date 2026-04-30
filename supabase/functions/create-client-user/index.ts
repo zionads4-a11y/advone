@@ -53,14 +53,23 @@ serve(async (req) => {
 
     const callerRole = roleData?.role;
 
-    const { email, password, full_name, company_id, role: targetRole, job_title } = await req.json();
+    const { email, full_name, company_id, role: targetRole, job_title } = await req.json();
 
-    if (!email || !password || !full_name || !company_id) {
-      return new Response(JSON.stringify({ error: "Campos obrigatórios: email, password, full_name, company_id" }), {
+    if (!email || !full_name || !company_id) {
+      return new Response(JSON.stringify({ error: "Campos obrigatórios: email, full_name, company_id" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Gera senha temporária aleatória forte (não aceita senha vinda do cliente)
+    const generateTempPassword = () => {
+      const bytes = new Uint8Array(12);
+      crypto.getRandomValues(bytes);
+      const base = btoa(String.fromCharCode(...bytes)).replace(/[+/=]/g, "");
+      return `Tmp!${base.slice(0, 12)}`;
+    };
+    const password = generateTempPassword();
 
     // Determine valid role based on caller
     let assignedRole: string;
@@ -134,7 +143,13 @@ serve(async (req) => {
     const roleLabel = assignedRole === "gerente" ? "Gerente" : "Operador";
 
     return new Response(
-      JSON.stringify({ success: true, user_id: newUserId, role: assignedRole, message: `${roleLabel} criado com sucesso` }),
+      JSON.stringify({
+        success: true,
+        user_id: newUserId,
+        role: assignedRole,
+        temp_password: password,
+        message: `${roleLabel} criado com sucesso`,
+      }),
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

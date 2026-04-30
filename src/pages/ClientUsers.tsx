@@ -152,7 +152,6 @@ export default function ClientUsers() {
     const { data, error } = await supabase.functions.invoke("create-client-user", {
       body: {
         email,
-        password: "123456",
         full_name: fullName,
         company_id: companyId,
         role,
@@ -167,7 +166,13 @@ export default function ClientUsers() {
       toast.error(errorMsg);
     } else {
       const jobLabel = getJobTitleLabel(jobTitle) ?? "Usuário";
-      toast.success(`${jobLabel} criado com sucesso! Email: ${email} | Senha padrão: 123456`);
+      const tempPwd = data?.temp_password;
+      toast.success(
+        tempPwd
+          ? `${jobLabel} criado! Email: ${email} | Senha temporária: ${tempPwd} (anote e compartilhe com segurança)`
+          : `${jobLabel} criado com sucesso! Email: ${email}`,
+        { duration: 15000 }
+      );
       setDialogOpen(false);
       fetchData();
     }
@@ -326,8 +331,8 @@ export default function ClientUsers() {
                       do advogado para liberar os módulos (Conversas, Kanban, Agenda,
                       Casos, Documentos, IA Jurídica, Monitoramento e Financeiro).
                       <br />
-                      <strong className="text-foreground">Senha padrão: 123456</strong>{" "}
-                      — peça para o advogado alterar no primeiro login.
+                      <strong className="text-foreground">Uma senha temporária aleatória será gerada e exibida ao criar</strong>{" "}
+                      — copie e envie ao advogado por canal seguro; peça para alterar no primeiro login.
                     </>
                   ) : (
                     <>
@@ -336,7 +341,7 @@ export default function ClientUsers() {
                       <br />
                       <strong className="text-foreground">Operador:</strong> atende mensagens e movimenta leads no Kanban.
                       <br />
-                      <strong className="text-foreground">Senha padrão: 123456</strong>
+                      <strong className="text-foreground">Uma senha temporária aleatória será gerada e exibida ao criar.</strong>
                     </>
                   )}
                 </p>

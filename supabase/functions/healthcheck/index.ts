@@ -47,9 +47,8 @@ Deno.serve(async (req) => {
     checks.push({ name: `env:${key}`, ok: present, detail: present ? "set" : "missing" });
   }
 
-  // 2. Optional env vars (just informational)
-  const optionalStatus: Record<string, boolean> = {};
-  for (const key of OPTIONAL_ENV) optionalStatus[key] = !!Deno.env.get(key);
+  // 2. Optional env vars (apenas resumo agregado para evitar info-leakage)
+  const optionalConfiguredCount = OPTIONAL_ENV.filter((k) => !!Deno.env.get(k)).length;
 
   // 3. Database connectivity (head query on a public table)
   try {
@@ -80,7 +79,7 @@ Deno.serve(async (req) => {
         timestamp: new Date().toISOString(),
         durationMs,
         checks,
-        optional_secrets: optionalStatus,
+        optional_configured_count: optionalConfiguredCount,
       },
       null,
       2
