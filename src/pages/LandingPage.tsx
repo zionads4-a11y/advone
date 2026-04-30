@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import logoAdvOne from "@/assets/logo-advone-light.png";
@@ -87,9 +88,9 @@ const testimonials = [
 ];
 
 // Floating particles for hero
-function HeroParticles() {
+const HeroParticles = forwardRef<HTMLDivElement>(function HeroParticles(_, ref) {
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div ref={ref} className="absolute inset-0 overflow-hidden pointer-events-none">
       {[...Array(20)].map((_, i) => (
         <div
           key={i}
@@ -112,7 +113,7 @@ function HeroParticles() {
       `}</style>
     </div>
   );
-}
+});
 
 export default function LandingPage() {
   const navigate = useNavigate();
