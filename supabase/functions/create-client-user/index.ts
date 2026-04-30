@@ -143,7 +143,13 @@ serve(async (req) => {
     const roleLabel = assignedRole === "gerente" ? "Gerente" : "Operador";
 
     return new Response(
-      JSON.stringify({ success: true, user_id: newUserId, role: assignedRole, message: `${roleLabel} criado com sucesso` }),
+      JSON.stringify({
+        success: true,
+        user_id: newUserId,
+        role: assignedRole,
+        temp_password: password,
+        message: `${roleLabel} criado com sucesso`,
+      }),
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
