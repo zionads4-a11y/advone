@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
 
 export function useScrollReveal<T extends HTMLElement = HTMLDivElement>(threshold = 0.15) {
   const ref = useRef<T>(null);
@@ -30,7 +30,10 @@ interface RevealProps {
   direction?: "up" | "left" | "right" | "none";
 }
 
-export function Reveal({ children, className = "", delay = 0, direction = "up" }: RevealProps) {
+export const Reveal = forwardRef<HTMLDivElement, RevealProps>(function Reveal(
+  { children, className = "", delay = 0, direction = "up" },
+  forwardedRef
+) {
   const { ref, visible } = useScrollReveal();
 
   const transform = {
@@ -42,7 +45,11 @@ export function Reveal({ children, className = "", delay = 0, direction = "up" }
 
   return (
     <div
-      ref={ref}
+      ref={(node) => {
+        ref.current = node;
+        if (typeof forwardedRef === "function") forwardedRef(node);
+        else if (forwardedRef) forwardedRef.current = node;
+      }}
       className={className}
       style={{
         opacity: visible ? 1 : 0,
@@ -53,4 +60,4 @@ export function Reveal({ children, className = "", delay = 0, direction = "up" }
       {children}
     </div>
   );
-}
+});
