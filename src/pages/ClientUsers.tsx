@@ -341,7 +341,7 @@ export default function ClientUsers() {
                       <br />
                       <strong className="text-foreground">Operador:</strong> atende mensagens e movimenta leads no Kanban.
                       <br />
-                      <strong className="text-foreground">Senha padrão: 123456</strong>
+                      <strong className="text-foreground">Uma senha temporária aleatória será gerada e exibida ao criar.</strong>
                     </>
                   )}
                 </p>
