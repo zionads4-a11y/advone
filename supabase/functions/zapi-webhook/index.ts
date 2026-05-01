@@ -487,6 +487,9 @@ function sanitizeDate(rawDate: string | undefined | null, timezone: string = "Am
   const oneYearAhead = todayMid + 365 * 86400000;
   const parsedMid = parsed.getTime();
   if (parsedMid < todayMid || parsedMid > oneYearAhead) return fallback;
+  // Se a data cair em feriado nacional ou fim de semana, avança para próximo dia útil
+  const dow = parsed.getDay();
+  if (dow === 0 || dow === 6 || isBrazilianHolidayStr(s)) return fallback;
   return s;
 }
 
