@@ -354,6 +354,11 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
   const dayKey = dayKeys[dayOfWeek];
   const dayName = dayNames[dayOfWeek];
 
+  // 🇧🇷 Feriado nacional: não oferecer agendamento
+  if (isBrazilianHolidayStr(dateStr)) {
+    return { date: formatDateDMY(dateStr), dayName, slots: [] };
+  }
+
   const { data: company } = await supabase
     .from("companies")
     .select("business_hours")
