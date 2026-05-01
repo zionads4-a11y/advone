@@ -2,6 +2,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { getErrorMessage } from "../_shared/errors.ts";
+import { isBrazilianHolidayStr } from "../_shared/holidays.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -152,7 +153,7 @@ IDENTIDADE E TOM
 - Seu papel não é resolver tudo no chat; seu papel é qualificar, gerar confiança e conduzir para o próximo passo
 - ${toneInstructions}
 
-📅 HOJE: ${todayDayName}, ${todayDMY} (${String(nowBR.getHours()).padStart(2, "0")}:${String(nowBR.getMinutes()).padStart(2, "0")} ${timezone}). O ANO ATUAL É ${nowBR.getFullYear()}. NUNCA use anos passados (ex: 2023, 2024, 2025) ao agendar — sempre use ${nowBR.getFullYear()} ou o próximo se já virou o ano. Se o lead não disser data, NÃO chute: passe apenas o turno para check_availability omitting the campo "date" (o sistema usa o próximo dia útil automaticamente). Sempre OFEREÇA O PRIMEIRO HORÁRIO LIVRE retornado por check_availability — não invente horários.
+📅 HOJE: ${todayDayName}, ${todayDMY} (${String(nowBR.getHours()).padStart(2, "0")}:${String(nowBR.getMinutes()).padStart(2, "0")} ${timezone}). O ANO ATUAL É ${nowBR.getFullYear()}. NUNCA use anos passados (ex: 2023, 2024, 2025) ao agendar — sempre use ${nowBR.getFullYear()} ou o próximo se já virou o ano. Se o lead não disser data, NÃO chute: passe apenas o turno para check_availability omitting the campo "date" (o sistema usa o próximo dia útil automaticamente). Sempre OFEREÇA O PRIMEIRO HORÁRIO LIVRE retornado por check_availability — não invente horários. 🚫 NUNCA ofereça agendamento em FERIADOS NACIONAIS (Confraternização 01/01, Carnaval, Sexta-Santa, Páscoa, Tiradentes 21/04, Trabalho 01/05, Corpus Christi, Independência 07/09, N.Sra Aparecida 12/10, Finados 02/11, República 15/11, Consciência Negra 20/11, Natal 25/12) nem em sábados/domingos — o sistema vai recusar essas datas automaticamente.
 ${leadNameInfo}
 
 ═══════════════════════════════════════
@@ -353,6 +354,11 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
   const dayKey = dayKeys[dayOfWeek];
   const dayName = dayNames[dayOfWeek];
 
+  // 🇧🇷 Feriado nacional: não oferecer agendamento
+  if (isBrazilianHolidayStr(dateStr)) {
+    return { date: formatDateDMY(dateStr), dayName, slots: [] };
+  }
+
   const { data: company } = await supabase
     .from("companies")
     .select("business_hours")
@@ -453,8 +459,9 @@ function getNextAvailableDays(count: number, includeToday: boolean = true, timez
   let d = includeToday ? new Date(nowBR) : new Date(nowBR.getTime() + 86400000);
   while (days.length < count) {
     const dow = d.getDay();
-    if (dow >= 1 && dow <= 5) {
-      days.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`);
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    if (dow >= 1 && dow <= 5 && !isBrazilianHolidayStr(dateStr)) {
+      days.push(dateStr);
     }
     d = new Date(d.getTime() + 86400000);
   }
@@ -480,6 +487,9 @@ function sanitizeDate(rawDate: string | undefined | null, timezone: string = "Am
   const oneYearAhead = todayMid + 365 * 86400000;
   const parsedMid = parsed.getTime();
   if (parsedMid < todayMid || parsedMid > oneYearAhead) return fallback;
+  // Se a data cair em feriado nacional ou fim de semana, avança para próximo dia útil
+  const dow = parsed.getDay();
+  if (dow === 0 || dow === 6 || isBrazilianHolidayStr(s)) return fallback;
   return s;
 }
 
