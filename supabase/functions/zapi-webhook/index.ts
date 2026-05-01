@@ -454,8 +454,9 @@ function getNextAvailableDays(count: number, includeToday: boolean = true, timez
   let d = includeToday ? new Date(nowBR) : new Date(nowBR.getTime() + 86400000);
   while (days.length < count) {
     const dow = d.getDay();
-    if (dow >= 1 && dow <= 5) {
-      days.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`);
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    if (dow >= 1 && dow <= 5 && !isBrazilianHolidayStr(dateStr)) {
+      days.push(dateStr);
     }
     d = new Date(d.getTime() + 86400000);
   }
