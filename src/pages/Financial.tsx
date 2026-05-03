@@ -76,7 +76,6 @@ interface Transaction {
 interface AsaasConfig {
   id: string;
   company_id: string;
-  api_key: string;
   environment: string;
   last_sync_at: string | null;
 }
@@ -129,7 +128,7 @@ export default function Financial() {
         .order("due_date", { ascending: false }),
       supabase
         .from("asaas_configs")
-        .select("*")
+        .select("id, company_id, environment, last_sync_at")
         .eq("company_id", companyId)
         .maybeSingle(),
     ]);
@@ -431,8 +430,8 @@ export default function Financial() {
                 variant="outline"
                 size="sm"
                 onClick={() => {
+                  setAsaasApiKey("");
                   if (asaasConfig) {
-                    setAsaasApiKey(asaasConfig.api_key);
                     setAsaasEnv(asaasConfig.environment);
                   }
                 }}
