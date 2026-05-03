@@ -53,7 +53,9 @@ export default function Companies() {
   const fetchData = async () => {
     const [companiesRes, configsRes] = await Promise.all([
       supabase.from("companies").select("*").order("created_at", { ascending: false }),
-      supabase.from("whatsapp_configs").select("*"),
+      supabase
+        .from("whatsapp_configs")
+        .select("id, company_id, zapi_instance_id, zapi_webhook_configured, phone_number, status"),
     ]);
     if (companiesRes.data) setCompanies(companiesRes.data as Company[]);
     if (configsRes.data) {
