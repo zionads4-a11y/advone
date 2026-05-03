@@ -53,7 +53,11 @@ export default function CompanyDetail() {
     setLoading(true);
     const [companyRes, configRes] = await Promise.all([
       supabase.from("companies").select("*").eq("id", id!).maybeSingle(),
-      supabase.from("whatsapp_configs").select("*").eq("company_id", id!).maybeSingle(),
+      supabase
+        .from("whatsapp_configs")
+        .select("id, company_id, zapi_instance_id, zapi_webhook_configured, phone_number, status")
+        .eq("company_id", id!)
+        .maybeSingle(),
     ]);
 
     if (companyRes.data) setCompany(companyRes.data);
