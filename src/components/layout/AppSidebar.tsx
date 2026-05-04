@@ -68,7 +68,6 @@ const adminItems = [
   { title: "Acessos", url: "/access-management", icon: KeyRound },
   { title: "Assinaturas", url: "/assinatura", icon: CreditCard },
   { title: "Histórico de Leads", url: "/historico-leads", icon: History },
-  { title: "Histórico de Leads", url: "/historico-leads", icon: History },
   { title: "Alertas de Fraude", url: "/fraudes", icon: ShieldAlert },
 ];
 
