@@ -94,9 +94,7 @@ const App = () => (
               <Route path="/monitoramento" element={<ProcessMonitoring />} />
               <Route path="/busca-processos" element={<ProcessSearch />} />
               <Route path="/assinatura" element={<Subscription />} />
-              <Route path="/comissoes" element={<Commissions />} />
               <Route path="/fraudes" element={<FraudAlerts />} />
-              <Route path="/agendamentos-exito" element={<ExitoSchedules />} />
               <Route path="/historico-leads" element={<LeadsHistory />} />
               <Route path="/ia-juridica" element={<LegalAI />} />
               <Route path="/tarefas" element={<Tasks />} />
