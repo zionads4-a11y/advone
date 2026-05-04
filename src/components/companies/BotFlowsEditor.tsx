@@ -51,7 +51,7 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
         label: f.label,
         icon_emoji: f.icon_emoji,
         position: f.position,
-        niche: f.niche as "previdenciario" | "trabalhista",
+        niche: f.niche as EnabledFlow["niche"],
         is_custom: f.is_custom,
         case_type: f.case_type || undefined,
         description: f.description || undefined,
