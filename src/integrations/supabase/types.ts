@@ -1574,8 +1574,51 @@ export type Database = {
         }
         Relationships: []
       }
+      kanban_boards: {
+        Row: {
+          color: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          icon: string
+          id: string
+          is_default: boolean
+          name: string
+          position: number
+          updated_at: string
+        }
+        Insert: {
+          color?: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          icon?: string
+          id?: string
+          is_default?: boolean
+          name: string
+          position?: number
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          icon?: string
+          id?: string
+          is_default?: boolean
+          name?: string
+          position?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       kanban_columns: {
         Row: {
+          board_id: string | null
           color: string
           company_id: string
           created_at: string
@@ -1587,6 +1630,7 @@ export type Database = {
           position: number
         }
         Insert: {
+          board_id?: string | null
           color?: string
           company_id: string
           created_at?: string
@@ -1598,6 +1642,7 @@ export type Database = {
           position?: number
         }
         Update: {
+          board_id?: string | null
           color?: string
           company_id?: string
           created_at?: string
@@ -2586,6 +2631,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      personal_tasks: {
+        Row: {
+          assigned_to: string | null
+          company_id: string
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          due_date: string | null
+          id: string
+          priority: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          company_id: string
+          completed_at?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          company_id?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       process_billing_audit_logs: {
         Row: {
