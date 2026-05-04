@@ -1681,6 +1681,90 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_cpf_alerts: {
+        Row: {
+          alert_type: string
+          company_id: string
+          cpf: string
+          created_at: string
+          description: string | null
+          id: string
+          lead_id: string
+          notified_at: string | null
+          payload: Json
+          read_at: string | null
+          title: string
+        }
+        Insert: {
+          alert_type: string
+          company_id: string
+          cpf: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          lead_id: string
+          notified_at?: string | null
+          payload?: Json
+          read_at?: string | null
+          title: string
+        }
+        Update: {
+          alert_type?: string
+          company_id?: string
+          cpf?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          lead_id?: string
+          notified_at?: string | null
+          payload?: Json
+          read_at?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      lead_cpf_lookups: {
+        Row: {
+          company_id: string
+          cpf: string
+          created_at: string
+          error_message: string | null
+          id: string
+          lead_id: string
+          payload: Json
+          processes_count: number
+          signature: string
+          source: string
+          status: string
+        }
+        Insert: {
+          company_id: string
+          cpf: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          lead_id: string
+          payload?: Json
+          processes_count?: number
+          signature?: string
+          source?: string
+          status?: string
+        }
+        Update: {
+          company_id?: string
+          cpf?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          lead_id?: string
+          payload?: Json
+          processes_count?: number
+          signature?: string
+          source?: string
+          status?: string
+        }
+        Relationships: []
+      }
       lead_document_requests: {
         Row: {
           company_id: string
