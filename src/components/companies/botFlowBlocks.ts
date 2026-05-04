@@ -1113,6 +1113,8 @@ export function buildDynamicLauraPrompt(params: {
       ? "Marina"
       : niche === "tributario"
       ? "Bianca"
+      : niche === "bancario_empresarial"
+      ? "Camila"
       : "Laura";
   const finalBotName = botName || defaultBotName;
   const finalBotRole = botRoleDescription || "atendente virtual";
