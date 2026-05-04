@@ -125,7 +125,7 @@ export function PracticeSpecialtySelector({ companyId, onChange, compact = false
 
   const grid = (
     <div className="space-y-3">
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {OPTIONS.map((opt) => {
           const Icon = opt.icon;
           const selected = value === opt.value;
