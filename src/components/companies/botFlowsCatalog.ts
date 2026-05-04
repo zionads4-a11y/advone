@@ -10,7 +10,8 @@ export type Niche =
   | "civel"
   | "familia"
   | "criminal"
-  | "tributario";
+  | "tributario"
+  | "bancario_empresarial";
 
 export interface BotFlowDefinition {
   flow_key: string;
