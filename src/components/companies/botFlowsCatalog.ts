@@ -79,6 +79,16 @@ export const TRIBUTARIO_FLOWS: BotFlowDefinition[] = [
   { flow_key: "fallback_outros", label: "Outro assunto tributário ou empresarial", icon_emoji: "6️⃣", description: "Qualificação livre para casos tributários/empresariais variados.", case_type: "fallback_outros", default_enabled: true },
 ];
 
+export const BANCARIO_EMPRESARIAL_FLOWS: BotFlowDefinition[] = [
+  { flow_key: "renegociacao_dividas_pj", label: "Renegociar dívidas da empresa (bancos/fornecedores)", icon_emoji: "1️⃣", description: "Renegociação extrajudicial de dívidas bancárias e com fornecedores, descontos e prazos.", case_type: "renegociacao_dividas_pj", default_enabled: true },
+  { flow_key: "revisao_contratos_bancarios", label: "Revisão de contratos bancários (juros abusivos)", icon_emoji: "2️⃣", description: "Revisão judicial de contratos bancários PJ — juros abusivos, capitalização, tarifas, IOF, anatocismo.", case_type: "revisao_contratos_bancarios", default_enabled: true },
+  { flow_key: "recuperacao_judicial", label: "Recuperação Judicial / Extrajudicial", icon_emoji: "3️⃣", description: "Empresa com dívidas impagáveis — proteção legal contra credores, plano de recuperação, blindagem patrimonial.", case_type: "recuperacao_judicial", default_enabled: true },
+  { flow_key: "execucao_bloqueio_bancario", label: "Sofri bloqueio / penhora / execução bancária", icon_emoji: "4️⃣", description: "Bloqueio de contas (BacenJud), penhora de bens, execução bancária — defesa urgente, embargos, suspensão.", case_type: "execucao_bloqueio_bancario", default_enabled: true },
+  { flow_key: "negativacao_serasa_pj", label: "Empresa negativada (Serasa, SCR Bacen, protesto)", icon_emoji: "5️⃣", description: "Negativação indevida no Serasa/SCR/protesto — exclusão, indenização, restabelecimento de crédito.", case_type: "negativacao_serasa_pj", default_enabled: true },
+  { flow_key: "blindagem_patrimonial", label: "Blindagem patrimonial / proteção de bens", icon_emoji: "6️⃣", description: "Estruturação de holding, separação de patrimônio pessoal e empresarial, proteção contra credores.", case_type: "blindagem_patrimonial", default_enabled: true },
+  { flow_key: "fallback_outros", label: "Outro problema bancário ou financeiro da empresa", icon_emoji: "7️⃣", description: "Qualificação livre para casos bancários/empresariais variados.", case_type: "fallback_outros", default_enabled: true },
+];
+
 export function getFlowCatalog(niche: Niche): BotFlowDefinition[] {
   if (niche === "trabalhista") return TRABALHISTA_FLOWS;
   if (niche === "hibrido") return [...PREVIDENCIARIO_FLOWS, ...TRABALHISTA_FLOWS];
@@ -86,5 +96,6 @@ export function getFlowCatalog(niche: Niche): BotFlowDefinition[] {
   if (niche === "familia") return FAMILIA_FLOWS;
   if (niche === "criminal") return CRIMINAL_FLOWS;
   if (niche === "tributario") return TRIBUTARIO_FLOWS;
+  if (niche === "bancario_empresarial") return BANCARIO_EMPRESARIAL_FLOWS;
   return PREVIDENCIARIO_FLOWS;
 }
