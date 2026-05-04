@@ -6,6 +6,7 @@ import { Loader2, MessageSquare } from "lucide-react";
 import { NewMessageNotificationProvider, useNewMessageNotifications } from "@/hooks/useNewMessageNotifications";
 import { ReminderAlertProvider } from "@/hooks/useReminderAlerts";
 import { ReminderAlertBell } from "./ReminderAlertBell";
+import { ThemeToggle } from "./ThemeToggle";
 import { useNavigate } from "react-router-dom";
 import { useSubscriptionGuard } from "@/hooks/useSubscriptionGuard";
 import SubscriptionBlockScreen from "./SubscriptionBlockScreen";
@@ -66,6 +67,7 @@ export default function AppLayout() {
                 </div>
                 <div className="ml-auto flex items-center gap-2">
                   <ReminderAlertBell />
+                  <ThemeToggle />
                   <HeaderNotification />
                 </div>
               </header>

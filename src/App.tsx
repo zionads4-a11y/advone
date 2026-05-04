@@ -43,16 +43,20 @@ import ProfileCheck from "./pages/ProfileCheck";
 import NotFound from "./pages/NotFound";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
+import Tasks from "./pages/Tasks";
+import Boards from "./pages/Boards";
+import { ThemeProvider } from "@/hooks/useTheme";
 
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
+  <ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
@@ -97,6 +101,8 @@ const App = () => (
               <Route path="/agendamentos-exito" element={<ExitoSchedules />} />
               <Route path="/historico-leads" element={<LeadsHistory />} />
               <Route path="/ia-juridica" element={<LegalAI />} />
+              <Route path="/tarefas" element={<Tasks />} />
+              <Route path="/boards" element={<Boards />} />
               <Route path="/perfil-check" element={<ProfileCheck />} />
             </Route>
             <Route path="*" element={<NotFound />} />
@@ -105,6 +111,7 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
+  </ThemeProvider>
 );
 
 export default App;
