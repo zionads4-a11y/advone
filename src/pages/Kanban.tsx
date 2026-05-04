@@ -46,6 +46,13 @@ interface Company {
   name: string;
 }
 
+interface Board {
+  id: string;
+  name: string;
+  is_default: boolean;
+  position: number;
+}
+
 const DEFAULT_COLUMNS = [
   { name: "Em Atendimento", color: "#f59e0b", position: 0, is_won: false, is_lost: false },
   { name: "1º Follow-UP", color: "#60a5fa", position: 1, is_won: false, is_lost: false },
@@ -65,6 +72,8 @@ export default function Kanban() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [kanbanColumns, setKanbanColumns] = useState<KanbanColumn[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
+  const [boards, setBoards] = useState<Board[]>([]);
+  const [selectedBoardId, setSelectedBoardId] = useState<string>("");
   const [filterSource, setFilterSource] = useState<string>("all");
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -81,8 +90,12 @@ export default function Kanban() {
   }, [companiesLoading]);
 
   useEffect(() => {
-    if (selectedCompanyId) fetchColumnsAndLeads();
+    if (selectedCompanyId) fetchBoards();
   }, [selectedCompanyId]);
+
+  useEffect(() => {
+    if (selectedCompanyId && selectedBoardId) fetchColumnsAndLeads();
+  }, [selectedCompanyId, selectedBoardId]);
 
   const fetchCompanies = async () => {
     const { data } = await supabase.from("companies").select("id, name").order("name");
@@ -96,9 +109,25 @@ export default function Kanban() {
     }
   };
 
+  const fetchBoards = async () => {
+    const { data } = await supabase
+      .from("kanban_boards")
+      .select("id, name, is_default, position")
+      .eq("company_id", selectedCompanyId)
+      .order("position");
+    const list = (data || []) as Board[];
+    setBoards(list);
+    if (list.length > 0) {
+      const def = list.find((b) => b.is_default) || list[0];
+      setSelectedBoardId((curr) => (list.some((b) => b.id === curr) ? curr : def.id));
+    } else {
+      setSelectedBoardId("");
+    }
+  };
+
   const fetchColumnsAndLeads = async () => {
     const [columnsRes, leadsRes] = await Promise.all([
-      supabase.from("kanban_columns").select("*").eq("company_id", selectedCompanyId).order("position"),
+      supabase.from("kanban_columns").select("*").eq("company_id", selectedCompanyId).eq("board_id", selectedBoardId).order("position"),
       supabase.from("leads").select("*").eq("company_id", selectedCompanyId).order("created_at", { ascending: false }),
     ]);
     if (columnsRes.data) setKanbanColumns(columnsRes.data as KanbanColumn[]);
@@ -246,6 +275,18 @@ export default function Kanban() {
               <SelectContent>
                 {companies.map((c) => (
                   <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          {boards.length > 1 && (
+            <Select value={selectedBoardId} onValueChange={setSelectedBoardId}>
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectValue placeholder="Selecione o quadro" />
+              </SelectTrigger>
+              <SelectContent>
+                {boards.map((b) => (
+                  <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
