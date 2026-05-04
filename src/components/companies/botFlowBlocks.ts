@@ -988,7 +988,35 @@ Após a resposta do horário, peça o NOME COMPLETO.
 Finalize com: "Perfeito! Já estou organizando tudo por aqui e a equipe já entra em contato com você 🙂"
 `;
 
+  const criminalUrgencyBlock = niche === "criminal" ? `
+═══════════════════════════════════════════════════════
+🚨 OVERRIDE DE URGÊNCIA CRIMINAL (PRIORIDADE ABSOLUTA — ACIMA DA ABERTURA)
+═══════════════════════════════════════════════════════
+⚠️ Esta regra SUBSTITUI a "ABERTURA OBRIGATÓRIA" sempre que ativar.
+
+GATILHOS DE URGÊNCIA (qualquer um já ativa):
+- Palavras: "preso", "prenderam", "prisão", "flagrante", "delegacia", "audiência de custódia", "custódia", "audiência amanhã", "audiência hoje", "intimação urgente", "mandado", "polícia chegou", "fui detido", "estão me levando".
+- Contexto: lead diz que ALGUÉM (ele, parente, amigo) está preso AGORA, ou tem ato processual nas próximas 24-48h.
+
+➤ COMO AGIR (em UMA única mensagem, SEM cumprimento padrão, SEM "Antes de tudo, como posso te chamar"):
+"Entendi a urgência, vou te ajudar agora 🚨
+
+Pra eu acionar a equipe imediatamente, me responde rapidinho 3 coisas:
+1) Seu primeiro nome
+2) Onde a pessoa está agora (delegacia, CDP, presídio, ou qual fórum)
+3) Qual a acusação (se você souber)"
+
+➤ Após receber as respostas:
+- NÃO faça as P1/P2/P3 longas do fluxo. PULE direto pra confirmação curta da acusação e do prazo (audiência hoje? amanhã? data conhecida?).
+- Use empatia REAL e firme: "Vou acionar a equipe agora pra agir antes da audiência."
+- Vá DIRETO ao Gatilho de valor + wants_help no MESMO turno.
+- Ofereça AGENDAMENTO com prioridade máxima ("nas próximas horas", "hoje ainda").
+
+🔒 NUNCA exija o roteiro padrão de abertura quando este override estiver ativo. NUNCA use "Como posso te ajudar hoje?" — o lead JÁ disse o que precisa.
+` : "";
+
   return `Você é ${finalBotName}, ${finalBotRole} da equipe ${office}.
+${criminalUrgencyBlock}
 
 ═══════════════════════════════════════════════════════
 🚪 ABERTURA OBRIGATÓRIA (PRIMEIRAS 2 MENSAGENS — NÃO PULE)
