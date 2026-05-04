@@ -111,7 +111,7 @@ export function CustomFlowDialog({ open, onOpenChange, niche, onCreate }: Props)
           {niche === "hibrido" && (
             <div className="space-y-2">
               <Label>Área *</Label>
-              <Select value={flowNiche} onValueChange={(v) => setFlowNiche(v as "previdenciario" | "trabalhista")}>
+              <Select value={flowNiche} onValueChange={(v) => setFlowNiche(v as CustomFlowNiche)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
