@@ -75,6 +75,8 @@ const adminItems = [
 const gerenteItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Kanban", url: "/kanban", icon: Kanban },
+  { title: "Quadros", url: "/boards", icon: Layers },
+  { title: "Tarefas", url: "/tarefas", icon: CheckSquare },
   { title: "Clientes", url: "/clientes", icon: UserCheck },
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
@@ -88,6 +90,7 @@ const gerenteItems = [
 
 const operadorItems = [
   { title: "Kanban", url: "/kanban", icon: Kanban },
+  { title: "Tarefas", url: "/tarefas", icon: CheckSquare },
   { title: "Clientes", url: "/clientes", icon: UserCheck },
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
