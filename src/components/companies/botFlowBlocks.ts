@@ -837,6 +837,166 @@ wants_help: "Posso encaixar uma conversa rápida com a equipe?" → sim | duvida
   },
 ];
 
+// =====================================================
+// FLUXOS — BANCÁRIO EMPRESARIAL / REESTRUTURAÇÃO DE DÍVIDAS
+// =====================================================
+const BANCARIO_EMPRESARIAL_FLOW_BLOCKS: FlowPromptBlock[] = [
+  {
+    flow_key: "renegociacao_dividas_pj",
+    niche: "bancario_empresarial",
+    case_type: "renegociacao_dividas_pj",
+    block: `▸ RENEGOCIAÇÃO DE DÍVIDAS PJ (case_type: renegociacao_dividas_pj)
+Use quando o lead falar: empresa devendo banco/fornecedor, parcelas atrasadas, quero renegociar, dívida acumulada.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, sua empresa está em qual situação: 1️⃣ Já em atraso 2️⃣ Vai atrasar nos próximos meses 3️⃣ Pagando, mas está sufocando o caixa?"
+- "Qual o valor total aproximado das dívidas? E são com bancos, fornecedores ou os dois?"
+- "Quantos credores diferentes (aproximado)? Já recebeu cobrança judicial ou só extrajudicial?"
+- "A empresa ainda está faturando? Quanto, em média, por mês?"
+
+Empatia: "Entendi… é bem desgastante ver o caixa sendo consumido por dívidas 😕"
+
+Gatilho: "Entendi, {nome}. A equipe aqui renegocia dívidas empresariais todos os dias e consegue descontos de 30 a 70% em muitos casos — mas cada mês que passa os juros engordam a bola de neve, e deixar pra depois pode chegar num ponto em que o banco não aceita mais negociar amigável."
+
+Transição: "Pra não deixar a situação piorar e perder a chance do desconto, o ideal é a equipe analisar agora 👀"
+
+wants_help: "Posso encaixar uma conversa rápida (e gratuita) com a equipe?" → sim | duvida.`,
+  },
+  {
+    flow_key: "revisao_contratos_bancarios",
+    niche: "bancario_empresarial",
+    case_type: "revisao_contratos_bancarios",
+    block: `▸ REVISÃO DE CONTRATOS BANCÁRIOS PJ (case_type: revisao_contratos_bancarios)
+Use quando o lead falar: juros abusivos, banco cobrando muito, capital de giro caro, cheque especial, conta garantida, IOF alto, anatocismo, capitalização.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, qual o tipo de contrato bancário (capital de giro, cheque especial PJ, conta garantida, financiamento, antecipação de recebíveis)?"
+- "Qual banco e há quanto tempo o contrato existe?"
+- "Sabe o valor original e quanto já pagou até agora?"
+- "Tem cópia do contrato e dos extratos / boletos das parcelas?"
+
+Empatia: "Entendi… muita empresa paga juros muito acima do legal sem nem perceber 😕"
+
+Gatilho: "Entendi, {nome}. A equipe aqui revisa contratos bancários todos os dias — e em boa parte dos casos é possível recuperar valores pagos a mais nos últimos 5 anos (tese da capitalização e do anatocismo). Cada mês que passa, mais um lote de cobranças prescreve e você perde esse direito de recuperar."
+
+Transição: "Pra não perder valores prescritos, o ideal é a equipe analisar o contrato 👀"
+
+wants_help: "Posso encaixar uma conversa rápida com a equipe pra revisar isso?" → sim | duvida.`,
+  },
+  {
+    flow_key: "recuperacao_judicial",
+    niche: "bancario_empresarial",
+    case_type: "recuperacao_judicial",
+    block: `▸ RECUPERAÇÃO JUDICIAL / EXTRAJUDICIAL (case_type: recuperacao_judicial)
+Use quando o lead falar: empresa quebrando, dívida impagável, falência, blindar a empresa, parar penhoras, plano de recuperação, RJ.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, qual o porte da empresa (faturamento mensal aproximado) e quantos funcionários?"
+- "Qual o valor total estimado das dívidas? Já há ações judiciais / penhoras em curso?"
+- "A empresa ainda opera e gera receita, ou já está parada?"
+- "Os sócios deram aval pessoal nas dívidas?"
+
+Empatia: "Entendi… é uma decisão muito difícil, mas existem caminhos legais pra proteger o que você construiu 😕"
+
+Gatilho: "Entendi, {nome}. A equipe aqui conduz Recuperações Judiciais e Extrajudiciais todos os dias — a RJ suspende todas as cobranças e penhoras por 180 dias, dá fôlego pra empresa se reorganizar e renegociar com até 70% de desconto. Mas precisa entrar com isso ANTES do colapso — depois que vem a penhora pesada ou pedido de falência, fica muito mais difícil recuperar."
+
+Transição: "Pra proteger a empresa enquanto ainda dá tempo, o ideal é a equipe analisar urgente 👀"
+
+wants_help: "Posso encaixar uma conversa rápida e sigilosa com a equipe?" → sim | duvida.`,
+  },
+  {
+    flow_key: "execucao_bloqueio_bancario",
+    niche: "bancario_empresarial",
+    case_type: "execucao_bloqueio_bancario",
+    block: `▸ EXECUÇÃO / BLOQUEIO BANCÁRIO (case_type: execucao_bloqueio_bancario)
+Use quando o lead falar: bloqueio de conta, BacenJud, penhora, oficial de justiça, execução, citação, banco penhorou.
+
+⚠️ URGENTE — pode haver prazos curtos de defesa.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, o que aconteceu: 1️⃣ Conta foi bloqueada (BacenJud) 2️⃣ Recebi citação de execução 3️⃣ Penhora de bens 4️⃣ Oficial de justiça apareceu?"
+- "Há quanto tempo? Tem cópia da decisão / mandado / citação?"
+- "Qual o valor envolvido?"
+- "É a empresa, você como sócio (avalista) ou ambos?"
+
+Empatia: "Entendi… imagino o desespero, principalmente se travou o caixa 😕"
+
+Gatilho: "Entendi, {nome}. A equipe aqui defende empresas em execuções e bloqueios todos os dias. Existem prazos MUITO curtos pra apresentar defesa, embargos ou pedido de desbloqueio — perder esses prazos pode significar perder bens e travar a empresa por meses. Mas, se entrar a tempo, dá pra desbloquear conta e suspender a execução."
+
+Transição: "Como o prazo é urgente, o ideal é a equipe analisar HOJE 👀"
+
+wants_help: "Posso encaixar uma conversa urgente com a equipe?" → sim | duvida.`,
+  },
+  {
+    flow_key: "negativacao_serasa_pj",
+    niche: "bancario_empresarial",
+    case_type: "negativacao_serasa_pj",
+    block: `▸ NEGATIVAÇÃO PJ — SERASA / SCR / PROTESTO (case_type: negativacao_serasa_pj)
+Use quando o lead falar: empresa negativada, SCR Bacen, Serasa, SPC PJ, protesto em cartório, perdeu crédito, banco recusou.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, onde a empresa está negativada (Serasa, SCR Bacen, SPC, protesto em cartório)?"
+- "Você reconhece a dívida, ou acha que é cobrança indevida?"
+- "Há quanto tempo está negativada?"
+- "Tem cópia da notificação ou print da consulta?"
+
+Empatia: "Entendi… ficar com a empresa negativada trava tudo: crédito, fornecedor, banco 😕"
+
+Gatilho: "Entendi, {nome}. A equipe aqui resolve negativações empresariais todos os dias. Se for indevida, dá pra excluir + pedir indenização. Se for legítima, dá pra negociar com desconto e limpar o nome rápido. Mas cada mês negativado a empresa perde oportunidades — fornecedores cortam prazo, bancos negam crédito, clientes desistem."
+
+Transição: "Pra não perder mais clientes e crédito, o ideal é a equipe analisar 👀"
+
+wants_help: "Posso encaixar uma conversa rápida com a equipe?" → sim | duvida.`,
+  },
+  {
+    flow_key: "blindagem_patrimonial",
+    niche: "bancario_empresarial",
+    case_type: "blindagem_patrimonial",
+    block: `▸ BLINDAGEM PATRIMONIAL (case_type: blindagem_patrimonial)
+Use quando o lead falar: proteger patrimônio, holding, separar bens da empresa, blindar imóveis, sócio quer se proteger.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, você quer proteger: 1️⃣ Patrimônio pessoal de risco da empresa 2️⃣ Patrimônio familiar (sucessão / herança) 3️⃣ Os dois?"
+- "A empresa tem dívidas atuais ou execuções em andamento?"
+- "Quais bens existem (imóveis, veículos, participação em empresas, investimentos)?"
+- "Tem família (cônjuge, filhos)?"
+
+⚠️ Importante: se a empresa JÁ tem dívidas em execução, a blindagem pode ser anulada por fraude — explique com cuidado.
+
+Empatia: "Entendi, é uma preocupação legítima — quem empreende sabe que o risco existe."
+
+Gatilho: "Entendi, {nome}. A equipe aqui estrutura holdings e proteção patrimonial todos os dias. Quando feito ANTES da crise, é totalmente legal e protege o que você levou anos pra construir. Quando feito DEPOIS que já existem dívidas, pode ser anulado — por isso o melhor momento é sempre 'agora, antes de precisar'."
+
+Transição: "Pra entender exatamente o que faz sentido no seu caso, o ideal é a equipe analisar 👀"
+
+wants_help: "Posso encaixar uma conversa rápida (e sigilosa) com a equipe?" → sim | duvida.`,
+  },
+  {
+    flow_key: "fallback_outros",
+    niche: "bancario_empresarial",
+    case_type: "fallback_outros",
+    block: `▸ OUTRO BANCÁRIO/EMPRESARIAL (case_type: fallback_outros)
+Use quando o caso não se encaixa nos fluxos acima.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, me conta resumidamente o que está acontecendo com a empresa."
+- "Tem documentos relacionados (contratos, notificações, extratos, citações)?"
+
+Gatilho: "Entendi, {nome}. A equipe aqui atende empresas em situações bancárias e financeiras todos os dias e sabe identificar o melhor caminho."
+
+Transição: "Pra não correr risco, o ideal é a equipe analisar 👀"
+
+wants_help: "Posso encaixar uma conversa rápida com a equipe?" → sim | duvida.`,
+  },
+];
+
 // Mapa global de blocos por nicho
 const BLOCKS_BY_NICHE: Record<FlowNiche, FlowPromptBlock[]> = {
   previdenciario: PREV_FLOW_BLOCKS,
@@ -845,6 +1005,7 @@ const BLOCKS_BY_NICHE: Record<FlowNiche, FlowPromptBlock[]> = {
   familia: FAMILIA_FLOW_BLOCKS,
   criminal: CRIMINAL_FLOW_BLOCKS,
   tributario: TRIBUTARIO_FLOW_BLOCKS,
+  bancario_empresarial: BANCARIO_EMPRESARIAL_FLOW_BLOCKS,
 };
 
 export function getFlowBlock(niche: FlowNiche, flow_key: string): FlowPromptBlock | undefined {
