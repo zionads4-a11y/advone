@@ -2634,6 +2634,7 @@ export type Database = {
       }
       personal_tasks: {
         Row: {
+          accepted_at: string | null
           assigned_to: string | null
           company_id: string
           completed_at: string | null
@@ -2643,11 +2644,14 @@ export type Database = {
           due_date: string | null
           id: string
           priority: string
+          rejected_at: string | null
+          rejection_reason: string | null
           status: string
           title: string
           updated_at: string
         }
         Insert: {
+          accepted_at?: string | null
           assigned_to?: string | null
           company_id: string
           completed_at?: string | null
@@ -2657,11 +2661,14 @@ export type Database = {
           due_date?: string | null
           id?: string
           priority?: string
+          rejected_at?: string | null
+          rejection_reason?: string | null
           status?: string
           title: string
           updated_at?: string
         }
         Update: {
+          accepted_at?: string | null
           assigned_to?: string | null
           company_id?: string
           completed_at?: string | null
@@ -2671,6 +2678,8 @@ export type Database = {
           due_date?: string | null
           id?: string
           priority?: string
+          rejected_at?: string | null
+          rejection_reason?: string | null
           status?: string
           title?: string
           updated_at?: string
