@@ -56,6 +56,7 @@ const AI_ONLY_ROUTES = new Set([
   "/kanban",
   "/clientes",
   "/agenda",
+  "/tarefas",
   "/company-settings",
 ]);
 
