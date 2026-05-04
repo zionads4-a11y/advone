@@ -67,6 +67,7 @@ export default function AppLayout() {
                 </div>
                 <div className="ml-auto flex items-center gap-2">
                   <ReminderAlertBell />
+                  <ThemeToggle />
                   <HeaderNotification />
                 </div>
               </header>
