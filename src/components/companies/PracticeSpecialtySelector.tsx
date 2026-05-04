@@ -2,12 +2,19 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Briefcase, Loader2, Save, Scale, Shield, Layers } from "lucide-react";
+import { Briefcase, Loader2, Save, Scale, Shield, Layers, Gavel, Heart, ShieldAlert, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-export type PracticeSpecialty = "previdenciario" | "trabalhista" | "hibrido";
+export type PracticeSpecialty =
+  | "previdenciario"
+  | "trabalhista"
+  | "hibrido"
+  | "civel"
+  | "familia"
+  | "criminal"
+  | "tributario";
 
 interface SpecialtyOption {
   value: PracticeSpecialty;
@@ -31,9 +38,33 @@ const OPTIONS: SpecialtyOption[] = [
   },
   {
     value: "hibrido",
-    label: "Os dois (Híbrido)",
+    label: "Previdenciário + Trabalhista",
     description: "Escritório atende casos previdenciários e trabalhistas.",
     icon: Layers,
+  },
+  {
+    value: "civel",
+    label: "Cível / Consumidor",
+    description: "Indenizações, banco, plano de saúde, voo, produtos com defeito.",
+    icon: Gavel,
+  },
+  {
+    value: "familia",
+    label: "Família",
+    description: "Divórcio, pensão, guarda, inventário, união estável.",
+    icon: Heart,
+  },
+  {
+    value: "criminal",
+    label: "Criminal",
+    description: "Flagrante, inquérito, audiência, recurso, habeas corpus, execução penal.",
+    icon: ShieldAlert,
+  },
+  {
+    value: "tributario",
+    label: "Tributário / Empresarial",
+    description: "Recuperação tributária, defesa fiscal, contratos, societário.",
+    icon: Building2,
   },
 ];
 
