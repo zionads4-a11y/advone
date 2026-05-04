@@ -138,7 +138,7 @@ export function useCompanyBotFlows(companyId: string | null, niche: Niche) {
     async (input: {
       label: string;
       description: string;
-      niche: "previdenciario" | "trabalhista";
+      niche: "previdenciario" | "trabalhista" | "civel" | "familia" | "criminal" | "tributario";
       icon_emoji?: string;
       case_type?: string;
     }) => {

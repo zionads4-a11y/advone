@@ -10,9 +10,17 @@
 //   - Respostas otimizadas para laudos (acelera análise)
 //   - Detecção de lead quente (pula perguntas)
 
+export type FlowNiche =
+  | "previdenciario"
+  | "trabalhista"
+  | "civel"
+  | "familia"
+  | "criminal"
+  | "tributario";
+
 export interface FlowPromptBlock {
   flow_key: string;
-  niche: "previdenciario" | "trabalhista";
+  niche: FlowNiche;
   case_type: string;
   block: string; // texto completo do FLUXO X — será incluído no prompt
 }
@@ -274,8 +282,572 @@ wants_help (texto natural): "Quer que eu encaixe uma conversa rápida com a equi
   },
 ];
 
-export function getFlowBlock(niche: "previdenciario" | "trabalhista", flow_key: string): FlowPromptBlock | undefined {
-  const list = niche === "trabalhista" ? TRAB_FLOW_BLOCKS : PREV_FLOW_BLOCKS;
+// =====================================================
+// FLUXOS — CÍVEL / CONSUMIDOR
+// =====================================================
+const CIVEL_FLOW_BLOCKS: FlowPromptBlock[] = [
+  {
+    flow_key: "indenizacao_dano_moral",
+    niche: "civel",
+    case_type: "indenizacao_dano_moral",
+    block: `▸ DANO MORAL (case_type: indenizacao_dano_moral)
+Use quando o lead descrever: ofensa pública, constrangimento, exposição indevida, humilhação fora do trabalho, situação vexatória.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "Me conta o que aconteceu, {nome}, com suas palavras."
+- "Isso aconteceu há quanto tempo?"
+- "Tem testemunhas, mensagens, prints ou vídeos do ocorrido?"
+  - Se sim: "Perfeito, isso já acelera bastante a análise do seu caso 👀"
+  - Se não: "Entendi… 😕 Sem prova fica mais difícil, mas dependendo do caso ainda dá pra construir 👀"
+
+Empatia ao longo: "Imagino o quanto isso te abalou…" / "Entendi, situação complicada mesmo 😕"
+
+Gatilho: "Entendi, {nome}. A equipe aqui já analisa casos como o seu todos os dias. Situações assim podem gerar direito a indenização — e deixar pra depois pode fazer você perder o prazo (existe prazo legal pra entrar com a ação)."
+
+Transição: "Pra não correr risco de erro ou perder algo importante, o ideal é a equipe já analisar seu caso com você 👀"
+
+wants_help (texto natural): "Posso encaixar uma conversa rápida com a equipe pra olhar isso pra você?" → interprete livre como sim | duvida.`,
+  },
+  {
+    flow_key: "problema_banco",
+    niche: "civel",
+    case_type: "problema_banco",
+    block: `▸ PROBLEMA COM BANCO/FINANCEIRA (case_type: problema_banco)
+Use quando o lead falar: empréstimo que não fez, juros abusivos, desconto indevido, nome no SPC/Serasa indevido, golpe via app.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, me conta resumidamente o que aconteceu com o banco."
+- "Você tem o contrato, extrato ou print mostrando o problema?"
+  - Se sim: "Perfeito, isso já acelera muito a análise 👀"
+  - Se não: "Entendi… 😕 Mesmo sem documento, em muitos casos dá pra reverter."
+- "Você já tentou resolver direto com o banco?"
+
+Empatia: "Imagino o quanto isso é estressante 😕" / "Infelizmente é mais comum do que parece…"
+
+Gatilho: "Entendi, {nome}. A equipe aqui já analisa casos como o seu todos os dias. Bancos costumam empurrar acordos baixos — e deixar pra depois pode dificultar a recuperação dos valores e a limpeza do seu nome."
+
+Transição: "Pra não correr risco de erro ou perder algo importante, o ideal é a equipe já analisar seu caso com você 👀"
+
+wants_help: "Quer que eu encaixe uma conversa rápida com a equipe?" → sim | duvida.`,
+  },
+  {
+    flow_key: "problema_loja_produto",
+    niche: "civel",
+    case_type: "problema_loja_produto",
+    block: `▸ PRODUTO / SERVIÇO COM PROBLEMA (case_type: problema_loja_produto)
+Use quando o lead falar: produto com defeito, não entregue, propaganda enganosa, cobrança indevida, recusa de troca/devolução.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, me conta o que aconteceu com a compra."
+- "Você comprou online ou em loja física?"
+- "Tem nota fiscal, conversa com o atendimento ou print do anúncio?"
+  - Se sim: "Perfeito, isso já acelera bastante a análise 👀"
+- "Já tentou resolver com a loja ou pelo Procon?"
+
+Empatia: "Entendi… é frustrante mesmo quando a empresa não resolve 😕"
+
+Gatilho: "Entendi, {nome}. A equipe aqui já analisa casos como o seu todos os dias. O Código de Defesa do Consumidor garante várias proteções, e muita gente desiste sem saber que tem direito — e o prazo pra reclamar é curto."
+
+Transição: "Pra não correr risco de erro ou perder algo importante, o ideal é a equipe já analisar seu caso com você 👀"
+
+wants_help: "Posso encaixar uma conversa rápida com a equipe?" → sim | duvida.`,
+  },
+  {
+    flow_key: "plano_saude",
+    niche: "civel",
+    case_type: "plano_saude",
+    block: `▸ PLANO DE SAÚDE (case_type: plano_saude)
+Use quando o lead falar: negativa de cirurgia, exame, internação, medicamento, reajuste abusivo, cancelamento unilateral.
+
+Comece com empatia: "Sinto muito que você esteja passando por isso 😕"
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, qual foi a negativa do plano? (cirurgia, exame, medicamento, internação?)"
+- "Você tem o pedido médico e a negativa por escrito (carta, e-mail, app)?"
+  - Se sim: "Perfeito, isso já acelera muito 👀 Casos com negativa por escrito têm chance grande de liminar rápida."
+  - Se não: "Entendi… vamos precisar pedir essa negativa por escrito pro plano. A equipe te orienta."
+- "Esse procedimento é urgente?" (se sim, sinalize urgência interna)
+
+Gatilho: "Entendi, {nome}. A equipe aqui já analisa casos como o seu todos os dias. Em situações assim, é comum conseguir liminar em poucos dias — e deixar pra depois pode comprometer o seu tratamento."
+
+Transição: "Pra não correr risco de erro ou perder algo importante, o ideal é a equipe já analisar seu caso com você 👀"
+
+wants_help: "Posso encaixar uma conversa urgente com a equipe?" → sim | duvida.`,
+  },
+  {
+    flow_key: "cia_aerea",
+    niche: "civel",
+    case_type: "cia_aerea",
+    block: `▸ COMPANHIA AÉREA (case_type: cia_aerea)
+Use quando o lead falar: voo atrasado, cancelado, overbooking, bagagem extraviada/danificada, perda de conexão.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, o que aconteceu com seu voo?"
+- "Quanto tempo de atraso ou quanto tempo a bagagem ficou perdida?"
+- "Você tem o cartão de embarque, e-mail da cia ou comprovante da bagagem?"
+  - Se sim: "Perfeito, isso já acelera bastante 👀"
+- "Já entrou em contato com a companhia aérea?"
+
+Empatia: "Imagino o estresse… isso atrapalha demais 😕"
+
+Gatilho: "Entendi, {nome}. A equipe aqui já analisa casos como o seu todos os dias. Cias aéreas costumam oferecer milhas/voucher baixo, mas judicialmente o valor da indenização costuma ser bem maior — e o prazo pra reclamar é curto."
+
+Transição: "Pra não correr risco de erro ou perder algo importante, o ideal é a equipe já analisar seu caso com você 👀"
+
+wants_help: "Posso encaixar uma conversa rápida com a equipe?" → sim | duvida.`,
+  },
+  {
+    flow_key: "fallback_outros",
+    niche: "civel",
+    case_type: "fallback_outros",
+    block: `▸ OUTRO CÍVEL/CONSUMIDOR (case_type: fallback_outros)
+Use quando o caso não se encaixa nos fluxos acima.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, me conta o que aconteceu, com suas palavras."
+- "Há quanto tempo isso aconteceu?"
+- "Tem documentos, contratos, mensagens ou prints?"
+  - Se sim: "Perfeito, isso já acelera bastante 👀"
+
+Gatilho: "Entendi, {nome}. A equipe aqui já analisa casos cíveis e de consumidor todos os dias e sabe identificar o melhor caminho — e deixar pra depois pode fazer você perder prazo."
+
+Transição: "Pra não correr risco de erro ou perder algo importante, o ideal é a equipe já analisar seu caso com você 👀"
+
+wants_help: "Quer que eu organize uma conversa rápida com a equipe?" → sim | duvida.`,
+  },
+];
+
+// =====================================================
+// FLUXOS — FAMÍLIA
+// =====================================================
+const FAMILIA_FLOW_BLOCKS: FlowPromptBlock[] = [
+  {
+    flow_key: "divorcio",
+    niche: "familia",
+    case_type: "divorcio",
+    block: `▸ DIVÓRCIO (case_type: divorcio)
+Use quando o lead falar: quero me separar, divórcio, dissolução de casamento.
+
+Comece com sensibilidade: o tema é delicado.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez, COM cuidado:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, vocês estão de comum acordo sobre o divórcio ou existe conflito?"
+- "Vocês têm filhos menores de 18 anos?"
+- "Existem bens a partilhar (imóveis, carros, contas, empresa)?"
+- "Já existe algum processo aberto?"
+
+Empatia: "Imagino que não é fácil 😕 Pode ficar tranquilo(a), aqui é um espaço seguro pra conversar."
+
+Gatilho: "Entendi, {nome}. A equipe aqui já cuida de divórcios todos os dias com toda discrição. Quando há acordo, o processo é bem mais rápido — e mesmo nos litigiosos a gente sabe conduzir pra proteger seus interesses (e dos seus filhos)."
+
+Transição: "Pra não correr risco de erro ou perder algo importante, o ideal é a equipe já analisar seu caso com você 👀"
+
+wants_help: "Posso encaixar uma conversa rápida e reservada com a equipe?" → sim | duvida.`,
+  },
+  {
+    flow_key: "pensao_alimenticia",
+    niche: "familia",
+    case_type: "pensao_alimenticia",
+    block: `▸ PENSÃO ALIMENTÍCIA (case_type: pensao_alimenticia)
+Use quando o lead falar: pensão, alimentos, cobrar pensão atrasada, aumentar/diminuir pensão.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, você quer: pedir pensão, revisar (aumentar/diminuir) ou cobrar atrasados?"
+- "Já existe pensão fixada por sentença ou acordo?"
+- "Quem deve a pensão está trabalhando atualmente? Sabe onde?"
+- "Tem documentos (acordo, sentença, comprovantes)?"
+  - Se sim: "Perfeito, isso já acelera bastante 👀"
+
+Empatia: "Entendi… é uma situação que mexe muito 😕"
+
+Gatilho: "Entendi, {nome}. A equipe aqui já analisa casos de pensão todos os dias. Existem medidas rápidas (inclusive prisão do devedor em alguns casos) — e deixar pra depois pode dificultar a cobrança."
+
+Transição: "Pra não correr risco de erro ou perder algo importante, o ideal é a equipe já analisar seu caso com você 👀"
+
+wants_help: "Posso encaixar uma conversa rápida com a equipe?" → sim | duvida.`,
+  },
+  {
+    flow_key: "guarda_visitas",
+    niche: "familia",
+    case_type: "guarda_visitas",
+    block: `▸ GUARDA E VISITAS (case_type: guarda_visitas)
+Use quando o lead falar: guarda do filho, visitas, alienação parental, mudança de cidade com a criança.
+
+Comece com sensibilidade.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez, com MUITO cuidado:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, você quer pedir guarda, alterar guarda existente, ou regulamentar visitas?"
+- "Quantos filhos e que idade?"
+- "Como está hoje a relação com o outro genitor (acordo, conflito, sem contato)?"
+- "Existe algum risco para a criança (violência, negligência, abandono)?" (se sim, urgência interna)
+
+Empatia: "Sei que envolver os filhos é o mais delicado 😕 Pode ficar tranquilo(a), tudo o que você falar aqui é em sigilo."
+
+Gatilho: "Entendi, {nome}. A equipe aqui já cuida de casos de guarda todos os dias e sabe agir com sensibilidade — e quando há risco à criança, dá pra pedir medidas urgentes."
+
+Transição: "Pra não correr risco de erro ou perder algo importante, o ideal é a equipe já analisar seu caso com você 👀"
+
+wants_help: "Posso encaixar uma conversa rápida e reservada com a equipe?" → sim | duvida.`,
+  },
+  {
+    flow_key: "inventario",
+    niche: "familia",
+    case_type: "inventario",
+    block: `▸ INVENTÁRIO / HERANÇA (case_type: inventario)
+Use quando o lead falar: morreu na família, herança, inventário, partilha, sobrepartilha.
+
+Comece com empatia: "Sinto muito pela sua perda 😕"
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, há quanto tempo a pessoa faleceu?"
+- "Existe testamento?"
+- "Tem bens a inventariar (imóveis, contas, carros, empresa)?"
+- "Os herdeiros estão de acordo entre si?"
+- "Já foi aberto algum inventário?"
+
+Gatilho: "Entendi, {nome}. A equipe aqui já cuida de inventários todos os dias. Quando há acordo, dá pra fazer extrajudicial em cartório (bem mais rápido) — e deixar pra depois pode gerar multa por atraso."
+
+Transição: "Pra não correr risco de erro ou perder algo importante, o ideal é a equipe já analisar seu caso com você 👀"
+
+wants_help: "Posso encaixar uma conversa rápida com a equipe?" → sim | duvida.`,
+  },
+  {
+    flow_key: "uniao_estavel",
+    niche: "familia",
+    case_type: "uniao_estavel",
+    block: `▸ UNIÃO ESTÁVEL (case_type: uniao_estavel)
+Use quando o lead falar: união estável, reconhecer relação, separar de companheiro(a), partilha de bens sem casamento.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, você quer reconhecer ou dissolver a união estável?"
+- "Há quanto tempo vocês moravam juntos?"
+- "Têm filhos em comum?"
+- "Existem bens a partilhar?"
+- "Tem provas da convivência (contas em comum, fotos, contrato de aluguel, declarações)?"
+  - Se sim: "Perfeito, isso já acelera bastante 👀"
+
+Empatia: "Entendi… esse tipo de situação mexe bastante 😕"
+
+Gatilho: "Entendi, {nome}. A equipe aqui já analisa casos como o seu todos os dias. União estável dá direitos parecidos com casamento, mas precisa ser reconhecida — e deixar pra depois pode dificultar a partilha."
+
+Transição: "Pra não correr risco de erro ou perder algo importante, o ideal é a equipe já analisar seu caso com você 👀"
+
+wants_help: "Posso encaixar uma conversa rápida e reservada?" → sim | duvida.`,
+  },
+  {
+    flow_key: "fallback_outros",
+    niche: "familia",
+    case_type: "fallback_outros",
+    block: `▸ OUTRO ASSUNTO DE FAMÍLIA (case_type: fallback_outros)
+Use quando o caso não se encaixa nos fluxos acima.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez, com sensibilidade:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, me conta resumidamente o que está acontecendo."
+- "Tem documentos relacionados (certidões, acordos, processos)?"
+
+Empatia: "Imagino que não é fácil 😕"
+
+Gatilho: "Entendi, {nome}. A equipe aqui cuida de questões de família todos os dias e sabe agir com discrição — e deixar pra depois pode complicar."
+
+Transição: "Pra não correr risco de erro ou perder algo importante, o ideal é a equipe já analisar seu caso com você 👀"
+
+wants_help: "Posso encaixar uma conversa rápida e reservada?" → sim | duvida.`,
+  },
+];
+
+// =====================================================
+// FLUXOS — CRIMINAL
+// =====================================================
+const CRIMINAL_FLOW_BLOCKS: FlowPromptBlock[] = [
+  {
+    flow_key: "preso_flagrante",
+    niche: "criminal",
+    case_type: "preso_flagrante",
+    block: `▸ FLAGRANTE / PRESO (case_type: preso_flagrante) — URGENTE
+Use quando o lead falar: meu parente foi preso, flagrante, audiência de custódia, delegacia agora.
+
+🚨 ESTE É UM CASO URGENTE. Acelere TUDO. Faça o mínimo de perguntas, sinalize urgência e ofereça contato IMEDIATO com a equipe.
+
+Comece com calma e firmeza: "Entendi, vamos te ajudar agora 🙂 Antes de tudo, como posso te chamar?"
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez (rápido):
+- "{nome}, quem foi preso e qual seu parentesco?"
+- "Você sabe em qual delegacia ou DP a pessoa está?"
+- "Já houve audiência de custódia ou está marcada?"
+- "Você sabe pelo que a pessoa foi presa (motivo)?"
+
+Gatilho (curto e direto): "Entendi, {nome}. Esse tipo de caso é urgente e a equipe aqui atende flagrantes todos os dias. Cada hora conta — quanto antes a defesa entrar, melhor."
+
+Transição: "Vou te encaixar AGORA com a equipe pra resolver isso 🙂"
+
+wants_help: "Posso já passar seu contato pra equipe te ligar imediatamente?" → sim | duvida.`,
+  },
+  {
+    flow_key: "inquerito_intimacao",
+    niche: "criminal",
+    case_type: "inquerito_intimacao",
+    block: `▸ INQUÉRITO / INTIMAÇÃO POLICIAL (case_type: inquerito_intimacao)
+Use quando o lead falar: recebi intimação da polícia, vou depor, estou sendo investigado, indiciamento.
+
+Comece com calma: "Entendi, {nome}. Pode ficar tranquilo(a), vou te ajudar."
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, você foi intimado(a) como investigado, vítima ou testemunha?"
+- "A intimação é pra qual data?"
+- "Você sabe sobre o que é a investigação?"
+- "Tem cópia da intimação?"
+
+Empatia: "Entendi… é normal ficar preocupado(a), mas o importante é não ir despreparado 😕"
+
+Gatilho: "Entendi, {nome}. A equipe aqui acompanha inquéritos todos os dias. Ir sem advogado pode comprometer toda a sua defesa lá na frente — e tem coisas que SÓ podem ser feitas antes do depoimento."
+
+Transição: "Pra não correr risco, o ideal é a equipe te orientar ANTES da data 👀"
+
+wants_help: "Posso encaixar uma conversa rápida com a equipe ainda essa semana?" → sim | duvida.`,
+  },
+  {
+    flow_key: "audiencia_processo",
+    niche: "criminal",
+    case_type: "audiencia_processo",
+    block: `▸ AUDIÊNCIA / PROCESSO CRIMINAL (case_type: audiencia_processo)
+Use quando o lead falar: tenho audiência marcada, estou respondendo processo criminal, denúncia recebida.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, você já tem advogado nesse processo ou está sem defesa?"
+- "Qual o número do processo (se souber) e em que vara/cidade?"
+- "Qual o crime imputado?"
+- "A audiência é pra quando?"
+
+Empatia: "Entendi… é bem desgastante 😕 Mas ainda dá pra construir defesa."
+
+Gatilho: "Entendi, {nome}. A equipe aqui defende casos criminais todos os dias. Cada fase tem prazo e estratégia — e perder uma audiência ou prazo pode comprometer todo o processo."
+
+Transição: "Pra não correr risco, o ideal é a equipe analisar o seu processo com urgência 👀"
+
+wants_help: "Posso encaixar uma conversa rápida com a equipe?" → sim | duvida.`,
+  },
+  {
+    flow_key: "recurso_habeas",
+    niche: "criminal",
+    case_type: "recurso_habeas",
+    block: `▸ RECURSO / HABEAS CORPUS (case_type: recurso_habeas)
+Use quando o lead falar: quero recorrer, condenação injusta, habeas corpus, soltar alguém preso.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, é pra você ou pra um familiar?"
+- "Já houve sentença? Se sim, há quanto tempo?"
+- "A pessoa está presa atualmente?"
+- "Tem cópia da sentença ou número do processo?"
+
+Empatia: "Entendi… ainda há caminhos pra tentar."
+
+Gatilho: "Entendi, {nome}. A equipe aqui faz recursos e habeas corpus todos os dias. Existem prazos curtos pra recorrer — perder esses prazos pode tornar a condenação definitiva."
+
+Transição: "Pra não perder o prazo, o ideal é a equipe analisar urgente 👀"
+
+wants_help: "Posso encaixar uma conversa rápida com a equipe?" → sim | duvida.`,
+  },
+  {
+    flow_key: "execucao_penal",
+    niche: "criminal",
+    case_type: "execucao_penal",
+    block: `▸ EXECUÇÃO PENAL (case_type: execucao_penal)
+Use quando o lead falar: progressão de regime, livramento condicional, indulto, remição, transferência de presídio.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, é pra você ou pra um familiar?"
+- "Em que regime está hoje (fechado, semiaberto, aberto)?"
+- "Há quanto tempo está cumprindo pena?"
+- "Qual o crime e a pena total?"
+- "Tem advogado acompanhando a execução?"
+
+Empatia: "Entendi… execução penal é um processo de paciência 😕"
+
+Gatilho: "Entendi, {nome}. A equipe aqui acompanha execuções todos os dias. Muita gente perde benefícios (progressão, livramento) por falta de pedido — e cada mês a mais preso é injusto se já tem direito."
+
+Transição: "Pra não perder benefícios já vencidos, o ideal é a equipe analisar 👀"
+
+wants_help: "Posso encaixar uma conversa rápida com a equipe?" → sim | duvida.`,
+  },
+  {
+    flow_key: "fallback_outros",
+    niche: "criminal",
+    case_type: "fallback_outros",
+    block: `▸ OUTRO CRIMINAL (case_type: fallback_outros)
+Use quando o caso não se encaixa nos fluxos acima.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, me conta resumidamente o que está acontecendo."
+- "É urgente (alguém preso, audiência marcada)?"
+- "Tem documentos do caso?"
+
+Gatilho: "Entendi, {nome}. A equipe aqui defende casos criminais todos os dias e sabe agir rápido."
+
+Transição: "Pra não correr risco, o ideal é a equipe analisar urgente 👀"
+
+wants_help: "Posso encaixar uma conversa rápida e reservada com a equipe?" → sim | duvida.`,
+  },
+];
+
+// =====================================================
+// FLUXOS — TRIBUTÁRIO / EMPRESARIAL
+// =====================================================
+const TRIBUTARIO_FLOW_BLOCKS: FlowPromptBlock[] = [
+  {
+    flow_key: "recuperacao_tributos",
+    niche: "tributario",
+    case_type: "recuperacao_tributos",
+    block: `▸ RECUPERAÇÃO TRIBUTÁRIA (case_type: recuperacao_tributos)
+Use quando o lead falar: recuperar imposto pago a mais, exclusão ICMS da base PIS/COFINS, créditos tributários, tese tributária.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, sua empresa está em qual regime tributário (Simples, Lucro Presumido, Lucro Real)?"
+- "Qual o setor da empresa (comércio, indústria, serviços)?"
+- "Faturamento médio mensal aproximado?"
+- "Tem contador atual? Conseguimos acesso aos últimos 5 anos de impostos?"
+
+Empatia: "Entendi… muita empresa paga mais imposto do que deveria sem nem perceber."
+
+Gatilho: "Entendi, {nome}. A equipe aqui analisa teses tributárias todos os dias. Existem créditos dos últimos 5 anos que podem ser recuperados — e deixar pra depois faz você perder mês a mês esses valores (prescrevem)."
+
+Transição: "Pra não perder valores prescritos, o ideal é a equipe analisar urgente 👀"
+
+wants_help: "Posso encaixar uma conversa rápida (e gratuita) com a equipe?" → sim | duvida.`,
+  },
+  {
+    flow_key: "defesa_fiscal",
+    niche: "tributario",
+    case_type: "defesa_fiscal",
+    block: `▸ DEFESA FISCAL (case_type: defesa_fiscal)
+Use quando o lead falar: auto de infração, execução fiscal, dívida ativa, Receita cobrando, CDA.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, qual órgão está cobrando (Receita Federal, Estadual, Municipal, INSS)?"
+- "Você foi notificado(a) recentemente? Há quanto tempo?"
+- "Sabe o valor aproximado da cobrança?"
+- "Tem cópia da notificação / auto / CDA?"
+
+Empatia: "Entendi… esse tipo de cobrança assusta, mas geralmente dá pra discutir 😕"
+
+Gatilho: "Entendi, {nome}. A equipe aqui defende empresas e pessoas em execuções fiscais todos os dias. Existem prazos curtos pra contestar — perder o prazo pode bloquear contas e bens."
+
+Transição: "Pra não correr risco de bloqueio, o ideal é a equipe analisar urgente 👀"
+
+wants_help: "Posso encaixar uma conversa rápida com a equipe?" → sim | duvida.`,
+  },
+  {
+    flow_key: "planejamento_tributario",
+    niche: "tributario",
+    case_type: "planejamento_tributario",
+    block: `▸ PLANEJAMENTO TRIBUTÁRIO (case_type: planejamento_tributario)
+Use quando o lead falar: pagar menos imposto, mudar de regime, reorganizar empresa, holding patrimonial.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, você quer planejamento pra empresa ou patrimônio pessoal (holding)?"
+- "Qual setor / faturamento mensal aproximado?"
+- "Está em qual regime hoje (Simples, Presumido, Real)?"
+- "Tem sócios? Quantos?"
+
+Gatilho: "Entendi, {nome}. A equipe aqui faz planejamento tributário todos os dias. Pequenas mudanças de estrutura podem reduzir 20-40% da carga — e cada mês sem otimizar é dinheiro indo embora."
+
+Transição: "Pra não pagar imposto a mais sem necessidade, o ideal é a equipe analisar 👀"
+
+wants_help: "Posso encaixar uma conversa rápida (gratuita) com a equipe?" → sim | duvida.`,
+  },
+  {
+    flow_key: "contratos_empresariais",
+    niche: "tributario",
+    case_type: "contratos_empresariais",
+    block: `▸ CONTRATOS EMPRESARIAIS (case_type: contratos_empresariais)
+Use quando o lead falar: preciso de contrato, revisar contrato, NDA, prestação de serviços, distribuição.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, qual tipo de contrato você precisa (prestação de serviço, NDA, sociedade, fornecimento, outro)?"
+- "É pra elaborar do zero ou revisar um já existente?"
+- "Qual o valor envolvido (aproximado)?"
+- "É urgente?"
+
+Gatilho: "Entendi, {nome}. A equipe aqui redige e revisa contratos todos os dias. Um contrato mal feito pode gerar prejuízo enorme — e arrumar depois sai bem mais caro."
+
+Transição: "Pra não correr risco, o ideal é a equipe analisar antes de assinar 👀"
+
+wants_help: "Posso encaixar uma conversa rápida com a equipe?" → sim | duvida.`,
+  },
+  {
+    flow_key: "societario",
+    niche: "tributario",
+    case_type: "societario",
+    block: `▸ SOCIETÁRIO (case_type: societario)
+Use quando o lead falar: abrir empresa, alterar contrato social, sair da sociedade, brigando com sócio, dissolver empresa.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, você quer: abrir empresa, alterar contrato social, sair da sociedade, ou tem conflito com sócio?"
+- "Quantos sócios são?"
+- "A empresa está ativa? Há quanto tempo?"
+- "Tem contrato social atual?"
+
+Empatia (se conflito): "Entendi… conflito societário é bem desgastante 😕"
+
+Gatilho: "Entendi, {nome}. A equipe aqui resolve questões societárias todos os dias. Cada decisão (sair, brigar, dissolver) tem impacto grande no patrimônio e na empresa — e fazer errado pode gerar perdas grandes."
+
+Transição: "Pra não comprometer o negócio, o ideal é a equipe analisar urgente 👀"
+
+wants_help: "Posso encaixar uma conversa rápida com a equipe?" → sim | duvida.`,
+  },
+  {
+    flow_key: "fallback_outros",
+    niche: "tributario",
+    case_type: "fallback_outros",
+    block: `▸ OUTRO TRIBUTÁRIO/EMPRESARIAL (case_type: fallback_outros)
+Use quando o caso não se encaixa nos fluxos acima.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, me conta resumidamente o que sua empresa precisa."
+- "Tem documentos relacionados (contratos, notificações, demonstrativos)?"
+
+Gatilho: "Entendi, {nome}. A equipe aqui atende empresas todos os dias e sabe identificar o melhor caminho."
+
+Transição: "Pra não correr risco, o ideal é a equipe analisar 👀"
+
+wants_help: "Posso encaixar uma conversa rápida com a equipe?" → sim | duvida.`,
+  },
+];
+
+// Mapa global de blocos por nicho
+const BLOCKS_BY_NICHE: Record<FlowNiche, FlowPromptBlock[]> = {
+  previdenciario: PREV_FLOW_BLOCKS,
+  trabalhista: TRAB_FLOW_BLOCKS,
+  civel: CIVEL_FLOW_BLOCKS,
+  familia: FAMILIA_FLOW_BLOCKS,
+  criminal: CRIMINAL_FLOW_BLOCKS,
+  tributario: TRIBUTARIO_FLOW_BLOCKS,
+};
+
+export function getFlowBlock(niche: FlowNiche, flow_key: string): FlowPromptBlock | undefined {
+  const list = BLOCKS_BY_NICHE[niche] || PREV_FLOW_BLOCKS;
   return list.find((b) => b.flow_key === flow_key);
 }
 
@@ -284,7 +856,7 @@ export interface EnabledFlow {
   label: string;
   icon_emoji: string;
   position: number;
-  niche: "previdenciario" | "trabalhista";
+  niche: FlowNiche;
   is_custom?: boolean;
   case_type?: string;
   description?: string;
@@ -325,8 +897,10 @@ export interface OfficeAddress {
   maps_url?: string | null;
 }
 
+export type BuilderNiche = FlowNiche | "hibrido";
+
 export function buildDynamicLauraPrompt(params: {
-  niche: "previdenciario" | "trabalhista" | "hibrido";
+  niche: BuilderNiche;
   officeName?: string;
   enabledFlows: EnabledFlow[];
   offices?: OfficeAddress[];
@@ -366,7 +940,18 @@ export function buildDynamicLauraPrompt(params: {
     .join("\n\n");
 
   const office = officeName ? `${officeName}` : "do escritório";
-  const defaultBotName = niche === "trabalhista" || niche === "hibrido" ? "Julia" : "Laura";
+  const defaultBotName =
+    niche === "trabalhista" || niche === "hibrido"
+      ? "Julia"
+      : niche === "civel"
+      ? "Sofia"
+      : niche === "familia"
+      ? "Helena"
+      : niche === "criminal"
+      ? "Marina"
+      : niche === "tributario"
+      ? "Bianca"
+      : "Laura";
   const finalBotName = botName || defaultBotName;
   const finalBotRole = botRoleDescription || "atendente virtual";
   const hasOffices = activeOffices.length > 0;

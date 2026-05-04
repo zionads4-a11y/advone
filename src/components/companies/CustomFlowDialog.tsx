@@ -9,6 +9,14 @@ import { Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import type { Niche } from "./botFlowsCatalog";
 
+type CustomFlowNiche =
+  | "previdenciario"
+  | "trabalhista"
+  | "civel"
+  | "familia"
+  | "criminal"
+  | "tributario";
+
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -16,7 +24,7 @@ interface Props {
   onCreate: (input: {
     label: string;
     description: string;
-    niche: "previdenciario" | "trabalhista";
+    niche: CustomFlowNiche;
     icon_emoji?: string;
     case_type?: string;
   }) => Promise<unknown>;
@@ -24,14 +32,18 @@ interface Props {
 
 const EMOJI_PRESETS = ["✨", "⚖️", "📋", "🎯", "💼", "🏛️", "🛡️", "📚", "🔍", "💰"];
 
+function defaultNicheFor(n: Niche): CustomFlowNiche {
+  if (n === "hibrido") return "previdenciario";
+  if (n === "trabalhista" || n === "civel" || n === "familia" || n === "criminal" || n === "tributario") return n;
+  return "previdenciario";
+}
+
 export function CustomFlowDialog({ open, onOpenChange, niche, onCreate }: Props) {
   const [label, setLabel] = useState("");
   const [description, setDescription] = useState("");
   const [icon, setIcon] = useState("✨");
   const [caseType, setCaseType] = useState("");
-  const [flowNiche, setFlowNiche] = useState<"previdenciario" | "trabalhista">(
-    niche === "trabalhista" ? "trabalhista" : "previdenciario"
-  );
+  const [flowNiche, setFlowNiche] = useState<CustomFlowNiche>(defaultNicheFor(niche));
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
@@ -99,7 +111,7 @@ export function CustomFlowDialog({ open, onOpenChange, niche, onCreate }: Props)
           {niche === "hibrido" && (
             <div className="space-y-2">
               <Label>Área *</Label>
-              <Select value={flowNiche} onValueChange={(v) => setFlowNiche(v as "previdenciario" | "trabalhista")}>
+              <Select value={flowNiche} onValueChange={(v) => setFlowNiche(v as CustomFlowNiche)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
