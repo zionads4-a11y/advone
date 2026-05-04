@@ -897,8 +897,10 @@ export interface OfficeAddress {
   maps_url?: string | null;
 }
 
+export type BuilderNiche = FlowNiche | "hibrido";
+
 export function buildDynamicLauraPrompt(params: {
-  niche: "previdenciario" | "trabalhista" | "hibrido";
+  niche: BuilderNiche;
   officeName?: string;
   enabledFlows: EnabledFlow[];
   offices?: OfficeAddress[];
