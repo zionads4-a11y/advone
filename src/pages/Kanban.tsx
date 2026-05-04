@@ -279,6 +279,18 @@ export default function Kanban() {
               </SelectContent>
             </Select>
           )}
+          {boards.length > 1 && (
+            <Select value={selectedBoardId} onValueChange={setSelectedBoardId}>
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectValue placeholder="Selecione o quadro" />
+              </SelectTrigger>
+              <SelectContent>
+                {boards.map((b) => (
+                  <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
           {!isClient && selectedCompanyId && (
             <KanbanColumnSettings
               companyId={selectedCompanyId}
