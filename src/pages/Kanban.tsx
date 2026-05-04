@@ -46,6 +46,13 @@ interface Company {
   name: string;
 }
 
+interface Board {
+  id: string;
+  name: string;
+  is_default: boolean;
+  position: number;
+}
+
 const DEFAULT_COLUMNS = [
   { name: "Em Atendimento", color: "#f59e0b", position: 0, is_won: false, is_lost: false },
   { name: "1º Follow-UP", color: "#60a5fa", position: 1, is_won: false, is_lost: false },
