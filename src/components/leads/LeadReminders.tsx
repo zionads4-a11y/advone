@@ -34,8 +34,7 @@ interface LeadRemindersProps {
 }
 
 export function LeadReminders({ leadId, companyId, leadName }: LeadRemindersProps) {
-  const { user, userRole } = useAuth();
-  const isSuperAdmin = userRole === "admin" || userRole === "member";
+  const { user } = useAuth();
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
