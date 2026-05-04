@@ -254,7 +254,6 @@ export default function LeadsHistory() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas parcerias</SelectItem>
-                <SelectItem value="exito">Êxito</SelectItem>
                 <SelectItem value="mensalidade_zionads">Mensalidade ZionAds</SelectItem>
               </SelectContent>
             </Select>
