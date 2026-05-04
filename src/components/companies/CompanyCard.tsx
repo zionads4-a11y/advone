@@ -103,15 +103,9 @@ export function CompanyCard({
               <AlertCircle className="mr-1 h-3 w-3" /> Sem WhatsApp
             </Badge>
           )}
-          {company.partnership_type === "exito" ? (
-            <Badge variant="outline" className="border-warning/40 text-warning text-[10px]">
-              🏆 Êxito
-            </Badge>
-          ) : (
-            <Badge variant="outline" className="border-primary/30 text-primary text-[10px]">
-              💼 Mensalidade ZionAds
-            </Badge>
-          )}
+          <Badge variant="outline" className="border-primary/30 text-primary text-[10px]">
+            💼 Mensalidade ZionAds
+          </Badge>
         </div>
 
         <div className="flex gap-2">
