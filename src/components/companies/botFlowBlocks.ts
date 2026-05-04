@@ -10,9 +10,17 @@
 //   - Respostas otimizadas para laudos (acelera análise)
 //   - Detecção de lead quente (pula perguntas)
 
+export type FlowNiche =
+  | "previdenciario"
+  | "trabalhista"
+  | "civel"
+  | "familia"
+  | "criminal"
+  | "tributario";
+
 export interface FlowPromptBlock {
   flow_key: string;
-  niche: "previdenciario" | "trabalhista";
+  niche: FlowNiche;
   case_type: string;
   block: string; // texto completo do FLUXO X — será incluído no prompt
 }
