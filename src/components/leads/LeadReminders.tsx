@@ -34,8 +34,7 @@ interface LeadRemindersProps {
 }
 
 export function LeadReminders({ leadId, companyId, leadName }: LeadRemindersProps) {
-  const { user, userRole } = useAuth();
-  const isSuperAdmin = userRole === "admin" || userRole === "member";
+  const { user } = useAuth();
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
@@ -142,27 +141,7 @@ export function LeadReminders({ leadId, companyId, leadName }: LeadRemindersProp
       toast.error("Erro ao confirmar reunião");
       return;
     }
-
-    const ym = new Date(reminder.due_at).toISOString().slice(0, 7);
-    const { error: errCharge } = await supabase.from("meeting_charges").insert({
-      company_id: companyId,
-      lead_id: leadId,
-      reminder_id: reminder.id,
-      lead_name: leadName || reminder.title || "Lead",
-      meeting_at: reminder.due_at,
-      confirmed_at: nowIso,
-      confirmed_by: user.id,
-      amount: 97.00,
-      status: "pending",
-      invoice_month: ym,
-    });
-
-    if (errCharge) {
-      console.error("Charge insert error", errCharge);
-      toast.warning("Reunião marcada — mas cobrança já existia");
-    } else {
-      toast.success("Reunião confirmada — cobrança de R$ 97,00 registrada");
-    }
+    toast.success("Reunião marcada como realizada");
     fetchReminders();
   };
 
@@ -291,7 +270,7 @@ export function LeadReminders({ leadId, companyId, leadName }: LeadRemindersProp
                   {formatDueAt(r.due_at)}
                   {r.reminder_type === "meeting" && r.end_at && ` - ${new Date(r.end_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`}
                 </p>
-                {isSuperAdmin && r.reminder_type === "meeting" && !r.meeting_held && (
+                {r.reminder_type === "meeting" && !r.meeting_held && (
                   <Button
                     size="sm"
                     variant="outline"
@@ -299,7 +278,7 @@ export function LeadReminders({ leadId, companyId, leadName }: LeadRemindersProp
                     className="mt-2 h-6 text-[10px] px-2 gap-1"
                   >
                     <CheckCheck className="h-3 w-3" />
-                    Reunião realizada (R$ 97)
+                    Reunião realizada
                   </Button>
                 )}
               </div>

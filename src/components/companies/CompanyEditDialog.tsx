@@ -82,7 +82,7 @@ export function CompanyEditDialog({
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [businessHours, setBusinessHours] = useState<BusinessHours>(getDefaultBusinessHours());
-  const [billingModel, setBillingModel] = useState<BillingModel>("exito");
+  const [billingModel, setBillingModel] = useState<BillingModel>("crm_full");
   const [botName, setBotName] = useState("");
   const [botRoleDescription, setBotRoleDescription] = useState("");
   const [googleClientId, setGoogleClientId] = useState("");

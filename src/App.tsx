@@ -32,9 +32,7 @@ import Cases from "./pages/Cases";
 import ProcessMonitoring from "./pages/ProcessMonitoring";
 import ProcessSearch from "./pages/ProcessSearch";
 import Subscription from "./pages/Subscription";
-import Commissions from "./pages/Commissions";
 import FraudAlerts from "./pages/FraudAlerts";
-import ExitoSchedules from "./pages/ExitoSchedules";
 import LeadsHistory from "./pages/LeadsHistory";
 import LegalAI from "./pages/LegalAI";
 import LandingIA from "./pages/LandingIA";
@@ -96,9 +94,7 @@ const App = () => (
               <Route path="/monitoramento" element={<ProcessMonitoring />} />
               <Route path="/busca-processos" element={<ProcessSearch />} />
               <Route path="/assinatura" element={<Subscription />} />
-              <Route path="/comissoes" element={<Commissions />} />
               <Route path="/fraudes" element={<FraudAlerts />} />
-              <Route path="/agendamentos-exito" element={<ExitoSchedules />} />
               <Route path="/historico-leads" element={<LeadsHistory />} />
               <Route path="/ia-juridica" element={<LegalAI />} />
               <Route path="/tarefas" element={<Tasks />} />

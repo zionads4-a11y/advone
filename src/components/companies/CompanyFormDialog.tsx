@@ -53,7 +53,7 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
           </div>
           <div className="space-y-2">
             <Label>Modelo de Cobrança *</Label>
-            <Select name="billing_model" defaultValue="exito">
+            <Select name="billing_model" defaultValue="crm_full">
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o modelo de cobrança" />
               </SelectTrigger>

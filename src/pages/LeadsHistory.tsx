@@ -254,7 +254,6 @@ export default function LeadsHistory() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas parcerias</SelectItem>
-                <SelectItem value="exito">Êxito</SelectItem>
                 <SelectItem value="mensalidade_zionads">Mensalidade ZionAds</SelectItem>
               </SelectContent>
             </Select>
@@ -307,9 +306,6 @@ export default function LeadsHistory() {
                       <TableRow key={r.id} className="border-border hover:bg-secondary/50">
                         <TableCell className="text-foreground">
                           <div className="font-medium">{r.company_name}</div>
-                          <div className="text-[10px] uppercase text-muted-foreground">
-                            {r.partnership_type === "exito" ? "Êxito" : "Mensalidade"}
-                          </div>
                         </TableCell>
                         <TableCell className="text-foreground">
                           <div className="font-medium">{r.name}</div>
