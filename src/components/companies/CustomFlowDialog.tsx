@@ -15,7 +15,8 @@ type CustomFlowNiche =
   | "civel"
   | "familia"
   | "criminal"
-  | "tributario";
+  | "tributario"
+  | "bancario_empresarial";
 
 interface Props {
   open: boolean;
