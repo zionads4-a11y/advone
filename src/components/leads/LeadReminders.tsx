@@ -142,27 +142,7 @@ export function LeadReminders({ leadId, companyId, leadName }: LeadRemindersProp
       toast.error("Erro ao confirmar reunião");
       return;
     }
-
-    const ym = new Date(reminder.due_at).toISOString().slice(0, 7);
-    const { error: errCharge } = await supabase.from("meeting_charges").insert({
-      company_id: companyId,
-      lead_id: leadId,
-      reminder_id: reminder.id,
-      lead_name: leadName || reminder.title || "Lead",
-      meeting_at: reminder.due_at,
-      confirmed_at: nowIso,
-      confirmed_by: user.id,
-      amount: 97.00,
-      status: "pending",
-      invoice_month: ym,
-    });
-
-    if (errCharge) {
-      console.error("Charge insert error", errCharge);
-      toast.warning("Reunião marcada — mas cobrança já existia");
-    } else {
-      toast.success("Reunião confirmada — cobrança de R$ 97,00 registrada");
-    }
+    toast.success("Reunião marcada como realizada");
     fetchReminders();
   };
 
