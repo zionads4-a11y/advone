@@ -202,6 +202,26 @@ export default function ClientUsers() {
     setDeleting(false);
   };
 
+  const handleResetPassword = async () => {
+    if (!pwdTarget) return;
+    if (!newPwd || newPwd.length < 8) {
+      toast.error("A senha precisa ter pelo menos 8 caracteres");
+      return;
+    }
+    setResetting(true);
+    const { data, error } = await supabase.functions.invoke("reset-user-password", {
+      body: { target_user_id: pwdTarget.user_id, new_password: newPwd },
+    });
+    if (error || data?.error) {
+      toast.error(data?.error || error?.message || "Erro ao redefinir senha");
+    } else {
+      toast.success(`Senha de ${pwdTarget.full_name} redefinida com sucesso`);
+      setPwdTarget(null);
+      setNewPwd("");
+    }
+    setResetting(false);
+  };
+
   const getRoleBadge = (role: string) => {
     if (role === "gerente") {
       return (
