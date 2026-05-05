@@ -978,6 +978,31 @@ Transição: "Pra entender exatamente o que faz sentido no seu caso, o ideal é 
 wants_help: "Posso encaixar uma conversa rápida (e sigilosa) com a equipe?" → sim | duvida.`,
   },
   {
+    flow_key: "agronegocio",
+    niche: "bancario_empresarial",
+    case_type: "agronegocio",
+    block: `▸ AGRONEGÓCIO (case_type: agronegocio)
+Use quando o lead for produtor rural, fazendeiro, cooperativado, empresa do agro, ou falar: CPR, custeio, Pronaf, Pronamp, cédula rural, safra, lavoura, financiamento rural, dívida com banco rural (BB, Sicredi, Sicoob, Bradesco Agro), trading, cooperativa, securitização rural, prorrogação de safra.
+
+Conduza por TEXTO LIVRE, UMA pergunta por vez:
+- "Antes de continuar, como posso te chamar?"
+- "{nome}, é produtor rural pessoa física ou tem empresa/fazenda registrada (CNPJ)?"
+- "O problema é: 1️⃣ Renegociar/prorrogar dívida (CPR, custeio, Pronaf) 2️⃣ Execução ou penhora de safra/terra/maquinário 3️⃣ Revisar contrato com banco/trading/cooperativa 4️⃣ Quebra de safra / frustração de produção 5️⃣ Outro?"
+- "Qual o valor aproximado da dívida ou do contrato envolvido?"
+- "Com quem é (banco, cooperativa, trading)?"
+- "Tem documentos (CPR, cédula rural, contrato, notificação, citação)?"
+
+⚠️ Atenção: dívidas rurais têm regras próprias (Lei 13.340, prorrogações de safra, securitização). NÃO confunda com dívida bancária comum.
+
+Empatia: "Entendi, {nome}. Quebra de safra, preço de commodity, clima — o agro tem riscos que outros setores não têm, e o sistema financeiro nem sempre entende isso."
+
+Gatilho: "A equipe aqui atende produtores rurais e empresas do agro todos os dias. Existem instrumentos específicos (prorrogação de safra, repactuação, Resolução 4.591, securitização) que muito advogado generalista não conhece. E quando o banco executa CPR ou penhora maquinário em plena safra, cada dia parado custa caro."
+
+Transição: "Pra não perder a próxima safra nem o patrimônio rural, o ideal é a equipe analisar 👀"
+
+wants_help: "Posso encaixar uma conversa rápida com a equipe?" → sim | duvida.`,
+  },
+  {
     flow_key: "fallback_outros",
     niche: "bancario_empresarial",
     case_type: "fallback_outros",
