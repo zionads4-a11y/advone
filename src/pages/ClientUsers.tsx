@@ -393,7 +393,7 @@ export default function ClientUsers() {
             <TableBody>
               {clients.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={isGerente ? 4 : 4} className="py-12 text-center text-muted-foreground">
+                  <TableCell colSpan={isGerente ? 4 : 5} className="py-12 text-center text-muted-foreground">
                     <Users className="mx-auto mb-2 h-8 w-8" />
                     <p>Nenhum usuário cadastrado</p>
                     <p className="text-xs">
