@@ -264,24 +264,21 @@ export default function Financial() {
 
   const handleSaveAsaas = async () => {
     if (!companyId) return;
-    const payload = {
-      company_id: companyId,
-      api_key: asaasApiKey,
-      environment: asaasEnv,
-    };
-
-    if (asaasConfig) {
-      const { error } = await supabase
-        .from("asaas_configs")
-        .update(payload)
-        .eq("id", asaasConfig.id);
-      if (error) return toast.error("Erro: " + error.message);
-    } else {
-      const { error } = await supabase.from("asaas_configs").insert(payload);
-      if (error) return toast.error("Erro: " + error.message);
+    if (!asaasApiKey || asaasApiKey.length < 20) {
+      return toast.error("Informe uma chave Asaas válida.");
     }
-
-    toast.success("Configuração Asaas salva!");
+    const { data, error } = await supabase.functions.invoke("asaas-config", {
+      body: {
+        company_id: companyId,
+        api_key: asaasApiKey,
+        environment: asaasEnv,
+      },
+    });
+    if (error || (data && (data as { error?: string }).error)) {
+      const msg = (data as { error?: string } | null)?.error || error?.message || "Falha ao salvar";
+      return toast.error("Erro: " + msg);
+    }
+    toast.success("Configuração Asaas salva e validada!");
     setAsaasOpen(false);
     fetchData();
   };
