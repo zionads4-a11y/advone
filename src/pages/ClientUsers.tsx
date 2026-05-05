@@ -425,31 +425,38 @@ export default function ClientUsers() {
                         </Badge>
                       </TableCell>
                     )}
-                    {isGerente && (
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          {client.role !== "gerente" && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 gap-1.5 text-xs text-muted-foreground hover:text-primary"
-                              onClick={() => setPermTarget(client)}
-                            >
-                              <ShieldCheck className="h-3.5 w-3.5" />
-                              Permissões
-                            </Button>
-                          )}
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        {isGerente && client.role !== "gerente" && (
                           <Button
                             variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                            onClick={() => setDeleteTarget(client)}
+                            size="sm"
+                            className="h-8 gap-1.5 text-xs text-muted-foreground hover:text-primary"
+                            onClick={() => setPermTarget(client)}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <ShieldCheck className="h-3.5 w-3.5" />
+                            Permissões
                           </Button>
-                        </div>
-                      </TableCell>
-                    )}
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 gap-1.5 text-xs text-muted-foreground hover:text-primary"
+                          onClick={() => { setPwdTarget(client); setNewPwd(""); }}
+                        >
+                          <KeyRound className="h-3.5 w-3.5" />
+                          Nova senha
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          onClick={() => setDeleteTarget(client)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))
               )}
