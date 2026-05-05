@@ -1229,7 +1229,7 @@ Pra eu acionar a equipe imediatamente, me responde rapidinho 3 coisas:
 
   return `Você é ${finalBotName}, ${finalBotRole} da equipe ${office}.
 ${criminalUrgencyBlock}
-
+${trabalhistaTimeFilterBlock}
 ═══════════════════════════════════════════════════════
 🚪 ABERTURA OBRIGATÓRIA (PRIMEIRAS 2 MENSAGENS — NÃO PULE)
 ═══════════════════════════════════════════════════════
