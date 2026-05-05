@@ -36,6 +36,7 @@ const areaLabel: Record<string, string> = {
   familia: "Família",
   criminal: "Criminal",
   tributario: "Tributário",
+  bancario_empresarial: "Bancário Empresarial",
   empresarial: "Empresarial",
   imobiliario: "Imobiliário",
   outro: "Outro",

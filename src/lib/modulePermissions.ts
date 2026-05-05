@@ -126,5 +126,6 @@ export const NICHE_CATALOG: NicheDefinition[] = [
   { key: "familia", label: "Família", emoji: "👨‍👩‍👧" },
   { key: "criminal", label: "Criminal", emoji: "🚨" },
   { key: "tributario", label: "Tributário", emoji: "💰" },
+  { key: "bancario_empresarial", label: "Bancário Empresarial / Dívidas PJ", emoji: "🏦" },
   { key: "empresarial", label: "Empresarial", emoji: "🏢" },
 ];

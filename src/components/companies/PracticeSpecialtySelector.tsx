@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Briefcase, Loader2, Save, Scale, Shield, Layers, Gavel, Heart, ShieldAlert, Building2 } from "lucide-react";
+import { Briefcase, Loader2, Save, Scale, Shield, Layers, Gavel, Heart, ShieldAlert, Building2, Landmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -14,7 +14,8 @@ export type PracticeSpecialty =
   | "civel"
   | "familia"
   | "criminal"
-  | "tributario";
+  | "tributario"
+  | "bancario_empresarial";
 
 interface SpecialtyOption {
   value: PracticeSpecialty;
@@ -65,6 +66,12 @@ const OPTIONS: SpecialtyOption[] = [
     label: "Tributário / Empresarial",
     description: "Recuperação tributária, defesa fiscal, contratos, societário.",
     icon: Building2,
+  },
+  {
+    value: "bancario_empresarial",
+    label: "Bancário Empresarial + Reestruturação de Dívidas",
+    description: "Renegociação de dívidas PJ, revisão de contratos bancários, recuperação judicial, blindagem patrimonial.",
+    icon: Landmark,
   },
 ];
 

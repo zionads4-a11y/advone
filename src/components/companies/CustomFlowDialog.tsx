@@ -15,7 +15,8 @@ type CustomFlowNiche =
   | "civel"
   | "familia"
   | "criminal"
-  | "tributario";
+  | "tributario"
+  | "bancario_empresarial";
 
 interface Props {
   open: boolean;
@@ -34,7 +35,7 @@ const EMOJI_PRESETS = ["✨", "⚖️", "📋", "🎯", "💼", "🏛️", "🛡
 
 function defaultNicheFor(n: Niche): CustomFlowNiche {
   if (n === "hibrido") return "previdenciario";
-  if (n === "trabalhista" || n === "civel" || n === "familia" || n === "criminal" || n === "tributario") return n;
+  if (n === "trabalhista" || n === "civel" || n === "familia" || n === "criminal" || n === "tributario" || n === "bancario_empresarial") return n;
   return "previdenciario";
 }
 
