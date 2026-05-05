@@ -67,6 +67,12 @@ const OPTIONS: SpecialtyOption[] = [
     description: "Recuperação tributária, defesa fiscal, contratos, societário.",
     icon: Building2,
   },
+  {
+    value: "bancario_empresarial",
+    label: "Bancário Empresarial + Reestruturação de Dívidas",
+    description: "Renegociação de dívidas PJ, revisão de contratos bancários, recuperação judicial, blindagem patrimonial.",
+    icon: Landmark,
+  },
 ];
 
 interface Props {
