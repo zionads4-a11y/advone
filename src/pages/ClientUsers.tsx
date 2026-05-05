@@ -52,6 +52,9 @@ export default function ClientUsers() {
   const [deleteTarget, setDeleteTarget] = useState<ClientUser | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [permTarget, setPermTarget] = useState<ClientUser | null>(null);
+  const [pwdTarget, setPwdTarget] = useState<ClientUser | null>(null);
+  const [newPwd, setNewPwd] = useState("");
+  const [resetting, setResetting] = useState(false);
 
   const isGerente = userRole === "gerente";
 
