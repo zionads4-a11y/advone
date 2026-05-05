@@ -499,6 +499,38 @@ export default function ClientUsers() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Reset password dialog */}
+      <Dialog open={!!pwdTarget} onOpenChange={(open) => { if (!open) { setPwdTarget(null); setNewPwd(""); } }}>
+        <DialogContent className="bg-card text-foreground">
+          <DialogHeader>
+            <DialogTitle className="font-display">Redefinir senha</DialogTitle>
+            <p className="text-xs text-muted-foreground">
+              Definir nova senha para <strong>{pwdTarget?.full_name}</strong>. Mínimo 8 caracteres.
+              Senhas comuns/vazadas (ex: 123456) podem ser bloqueadas pelo sistema.
+            </p>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-2">
+              <Label>Nova senha</Label>
+              <Input
+                type="text"
+                value={newPwd}
+                onChange={(e) => setNewPwd(e.target.value)}
+                placeholder="Ex.: AdvOne#Senha1"
+                autoFocus
+              />
+            </div>
+            <Button
+              onClick={handleResetPassword}
+              disabled={resetting || newPwd.length < 8}
+              className="w-full gradient-primary text-primary-foreground"
+            >
+              {resetting ? "Redefinindo..." : "Redefinir senha"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
