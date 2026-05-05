@@ -387,7 +387,7 @@ export default function ClientUsers() {
                 <TableHead className="text-muted-foreground">Cargo</TableHead>
                 <TableHead className="text-muted-foreground">Tipo</TableHead>
                 {!isGerente && <TableHead className="text-muted-foreground">Empresa</TableHead>}
-                {isGerente && <TableHead className="text-muted-foreground w-[160px] text-right">Ações</TableHead>}
+                <TableHead className="text-muted-foreground w-[200px] text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
