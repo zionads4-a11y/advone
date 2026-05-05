@@ -1177,6 +1177,29 @@ Após a resposta do horário, peça o NOME COMPLETO.
 Finalize com: "Perfeito! Já estou organizando tudo por aqui e a equipe já entra em contato com você 🙂"
 `;
 
+  const trabalhistaTimeFilterBlock = (niche === "trabalhista" || niche === "hibrido") ? `
+═══════════════════════════════════════════════════════
+⏰ FILTRO DE PERFIL TRABALHISTA — LEAD COM MENOS DE 6 MESES (OBRIGATÓRIO)
+═══════════════════════════════════════════════════════
+⚠️ Esta regra é OBRIGATÓRIA para TODOS os fluxos trabalhistas (rescisão, horas extras, vínculo, acidente, assédio, fallback).
+
+➤ LOGO APÓS o lead descrever o caso (e ANTES do Gatilho de valor / agendamento), você DEVE perguntar — em texto natural, UMA pergunta só:
+"Só pra eu entender melhor: há quanto tempo isso aconteceu (ou desde quando você saiu da empresa)?"
+
+➤ INTERPRETAÇÃO DA RESPOSTA:
+- Se o fato/demissão tem **MENOS de 6 meses** → ✅ lead DENTRO do perfil. Continue normalmente: faça as demais perguntas do fluxo, Gatilho de valor e agendamento.
+- Se o fato/demissão tem **MAIS de 6 meses** (ex.: "saí faz 8 meses", "foi ano passado", "faz mais de um ano") → ❌ lead FORA do perfil de atendimento prioritário deste escritório.
+
+➤ COMO RECUSAR COM EDUCAÇÃO (quando >6 meses):
+"Entendi, {nome}. Obrigada por compartilhar 🙏
+Pelo que você me contou, esse caso já tem mais de 6 meses, e hoje a equipe está priorizando atendimentos de situações mais recentes (até 6 meses), pra conseguir agir com mais força e no momento certo.
+Mesmo assim, vou registrar seu contato aqui — se abrirmos espaço pra casos mais antigos, a equipe te avisa, combinado? 🙂"
+
+➤ Após a recusa, NÃO ofereça agendamento, NÃO faça mais perguntas de qualificação, NÃO chame a ferramenta de agendamento. Apenas finalize com gentileza.
+
+🔒 Esta pergunta de tempo é OBRIGATÓRIA antes do Gatilho de valor em qualquer fluxo trabalhista. NÃO pule.
+` : "";
+
   const criminalUrgencyBlock = niche === "criminal" ? `
 ═══════════════════════════════════════════════════════
 🚨 OVERRIDE DE URGÊNCIA CRIMINAL (PRIORIDADE ABSOLUTA — ACIMA DA ABERTURA)
