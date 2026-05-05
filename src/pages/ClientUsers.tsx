@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { UserPlus, Users, Building2, Shield, Headphones, Trash2, ShieldCheck } from "lucide-react";
+import { UserPlus, Users, Building2, Shield, Headphones, Trash2, ShieldCheck, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 import { OperadorPermissionsDialog } from "@/components/users/OperadorPermissionsDialog";
 
@@ -52,6 +52,9 @@ export default function ClientUsers() {
   const [deleteTarget, setDeleteTarget] = useState<ClientUser | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [permTarget, setPermTarget] = useState<ClientUser | null>(null);
+  const [pwdTarget, setPwdTarget] = useState<ClientUser | null>(null);
+  const [newPwd, setNewPwd] = useState("");
+  const [resetting, setResetting] = useState(false);
 
   const isGerente = userRole === "gerente";
 
@@ -197,6 +200,26 @@ export default function ClientUsers() {
     }
 
     setDeleting(false);
+  };
+
+  const handleResetPassword = async () => {
+    if (!pwdTarget) return;
+    if (!newPwd || newPwd.length < 8) {
+      toast.error("A senha precisa ter pelo menos 8 caracteres");
+      return;
+    }
+    setResetting(true);
+    const { data, error } = await supabase.functions.invoke("reset-user-password", {
+      body: { target_user_id: pwdTarget.user_id, new_password: newPwd },
+    });
+    if (error || data?.error) {
+      toast.error(data?.error || error?.message || "Erro ao redefinir senha");
+    } else {
+      toast.success(`Senha de ${pwdTarget.full_name} redefinida com sucesso`);
+      setPwdTarget(null);
+      setNewPwd("");
+    }
+    setResetting(false);
   };
 
   const getRoleBadge = (role: string) => {
@@ -364,13 +387,13 @@ export default function ClientUsers() {
                 <TableHead className="text-muted-foreground">Cargo</TableHead>
                 <TableHead className="text-muted-foreground">Tipo</TableHead>
                 {!isGerente && <TableHead className="text-muted-foreground">Empresa</TableHead>}
-                {isGerente && <TableHead className="text-muted-foreground w-[160px] text-right">Ações</TableHead>}
+                <TableHead className="text-muted-foreground w-[200px] text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {clients.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={isGerente ? 4 : 4} className="py-12 text-center text-muted-foreground">
+                  <TableCell colSpan={isGerente ? 4 : 5} className="py-12 text-center text-muted-foreground">
                     <Users className="mx-auto mb-2 h-8 w-8" />
                     <p>Nenhum usuário cadastrado</p>
                     <p className="text-xs">
@@ -402,31 +425,38 @@ export default function ClientUsers() {
                         </Badge>
                       </TableCell>
                     )}
-                    {isGerente && (
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          {client.role !== "gerente" && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 gap-1.5 text-xs text-muted-foreground hover:text-primary"
-                              onClick={() => setPermTarget(client)}
-                            >
-                              <ShieldCheck className="h-3.5 w-3.5" />
-                              Permissões
-                            </Button>
-                          )}
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        {isGerente && client.role !== "gerente" && (
                           <Button
                             variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                            onClick={() => setDeleteTarget(client)}
+                            size="sm"
+                            className="h-8 gap-1.5 text-xs text-muted-foreground hover:text-primary"
+                            onClick={() => setPermTarget(client)}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <ShieldCheck className="h-3.5 w-3.5" />
+                            Permissões
                           </Button>
-                        </div>
-                      </TableCell>
-                    )}
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 gap-1.5 text-xs text-muted-foreground hover:text-primary"
+                          onClick={() => { setPwdTarget(client); setNewPwd(""); }}
+                        >
+                          <KeyRound className="h-3.5 w-3.5" />
+                          Nova senha
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          onClick={() => setDeleteTarget(client)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))
               )}
@@ -469,6 +499,38 @@ export default function ClientUsers() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Reset password dialog */}
+      <Dialog open={!!pwdTarget} onOpenChange={(open) => { if (!open) { setPwdTarget(null); setNewPwd(""); } }}>
+        <DialogContent className="bg-card text-foreground">
+          <DialogHeader>
+            <DialogTitle className="font-display">Redefinir senha</DialogTitle>
+            <p className="text-xs text-muted-foreground">
+              Definir nova senha para <strong>{pwdTarget?.full_name}</strong>. Mínimo 8 caracteres.
+              Senhas comuns/vazadas (ex: 123456) podem ser bloqueadas pelo sistema.
+            </p>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-2">
+              <Label>Nova senha</Label>
+              <Input
+                type="text"
+                value={newPwd}
+                onChange={(e) => setNewPwd(e.target.value)}
+                placeholder="Ex.: AdvOne#Senha1"
+                autoFocus
+              />
+            </div>
+            <Button
+              onClick={handleResetPassword}
+              disabled={resetting || newPwd.length < 8}
+              className="w-full gradient-primary text-primary-foreground"
+            >
+              {resetting ? "Redefinindo..." : "Redefinir senha"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
