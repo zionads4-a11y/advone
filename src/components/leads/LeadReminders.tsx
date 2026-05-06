@@ -270,17 +270,6 @@ export function LeadReminders({ leadId, companyId, leadName }: LeadRemindersProp
                   {formatDueAt(r.due_at)}
                   {r.reminder_type === "meeting" && r.end_at && ` - ${new Date(r.end_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`}
                 </p>
-                {r.reminder_type === "meeting" && !r.meeting_held && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => markMeetingHeld(r)}
-                    className="mt-2 h-6 text-[10px] px-2 gap-1"
-                  >
-                    <CheckCheck className="h-3 w-3" />
-                    Reunião realizada
-                  </Button>
-                )}
               </div>
               <button
                 onClick={() => handleDelete(r.id)}
