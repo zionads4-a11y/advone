@@ -173,6 +173,41 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
   }
 
   return (
+    <div className="space-y-6">
+      {/* Highlight banner: test the bot */}
+      <Card className="border-primary/40 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent">
+        <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
+              <Sparkles className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">Teste seu bot agora</p>
+              <p className="text-xs text-muted-foreground">
+                Converse como se fosse um cliente. As mensagens usam o prompt e os fluxos atualmente salvos.
+              </p>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="default"
+            size="sm"
+            onClick={() => {
+              const el = document.getElementById("bot-test-chat");
+              el?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+          >
+            <Bot className="mr-1 h-4 w-4" />
+            Abrir teste
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Mobile-first test chat (visible only on small screens) */}
+      <div id="bot-test-chat" className="lg:hidden">
+        <BotTestChat companyId={companyId} />
+      </div>
+
     <div className="grid gap-6 lg:grid-cols-[1fr,400px]">
       <div className="space-y-6">
       {/* Practice specialty selector */}
