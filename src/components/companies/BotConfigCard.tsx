@@ -478,10 +478,11 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
       <DecisionRulesPanel companyId={companyId} />
       </div>
 
-      {/* Test Chat Panel */}
-      <div className="lg:sticky lg:top-4 self-start">
+      {/* Test Chat Panel (desktop sticky) */}
+      <div className="hidden lg:block lg:sticky lg:top-4 self-start">
         <BotTestChat companyId={companyId} />
       </div>
+    </div>
     </div>
   );
 }
