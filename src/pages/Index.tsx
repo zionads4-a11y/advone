@@ -30,8 +30,8 @@ const Index = () => {
   }
 
   if (user) return <Navigate to={getHomeRoute(userRole)} replace />;
-  // Landing pública desativada — acesso somente via login
-  return <Navigate to="/auth" replace />;
+  // Visitantes vão para a Landing IA (página de venda)
+  return <Navigate to="/IA" replace />;
 };
 
 export default Index;
