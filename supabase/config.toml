@@ -9,6 +9,9 @@ enable_confirm_email = false # To help the user get in quickly
 [functions.create-client-user]
 verify_jwt = false
 
+[functions.meta-capi]
+verify_jwt = false
+
 [functions.zapi-webhook]
 verify_jwt = false
 
