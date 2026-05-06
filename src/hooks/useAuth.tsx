@@ -78,6 +78,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         data: { full_name: fullName },
       },
     });
+    if (!error) {
+      const { trackMetaEvent } = await import("@/lib/metaPixel");
+      trackMetaEvent("CompleteRegistration", { email, contentName: fullName });
+      trackMetaEvent("Lead", { email, contentName: "Signup" });
+    }
     return { error: error as Error | null };
   };
 
