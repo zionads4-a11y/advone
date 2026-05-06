@@ -2063,6 +2063,69 @@ export type Database = {
           },
         ]
       }
+      lead_subscriptions: {
+        Row: {
+          asaas_customer_id: string | null
+          asaas_subscription_id: string | null
+          billing_type: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          cycle: string
+          id: string
+          invoice_url: string | null
+          lead_id: string
+          status: string
+          updated_at: string
+          value: number
+        }
+        Insert: {
+          asaas_customer_id?: string | null
+          asaas_subscription_id?: string | null
+          billing_type?: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          cycle?: string
+          id?: string
+          invoice_url?: string | null
+          lead_id: string
+          status?: string
+          updated_at?: string
+          value?: number
+        }
+        Update: {
+          asaas_customer_id?: string | null
+          asaas_subscription_id?: string | null
+          billing_type?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          cycle?: string
+          id?: string
+          invoice_url?: string | null
+          lead_id?: string
+          status?: string
+          updated_at?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_subscriptions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_subscriptions_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lead_summaries: {
         Row: {
           company_id: string
