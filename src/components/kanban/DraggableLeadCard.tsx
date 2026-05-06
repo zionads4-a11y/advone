@@ -138,15 +138,6 @@ function LeadCardContent({ lead, onValueUpdate, isInMeetingHeld }: { lead: Dragg
               Pendente
             </span>
           )}
-          {isInMeetingHeld && (
-            <span
-              title="Reunião realizada — cobrança de R$ 97 gerada"
-              className="inline-flex items-center gap-0.5 rounded-md bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold text-primary border border-primary/30 shrink-0"
-            >
-              <CalendarCheck className="h-2.5 w-2.5" />
-              R$ 97
-            </span>
-          )}
         </div>
         <div className="flex items-center gap-1.5">
           {lead.phone && (
