@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { trackMetaEvent } from "@/lib/metaPixel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -198,7 +199,13 @@ export default function LandingIA() {
     }
   }, []);
 
+  useEffect(() => {
+    // ViewContent quando a landing carrega (além do PageView automático)
+    trackMetaEvent("ViewContent", { contentName: "Landing IA - Laura SDR" });
+  }, []);
+
   function scrollToForm() {
+    trackMetaEvent("InitiateCheckout", { contentName: "CTA Landing IA" });
     formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
@@ -241,6 +248,19 @@ export default function LandingIA() {
 
       const { error } = await supabase.from("landing_ia_leads").insert(payload);
       if (error) throw error;
+
+      // Lead capturado — dispara Pixel + CAPI com email/telefone hasheados
+      trackMetaEvent("Lead", {
+        email: parsed.data.email || undefined,
+        phone: parsed.data.whatsapp,
+        contentName: "Landing IA - Form Submit",
+        value: 697,
+        currency: "BRL",
+        customData: {
+          practice_area: parsed.data.practice_area || undefined,
+          oab: parsed.data.oab || undefined,
+        },
+      });
 
       setSubmitted(true);
       toast.success("Recebemos sua solicitação! Nosso time entrará em contato em breve.");
