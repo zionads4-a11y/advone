@@ -58,9 +58,9 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/IA" element={<LandingIA />} />
-            <Route path="/ia" element={<LandingIA />} />
+            <Route path="/signup" element={<Navigate to="/auth" replace />} />
+            <Route path="/IA" element={<Navigate to="/auth" replace />} />
+            <Route path="/ia" element={<Navigate to="/auth" replace />} />
             <Route path="/connect/:token" element={<ConnectWhatsApp />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
