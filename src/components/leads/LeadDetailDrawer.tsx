@@ -17,6 +17,7 @@ import { LeadNotes } from "@/components/leads/LeadNotes";
 import { LeadCases } from "@/components/leads/LeadCases";
 import { LeadContract } from "@/components/leads/LeadContract";
 import { LeadKanbanHistory } from "@/components/leads/LeadKanbanHistory";
+import { LeadAsaasSubscription } from "@/components/leads/LeadAsaasSubscription";
 
 type LeadStatus = "new" | "contacted" | "qualified" | "negotiating" | "won" | "lost";
 
@@ -192,6 +193,11 @@ export function LeadDetailDrawer({ lead, open, onOpenChange, onLeadUpdate }: Lea
               leadPhone={lead.whatsapp || lead.phone}
               leadEmail={lead.email}
             />
+
+            <Separator />
+
+            {/* Cobrança Asaas */}
+            <LeadAsaasSubscription leadId={lead.id} companyId={lead.company_id} />
 
             <Separator />
 
