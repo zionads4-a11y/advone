@@ -36,6 +36,7 @@ import FraudAlerts from "./pages/FraudAlerts";
 import LeadsHistory from "./pages/LeadsHistory";
 import LegalAI from "./pages/LegalAI";
 import LandingIA from "./pages/LandingIA";
+import LandingIALeads from "./pages/LandingIALeads";
 import AppLayout from "./components/layout/AppLayout";
 import ProfileCheck from "./pages/ProfileCheck";
 import NotFound from "./pages/NotFound";
@@ -96,6 +97,7 @@ const App = () => (
               <Route path="/assinatura" element={<Subscription />} />
               <Route path="/fraudes" element={<FraudAlerts />} />
               <Route path="/historico-leads" element={<LeadsHistory />} />
+              <Route path="/leads-landing-ia" element={<LandingIALeads />} />
               <Route path="/ia-juridica" element={<LegalAI />} />
               <Route path="/tarefas" element={<Tasks />} />
               <Route path="/boards" element={<Boards />} />
