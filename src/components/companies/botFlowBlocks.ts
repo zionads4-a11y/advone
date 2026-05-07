@@ -44,12 +44,58 @@ wants_help: "Para não correr risco de erro ou perder algo importante, o ideal �
     niche: "previdenciario",
     case_type: "beneficio_negado",
     block: `▸ BENEFÍCIO NEGADO (case_type: beneficio_negado)
-"Imagino o quanto isso é frustrante 😊 Antes de continuar, como posso te chamar?"
-P1 benefit_type: "Qual benefício o INSS negou? 1️⃣ Aposentadoria 2️⃣ Auxílio-doença 3️⃣ BPC/LOAS 4️⃣ Pensão por morte 5️⃣ Outro" → aposentadoria | auxilio_doenca | bpc | pensao | outro
-P2 denial_date: "Há quanto tempo você recebeu essa negativa? 1️⃣ Menos de 30 dias 2️⃣ 1-6 meses 3️⃣ Mais de 6 meses 4️⃣ Não lembro" → menos_30d | 1_6m | mais_6m | nao_lembro
-P3 has_denial_doc: "Você tem a carta de indeferimento ou print do Meu INSS? 1️⃣ Sim 2️⃣ Não 3️⃣ Posso conseguir" → sim | nao | posso_conseguir
-Gatilho: "Entendi, {nome}. A equipe aqui já analisa casos como o seu todos os dias. Muita gente não sabe, mas grande parte das negativas do INSS pode ser revertida com a documentação certa — e deixar pra depois pode acabar atrasando sua vida ou até fazendo você perder esse direito…"
-wants_help: "Pra não correr risco de erro ou perder algo importante, o ideal é a equipe já analisar seu caso com você 👀 Quer que a equipe analise sua negativa? 1️⃣ Sim 2️⃣ Tenho dúvida ainda" → sim | duvida`,
+
+INÍCIO (OBRIGATÓRIO)
+"Oi 😊 Eu sou a {bot_name}, assistente da Dra. {advogada}.
+Antes de tudo, como posso te chamar?"
+(aguarda resposta)
+
+SEGUNDA MENSAGEM
+"Prazer, {nome} 🙂 Como posso te ajudar hoje?"
+(aguarda o lead explicar)
+
+🧠 REGRA PRINCIPAL
+⚠️ Se o lead já explicar bem → NÃO repetir perguntas → Ir direto para validação + agendamento
+
+🔎 QUALIFICAÇÃO (ATÉ 3 PERGUNTAS — SÓ O QUE FALTAR)
+P1 (só se não ficou claro): "{nome}, me conta melhor o que aconteceu no seu caso?"
+P2 (benefício, se necessário): "E qual foi o benefício que acabou sendo negado?"
+
+🔀 RAMIFICAÇÃO BPC/LOAS
+👉 Se mencionar BPC/LOAS:
+"{nome}, entendi… você chegou a dar entrada no BPC/LOAS, certo?"
+"Você sabe se foi por causa da renda ou te falaram outro motivo?"
+→ Se não souber: "Sem problema 🙂 isso a gente verifica depois pra você"
+
+⏱️ P3 (tempo — se necessário): "Isso aconteceu faz pouco tempo ou já tem um tempinho?"
+→ Se recente: "Perfeito — quanto mais rápido agir, maiores são as chances 👀"
+→ Se antigo: "Ainda pode ter solução, mas é importante não deixar isso parado."
+
+📄 P4 (documentos — opcional): "Você tem algum documento do INSS ou a carta de negativa aí com você?"
+
+💣 VALIDAÇÃO (SÓ DEPOIS DE ENTENDER)
+👉 Se BPC/LOAS:
+"Entendi, {nome}… 😕 BPC negado é mais comum do que parece, principalmente por detalhes na renda ou na análise do INSS. E em muitos casos isso pode ser revisto sim 👀"
+👉 Outros benefícios:
+"Entendi, {nome}… Pelo que você me contou, vale a pena analisar com mais cuidado 👀"
+
+📄 COMPLEMENTO (DOCS)
+→ Se tem: "Perfeito — isso ajuda bastante na análise."
+→ Se não tem: "Sem problema, ainda dá pra avaliar o seu caso sim."
+
+🚀 TRANSIÇÃO
+"{nome}, esse tipo de situação precisa ser analisado com mais cuidado… Porque às vezes é um detalhe que muda totalmente o resultado 👀"
+
+🔥 FECHAMENTO (AGENDAMENTO)
+"Pra te orientar com segurança mesmo, o ideal é a equipe jurídica analisar seu caso com você."
+"É uma conversa gratuita e bem rápida, coisa de uns 10 minutos 🙂 Posso te encaixar agora 👇"
+"Qual horário fica melhor pra você: manhã, tarde ou final do dia?"
+
+⚡ VARIAÇÃO — LEAD QUENTE
+"Perfeito, {nome}… já entendi seu caso 👀"
+👉 Se BPC: "BPC negado acontece bastante, principalmente por detalhes na análise."
+👉 Geral: "Pelo que você me falou, vale a pena olhar isso com mais atenção. Quanto antes analisar, melhor — pra não perder tempo ou oportunidade."
+"Posso te encaixar com a equipe 🙂 Qual horário fica melhor: manhã ou tarde?"`,
   },
   {
     flow_key: "revisao_aposentadoria",
