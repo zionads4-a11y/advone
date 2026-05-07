@@ -11,7 +11,7 @@
 //     messages: [{ role: "system", content: "..." }, { role: "user", content: "..." }],
 //     tools,                       // opcional
 //     tool_choice,                 // opcional
-//     fallbackModel: "google/gemini-2.5-flash",  // se a empresa não tiver config
+//     fallbackModel: "google/gemini-3-flash-preview",  // se a empresa não tiver config
 //   });
 //   const reply = resp.choices?.[0]?.message?.content;
 
@@ -71,7 +71,7 @@ export async function getCompanyAIConfig(companyId: string): Promise<CompanyAICo
   if (!row) {
     return {
       provider: "lovable",
-      model: "google/gemini-2.5-flash",
+      model: "google/gemini-3-flash-preview",
       custom_system_prompt: null,
       use_openai_for_testing: false,
     };
@@ -86,7 +86,7 @@ export async function getCompanyAIConfig(companyId: string): Promise<CompanyAICo
  */
 export async function chatCompletion(params: ChatCompletionParams): Promise<any> {
   let provider: AIProvider = params.forceProvider ?? "lovable";
-  let model: string = params.forceModel ?? params.fallbackModel ?? "google/gemini-2.5-flash";
+  let model: string = params.forceModel ?? params.fallbackModel ?? "google/gemini-3-flash-preview";
 
   if (params.companyId && !params.forceProvider) {
     const cfg = await getCompanyAIConfig(params.companyId);
