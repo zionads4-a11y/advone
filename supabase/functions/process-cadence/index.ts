@@ -326,7 +326,7 @@ REGRAS OBRIGATÓRIAS:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: system },
           { role: "user", content: `Histórico:\n\n${history}\n\n---\nGere a próxima mensagem de retomada continuando de onde parou.` },
@@ -801,7 +801,7 @@ REGRAS OBRIGATÓRIAS:
               method: "POST",
               headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
               body: JSON.stringify({
-                model: "google/gemini-2.5-flash",
+                model: "google/gemini-3-flash-preview",
                 messages: [
                   { role: "system", content: followupSystem },
                   { role: "user", content: `Histórico:\n\n${convHistory}\n\n---\nGere a próxima mensagem de retomada.` },
