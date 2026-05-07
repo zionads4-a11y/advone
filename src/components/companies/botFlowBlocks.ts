@@ -102,12 +102,30 @@ P2 (benefício, se necessário): "E qual foi o benefício que acabou sendo negad
     niche: "previdenciario",
     case_type: "revisao_aposentadoria",
     block: `▸ REVISÃO DE APOSENTADORIA (case_type: revisao_aposentadoria)
-"Entendi 😊 Antes de continuar, como posso te chamar?"
-P1 already_retired: "Você já está aposentado(a)? 1️⃣ Sim, aposentadoria 2️⃣ Recebo outro benefício 3️⃣ Ainda não" → sim | outro_beneficio | nao
-P2 value_seems_low: "Você sente que o valor está abaixo do que deveria? 1️⃣ Sim 2️⃣ Não tenho certeza 3️⃣ Não" → sim | nao_tenho_certeza | nao
-P3 has_cnis: "Você tem o CNIS, carta de concessão ou algum documento do benefício? 1️⃣ Sim 2️⃣ Não 3️⃣ Posso conseguir" → sim | nao | posso_conseguir
-Gatilho: "Entendi, {nome}. A equipe aqui já analisa casos como o seu todos os dias. Em alguns casos, a aposentadoria pode ter sido concedida com valor menor do que o devido — e deixar pra depois pode fazer você perder a chance de recuperar esses valores retroativos."
-wants_help: "Para não correr risco de erro ou perder algo importante, o ideal é a equipe já analisar seu caso com você 👀 Quer que a equipe verifique se existe alguma revisão possível? 1️⃣ Sim 2️⃣ Tenho dúvida ainda" → sim | duvida`,
+
+INÍCIO
+"Entendi 😊 Me conta rapidinho… como posso te chamar?"
+
+QUALIFICAÇÃO (ATÉ 3 PERGUNTAS — SÓ O NECESSÁRIO. Se já entendeu → PARE)
+P1 (obrigatória): "{nome}, você já está aposentado(a) ou ainda está vendo isso?"
+P2 (dor principal): "E você sente que o valor que está recebendo pode estar menor do que deveria?"
+P3 (prova leve): "Você tem algum documento da aposentadoria aí, tipo carta ou extrato?"
+→ Se não: "Sem problema, isso a gente vê depois 👍"
+
+💣 GATILHO
+"{nome}, isso é mais comum do que parece… muita gente acaba recebendo menos do que deveria e nem sabe 😕"
+
+🚀 TRANSIÇÃO
+"Pra te falar com segurança mesmo, o ideal é a equipe dar uma olhada no seu caso. Às vezes é um detalhe que já muda o valor 👀"
+
+🔥 FECHAMENTO
+"Já vou te encaixar com a equipe 🙂 Qual horário costuma ser melhor pra você… manhã, tarde ou final do dia?"
+
+⚡ VARIAÇÃO (LEAD QUENTE)
+"Perfeito, já entendi 👀 Isso tem bastante chance de revisão sim."
+"Muita aposentadoria sai com valor menor por erro ou falta de informação."
+"Pra não deixar passar nada, o ideal é a equipe já analisar com você. É rápido, coisa de 10 minutos."
+"Qual horário fica melhor pra você… manhã ou tarde?"`,
   },
   {
     flow_key: "bpc_loas",
