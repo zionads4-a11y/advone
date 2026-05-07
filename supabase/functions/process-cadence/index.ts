@@ -30,7 +30,7 @@ async function isRepetitiveByAI(candidate: string, previousMessages: string[]): 
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite",
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: "Você é um validador. Responda SOMENTE com 'SIM' ou 'NAO'. Diga SIM se a mensagem candidata for muito parecida (mesma intenção, mesma pergunta, mesma estrutura) com alguma das tentativas anteriores. Diga NAO se ela trouxer ângulo, pergunta ou tom claramente diferente." },
           { role: "user", content: `CANDIDATA:\n${candidate}\n\nTENTATIVAS ANTERIORES:\n${previousList}\n\nÉ muito parecida?` },
@@ -326,7 +326,7 @@ REGRAS OBRIGATÓRIAS:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: system },
           { role: "user", content: `Histórico:\n\n${history}\n\n---\nGere a próxima mensagem de retomada continuando de onde parou.` },
@@ -671,7 +671,7 @@ serve(async (req) => {
                   "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                  model: "google/gemini-2.5-flash-lite",
+                  model: "google/gemini-2.5-flash",
                   messages: [
                     {
                       role: "system",
@@ -801,7 +801,7 @@ REGRAS OBRIGATÓRIAS:
               method: "POST",
               headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
               body: JSON.stringify({
-                model: "google/gemini-3-flash-preview",
+                model: "google/gemini-2.5-flash",
                 messages: [
                   { role: "system", content: followupSystem },
                   { role: "user", content: `Histórico:\n\n${convHistory}\n\n---\nGere a próxima mensagem de retomada.` },
