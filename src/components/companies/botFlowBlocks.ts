@@ -132,26 +132,65 @@ P3 (prova leve): "Você tem algum documento da aposentadoria aí, tipo carta ou 
     niche: "previdenciario",
     case_type: "bpc_loas",
     block: `▸ BPC/LOAS (case_type: bpc_loas)
-"Entendi 😊 Antes de continuar, como posso te chamar?"
-P1 bpc_profile: "O BPC seria para: 1️⃣ Idoso(a) com 65 anos ou mais 2️⃣ Pessoa com deficiência 3️⃣ Tenho dúvida" → idoso | deficiencia | duvida
-P2 family_income: "A renda familiar por pessoa hoje é: 1️⃣ Até 1/4 do salário mínimo 2️⃣ Maior do que isso 3️⃣ Não sei" → ate_1_4 | maior | nao_sei
-P3 cadunico: "Você está inscrito(a) no CadÚnico? 1️⃣ Sim 2️⃣ Não 3️⃣ Não sei" → sim | nao | nao_sei
-Gatilho: "Entendi, {nome}. A equipe aqui já analisa casos como o seu todos os dias. O BPC tem regras bem específicas e muita gente deixa de receber por erro no pedido ou falta de orientação — e deixar pra depois pode atrasar um benefício que é seu por direito."
-wants_help: "Pra não correr risco de erro ou perder algo importante, o ideal é a equipe já analisar seu caso com você 👀 Quer ajuda para entender melhor seu caso de BPC? 1️⃣ Sim 2️⃣ Tenho dúvida ainda" → sim | duvida`,
+
+INÍCIO
+"Entendi 😊 Me conta rapidinho… como posso te chamar?"
+
+QUALIFICAÇÃO (ATÉ 3 PERGUNTAS — SÓ O NECESSÁRIO. Se já entendeu → PARE)
+P1 (perfil): "{nome}, esse benefício seria pra você ou pra outra pessoa?"
+👉 (se já falar idoso ou deficiência, NÃO perguntar de novo)
+P2 (critério principal): "Hoje, mais ou menos, a renda da família é baixa ou está mais apertada?"
+P3 (prova leve): "Você já chegou a se cadastrar no CadÚnico ou ainda não?"
+→ Se não: "Sem problema, isso a gente resolve depois 👍"
+
+💣 GATILHO
+"{nome}, muita gente tem direito ao BPC e nem sabe… ou acaba tendo o pedido negado por detalhe 😕"
+
+🚀 TRANSIÇÃO
+"Pra te orientar com segurança mesmo, o ideal é a equipe analisar seu caso direitinho. Porque às vezes é um detalhe que faz toda diferença 👀"
+
+🔥 FECHAMENTO
+"Já vou te encaixar com a equipe 🙂 Qual horário costuma ser melhor pra você… manhã, tarde ou final do dia?"
+
+⚡ VARIAÇÃO (LEAD QUENTE)
+"Perfeito, já entendi 👀 Isso pode sim ter direito ao BPC."
+"Muita gente nessa situação consegue o benefício, mas acaba errando no pedido."
+"Pra ver isso certinho no seu caso, o ideal é a equipe analisar com você. É rápido, coisa de 10 minutos."
+"Qual horário fica melhor pra você… manhã ou tarde?"`,
   },
   {
     flow_key: "auxilio_invalidez",
     niche: "previdenciario",
     case_type: "auxilio_invalidez",
     block: `▸ AUXÍLIO-DOENÇA / INVALIDEZ (case_type: auxilio_invalidez)
-"Sinto muito que você esteja passando por isso 😊 Antes de continuar, como posso te chamar?"
-P1 health_status: "Hoje você está: 1️⃣ Afastado(a) 2️⃣ Trabalhando com dificuldade 3️⃣ Sem conseguir trabalhar" → afastado | dificuldade | sem_trabalhar
-P2 contributing_inss: "Você contribuía para o INSS quando esse problema começou? 1️⃣ Sim 2️⃣ Não 3️⃣ Não tenho certeza" → sim | nao | nao_tenho_certeza
-P3 has_medical_docs: "Você tem laudos, exames, atestados ou outros documentos médicos? 1️⃣ Sim 2️⃣ Não 3️⃣ Tenho alguns" → sim | nao | tenho_alguns
-- Resposta se sim: "Perfeito, isso já acelera bastante a análise do seu caso 👀"
-- Resposta se não: "Entendi… 😕 Sem documento fica mais difícil, mas ainda assim pode ter solução dependendo do seu caso 👀"
-Gatilho: "Entendi, {nome}. A equipe aqui já analisa casos como o seu todos os dias. Quando a pessoa está sem conseguir trabalhar, cada dia de demora pesa ainda mais — e deixar pra depois pode acabar atrasando ou até fazendo você perder esse direito…"
-wants_help: "Pra não correr risco de erro ou perder algo importante, o ideal é a equipe já analisar seu caso com você 👀 Quer que a equipe analise seu caso com mais cuidado? 1️⃣ Sim 2️⃣ Tenho dúvida ainda" → sim | duvida`,
+
+INÍCIO
+"Sinto muito por isso 😕 Quando a saúde complica, realmente tudo fica mais difícil… Antes de continuar, como posso te chamar?"
+
+QUALIFICAÇÃO (ATÉ 4 PERGUNTAS — SÓ O NECESSÁRIO. Se já entendeu → PARE)
+P1 (situação atual): "{nome}, hoje você está afastado(a) ou ainda tentando trabalhar mesmo com dificuldade?"
+P2 (INSS): "Na época que isso começou, você contribuía pro INSS?"
+→ se sim: "Perfeito, isso já ajuda bastante 👀"
+→ se não/dúvida: "Mesmo assim, dependendo da situação ainda pode ter direito sim 👍"
+P3 (perícia): "Você chegou a passar por perícia do INSS?"
+→ se negada: "Isso acontece muito… vários pedidos são negados mesmo quando a pessoa tem direito 😕"
+P4 (prova): "Você tem algum laudo ou exame médico?"
+→ se não: "Sem problema, isso a gente resolve depois 👍"
+
+💣 GATILHO
+"{nome}, quando a pessoa está com problema de saúde e não consegue trabalhar direito… cada dia sem resolver isso pesa muito 😕"
+
+🚀 TRANSIÇÃO
+"Pra te orientar com segurança mesmo, o ideal é a equipe analisar seu caso. Às vezes é um detalhe que faz toda diferença 👀"
+
+🔥 FECHAMENTO
+"Já vou te encaixar com a equipe 🙂 Qual horário costuma ser melhor pra você… manhã, tarde ou final do dia?"
+
+⚡ VARIAÇÃO (LEAD QUENTE)
+"Perfeito, já entendi 👀 Pelo que você me falou, isso tem sim chance de conseguir o benefício."
+"Muita gente nessa situação acaba tendo o pedido negado por detalhe."
+"Pra não deixar passar nada, o ideal é a equipe já analisar com você. É rápido, coisa de 10 minutos."
+"Qual horário fica melhor pra você… manhã ou tarde?"`,
   },
   {
     flow_key: "rmc_rcc",
@@ -170,33 +209,74 @@ wants_help: "Pra não correr risco de erro ou perder algo importante, o ideal é
     niche: "previdenciario",
     case_type: "demora_inss",
     block: `▸ DEMORA NO INSS (case_type: demora_inss)
-"Entendi 😊 Demora no INSS realmente angustia. Antes de continuar, como posso te chamar?"
-P1 tipo_pedido: "{nome}, qual benefício você está esperando? 1️⃣ Aposentadoria 2️⃣ Auxílio-doença / incapacidade 3️⃣ BPC/LOAS 4️⃣ Pensão por morte 5️⃣ Outro" → aposentadoria | auxilio | bpc | pensao | outro
-P2 dias_desde_der: "Você lembra mais ou menos há quanto tempo fez o pedido? 1️⃣ Menos de 45 dias 2️⃣ Entre 45 e 90 dias 3️⃣ Entre 90 e 180 dias 4️⃣ Mais de 180 dias 5️⃣ Não sei dizer" → menos_45 | 45_90 | 90_180 | mais_180 | nao_sei
-P3 status_atual: "No Meu INSS o pedido aparece como: 1️⃣ Em análise 2️⃣ Aguardando perícia 3️⃣ Aguardando documentos 4️⃣ Sem movimento nenhum 5️⃣ Não consigo acessar" → em_analise | pericia | docs | sem_movimento | sem_acesso
-P4 ja_reclamou: "Você já abriu reclamação na Ouvidoria do INSS ou no 135? 1️⃣ Sim 2️⃣ Não 3️⃣ Não sabia que podia" → sim | nao | nao_sabia
-Gatilho: {regra_legal_dinamica}
-wants_help: "Para não correr risco de erro ou perder algo importante, o ideal é a equipe já analisar seu caso com você 👀 Você quer que a equipe veja seu caso e te diga o que pode ser feito para acelerar isso? 1️⃣ Sim 2️⃣ Tenho dúvida ainda" → sim | duvida
 
-REGRA INTERNA DEMORA (use no Gatilho conforme dias_desde_der):
-- menos_45: "Pelas regras atuais, o INSS ainda pode estar dentro do prazo. Mesmo assim, a equipe aqui analisa esses prazos todo dia e pode te orientar a acompanhar pelos canais oficiais."
-- 45_90: "Já passou do prazo normal de resposta. A equipe aqui analisa casos como o seu todos os dias e pode avaliar medidas para tentar acelerar a decisão."
-- 90_180: "Essa demora já está bem acima do razoável. Deixar pra depois só atrasa sua vida. A equipe consegue analisar o melhor caminho para forçar uma resposta."
-- mais_180: "A demora está muito acima do esperado. Esse tipo de caso exige avaliação urgente da equipe para não perder seu direito."
-- nao_sei: "Tudo bem, {nome}. A equipe pode te orientar a verificar a data exata e ver o melhor caminho."`,
+INÍCIO
+"Entendi 😕 Essa demora do INSS realmente angustia… Antes de continuar, como posso te chamar?"
+
+QUALIFICAÇÃO (ATÉ 3 PERGUNTAS — SÓ O NECESSÁRIO. Se já entendeu → PARE)
+P1 (contexto): "{nome}, qual benefício você está esperando?"
+P2 (tempo — chave da urgência): "E já faz mais ou menos quanto tempo que você deu entrada?"
+P3 (situação atual): "E hoje aparece como ainda em análise ou parado sem resposta?"
+
+💣 GATILHO (DINÂMICO — BASEADO NO TEMPO)
+👉 Pouco tempo (até ~45 dias): "{nome}, pode ser que ainda esteja dentro do prazo… mas mesmo assim dá pra acompanhar e tentar acelerar 👀"
+👉 Médio (45 a 90 dias): "{nome}, já passou do prazo normal… isso começa a indicar demora acima do esperado 😕"
+👉 Longo (90+ dias): "{nome}, isso já está bem acima do prazo… e nesses casos dá pra buscar formas de acelerar sim 👀"
+👉 Muito longo (180+): "{nome}, isso já passou muito do tempo normal… vale olhar com mais urgência mesmo."
+👉 Não souber: "Sem problema 😊 a equipe consegue ver isso certinho pra você depois."
+
+🚀 TRANSIÇÃO
+"Pra te orientar com segurança mesmo, o ideal é a equipe analisar seu caso. Porque às vezes dá pra acelerar isso dependendo do que está travando 👀"
+
+🔥 FECHAMENTO
+"Já vou te encaixar com a equipe 🙂 Qual horário costuma ser melhor pra você… manhã, tarde ou final do dia?"
+
+⚡ VARIAÇÃO (LEAD IRRITADO / QUENTE)
+"Perfeito, já entendi 😕 Isso acontece muito mais do que deveria."
+"Dependendo do caso, dá sim pra pressionar e acelerar essa resposta."
+"Pra ver o melhor caminho no seu caso, o ideal é a equipe analisar com você. É rápido, coisa de 10 minutos."
+"Qual horário fica melhor pra você… manhã ou tarde?"`,
   },
   {
     flow_key: "salario_maternidade",
     niche: "previdenciario",
     case_type: "salario_maternidade",
     block: `▸ SALÁRIO-MATERNIDADE (case_type: salario_maternidade)
-"Que momento importante 🤰😊 Antes de continuar, como posso te chamar?"
-⚠️ REGRA ANTI-REPETIÇÃO: Antes de cada pergunta abaixo, RELEIA o histórico da conversa. Se a informação JÁ foi dada pelo lead (ex: ele já disse "estou grávida", "o bebê já nasceu", "trabalho de carteira assinada"), NÃO pergunte de novo — registre internamente e PULE direto para a próxima pergunta ainda não respondida. NUNCA pergunte a mesma coisa duas vezes.
-P1 situacao (PULAR se o lead já contou): "{nome}, qual é a sua situação hoje? 1️⃣ Estou grávida 2️⃣ O bebê já nasceu 3️⃣ Adotei ou estou em processo de adoção 4️⃣ Tive aborto espontâneo / natimorto" → gravida | nasceu | adocao | aborto
-P2 vinculo (PULAR se já informado): "Como você trabalha ou trabalhava? 1️⃣ CLT (carteira assinada) 2️⃣ MEI / Autônoma 3️⃣ Desempregada (mas já trabalhou) 4️⃣ Nunca trabalhou" → clt | mei | desempregada | nunca
-P3 data_evento (PULAR se já informado): "Há quanto tempo aconteceu (ou para quando está previsto)? 1️⃣ Menos de 5 anos 2️⃣ Mais de 5 anos 3️⃣ Ainda vai acontecer" → menos_5a | mais_5a | futuro
-Gatilho: "Entendi, {nome}. A equipe aqui já analisa casos de salário-maternidade todos os dias e sabe como as regras do INSS podem ser complexas."
-wants_help: "Para garantir que você não perca esse benefício, o ideal é a equipe jurídica já analisar seu caso 👀 Quer que a equipe veja isso pra você? 1️⃣ Sim 2️⃣ Tenho dúvida ainda" → sim | duvida`,
+
+INÍCIO (OBRIGATÓRIO)
+"Oi 😊 Eu sou a {bot_name}, assistente da Dra. {advogada}. Antes de tudo, como posso te chamar?"
+(aguarda resposta)
+
+SEGUNDA MENSAGEM
+"Prazer, {nome} 🙂 Como posso te ajudar hoje?"
+(aguarda o lead explicar)
+
+QUALIFICAÇÃO (ATÉ 3 PERGUNTAS — SÓ O NECESSÁRIO. Se já entendeu → PARE)
+P1: "{nome}, você está grávida ou o bebê já nasceu?"
+→ Se grávida: "E com quantos meses você está?"
+→ Se já nasceu: "Há quanto tempo mais ou menos nasceu?"
+⚠️ REGRA INTERNA: Se passou de 5 anos → DESCARTAR educadamente
+
+P2 (vínculo real): "{nome}, hoje você está trabalhando, já trabalhou antes ou nunca trabalhou?"
+→ Se trabalhou: "Você era registrada, autônoma ou rural?"
+
+P3 (INSS — essencial): "Você chegou a contribuir pro INSS alguma vez?"
+→ Se NÃO: "Entendi 🙂 Em alguns casos específicos, principalmente quando envolve trabalho rural, ainda pode existir possibilidade — mas precisa analisar certinho."
+
+💣 GATILHO DE VALOR (SÓ DEPOIS DAS RESPOSTAS)
+"{nome}, pelo que você me falou, vale a pena analisar sim 👀"
+"Muita gente na sua situação deixa de receber por falta de orientação."
+
+🚀 TRANSIÇÃO
+"Pra te orientar com segurança mesmo, o ideal é a equipe da Dra. analisar seu caso com você. É rápido, coisa de 10 minutos."
+
+🔥 FECHAMENTO
+"Posso te encaixar 🙂 Qual horário costuma ser melhor pra você… manhã, tarde ou final do dia?"
+
+⚡ VARIAÇÃO — LEAD QUENTE
+"Perfeito, já entendi 👀 Pelo que você me falou, vale sim analisar."
+"Muita gente nessa situação tem direito e acaba não sabendo."
+"Qual horário fica melhor pra você… manhã ou tarde?"`,
   },
   {
     flow_key: "fallback_outros",
