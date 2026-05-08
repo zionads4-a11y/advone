@@ -68,6 +68,7 @@ export default function ProcessMonitoring() {
 
   const [newCnj, setNewCnj] = useState("");
   const [newClientName, setNewClientName] = useState("");
+  const [newClientCpf, setNewClientCpf] = useState("");
   const [addCompanyId, setAddCompanyId] = useState("");
 
   // Company selection for admin
