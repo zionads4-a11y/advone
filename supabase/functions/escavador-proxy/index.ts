@@ -125,13 +125,12 @@ Deno.serve(async (req) => {
         }
 
         // URL pública do nosso webhook que o Escavador irá chamar a cada movimentação
-        const callbackUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/escavador-webhook`;
+        const callbackUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/escavador-webhook`; // Manteve para log ou uso futuro se a API aceitar
 
-        // Register monitoring on Escavador V2 with real-time callback
+        // Register monitoring on Escavador V2
         const monitoringBody: any = {
-          numero_cnj: numero_cnj.trim(),
+          numero: numero_cnj.trim(),
           frequencia: "DIARIA",
-          urls_de_callback: [callbackUrl],
         };
         if (tribunal) {
           monitoringBody.tribunal = tribunal;
@@ -141,7 +140,7 @@ Deno.serve(async (req) => {
         let escavadorMonitoringId: number | null = null;
         let callbackRegisteredAt: string | null = null;
         try {
-          escavadorMonitoring = await escavadorFetch("/processos/monitorar", "POST", monitoringBody);
+          escavadorMonitoring = await escavadorFetch("/monitoramentos/processos", "POST", monitoringBody);
           console.log("Escavador monitoring registered:", JSON.stringify(escavadorMonitoring));
           escavadorMonitoringId =
             escavadorMonitoring?.id ||
@@ -329,6 +328,21 @@ Deno.serve(async (req) => {
         const { process_id: removeId } = body;
         if (!removeId) throw new Error("process_id obrigatório");
 
+        const { data: proc } = await admin
+          .from("monitored_processes")
+          .select("id, escavador_monitoring_id")
+          .eq("id", removeId)
+          .single();
+
+        if (proc?.escavador_monitoring_id) {
+          try {
+            await escavadorFetch(`/monitoramentos/processos/${proc.escavador_monitoring_id}`, "DELETE");
+            console.log(`Monitoring ${proc.escavador_monitoring_id} removed from Escavador`);
+          } catch (e) {
+            console.error("Failed to remove monitoring from Escavador:", e);
+          }
+        }
+
         await admin
           .from("monitored_processes")
           .update({ is_active: false })
@@ -352,13 +366,12 @@ Deno.serve(async (req) => {
         for (const p of pending || []) {
           try {
             const monitoringBody: any = {
-              numero_cnj: p.numero_cnj,
+              numero: p.numero_cnj,
               frequencia: "DIARIA",
-              urls_de_callback: [callbackUrl],
             };
             if (p.tribunal_sigla) monitoringBody.tribunal = p.tribunal_sigla;
 
-            const r = await escavadorFetch("/processos/monitorar", "POST", monitoringBody);
+            const r = await escavadorFetch("/monitoramentos/processos", "POST", monitoringBody);
             const monId = r?.id || r?.monitoramento?.id || r?.data?.id || null;
             await admin.from("monitored_processes").update({
               escavador_monitoring_id: monId,
