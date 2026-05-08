@@ -78,6 +78,7 @@ const gerenteItems = [
   { title: "Clientes", url: "/clientes", icon: UserCheck },
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
+  { title: "Bot SDR", url: "/bot-config", icon: Bot, premium: true },
   { title: "IA Jurídica", url: "/ia-juridica", icon: Scale, premium: true },
   { title: "Financeiro", url: "/financeiro", icon: Wallet },
   { title: "Monitoramento", url: "/monitoramento", icon: Radar },
