@@ -1,0 +1,1 @@
+ALTER TABLE public.monitored_processes ADD COLUMN IF NOT EXISTS client_cpf TEXT;
