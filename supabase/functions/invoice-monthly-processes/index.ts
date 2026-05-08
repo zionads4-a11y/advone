@@ -122,7 +122,7 @@ Deno.serve(async (req) => {
 
         const { data: company } = await admin
           .from("companies")
-          .select("id, name, whatsapp, billing_model, custom_base_value")
+          .select("id, name, whatsapp, billing_model, custom_base_value, office_legal_name, office_cnpj, office_address")
           .eq("id", companyId)
           .maybeSingle();
         if (!company) {
@@ -170,8 +170,10 @@ Deno.serve(async (req) => {
           const created = await asaas<AsaasCustomer>(`/customers`, {
             method: "POST",
             body: JSON.stringify({
-              name: company.name,
+              name: company.office_legal_name || company.name,
+              cpfCnpj: company.office_cnpj ? company.office_cnpj.replace(/\D/g, "") : undefined,
               mobilePhone: cleanPhone || undefined,
+              address: company.office_address || undefined,
             }),
           });
           customerId = created.id;
