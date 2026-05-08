@@ -3,7 +3,7 @@
 //   - partnership_type (sempre "mensalidade_zionads")
 //   - service_mode    (full = CRM completo / ai_only = só IA Laura)
 
-export type BillingModel = "plan_admin" | "plan_completo" | "plan_ia_monthly" | "plan_ia_6m" | "plan_ia_12m" | "ia_only" | "crm_full";
+export type BillingModel = "plan_completo" | "plan_ia_monthly" | "plan_ia_6m" | "plan_ia_12m" | "ia_only" | "crm_full";
 
 export interface BillingModelOption {
   key: BillingModel;
@@ -17,18 +17,9 @@ export interface BillingModelOption {
 
 export const BILLING_MODELS: BillingModelOption[] = [
   {
-    key: "plan_admin",
-    emoji: "💼",
-    label: "Plano Admin (R$ 297/mês)",
-    description: "CRM completo, Agenda, Financeiro, Docs. WhatsApp (só notificações). IA Gemini. 20 monitoramentos.",
-    partnership_type: "mensalidade_zionads",
-    service_mode: "full",
-    monitoring_quota: 20,
-  },
-  {
     key: "plan_completo",
     emoji: "🚀",
-    label: "Plano Completo (R$ 497/mês)",
+    label: "Plano Completo (R$ 897/mês)",
     description: "Tudo do Admin + Bot SDR (Laura), IA Jurídica Claude, Alertas de Fraude, Boards. 50 monitoramentos.",
     partnership_type: "mensalidade_zionads",
     service_mode: "full",
