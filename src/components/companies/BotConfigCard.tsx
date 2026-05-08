@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Bot, Loader2, Save, ShieldCheck, Building2, Link2, Users, Clock, ListChecks, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 import { TriageOptionsEditor, type TriageOption } from "./TriageOptionsEditor";
 import { BotTestChat } from "./BotTestChat";
 import { AgentConfigPanel } from "./AgentConfigPanel";
