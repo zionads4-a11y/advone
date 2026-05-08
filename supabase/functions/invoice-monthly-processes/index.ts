@@ -145,7 +145,7 @@ Deno.serve(async (req) => {
           plan_ia_monthly: 30,
           plan_ia_6m: 30,
           plan_ia_12m: 30,
-          plan_cortesia: 0, // cortesia: cobra todo processo monitorado
+          plan_zionads: 0, // plano zionads: cobra todo processo monitorado
         };
         const quota = quotaByPlan[company.billing_model as string] ?? 0;
         const excess = Math.max(0, count - quota);
@@ -184,7 +184,7 @@ Deno.serve(async (req) => {
             billingType: "UNDEFINED",
             value: total,
             dueDate: dueDate(month),
-            description: company.billing_model === 'plan_cortesia' 
+            description: company.billing_model === 'plan_zionads' 
               ? `Fatura Mensal AdvOne — ${month} (Monitoramento: ${count} proc., Base/Tráfego: R$ ${customBase.toFixed(2).replace(".", ",")})`
               : `Monitoramento de processos AdvOne — ${count} processo(s) ativo(s) em ${month} (R$ ${PRICE_PER_PROCESS.toFixed(2).replace(".", ",")} cada)`,
             externalReference: `processes:${companyId}:${month}`,

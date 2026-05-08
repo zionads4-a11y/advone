@@ -72,7 +72,7 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
                 ))}
               </SelectContent>
             </Select>
-            {selectedModel === "plan_cortesia" && (
+            {selectedModel === "plan_zionads" && (
               <div className="mt-3 space-y-2 animate-in fade-in slide-in-from-top-1">
                 <Label>Valor Base Customizado (R$)</Label>
                 <Input 

@@ -170,7 +170,7 @@ export function CompanyEditDialog({
             </p>
           </div>
 
-          {billingModel === "plan_cortesia" && (
+          {billingModel === "plan_zionads" && (
             <div className="space-y-2 p-3 rounded-lg border border-primary/20 bg-primary/5 animate-in fade-in">
               <Label>Valor Base Customizado (R$)</Label>
               <Input 
