@@ -959,7 +959,8 @@ export default function LandingPage() {
               "CRM Jurídico completo com Kanban",
               "Agenda + Financeiro integrados",
               "Templates e documentos ilimitados",
-              "Suporte prioritário"
+              "Suporte prioritário",
+              "Monitoramento de Processos (R$ 2,50/processo)"
             ].map((feature) => (
               <div key={feature} className="flex items-center gap-3 p-4 rounded-xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)]">
                 <div className="h-5 w-5 flex items-center justify-center rounded-full bg-[hsl(153,60%,45%)]/20 text-[hsl(153,60%,45%)]">

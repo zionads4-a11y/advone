@@ -667,7 +667,8 @@ export default function LandingIA() {
               "CRM Jurídico completo com Kanban",
               "Agenda + Financeiro integrados",
               "Templates e documentos ilimitados",
-              "Suporte prioritário"
+              "Suporte prioritário",
+              "Monitoramento de Processos (R$ 2,50/processo)"
             ].map((feature) => (
               <div key={feature} className="flex items-center gap-3 p-4 rounded-xl border border-border/60 bg-card/40">
                 <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
