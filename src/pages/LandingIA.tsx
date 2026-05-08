@@ -522,25 +522,22 @@ export default function LandingIA() {
             </div>
           </Reveal>
 
-          <div className="mt-12 flex justify-center max-w-5xl mx-auto">
-            {/* Plano IA AdvOne */}
-            <Reveal delay={0}>
-              <Card className="h-full max-w-lg border-primary/40 bg-card shadow-2xl shadow-primary/10 relative overflow-hidden">
-                <div className="absolute top-0 right-0 bg-primary px-3 py-1 text-[10px] font-bold text-primary-foreground uppercase tracking-widest rounded-bl-lg">
-                  Lançamento
-                </div>
+          <div className="mt-12 grid gap-8 md:grid-cols-2 max-w-5xl mx-auto">
+            {/* Plano Mensal */}
+            <Reveal delay={120}>
+              <Card className="h-full border-border/60 bg-card/40 hover:border-primary/20 transition-all">
                 <CardContent className="space-y-6 p-8 flex flex-col h-full">
                   <div className="text-center">
-                    <div className="text-sm font-semibold uppercase tracking-wide text-primary">
-                      IA Jurídica AdvOne
+                    <div className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                      Mensal
                     </div>
                     <div className="mt-2 flex items-baseline justify-center gap-1">
                       <span className="text-4xl font-bold">R$</span>
-                      <span className="font-display text-5xl font-bold">297</span>
+                      <span className="font-display text-5xl font-bold">497</span>
                       <span className="text-muted-foreground">/mês</span>
                     </div>
                     <div className="mt-1 text-xs text-muted-foreground">
-                      CRM Jurídico + IA Jurídica Completa
+                      Sem compromisso de longo prazo
                     </div>
                   </div>
 
@@ -548,7 +545,7 @@ export default function LandingIA() {
 
                   <ul className="space-y-3 flex-1">
                     {[
-                      "IA Jurídica com Gemini Flash (Petições e Resumos)",
+                      "IA Jurídica com Gemini Flash",
                       "CRM Jurídico completo com Kanban",
                       "WhatsApp (Notificações automáticas)",
                       "Agenda e Financeiro integrados",
@@ -565,13 +562,67 @@ export default function LandingIA() {
 
                   <Button
                     size="lg"
-                    onClick={() => navigate("/signup?plan=admin")}
+                    variant="outline"
+                    onClick={() => navigate("/signup?plan=mensal")}
+                    className="w-full"
+                  >
+                    Assinar Mensal
+                  </Button>
+                  <p className="text-center text-xs text-muted-foreground">Cancele quando quiser.</p>
+                </CardContent>
+              </Card>
+            </Reveal>
+
+            {/* Plano Anual */}
+            <Reveal delay={240}>
+              <Card className="h-full border-primary/40 bg-card shadow-2xl shadow-primary/10 relative overflow-hidden">
+                <div className="absolute top-0 right-0 bg-primary px-3 py-1 text-[10px] font-bold text-primary-foreground uppercase tracking-widest rounded-bl-lg">
+                  Economize 40%
+                </div>
+                <CardContent className="space-y-6 p-8 flex flex-col h-full">
+                  <div className="text-center">
+                    <div className="text-sm font-semibold uppercase tracking-wide text-primary">
+                      Anual
+                    </div>
+                    <div className="mt-2 flex items-baseline justify-center gap-1">
+                      <span className="text-4xl font-bold">R$</span>
+                      <span className="font-display text-5xl font-bold">297</span>
+                      <span className="text-muted-foreground">/mês</span>
+                    </div>
+                    <div className="mt-1 text-xs text-primary font-semibold">
+                      12× R$ 297 — Total R$ 3.564/ano
+                    </div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      Melhor custo-benefício
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-border" />
+
+                  <ul className="space-y-3 flex-1">
+                    {[
+                      "Tudo do Plano Mensal",
+                      "Economia de R$ 2.400 por ano",
+                      "Preço travado por 12 meses",
+                      "Onboarding personalizado",
+                      "Suporte prioritário VIP"
+                    ].map((item) => (
+                      <li key={item} className="flex items-start gap-3 text-sm">
+                        <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+                        <span className="font-semibold">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Button
+                    size="lg"
+                    onClick={() => navigate("/signup?plan=anual")}
                     className="w-full gradient-primary text-primary-foreground font-bold"
                   >
-                    Assinar Agora
+                    Assinar Anual e Economizar
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
-                  <p className="text-center text-xs text-muted-foreground">Cancele a qualquer momento.</p>
+                  <p className="text-center text-xs text-muted-foreground">Pagamento anual ou em 12×.</p>
                 </CardContent>
               </Card>
             </Reveal>
