@@ -7,14 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Save, Loader2, KeyRound, Zap } from "lucide-react";
+import { Sparkles, Save, Loader2, KeyRound, Zap, Brain } from "lucide-react";
 import { toast } from "sonner";
 
 interface Props {
   companyId: string;
 }
 
-type Provider = "lovable" | "openai";
+type Provider = "lovable" | "openai" | "anthropic";
 
 interface AIConfig {
   provider: Provider;
@@ -37,6 +37,12 @@ const OPENAI_MODELS = [
   { value: "gpt-5-nano", label: "GPT-5 Nano (rápido)" },
   { value: "gpt-5-mini", label: "GPT-5 Mini" },
   { value: "gpt-5", label: "GPT-5 (mais inteligente)" },
+];
+
+const ANTHROPIC_MODELS = [
+  { value: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5 (mais rápido, mais barato)" },
+  { value: "claude-sonnet-4-6", label: "Claude Sonnet 4.6 (recomendado, melhor custo-benefício)" },
+  { value: "claude-opus-4-7", label: "Claude Opus 4.7 (mais inteligente, premium)" },
 ];
 
 const DEFAULTS: AIConfig = {
@@ -104,11 +110,15 @@ export function CompanyAIConfigCard({ companyId }: Props) {
     setConfig((c) => ({
       ...c,
       provider: p,
-      model: p === "openai" ? "gpt-4o" : "google/gemini-2.5-flash",
+      model: p === "openai" ? "gpt-4o" : p === "anthropic" ? "claude-sonnet-4-6" : "google/gemini-2.5-flash",
     }));
   }
 
-  const models = config.provider === "openai" ? OPENAI_MODELS : LOVABLE_MODELS;
+  const models = config.provider === "openai"
+    ? OPENAI_MODELS
+    : config.provider === "anthropic"
+    ? ANTHROPIC_MODELS
+    : LOVABLE_MODELS;
 
   if (loading) {
     return (
@@ -126,8 +136,8 @@ export function CompanyAIConfigCard({ companyId }: Props) {
         <CardTitle className="font-display text-lg flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-primary" />
           Provedor de IA
-          <Badge variant={config.provider === "openai" ? "default" : "secondary"} className="ml-2">
-            {config.provider === "openai" ? "OpenAI" : "AdvOne IA (Gemini)"}
+          <Badge variant={config.provider === "openai" ? "default" : config.provider === "anthropic" ? "default" : "secondary"} className="ml-2">
+            {config.provider === "openai" ? "OpenAI" : config.provider === "anthropic" ? "Claude (Anthropic)" : "AdvOne IA (Gemini)"}
           </Badge>
         </CardTitle>
         <CardDescription>
@@ -136,7 +146,7 @@ export function CompanyAIConfigCard({ companyId }: Props) {
       </CardHeader>
       <CardContent className="space-y-5">
         {/* Provider toggle */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <button
             type="button"
             onClick={() => setProvider("lovable")}
@@ -172,6 +182,23 @@ export function CompanyAIConfigCard({ companyId }: Props) {
               Usa a chave OpenAI configurada na plataforma. GPT-4o / GPT-5. Maior qualidade em PT-BR jurídico.
             </p>
           </button>
+
+          <button
+            type="button"
+            onClick={() => setProvider("anthropic")}
+            className={`text-left rounded-lg border-2 p-4 transition-all ${
+              config.provider === "anthropic"
+                ? "border-primary bg-primary/5"
+                : "border-border bg-muted/20 hover:border-border/80"
+            }`}
+          >
+            <div className="flex items-center gap-2 mb-1">
+              <Brain className="h-4 w-4 text-primary" />
+              <span className="font-semibold text-sm">Claude (Anthropic)</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              IA premium para o plano Completo. Claude Sonnet/Opus. Excelente em análise jurídica e redação em PT-BR.
+            </p>
         </div>
 
         {/* Modelo */}
@@ -220,9 +247,9 @@ export function CompanyAIConfigCard({ companyId }: Props) {
             onCheckedChange={(v) => setConfig((c) => ({ ...c, use_openai_for_testing: v }))}
           />
           <div className="flex-1">
-            <Label className="text-sm cursor-pointer">Forçar OpenAI no ambiente de teste</Label>
+            <Label className="text-sm cursor-pointer">Forçar Claude no ambiente de teste</Label>
             <p className="text-[11px] text-muted-foreground mt-0.5">
-              Mesmo que o provider acima esteja em "AdvOne IA", o ambiente de teste usará OpenAI. Ideal para comparar respostas.
+              Mesmo que o provider acima esteja em "AdvOne IA", o ambiente de teste usará Claude. Ideal para comparar respostas.
             </p>
           </div>
         </div>
