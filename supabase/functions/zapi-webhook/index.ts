@@ -18,7 +18,6 @@ function buildSDRPrompt(
   flowsBlock: string = "",
   triageBlock: string = "",
   timezone: string = "America/Sao_Paulo",
-  checkClientStatus: boolean = false,
 ): string {
   const company = config.companies;
   const officeName = config.office_name || company?.name || "o escritório";
@@ -780,7 +779,6 @@ async function handleAgentPhase(
   flowsBlock?: string,
   triageBlock?: string,
   timezone: string = "America/Sao_Paulo",
-  checkClientStatus: boolean = false,
 ): Promise<string | null> {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!LOVABLE_API_KEY) return null;
@@ -815,7 +813,7 @@ async function handleAgentPhase(
     tools = contractCloserTools;
   } else {
     // SDR phase (default)
-    systemPrompt = buildSDRPrompt(config, leadName, companyOffices || [], flowsBlock || "", triageBlock || "", timezone, checkClientStatus);
+    systemPrompt = buildSDRPrompt(config, leadName, companyOffices || [], flowsBlock || "", triageBlock || "", timezone);
     tools = sdrTools;
     if (config?.debug_mode) {
       console.log("[SDR PROMPT DEBUG]", JSON.stringify({
@@ -1496,7 +1494,7 @@ serve(async (req) => {
       .select(`
         id, company_id, zapi_instance_id, zapi_token, ai_enabled, ai_prompt, ai_auto_reply, 
         office_name, practice_area, communication_tone, scheduling_link, consultation_duration, 
-        target_audience, alert_whatsapp, triage_options, debug_mode, check_client_status,
+        target_audience, alert_whatsapp, triage_options, debug_mode,
         companies (name, bot_name, bot_role_description, timezone, decision_rules, billing_model)
       `)
       .eq("company_id", companyId)
@@ -1822,8 +1820,7 @@ serve(async (req) => {
             effectivePhase, config, agentConfigs, history,
             companyId, leadId, supabase, currentLeadName, cleanPhone,
             flowsBlock, triageBlock,
-            (config.companies as any)?.timezone || "America/Sao_Paulo",
-            !!config.check_client_status,
+            (config.companies as any)?.timezone || "America/Sao_Paulo"
           );
 
           const SERVER_URL = "https://ziondigital.uazapi.com";
