@@ -124,8 +124,8 @@ export default function ProcessMonitoring() {
 
   const handleAddProcess = async () => {
     const targetCompanyId = isAdmin && selectedCompanyId === "all" ? addCompanyId : selectedCompanyId;
-    if (!newCnj.trim() || !newClientName.trim() || !targetCompanyId) {
-      toast.error("Preencha todos os campos");
+    if (!newCnj.trim() || !newClientName.trim() || !newClientCpf.trim() || !targetCompanyId) {
+      toast.error("Preencha todos os campos (CNJ, Nome e CPF)");
       return;
     }
     setAddingProcess(true);
