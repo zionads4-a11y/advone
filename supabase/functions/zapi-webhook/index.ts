@@ -18,6 +18,7 @@ function buildSDRPrompt(
   flowsBlock: string = "",
   triageBlock: string = "",
   timezone: string = "America/Sao_Paulo",
+  checkClientStatus: boolean = false,
 ): string {
   const company = config.companies;
   const officeName = config.office_name || company?.name || "o escritório";
@@ -133,8 +134,7 @@ function buildSDRPrompt(
     ? `\n\n═══════════════════════════════════════\nREGRAS DE OURO E COMPORTAMENTO\n═══════════════════════════════════════\n${company.decision_rules}\n`
     : "";
 
-  return `Você é ${botName}, ${botRole} da equipe ${officeName}${practiceArea ? `, especializada no atendimento inicial de casos ${practiceArea}` : ""}.
-
+  const clientIdentificationBlock = checkClientStatus ? `
 ═══════════════════════════════════════
 🔍 IDENTIFICAÇÃO DE CLIENTE EXISTENTE (CRÍTICO)
 ═══════════════════════════════════════
@@ -149,11 +149,14 @@ Muitos clientes já cadastrados entram em contato por este mesmo WhatsApp. Sua p
 2. **Se NÃO for sobre processo ou se for um NOVO contato (Lead):**
    - Siga o fluxo de qualificação SDR padrão abaixo.
    - NUNCA peça CPF para novos leads (mantenha a regra de ouro abaixo).
+` : "";
 
+  return `Você é ${botName}, ${botRole} da equipe ${officeName}${practiceArea ? `, especializada no atendimento inicial de casos ${practiceArea}` : ""}.
+${clientIdentificationBlock}
 ═══════════════════════════════════════
 🚫 REGRA DE OURO (LEADS NOVOS)
 ═══════════════════════════════════════
-NUNCA peça o CPF ou RG de um lead NOVO (que ainda não é cliente). Esta regra só é aberta para quem já tem processo e quer saber o status. Peça apenas o NOME COMPLETO no final do agendamento.
+NUNCA peça o CPF ou RG de um lead NOVO (que ainda não é cliente). ${checkClientStatus ? "Esta regra só é aberta para quem já tem processo e quer saber o status." : ""} Peça apenas o NOME COMPLETO no final do agendamento.
 
 ═══════════════════════════════════════
 IDENTIDADE E TOM
@@ -194,7 +197,7 @@ ${leadNameInfo}
 📋 FLUXO OBRIGATÓRIO (IDENTIFICAÇÃO)
 ═══════════════════════════════════════
 PASSO 1 — Saudação e Identificação de Cliente:
-Se o lead já iniciou falando o assunto, reconheça brevemente. Se for sobre processo, peça o CPF.
+Se o lead já iniciou falando o assunto, reconheça brevemente. ${checkClientStatus ? "Se for sobre processo, peça o CPF." : ""}
 Se for novo contato:
 "Oi! Tudo bem? 😊 Eu sou a ${botName}, aqui da equipe ${officeName}. Antes de continuarmos, como eu posso te chamar? 🙂"
 
@@ -793,6 +796,7 @@ async function handleAgentPhase(
   flowsBlock?: string,
   triageBlock?: string,
   timezone: string = "America/Sao_Paulo",
+  checkClientStatus: boolean = false,
 ): Promise<string | null> {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!LOVABLE_API_KEY) return null;
@@ -827,7 +831,7 @@ async function handleAgentPhase(
     tools = contractCloserTools;
   } else {
     // SDR phase (default)
-    systemPrompt = buildSDRPrompt(config, leadName, companyOffices || [], flowsBlock || "", triageBlock || "", timezone);
+    systemPrompt = buildSDRPrompt(config, leadName, companyOffices || [], flowsBlock || "", triageBlock || "", timezone, checkClientStatus);
     tools = sdrTools;
     if (config?.debug_mode) {
       console.log("[SDR PROMPT DEBUG]", JSON.stringify({
@@ -1508,7 +1512,7 @@ serve(async (req) => {
       .select(`
         id, company_id, zapi_instance_id, zapi_token, ai_enabled, ai_prompt, ai_auto_reply, 
         office_name, practice_area, communication_tone, scheduling_link, consultation_duration, 
-        target_audience, alert_whatsapp, triage_options, debug_mode,
+        target_audience, alert_whatsapp, triage_options, debug_mode, check_client_status,
         companies (name, bot_name, bot_role_description, timezone, decision_rules, billing_model)
       `)
       .eq("company_id", companyId)
