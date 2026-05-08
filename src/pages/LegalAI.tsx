@@ -107,7 +107,7 @@ export default function LegalAI() {
       }
       const { data } = await query;
       const list = (data || [])
-        .filter(c => c.billing_model === 'plan_completo' || c.billing_model === 'crm_full')
+        .filter((c: any) => c.billing_model === 'plan_completo' || c.billing_model === 'crm_full')
         .map((c) => ({ id: c.id, name: c.name }));
       setCompanies(list);
       if (list.length > 0) {
