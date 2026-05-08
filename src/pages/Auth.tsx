@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Navigate, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Navigate, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,14 @@ import logoAdvOne from "@/assets/logo-advone.png";
 
 export default function Auth() {
   const { user, loading } = useAuth();
+  const [searchParams] = useSearchParams();
+  const mode = searchParams.get("mode");
+
+  useEffect(() => {
+    if (mode === "login") {
+      document.title = "Acesse sua conta | AdvOne";
+    }
+  }, [mode]);
 
   if (loading) {
     return (
@@ -36,13 +44,13 @@ export default function Auth() {
           </p>
         </div>
 
-        <LoginForm />
+        <LoginForm mode={mode} />
       </div>
     </div>
   );
 }
 
-function LoginForm() {
+function LoginForm({ mode }: { mode: string | null }) {
   const { signInWithGoogle, signIn } = useAuth();
   const [googleLoading, setGoogleLoading] = useState(false);
   const [emailLoading, setEmailLoading] = useState(false);
@@ -159,12 +167,14 @@ function LoginForm() {
           Google Workspace
         </Button>
 
-        <p className="text-center text-sm text-[hsl(220,10%,55%)] mt-6">
-          Novo por aqui?{" "}
-          <Link to="/signup" className="text-[hsl(153,60%,45%)] hover:underline font-bold">
-            Crie sua conta
-          </Link>
-        </p>
+        {mode !== "login" && (
+          <p className="text-center text-sm text-[hsl(220,10%,55%)] mt-6">
+            Novo por aqui?{" "}
+            <Link to="/signup" className="text-[hsl(153,60%,45%)] hover:underline font-bold">
+              Crie sua conta
+            </Link>
+          </p>
+        )}
       </CardContent>
     </Card>
   );

@@ -309,9 +309,14 @@ export default function LandingIA() {
               FAQ
             </a>
           </nav>
-          <Button onClick={() => scrollToForm()} className="gradient-primary text-primary-foreground">
-            Quero a Laura
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" onClick={() => navigate("/auth?mode=login")} className="hidden md:flex">
+              Login
+            </Button>
+            <Button onClick={() => scrollToForm()} className="gradient-primary text-primary-foreground">
+              Quero a Laura
+            </Button>
+          </div>
         </div>
       </header>
 
