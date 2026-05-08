@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Bot, Loader2 } from "lucide-react";
 
 export default function BotConfig() {
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
   const { companyIds, isClient, loading: companiesLoading } = useUserCompanies();
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>("");
