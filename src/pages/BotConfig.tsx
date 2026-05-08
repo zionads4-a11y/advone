@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Bot, Loader2 } from "lucide-react";
 
 export default function BotConfig() {
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
   const { companyIds, isClient, loading: companiesLoading } = useUserCompanies();
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>("");
@@ -45,6 +45,17 @@ export default function BotConfig() {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Se for gerente, mas NÃO for o super_admin, bloqueia o acesso à página
+  if (userRole === "gerente" && user?.email !== "zionads4@gmail.com") {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+        <Bot className="mb-3 h-10 w-10" />
+        <p className="font-medium">Acesso restrito</p>
+        <p className="text-sm">Estas configurações só podem ser acessadas pelo Super Admin.</p>
       </div>
     );
   }

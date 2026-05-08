@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Bot, Loader2, Save, ShieldCheck, Building2, Link2, Users, Clock, ListChecks, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 import { TriageOptionsEditor, type TriageOption } from "./TriageOptionsEditor";
 import { BotTestChat } from "./BotTestChat";
 import { AgentConfigPanel } from "./AgentConfigPanel";
@@ -23,6 +24,7 @@ interface BotConfigCardProps {
 }
 
 export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardProps) {
+  const { userRole, user } = useAuth();
   const [aiEnabled, setAiEnabled] = useState(false);
   const [aiAutoReply, setAiAutoReply] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
@@ -167,6 +169,28 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
       <Card className="border-border/50">
         <CardContent className="flex items-center justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (userRole === "gerente" && user?.email !== "zionads4@gmail.com") {
+    return (
+      <Card className="border-border/50">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base text-muted-foreground">
+            <Bot className="h-5 w-5" />
+            Configuração do Bot SDR
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center justify-center py-10 text-center">
+            <ShieldCheck className="h-10 w-10 text-muted-foreground/30 mb-3" />
+            <p className="text-sm font-medium text-muted-foreground">Acesso Restrito</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Apenas o Super Admin pode realizar a configuração do Bot SDR.
+            </p>
+          </div>
         </CardContent>
       </Card>
     );
