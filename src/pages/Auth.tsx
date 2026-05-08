@@ -167,12 +167,14 @@ function LoginForm() {
           Google Workspace
         </Button>
 
-        <p className="text-center text-sm text-[hsl(220,10%,55%)] mt-6">
-          Novo por aqui?{" "}
-          <Link to="/signup" className="text-[hsl(153,60%,45%)] hover:underline font-bold">
-            Crie sua conta
-          </Link>
-        </p>
+        {mode !== "login" && (
+          <p className="text-center text-sm text-[hsl(220,10%,55%)] mt-6">
+            Novo por aqui?{" "}
+            <Link to="/signup" className="text-[hsl(153,60%,45%)] hover:underline font-bold">
+              Crie sua conta
+            </Link>
+          </p>
+        )}
       </CardContent>
     </Card>
   );
