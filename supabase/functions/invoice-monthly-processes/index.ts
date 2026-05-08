@@ -19,7 +19,7 @@ const corsHeaders = {
 
 const ASAAS_API_KEY = Deno.env.get("ASAAS_ADVONE_API_KEY")!;
 const ASAAS_BASE = "https://api.asaas.com/v3";
-const PRICE_PER_PROCESS = 3.50;
+const PRICE_PER_PROCESS = 2.58;
 
 interface AsaasCustomer { id: string; name: string; }
 interface AsaasPayment { id: string; invoiceUrl: string; }
@@ -122,7 +122,7 @@ Deno.serve(async (req) => {
 
         const { data: company } = await admin
           .from("companies")
-          .select("id, name, whatsapp")
+          .select("id, name, whatsapp, billing_model")
           .eq("id", companyId)
           .maybeSingle();
         if (!company) {
@@ -139,7 +139,15 @@ Deno.serve(async (req) => {
           continue;
         }
 
-        const total = +(count * PRICE_PER_PROCESS).toFixed(2);
+        const quota = company.billing_model === 'plan_completo' || company.billing_model === 'crm_full' ? 50 : 20;
+        const excess = Math.max(0, count - quota);
+        const total = +(excess * PRICE_PER_PROCESS).toFixed(2);
+
+        if (total <= 0) {
+          console.log(`[invoice-processes] skip company=${companyId} (quota não excedida: ${count}/${quota})`);
+          results.push({ company_id: companyId, ok: true, skipped: "quota não excedida" });
+          continue;
+        }
         const cleanPhone = (company.whatsapp || "").replace(/\D/g, "");
         let customerId: string | null = null;
 
