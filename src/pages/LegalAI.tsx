@@ -100,13 +100,15 @@ export default function LegalAI() {
     const load = async () => {
       let query = supabase
         .from("companies")
-        .select("id, name, partnership_type")
+        .select("id, name, partnership_type, billing_model")
         .eq("partnership_type", "mensalidade_zionads");
       if (companyIds.length > 0) {
         query = query.in("id", companyIds);
       }
       const { data } = await query;
-      const list = (data || []).map((c) => ({ id: c.id, name: c.name }));
+      const list = (data || [])
+        .filter(c => c.billing_model === 'plan_completo' || c.billing_model === 'crm_full')
+        .map((c) => ({ id: c.id, name: c.name }));
       setCompanies(list);
       if (list.length > 0) {
         setActiveCompanyId((prev) => prev || list[0].id);
@@ -345,8 +347,8 @@ export default function LegalAI() {
           </div>
           <h2 className="mb-2 text-xl font-semibold">IA Jurídica indisponível</h2>
           <p className="text-sm text-muted-foreground">
-            Este recurso premium está disponível apenas para escritórios no plano de mensalidade.
-            Fale com seu gestor para liberar o acesso.
+            Este recurso premium está disponível apenas para escritórios no **Plano Completo**.
+            Faça o upgrade da sua assinatura para liberar o acesso à Helena.
           </p>
         </Card>
       </div>
