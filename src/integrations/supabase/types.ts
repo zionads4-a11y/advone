@@ -3238,6 +3238,7 @@ export type Database = {
           ai_objective: string | null
           ai_prompt: string | null
           alert_whatsapp: string | null
+          check_client_status: boolean | null
           communication_tone: string | null
           company_id: string
           consultation_duration: string | null
@@ -3262,6 +3263,7 @@ export type Database = {
           ai_objective?: string | null
           ai_prompt?: string | null
           alert_whatsapp?: string | null
+          check_client_status?: boolean | null
           communication_tone?: string | null
           company_id: string
           consultation_duration?: string | null
@@ -3286,6 +3288,7 @@ export type Database = {
           ai_objective?: string | null
           ai_prompt?: string | null
           alert_whatsapp?: string | null
+          check_client_status?: boolean | null
           communication_tone?: string | null
           company_id?: string
           consultation_duration?: string | null
