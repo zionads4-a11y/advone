@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Save, Loader2, KeyRound, Zap, Brain } from "lucide-react";
+import { Sparkles, Save, Loader2, KeyRound, Zap, Brain, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { type BillingModel } from "@/lib/billingModels";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Props {
   companyId: string;
@@ -56,6 +58,11 @@ export function CompanyAIConfigCard({ companyId }: Props) {
   const [config, setConfig] = useState<AIConfig>(DEFAULTS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [billingModel, setBillingModel] = useState<BillingModel | null>(null);
+  const { userRole } = useAuth();
+  
+  const isAgencyStaff = userRole === "admin" || userRole === "member";
+  const isPlanCompleto = isAgencyStaff || billingModel === "plan_completo" || billingModel === "crm_full";
 
   useEffect(() => {
     void load();
@@ -66,11 +73,12 @@ export function CompanyAIConfigCard({ companyId }: Props) {
     setLoading(true);
     const { data } = await supabase
       .from("company_ai_config" as any)
-      .select("provider,model,custom_system_prompt,use_openai_for_testing")
+      .select("provider,model,custom_system_prompt,use_openai_for_testing, companies(billing_model)")
       .eq("company_id", companyId)
       .maybeSingle();
 
     if (data) {
+      setBillingModel((data as any).companies?.billing_model);
       setConfig({
         provider: ((data as any).provider as Provider) ?? "lovable",
         model: (data as any).model ?? DEFAULTS.model,
@@ -185,13 +193,17 @@ export function CompanyAIConfigCard({ companyId }: Props) {
 
           <button
             type="button"
+            disabled={isAnthropicDisabled}
             onClick={() => setProvider("anthropic")}
-            className={`text-left rounded-lg border-2 p-4 transition-all ${
+            className={`text-left rounded-lg border-2 p-4 transition-all relative ${
               config.provider === "anthropic"
                 ? "border-primary bg-primary/5"
                 : "border-border bg-muted/20 hover:border-border/80"
-            }`}
+            } ${isAnthropicDisabled ? "opacity-60 grayscale cursor-not-allowed" : ""}`}
           >
+            {!isPlanCompleto && (
+              <Badge className="absolute -top-2 -right-2 bg-accent text-[9px] h-4">PREMIUM</Badge>
+            )}
             <div className="flex items-center gap-2 mb-1">
               <Brain className="h-4 w-4 text-primary" />
               <span className="font-semibold text-sm">Claude (Anthropic)</span>
