@@ -143,7 +143,7 @@ export default function LandingPage() {
             <Button variant="ghost" onClick={() => navigate("/auth")} className="text-[hsl(220,10%,70%)] hover:text-[hsl(153,60%,45%)]">
               Login
             </Button>
-            <Button onClick={() => navigate("/signup?plan=mensal")} className="gradient-primary text-[hsl(0,0%,100%)] font-semibold">
+            <Button onClick={() => navigate("/signup?plan=admin")} className="gradient-primary text-[hsl(0,0%,100%)] font-semibold">
               Começar agora
             </Button>
           </div>
@@ -179,7 +179,7 @@ export default function LandingPage() {
               <div className="flex flex-col items-center gap-4 sm:flex-row lg:justify-start animate-slide-up" style={{ animationDelay: "0.2s" }}>
                 <Button
                   size="lg"
-                  onClick={() => navigate("/signup?plan=mensal")}
+                  onClick={() => navigate("/signup?plan=admin")}
                   className="gradient-primary glow-primary px-8 py-6 text-lg font-semibold text-[hsl(0,0%,100%)] group"
                 >
                   Começar agora
@@ -781,7 +781,7 @@ export default function LandingPage() {
               <div className="mt-8 flex flex-col items-center gap-3">
                 <Button
                   size="lg"
-                  onClick={() => navigate("/signup?plan=mensal")}
+                  onClick={() => navigate("/signup?plan=completo")}
                   className="bg-gradient-to-r from-[hsl(38,90%,55%)] to-[hsl(45,95%,60%)] hover:opacity-90 text-[hsl(220,25%,6%)] font-bold px-8 py-6 text-base shadow-lg shadow-[hsl(38,90%,55%)]/20"
                 >
                   <Sparkles className="mr-2 h-5 w-5" />
