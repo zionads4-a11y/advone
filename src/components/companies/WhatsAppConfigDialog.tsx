@@ -104,7 +104,7 @@ export function WhatsAppConfigDialog({
       setAiLoading(true);
       const { data } = await supabase
         .from("whatsapp_configs")
-        .select("ai_enabled, ai_auto_reply, ai_prompt, ai_objective, alert_whatsapp")
+        .select("ai_enabled, ai_auto_reply, ai_prompt, ai_objective, alert_whatsapp, check_client_status")
         .eq("company_id", companyId)
         .maybeSingle();
 
