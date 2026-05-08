@@ -522,14 +522,17 @@ export default function LandingIA() {
             </div>
           </Reveal>
 
-          <div className="mt-12 grid gap-8 md:grid-cols-2 max-w-5xl mx-auto">
-            {/* Plano Admin */}
-            <Reveal delay={120}>
-              <Card className="h-full border-border/60 bg-card/40 hover:border-primary/20 transition-all">
+          <div className="mt-12 flex justify-center max-w-5xl mx-auto">
+            {/* Plano IA AdvOne */}
+            <Reveal delay={0}>
+              <Card className="h-full max-w-lg border-primary/40 bg-card shadow-2xl shadow-primary/10 relative overflow-hidden">
+                <div className="absolute top-0 right-0 bg-primary px-3 py-1 text-[10px] font-bold text-primary-foreground uppercase tracking-widest rounded-bl-lg">
+                  Lançamento
+                </div>
                 <CardContent className="space-y-6 p-8 flex flex-col h-full">
                   <div className="text-center">
-                    <div className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                      Plano Admin
+                    <div className="text-sm font-semibold uppercase tracking-wide text-primary">
+                      IA Jurídica AdvOne
                     </div>
                     <div className="mt-2 flex items-baseline justify-center gap-1">
                       <span className="text-4xl font-bold">R$</span>
@@ -537,73 +540,38 @@ export default function LandingIA() {
                       <span className="text-muted-foreground">/mês</span>
                     </div>
                     <div className="mt-1 text-xs text-muted-foreground">
-                      O CRM essencial para sua gestão
+                      CRM Jurídico + IA Jurídica Completa
                     </div>
                   </div>
 
                   <div className="h-px bg-border" />
 
                   <ul className="space-y-3 flex-1">
-                    {beneficiosAdmin.map((b) => (
-                      <li key={b} className="flex items-start gap-3 text-sm">
+                    {[
+                      "IA Jurídica com Gemini Flash (Petições e Resumos)",
+                      "CRM Jurídico completo com Kanban",
+                      "WhatsApp (Notificações automáticas)",
+                      "Agenda e Financeiro integrados",
+                      "Documentos e Templates ilimitados",
+                      "20 monitoramentos de processos inclusos",
+                      "Suporte prioritário"
+                    ].map((item) => (
+                      <li key={item} className="flex items-start gap-3 text-sm">
                         <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                        <span>{b}</span>
+                        <span>{item}</span>
                       </li>
                     ))}
                   </ul>
 
                   <Button
                     size="lg"
-                    variant="outline"
-                    onClick={() => scrollToForm("admin")}
-                    className="w-full"
+                    onClick={() => navigate("/signup?plan=admin")}
+                    className="w-full gradient-primary text-primary-foreground font-bold"
                   >
-                    Começar com Admin
-                  </Button>
-                </CardContent>
-              </Card>
-            </Reveal>
-
-            {/* Plano Completo */}
-            <Reveal delay={240}>
-              <Card className="h-full border-primary/40 bg-card shadow-2xl shadow-primary/10 relative overflow-hidden">
-                <div className="absolute top-0 right-0 bg-primary px-3 py-1 text-[10px] font-bold text-primary-foreground uppercase tracking-widest rounded-bl-lg">
-                  Recomendado
-                </div>
-                <CardContent className="space-y-6 p-8 flex flex-col h-full">
-                  <div className="text-center">
-                    <div className="text-sm font-semibold uppercase tracking-wide text-primary">
-                      Plano Completo
-                    </div>
-                    <div className="mt-2 flex items-baseline justify-center gap-1">
-                      <span className="text-4xl font-bold">R$</span>
-                      <span className="font-display text-5xl font-bold">497</span>
-                      <span className="text-muted-foreground">/mês</span>
-                    </div>
-                    <div className="mt-1 text-xs text-muted-foreground">
-                      IA Jurídica e Bot comercial 24/7
-                    </div>
-                  </div>
-
-                  <div className="h-px bg-border" />
-
-                  <ul className="space-y-3 flex-1">
-                    {beneficiosCompleto.map((b) => (
-                      <li key={b} className="flex items-start gap-3 text-sm">
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                        <span className={b.includes("Bot") || b.includes("Claude") || b.includes("Fraude") ? "font-semibold" : ""}>{b}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Button
-                    size="lg"
-                    onClick={() => scrollToForm("completo")}
-                    className="w-full gradient-primary text-primary-foreground"
-                  >
-                    Quero o Plano Completo
+                    Assinar Agora
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
+                  <p className="text-center text-xs text-muted-foreground">Cancele a qualquer momento.</p>
                 </CardContent>
               </Card>
             </Reveal>
