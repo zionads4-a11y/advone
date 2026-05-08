@@ -521,7 +521,7 @@ export default function LandingIA() {
             </div>
           </Reveal>
 
-          <div className="mt-12 grid gap-8 md:grid-cols-2 max-w-5xl mx-auto">
+          <div className="mt-12 grid gap-8 md:grid-cols-3 max-w-6xl mx-auto">
             {/* Plano Mensal */}
             <Reveal delay={120}>
               <Card className="h-full border-border/60 bg-card/40 hover:border-primary/20 transition-all">
@@ -532,14 +532,8 @@ export default function LandingIA() {
                     </div>
                     <div className="mt-2 flex items-baseline justify-center gap-1">
                       <span className="text-4xl font-bold">R$</span>
-                      <span className="font-display text-5xl font-bold">497</span>
+                      <span className="font-display text-5xl font-bold">797</span>
                       <span className="text-muted-foreground">/mês</span>
-                    </div>
-                    <div className="mt-1 text-xs text-muted-foreground font-semibold">
-                      Mais flexibilidade para começar
-                    </div>
-                    <div className="mt-1 text-xs text-muted-foreground">
-                      Ideal para quem quer começar sem compromisso de longo prazo.
                     </div>
                   </div>
 
@@ -571,6 +565,50 @@ export default function LandingIA() {
               </Card>
             </Reveal>
 
+            {/* Plano Semestral */}
+            <Reveal delay={180}>
+              <Card className="h-full border-border/60 bg-card/40 hover:border-primary/20 transition-all">
+                <CardContent className="space-y-6 p-8 flex flex-col h-full">
+                  <div className="text-center">
+                    <div className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                      PAGAMENTO SEMESTRAL
+                    </div>
+                    <div className="mt-2 flex items-baseline justify-center gap-1">
+                      <span className="font-display text-4xl font-bold">6x R$ 497</span>
+                    </div>
+                    <div className="mt-1 text-xs text-primary font-bold">
+                      Economize R$ 1.800 no semestre
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-border" />
+
+                  <ul className="space-y-3 flex-1">
+                    {[
+                      "Mesmo acesso completo",
+                      "Suporte prioritário",
+                      "Compromisso de 6 meses",
+                      "Ativação rápida"
+                    ].map((item) => (
+                      <li key={item} className="flex items-start gap-3 text-sm">
+                        <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={() => navigate("/signup?plan=semestral")}
+                    className="w-full"
+                  >
+                    COMEÇAR AGORA
+                  </Button>
+                </CardContent>
+              </Card>
+            </Reveal>
+
             {/* Plano Anual */}
             <Reveal delay={240}>
               <Card className="h-full border-primary/40 bg-card shadow-2xl shadow-primary/10 relative overflow-hidden">
@@ -583,21 +621,14 @@ export default function LandingIA() {
                       PAGAMENTO ANUAL
                     </div>
                     <div className="mt-2 flex items-baseline justify-center gap-1">
-                      <span className="text-4xl font-bold">🔥 12x de R$ 297</span>
-                    </div>
-                    <div className="mt-1 text-xs text-primary font-semibold">
-                      ou pagamento anual à vista
+                      <span className="font-display text-4xl font-bold">12x R$ 297</span>
                     </div>
                     <div className="mt-1 text-xs text-primary font-bold">
-                      Economize R$ 2.400 por ano
+                      Economize R$ 6.000 por ano
                     </div>
                   </div>
 
                   <div className="h-px bg-border" />
-
-                  <p className="text-sm text-center text-muted-foreground">
-                    Mesmo acesso completo à plataforma + economia máxima.
-                  </p>
 
                   <ul className="space-y-3 flex-1">
                     {[
@@ -613,12 +644,6 @@ export default function LandingIA() {
                     ))}
                   </ul>
 
-                  <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
-                    <p className="text-[10px] text-center text-muted-foreground italic">
-                      A única diferença: você paga menos por escolher o compromisso anual.
-                    </p>
-                  </div>
-
                   <Button
                     size="lg"
                     onClick={() => navigate("/signup?plan=anual")}
@@ -627,7 +652,6 @@ export default function LandingIA() {
                     QUERO ECONOMIZAR
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
-                  <p className="text-center text-xs text-muted-foreground">Pagamento anual ou em 12×</p>
                 </CardContent>
               </Card>
             </Reveal>
