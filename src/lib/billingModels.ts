@@ -3,7 +3,7 @@
 //   - partnership_type (sempre "mensalidade_zionads")
 //   - service_mode    (full = CRM completo / ai_only = só IA Laura)
 
-export type BillingModel = "plan_completo" | "plan_ia_monthly" | "plan_ia_6m" | "plan_ia_12m" | "ia_only" | "crm_full";
+export type BillingModel = "plan_completo" | "plan_ia_monthly" | "plan_ia_6m" | "plan_ia_12m" | "plan_cortesia";
 
 export interface BillingModelOption {
   key: BillingModel;
@@ -53,22 +53,13 @@ export const BILLING_MODELS: BillingModelOption[] = [
     monitoring_quota: 30,
   },
   {
-    key: "ia_only",
-    emoji: "🤖",
-    label: "IA Laura Avulsa (Legado)",
-    description: "Acesso restrito: Kanban, Agenda, Conversas e Configuração do Escritório.",
-    partnership_type: "mensalidade_zionads",
-    service_mode: "ai_only",
-    monitoring_quota: 10,
-  },
-  {
-    key: "crm_full",
-    emoji: "🏢",
-    label: "CRM Completo (Legado)",
-    description: "Sistema completo com IA e Financeiro.",
+    key: "plan_cortesia",
+    emoji: "🎁",
+    label: "Plano Cortesia ZionAds",
+    description: "Acesso completo cortesia para parceiros ZionAds. 50 monitoramentos.",
     partnership_type: "mensalidade_zionads",
     service_mode: "full",
-    monitoring_quota: 30,
+    monitoring_quota: 50,
   },
 ];
 
@@ -81,7 +72,6 @@ export function inferBillingModel(
   _partnership_type?: string | null,
   service_mode?: string | null,
 ): BillingModel {
-  if (service_mode === "ai_only") return "ia_only";
-  return "crm_full";
+  return "plan_cortesia";
 }
 
