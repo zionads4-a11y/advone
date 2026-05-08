@@ -57,7 +57,7 @@ export default function Companies() {
         .from("whatsapp_configs")
         .select("id, company_id, zapi_instance_id, zapi_webhook_configured, phone_number, status"),
     ]);
-    if (companiesRes.data) setCompanies(companiesRes.data as Company[]);
+    if (companiesRes.data) setCompanies(companiesRes.data as unknown as Company[]);
     if (configsRes.data) {
       const map: Record<string, WhatsAppConfig> = {};
       configsRes.data.forEach((c) => (map[c.company_id] = c as WhatsAppConfig));
