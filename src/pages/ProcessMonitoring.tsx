@@ -26,6 +26,7 @@ interface MonitoredProcess {
   numero_cnj: string;
   client_name: string;
   tribunal_sigla: string | null;
+  client_cpf: string | null;
   classe: string | null;
   assunto: string | null;
   area: string | null;
@@ -67,6 +68,7 @@ export default function ProcessMonitoring() {
 
   const [newCnj, setNewCnj] = useState("");
   const [newClientName, setNewClientName] = useState("");
+  const [newClientCpf, setNewClientCpf] = useState("");
   const [addCompanyId, setAddCompanyId] = useState("");
 
   // Company selection for admin
@@ -122,8 +124,8 @@ export default function ProcessMonitoring() {
 
   const handleAddProcess = async () => {
     const targetCompanyId = isAdmin && selectedCompanyId === "all" ? addCompanyId : selectedCompanyId;
-    if (!newCnj.trim() || !newClientName.trim() || !targetCompanyId) {
-      toast.error("Preencha todos os campos");
+    if (!newCnj.trim() || !newClientName.trim() || !newClientCpf.trim() || !targetCompanyId) {
+      toast.error("Preencha todos os campos (CNJ, Nome e CPF)");
       return;
     }
     setAddingProcess(true);
@@ -134,6 +136,7 @@ export default function ProcessMonitoring() {
           company_id: targetCompanyId,
           numero_cnj: newCnj.trim(),
           client_name: newClientName.trim(),
+          client_cpf: newClientCpf.trim(),
         },
       });
       if (error) throw error;
@@ -142,6 +145,7 @@ export default function ProcessMonitoring() {
       setAddDialogOpen(false);
       setNewCnj("");
       setNewClientName("");
+      setNewClientCpf("");
       fetchData();
     } catch (e: any) {
       toast.error(e.message || "Erro ao adicionar processo");
@@ -273,6 +277,15 @@ export default function ProcessMonitoring() {
                     maxLength={200}
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label>CPF/CNPJ do Cliente</Label>
+                  <Input
+                    placeholder="000.000.000-00"
+                    value={newClientCpf}
+                    onChange={(e) => setNewClientCpf(e.target.value)}
+                    maxLength={20}
+                  />
+                </div>
                 <Button onClick={handleAddProcess} disabled={addingProcess} className="w-full">
                   {addingProcess ? (
                     <>
@@ -334,6 +347,11 @@ export default function ProcessMonitoring() {
                             <p className="text-xs text-muted-foreground font-mono mt-0.5">
                               {proc.numero_cnj}
                             </p>
+                            {proc.client_cpf && (
+                              <p className="text-[10px] text-muted-foreground mt-0.5">
+                                CPF: {proc.client_cpf}
+                              </p>
+                            )}
                             <div className="flex items-center gap-2 mt-1">
                               {statusIcon(proc.status_predito)}
                               {proc.tribunal_sigla && (

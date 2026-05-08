@@ -2562,6 +2562,7 @@ export type Database = {
           callback_registered_at: string | null
           case_id: string | null
           classe: string | null
+          client_cpf: string | null
           client_name: string
           company_id: string
           created_at: string
@@ -2586,6 +2587,7 @@ export type Database = {
           callback_registered_at?: string | null
           case_id?: string | null
           classe?: string | null
+          client_cpf?: string | null
           client_name: string
           company_id: string
           created_at?: string
@@ -2610,6 +2612,7 @@ export type Database = {
           callback_registered_at?: string | null
           case_id?: string | null
           classe?: string | null
+          client_cpf?: string | null
           client_name?: string
           company_id?: string
           created_at?: string
