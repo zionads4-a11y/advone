@@ -215,8 +215,12 @@ export default function LandingIA() {
     trackMetaEvent("ViewContent", { contentName: "Landing IA - Laura SDR" });
   }, []);
 
-  function scrollToForm() {
-    trackMetaEvent("InitiateCheckout", { contentName: "CTA Landing IA" });
+  function scrollToForm(plan?: string) {
+    trackMetaEvent("InitiateCheckout", { contentName: "CTA Landing IA", plan });
+    if (plan) {
+      navigate(`/signup?plan=${plan}`);
+      return;
+    }
     formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
@@ -305,7 +309,7 @@ export default function LandingIA() {
               FAQ
             </a>
           </nav>
-          <Button onClick={scrollToForm} className="gradient-primary text-primary-foreground">
+          <Button onClick={() => scrollToForm()} className="gradient-primary text-primary-foreground">
             Quero a Laura
           </Button>
         </div>
@@ -339,7 +343,7 @@ export default function LandingIA() {
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Button
                   size="lg"
-                  onClick={scrollToForm}
+                  onClick={() => scrollToForm()}
                   className="gradient-primary text-primary-foreground"
                 >
                   Agendar demonstração grátis
@@ -551,7 +555,7 @@ export default function LandingIA() {
                   <Button
                     size="lg"
                     variant="outline"
-                    onClick={scrollToForm}
+                    onClick={() => scrollToForm("admin")}
                     className="w-full"
                   >
                     Começar com Admin
@@ -594,7 +598,7 @@ export default function LandingIA() {
 
                   <Button
                     size="lg"
-                    onClick={scrollToForm}
+                    onClick={() => scrollToForm("completo")}
                     className="w-full gradient-primary text-primary-foreground"
                   >
                     Quero o Plano Completo
@@ -848,7 +852,7 @@ export default function LandingIA() {
               </p>
               <Button
                 size="lg"
-                onClick={scrollToForm}
+                onClick={() => scrollToForm()}
                 className="gradient-primary text-primary-foreground"
               >
                 Quero a Laura no meu WhatsApp
