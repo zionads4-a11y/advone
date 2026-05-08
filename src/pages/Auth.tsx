@@ -44,13 +44,13 @@ export default function Auth() {
           </p>
         </div>
 
-        <LoginForm />
+        <LoginForm mode={mode} />
       </div>
     </div>
   );
 }
 
-function LoginForm() {
+function LoginForm({ mode }: { mode: string | null }) {
   const { signInWithGoogle, signIn } = useAuth();
   const [googleLoading, setGoogleLoading] = useState(false);
   const [emailLoading, setEmailLoading] = useState(false);
