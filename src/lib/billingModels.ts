@@ -3,7 +3,7 @@
 //   - partnership_type (sempre "mensalidade_zionads")
 //   - service_mode    (full = CRM completo / ai_only = só IA Laura)
 
-export type BillingModel = "ia_only" | "crm_full";
+export type BillingModel = "plan_admin" | "plan_completo" | "ia_only" | "crm_full";
 
 export interface BillingModelOption {
   key: BillingModel;
@@ -12,26 +12,45 @@ export interface BillingModelOption {
   description: string;
   partnership_type: "mensalidade_zionads";
   service_mode: "full" | "ai_only";
+  monitoring_quota: number;
 }
 
 export const BILLING_MODELS: BillingModelOption[] = [
   {
+    key: "plan_admin",
+    emoji: "💼",
+    label: "Plano Admin (R$ 297/mês)",
+    description: "CRM completo, Agenda, Financeiro, Docs. WhatsApp (só notificações). IA Gemini. 20 monitoramentos.",
+    partnership_type: "mensalidade_zionads",
+    service_mode: "full",
+    monitoring_quota: 20,
+  },
+  {
+    key: "plan_completo",
+    emoji: "🚀",
+    label: "Plano Completo (R$ 497/mês)",
+    description: "Tudo do Admin + Bot SDR (Laura), IA Jurídica Claude, Alertas de Fraude, Boards. 50 monitoramentos.",
+    partnership_type: "mensalidade_zionads",
+    service_mode: "full",
+    monitoring_quota: 50,
+  },
+  {
     key: "ia_only",
     emoji: "🤖",
-    label: "IA Laura Avulsa (cliente compra só o uso da IA)",
-    description:
-      "Acesso restrito: Kanban, Agenda, Conversas e Configuração do Escritório. Sem CRM completo.",
+    label: "IA Laura Avulsa (Legado)",
+    description: "Acesso restrito: Kanban, Agenda, Conversas e Configuração do Escritório.",
     partnership_type: "mensalidade_zionads",
     service_mode: "ai_only",
+    monitoring_quota: 10,
   },
   {
     key: "crm_full",
     emoji: "🏢",
-    label: "CRM Completo (cliente compra tudo)",
-    description:
-      "Sistema completo: CRM, IA, Financeiro, Kanban, Agenda, Contratos, Documentos. Mensalidade fixa.",
+    label: "CRM Completo (Legado)",
+    description: "Sistema completo com IA e Financeiro.",
     partnership_type: "mensalidade_zionads",
     service_mode: "full",
+    monitoring_quota: 30,
   },
 ];
 
