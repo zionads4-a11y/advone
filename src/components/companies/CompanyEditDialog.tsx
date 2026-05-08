@@ -45,6 +45,9 @@ interface Company {
   service_mode?: ServiceMode | null;
   billing_model?: BillingModel | null;
   custom_base_value?: number | null;
+  office_legal_name?: string | null;
+  office_cnpj?: string | null;
+  office_address?: string | null;
   bot_name?: string | null;
   bot_role_description?: string | null;
   google_client_id?: string | null;
@@ -65,6 +68,9 @@ interface CompanyEditDialogProps {
       service_mode: ServiceMode;
       billing_model: BillingModel;
       custom_base_value: number | null;
+      office_legal_name: string | null;
+      office_cnpj: string | null;
+      office_address: string | null;
       bot_name: string;
       bot_role_description: string;
       google_client_id: string | null;
@@ -90,6 +96,9 @@ export function CompanyEditDialog({
   const [googleClientId, setGoogleClientId] = useState("");
   const [googleClientSecret, setGoogleClientSecret] = useState("");
   const [customBaseValue, setCustomBaseValue] = useState<string>("");
+  const [officeLegalName, setOfficeLegalName] = useState("");
+  const [officeCnpj, setOfficeCnpj] = useState("");
+  const [officeAddress, setOfficeAddress] = useState("");
 
   useEffect(() => {
     if (company) {
@@ -105,6 +114,9 @@ export function CompanyEditDialog({
       setGoogleClientId(company.google_client_id || "");
       setGoogleClientSecret(company.google_client_secret || "");
       setCustomBaseValue(company.custom_base_value?.toString() || "");
+      setOfficeLegalName(company.office_legal_name || "");
+      setOfficeCnpj(company.office_cnpj || "");
+      setOfficeAddress(company.office_address || "");
     }
   }, [company]);
 
@@ -128,6 +140,9 @@ export function CompanyEditDialog({
               service_mode: model.service_mode,
               billing_model: model.key,
               custom_base_value: customBaseValue ? parseFloat(customBaseValue) : null,
+              office_legal_name: officeLegalName || null,
+              office_cnpj: officeCnpj || null,
+              office_address: officeAddress || null,
               bot_name: botName,
               bot_role_description: botRoleDescription,
               google_client_id: googleClientId || null,
@@ -146,6 +161,30 @@ export function CompanyEditDialog({
               value={whatsapp}
               onChange={(e) => setWhatsapp(e.target.value)}
               placeholder="5511999999999"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Nome Completo / Razão Social</Label>
+            <Input
+              value={officeLegalName}
+              onChange={(e) => setOfficeLegalName(e.target.value)}
+              placeholder="Nome para o boleto"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>CPF / CNPJ</Label>
+            <Input
+              value={officeCnpj}
+              onChange={(e) => setOfficeCnpj(e.target.value)}
+              placeholder="000.000.000-00"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Endereço Completo</Label>
+            <Input
+              value={officeAddress}
+              onChange={(e) => setOfficeAddress(e.target.value)}
+              placeholder="Rua, número, bairro..."
             />
           </div>
           <div className="space-y-2">

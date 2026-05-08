@@ -74,6 +74,9 @@ export default function Companies() {
     const { error } = await supabase.from("companies").insert({
       name: formData.get("name") as string,
       whatsapp: (formData.get("whatsapp") as string) || null,
+      office_legal_name: (formData.get("office_legal_name") as string) || null,
+      office_cnpj: (formData.get("office_cnpj") as string) || null,
+      office_address: (formData.get("office_address") as string) || null,
       partnership_type: model.partnership_type,
       service_mode: model.service_mode,
       billing_model: model.key,

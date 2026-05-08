@@ -51,6 +51,18 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
             <Input name="name" required placeholder="Nome da empresa" />
           </div>
           <div className="space-y-2">
+            <Label>Nome Completo / Razão Social *</Label>
+            <Input name="office_legal_name" required placeholder="Nome para o boleto" />
+          </div>
+          <div className="space-y-2">
+            <Label>CPF / CNPJ *</Label>
+            <Input name="office_cnpj" required placeholder="000.000.000-00 ou 00.000.000/0000-00" />
+          </div>
+          <div className="space-y-2">
+            <Label>Endereço Completo *</Label>
+            <Input name="office_address" required placeholder="Rua, número, bairro, cidade, UF" />
+          </div>
+          <div className="space-y-2">
             <Label>Telefone / WhatsApp</Label>
             <Input name="whatsapp" placeholder="5511999999999" />
           </div>
