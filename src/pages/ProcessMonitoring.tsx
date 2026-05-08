@@ -200,7 +200,7 @@ export default function ProcessMonitoring() {
             Monitoramento de Processos
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Acompanhe movimentações processuais diariamente via Escavador • <span className="font-medium text-foreground">R$ 3,50/mês por processo ativo</span>
+            Acompanhe movimentações processuais diariamente via Escavador • <span className="font-medium text-foreground">R$ 2,50/mês por processo ativo</span>
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -229,6 +229,15 @@ export default function ProcessMonitoring() {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Adicionar Processo ao Monitoramento</DialogTitle>
+                <div className="bg-primary/5 border border-primary/20 rounded-md p-3 mt-2">
+                  <p className="text-xs text-primary font-medium flex items-center gap-2">
+                    <AlertCircle className="h-3.5 w-3.5" />
+                    Atenção: Cobrança de R$ 2,50/mês
+                  </p>
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Cada processo ativo gera uma cobrança mensal de R$ 2,50 que será incluída na fatura do seu contrato ZionAds.
+                  </p>
+                </div>
               </DialogHeader>
               <div className="space-y-4 pt-2">
                 {isAdmin && selectedCompanyId === "all" && (
