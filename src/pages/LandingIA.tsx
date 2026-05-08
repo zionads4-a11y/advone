@@ -513,34 +513,33 @@ export default function LandingIA() {
                 Oferta exclusiva desta página
               </div>
               <h2 className="mt-4 font-display text-3xl font-bold md:text-4xl">
-                Planos Sob Medida
+                ESCOLHA SUA FORMA DE PAGAMENTO
               </h2>
               <p className="mt-4 text-muted-foreground">
-                Tudo que você precisa para nunca mais perder um lead — por menos do que custa um
-                estagiário.
+                Tudo que seu escritório precisa para nunca mais perder um lead.
               </p>
             </div>
           </Reveal>
 
           <div className="mt-12 grid gap-8 md:grid-cols-2 max-w-5xl mx-auto">
-            {/* Plano Semestral */}
+            {/* Plano Mensal */}
             <Reveal delay={120}>
               <Card className="h-full border-border/60 bg-card/40 hover:border-primary/20 transition-all">
                 <CardContent className="space-y-6 p-8 flex flex-col h-full">
                   <div className="text-center">
                     <div className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                      Semestral
+                      PAGAMENTO MENSAL
                     </div>
                     <div className="mt-2 flex items-baseline justify-center gap-1">
                       <span className="text-4xl font-bold">R$</span>
-                      <span className="font-display text-5xl font-bold">297</span>
+                      <span className="font-display text-5xl font-bold">497</span>
                       <span className="text-muted-foreground">/mês</span>
                     </div>
                     <div className="mt-1 text-xs text-muted-foreground font-semibold">
-                      6× R$ 297 — Total R$ 1.782
+                      Mais flexibilidade para começar
                     </div>
                     <div className="mt-1 text-xs text-muted-foreground">
-                      Ideal para médio prazo
+                      Ideal para quem quer começar sem compromisso de longo prazo.
                     </div>
                   </div>
 
@@ -548,13 +547,10 @@ export default function LandingIA() {
 
                   <ul className="space-y-3 flex-1">
                     {[
-                      "IA Jurídica com Gemini Flash",
-                      "CRM Jurídico completo com Kanban",
-                      "WhatsApp (Notificações automáticas)",
-                      "Agenda e Financeiro integrados",
-                      "Documentos e Templates ilimitados",
-                      "20 monitoramentos de processos inclusos",
-                      "Suporte prioritário"
+                      "Mesmo acesso completo à plataforma",
+                      "Sem fidelidade",
+                      "Cancele quando quiser",
+                      "Ativação rápida em até 24h"
                     ].map((item) => (
                       <li key={item} className="flex items-start gap-3 text-sm">
                         <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
@@ -566,12 +562,11 @@ export default function LandingIA() {
                   <Button
                     size="lg"
                     variant="outline"
-                    onClick={() => navigate("/signup?plan=semestral")}
+                    onClick={() => navigate("/signup?plan=mensal")}
                     className="w-full"
                   >
-                    Assinar Semestral
+                    COMEÇAR AGORA
                   </Button>
-                  <p className="text-center text-xs text-muted-foreground">Pagamento em 6×</p>
                 </CardContent>
               </Card>
             </Reveal>
@@ -580,35 +575,36 @@ export default function LandingIA() {
             <Reveal delay={240}>
               <Card className="h-full border-primary/40 bg-card shadow-2xl shadow-primary/10 relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-primary px-3 py-1 text-[10px] font-bold text-primary-foreground uppercase tracking-widest rounded-bl-lg">
-                  Melhor Preço
+                  Melhor Custo-Benefício
                 </div>
                 <CardContent className="space-y-6 p-8 flex flex-col h-full">
                   <div className="text-center">
                     <div className="text-sm font-semibold uppercase tracking-wide text-primary">
-                      Anual
+                      PAGAMENTO ANUAL
                     </div>
                     <div className="mt-2 flex items-baseline justify-center gap-1">
-                      <span className="text-4xl font-bold">R$</span>
-                      <span className="font-display text-5xl font-bold">197</span>
-                      <span className="text-muted-foreground">/mês</span>
+                      <span className="text-4xl font-bold">🔥 12x de R$ 297</span>
                     </div>
                     <div className="mt-1 text-xs text-primary font-semibold">
-                      12× R$ 197 — Total R$ 2.364/ano
+                      ou pagamento anual à vista
                     </div>
-                    <div className="mt-1 text-xs text-muted-foreground">
-                      Custo-benefício imbatível
+                    <div className="mt-1 text-xs text-primary font-bold">
+                      Economize R$ 2.400 por ano
                     </div>
                   </div>
 
                   <div className="h-px bg-border" />
 
+                  <p className="text-sm text-center text-muted-foreground">
+                    Mesmo acesso completo à plataforma + economia máxima.
+                  </p>
+
                   <ul className="space-y-3 flex-1">
                     {[
-                      "Tudo do Plano Semestral",
-                      "Menor preço do mercado",
-                      "Preço travado por 12 meses",
-                      "Onboarding personalizado",
-                      "Suporte prioritário VIP"
+                      "Tudo exatamente igual ao plano mensal",
+                      "Mesmo suporte",
+                      "Mesmo sistema completo",
+                      "Mesmo funcionalidades"
                     ].map((item) => (
                       <li key={item} className="flex items-start gap-3 text-sm">
                         <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
@@ -617,18 +613,43 @@ export default function LandingIA() {
                     ))}
                   </ul>
 
+                  <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
+                    <p className="text-[10px] text-center text-muted-foreground italic">
+                      A única diferença: você paga menos por escolher o compromisso anual.
+                    </p>
+                  </div>
+
                   <Button
                     size="lg"
                     onClick={() => navigate("/signup?plan=anual")}
                     className="w-full gradient-primary text-primary-foreground font-bold"
                   >
-                    Assinar Anual e Economizar
+                    QUERO ECONOMIZAR
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                   <p className="text-center text-xs text-muted-foreground">Pagamento anual ou em 12×</p>
                 </CardContent>
               </Card>
             </Reveal>
+          </div>
+
+          <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
+            {[
+              "Secretária Virtual Jurídica com IA 24h",
+              "Atendimento automático no seu WhatsApp",
+              "Qualificação inteligente dos leads",
+              "Agendamento automático na sua agenda",
+              "Follow-up automático",
+              "CRM Jurídico completo com Kanban",
+              "Agenda + Financeiro integrados",
+              "Templates e documentos ilimitados",
+              "Suporte prioritário"
+            ].map((feature) => (
+              <div key={feature} className="flex items-center gap-3 p-4 rounded-xl border border-border/60 bg-card/40">
+                <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+                <span className="text-sm font-medium">{feature}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>

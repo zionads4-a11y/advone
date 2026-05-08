@@ -831,31 +831,36 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl px-6 py-24">
           <Reveal className="mb-16 text-center">
             <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Planos</p>
-            <h2 className="text-3xl font-bold md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              A tecnologia mais avançada para o seu escritório.
+            <h2 className="text-3xl font-bold md:text-4xl mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              ESCOLHA SUA FORMA DE PAGAMENTO
             </h2>
+            <p className="text-[hsl(220,10%,60%)] max-w-2xl mx-auto">
+              Tudo que seu escritório precisa para nunca mais perder um lead.
+            </p>
           </Reveal>
-          <div className="grid gap-8 md:grid-cols-2 max-w-4xl mx-auto">
-            {/* Plano Semestral */}
+
+          <div className="grid gap-8 md:grid-cols-2 max-w-5xl mx-auto">
+            {/* Plano Mensal */}
             <Reveal delay={0}>
               <div className="rounded-2xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col h-full transition-all duration-500 hover:border-[hsl(153,60%,45%)]/30 hover:-translate-y-1">
                 <div className="mb-6 flex items-center justify-between">
-                  <span className="inline-block rounded-full bg-[hsl(220,20%,16%)] px-3 py-1 text-xs font-semibold text-[hsl(220,10%,75%)]">Semestral</span>
+                  <span className="inline-block rounded-full bg-[hsl(220,20%,16%)] px-3 py-1 text-xs font-semibold text-[hsl(220,10%,75%)]">PAGAMENTO MENSAL</span>
                 </div>
-                <p className="mb-1 text-5xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                  R$ 297<span className="text-base font-normal text-[hsl(220,10%,55%)]">/mês</span>
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold text-[hsl(220,10%,92%)] mb-2">Mais flexibilidade para começar</h3>
+                  <p className="text-5xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                    R$ 497<span className="text-base font-normal text-[hsl(220,10%,55%)]">/mês</span>
+                  </p>
+                </div>
+                <p className="mb-8 text-sm text-[hsl(220,10%,55%)] italic">
+                  Ideal para quem quer começar sem compromisso de longo prazo.
                 </p>
-                <p className="mt-1 mb-1 text-xs text-[hsl(220,10%,55%)] font-semibold">6× R$ 297 — Total R$ 1.782</p>
-                <p className="mb-6 text-sm text-[hsl(220,10%,55%)]">Ideal para médio prazo</p>
                 <ul className="mb-8 flex-1 space-y-3">
                   {[
-                    "IA Jurídica com Gemini Flash",
-                    "CRM jurídico completo com Kanban",
-                    "WhatsApp (Notificações automáticas)",
-                    "Agenda e Financeiro integrados",
-                    "Documentos e Templates ilimitados",
-                    "20 monitoramentos de processos inclusos",
-                    "Suporte prioritário via WhatsApp"
+                    "Mesmo acesso completo à plataforma",
+                    "Sem fidelidade",
+                    "Cancele quando quiser",
+                    "Ativação rápida em até 24h"
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2 text-sm text-[hsl(220,10%,75%)]">
                       <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(153,60%,45%)]" />
@@ -864,12 +869,11 @@ export default function LandingPage() {
                   ))}
                 </ul>
                 <Button 
-                  onClick={() => navigate("/signup?plan=semestral")} 
-                  className="w-full bg-transparent border border-[hsl(220,20%,16%)] hover:bg-[hsl(220,20%,16%)] text-[hsl(220,10%,92%)] font-semibold"
+                  onClick={() => navigate("/signup?plan=mensal")} 
+                  className="w-full bg-transparent border border-[hsl(220,20%,16%)] hover:bg-[hsl(220,20%,16%)] text-[hsl(220,10%,92%)] font-bold py-6"
                 >
-                  Assinar Semestral
+                  COMEÇAR AGORA
                 </Button>
-                <p className="mt-4 text-center text-xs text-[hsl(220,10%,50%)]">Pagamento em 6×</p>
               </div>
             </Reveal>
 
@@ -877,40 +881,70 @@ export default function LandingPage() {
             <Reveal delay={150}>
               <div className="relative rounded-2xl border-2 border-[hsl(153,60%,45%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col h-full shadow-xl shadow-[hsl(153,60%,45%)]/10 transition-all duration-500 hover:-translate-y-2">
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[hsl(153,60%,45%)] px-4 py-1 text-xs font-bold text-[hsl(220,25%,6%)]">
-                  MELHOR PREÇO
+                  MELHOR CUSTO-BENEFÍCIO
                 </div>
                 <div className="mb-6 flex items-center justify-between">
-                  <span className="inline-block rounded-full bg-[hsl(153,60%,45%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(153,60%,45%)]">Anual</span>
+                  <span className="inline-block rounded-full bg-[hsl(153,60%,45%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(153,60%,45%)]">PAGAMENTO ANUAL</span>
                 </div>
-                <p className="mb-1 text-5xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                  R$ 197<span className="text-base font-normal text-[hsl(220,10%,55%)]">/mês</span>
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold text-[hsl(220,10%,92%)] mb-2 text-[hsl(153,60%,45%)]">Melhor custo-benefício</h3>
+                  <p className="text-5xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                    🔥 12x de R$ 297
+                  </p>
+                  <p className="mt-2 text-sm text-[hsl(220,10%,55%)]">ou pagamento anual à vista</p>
+                  <p className="mt-2 text-[hsl(153,60%,45%)] font-bold text-sm">Economize R$ 2.400 por ano</p>
+                </div>
+                <p className="mb-8 text-sm text-[hsl(220,10%,75%)]">
+                  Mesmo acesso completo à plataforma + economia máxima.
                 </p>
-                <p className="mt-1 mb-1 text-xs text-[hsl(153,60%,45%)] font-semibold">12× R$ 197 — Total R$ 2.364/ano</p>
-                <p className="mb-6 text-sm text-[hsl(220,10%,55%)]">Custo-benefício imbatível</p>
                 <ul className="mb-8 flex-1 space-y-3">
                   {[
-                    "Tudo do Plano Semestral",
-                    "Menor preço do mercado",
-                    "Preço travado por 12 meses",
-                    "Onboarding personalizado",
-                    "Suporte prioritário VIP"
+                    "Tudo exatamente igual ao plano mensal",
+                    "Mesmo suporte",
+                    "Mesmo sistema completo",
+                    "Mesmo funcionalidades"
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2 text-sm text-[hsl(220,10%,75%)]">
                       <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(153,60%,45%)]" />
-                      <span className="font-medium">{item}</span>
+                      {item}
                     </li>
                   ))}
                 </ul>
+                <div className="mb-6 p-4 rounded-xl bg-[hsl(153,60%,45%)]/5 border border-[hsl(153,60%,45%)]/20">
+                  <p className="text-xs text-[hsl(220,10%,75%)] leading-relaxed">
+                    A única diferença: você paga menos por escolher o compromisso anual.
+                  </p>
+                </div>
                 <Button 
                   onClick={() => navigate("/signup?plan=anual")} 
                   size="lg"
-                  className="w-full bg-gradient-to-r from-[hsl(153,60%,45%)] to-[hsl(153,70%,55%)] hover:opacity-90 text-[hsl(220,25%,6%)] font-bold text-lg py-6"
+                  className="w-full bg-gradient-to-r from-[hsl(153,60%,45%)] to-[hsl(153,70%,55%)] hover:opacity-90 text-[hsl(220,25%,6%)] font-bold text-lg py-6 shadow-lg shadow-[hsl(153,60%,45%)]/20"
                 >
-                  Assinar Anual e Economizar
+                  QUERO ECONOMIZAR
                 </Button>
-                <p className="mt-4 text-center text-xs text-[hsl(220,10%,50%)]">Pagamento anual ou em 12×</p>
               </div>
             </Reveal>
+          </div>
+
+          <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
+            {[
+              "Secretária Virtual Jurídica com IA 24h",
+              "Atendimento automático no seu WhatsApp",
+              "Qualificação inteligente dos leads",
+              "Agendamento automático na sua agenda",
+              "Follow-up automático",
+              "CRM Jurídico completo com Kanban",
+              "Agenda + Financeiro integrados",
+              "Templates e documentos ilimitados",
+              "Suporte prioritário"
+            ].map((feature) => (
+              <div key={feature} className="flex items-center gap-3 p-4 rounded-xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)]">
+                <div className="h-5 w-5 flex items-center justify-center rounded-full bg-[hsl(153,60%,45%)]/20 text-[hsl(153,60%,45%)]">
+                  <CheckCircle2 className="h-4 w-4" />
+                </div>
+                <span className="text-sm font-medium text-[hsl(220,10%,80%)]">{feature}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
