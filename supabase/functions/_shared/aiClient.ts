@@ -17,8 +17,9 @@
 
 const LOVABLE_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
+const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 
-export type AIProvider = "lovable" | "openai";
+export type AIProvider = "lovable" | "openai" | "anthropic";
 
 export interface CompanyAIConfig {
   provider: AIProvider;
@@ -90,8 +91,84 @@ export async function chatCompletion(params: ChatCompletionParams): Promise<any>
 
   if (params.companyId && !params.forceProvider) {
     const cfg = await getCompanyAIConfig(params.companyId);
-    provider = cfg.use_openai_for_testing ? "openai" : cfg.provider;
+    provider = cfg.use_openai_for_testing ? "anthropic" : cfg.provider;
     model = params.forceModel ?? cfg.model;
+  }
+
+  if (provider === "anthropic") {
+    const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
+    if (!apiKey) throw new Error("ANTHROPIC_API_KEY não configurada");
+
+    // Limpar prefixo se houver (ex: "anthropic/claude-sonnet-4-6" -> "claude-sonnet-4-6")
+    if (model.includes("/")) {
+      model = model.split("/").pop()!;
+    }
+
+    // Separar system message das demais
+    const systemMsg = params.messages.find(m => m.role === "system");
+    const otherMessages = params.messages.filter(m => m.role !== "system");
+
+    const anthropicBody: any = {
+      model,
+      max_tokens: 4096,
+      messages: otherMessages.map(m => ({
+        role: m.role === "tool" ? "user" : m.role,
+        content: m.content ?? "",
+      })),
+    };
+
+    if (systemMsg?.content) {
+      anthropicBody.system = systemMsg.content;
+    }
+
+    // Suporte a extended thinking para modelos que suportam
+    if (params.reasoning && (model.includes("claude-opus") || model.includes("claude-sonnet"))) {
+      anthropicBody.thinking = {
+        type: "enabled",
+        budget_tokens: params.reasoning.effort === "high" ? 8000 : params.reasoning.effort === "medium" ? 4000 : 2000,
+      };
+      anthropicBody.max_tokens = anthropicBody.max_tokens + anthropicBody.thinking.budget_tokens;
+    }
+
+    if (params.stream) {
+      anthropicBody.stream = true;
+    }
+
+    const resp = await fetch(ANTHROPIC_URL, {
+      method: "POST",
+      headers: {
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(anthropicBody),
+    });
+
+    if (!resp.ok) {
+      const errText = await resp.text();
+      throw new Error(`AI anthropic ${resp.status}: ${errText}`);
+    }
+
+    if (params.stream) return resp;
+
+    // Converter resposta Anthropic para formato OpenAI (compatibilidade)
+    const anthropicData = await resp.json();
+    const textBlock = anthropicData.content?.find((b: any) => b.type === "text");
+
+    return {
+      choices: [{
+        message: {
+          role: "assistant",
+          content: textBlock?.text ?? "",
+        },
+        finish_reason: anthropicData.stop_reason === "end_turn" ? "stop" : anthropicData.stop_reason,
+      }],
+      usage: {
+        prompt_tokens: anthropicData.usage?.input_tokens ?? 0,
+        completion_tokens: anthropicData.usage?.output_tokens ?? 0,
+        total_tokens: (anthropicData.usage?.input_tokens ?? 0) + (anthropicData.usage?.output_tokens ?? 0),
+      },
+    };
   }
 
   const url = provider === "openai" ? OPENAI_URL : LOVABLE_URL;
