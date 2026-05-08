@@ -68,7 +68,7 @@ export default function Companies() {
   const handleAdd = async (formData: FormData) => {
     if (!user) return;
 
-    const billingKey = (formData.get("billing_model") as BillingModel) || "crm_full";
+    const billingKey = (formData.get("billing_model") as BillingModel) || "plan_completo";
     const model = getBillingModel(billingKey);
 
     const { error } = await supabase.from("companies").insert({
