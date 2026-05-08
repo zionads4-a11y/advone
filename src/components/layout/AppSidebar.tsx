@@ -55,6 +55,7 @@ const AI_ONLY_ROUTES = new Set([
   "/clientes",
   "/agenda",
   "/tarefas",
+  "/monitoramento",
   "/company-settings",
 ]);
 

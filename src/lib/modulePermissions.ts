@@ -82,7 +82,7 @@ export const MODULE_CATALOG: ModuleDefinition[] = [
     description: "Acompanhar movimentações processuais.",
     route: "/monitoramento",
     icon: Radar,
-    defaultForOperador: false,
+    defaultForOperador: true,
   },
   {
     key: "legal_ai",
