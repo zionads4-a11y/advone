@@ -117,6 +117,7 @@ export function WhatsAppConfigDialog({
         );
         setAiObjective(data.ai_objective || "Entrar em contato com os Leads e agendar uma reunião");
         setAlertWhatsapp(data.alert_whatsapp || "");
+        setCheckClientStatus(data.check_client_status || false);
       }
       setAiLoading(false);
     };
