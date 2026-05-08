@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserCompanies } from "@/hooks/useUserCompanies";
 import { useAuth } from "@/hooks/useAuth";
+import { type BillingModel } from "@/lib/billingModels";
 
 export type ServiceMode = "full" | "ai_only";
 
 /**
- * Returns the service_mode of the user's primary company.
+ * Returns the service_mode and billing_model of the user's primary company.
  * For admin/member (agency staff) returns "full" (they see everything).
  * For gerente/operador/client returns the mode of their first linked company.
  */
@@ -14,6 +15,7 @@ export function useCompanyServiceMode() {
   const { userRole } = useAuth();
   const { companyIds, loading: companiesLoading } = useUserCompanies();
   const [serviceMode, setServiceMode] = useState<ServiceMode>("full");
+  const [billingModel, setBillingModel] = useState<BillingModel | null>(null);
   const [loading, setLoading] = useState(true);
 
   const isAgencyStaff = userRole === "admin" || userRole === "member";
@@ -21,6 +23,7 @@ export function useCompanyServiceMode() {
   useEffect(() => {
     if (isAgencyStaff) {
       setServiceMode("full");
+      setBillingModel("plan_completo"); // Admins see everything
       setLoading(false);
       return;
     }
@@ -35,14 +38,13 @@ export function useCompanyServiceMode() {
     const fetchMode = async () => {
       const { data } = await supabase
         .from("companies")
-        .select("service_mode")
+        .select("service_mode, billing_model")
         .eq("id", companyIds[0])
         .maybeSingle();
 
-      if (data?.service_mode === "ai_only") {
-        setServiceMode("ai_only");
-      } else {
-        setServiceMode("full");
+      if (data) {
+        setServiceMode(data.service_mode as ServiceMode);
+        setBillingModel(data.billing_model as BillingModel);
       }
       setLoading(false);
     };
@@ -50,5 +52,11 @@ export function useCompanyServiceMode() {
     fetchMode();
   }, [companyIds, companiesLoading, isAgencyStaff]);
 
-  return { serviceMode, isAiOnly: serviceMode === "ai_only", loading };
+  return { 
+    serviceMode, 
+    isAiOnly: serviceMode === "ai_only", 
+    billingModel,
+    isPlanCompleto: billingModel === "plan_completo" || billingModel === "crm_full",
+    loading 
+  };
 }

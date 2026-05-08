@@ -1495,7 +1495,7 @@ serve(async (req) => {
         id, company_id, zapi_instance_id, zapi_token, ai_enabled, ai_prompt, ai_auto_reply, 
         office_name, practice_area, communication_tone, scheduling_link, consultation_duration, 
         target_audience, alert_whatsapp, triage_options, debug_mode,
-        companies (name, bot_name, bot_role_description, timezone, decision_rules)
+        companies (name, bot_name, bot_role_description, timezone, decision_rules, billing_model)
       `)
       .eq("company_id", companyId)
       .maybeSingle();
@@ -1770,7 +1770,8 @@ serve(async (req) => {
     });
 
     // AI Auto-Reply with multi-agent support
-    if (config.ai_enabled && config.ai_auto_reply && leadId && !existingLead?.bot_disabled) {
+    const isPlanCompleto = config.companies?.billing_model === 'plan_completo' || config.companies?.billing_model === 'crm_full';
+    if (config.ai_enabled && config.ai_auto_reply && leadId && !existingLead?.bot_disabled && isPlanCompleto) {
       try {
         const leadStatus = existingLead?.status;
         const isCompleted = currentPhase === "completed";

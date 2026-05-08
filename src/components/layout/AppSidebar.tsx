@@ -67,17 +67,18 @@ const adminItems = [
   { title: "Assinaturas", url: "/assinatura", icon: CreditCard },
   { title: "Histórico de Leads", url: "/historico-leads", icon: History },
   { title: "Leads Landing IA", url: "/leads-landing-ia", icon: History },
-  { title: "Alertas de Fraude", url: "/fraudes", icon: ShieldAlert },
+  { title: "Alertas de Fraude", url: "/fraudes", icon: ShieldAlert, premium: true },
 ];
 
 const gerenteItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Kanban", url: "/kanban", icon: Kanban },
-  { title: "Quadros", url: "/boards", icon: Layers },
+  { title: "Quadros", url: "/boards", icon: Layers, premium: true },
   { title: "Tarefas", url: "/tarefas", icon: CheckSquare },
   { title: "Clientes", url: "/clientes", icon: UserCheck },
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
+  { title: "Bot SDR", url: "/bot-config", icon: Bot, premium: true },
   { title: "IA Jurídica", url: "/ia-juridica", icon: Scale, premium: true },
   { title: "Financeiro", url: "/financeiro", icon: Wallet },
   { title: "Monitoramento", url: "/monitoramento", icon: Radar },
@@ -151,7 +152,7 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const { unreadCount } = useNewMessageNotifications();
   const { profile, initials } = useUserProfile();
-  const { isAiOnly } = useCompanyServiceMode();
+  const { isAiOnly, isPlanCompleto } = useCompanyServiceMode();
   const { can, isUnrestricted } = useModulePermissions();
   const baseItems = getMenuItems(userRole);
   
@@ -163,15 +164,20 @@ export function AppSidebar() {
   const aiFiltered = isAiOnly
     ? filteredBaseItems.filter((item) => AI_ONLY_ROUTES.has(item.url))
     : filteredBaseItems;
+
+  const planFiltered = aiFiltered.filter((item) => {
+    if ((item as any).premium && !isPlanCompleto) return false;
+    return true;
+  });
     
   // Para operador, filtra também pelos módulos liberados pelo gerente
   const menuItems =
     userRole === "operador" && !isUnrestricted
-      ? aiFiltered.filter((item) => {
+      ? planFiltered.filter((item) => {
           const moduleKey = MODULE_BY_ROUTE[item.url] as ModuleKey | undefined;
           return moduleKey ? can(moduleKey) : true;
         })
-      : aiFiltered;
+      : planFiltered;
 
   return (
     <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border bg-sidebar">
