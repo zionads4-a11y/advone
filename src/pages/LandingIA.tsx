@@ -556,7 +556,7 @@ export default function LandingIA() {
                   <Button
                     size="lg"
                     variant="outline"
-                    onClick={() => navigate("/signup?plan=mensal")}
+                    onClick={() => document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' })}
                     className="w-full"
                   >
                     COMEÇAR AGORA
@@ -600,7 +600,7 @@ export default function LandingIA() {
                   <Button
                     size="lg"
                     variant="outline"
-                    onClick={() => navigate("/signup?plan=semestral")}
+                    onClick={() => document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' })}
                     className="w-full"
                   >
                     COMEÇAR AGORA
@@ -646,7 +646,7 @@ export default function LandingIA() {
 
                   <Button
                     size="lg"
-                    onClick={() => navigate("/signup?plan=anual")}
+                    onClick={() => document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' })}
                     className="w-full gradient-primary text-primary-foreground font-bold"
                   >
                     QUERO ECONOMIZAR
