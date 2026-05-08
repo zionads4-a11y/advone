@@ -169,6 +169,7 @@ Deno.serve(async (req) => {
           company_id,
           numero_cnj: numero_cnj.trim(),
           client_name,
+          client_cpf: client_cpf || null,
           tribunal_sigla: tribunal || fonte?.sigla || null,
           classe: capa?.classe || null,
           assunto: capa?.assunto || null,
