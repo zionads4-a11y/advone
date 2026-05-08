@@ -44,6 +44,7 @@ interface Company {
   partnership_type?: PartnershipType | null;
   service_mode?: ServiceMode | null;
   billing_model?: BillingModel | null;
+  custom_base_value?: number | null;
   bot_name?: string | null;
   bot_role_description?: string | null;
   google_client_id?: string | null;
@@ -63,6 +64,7 @@ interface CompanyEditDialogProps {
       partnership_type: PartnershipType;
       service_mode: ServiceMode;
       billing_model: BillingModel;
+      custom_base_value: number | null;
       bot_name: string;
       bot_role_description: string;
       google_client_id: string | null;
@@ -87,6 +89,7 @@ export function CompanyEditDialog({
   const [botRoleDescription, setBotRoleDescription] = useState("");
   const [googleClientId, setGoogleClientId] = useState("");
   const [googleClientSecret, setGoogleClientSecret] = useState("");
+  const [customBaseValue, setCustomBaseValue] = useState<string>("");
 
   useEffect(() => {
     if (company) {
@@ -101,6 +104,7 @@ export function CompanyEditDialog({
       setBotRoleDescription(company.bot_role_description || "");
       setGoogleClientId(company.google_client_id || "");
       setGoogleClientSecret(company.google_client_secret || "");
+      setCustomBaseValue(company.custom_base_value?.toString() || "");
     }
   }, [company]);
 
@@ -123,6 +127,7 @@ export function CompanyEditDialog({
               partnership_type: model.partnership_type,
               service_mode: model.service_mode,
               billing_model: model.key,
+              custom_base_value: customBaseValue ? parseFloat(customBaseValue) : null,
               bot_name: botName,
               bot_role_description: botRoleDescription,
               google_client_id: googleClientId || null,
@@ -164,6 +169,22 @@ export function CompanyEditDialog({
               {getBillingModel(billingModel).description}
             </p>
           </div>
+
+          {billingModel === "plan_cortesia" && (
+            <div className="space-y-2 p-3 rounded-lg border border-primary/20 bg-primary/5 animate-in fade-in">
+              <Label>Valor Base Customizado (R$)</Label>
+              <Input 
+                value={customBaseValue} 
+                onChange={(e) => setCustomBaseValue(e.target.value)} 
+                type="number" 
+                step="0.01" 
+                placeholder="0,00"
+              />
+              <p className="text-[10px] text-muted-foreground">
+                Valor manual para ser incluído na cobrança (ex: tráfego pago).
+              </p>
+            </div>
+          )}
           <BusinessHoursConfig value={businessHours} onChange={setBusinessHours} />
 
           <Separator className="my-2" />

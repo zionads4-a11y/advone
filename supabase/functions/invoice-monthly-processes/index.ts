@@ -122,7 +122,7 @@ Deno.serve(async (req) => {
 
         const { data: company } = await admin
           .from("companies")
-          .select("id, name, whatsapp, billing_model")
+          .select("id, name, whatsapp, billing_model, custom_base_value")
           .eq("id", companyId)
           .maybeSingle();
         if (!company) {
@@ -149,10 +149,11 @@ Deno.serve(async (req) => {
         };
         const quota = quotaByPlan[company.billing_model as string] ?? 0;
         const excess = Math.max(0, count - quota);
-        const total = +(excess * PRICE_PER_PROCESS).toFixed(2);
+        const customBase = Number(company.custom_base_value || 0);
+        const total = +(excess * PRICE_PER_PROCESS + customBase).toFixed(2);
 
         if (total <= 0) {
-          console.log(`[invoice-processes] skip company=${companyId} (quota não excedida: ${count}/${quota})`);
+          console.log(`[invoice-processes] skip company=${companyId} (total zero: excesso=${excess}, base=${customBase})`);
           results.push({ company_id: companyId, ok: true, skipped: "quota não excedida" });
           continue;
         }
@@ -183,7 +184,9 @@ Deno.serve(async (req) => {
             billingType: "UNDEFINED",
             value: total,
             dueDate: dueDate(month),
-            description: `Monitoramento de processos AdvOne — ${count} processo(s) ativo(s) em ${month} (R$ ${PRICE_PER_PROCESS.toFixed(2).replace(".", ",")} cada)`,
+            description: company.billing_model === 'plan_cortesia' 
+              ? `Fatura Mensal AdvOne — ${month} (Monitoramento: ${count} proc., Base/Tráfego: R$ ${customBase.toFixed(2).replace(".", ",")})`
+              : `Monitoramento de processos AdvOne — ${count} processo(s) ativo(s) em ${month} (R$ ${PRICE_PER_PROCESS.toFixed(2).replace(".", ",")} cada)`,
             externalReference: `processes:${companyId}:${month}`,
           }),
         });
