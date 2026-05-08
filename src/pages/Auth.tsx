@@ -11,6 +11,14 @@ import logoAdvOne from "@/assets/logo-advone.png";
 
 export default function Auth() {
   const { user, loading } = useAuth();
+  const [searchParams] = useSearchParams();
+  const mode = searchParams.get("mode");
+
+  useEffect(() => {
+    if (mode === "login") {
+      document.title = "Acesse sua conta | AdvOne";
+    }
+  }, [mode]);
 
   if (loading) {
     return (
