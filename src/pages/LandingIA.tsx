@@ -630,7 +630,6 @@ export default function LandingIA() {
               </Card>
             </Reveal>
           </div>
-          </div>
         </div>
       </section>
 
