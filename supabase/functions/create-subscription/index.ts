@@ -23,7 +23,10 @@ interface PlanInfo {
 }
 
 const PLAN_CONFIG: Record<string, PlanInfo> = {
-  mensal:     { monthlyEquivalent: 997, chargedValue: 997,  billing: "recurring_monthly", description: "AdvOne — Plano Mensal (R$ 997/mês)" },
+  admin:      { monthlyEquivalent: 297, chargedValue: 297,  billing: "recurring_monthly", description: "AdvOne — Plano Admin (R$ 297/mês)" },
+  completo:   { monthlyEquivalent: 497, chargedValue: 497,  billing: "recurring_monthly", description: "AdvOne — Plano Completo (R$ 497/mês)" },
+  // Compatibility with legacy frontend links
+  mensal:     { monthlyEquivalent: 497, chargedValue: 497,  billing: "recurring_monthly", description: "AdvOne — Plano Completo (R$ 497/mês)" },
   trimestral: { monthlyEquivalent: 797, chargedValue: 2391, billing: "one_time",          description: "AdvOne — Plano Trimestral (3x R$ 797 = R$ 2.391 à vista)" },
   anual:      { monthlyEquivalent: 597, chargedValue: 7164, billing: "one_time",          description: "AdvOne — Plano Anual (12x R$ 597 = R$ 7.164 à vista)" },
 };
@@ -84,10 +87,21 @@ Deno.serve(async (req) => {
     await adminClient.from("user_roles").update({ role: "gerente" }).eq("user_id", userId);
 
     // 3. Create company
+    const billing_model = plan === 'admin' ? 'plan_admin' : 'plan_completo';
+    const service_mode = 'full';
+    const partnership_type = 'mensalidade_zionads';
+
     const officeName = company_name || `Escritório ${full_name}`;
     const { data: company, error: companyErr } = await adminClient
       .from("companies")
-      .insert({ name: officeName, created_by: userId, whatsapp: phone || null })
+      .insert({ 
+        name: officeName, 
+        created_by: userId, 
+        whatsapp: phone || null,
+        billing_model,
+        service_mode,
+        partnership_type
+      })
       .select("id")
       .single();
 
@@ -101,11 +115,12 @@ Deno.serve(async (req) => {
     // 4. Link user to company
     await adminClient.from("client_companies").insert({ user_id: userId, company_id: company.id });
 
-    // 5. Standard monitoring plan for all 3 tiers
+    // 5. Monitoring quota
+    const max_processes = billing_model === 'plan_admin' ? 20 : 50;
     await adminClient.from("company_monitoring_plans").insert({
       company_id: company.id,
       plan_type: "professional",
-      max_processes: STANDARD_MAX_PROCESSES,
+      max_processes,
       is_active: true,
     });
 

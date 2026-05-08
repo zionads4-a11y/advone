@@ -11,16 +11,28 @@ import { toast } from "sonner";
 import logoAdvOne from "@/assets/logo-advone.png";
 import { Progress } from "@/components/ui/progress";
 
-type PlanKey = "mensal" | "trimestral" | "anual";
+type PlanKey = "admin" | "completo" | "mensal" | "trimestral" | "anual";
 
-const COMMON_FEATURES = [
+const FEATURES_ADMIN = [
   "CRM completo com Kanban",
-  "Bot com IA no WhatsApp",
-  "Cadência automática",
+  "WhatsApp (Só notificações)",
   "Agenda integrada",
-  "Monitoramento de processos",
-  "Alertas automáticos",
-  "Financeiro integrado",
+  "Financeiro completo",
+  "IA com Gemini Flash",
+  "Documentos e Templates",
+  "20 monitoramentos inclusos",
+  "Adicional: R$ 2,58/processo",
+];
+
+const FEATURES_COMPLETO = [
+  "Tudo do Plano Admin",
+  "Bot SDR (Atende, qualifica, agenda)",
+  "IA Jurídica Claude (Petições)",
+  "Alertas de fraude",
+  "Boards e Tarefas avançadas",
+  "50 monitoramentos inclusos",
+  "Adicional: R$ 2,58/processo",
+  "Suporte prioritário",
 ];
 
 const PLANS: Record<PlanKey, {
@@ -32,6 +44,25 @@ const PLANS: Record<PlanKey, {
   color: string;
   features: string[];
 }> = {
+  admin: {
+    label: "Admin",
+    monthly: 297,
+    charged: 297,
+    billingLabel: "Recorrente mensal",
+    ctaSuffix: "R$ 297/mês",
+    color: "hsl(210,80%,55%)",
+    features: FEATURES_ADMIN,
+  },
+  completo: {
+    label: "Completo",
+    monthly: 497,
+    charged: 497,
+    billingLabel: "Recorrente mensal",
+    ctaSuffix: "R$ 497/mês",
+    color: "hsl(153,60%,45%)",
+    features: FEATURES_COMPLETO,
+  },
+  // Legacy plans (for redirection compatibility)
   mensal: {
     label: "Mensal",
     monthly: 997,
@@ -39,7 +70,7 @@ const PLANS: Record<PlanKey, {
     billingLabel: "Recorrente mensal",
     ctaSuffix: "R$ 997/mês",
     color: "hsl(210,80%,55%)",
-    features: COMMON_FEATURES,
+    features: FEATURES_COMPLETO,
   },
   trimestral: {
     label: "Trimestral",
@@ -48,7 +79,7 @@ const PLANS: Record<PlanKey, {
     billingLabel: "R$ 2.391 (3x R$ 797)",
     ctaSuffix: "R$ 2.391 à vista",
     color: "hsl(153,60%,45%)",
-    features: COMMON_FEATURES,
+    features: FEATURES_COMPLETO,
   },
   anual: {
     label: "Anual",
@@ -57,7 +88,7 @@ const PLANS: Record<PlanKey, {
     billingLabel: "R$ 7.164 (12x R$ 597)",
     ctaSuffix: "R$ 7.164 à vista",
     color: "hsl(38,90%,55%)",
-    features: COMMON_FEATURES,
+    features: FEATURES_COMPLETO,
   },
 };
 
