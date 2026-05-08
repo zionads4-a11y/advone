@@ -832,30 +832,32 @@ export default function LandingPage() {
           <Reveal className="mb-16 text-center">
             <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Planos</p>
             <h2 className="text-3xl font-bold md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Escolha o plano ideal para o seu escritório.
+              A tecnologia mais avançada para o seu escritório.
             </h2>
           </Reveal>
-          <div className="grid gap-8 md:grid-cols-3">
-            {/* Plano Admin */}
+          <div className="flex justify-center">
+            {/* Plano IA AdvOne */}
             <Reveal delay={0}>
-              <div className="rounded-2xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col h-full transition-all duration-500 hover:border-[hsl(153,60%,45%)]/30 hover:-translate-y-1">
-                <div className="mb-6 flex items-center justify-between">
-                  <span className="inline-block rounded-full bg-[hsl(220,20%,16%)] px-3 py-1 text-xs font-semibold text-[hsl(220,10%,75%)]">Plano Admin</span>
+              <div className="relative max-w-lg rounded-2xl border-2 border-[hsl(153,60%,45%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col h-full shadow-xl shadow-[hsl(153,60%,45%)]/10 transition-all duration-500 hover:-translate-y-1">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[hsl(153,60%,45%)] px-4 py-1 text-xs font-bold text-[hsl(220,25%,6%)]">
+                  OFERTA DE LANÇAMENTO
                 </div>
-                <p className="mb-1 text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                <div className="mb-6 flex items-center justify-between">
+                  <span className="inline-block rounded-full bg-[hsl(153,60%,45%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(153,60%,45%)]">Plano IA AdvOne</span>
+                </div>
+                <p className="mb-1 text-5xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                   R$ 297<span className="text-base font-normal text-[hsl(220,10%,55%)]">/mês</span>
                 </p>
-                <p className="mt-1 mb-6 text-sm text-[hsl(220,10%,55%)]">O CRM essencial para sua gestão</p>
+                <p className="mt-1 mb-6 text-sm text-[hsl(220,10%,55%)]">IA Jurídica & Gestão Completa</p>
                 <ul className="mb-8 flex-1 space-y-3">
                   {[
-                    "CRM completo com Kanban",
-                    "WhatsApp (Só notificações)",
-                    "Agenda integrada",
-                    "Financeiro completo",
-                    "IA com Gemini Flash",
-                    "Documentos e Templates",
-                    "20 monitoramentos inclusos",
-                    "Adicional: R$ 2,58/processo"
+                    "IA Jurídica com Gemini Flash",
+                    "CRM jurídico completo com Kanban",
+                    "WhatsApp (Notificações automáticas)",
+                    "Agenda e Financeiro integrados",
+                    "Documentos e Templates ilimitados",
+                    "20 monitoramentos de processos inclusos",
+                    "Suporte prioritário via WhatsApp"
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2 text-sm text-[hsl(220,10%,75%)]">
                       <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(153,60%,45%)]" />
@@ -863,76 +865,14 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <Button onClick={() => navigate("/signup?plan=admin")} className="w-full bg-transparent border border-[hsl(220,20%,16%)] hover:bg-[hsl(220,20%,16%)] text-[hsl(220,10%,92%)] font-semibold">
-                  Assinar Plano Admin
+                <Button 
+                  onClick={() => navigate("/signup?plan=admin")} 
+                  size="lg"
+                  className="w-full bg-gradient-to-r from-[hsl(153,60%,45%)] to-[hsl(153,70%,55%)] hover:opacity-90 text-[hsl(220,25%,6%)] font-bold text-lg py-6"
+                >
+                  Assinar Agora e Começar
                 </Button>
-              </div>
-            </Reveal>
-
-            {/* Plano Completo */}
-            <Reveal delay={150}>
-              <div className="relative rounded-2xl border-2 border-[hsl(153,60%,45%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col h-full shadow-lg shadow-[hsl(153,60%,45%)]/10 transition-all duration-500 hover:-translate-y-2">
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[hsl(153,60%,45%)] px-4 py-1 text-xs font-bold text-[hsl(220,25%,6%)]">
-                  RECOMENDADO
-                </div>
-                <div className="mb-6 flex items-center justify-between">
-                  <span className="inline-block rounded-full bg-[hsl(153,60%,45%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(153,60%,45%)]">Plano Completo</span>
-                </div>
-                <p className="mb-1 text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                  R$ 497<span className="text-base font-normal text-[hsl(220,10%,55%)]">/mês</span>
-                </p>
-                <p className="mt-1 mb-6 text-sm text-[hsl(220,10%,55%)]">IA Jurídica e Bot comercial 24/7</p>
-                <ul className="mb-8 flex-1 space-y-3">
-                  {[
-                    "Tudo do Plano Admin",
-                    "Bot SDR (Atende, qualifica, agenda)",
-                    "IA Jurídica Claude (Petições)",
-                    "Alertas de fraude",
-                    "Boards e Tarefas avançadas",
-                    "50 monitoramentos inclusos",
-                    "Adicional: R$ 2,58/processo",
-                    "Suporte prioritário"
-                  ].map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-sm text-[hsl(220,10%,75%)]">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(153,60%,45%)]" />
-                      <span className={item.includes("Bot") || item.includes("IA Jurídica") ? "font-bold text-[hsl(153,60%,45%)]" : ""}>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Button onClick={() => navigate("/signup?plan=completo")} className="w-full gradient-primary text-[hsl(0,0%,100%)] font-semibold">
-                  Assinar Plano Completo
-                </Button>
-              </div>
-            </Reveal>
-
-            {/* Custom / Enterprise */}
-            <Reveal delay={300}>
-              <div className="rounded-2xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col h-full transition-all duration-500 hover:border-[hsl(38,90%,55%)]/30 hover:-translate-y-1">
-                <div className="mb-6">
-                  <span className="inline-block rounded-full bg-[hsl(38,90%,55%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(38,90%,55%)]">Personalizado</span>
-                </div>
-                <p className="mb-1 text-3xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                  Sob consulta
-                </p>
-                <p className="mt-1 mb-6 text-sm text-[hsl(220,10%,55%)]">Para grandes escritórios (+10 advogados)</p>
-                <ul className="mb-8 flex-1 space-y-3">
-                  {[
-                    "Acesso via API",
-                    "Múltiplos números WhatsApp",
-                    "Treinamento personalizado",
-                    "Gerente de conta exclusivo",
-                    "SLA de atendimento",
-                    "Consultoria de processos"
-                  ].map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-sm text-[hsl(220,10%,75%)]">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(38,90%,55%)]" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <Button onClick={() => window.open("https://wa.me/558179063377", "_blank")} className="w-full bg-transparent border border-[hsl(38,90%,55%)] text-[hsl(38,90%,55%)] hover:bg-[hsl(38,90%,55%)] hover:text-white font-semibold">
-                  Falar com especialista
-                </Button>
+                <p className="mt-4 text-center text-xs text-[hsl(220,10%,50%)]">Sem fidelidade. Cancele quando quiser.</p>
               </div>
             </Reveal>
           </div>
