@@ -49,6 +49,17 @@ export default function BotConfig() {
     );
   }
 
+  // Se for gerente, mas NÃO for o super_admin, bloqueia o acesso à página
+  if (userRole === "gerente" && user?.email !== "zionads4@gmail.com") {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+        <Bot className="mb-3 h-10 w-10" />
+        <p className="font-medium">Acesso restrito</p>
+        <p className="text-sm">Estas configurações só podem ser acessadas pelo Super Admin.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
