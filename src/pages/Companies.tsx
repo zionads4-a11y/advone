@@ -77,6 +77,7 @@ export default function Companies() {
       partnership_type: model.partnership_type,
       service_mode: model.service_mode,
       billing_model: model.key,
+      custom_base_value: formData.get("custom_base_value") ? parseFloat(formData.get("custom_base_value") as string) : null,
       created_by: user.id,
     } as any);
 
@@ -90,7 +91,7 @@ export default function Companies() {
     fetchData();
   };
 
-  const handleUpdate = async (id: string, data: { name: string; whatsapp: string | null; business_hours?: Record<string, unknown[]>; partnership_type?: "exito" | "mensalidade_zionads"; service_mode?: "full" | "ai_only"; billing_model?: BillingModel }) => {
+  const handleUpdate = async (id: string, data: { name: string; whatsapp: string | null; business_hours?: Record<string, unknown[]>; partnership_type?: "exito" | "mensalidade_zionads"; service_mode?: "full" | "ai_only"; billing_model?: BillingModel; custom_base_value?: number | null }) => {
     const { error } = await supabase.from("companies").update(data as any).eq("id", id);
 
     if (error) {

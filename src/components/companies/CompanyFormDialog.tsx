@@ -15,8 +15,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BILLING_MODELS } from "@/lib/billingModels";
+import { BILLING_MODELS, type BillingModel } from "@/lib/billingModels";
 import { Plus } from "lucide-react";
+import { useState } from "react";
 
 interface CompanyFormDialogProps {
   open: boolean;
@@ -25,6 +26,8 @@ interface CompanyFormDialogProps {
 }
 
 export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormDialogProps) {
+  const [selectedModel, setSelectedModel] = useState<BillingModel>("plan_ia_monthly");
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
@@ -53,7 +56,11 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
           </div>
           <div className="space-y-2">
             <Label>Modelo de Cobrança *</Label>
-            <Select name="billing_model" defaultValue="plan_ia_monthly">
+            <Select 
+              name="billing_model" 
+              defaultValue={selectedModel}
+              onValueChange={(v) => setSelectedModel(v as BillingModel)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o modelo de cobrança" />
               </SelectTrigger>
@@ -65,6 +72,21 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
                 ))}
               </SelectContent>
             </Select>
+            {selectedModel === "plan_cortesia" && (
+              <div className="mt-3 space-y-2 animate-in fade-in slide-in-from-top-1">
+                <Label>Valor Base Customizado (R$)</Label>
+                <Input 
+                  name="custom_base_value" 
+                  type="number" 
+                  step="0.01" 
+                  placeholder="0,00" 
+                  className="bg-background"
+                />
+                <p className="text-[10px] text-muted-foreground">
+                  Este valor será somado à fatura mensal da empresa no Asaas.
+                </p>
+              </div>
+            )}
             <p className="text-xs text-muted-foreground">
               Define como a empresa será cobrada e quais módulos ela enxerga no sistema.
             </p>
