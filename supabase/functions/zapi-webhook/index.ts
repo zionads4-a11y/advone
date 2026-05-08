@@ -18,7 +18,6 @@ function buildSDRPrompt(
   flowsBlock: string = "",
   triageBlock: string = "",
   timezone: string = "America/Sao_Paulo",
-  checkClientStatus: boolean = false,
 ): string {
   const company = config.companies;
   const officeName = config.office_name || company?.name || "o escritório";
@@ -134,29 +133,12 @@ function buildSDRPrompt(
     ? `\n\n═══════════════════════════════════════\nREGRAS DE OURO E COMPORTAMENTO\n═══════════════════════════════════════\n${company.decision_rules}\n`
     : "";
 
-  const clientIdentificationBlock = checkClientStatus ? `
-═══════════════════════════════════════
-🔍 IDENTIFICAÇÃO DE CLIENTE EXISTENTE (CRÍTICO)
-═══════════════════════════════════════
-Muitos clientes já cadastrados entram em contato por este mesmo WhatsApp. Sua primeira prioridade é identificar se a pessoa já é cliente ou se é um lead novo.
-
-1. **Se o assunto for sobre um PROCESSO em andamento ou ATUALIZAÇÃO de caso:**
-   - Peça educadamente o CPF do cliente para que você possa consultar no sistema.
-   - Use exatamente: "Para eu localizar seu caso aqui no sistema e te passar uma atualização, você poderia me informar seu CPF, por favor? 🙂"
-   - Após ele informar o CPF, use a ferramenta \`check_process_status\` (se disponível) ou apenas simule que está verificando e diga: "Identifiquei aqui! O Dr.(a) já está acompanhando tudo de perto e seu caso está seguindo os trâmites normais. Fique tranquilo(a) que qualquer novidade relevante entraremos em contato imediatamente! 😉"
-   - Dê um resumo simples em linguagem leiga sobre o status (ex: "está em análise pelo juiz", "estamos aguardando um prazo").
-
-2. **Se NÃO for sobre processo ou se for um NOVO contato (Lead):**
-   - Siga o fluxo de qualificação SDR padrão abaixo.
-   - NUNCA peça CPF para novos leads (mantenha a regra de ouro abaixo).
-` : "";
-
   return `Você é ${botName}, ${botRole} da equipe ${officeName}${practiceArea ? `, especializada no atendimento inicial de casos ${practiceArea}` : ""}.
-${clientIdentificationBlock}
+
 ═══════════════════════════════════════
 🚫 REGRA DE OURO (LEADS NOVOS)
 ═══════════════════════════════════════
-NUNCA peça o CPF ou RG de um lead NOVO (que ainda não é cliente). ${checkClientStatus ? "Esta regra só é aberta para quem já tem processo e quer saber o status." : ""} Peça apenas o NOME COMPLETO no final do agendamento.
+NUNCA, em hipótese alguma, peça o CPF ou RG do cliente. Se o cliente perguntar se precisa de algum dado assim, diga que não é necessário agora. Esta regra é inviolável. Peça apenas o NOME COMPLETO no final do agendamento.
 
 ═══════════════════════════════════════
 IDENTIDADE E TOM
@@ -186,7 +168,7 @@ ${leadNameInfo}
   ═══════════════════════════════════════
   🚫 REGRAS INVIOLÁVEIS (PRIORIDADE MÁXIMA)
   ═══════════════════════════════════════
-  1. 🚫 NUNCA peça CPF para o lead. Esta é a regra mais importante. (Exceção: clientes antigos buscando status de processo).
+  1. 🚫 NUNCA peça CPF para o lead. Esta é a regra mais importante.
   2. 🚫 NUNCA peça RG ou senha do Meu INSS.
   3. 🚫 É PROIBIDO agendar ou oferecer horário antes de fazer as perguntas P1, P2 e P3 do fluxo.
   4. 🚫 Se o lead tentar pular para o agendamento, diga: "Claro! Só preciso entender 2 ou 3 coisinhas rapidinho para a equipe já saber como te ajudar da melhor forma, tudo bem? 🙂" e continue as perguntas.
@@ -196,17 +178,18 @@ ${leadNameInfo}
 ═══════════════════════════════════════
 📋 FLUXO OBRIGATÓRIO (IDENTIFICAÇÃO)
 ═══════════════════════════════════════
-PASSO 1 — Saudação e Identificação de Cliente:
-Se o lead já iniciou falando o assunto, reconheça brevemente. ${checkClientStatus ? "Se for sobre processo, peça o CPF." : ""}
-Se for novo contato:
+PASSO 1 — Saudação e Nome:
+Se o lead já iniciou falando o assunto, reconheça brevemente, mas peça o nome primeiro:
+"Oi! Tudo bem? 😊 Eu sou a ${botName}, aqui da equipe ${officeName}. Vi que você quer falar sobre [assunto mencionado], mas antes de continuarmos, como eu posso te chamar? 🙂"
+Se ele não falou o assunto:
 "Oi! Tudo bem? 😊 Eu sou a ${botName}, aqui da equipe ${officeName}. Antes de continuarmos, como eu posso te chamar? 🙂"
 
 PASSO 2 — Entender o Assunto e o Caso:
 Após o lead dizer o nome, confirme o assunto se ele já tiver falado, ou peça para ele explicar:
-"Prazer em te conhecer, [Nome]! Pode ficar tranquilo(a). Me conta um pouco mais sobre o que está acontecendo para eu entender como podemos te ajudar 🙂"
+"Prazer em te conhecer, [Nome]! Pode ficar tranquilo(a). Me conta um pouco mais sobre o que está acontecendo com [assunto] para eu entender como podemos te ajudar 🙂"
 
 PASSO 3 — Qualificação (Máximo 3-4 perguntas aqui):
-Faça apenas as perguntas essenciais para entender se o caso é viável. UMA por vez.
+Faça apenas as perguntas essenciais para entender se o caso é viável. UMA por vez. Não se aprofunde em explicações técnicas ainda.
 
 PASSO 4 — Convite para Reunião (TOTALMENTE GRATUITA):
 "Pelo que você me contou, faz total sentido você conversar rapidinho com o(a) advogado(a). Essa primeira conversa é TOTALMENTE GRATUITA. Posso já te encaixar?"
@@ -218,7 +201,7 @@ PASSO 6 — Horário e Dados Finais (NOME COMPLETO):
 1. Pergunte o turno: "Qual horário é melhor pra você... manhã, tarde ou final do dia?"
 2. Use check_availability para o turno escolhido.
 3. Ofereça SEMPRE 2 opções: UMA na parte da manhã e UMA na parte da tarde.
-4. Ofereça horários específicos.
+4. Ofereça horários específicos: "Tenho esses horários:\\n📅 Manhã: [dia] às [HH:MM]\\n📅 Tarde: [dia] às [HH:MM]\\n\\nQual fica melhor? 😊"
 5. APÓS o lead aceitar o horário, peça o dado final: "Perfeito 🙂 Pra já deixar tudo organizado aqui pra equipe, me passa o seu *nome completo*, por favor?"
 6. SÓ chame register_client_name e schedule_appointment APÓS o lead informar o nome completo.
 
@@ -796,7 +779,6 @@ async function handleAgentPhase(
   flowsBlock?: string,
   triageBlock?: string,
   timezone: string = "America/Sao_Paulo",
-  checkClientStatus: boolean = false,
 ): Promise<string | null> {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!LOVABLE_API_KEY) return null;
@@ -831,7 +813,7 @@ async function handleAgentPhase(
     tools = contractCloserTools;
   } else {
     // SDR phase (default)
-    systemPrompt = buildSDRPrompt(config, leadName, companyOffices || [], flowsBlock || "", triageBlock || "", timezone, checkClientStatus);
+    systemPrompt = buildSDRPrompt(config, leadName, companyOffices || [], flowsBlock || "", triageBlock || "", timezone);
     tools = sdrTools;
     if (config?.debug_mode) {
       console.log("[SDR PROMPT DEBUG]", JSON.stringify({
@@ -1512,7 +1494,7 @@ serve(async (req) => {
       .select(`
         id, company_id, zapi_instance_id, zapi_token, ai_enabled, ai_prompt, ai_auto_reply, 
         office_name, practice_area, communication_tone, scheduling_link, consultation_duration, 
-        target_audience, alert_whatsapp, triage_options, debug_mode, check_client_status,
+        target_audience, alert_whatsapp, triage_options, debug_mode,
         companies (name, bot_name, bot_role_description, timezone, decision_rules, billing_model)
       `)
       .eq("company_id", companyId)
@@ -1838,8 +1820,7 @@ serve(async (req) => {
             effectivePhase, config, agentConfigs, history,
             companyId, leadId, supabase, currentLeadName, cleanPhone,
             flowsBlock, triageBlock,
-            (config.companies as any)?.timezone || "America/Sao_Paulo",
-            !!config.check_client_status,
+            (config.companies as any)?.timezone || "America/Sao_Paulo"
           );
 
           const SERVER_URL = "https://ziondigital.uazapi.com";

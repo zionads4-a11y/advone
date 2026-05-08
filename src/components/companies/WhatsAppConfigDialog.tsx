@@ -78,7 +78,6 @@ export function WhatsAppConfigDialog({
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiObjective, setAiObjective] = useState("Entrar em contato com os Leads e agendar uma reunião");
   const [alertWhatsapp, setAlertWhatsapp] = useState("");
-  const [checkClientStatus, setCheckClientStatus] = useState(false);
   const [aiLoading, setAiLoading] = useState(true);
 
   const webhookUrl = getWebhookUrl(companyId);
@@ -104,7 +103,7 @@ export function WhatsAppConfigDialog({
       setAiLoading(true);
       const { data } = await supabase
         .from("whatsapp_configs")
-        .select("ai_enabled, ai_auto_reply, ai_prompt, ai_objective, alert_whatsapp, check_client_status")
+        .select("ai_enabled, ai_auto_reply, ai_prompt, ai_objective, alert_whatsapp")
         .eq("company_id", companyId)
         .maybeSingle();
 
@@ -117,7 +116,6 @@ export function WhatsAppConfigDialog({
         );
         setAiObjective(data.ai_objective || "Entrar em contato com os Leads e agendar uma reunião");
         setAlertWhatsapp(data.alert_whatsapp || "");
-        setCheckClientStatus(data.check_client_status || false);
       }
       setAiLoading(false);
     };
@@ -233,7 +231,6 @@ export function WhatsAppConfigDialog({
       ai_prompt: "", // Removido da UI: prompt agora é montado dinamicamente pelo Bot Flows Editor
       ai_objective: aiObjective,
       alert_whatsapp: alertWhatsapp || null,
-      check_client_status: checkClientStatus,
     };
 
     const { error } = await supabase
@@ -437,17 +434,6 @@ export function WhatsAppConfigDialog({
                         placeholder="Ex: Entrar em contatos com os Leads e agendar uma reunião"
                       />
                       <p className="text-xs text-muted-foreground">Define o objetivo principal do chatbot</p>
-                    </div>
-
-                    {/* Opção de Identificar Clientes */}
-                    <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/20">
-                      <div>
-                        <p className="font-medium text-sm">Identificar Clientes Antigos</p>
-                        <p className="text-xs text-muted-foreground">
-                          Se o cliente pedir atualização de processo, a IA pedirá o CPF e dará o status.
-                        </p>
-                      </div>
-                      <Switch checked={checkClientStatus} onCheckedChange={setCheckClientStatus} />
                     </div>
 
                     {/* WhatsApp para Alertas */}
