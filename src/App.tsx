@@ -37,6 +37,7 @@ import LeadsHistory from "./pages/LeadsHistory";
 import LegalAI from "./pages/LegalAI";
 import LandingIA from "./pages/LandingIA";
 import LandingIALeads from "./pages/LandingIALeads";
+import LandingPage from "./pages/LandingPage";
 import AppLayout from "./components/layout/AppLayout";
 import ProfileCheck from "./pages/ProfileCheck";
 import NotFound from "./pages/NotFound";
