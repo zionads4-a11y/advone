@@ -23,6 +23,7 @@ interface BotConfigCardProps {
 }
 
 export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardProps) {
+  const { userRole, user } = useAuth();
   const [aiEnabled, setAiEnabled] = useState(false);
   const [aiAutoReply, setAiAutoReply] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
