@@ -1838,7 +1838,8 @@ serve(async (req) => {
             effectivePhase, config, agentConfigs, history,
             companyId, leadId, supabase, currentLeadName, cleanPhone,
             flowsBlock, triageBlock,
-            (config.companies as any)?.timezone || "America/Sao_Paulo"
+            (config.companies as any)?.timezone || "America/Sao_Paulo",
+            !!config.check_client_status,
           );
 
           const SERVER_URL = "https://ziondigital.uazapi.com";
