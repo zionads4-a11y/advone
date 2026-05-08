@@ -199,6 +199,7 @@ export function CompanyAIConfigCard({ companyId }: Props) {
             <p className="text-xs text-muted-foreground">
               IA premium para o plano Completo. Claude Sonnet/Opus. Excelente em análise jurídica e redação em PT-BR.
             </p>
+          </button>
         </div>
 
         {/* Modelo */}
