@@ -3,7 +3,7 @@
 //   - partnership_type (sempre "mensalidade_zionads")
 //   - service_mode    (full = CRM completo / ai_only = só IA Laura)
 
-export type BillingModel = "plan_admin" | "plan_completo" | "plan_ia_monthly" | "ia_only" | "crm_full";
+export type BillingModel = "plan_admin" | "plan_completo" | "plan_ia_monthly" | "plan_ia_6m" | "plan_ia_12m" | "ia_only" | "crm_full";
 
 export interface BillingModelOption {
   key: BillingModel;
@@ -39,6 +39,24 @@ export const BILLING_MODELS: BillingModelOption[] = [
     emoji: "🤖",
     label: "Plano IA Mensal (R$ 797/mês)",
     description: "IA Laura, IA Jurídica, Boards e Agenda. Sem fidelidade. 30 monitoramentos.",
+    partnership_type: "mensalidade_zionads",
+    service_mode: "full",
+    monitoring_quota: 30,
+  },
+  {
+    key: "plan_ia_6m",
+    emoji: "🤖",
+    label: "Plano IA 6 Meses (R$ 497/mês)",
+    description: "IA Laura, IA Jurídica, Boards e Agenda. Fidelidade de 6 meses. 30 monitoramentos.",
+    partnership_type: "mensalidade_zionads",
+    service_mode: "full",
+    monitoring_quota: 30,
+  },
+  {
+    key: "plan_ia_12m",
+    emoji: "🤖",
+    label: "Plano IA 12 Meses (R$ 297/mês)",
+    description: "IA Laura, IA Jurídica, Boards e Agenda. Fidelidade de 12 meses. 30 monitoramentos.",
     partnership_type: "mensalidade_zionads",
     service_mode: "full",
     monitoring_quota: 30,
