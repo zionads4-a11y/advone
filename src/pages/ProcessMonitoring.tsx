@@ -136,6 +136,7 @@ export default function ProcessMonitoring() {
           company_id: targetCompanyId,
           numero_cnj: newCnj.trim(),
           client_name: newClientName.trim(),
+          client_cpf: newClientCpf.trim(),
         },
       });
       if (error) throw error;
