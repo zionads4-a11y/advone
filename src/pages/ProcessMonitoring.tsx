@@ -347,6 +347,11 @@ export default function ProcessMonitoring() {
                             <p className="text-xs text-muted-foreground font-mono mt-0.5">
                               {proc.numero_cnj}
                             </p>
+                            {proc.client_cpf && (
+                              <p className="text-[10px] text-muted-foreground mt-0.5">
+                                CPF: {proc.client_cpf}
+                              </p>
+                            )}
                             <div className="flex items-center gap-2 mt-1">
                               {statusIcon(proc.status_predito)}
                               {proc.tribunal_sigla && (
