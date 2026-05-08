@@ -866,7 +866,7 @@ export default function LandingPage() {
                   ))}
                 </ul>
                 <Button 
-                  onClick={() => navigate("/signup?plan=mensal")} 
+                  onClick={() => document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' })} 
                   className="w-full bg-transparent border border-[hsl(220,20%,16%)] hover:bg-[hsl(220,20%,16%)] text-[hsl(220,10%,92%)] font-bold py-6"
                 >
                   COMEÇAR AGORA
@@ -901,7 +901,7 @@ export default function LandingPage() {
                   ))}
                 </ul>
                 <Button 
-                  onClick={() => navigate("/signup?plan=semestral")} 
+                  onClick={() => document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' })} 
                   className="w-full bg-transparent border border-[hsl(220,20%,16%)] hover:bg-[hsl(220,20%,16%)] text-[hsl(220,10%,92%)] font-bold py-6"
                 >
                   COMEÇAR AGORA
@@ -939,7 +939,7 @@ export default function LandingPage() {
                   ))}
                 </ul>
                 <Button 
-                  onClick={() => navigate("/signup?plan=anual")} 
+                  onClick={() => document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' })} 
                   size="lg"
                   className="w-full bg-gradient-to-r from-[hsl(153,60%,45%)] to-[hsl(153,70%,55%)] hover:opacity-90 text-[hsl(220,25%,6%)] font-bold text-lg py-6 shadow-lg shadow-[hsl(153,60%,45%)]/20"
                 >
