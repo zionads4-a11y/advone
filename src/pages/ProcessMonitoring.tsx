@@ -26,6 +26,7 @@ interface MonitoredProcess {
   numero_cnj: string;
   client_name: string;
   tribunal_sigla: string | null;
+  client_cpf: string | null;
   classe: string | null;
   assunto: string | null;
   area: string | null;
