@@ -30,8 +30,8 @@ const Index = () => {
   }
 
   if (user) return <Navigate to={getHomeRoute(userRole)} replace />;
-  // Visitantes vão para a Landing IA (página de venda)
-  return <Navigate to="/IA" replace />;
+  // Visitantes vão para a Landing Page principal
+  return <Navigate to="/home" replace />;
 };
 
 export default Index;
