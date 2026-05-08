@@ -216,7 +216,7 @@ export default function LandingIA() {
   }, []);
 
   function scrollToForm(plan?: string) {
-    trackMetaEvent("InitiateCheckout", { contentName: "CTA Landing IA", plan });
+    trackMetaEvent("InitiateCheckout", { contentName: "CTA Landing IA" });
     if (plan) {
       navigate(`/signup?plan=${plan}`);
       return;
