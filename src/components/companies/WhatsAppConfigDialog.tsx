@@ -59,7 +59,7 @@ export function WhatsAppConfigDialog({
   config,
   onSubmit,
 }: WhatsAppConfigDialogProps) {
-  const { userRole: _userRole } = useAuth();
+  const { userRole, user } = useAuth();
 
   const [activeTab, setActiveTab] = useState("whatsapp");
   const [saving, setSaving] = useState(false);
