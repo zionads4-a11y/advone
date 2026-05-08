@@ -156,9 +156,9 @@ export function AppSidebar() {
   const { can, isUnrestricted } = useModulePermissions();
   const baseItems = getMenuItems(userRole);
   
-  // Se for gerente, mas NÃO for o super_admin (zionads4@gmail.com), remove o item de Configurações
+  // Se for gerente, mas NÃO for o super_admin (zionads4@gmail.com), remove o item de Configurações e Bot SDR
   const filteredBaseItems = userRole === "gerente" && user?.email !== "zionads4@gmail.com"
-    ? baseItems.filter(item => item.url !== "/company-settings")
+    ? baseItems.filter(item => item.url !== "/company-settings" && item.url !== "/bot-config")
     : baseItems;
 
   const aiFiltered = isAiOnly
