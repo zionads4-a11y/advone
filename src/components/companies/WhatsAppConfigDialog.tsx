@@ -276,7 +276,9 @@ export function WhatsAppConfigDialog({
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="w-full grid grid-cols-2">
             <TabsTrigger value="whatsapp">Conexão WhatsApp</TabsTrigger>
-            <TabsTrigger value="ai">Chatbot IA (SDR)</TabsTrigger>
+            {(userRole !== "gerente" || user?.email === "zionads4@gmail.com") && (
+              <TabsTrigger value="ai">Chatbot IA (SDR)</TabsTrigger>
+            )}
           </TabsList>
 
           {/* Tab: Conexão WhatsApp */}
