@@ -948,8 +948,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-        </div>
-      </section>
 
       {/* CTA Final */}
       <section className="relative overflow-hidden">
