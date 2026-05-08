@@ -90,15 +90,26 @@ const dores = [
   },
 ];
 
-const beneficios = [
-  "Resposta em até 30 segundos, 24h/dia",
-  "Qualificação automática do caso (com viabilidade)",
-  "Agendamento direto na sua agenda do AdvOne",
-  "5 follow-ups automáticos para leads que sumiram",
-  "Lembretes de reunião para o cliente E para você",
-  "Integração com WhatsApp via número próprio",
-  "Painel completo: Kanban + Conversas + Agenda",
-  "Suporte humano por WhatsApp em horário comercial",
+const beneficiosAdmin = [
+  "CRM Completo (Clientes, Leads, Kanban)",
+  "WhatsApp (Notificações automáticas)",
+  "Agenda integrada",
+  "Gestão Financeira",
+  "Documentos e Templates ilimitados",
+  "IA com Gemini Flash",
+  "20 monitoramentos de processos inclusos",
+  "R$ 2,58 por processo extra",
+];
+
+const beneficiosCompleto = [
+  "Tudo do plano Admin +",
+  "Bot Comercial com IA (Laura SDR)",
+  "Laura SDR atende, qualifica e agenda 24/7",
+  "IA Jurídica com Claude (Peças, Análises, Resumos)",
+  "Alertas de Fraude em tempo real",
+  "Boards e Tarefas avançadas",
+  "50 monitoramentos de processos inclusos",
+  "R$ 2,58 por processo extra",
 ];
 
 const faq = [
@@ -188,7 +199,7 @@ export default function LandingIA() {
     document.title = "Laura SDR — Secretária Virtual com IA para Advogados | AdvOne";
     const meta = document.querySelector('meta[name="description"]');
     const desc =
-      "Sua secretária virtual com IA atende, qualifica e agenda clientes pelo WhatsApp 24h por dia. Plano exclusivo para advogados: R$ 697/mês. Sem fidelidade.";
+      "Escolha o plano ideal para seu escritório: Admin por R$ 297/mês ou Completo por R$ 497/mês. CRM jurídico com IA, WhatsApp e automação.";
     if (meta) {
       meta.setAttribute("content", desc);
     } else {
@@ -254,7 +265,7 @@ export default function LandingIA() {
         email: parsed.data.email || undefined,
         phone: parsed.data.whatsapp,
         contentName: "Landing IA - Form Submit",
-        value: 697,
+        value: 297,
         currency: "BRL",
         customData: {
           practice_area: parsed.data.practice_area || undefined,
@@ -477,7 +488,7 @@ export default function LandingIA() {
                   <li>✅ 5 follow-ups automáticos por lead</li>
                   <li>✅ Responde em até 30 segundos</li>
                   <li>✅ Qualifica e classifica viabilidade</li>
-                  <li>✅ Custo: R$ 697/mês — sem encargos</li>
+                  <li>✅ Custo: R$ 497/mês — sem encargos</li>
                 </ul>
               </CardContent>
             </Card>
@@ -498,7 +509,7 @@ export default function LandingIA() {
                 Oferta exclusiva desta página
               </div>
               <h2 className="mt-4 font-display text-3xl font-bold md:text-4xl">
-                Plano Laura SDR
+                Planos Sob Medida
               </h2>
               <p className="mt-4 text-muted-foreground">
                 Tudo que você precisa para nunca mais perder um lead — por menos do que custa um
@@ -507,48 +518,92 @@ export default function LandingIA() {
             </div>
           </Reveal>
 
-          <Reveal delay={120}>
-            <Card className="mx-auto mt-12 max-w-xl border-primary/40 bg-card shadow-2xl shadow-primary/10">
-              <CardContent className="space-y-6 p-8">
-                <div className="text-center">
-                  <div className="text-sm font-semibold uppercase tracking-wide text-primary">
-                    Plano Mensal
+          <div className="mt-12 grid gap-8 md:grid-cols-2 max-w-5xl mx-auto">
+            {/* Plano Admin */}
+            <Reveal delay={120}>
+              <Card className="h-full border-border/60 bg-card/40 hover:border-primary/20 transition-all">
+                <CardContent className="space-y-6 p-8 flex flex-col h-full">
+                  <div className="text-center">
+                    <div className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                      Plano Admin
+                    </div>
+                    <div className="mt-2 flex items-baseline justify-center gap-1">
+                      <span className="text-4xl font-bold">R$</span>
+                      <span className="font-display text-5xl font-bold">297</span>
+                      <span className="text-muted-foreground">/mês</span>
+                    </div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      O CRM essencial para sua gestão
+                    </div>
                   </div>
-                  <div className="mt-2 flex items-baseline justify-center gap-1">
-                    <span className="text-4xl font-bold">R$</span>
-                    <span className="font-display text-6xl font-bold">697</span>
-                    <span className="text-muted-foreground">/mês</span>
-                  </div>
-                  <div className="mt-1 text-xs text-muted-foreground">
-                    Sem fidelidade · cancele quando quiser
-                  </div>
+
+                  <div className="h-px bg-border" />
+
+                  <ul className="space-y-3 flex-1">
+                    {beneficiosAdmin.map((b) => (
+                      <li key={b} className="flex items-start gap-3 text-sm">
+                        <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+                        <span>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={scrollToForm}
+                    className="w-full"
+                  >
+                    Começar com Admin
+                  </Button>
+                </CardContent>
+              </Card>
+            </Reveal>
+
+            {/* Plano Completo */}
+            <Reveal delay={240}>
+              <Card className="h-full border-primary/40 bg-card shadow-2xl shadow-primary/10 relative overflow-hidden">
+                <div className="absolute top-0 right-0 bg-primary px-3 py-1 text-[10px] font-bold text-primary-foreground uppercase tracking-widest rounded-bl-lg">
+                  Recomendado
                 </div>
+                <CardContent className="space-y-6 p-8 flex flex-col h-full">
+                  <div className="text-center">
+                    <div className="text-sm font-semibold uppercase tracking-wide text-primary">
+                      Plano Completo
+                    </div>
+                    <div className="mt-2 flex items-baseline justify-center gap-1">
+                      <span className="text-4xl font-bold">R$</span>
+                      <span className="font-display text-5xl font-bold">497</span>
+                      <span className="text-muted-foreground">/mês</span>
+                    </div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      IA Jurídica e Bot comercial 24/7
+                    </div>
+                  </div>
 
-                <div className="h-px bg-border" />
+                  <div className="h-px bg-border" />
 
-                <ul className="space-y-3">
-                  {beneficios.map((b) => (
-                    <li key={b} className="flex items-start gap-3 text-sm">
-                      <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-primary" />
-                      <span>{b}</span>
-                    </li>
-                  ))}
-                </ul>
+                  <ul className="space-y-3 flex-1">
+                    {beneficiosCompleto.map((b) => (
+                      <li key={b} className="flex items-start gap-3 text-sm">
+                        <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+                        <span className={b.includes("Bot") || b.includes("Claude") || b.includes("Fraude") ? "font-semibold" : ""}>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
 
-                <Button
-                  size="lg"
-                  onClick={scrollToForm}
-                  className="w-full gradient-primary text-primary-foreground"
-                >
-                  Quero agendar minha demonstração
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-                <p className="text-center text-xs text-muted-foreground">
-                  Você fala com um especialista antes de assinar — sem cartão exigido.
-                </p>
-              </CardContent>
-            </Card>
-          </Reveal>
+                  <Button
+                    size="lg"
+                    onClick={scrollToForm}
+                    className="w-full gradient-primary text-primary-foreground"
+                  >
+                    Quero o Plano Completo
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </CardContent>
+              </Card>
+            </Reveal>
+          </div>
         </div>
       </section>
 
@@ -788,8 +843,8 @@ export default function LandingIA() {
                 Pare de perder leads enquanto você dorme.
               </h2>
               <p className="mx-auto max-w-2xl text-muted-foreground">
-                A Laura está pronta para começar a atender no seu WhatsApp em 24h. R$ 397/mês, sem
-                fidelidade.
+                A Laura está pronta para começar a atender no seu WhatsApp em 24h. Planos a partir de R$ 297/mês,
+                sem fidelidade.
               </p>
               <Button
                 size="lg"
