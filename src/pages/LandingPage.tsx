@@ -839,7 +839,7 @@ export default function LandingPage() {
             </p>
           </Reveal>
 
-          <div className="grid gap-8 md:grid-cols-2 max-w-5xl mx-auto">
+          <div className="grid gap-8 md:grid-cols-3 max-w-6xl mx-auto">
             {/* Plano Mensal */}
             <Reveal delay={0}>
               <div className="rounded-2xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col h-full transition-all duration-500 hover:border-[hsl(153,60%,45%)]/30 hover:-translate-y-1">
@@ -847,14 +847,11 @@ export default function LandingPage() {
                   <span className="inline-block rounded-full bg-[hsl(220,20%,16%)] px-3 py-1 text-xs font-semibold text-[hsl(220,10%,75%)]">PAGAMENTO MENSAL</span>
                 </div>
                 <div className="mb-6">
-                  <h3 className="text-xl font-bold text-[hsl(220,10%,92%)] mb-2">Mais flexibilidade para começar</h3>
+                  <h3 className="text-xl font-bold text-[hsl(220,10%,92%)] mb-2">Mais flexibilidade</h3>
                   <p className="text-5xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                    R$ 497<span className="text-base font-normal text-[hsl(220,10%,55%)]">/mês</span>
+                    R$ 797<span className="text-base font-normal text-[hsl(220,10%,55%)]">/mês</span>
                   </p>
                 </div>
-                <p className="mb-8 text-sm text-[hsl(220,10%,55%)] italic">
-                  Ideal para quem quer começar sem compromisso de longo prazo.
-                </p>
                 <ul className="mb-8 flex-1 space-y-3">
                   {[
                     "Mesmo acesso completo à plataforma",
@@ -877,8 +874,43 @@ export default function LandingPage() {
               </div>
             </Reveal>
 
+            {/* Plano Semestral */}
+            <Reveal delay={100}>
+              <div className="rounded-2xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col h-full transition-all duration-500 hover:border-[hsl(153,60%,45%)]/30 hover:-translate-y-1">
+                <div className="mb-6 flex items-center justify-between">
+                  <span className="inline-block rounded-full bg-[hsl(220,20%,16%)] px-3 py-1 text-xs font-semibold text-[hsl(220,10%,75%)]">PAGAMENTO SEMESTRAL</span>
+                </div>
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold text-[hsl(220,10%,92%)] mb-2">Economia intermediária</h3>
+                  <p className="text-5xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                    6x R$ 497
+                  </p>
+                  <p className="mt-2 text-[hsl(153,60%,45%)] font-bold text-sm">Economize R$ 1.800 no semestre</p>
+                </div>
+                <ul className="mb-8 flex-1 space-y-3">
+                  {[
+                    "Mesmo acesso completo",
+                    "Suporte prioritário",
+                    "Compromisso de 6 meses",
+                    "Ativação rápida"
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-sm text-[hsl(220,10%,75%)]">
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(153,60%,45%)]" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <Button 
+                  onClick={() => navigate("/signup?plan=semestral")} 
+                  className="w-full bg-transparent border border-[hsl(220,20%,16%)] hover:bg-[hsl(220,20%,16%)] text-[hsl(220,10%,92%)] font-bold py-6"
+                >
+                  COMEÇAR AGORA
+                </Button>
+              </div>
+            </Reveal>
+
             {/* Plano Anual */}
-            <Reveal delay={150}>
+            <Reveal delay={200}>
               <div className="relative rounded-2xl border-2 border-[hsl(153,60%,45%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col h-full shadow-xl shadow-[hsl(153,60%,45%)]/10 transition-all duration-500 hover:-translate-y-2">
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[hsl(153,60%,45%)] px-4 py-1 text-xs font-bold text-[hsl(220,25%,6%)]">
                   MELHOR CUSTO-BENEFÍCIO
@@ -887,22 +919,18 @@ export default function LandingPage() {
                   <span className="inline-block rounded-full bg-[hsl(153,60%,45%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(153,60%,45%)]">PAGAMENTO ANUAL</span>
                 </div>
                 <div className="mb-6">
-                  <h3 className="text-xl font-bold text-[hsl(220,10%,92%)] mb-2 text-[hsl(153,60%,45%)]">Melhor custo-benefício</h3>
+                  <h3 className="text-xl font-bold text-[hsl(220,10%,92%)] mb-2 text-[hsl(153,60%,45%)]">Economia máxima</h3>
                   <p className="text-5xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                    🔥 12x de R$ 297
+                    12x R$ 297
                   </p>
-                  <p className="mt-2 text-sm text-[hsl(220,10%,55%)]">ou pagamento anual à vista</p>
-                  <p className="mt-2 text-[hsl(153,60%,45%)] font-bold text-sm">Economize R$ 2.400 por ano</p>
+                  <p className="mt-2 text-[hsl(153,60%,45%)] font-bold text-sm">Economize R$ 6.000 por ano</p>
                 </div>
-                <p className="mb-8 text-sm text-[hsl(220,10%,75%)]">
-                  Mesmo acesso completo à plataforma + economia máxima.
-                </p>
                 <ul className="mb-8 flex-1 space-y-3">
                   {[
-                    "Tudo exatamente igual ao plano mensal",
-                    "Mesmo suporte",
-                    "Mesmo sistema completo",
-                    "Mesmo funcionalidades"
+                    "Acesso completo vitalício (no período)",
+                    "Melhor suporte da plataforma",
+                    "Sistema completo AdvOne",
+                    "Todas as funcionalidades inclusas"
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2 text-sm text-[hsl(220,10%,75%)]">
                       <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(153,60%,45%)]" />
@@ -910,11 +938,6 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <div className="mb-6 p-4 rounded-xl bg-[hsl(153,60%,45%)]/5 border border-[hsl(153,60%,45%)]/20">
-                  <p className="text-xs text-[hsl(220,10%,75%)] leading-relaxed">
-                    A única diferença: você paga menos por escolher o compromisso anual.
-                  </p>
-                </div>
                 <Button 
                   onClick={() => navigate("/signup?plan=anual")} 
                   size="lg"
