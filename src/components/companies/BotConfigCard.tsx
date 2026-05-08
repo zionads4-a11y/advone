@@ -174,6 +174,28 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
     );
   }
 
+  if (userRole === "gerente" && user?.email !== "zionads4@gmail.com") {
+    return (
+      <Card className="border-border/50">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base text-muted-foreground">
+            <Bot className="h-5 w-5" />
+            Configuração do Bot SDR
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center justify-center py-10 text-center">
+            <ShieldCheck className="h-10 w-10 text-muted-foreground/30 mb-3" />
+            <p className="text-sm font-medium text-muted-foreground">Acesso Restrito</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Apenas o Super Admin pode realizar a configuração do Bot SDR.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Highlight banner: test the bot */}
