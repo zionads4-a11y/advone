@@ -836,16 +836,17 @@ export default function LandingPage() {
             </h2>
           </Reveal>
           <div className="grid gap-8 md:grid-cols-2 max-w-4xl mx-auto">
-            {/* Plano Mensal */}
+            {/* Plano Semestral */}
             <Reveal delay={0}>
               <div className="rounded-2xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col h-full transition-all duration-500 hover:border-[hsl(153,60%,45%)]/30 hover:-translate-y-1">
                 <div className="mb-6 flex items-center justify-between">
-                  <span className="inline-block rounded-full bg-[hsl(220,20%,16%)] px-3 py-1 text-xs font-semibold text-[hsl(220,10%,75%)]">Mensal</span>
+                  <span className="inline-block rounded-full bg-[hsl(220,20%,16%)] px-3 py-1 text-xs font-semibold text-[hsl(220,10%,75%)]">Semestral</span>
                 </div>
                 <p className="mb-1 text-5xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                  R$ 497<span className="text-base font-normal text-[hsl(220,10%,55%)]">/mês</span>
+                  R$ 297<span className="text-base font-normal text-[hsl(220,10%,55%)]">/mês</span>
                 </p>
-                <p className="mt-1 mb-6 text-sm text-[hsl(220,10%,55%)]">Sem compromisso de longo prazo</p>
+                <p className="mt-1 mb-1 text-xs text-[hsl(220,10%,55%)] font-semibold">6× R$ 297 — Total R$ 1.782</p>
+                <p className="mb-6 text-sm text-[hsl(220,10%,55%)]">Ideal para médio prazo</p>
                 <ul className="mb-8 flex-1 space-y-3">
                   {[
                     "IA Jurídica com Gemini Flash",
@@ -863,12 +864,12 @@ export default function LandingPage() {
                   ))}
                 </ul>
                 <Button 
-                  onClick={() => navigate("/signup?plan=mensal")} 
+                  onClick={() => navigate("/signup?plan=semestral")} 
                   className="w-full bg-transparent border border-[hsl(220,20%,16%)] hover:bg-[hsl(220,20%,16%)] text-[hsl(220,10%,92%)] font-semibold"
                 >
-                  Assinar Mensal
+                  Assinar Semestral
                 </Button>
-                <p className="mt-4 text-center text-xs text-[hsl(220,10%,50%)]">Cancele quando quiser.</p>
+                <p className="mt-4 text-center text-xs text-[hsl(220,10%,50%)]">Pagamento em 6×</p>
               </div>
             </Reveal>
 
@@ -876,20 +877,20 @@ export default function LandingPage() {
             <Reveal delay={150}>
               <div className="relative rounded-2xl border-2 border-[hsl(153,60%,45%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col h-full shadow-xl shadow-[hsl(153,60%,45%)]/10 transition-all duration-500 hover:-translate-y-2">
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[hsl(153,60%,45%)] px-4 py-1 text-xs font-bold text-[hsl(220,25%,6%)]">
-                  ECONOMIZE 40%
+                  MELHOR PREÇO
                 </div>
                 <div className="mb-6 flex items-center justify-between">
                   <span className="inline-block rounded-full bg-[hsl(153,60%,45%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(153,60%,45%)]">Anual</span>
                 </div>
                 <p className="mb-1 text-5xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                  R$ 297<span className="text-base font-normal text-[hsl(220,10%,55%)]">/mês</span>
+                  R$ 197<span className="text-base font-normal text-[hsl(220,10%,55%)]">/mês</span>
                 </p>
-                <p className="mt-1 mb-1 text-xs text-[hsl(153,60%,45%)] font-semibold">12× R$ 297 — Total R$ 3.564/ano</p>
-                <p className="mb-6 text-sm text-[hsl(220,10%,55%)]">Melhor custo-benefício</p>
+                <p className="mt-1 mb-1 text-xs text-[hsl(153,60%,45%)] font-semibold">12× R$ 197 — Total R$ 2.364/ano</p>
+                <p className="mb-6 text-sm text-[hsl(220,10%,55%)]">Custo-benefício imbatível</p>
                 <ul className="mb-8 flex-1 space-y-3">
                   {[
-                    "Tudo do Plano Mensal",
-                    "Economia de R$ 2.400 por ano",
+                    "Tudo do Plano Semestral",
+                    "Menor preço do mercado",
                     "Preço travado por 12 meses",
                     "Onboarding personalizado",
                     "Suporte prioritário VIP"

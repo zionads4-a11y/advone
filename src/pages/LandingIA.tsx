@@ -523,21 +523,24 @@ export default function LandingIA() {
           </Reveal>
 
           <div className="mt-12 grid gap-8 md:grid-cols-2 max-w-5xl mx-auto">
-            {/* Plano Mensal */}
+            {/* Plano Semestral */}
             <Reveal delay={120}>
               <Card className="h-full border-border/60 bg-card/40 hover:border-primary/20 transition-all">
                 <CardContent className="space-y-6 p-8 flex flex-col h-full">
                   <div className="text-center">
                     <div className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                      Mensal
+                      Semestral
                     </div>
                     <div className="mt-2 flex items-baseline justify-center gap-1">
                       <span className="text-4xl font-bold">R$</span>
-                      <span className="font-display text-5xl font-bold">497</span>
+                      <span className="font-display text-5xl font-bold">297</span>
                       <span className="text-muted-foreground">/mês</span>
                     </div>
+                    <div className="mt-1 text-xs text-muted-foreground font-semibold">
+                      6× R$ 297 — Total R$ 1.782
+                    </div>
                     <div className="mt-1 text-xs text-muted-foreground">
-                      Sem compromisso de longo prazo
+                      Ideal para médio prazo
                     </div>
                   </div>
 
@@ -563,12 +566,12 @@ export default function LandingIA() {
                   <Button
                     size="lg"
                     variant="outline"
-                    onClick={() => navigate("/signup?plan=mensal")}
+                    onClick={() => navigate("/signup?plan=semestral")}
                     className="w-full"
                   >
-                    Assinar Mensal
+                    Assinar Semestral
                   </Button>
-                  <p className="text-center text-xs text-muted-foreground">Cancele quando quiser.</p>
+                  <p className="text-center text-xs text-muted-foreground">Pagamento em 6×</p>
                 </CardContent>
               </Card>
             </Reveal>
@@ -577,7 +580,7 @@ export default function LandingIA() {
             <Reveal delay={240}>
               <Card className="h-full border-primary/40 bg-card shadow-2xl shadow-primary/10 relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-primary px-3 py-1 text-[10px] font-bold text-primary-foreground uppercase tracking-widest rounded-bl-lg">
-                  Economize 40%
+                  Melhor Preço
                 </div>
                 <CardContent className="space-y-6 p-8 flex flex-col h-full">
                   <div className="text-center">
@@ -586,14 +589,14 @@ export default function LandingIA() {
                     </div>
                     <div className="mt-2 flex items-baseline justify-center gap-1">
                       <span className="text-4xl font-bold">R$</span>
-                      <span className="font-display text-5xl font-bold">297</span>
+                      <span className="font-display text-5xl font-bold">197</span>
                       <span className="text-muted-foreground">/mês</span>
                     </div>
                     <div className="mt-1 text-xs text-primary font-semibold">
-                      12× R$ 297 — Total R$ 3.564/ano
+                      12× R$ 197 — Total R$ 2.364/ano
                     </div>
                     <div className="mt-1 text-xs text-muted-foreground">
-                      Melhor custo-benefício
+                      Custo-benefício imbatível
                     </div>
                   </div>
 
@@ -601,8 +604,8 @@ export default function LandingIA() {
 
                   <ul className="space-y-3 flex-1">
                     {[
-                      "Tudo do Plano Mensal",
-                      "Economia de R$ 2.400 por ano",
+                      "Tudo do Plano Semestral",
+                      "Menor preço do mercado",
                       "Preço travado por 12 meses",
                       "Onboarding personalizado",
                       "Suporte prioritário VIP"
@@ -622,7 +625,7 @@ export default function LandingIA() {
                     Assinar Anual e Economizar
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
-                  <p className="text-center text-xs text-muted-foreground">Pagamento anual ou em 12×.</p>
+                  <p className="text-center text-xs text-muted-foreground">Pagamento anual ou em 12×</p>
                 </CardContent>
               </Card>
             </Reveal>
