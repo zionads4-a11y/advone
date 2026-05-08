@@ -128,6 +128,8 @@ export function CompanyAIConfigCard({ companyId }: Props) {
     ? ANTHROPIC_MODELS
     : LOVABLE_MODELS;
 
+  const isAnthropicDisabled = !isPlanCompleto;
+
   if (loading) {
     return (
       <Card className="glass-card">
