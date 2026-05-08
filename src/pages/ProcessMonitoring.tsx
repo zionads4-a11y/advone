@@ -277,6 +277,15 @@ export default function ProcessMonitoring() {
                     maxLength={200}
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label>CPF/CNPJ do Cliente</Label>
+                  <Input
+                    placeholder="000.000.000-00"
+                    value={newClientCpf}
+                    onChange={(e) => setNewClientCpf(e.target.value)}
+                    maxLength={20}
+                  />
+                </div>
                 <Button onClick={handleAddProcess} disabled={addingProcess} className="w-full">
                   {addingProcess ? (
                     <>
