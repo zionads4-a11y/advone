@@ -439,6 +439,17 @@ export function WhatsAppConfigDialog({
                       <p className="text-xs text-muted-foreground">Define o objetivo principal do chatbot</p>
                     </div>
 
+                    {/* Opção de Identificar Clientes */}
+                    <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/20">
+                      <div>
+                        <p className="font-medium text-sm">Identificar Clientes Antigos</p>
+                        <p className="text-xs text-muted-foreground">
+                          Se o cliente pedir atualização de processo, a IA pedirá o CPF e dará o status.
+                        </p>
+                      </div>
+                      <Switch checked={checkClientStatus} onCheckedChange={setCheckClientStatus} />
+                    </div>
+
                     {/* WhatsApp para Alertas */}
                     <div className="space-y-2">
                       <Label className="font-medium">Seu WhatsApp para Alertas</Label>
