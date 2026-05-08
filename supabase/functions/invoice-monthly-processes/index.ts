@@ -19,7 +19,7 @@ const corsHeaders = {
 
 const ASAAS_API_KEY = Deno.env.get("ASAAS_ADVONE_API_KEY")!;
 const ASAAS_BASE = "https://api.asaas.com/v3";
-const PRICE_PER_PROCESS = 2.58;
+const PRICE_PER_PROCESS = 2.50;
 
 interface AsaasCustomer { id: string; name: string; }
 interface AsaasPayment { id: string; invoiceUrl: string; }
@@ -139,7 +139,15 @@ Deno.serve(async (req) => {
           continue;
         }
 
-        const quota = company.billing_model === 'plan_completo' || company.billing_model === 'crm_full' ? 50 : 20;
+        // Quota mensal incluída por plano (acima disso é cobrado por processo)
+        const quotaByPlan: Record<string, number> = {
+          plan_completo: 50,
+          plan_ia_monthly: 30,
+          plan_ia_6m: 30,
+          plan_ia_12m: 30,
+          plan_cortesia: 0, // cortesia: cobra todo processo monitorado
+        };
+        const quota = quotaByPlan[company.billing_model as string] ?? 0;
         const excess = Math.max(0, count - quota);
         const total = +(excess * PRICE_PER_PROCESS).toFixed(2);
 

@@ -55,11 +55,11 @@ export const BILLING_MODELS: BillingModelOption[] = [
   {
     key: "plan_cortesia",
     emoji: "🎁",
-    label: "Plano Cortesia ZionAds",
-    description: "Acesso completo cortesia para parceiros ZionAds. 50 monitoramentos.",
+    label: "Plano Cortesia ZionAds (somente IA)",
+    description: "Cortesia para parceiros ZionAds: acesso à IA Laura, IA Jurídica, Boards e Agenda. Monitoramento de processos opcional (R$ 2,50/mês por processo, cobrado via Asaas).",
     partnership_type: "mensalidade_zionads",
-    service_mode: "full",
-    monitoring_quota: 50,
+    service_mode: "ai_only",
+    monitoring_quota: 0,
   },
 ];
 
