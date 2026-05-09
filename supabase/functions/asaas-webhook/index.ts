@@ -1,10 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { getErrorMessage } from "../_shared/errors.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, asaas-access-token",
-};
+import { webhookCorsHeaders as corsHeaders } from "../_shared/cors.ts";
+import { log } from "../_shared/logger.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -12,14 +9,43 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const asaasToken = Deno.env.get("ASAAS_WEBHOOK_TOKEN");
+    const receivedToken = req.headers.get("asaas-access-token");
+
+    if (asaasToken && receivedToken !== asaasToken) {
+      log("warn", "asaas-webhook", "Unauthorized attempt", { receivedToken });
+      return new Response("Unauthorized", { status: 401, headers: corsHeaders });
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const adminClient = createClient(supabaseUrl, serviceKey);
 
     const body = await req.json();
-    console.log("Asaas webhook received:", JSON.stringify(body));
+    log("info", "asaas-webhook", "Received webhook", { event: body.event });
+
 
     const { event, payment, subscription: subEvent } = body;
+    const eventId = body.id || `${event}_${payment?.id || subEvent?.id}_${Date.now()}`;
+
+    const { data: existing } = await adminClient
+      .from("webhook_events")
+      .select("id")
+      .eq("event_id", eventId)
+      .maybeSingle();
+
+    if (existing) {
+      log("info", "asaas-webhook", "Duplicate event skipped", { eventId });
+      return new Response(JSON.stringify({ ok: true, duplicate: true }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    await adminClient.from("webhook_events").insert({
+      event_id: eventId,
+      event_type: event,
+      payload: body,
+    });
 
     if (!event) {
       return new Response(JSON.stringify({ error: "Event missing" }), {
@@ -27,6 +53,7 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
 
     // Payment events — update subscription status based on payment
     if (event.startsWith("PAYMENT_")) {
