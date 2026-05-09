@@ -31,11 +31,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .maybeSingle();
       if (error) {
         console.error("Error fetching user role:", error);
-        return;
+        return null;
       }
-      setUserRole(data?.role ?? null);
+      const role = data?.role ?? null;
+      setUserRole(role);
+      return role;
     } catch (err) {
       console.error("Failed to fetch user role:", err);
+      return null;
     }
   };
 
