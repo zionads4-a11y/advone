@@ -16,7 +16,11 @@ export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   }
 
   if (!user && !loading) {
-    const redirectPath = location.pathname + location.search;
+    const currentPath = location.pathname;
+    // Don't append redirect if we are already going to /auth
+    if (currentPath === "/auth") return null;
+    
+    const redirectPath = currentPath + location.search;
     return <Navigate to={`/auth?redirect=${encodeURIComponent(redirectPath)}`} replace />;
   }
 

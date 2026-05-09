@@ -30,9 +30,12 @@ export default function Auth() {
 
   if (user && !loading) {
     const from = searchParams.get("redirect") || "/dashboard";
-    if (from.startsWith("/auth")) {
+    
+    // Prevent redirecting back to /auth if we are already logged in
+    if (from.startsWith("/auth") || from === "/" || from === "") {
       return <Navigate to="/dashboard" replace />;
     }
+    
     return <Navigate to={from} replace />;
   }
 
