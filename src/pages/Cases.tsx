@@ -721,7 +721,7 @@ export default function Cases() {
       {/* Folder grid */}
       {loading ? (
         <div className="text-center py-12 text-muted-foreground">Carregando...</div>
-      ) : filteredCases.length === 0 ? (
+      ) : paginatedCases.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
           <Briefcase className="h-12 w-12 mb-3 opacity-30" />
           <p className="text-sm">
@@ -730,7 +730,7 @@ export default function Cases() {
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filteredCases.map((c) => (
+          {paginatedCases.map((c) => (
             <Card
               key={c.id}
               className="glass-card cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] group"
@@ -810,6 +810,14 @@ export default function Cases() {
           ))}
         </div>
       )}
+
+      <TablePagination 
+        totalItems={filteredCases.length}
+        pageSize={pageSize}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 }
+
