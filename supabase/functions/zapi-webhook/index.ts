@@ -1472,12 +1472,22 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    const expectedToken = Deno.env.get("ZAPI_WEBHOOK_SECRET");
+    if (expectedToken) {
+      const received = req.headers.get("x-webhook-secret") || req.headers.get("authorization");
+      if (received !== expectedToken && received !== `Bearer ${expectedToken}`) {
+        log("warn", "zapi-webhook", "Unauthorized attempt");
+        return new Response("Unauthorized", { status: 401, headers: corsHeaders });
+      }
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const url = new URL(req.url);
     const companyId = url.searchParams.get("company_id");
+
 
     if (!companyId) {
       return new Response(JSON.stringify({ error: "Missing company_id" }), {
