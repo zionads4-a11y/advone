@@ -46,16 +46,20 @@ import Privacy from "./pages/Privacy";
 import Tasks from "./pages/Tasks";
 import Boards from "./pages/Boards";
 import { ThemeProvider } from "@/hooks/useTheme";
+import { ErrorBoundary } from "./components/ErrorBoundary";
+
 
 const queryClient = new QueryClient();
 
 const App = () => (
-  <ThemeProvider>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+  <ErrorBoundary>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+
           <AuthProvider>
           <Routes>
              <Route path="/" element={<Index />} />
@@ -109,9 +113,11 @@ const App = () => (
           </Routes>
         </AuthProvider>
       </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-  </ThemeProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
+  </ErrorBoundary>
 );
+
 
 export default App;
