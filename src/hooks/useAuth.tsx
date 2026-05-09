@@ -139,47 +139,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-
-  const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error: error as Error | null };
-  };
-
-  const signInWithGoogle = async () => {
-    const { error } = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin + "/auth",
-    });
-    return { error: error as Error | null };
-  };
-
-  const signUp = async (email: string, password: string, fullName: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: window.location.origin,
-        data: { full_name: fullName },
-      },
-    });
-    if (!error) {
-      const { trackMetaEvent } = await import("@/lib/metaPixel");
-      trackMetaEvent("CompleteRegistration", { email, contentName: fullName });
-      trackMetaEvent("Lead", { email, contentName: "Signup" });
-    }
-    return { error: error as Error | null };
-  };
-
-  const signOut = async () => {
-    await supabase.auth.signOut();
-  };
-
-  return (
-    <AuthContext.Provider value={{ user, session, loading, userRole, signIn, signInWithGoogle, signUp, signOut }}>
-      {children}
-    </AuthContext.Provider>
-  );
-}
-
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
