@@ -73,16 +73,23 @@ export default function Leads() {
 
   const fetchData = async () => {
     setLoading(true);
-    const [leadsRes, companiesRes, campaignsRes] = await Promise.all([
-      supabase.from("leads").select("*").order("created_at", { ascending: false }),
+    const { data: leadsData } = await supabase
+      .from("leads")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .range(0, 1000); // Limit initial load to 1000 records
+    
+    const [companiesRes, campaignsRes] = await Promise.all([
       supabase.from("companies").select("id, name"),
       supabase.from("campaigns").select("id, name, company_id"),
     ]);
-    if (leadsRes.data) setLeads(leadsRes.data as Lead[]);
+
+    if (leadsData) setLeads(leadsData as Lead[]);
     if (companiesRes.data) setCompanies(companiesRes.data);
     if (campaignsRes.data) setCampaigns(campaignsRes.data);
     setLoading(false);
   };
+
 
   const filteredLeads = useMemo(() => {
     return leads.filter((lead) => {

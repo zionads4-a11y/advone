@@ -130,7 +130,9 @@ export default function Financial() {
         .from("financial_transactions")
         .select("*")
         .eq("company_id", companyId)
-        .order("due_date", { ascending: false }),
+        .order("due_date", { ascending: false })
+        .range(0, 500), // Limit initial load
+
       supabase
         .from("asaas_configs")
         .select("id, company_id, environment, last_sync_at")

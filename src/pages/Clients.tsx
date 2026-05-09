@@ -50,8 +50,10 @@ export default function Clients() {
         .from("leads")
         .select("id, name, cpf_cliente_final, phone, whatsapp, email, area_direito, tipo_caso_detalhado, became_client_at, company_id")
         .eq("is_client", true)
-        .order("became_client_at", { ascending: false }),
+        .order("became_client_at", { ascending: false })
+        .range(0, 500), // Limit initial load
       supabase.from("companies").select("id, name"),
+
     ]);
     if (clientsRes.data) {
       const list = clientsRes.data as Client[];
