@@ -3,6 +3,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 
 function getHomeRoute(role: string | null) {
+  if (!role) return "/dashboard";
+  
   switch (role) {
     case "admin":
     case "member":
