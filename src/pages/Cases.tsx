@@ -162,7 +162,9 @@ export default function Cases() {
       .from("cases")
       .select("*")
       .eq("company_id", companyId)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .range(0, 500); // Limit initial load
+
 
     if (error) {
       toast.error("Erro ao carregar processos");
