@@ -73,11 +73,24 @@ export default function Leads() {
 
   const fetchData = async () => {
     setLoading(true);
-    const { data: leadsData } = await supabase
+    let query = supabase
       .from("leads")
       .select("*")
-      .order("created_at", { ascending: false })
-      .range(0, 1000); // Limit initial load to 1000 records
+      .order("created_at", { ascending: false });
+
+    // Multi-tenant check for client role
+    if (userRole === "client" || userRole === "gerente" || userRole === "operador") {
+       const { data: clientComps } = await supabase
+         .from("client_companies")
+         .select("company_id")
+         .eq("user_id", user?.id);
+       
+       if (clientComps && clientComps.length > 0) {
+         query = query.in("company_id", clientComps.map(c => c.company_id));
+       }
+    }
+
+    const { data: leadsData } = await query.range(0, 1000); // Limit initial load to 1000 records
     
     const [companiesRes, campaignsRes] = await Promise.all([
       supabase.from("companies").select("id, name"),
