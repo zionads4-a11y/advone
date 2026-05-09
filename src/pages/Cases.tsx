@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserCompanies } from "@/hooks/useUserCompanies";
@@ -21,6 +21,10 @@ import {
   User,
   Link2,
 } from "lucide-react";
+// ... keep existing code
+import { TablePagination } from "@/components/ui/table-pagination";
+
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -103,12 +107,14 @@ function formatFileSize(bytes: number) {
 
 export default function Cases() {
   const { user, userRole } = useAuth();
-  const { companyIds } = useUserCompanies();
-  const companyId = companyIds[0] || "";
-
-  const [cases, setCases] = useState<CaseRecord[]>([]);
-  const [loading, setLoading] = useState(true);
+  // ... keep existing code
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 50;
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 50;
+
 
   // Selected case (folder view)
   const [selectedCase, setSelectedCase] = useState<CaseRecord | null>(null);
@@ -368,14 +374,22 @@ export default function Cases() {
     }
   };
 
-  const filteredCases = cases.filter((c) => {
-    if (!searchTerm) return true;
-    const term = searchTerm.toLowerCase();
-    return (
-      c.client_name.toLowerCase().includes(term) ||
-      (c.case_number || "").toLowerCase().includes(term)
-    );
-  });
+  const filteredCases = useMemo(() => {
+    return cases.filter((c) => {
+      if (!searchTerm) return true;
+      const term = searchTerm.toLowerCase();
+      return (
+        c.client_name.toLowerCase().includes(term) ||
+        (c.case_number || "").toLowerCase().includes(term)
+      );
+    });
+  }, [cases, searchTerm]);
+
+  const paginatedCases = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredCases.slice(start, start + pageSize);
+  }, [filteredCases, currentPage]);
+
 
   if (!companyId) {
     return (
