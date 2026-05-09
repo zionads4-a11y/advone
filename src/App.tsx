@@ -5,7 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { RoleProtectedRoute } from "@/components/auth/RoleProtectedRoute";
 import Index from "./pages/Index";
+
 import Auth from "./pages/Auth";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
@@ -85,15 +87,45 @@ const App = () => (
               <Route path="/kanban" element={<Kanban />} />
               <Route path="/conversations" element={<Conversations />} />
               <Route path="/campaigns" element={<Campaigns />} />
-              <Route path="/companies" element={<Companies />} />
+              <Route 
+                path="/companies" 
+                element={
+                  <RoleProtectedRoute allowedRoles={["admin", "member"]}>
+                    <Companies />
+                  </RoleProtectedRoute>
+                } 
+              />
+
               <Route path="/companies/:id" element={<CompanyDetail />} />
               <Route path="/tracking" element={<TrackingLinks />} />
               <Route path="/agenda" element={<Agenda />} />
               <Route path="/client-users" element={<ClientUsers />} />
-              <Route path="/access-management" element={<AccessManagement />} />
+              <Route 
+                path="/access-management" 
+                element={
+                  <RoleProtectedRoute allowedRoles={["admin", "member", "gerente"]}>
+                    <AccessManagement />
+                  </RoleProtectedRoute>
+                } 
+              />
               <Route path="/profile" element={<Profile />} />
-              <Route path="/bot-config" element={<BotConfig />} />
-              <Route path="/company-settings" element={<CompanySettings />} />
+              <Route 
+                path="/bot-config" 
+                element={
+                  <RoleProtectedRoute allowedRoles={["admin", "member", "gerente"]}>
+                    <BotConfig />
+                  </RoleProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/company-settings" 
+                element={
+                  <RoleProtectedRoute allowedRoles={["admin", "member", "gerente"]}>
+                    <CompanySettings />
+                  </RoleProtectedRoute>
+                } 
+              />
+
               <Route path="/financeiro" element={<Financial />} />
               <Route path="/documentos" element={<Documents />} />
               <Route path="/modelos-documentos" element={<DocumentTemplates />} />
