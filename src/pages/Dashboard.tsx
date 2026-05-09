@@ -57,7 +57,10 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!companiesLoading) {
+      // Adding a simple guard to avoid unnecessary re-fetches
+      const controller = new AbortController();
       fetchStats();
+      return () => controller.abort();
     }
   }, [companiesLoading]);
 
