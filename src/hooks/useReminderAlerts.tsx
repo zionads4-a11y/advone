@@ -201,9 +201,15 @@ export function ReminderAlertProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!user || loading) return;
 
-    fetchAlerts();
-    fetchFinancialAlerts();
-    fetchProcessAlerts();
+    const initFetch = async () => {
+      await Promise.allSettled([
+        fetchAlerts(),
+        fetchFinancialAlerts(),
+        fetchProcessAlerts()
+      ]);
+    };
+    initFetch();
+
     intervalRef.current = setInterval(() => {
       fetchAlerts();
       fetchFinancialAlerts();

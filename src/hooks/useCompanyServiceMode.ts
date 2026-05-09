@@ -21,6 +21,8 @@ export function useCompanyServiceMode() {
   const isAgencyStaff = userRole === "admin" || userRole === "member";
 
   useEffect(() => {
+    let mounted = true;
+
     if (isAgencyStaff) {
       setServiceMode("full");
       setBillingModel("plan_completo"); // Admins see everything
@@ -36,20 +38,31 @@ export function useCompanyServiceMode() {
     }
 
     const fetchMode = async () => {
-      const { data } = await supabase
-        .from("companies")
-        .select("service_mode, billing_model")
-        .eq("id", companyIds[0])
-        .maybeSingle();
+      try {
+        const { data } = await supabase
+          .from("companies")
+          .select("service_mode, billing_model")
+          .eq("id", companyIds[0])
+          .maybeSingle();
 
-      if (data) {
-        setServiceMode(data.service_mode as ServiceMode);
-        setBillingModel(data.billing_model as BillingModel);
+        if (!mounted) return;
+        
+        if (data) {
+          setServiceMode(data.service_mode as ServiceMode);
+          setBillingModel(data.billing_model as BillingModel);
+        }
+      } catch (err) {
+        console.error("Service mode fetch error:", err);
+      } finally {
+        if (mounted) setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchMode();
+
+    return () => {
+      mounted = false;
+    };
   }, [companyIds, companiesLoading, isAgencyStaff]);
 
   return { 

@@ -43,29 +43,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+    // Get initial session first to avoid race conditions with onAuthStateChange
+    const initSession = async () => {
+      try {
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
         if (!mounted) return;
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await fetchUserRole(session.user.id);
-        } else {
-          setUserRole(null);
+        
+        if (initialSession) {
+          setSession(initialSession);
+          setUser(initialSession.user);
+          await fetchUserRole(initialSession.user.id);
         }
-        setLoading(false);
+      } catch (err) {
+        console.error("Session fetch error:", err);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    initSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (!mounted) return;
+        
+        // Only trigger updates on specific events to avoid redundant renders or loops
+        if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED" || event === "TOKEN_REFRESHED") {
+          setSession(session);
+          setUser(session?.user ?? null);
+          if (session?.user) {
+            await fetchUserRole(session.user.id);
+          } else {
+            setUserRole(null);
+          }
+          setLoading(false);
+        }
       }
     );
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
-      if (session) {
-        setSession(session);
-        setUser(session.user);
-        fetchUserRole(session.user.id);
-      }
-      setLoading(false);
-    });
 
     return () => {
       mounted = false;
