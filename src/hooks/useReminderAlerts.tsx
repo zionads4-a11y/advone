@@ -240,6 +240,7 @@ export function ReminderAlertProvider({ children }: { children: ReactNode }) {
     return () => {
       supabase.removeChannel(channel);
     };
+
   }, [user, loading, fetchAlerts, fetchFinancialAlerts, fetchProcessAlerts]);
 
   const dismissAlert = useCallback((id: string) => {

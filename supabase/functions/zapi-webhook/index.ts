@@ -1,14 +1,10 @@
-// deno-lint-ignore-file no-explicit-any
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { getErrorMessage } from "../_shared/errors.ts";
 import { isBrazilianHolidayStr } from "../_shared/holidays.ts";
+import { webhookCorsHeaders as corsHeaders } from "../_shared/cors.ts";
+import { log } from "../_shared/logger.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
 
 // ====== PROMPT BUILDERS ======
 function buildSDRPrompt(
@@ -1476,12 +1472,22 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    const expectedToken = Deno.env.get("ZAPI_WEBHOOK_SECRET");
+    if (expectedToken) {
+      const received = req.headers.get("x-webhook-secret") || req.headers.get("authorization");
+      if (received !== expectedToken && received !== `Bearer ${expectedToken}`) {
+        log("warn", "zapi-webhook", "Unauthorized attempt");
+        return new Response("Unauthorized", { status: 401, headers: corsHeaders });
+      }
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const url = new URL(req.url);
     const companyId = url.searchParams.get("company_id");
+
 
     if (!companyId) {
       return new Response(JSON.stringify({ error: "Missing company_id" }), {

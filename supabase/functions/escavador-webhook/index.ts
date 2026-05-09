@@ -1,15 +1,8 @@
 // Webhook público que recebe callbacks do Escavador V2 quando há novas
 // movimentações nos processos monitorados.
-// - Valida e normaliza o payload
-// - Loga TODOS os eventos em escavador_webhook_events para auditoria/retry
-// - Deduplicação automática via UNIQUE (monitored_process_id, escavador_movement_id)
-// - Em caso de erro processando um item, marca o evento como `failed` para retry
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { webhookCorsHeaders as corsHeaders } from "../_shared/cors.ts";
+import { log } from "../_shared/logger.ts";
 
 function admin() {
   return createClient(
@@ -17,6 +10,7 @@ function admin() {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
 }
+
 
 async function sendWhatsappAlert(companyId: string, numeroCnj: string, clientName: string | null, count: number) {
   try {
@@ -130,18 +124,25 @@ export async function processEvent(ev: any): Promise<{ inserted: number; error?:
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  const sb = admin();
-  let rawBody = "";
-  let payload: any = {};
-
   try {
+    const expectedToken = Deno.env.get("ESCAVADOR_WEBHOOK_SECRET");
+    if (expectedToken) {
+      const received = req.headers.get("x-webhook-secret") || req.headers.get("authorization");
+      if (received !== expectedToken && received !== `Bearer ${expectedToken}`) {
+        log("warn", "escavador-webhook", "Unauthorized attempt");
+        return new Response("Unauthorized", { status: 401, headers: corsHeaders });
+      }
+    }
+
+    const sb = admin();
+    let rawBody = "";
+    let payload: any = {};
+
     rawBody = await req.text();
     try { payload = rawBody ? JSON.parse(rawBody) : {}; } catch { payload = { _raw: rawBody }; }
 
-    console.log("[escavador-webhook] received", {
-      bytes: rawBody.length,
-      keys: Object.keys(payload || {}),
-    });
+    log("info", "escavador-webhook", "Received webhook", { bytes: rawBody.length });
+
 
     // Validação básica do envelope
     if (!payload || typeof payload !== "object") {

@@ -1,17 +1,16 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { getErrorMessage } from "../_shared/errors.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+import { getCorsHeaders } from "../_shared/cors.ts";
+import { checkRateLimit } from "../_shared/rateLimit.ts";
+import { log } from "../_shared/logger.ts";
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -42,16 +41,50 @@ serve(async (req) => {
       });
     }
 
-    const { company_id, phone, message, action, media_url, media_type } = await req.json();
+    const body = await req.json();
+    const { company_id, phone, message, action, media_url, media_type } = body;
 
-    if (!company_id) {
-      return new Response(JSON.stringify({ error: "company_id é obrigatório" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    // Input Validation
+    if (typeof company_id !== "string" || !company_id.match(/^[0-9a-f-]{36}$/)) {
+      return new Response(JSON.stringify({ error: "company_id inválido" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (phone && (typeof phone !== "string" || phone.length > 20)) {
+      return new Response(JSON.stringify({ error: "phone inválido" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (message && (typeof message !== "string" || message.length > 4096)) {
+      return new Response(JSON.stringify({ error: "mensagem muito longa (max 4096)" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Multi-tenant check
+    const { data: membership } = await adminClient
+      .from("client_companies")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("company_id", company_id)
+      .maybeSingle();
+
+    if (!membership) {
+      return new Response(JSON.stringify({ error: "Sem acesso a esta empresa" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Rate Limiting
+    const isAllowed = await checkRateLimit(adminClient, userId, "send-whatsapp", 200);
+    if (!isAllowed) {
+      return new Response(JSON.stringify({ error: "Limite de envio atingido (200/hora)." }), {
+        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
 
     // Get Z-API config for this company
     const { data: config } = await adminClient
