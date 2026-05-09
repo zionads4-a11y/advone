@@ -30,7 +30,9 @@ export default function Auth() {
 
   if (user && !loading) {
     const from = searchParams.get("redirect") || "/dashboard";
-    console.log("[Auth] User detected, redirecting to:", from);
+    if (from.startsWith("/auth")) {
+      return <Navigate to="/dashboard" replace />;
+    }
     return <Navigate to={from} replace />;
   }
 
