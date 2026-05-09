@@ -201,13 +201,14 @@ export function ReminderAlertProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!user || loading) return;
 
-    fetchAlerts();
-    fetchFinancialAlerts();
-    fetchProcessAlerts();
-    intervalRef.current = setInterval(() => {
-      fetchAlerts();
-      fetchFinancialAlerts();
-      fetchProcessAlerts();
+    const initFetch = async () => {
+      await Promise.allSettled([
+        fetchAlerts(),
+        fetchFinancialAlerts(),
+        fetchProcessAlerts()
+      ]);
+    };
+    initFetch();
     }, 60000);
 
     return () => {
