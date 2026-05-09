@@ -28,7 +28,7 @@ export default function Auth() {
     );
   }
 
-  if (user) return <Navigate to="/dashboard" replace />;
+  if (user && !loading) return <Navigate to="/dashboard" replace />;
 
   return (
     <div className="dark flex min-h-screen items-center justify-center bg-[hsl(220,25%,6%)] p-4">
