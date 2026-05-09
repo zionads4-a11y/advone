@@ -1,10 +1,13 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { getErrorMessage } from "../_shared/errors.ts";
+import { getCorsHeaders } from "../_shared/cors.ts";
+import { log } from "../_shared/logger.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+// Helper to determine headers
+const getResponseHeaders = (req: Request) => {
+  return { ...getCorsHeaders(req), "Content-Type": "application/json" };
 };
+
 
 // Standard monitoring limit for all 3 plans
 const STANDARD_MAX_PROCESSES = 50;
