@@ -1,10 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { webhookCorsHeaders as corsHeaders } from "../_shared/cors.ts";
+import { log } from "../_shared/logger.ts";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -12,12 +9,43 @@ serve(async (req) => {
   }
 
   try {
+    const expectedToken = Deno.env.get("ZAPSIGN_WEBHOOK_TOKEN");
+    if (expectedToken) {
+      const received = req.headers.get("authorization");
+      if (received !== expectedToken && received !== `Bearer ${expectedToken}`) {
+        log("warn", "zapsign-webhook", "Unauthorized attempt");
+        return new Response("Unauthorized", { status: 401, headers: corsHeaders });
+      }
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
+
     const body = await req.json();
-    console.log("ZapSign webhook received:", JSON.stringify(body));
+    log("info", "zapsign-webhook", "Received webhook", { eventType: body.event_type || body.type });
+
+    const eventId = body.id || `zapsign_${body.doc?.token || body.doc_token}_${Date.now()}`;
+    const { data: existing } = await adminClient
+      .from("webhook_events")
+      .select("id")
+      .eq("event_id", eventId)
+      .maybeSingle();
+
+    if (existing) {
+      log("info", "zapsign-webhook", "Duplicate event skipped", { eventId });
+      return new Response(JSON.stringify({ ok: true, duplicate: true }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    await adminClient.from("webhook_events").insert({
+      event_id: eventId,
+      event_type: body.event_type || body.type || "unknown",
+      payload: body,
+    });
+
 
     // ZapSign sends: { event_type, doc_token, signer_token, status, ... }
     const eventType = body.event_type || body.type;
