@@ -91,15 +91,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setLoading(false);
         } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
           if (currentSession?.user) {
-            const isUserChange = currentSession.user.id !== user?.id;
+            const isUserChange = !user || currentSession.user.id !== user.id;
             console.log("[Auth] Session active for:", currentSession.user.id, "isUserChange:", isUserChange);
             
             setSession(currentSession);
             setUser(currentSession.user);
+            
+            // Fetch role if user changed or if we don't have it yet
             if (isUserChange || !userRole) {
               await fetchUserRole(currentSession.user.id);
             }
-          } else {
+          } else if (!currentSession) {
+            // Explicitly handle no session case within these events
             setSession(null);
             setUser(null);
             setUserRole(null);
