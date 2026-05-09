@@ -131,7 +131,9 @@ export function NewMessageNotificationProvider({ children }: { children: ReactNo
     }
 
     return () => {
-      channels.forEach((ch) => supabase.removeChannel(ch));
+      channels.forEach((ch) => {
+        supabase.removeChannel(ch);
+      });
     };
   }, [user, loading, isClient, companyIds]);
 
