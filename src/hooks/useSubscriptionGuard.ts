@@ -15,6 +15,8 @@ export function useSubscriptionGuard(): SubscriptionGuard {
   const [status, setStatus] = useState<string | null>(null);
 
   useEffect(() => {
+    let mounted = true;
+
     if (!user) {
       setLoading(false);
       return;
@@ -28,21 +30,32 @@ export function useSubscriptionGuard(): SubscriptionGuard {
     }
 
     const check = async () => {
-      const { data } = await supabase
-        .from("subscriptions")
-        .select("status")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      try {
+        const { data } = await supabase
+          .from("subscriptions")
+          .select("status")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
 
-      const subStatus = data?.status ?? null;
-      setStatus(subStatus);
-      setBlocked(subStatus === "overdue" || subStatus === "cancelled");
-      setLoading(false);
+        if (!mounted) return;
+        
+        const subStatus = data?.status ?? null;
+        setStatus(subStatus);
+        setBlocked(subStatus === "overdue" || subStatus === "cancelled");
+      } catch (err) {
+        console.error("Subscription check error:", err);
+      } finally {
+        if (mounted) setLoading(false);
+      }
     };
 
     check();
+
+    return () => {
+      mounted = false;
+    };
   }, [user, userRole]);
 
   return { loading, blocked, status };
