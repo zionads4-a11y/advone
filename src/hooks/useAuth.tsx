@@ -46,38 +46,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
-    // Get initial session first to avoid race conditions with onAuthStateChange
-    const initSession = async () => {
+    const initAuth = async () => {
       try {
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         if (!mounted) return;
-        
+
         if (initialSession) {
           setSession(initialSession);
           setUser(initialSession.user);
           await fetchUserRole(initialSession.user.id);
         }
       } catch (err) {
-        console.error("Session fetch error:", err);
+        console.error("Auth init error:", err);
       } finally {
         if (mounted) setLoading(false);
       }
     };
 
-    initSession();
+    initAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (event, currentSession) => {
         if (!mounted) return;
-        
-        // Only trigger updates on specific events to avoid redundant renders or loops
-        if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED" || event === "TOKEN_REFRESHED") {
-          setSession(session);
-          setUser(session?.user ?? null);
-          if (session?.user) {
-            await fetchUserRole(session.user.id);
-          } else {
-            setUserRole(null);
+
+        if (event === "SIGNED_OUT") {
+          setSession(null);
+          setUser(null);
+          setUserRole(null);
+          setLoading(false);
+        } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
+          setSession(currentSession);
+          setUser(currentSession?.user ?? null);
+          if (currentSession?.user) {
+            await fetchUserRole(currentSession.user.id);
           }
           setLoading(false);
         }
