@@ -107,14 +107,14 @@ function formatFileSize(bytes: number) {
 
 export default function Cases() {
   const { user, userRole } = useAuth();
-  // ... keep existing code
+  const { companyIds } = useUserCompanies();
+  const companyId = companyIds[0] || "";
+
+  const [cases, setCases] = useState<CaseRecord[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 50;
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 50;
-
 
   // Selected case (folder view)
   const [selectedCase, setSelectedCase] = useState<CaseRecord | null>(null);
@@ -128,6 +128,7 @@ export default function Cases() {
   const [formCaseNumber, setFormCaseNumber] = useState("");
   const [formNotes, setFormNotes] = useState("");
   const [formStatus, setFormStatus] = useState("ativo");
+
   const [formLeadId, setFormLeadId] = useState<string>("none");
 
   // Leads for linking
