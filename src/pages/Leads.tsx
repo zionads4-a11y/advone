@@ -54,7 +54,7 @@ const statusConfig: Record<LeadStatus, { label: string; className: string }> = {
 };
 
 export default function Leads() {
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
