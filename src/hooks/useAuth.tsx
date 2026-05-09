@@ -27,6 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (isFetchingRoleRef.current) return;
     isFetchingRoleRef.current = true;
     try {
+      console.log("[Auth] Fetching role for user:", userId);
       const { data, error } = await supabase
         .from("user_roles")
         .select("role")
@@ -38,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return null;
       }
       const role = data?.role ?? null;
+      console.log("[Auth] Fetched role:", role);
       setUserRole(role);
       return role;
     } catch (err) {
@@ -53,18 +55,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const initAuth = async () => {
       try {
+        console.log("[Auth] Initializing session...");
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         if (!mounted) return;
 
         if (initialSession) {
+          console.log("[Auth] Found initial session for:", initialSession.user.id);
           setSession(initialSession);
           setUser(initialSession.user);
           await fetchUserRole(initialSession.user.id);
+        } else {
+          console.log("[Auth] No initial session found.");
         }
       } catch (err) {
         console.error("Auth init error:", err);
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          console.log("[Auth] Loading complete.");
+          setLoading(false);
+        }
       }
     };
 
@@ -73,6 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
         if (!mounted) return;
+        console.log("[Auth] Auth state change event:", event);
 
         if (event === "SIGNED_OUT") {
           setSession(null);
@@ -80,9 +90,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUserRole(null);
           setLoading(false);
         } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
-          const isUserChange = currentSession?.user?.id !== user?.id;
-          
           if (currentSession?.user) {
+            const isUserChange = currentSession.user.id !== user?.id;
+            console.log("[Auth] Session active for:", currentSession.user.id, "isUserChange:", isUserChange);
+            
             setSession(currentSession);
             setUser(currentSession.user);
             if (isUserChange || !userRole) {
@@ -102,7 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [user?.id, userRole]);
+  }, []); // Removed user?.id and userRole from dependencies to prevent redundant triggers
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });

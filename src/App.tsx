@@ -61,13 +61,12 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-
-          <AuthProvider>
-          <Routes>
-             <Route path="/" element={<Index />} />
-             <Route path="/home" element={<LandingPage />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/signup" element={<Navigate to="/auth" replace />} />
+            <AuthProvider>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/home" element={<LandingPage />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/signup" element={<Navigate to="/auth" replace />} />
             <Route path="/IA" element={<LandingIA />} />
             <Route path="/ia" element={<LandingIA />} />
             <Route path="/connect/:token" element={<ConnectWhatsApp />} />
