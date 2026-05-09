@@ -5,6 +5,7 @@ import { useUserCompanies } from "@/hooks/useUserCompanies";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { TablePagination } from "@/components/ui/table-pagination";
 import {
   DollarSign,
   TrendingUp,
@@ -21,6 +22,7 @@ import {
   AlertCircle,
   XCircle,
 } from "lucide-react";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -96,6 +98,9 @@ export default function Financial() {
   const [asaasConfig, setAsaasConfig] = useState<AsaasConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 50;
+
 
   // Form states
   const [addOpen, setAddOpen] = useState(false);
@@ -332,9 +337,13 @@ export default function Financial() {
 
   const renderTable = (type: "payable" | "receivable") => {
     const filtered = transactions.filter((t) => t.type === type);
+    const start = (currentPage - 1) * pageSize;
+    const paginated = filtered.slice(start, start + pageSize);
+
     return (
       <div className="overflow-x-auto -mx-2 sm:mx-0">
       <Table className="min-w-[700px]">
+
         <TableHeader>
           <TableRow>
             <TableHead>Descrição</TableHead>
@@ -347,14 +356,15 @@ export default function Financial() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filtered.length === 0 ? (
+          {paginated.length === 0 ? (
             <TableRow>
               <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                 Nenhuma transação encontrada
               </TableCell>
             </TableRow>
           ) : (
-            filtered.map((tx) => {
+            paginated.map((tx) => {
+
               const st = STATUS_MAP[tx.status] || STATUS_MAP.pending;
               const Icon = st.icon;
               return (
@@ -401,7 +411,14 @@ export default function Financial() {
           )}
         </TableBody>
       </Table>
+      <TablePagination 
+        totalItems={filtered.length}
+        pageSize={pageSize}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+      />
       </div>
+
     );
   };
 
