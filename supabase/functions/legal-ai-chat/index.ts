@@ -1,12 +1,10 @@
 // deno-lint-ignore-file no-explicit-any
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { getErrorMessage } from "../_shared/errors.ts";
+import { getCorsHeaders } from "../_shared/cors.ts";
+import { log } from "../_shared/logger.ts";
+import { checkRateLimit } from "../_shared/rateLimit.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
 
 const SYSTEM_PROMPT = `Você é a Dra. Helena Vasconcellos, uma advogada brasileira sênior com mais de 30 anos de experiência prática em advocacia, doutora em Direito pela USP, com pós-doutorado em Direito Constitucional, Civil, Trabalhista, Previdenciário, Tributário e Processual.
 
@@ -37,8 +35,9 @@ Aja como uma colega experiente respondendo a um(a) advogado(a). Seja direta, té
 
 async function handler(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: getCorsHeaders(req) });
   }
+
 
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -47,13 +46,14 @@ async function handler(req: Request): Promise<Response> {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     if (!LOVABLE_API_KEY) {
-      return jsonResponse({ error: "LOVABLE_API_KEY não configurada" }, 500);
+      return jsonResponse(req, { error: "LOVABLE_API_KEY não configurada" }, 500);
     }
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      return jsonResponse({ error: "Não autenticado" }, 401);
+      return jsonResponse(req, { error: "Não autenticado" }, 401);
     }
+
 
     const accessToken = authHeader.replace("Bearer ", "");
     const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -62,9 +62,10 @@ async function handler(req: Request): Promise<Response> {
 
     const { data: claims, error: claimsError } = await userClient.auth.getClaims(accessToken);
     if (claimsError || !claims?.claims?.sub) {
-      return jsonResponse({ error: "Token inválido" }, 401);
+      return jsonResponse(req, { error: "Token inválido" }, 401);
     }
     const userId = claims.claims.sub as string;
+
 
     const body = await req.json();
     const { conversationId, companyId, messages, documentType } = body as {
@@ -75,10 +76,33 @@ async function handler(req: Request): Promise<Response> {
     };
 
     if (!companyId || !Array.isArray(messages) || messages.length === 0) {
-      return jsonResponse({ error: "Parâmetros inválidos" }, 400);
+      return jsonResponse(req, { error: "Parâmetros inválidos" }, 400);
+    }
+
+    if (typeof companyId !== "string" || !companyId.match(/^[0-9a-f-]{36}$/)) {
+      return jsonResponse(req, { error: "company_id inválido" }, 400);
     }
 
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // Multi-tenant check
+    const { data: membership } = await admin
+      .from("client_companies")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("company_id", companyId)
+      .maybeSingle();
+
+    if (!membership) {
+      return jsonResponse(req, { error: "Sem acesso a esta empresa" }, 403);
+    }
+
+    // Rate Limiting
+    const isAllowed = await checkRateLimit(admin, userId, "legal-ai-chat", 60);
+    if (!isAllowed) {
+      return jsonResponse(req, { error: "Limite de uso da IA atingido para esta hora (60/hora). Tente mais tarde." }, 429);
+    }
+
 
     // Verifica acesso da empresa (bloqueia êxito)
     const { data: company, error: cErr } = await admin
@@ -88,14 +112,34 @@ async function handler(req: Request): Promise<Response> {
       .single();
 
     if (cErr || !company) {
-      return jsonResponse({ error: "Empresa não encontrada" }, 404);
+      return jsonResponse(req, { error: "Empresa não encontrada" }, 404);
     }
+
+    // Role check (Server-side)
+    const { data: roleData } = await admin.from("user_roles").select("role").eq("user_id", userId).maybeSingle();
+    const role = roleData?.role;
+
+    // Subscription Check
+    const { data: sub } = await admin
+      .from("subscriptions")
+      .select("status")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (sub?.status === "overdue" || sub?.status === "cancelled") {
+      return jsonResponse(req, { error: "Assinatura inativa ou com pendência" }, 403);
+    }
+
     if (company.partnership_type !== "mensalidade_zionads") {
       return jsonResponse(
+        req,
         { error: "A IA Jurídica está disponível apenas para clientes do plano mensal. Fale com seu gestor para liberar." },
         403
       );
     }
+
 
     // Garante conversa
     let convId = conversationId;
@@ -114,8 +158,9 @@ async function handler(req: Request): Promise<Response> {
         .single();
       if (nErr || !newConv) {
         console.error("create conversation failed", nErr);
-        return jsonResponse({ error: "Falha ao criar conversa" }, 500);
+        return jsonResponse(req, { error: "Falha ao criar conversa" }, 500);
       }
+
       convId = newConv.id;
     } else {
       // Atualiza updated_at e document_type se vier
@@ -149,14 +194,15 @@ async function handler(req: Request): Promise<Response> {
 
     if (!aiResp.ok) {
       if (aiResp.status === 429) {
-        return jsonResponse({ error: "Limite de requisições atingido. Tente novamente em instantes." }, 429);
+        return jsonResponse(req, { error: "Limite de requisições atingido. Tente novamente em instantes." }, 429);
       }
       if (aiResp.status === 402) {
-        return jsonResponse({ error: "Créditos da IA esgotados. Adicione créditos no workspace." }, 402);
+        return jsonResponse(req, { error: "Créditos da IA esgotados. Adicione créditos no workspace." }, 402);
       }
       const t = await aiResp.text();
       console.error("AI gateway error:", aiResp.status, t);
-      return jsonResponse({ error: "Erro no gateway de IA" }, 500);
+      return jsonResponse(req, { error: "Erro no gateway de IA" }, 500);
+
     }
 
     // Tee o stream para repassar ao cliente E coletar texto para salvar
@@ -167,14 +213,15 @@ async function handler(req: Request): Promise<Response> {
 
     // Devolve com cabeçalhos x- para o cliente saber o conversationId
     const headers = new Headers({
-      ...corsHeaders,
+      ...getCorsHeaders(req),
+
       "Content-Type": "text/event-stream",
       "X-Conversation-Id": convId!,
     });
     return new Response(browserStream, { headers });
   } catch (e) {
     console.error("legal-ai-chat error:", e);
-    return jsonResponse({ error: getErrorMessage(e, "Erro inesperado") }, 500);
+    return jsonResponse(req, { error: getErrorMessage(e, "Erro inesperado") }, 500);
   }
 }
 
@@ -231,12 +278,13 @@ async function captureAndSave(
   }
 }
 
-function jsonResponse(body: unknown, status: number) {
+function jsonResponse(req: Request, body: unknown, status: number) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
   });
 }
+
 
 // Deno serve
 Deno.serve(handler);
