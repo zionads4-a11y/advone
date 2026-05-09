@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search, FolderOpen, UserCheck, Bell } from "lucide-react";
+import { TablePagination } from "@/components/ui/table-pagination";
+
 
 interface Client {
   id: string;
@@ -33,6 +35,9 @@ export default function Clients() {
   const [alertCounts, setAlertCounts] = useState<Record<string, number>>({});
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 50;
+
 
   useEffect(() => {
     fetchClients();
@@ -90,17 +95,25 @@ export default function Clients() {
     setLoading(false);
   };
 
-  const filtered = clients.filter((c) => {
-    if (!search) return true;
-    const q = search.toLowerCase();
-    return (
-      c.name?.toLowerCase().includes(q) ||
-      c.cpf_cliente_final?.toLowerCase().includes(q) ||
-      c.phone?.toLowerCase().includes(q) ||
-      c.whatsapp?.toLowerCase().includes(q) ||
-      c.email?.toLowerCase().includes(q)
-    );
-  });
+  const filtered = useMemo(() => {
+    return clients.filter((c) => {
+      if (!search) return true;
+      const q = search.toLowerCase();
+      return (
+        c.name?.toLowerCase().includes(q) ||
+        c.cpf_cliente_final?.toLowerCase().includes(q) ||
+        c.phone?.toLowerCase().includes(q) ||
+        c.whatsapp?.toLowerCase().includes(q) ||
+        c.email?.toLowerCase().includes(q)
+      );
+    });
+  }, [clients, search]);
+
+  const paginated = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filtered.slice(start, start + pageSize);
+  }, [filtered, currentPage]);
+
 
   return (
     <div className="space-y-6">
@@ -154,8 +167,9 @@ export default function Clients() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filtered.map((c) => (
+                  {paginated.map((c) => (
                     <TableRow key={c.id} className="cursor-pointer hover:bg-muted/40" onClick={() => navigate(`/clientes/${c.id}`)}>
+
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
                           {alertCounts[c.id] > 0 && (
@@ -197,7 +211,14 @@ export default function Clients() {
               </Table>
             </div>
           )}
+          <TablePagination 
+            totalItems={filtered.length}
+            pageSize={pageSize}
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+          />
         </CardContent>
+
       </Card>
     </div>
   );

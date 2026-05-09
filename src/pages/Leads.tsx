@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Search, Filter } from "lucide-react";
 import { toast } from "sonner";
 import { SourceBadge } from "@/components/leads/SourceBadge";
+import { TablePagination } from "@/components/ui/table-pagination";
+
 
 type LeadStatus = "new" | "contacted" | "qualified" | "negotiating" | "won" | "lost";
 type CampaignSource = "google" | "meta";
@@ -61,6 +63,9 @@ export default function Leads() {
   const [filterSource, setFilterSource] = useState<string>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 50;
+
 
   useEffect(() => {
     fetchData();
@@ -79,15 +84,23 @@ export default function Leads() {
     setLoading(false);
   };
 
-  const filteredLeads = leads.filter((lead) => {
-    const matchSearch =
-      lead.name.toLowerCase().includes(search.toLowerCase()) ||
-      (lead.email?.toLowerCase().includes(search.toLowerCase()) ?? false) ||
-      (lead.phone?.includes(search) ?? false);
-    const matchStatus = filterStatus === "all" || lead.status === filterStatus;
-    const matchSource = filterSource === "all" || lead.source === filterSource;
-    return matchSearch && matchStatus && matchSource;
-  });
+  const filteredLeads = useMemo(() => {
+    return leads.filter((lead) => {
+      const matchSearch =
+        lead.name.toLowerCase().includes(search.toLowerCase()) ||
+        (lead.email?.toLowerCase().includes(search.toLowerCase()) ?? false) ||
+        (lead.phone?.includes(search) ?? false);
+      const matchStatus = filterStatus === "all" || lead.status === filterStatus;
+      const matchSource = filterSource === "all" || lead.source === filterSource;
+      return matchSearch && matchStatus && matchSource;
+    });
+  }, [leads, search, filterStatus, filterSource]);
+
+  const paginatedLeads = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredLeads.slice(start, start + pageSize);
+  }, [filteredLeads, currentPage]);
+
 
   const handleAddLead = async (formData: FormData) => {
     const companyId = formData.get("company_id") as string;
@@ -262,14 +275,15 @@ export default function Leads() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredLeads.length === 0 ? (
+                {paginatedLeads.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="py-12 text-center text-muted-foreground">
                       {loading ? "Carregando..." : "Nenhum lead encontrado"}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredLeads.map((lead) => (
+                  paginatedLeads.map((lead) => (
+
                     <TableRow key={lead.id} className="border-border hover:bg-secondary/50">
                       <TableCell className="font-medium text-foreground">{lead.name}</TableCell>
                       <TableCell className="text-muted-foreground">
@@ -300,7 +314,14 @@ export default function Leads() {
               </TableBody>
             </Table>
           </div>
+          <TablePagination 
+            totalItems={filteredLeads.length}
+            pageSize={pageSize}
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+          />
         </CardContent>
+
       </Card>
     </div>
   );

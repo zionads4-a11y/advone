@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserCompanies } from "@/hooks/useUserCompanies";
@@ -21,6 +21,10 @@ import {
   User,
   Link2,
 } from "lucide-react";
+// ... keep existing code
+import { TablePagination } from "@/components/ui/table-pagination";
+
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -109,6 +113,8 @@ export default function Cases() {
   const [cases, setCases] = useState<CaseRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 50;
 
   // Selected case (folder view)
   const [selectedCase, setSelectedCase] = useState<CaseRecord | null>(null);
@@ -122,6 +128,7 @@ export default function Cases() {
   const [formCaseNumber, setFormCaseNumber] = useState("");
   const [formNotes, setFormNotes] = useState("");
   const [formStatus, setFormStatus] = useState("ativo");
+
   const [formLeadId, setFormLeadId] = useState<string>("none");
 
   // Leads for linking
@@ -368,14 +375,22 @@ export default function Cases() {
     }
   };
 
-  const filteredCases = cases.filter((c) => {
-    if (!searchTerm) return true;
-    const term = searchTerm.toLowerCase();
-    return (
-      c.client_name.toLowerCase().includes(term) ||
-      (c.case_number || "").toLowerCase().includes(term)
-    );
-  });
+  const filteredCases = useMemo(() => {
+    return cases.filter((c) => {
+      if (!searchTerm) return true;
+      const term = searchTerm.toLowerCase();
+      return (
+        c.client_name.toLowerCase().includes(term) ||
+        (c.case_number || "").toLowerCase().includes(term)
+      );
+    });
+  }, [cases, searchTerm]);
+
+  const paginatedCases = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredCases.slice(start, start + pageSize);
+  }, [filteredCases, currentPage]);
+
 
   if (!companyId) {
     return (
@@ -706,7 +721,7 @@ export default function Cases() {
       {/* Folder grid */}
       {loading ? (
         <div className="text-center py-12 text-muted-foreground">Carregando...</div>
-      ) : filteredCases.length === 0 ? (
+      ) : paginatedCases.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
           <Briefcase className="h-12 w-12 mb-3 opacity-30" />
           <p className="text-sm">
@@ -715,7 +730,7 @@ export default function Cases() {
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filteredCases.map((c) => (
+          {paginatedCases.map((c) => (
             <Card
               key={c.id}
               className="glass-card cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] group"
@@ -795,6 +810,14 @@ export default function Cases() {
           ))}
         </div>
       )}
+
+      <TablePagination 
+        totalItems={filteredCases.length}
+        pageSize={pageSize}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 }
+
