@@ -44,7 +44,10 @@ export default function AppLayout() {
     );
   }
 
-  if (!user) return <Navigate to="/auth" replace />;
+  if (!user && !loading) {
+    const currentPath = window.location.pathname + window.location.search;
+    return <Navigate to={`/auth?redirect=${encodeURIComponent(currentPath)}`} replace />;
+  }
 
   if (subscription.blocked) {
     return <SubscriptionBlockScreen status={subscription.status} />;

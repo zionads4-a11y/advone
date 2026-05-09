@@ -82,11 +82,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
           const isUserChange = currentSession?.user?.id !== user?.id;
           
-          setSession(currentSession);
-          setUser(currentSession?.user ?? null);
-          
-          if (currentSession?.user && (isUserChange || !userRole)) {
-            await fetchUserRole(currentSession.user.id);
+          if (currentSession?.user) {
+            setSession(currentSession);
+            setUser(currentSession.user);
+            if (isUserChange || !userRole) {
+              await fetchUserRole(currentSession.user.id);
+            }
+          } else {
+            setSession(null);
+            setUser(null);
+            setUserRole(null);
           }
           setLoading(false);
         }
