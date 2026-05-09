@@ -36,6 +36,9 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  let userId: string | null = null;
+  let companyId: string | null = null;
+
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -49,13 +52,15 @@ Deno.serve(async (req) => {
 
     const adminClient = createClient(supabaseUrl, serviceKey);
 
-    const { email, password, full_name, phone, cpf_cnpj, plan, company_name } = await req.json();
+    const body = await req.json();
+    const { email, password, full_name, phone, cpf_cnpj, plan, company_name } = body;
 
     if (!email || !password || !full_name || !plan || !cpf_cnpj) {
       return new Response(JSON.stringify({ error: "Campos obrigatórios: email, password, full_name, cpf_cnpj, plan" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
 
     const planConfig = PLAN_CONFIG[plan];
     if (!planConfig) {
@@ -81,7 +86,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    const userId = userData.user.id;
+    userId = userData.user.id;
+    log("info", "create-subscription", "User created", { userId });
+
 
     // 2. Update role to gerente
     await adminClient.from("user_roles").update({ role: "gerente" }).eq("user_id", userId);
@@ -107,10 +114,10 @@ Deno.serve(async (req) => {
 
     if (companyErr) {
       console.error("Error creating company:", companyErr);
-      return new Response(JSON.stringify({ error: "Erro ao criar empresa" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      throw companyErr;
     }
+    companyId = company.id;
+
 
     // 4. Link user to company
     await adminClient.from("client_companies").insert({ user_id: userId, company_id: company.id });
@@ -252,10 +259,25 @@ Deno.serve(async (req) => {
     });
 
   } catch (error: unknown) {
-    console.error("Subscription error:", error);
+    log("error", "create-subscription", "Fatal failure", { userId, companyId, error: String(error) });
+    
+    if (userId) {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+      const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const adminClient = createClient(supabaseUrl, serviceKey);
+      
+      // Mark as error for manual review instead of leaving it dangling
+      await adminClient.from("subscriptions").upsert({
+        user_id: userId,
+        company_id: companyId,
+        status: "setup_error",
+      });
+    }
+
     const msg = getErrorMessage(error, "Erro desconhecido");
     return new Response(JSON.stringify({ error: msg }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
+
 });
