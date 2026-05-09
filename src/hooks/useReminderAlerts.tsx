@@ -209,6 +209,11 @@ export function ReminderAlertProvider({ children }: { children: ReactNode }) {
       ]);
     };
     initFetch();
+
+    intervalRef.current = setInterval(() => {
+      fetchAlerts();
+      fetchFinancialAlerts();
+      fetchProcessAlerts();
     }, 60000);
 
     return () => {
