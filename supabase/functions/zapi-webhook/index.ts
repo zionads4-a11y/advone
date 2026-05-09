@@ -1,14 +1,10 @@
-// deno-lint-ignore-file no-explicit-any
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { getErrorMessage } from "../_shared/errors.ts";
 import { isBrazilianHolidayStr } from "../_shared/holidays.ts";
+import { webhookCorsHeaders as corsHeaders } from "../_shared/cors.ts";
+import { log } from "../_shared/logger.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
 
 // ====== PROMPT BUILDERS ======
 function buildSDRPrompt(
