@@ -170,7 +170,7 @@ async function handler(req: Request): Promise<Response> {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "anthropic/claude-3-5-sonnet",
+        model: "openai/gpt-5",
         stream: true,
         messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
       }),
