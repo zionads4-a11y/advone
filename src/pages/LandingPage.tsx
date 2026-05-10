@@ -883,9 +883,9 @@ export default function LandingPage() {
                 <div className="mb-6">
                   <h3 className="text-xl font-bold text-[hsl(220,10%,92%)] mb-2">Economia intermediária</h3>
                   <p className="text-5xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                    6x R$ 497
+                    6x R$ 797
                   </p>
-                  <p className="mt-2 text-[hsl(153,60%,45%)] font-bold text-sm">Economize R$ 1.800 no semestre</p>
+                  <p className="mt-2 text-[hsl(153,60%,45%)] font-bold text-sm">Economize R$ 1.200 no semestre</p>
                 </div>
                 <ul className="mb-8 flex-1 space-y-3">
                   {[
