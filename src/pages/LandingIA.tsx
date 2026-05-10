@@ -573,7 +573,7 @@ export default function LandingIA() {
                   <Button
                     size="lg"
                     variant="outline"
-                    onClick={() => document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' })}
+                    onClick={() => openWhatsApp("Plano Mensal - Começar agora")}
                     className="w-full"
                   >
                     COMEÇAR AGORA
