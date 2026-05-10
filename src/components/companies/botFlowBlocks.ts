@@ -1176,6 +1176,15 @@ const BLOCKS_BY_NICHE: Record<FlowNiche, FlowPromptBlock[]> = {
   criminal: CRIMINAL_FLOW_BLOCKS,
   tributario: TRIBUTARIO_FLOW_BLOCKS,
   bancario_empresarial: BANCARIO_EMPRESARIAL_FLOW_BLOCKS,
+  full_service: [
+    ...PREV_FLOW_BLOCKS,
+    ...TRAB_FLOW_BLOCKS,
+    ...CIVEL_FLOW_BLOCKS,
+    ...FAMILIA_FLOW_BLOCKS,
+    ...CRIMINAL_FLOW_BLOCKS,
+    ...TRIBUTARIO_FLOW_BLOCKS,
+    ...BANCARIO_EMPRESARIAL_FLOW_BLOCKS,
+  ],
 };
 
 export function getFlowBlock(niche: FlowNiche, flow_key: string): FlowPromptBlock | undefined {
@@ -1229,7 +1238,7 @@ export interface OfficeAddress {
   maps_url?: string | null;
 }
 
-export type BuilderNiche = FlowNiche | "hibrido";
+export type BuilderNiche = FlowNiche | "hibrido" | "full_service";
 
 export function buildDynamicLauraPrompt(params: {
   niche: BuilderNiche;

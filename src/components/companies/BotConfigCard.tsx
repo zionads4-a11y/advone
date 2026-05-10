@@ -430,7 +430,7 @@ export function BotConfigCard({ companyId, hasWhatsappConfig }: BotConfigCardPro
       {/* Editor de fluxos do bot por empresa */}
       <BotFlowsEditor
         companyId={companyId}
-        niche={specialty}
+        niche={specialty as any}
         officeName={officeName}
         disabled={!aiEnabled}
         onApplyPrompt={(p) => {
