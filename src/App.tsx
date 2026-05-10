@@ -47,6 +47,7 @@ import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Tasks from "./pages/Tasks";
 import Boards from "./pages/Boards";
+import WebhookLogs from "./pages/WebhookLogs";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
@@ -132,6 +133,14 @@ const App = () => (
               <Route path="/monitoramento" element={<ProcessMonitoring />} />
               <Route path="/busca-processos" element={<ProcessSearch />} />
               <Route path="/assinatura" element={<Subscription />} />
+              <Route 
+                path="/webhook-logs" 
+                element={
+                  <RoleProtectedRoute allowedRoles={["admin", "member", "gerente"]}>
+                    <WebhookLogs />
+                  </RoleProtectedRoute>
+                } 
+              />
               <Route path="/fraudes" element={<FraudAlerts />} />
               <Route path="/historico-leads" element={<LeadsHistory />} />
               <Route path="/leads-landing-ia" element={<LandingIALeads />} />

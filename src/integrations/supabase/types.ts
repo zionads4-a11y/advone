@@ -1577,6 +1577,45 @@ export type Database = {
         }
         Relationships: []
       }
+      google_calendar_webhook_logs: {
+        Row: {
+          channel_id: string | null
+          created_at: string | null
+          error_message: string | null
+          id: string
+          payload: Json | null
+          processing_time_ms: number | null
+          resource_id: string | null
+          resource_state: string | null
+          status_code: number | null
+          user_id: string | null
+        }
+        Insert: {
+          channel_id?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          payload?: Json | null
+          processing_time_ms?: number | null
+          resource_id?: string | null
+          resource_state?: string | null
+          status_code?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          channel_id?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          payload?: Json | null
+          processing_time_ms?: number | null
+          resource_id?: string | null
+          resource_state?: string | null
+          status_code?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       kanban_boards: {
         Row: {
           color: string
@@ -3613,6 +3652,7 @@ export type Database = {
       }
     }
     Functions: {
+      cleanup_webhook_logs: { Args: never; Returns: undefined }
       company_has_legal_ai_access: {
         Args: { _company_id: string }
         Returns: boolean
