@@ -78,6 +78,8 @@ interface CompanyEditDialogProps {
       bot_role_description: string;
       google_client_id: string | null;
       google_client_secret: string | null;
+      shared_whatsapp_number: boolean;
+      client_support_responsible_phone: string | null;
     }
   ) => void;
   onDelete: (id: string) => void;
