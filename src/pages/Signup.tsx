@@ -55,10 +55,10 @@ const PLANS: Record<PlanKey, {
   },
   completo: {
     label: "Completo",
-    monthly: 497,
-    charged: 497,
+    monthly: 997,
+    charged: 997,
     billingLabel: "Recorrente mensal",
-    ctaSuffix: "R$ 497/mês",
+    ctaSuffix: "R$ 997/mês",
     color: "hsl(153,60%,45%)",
     features: FEATURES_COMPLETO,
   },
