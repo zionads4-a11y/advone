@@ -325,7 +325,7 @@ export default function LandingIA() {
             <Button variant="ghost" onClick={() => navigate("/auth?mode=login")} className="hidden md:flex">
               Login
             </Button>
-            <Button onClick={() => scrollToForm()} className="gradient-primary text-primary-foreground">
+            <Button onClick={() => openWhatsApp("Header - Quero a Laura")} className="gradient-primary text-primary-foreground">
               Quero a Laura
             </Button>
           </div>
