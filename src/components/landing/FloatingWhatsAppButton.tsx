@@ -1,3 +1,6 @@
+import { supabase } from "@/integrations/supabase/client";
+import { trackMetaEvent } from "@/lib/metaPixel";
+
 interface Props {
   phone?: string; // Apenas números, com DDI. Ex: "5511999999999"
   message?: string;
@@ -9,11 +12,38 @@ export function FloatingWhatsAppButton({
 }: Props) {
   const href = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 
+  const handleClick = () => {
+    // Não bloqueia abertura: dispara fire-and-forget
+    try {
+      trackMetaEvent("Contact", { contentName: "Floating WhatsApp Button" });
+    } catch (e) {
+      console.warn("[WA Button] Meta Pixel falhou", e);
+    }
+
+    try {
+      const params = new URLSearchParams(window.location.search);
+      void supabase.from("landing_whatsapp_clicks").insert({
+        page: window.location.pathname,
+        phone,
+        user_agent: navigator.userAgent,
+        referrer: document.referrer || null,
+        utm_source: params.get("utm_source"),
+        utm_medium: params.get("utm_medium"),
+        utm_campaign: params.get("utm_campaign"),
+        utm_content: params.get("utm_content"),
+        utm_term: params.get("utm_term"),
+      });
+    } catch (e) {
+      console.warn("[WA Button] Falha ao registrar clique", e);
+    }
+  };
+
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={handleClick}
       aria-label="Falar no WhatsApp"
       className="fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg shadow-[#25D366]/40 transition-all hover:scale-110 hover:shadow-xl md:h-16 md:w-16"
     >
