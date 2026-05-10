@@ -7,11 +7,12 @@ const corsHeaders = {
 
 // Charged value per plan (NOT the monthly equivalent)
 // mensal:     R$ 997 recorrente mensal
-// trimestral: R$ 2.391 à vista (3x R$ 797)
+// semestral:  R$ 4.782 à vista (6x R$ 797)
 // anual:      R$ 7.164 à vista (12x R$ 597)
 const PLAN_VALUES: Record<string, number> = {
   mensal: 997,
-  trimestral: 2391,
+  semestral: 4782,
+  trimestral: 4782, // for compatibility
   anual: 7164,
 };
 
