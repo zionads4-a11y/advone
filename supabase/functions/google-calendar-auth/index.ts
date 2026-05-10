@@ -86,6 +86,31 @@ serve(async (req) => {
 
     if (upsertError) throw upsertError;
 
+    // Registra push notifications (Watch) para sync em tempo real — fire-and-forget
+    try {
+      const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+      const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+      const watchPromise = fetch(`${SUPABASE_URL}/functions/v1/google-calendar-watch-register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${SERVICE_ROLE_KEY}`,
+          "apikey": SERVICE_ROLE_KEY,
+        },
+        body: JSON.stringify({ userId: user.id }),
+      }).then(async (r) => {
+        const text = await r.text();
+        console.log(`watch-register status=${r.status} body=${text.slice(0, 200)}`);
+      }).catch((e) => console.error("watch-register failed:", e));
+      // @ts-ignore
+      if (typeof EdgeRuntime !== "undefined" && (EdgeRuntime as any).waitUntil) {
+        // @ts-ignore
+        (EdgeRuntime as any).waitUntil(watchPromise);
+      }
+    } catch (e) {
+      console.error("Failed to schedule watch register:", e);
+    }
+
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
