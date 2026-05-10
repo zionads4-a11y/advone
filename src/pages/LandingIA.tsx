@@ -216,6 +216,17 @@ export default function LandingIA() {
     trackMetaEvent("ViewContent", { contentName: "Landing IA - Laura SDR" });
   }, []);
 
+  const WA_LINK = "https://wa.link/gvgo7x";
+
+  function openWhatsApp(label = "CTA Landing IA") {
+    try {
+      trackMetaEvent("Contact", { contentName: label });
+    } catch (e) {
+      console.warn("[LandingIA] Meta Pixel falhou", e);
+    }
+    window.open(WA_LINK, "_blank", "noopener,noreferrer");
+  }
+
   function scrollToForm(plan?: string) {
     trackMetaEvent("InitiateCheckout", { contentName: "CTA Landing IA" });
     if (plan) {
