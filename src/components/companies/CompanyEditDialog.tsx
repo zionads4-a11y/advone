@@ -124,6 +124,8 @@ export function CompanyEditDialog({
       setOfficeLegalName(company.office_legal_name || "");
       setOfficeCnpj(company.office_cnpj || "");
       setOfficeAddress(company.office_address || "");
+      setSharedWhats(!!company.shared_whatsapp_number);
+      setSupportPhone(company.client_support_responsible_phone || "");
     }
   }, [company]);
 
