@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +28,8 @@ interface CompanyFormDialogProps {
 
 export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormDialogProps) {
   const [selectedModel, setSelectedModel] = useState<BillingModel>("plan_ia_monthly");
+  const [sharedWhats, setSharedWhats] = useState(false);
+  const [supportPhone, setSupportPhone] = useState("");
   const isFree = selectedModel === "plan_free";
 
   return (
@@ -36,14 +39,17 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
           <Plus className="mr-2 h-4 w-4" /> Nova Empresa
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-card text-foreground">
+      <DialogContent className="bg-card text-foreground max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-display">Adicionar Empresa</DialogTitle>
         </DialogHeader>
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            onSubmit(new FormData(e.currentTarget));
+            const fd = new FormData(e.currentTarget);
+            fd.set("shared_whatsapp_number", sharedWhats ? "true" : "false");
+            fd.set("client_support_responsible_phone", sharedWhats ? supportPhone : "");
+            onSubmit(fd);
           }}
           className="space-y-4"
         >
@@ -95,6 +101,35 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
               </div>
             </>
           )}
+
+          <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-0.5">
+                <Label>Mesmo número para leads e clientes</Label>
+                <p className="text-[11px] text-muted-foreground">
+                  Ative se o escritório usa o MESMO WhatsApp para captar novos leads e
+                  atender clientes que já têm processo. A Laura/Julia perguntará se a
+                  pessoa já é cliente antes de qualificar.
+                </p>
+              </div>
+              <Switch checked={sharedWhats} onCheckedChange={setSharedWhats} />
+            </div>
+            {sharedWhats && (
+              <div className="space-y-2 animate-in fade-in">
+                <Label>WhatsApp do advogado responsável (alertas)</Label>
+                <Input
+                  value={supportPhone}
+                  onChange={(e) => setSupportPhone(e.target.value)}
+                  placeholder="5511988887777"
+                />
+                <p className="text-[10px] text-muted-foreground">
+                  Quando um cliente existente quiser falar, esse número recebe um
+                  alerta no WhatsApp. Se ficar vazio, usamos o WhatsApp principal da
+                  empresa.
+                </p>
+              </div>
+            )}
+          </div>
 
           {selectedModel === "plan_zionads" && (
             <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
