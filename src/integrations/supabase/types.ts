@@ -3168,8 +3168,13 @@ export type Database = {
           refresh_token: string | null
           scopes: string[] | null
           sync_enabled: boolean | null
+          sync_token: string | null
           updated_at: string | null
           user_id: string
+          watch_channel_id: string | null
+          watch_expiration: string | null
+          watch_resource_id: string | null
+          watch_token: string | null
         }
         Insert: {
           access_token?: string | null
@@ -3181,8 +3186,13 @@ export type Database = {
           refresh_token?: string | null
           scopes?: string[] | null
           sync_enabled?: boolean | null
+          sync_token?: string | null
           updated_at?: string | null
           user_id: string
+          watch_channel_id?: string | null
+          watch_expiration?: string | null
+          watch_resource_id?: string | null
+          watch_token?: string | null
         }
         Update: {
           access_token?: string | null
@@ -3194,8 +3204,13 @@ export type Database = {
           refresh_token?: string | null
           scopes?: string[] | null
           sync_enabled?: boolean | null
+          sync_token?: string | null
           updated_at?: string | null
           user_id?: string
+          watch_channel_id?: string | null
+          watch_expiration?: string | null
+          watch_resource_id?: string | null
+          watch_token?: string | null
         }
         Relationships: []
       }
