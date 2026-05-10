@@ -9,7 +9,7 @@ interface DemoMessage {
 
 const demoScript: DemoMessage[] = [
   { role: "user", text: "Oi, boa tarde. Vi o anúncio de vocês.", delay: 0 },
-  { role: "bot", text: "Boa tarde! 👋 Aqui é a Júlia, secretária virtual do escritório Mendes & Vasconcelos Advocacia. Que bom ter você por aqui! Pra eu te ajudar direitinho, me conta: o que aconteceu?", delay: 1400 },
+  { role: "bot", text: "Boa tarde! 👋 Aqui é a Laura, secretária virtual do escritório Mendes & Vasconcelos Advocacia. Que bom ter você por aqui! Pra eu te ajudar direitinho, me conta: o que aconteceu?", delay: 1400 },
   { role: "user", text: "Fui demitido semana passada e acho que não recebi tudo certo.", delay: 3600 },
   { role: "bot", text: "Imagino o quanto isso é estressante 😔 Fica tranquilo(a), vou te ajudar. Você trabalhou de carteira assinada?", delay: 5200 },
   { role: "user", text: "Sim, 4 anos e meio.", delay: 7000 },
