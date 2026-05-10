@@ -3,7 +3,7 @@
 //   - partnership_type (sempre "mensalidade_zionads")
 //   - service_mode    (full = CRM completo / ai_only = só IA Laura)
 
-export type BillingModel = "plan_completo" | "plan_ia_monthly" | "plan_ia_6m" | "plan_ia_12m" | "plan_zionads";
+export type BillingModel = "plan_completo" | "plan_ia_monthly" | "plan_ia_6m" | "plan_ia_12m" | "plan_zionads" | "plan_free";
 
 export interface BillingModelOption {
   key: BillingModel;
@@ -59,6 +59,15 @@ export const BILLING_MODELS: BillingModelOption[] = [
     description: "Plano para parceiros ZionAds: acesso à IA Laura, IA Jurídica, Boards e Agenda. Valor base customizável + monitoramento opcional.",
     partnership_type: "mensalidade_zionads",
     service_mode: "ai_only",
+    monitoring_quota: 0,
+  },
+  {
+    key: "plan_free",
+    emoji: "🆓",
+    label: "Acesso Livre (Sem Plano)",
+    description: "Libera o acesso ao sistema sem cobrança vinculada. Ideal para demonstrações ou parcerias especiais.",
+    partnership_type: "mensalidade_zionads",
+    service_mode: "full",
     monitoring_quota: 0,
   },
 ];

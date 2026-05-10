@@ -46,6 +46,7 @@ export function useSubscriptionGuard(): SubscriptionGuard {
         
         // Only block if status is explicitly overdue or cancelled
         // If there's no plan linked (subStatus is null), access is allowed
+        // Access is allowed if no plan is linked (subStatus null) OR status is active/trialing/free
         setBlocked(subStatus === "overdue" || subStatus === "cancelled");
       } catch (err) {
         console.error("Subscription check error:", err);
