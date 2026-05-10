@@ -30,9 +30,10 @@ export default function Auth() {
 
   if (user && !loading) {
     const from = searchParams.get("redirect") || "/dashboard";
+    console.log("[Auth Page] User logged in, redirecting to:", from);
     
-    // Prevent redirecting back to /auth if we are already logged in
-    if (from.startsWith("/auth") || from === "/" || from === "") {
+    // Prevent redirect loops
+    if (from.includes("/auth") || from === "/" || from === "") {
       return <Navigate to="/dashboard" replace />;
     }
     

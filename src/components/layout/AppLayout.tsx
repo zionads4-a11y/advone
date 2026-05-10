@@ -46,6 +46,11 @@ export default function AppLayout() {
 
   if (!user && !loading) {
     const currentPath = window.location.pathname + window.location.search;
+    console.log("[AppLayout] No user found, redirecting to auth from:", currentPath);
+    
+    // Evita loop se já estiver na página de auth (embora o layout não devesse ser usado lá)
+    if (currentPath.includes("/auth")) return null;
+    
     return <Navigate to={`/auth?redirect=${encodeURIComponent(currentPath)}`} replace />;
   }
 

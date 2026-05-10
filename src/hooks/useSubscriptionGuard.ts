@@ -42,10 +42,10 @@ export function useSubscriptionGuard(): SubscriptionGuard {
         if (!mounted) return;
         
         const subStatus = data?.status ?? null;
+        console.log("[SubscriptionGuard] Status:", subStatus);
         setStatus(subStatus);
         
-        // Only block if status is explicitly overdue or cancelled
-        // If there's no plan linked (subStatus is null), access is allowed
+        // Block ONLY if status is explicitly overdue or cancelled
         setBlocked(subStatus === "overdue" || subStatus === "cancelled");
       } catch (err) {
         console.error("Subscription check error:", err);
