@@ -19,6 +19,7 @@ import {
   Search,
   CheckSquare,
   Layers,
+  Activity,
 } from "lucide-react";
 import logoAdvOne from "@/assets/logo-advone-light.png";
 import { NavLink } from "@/components/NavLink";
