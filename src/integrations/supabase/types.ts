@@ -712,6 +712,7 @@ export type Database = {
           bot_prompt: string | null
           bot_role_description: string | null
           business_hours: Json | null
+          client_support_responsible_phone: string | null
           created_at: string
           created_by: string
           custom_base_value: number | null
@@ -738,6 +739,7 @@ export type Database = {
           partnership_type: Database["public"]["Enums"]["partnership_type"]
           practice_specialty: string
           service_mode: string
+          shared_whatsapp_number: boolean
           timezone: string
           updated_at: string
           website: string | null
@@ -749,6 +751,7 @@ export type Database = {
           bot_prompt?: string | null
           bot_role_description?: string | null
           business_hours?: Json | null
+          client_support_responsible_phone?: string | null
           created_at?: string
           created_by: string
           custom_base_value?: number | null
@@ -775,6 +778,7 @@ export type Database = {
           partnership_type?: Database["public"]["Enums"]["partnership_type"]
           practice_specialty?: string
           service_mode?: string
+          shared_whatsapp_number?: boolean
           timezone?: string
           updated_at?: string
           website?: string | null
@@ -786,6 +790,7 @@ export type Database = {
           bot_prompt?: string | null
           bot_role_description?: string | null
           business_hours?: Json | null
+          client_support_responsible_phone?: string | null
           created_at?: string
           created_by?: string
           custom_base_value?: number | null
@@ -812,6 +817,7 @@ export type Database = {
           partnership_type?: Database["public"]["Enums"]["partnership_type"]
           practice_specialty?: string
           service_mode?: string
+          shared_whatsapp_number?: boolean
           timezone?: string
           updated_at?: string
           website?: string | null
