@@ -53,6 +53,8 @@ interface Company {
   bot_role_description?: string | null;
   google_client_id?: string | null;
   google_client_secret?: string | null;
+  shared_whatsapp_number?: boolean | null;
+  client_support_responsible_phone?: string | null;
 }
 
 interface CompanyEditDialogProps {
