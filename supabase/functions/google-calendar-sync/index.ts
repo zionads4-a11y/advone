@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -45,37 +45,32 @@ serve(async (req) => {
   try {
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
     );
 
     let user;
     const body = await req.json().catch(() => ({}));
     const authHeader = req.headers.get("Authorization");
+    const incremental = body?.incremental === true;
 
-    // 1) Prioridade: body.userId (chamadas server-to-server via poll-all/cron)
+    // 1) Prioridade: body.userId (chamadas server-to-server)
     if (body?.userId) {
-      const { data: userData, error: fetchUserError } = await supabaseClient.auth.admin.getUserById(body.userId);
-      if (!fetchUserError && userData?.user) {
-        user = userData.user;
-      }
+      const { data: userData, error } = await supabaseClient.auth.admin.getUserById(body.userId);
+      if (!error && userData?.user) user = userData.user;
     }
 
-    // 2) Fallback: resolver via JWT do usuário logado (chamada direta do front)
+    // 2) Fallback: JWT do usuário logado
     if (!user && authHeader) {
       const userClient = createClient(
         Deno.env.get("SUPABASE_URL") ?? "",
         Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-        { global: { headers: { Authorization: authHeader } } }
+        { global: { headers: { Authorization: authHeader } } },
       );
       const { data: { user: authUser }, error: userError } = await userClient.auth.getUser();
-      if (!userError && authUser) {
-        user = authUser;
-      }
+      if (!userError && authUser) user = authUser;
     }
 
-    if (!user) {
-      throw new Error("Não foi possível identificar o usuário — autenticação inválida.");
-    }
+    if (!user) throw new Error("Não foi possível identificar o usuário — autenticação inválida.");
 
     const { data: integration, error: integrationError } = await supabaseClient
       .from("user_integrations")
@@ -91,19 +86,15 @@ serve(async (req) => {
       accessToken = await refreshGoogleToken(supabaseClient, integration);
     }
 
-    // Resolve company_id do usuário (necessário para NOT NULL em lead_reminders)
     const { data: clientCompanies } = await supabaseClient
       .from("client_companies")
       .select("company_id")
       .eq("user_id", user.id)
       .limit(1);
     const companyId = clientCompanies?.[0]?.company_id ?? null;
+    if (!companyId) throw new Error("Usuário não está vinculado a nenhuma empresa — não é possível sincronizar.");
 
-    if (!companyId) {
-      throw new Error("Usuário não está vinculado a nenhuma empresa — não é possível sincronizar.");
-    }
-
-    // 1. Push local -> Google (apenas eventos ainda não enviados)
+    // ====== 1. PUSH local -> Google ======
     const { data: localReminders } = await supabaseClient
       .from("lead_reminders")
       .select("*")
@@ -117,7 +108,10 @@ serve(async (req) => {
             summary: reminder.title,
             description: reminder.description,
             start: { dateTime: reminder.due_at },
-            end: { dateTime: reminder.end_at || new Date(new Date(reminder.due_at).getTime() + 60 * 60 * 1000).toISOString() },
+            end: {
+              dateTime: reminder.end_at ||
+                new Date(new Date(reminder.due_at).getTime() + 60 * 60 * 1000).toISOString(),
+            },
           };
           const pushResponse = await fetch(
             "https://www.googleapis.com/calendar/v3/calendars/primary/events",
@@ -125,78 +119,114 @@ serve(async (req) => {
               method: "POST",
               headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
               body: JSON.stringify(googleEvent),
-            }
+            },
           );
           if (pushResponse.ok) {
-            const pushedData = await pushResponse.json();
+            const pushed = await pushResponse.json();
             await supabaseClient
               .from("lead_reminders")
-              .update({ google_event_id: pushedData.id })
+              .update({ google_event_id: pushed.id })
               .eq("id", reminder.id);
           }
-        } catch (pushErr) {
-          console.error(`Error pushing event ${reminder.id}:`, pushErr);
+        } catch (e) {
+          console.error(`Error pushing event ${reminder.id}:`, e);
         }
       }
     }
 
-    // 2. Pull Google -> local
-    const now = new Date();
-    const timeMin = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
-    const timeMax = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString();
+    // ====== 2. PULL Google -> local ======
+    const fullWindowMin = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const fullWindowMax = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString();
 
-    const fetchEvents = async (token: string) =>
-      fetch(
-        `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime&showDeleted=true`,
-        { headers: { Authorization: `Bearer ${token}` } }
+    let useSyncToken = incremental && !!integration.sync_token;
+    let syncToken: string | null = useSyncToken ? integration.sync_token : null;
+
+    const fetchEventsPage = async (token: string, pageToken?: string | null): Promise<Response> => {
+      const params = new URLSearchParams();
+      params.set("singleEvents", "true");
+      params.set("showDeleted", "true");
+      if (useSyncToken && syncToken) {
+        params.set("syncToken", syncToken);
+      } else {
+        params.set("timeMin", fullWindowMin);
+        params.set("timeMax", fullWindowMax);
+        // NÃO usar orderBy aqui — Google só retorna nextSyncToken se não houver orderBy
+      }
+      if (pageToken) params.set("pageToken", pageToken);
+      return fetch(
+        `https://www.googleapis.com/calendar/v3/calendars/primary/events?${params.toString()}`,
+        { headers: { Authorization: `Bearer ${token}` } },
       );
+    };
 
-    let eventsResponse = await fetchEvents(accessToken);
-    if (eventsResponse.status === 401) {
-      accessToken = await refreshGoogleToken(supabaseClient, integration);
-      eventsResponse = await fetchEvents(accessToken);
+    let allEvents: any[] = [];
+    let nextSyncToken: string | null = null;
+    let pageToken: string | null = null;
+    let pages = 0;
+
+    while (true) {
+      let resp = await fetchEventsPage(accessToken, pageToken);
+      if (resp.status === 401) {
+        accessToken = await refreshGoogleToken(supabaseClient, integration);
+        resp = await fetchEventsPage(accessToken, pageToken);
+      }
+      if (resp.status === 410 && useSyncToken) {
+        // syncToken inválido — reset e refaz com janela completa
+        console.log("syncToken expirado (410) — refazendo full sync");
+        useSyncToken = false;
+        syncToken = null;
+        pageToken = null;
+        allEvents = [];
+        continue;
+      }
+
+      const data = await resp.json();
+      if (data.error) throw new Error(`Google Calendar error: ${data.error.message}`);
+
+      allEvents = allEvents.concat(data.items || []);
+      nextSyncToken = data.nextSyncToken || nextSyncToken;
+      pageToken = data.nextPageToken || null;
+      pages++;
+      if (!pageToken || pages > 20) break;
     }
 
-    const eventsData = await eventsResponse.json();
-    if (eventsData.error) throw new Error(`Google Calendar error: ${eventsData.error.message}`);
-
-    const events = eventsData.items || [];
-    console.log(`Found ${events.length} events from Google`);
+    console.log(
+      `Found ${allEvents.length} events (${useSyncToken ? "incremental" : "full"} sync, ${pages} page(s))`,
+    );
 
     const seenGoogleIds: string[] = [];
     const deletedGoogleIds: string[] = [];
 
-    for (const event of events) {
-      // Eventos cancelados/excluídos no Google
+    for (const event of allEvents) {
       if (event.status === "cancelled") {
         if (event.id) deletedGoogleIds.push(event.id);
         continue;
       }
-
       const startTime = event.start?.dateTime || event.start?.date;
       if (!startTime) continue;
-
       seenGoogleIds.push(event.id);
 
       const { error: upsertError } = await supabaseClient
         .from("lead_reminders")
-        .upsert({
-          company_id: companyId,
-          google_event_id: event.id,
-          title: event.summary || "Sem título",
-          description: event.description || null,
-          due_at: startTime,
-          end_at: event.end?.dateTime || event.end?.date || new Date(new Date(startTime).getTime() + 60 * 60 * 1000).toISOString(),
-          completed: false,
-          reminder_type: "meeting",
-          created_by: user.id,
-        }, { onConflict: "google_event_id" });
+        .upsert(
+          {
+            company_id: companyId,
+            google_event_id: event.id,
+            title: event.summary || "Sem título",
+            description: event.description || null,
+            due_at: startTime,
+            end_at: event.end?.dateTime || event.end?.date ||
+              new Date(new Date(startTime).getTime() + 60 * 60 * 1000).toISOString(),
+            completed: false,
+            reminder_type: "meeting",
+            created_by: user.id,
+          },
+          { onConflict: "google_event_id" },
+        );
 
       if (upsertError) console.error(`Error upserting event ${event.id}:`, upsertError);
     }
 
-    // 3. Apagar no sistema o que foi apagado no Google
-    // (a) eventos com status=cancelled vindos da API
     if (deletedGoogleIds.length > 0) {
       const { error: delErr } = await supabaseClient
         .from("lead_reminders")
@@ -207,41 +237,50 @@ serve(async (req) => {
       else console.log(`Deleted ${deletedGoogleIds.length} cancelled events`);
     }
 
-    // (b) eventos locais que tinham google_event_id mas sumiram da janela do Google
-    const { data: localWithGoogle } = await supabaseClient
-      .from("lead_reminders")
-      .select("id, google_event_id, due_at")
-      .eq("created_by", user.id)
-      .not("google_event_id", "is", null)
-      .gte("due_at", timeMin)
-      .lte("due_at", timeMax);
+    // No full sync também removemos órfãos locais que sumiram da janela do Google
+    if (!useSyncToken) {
+      const { data: localWithGoogle } = await supabaseClient
+        .from("lead_reminders")
+        .select("id, google_event_id, due_at")
+        .eq("created_by", user.id)
+        .not("google_event_id", "is", null)
+        .gte("due_at", fullWindowMin)
+        .lte("due_at", fullWindowMax);
 
-    if (localWithGoogle) {
-      const orphanIds = localWithGoogle
-        .filter((r: any) => !seenGoogleIds.includes(r.google_event_id))
-        .map((r: any) => r.id);
-
-      if (orphanIds.length > 0) {
-        const { error: orphanErr } = await supabaseClient
-          .from("lead_reminders")
-          .delete()
-          .in("id", orphanIds);
-        if (orphanErr) console.error("Error deleting orphan events:", orphanErr);
-        else console.log(`Deleted ${orphanIds.length} orphan events removed from Google`);
+      if (localWithGoogle) {
+        const orphanIds = localWithGoogle
+          .filter((r: any) => !seenGoogleIds.includes(r.google_event_id))
+          .map((r: any) => r.id);
+        if (orphanIds.length > 0) {
+          await supabaseClient.from("lead_reminders").delete().in("id", orphanIds);
+          console.log(`Deleted ${orphanIds.length} orphan events`);
+        }
       }
     }
 
+    // Persiste o syncToken para próxima execução incremental
+    const updatePatch: any = {
+      last_google_sync: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    if (nextSyncToken) updatePatch.sync_token = nextSyncToken;
+
     await supabaseClient
       .from("user_integrations")
-      .update({ last_google_sync: new Date().toISOString() })
+      .update(updatePatch)
       .eq("id", integration.id);
 
-    return new Response(JSON.stringify({ success: true, count: events.length }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  } catch (error) {
+    return new Response(
+      JSON.stringify({
+        success: true,
+        count: allEvents.length,
+        mode: useSyncToken ? "incremental" : "full",
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  } catch (error: any) {
     console.error("Sync error:", error);
-    return new Response(JSON.stringify({ error: (error as any).message }), {
+    return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 400,
     });

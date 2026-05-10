@@ -51,4 +51,12 @@ verify_jwt = false # Called by Escavador callback
 [functions.escavador-webhook-retry]
 verify_jwt = false # Called by cron / admins
 
+[functions.google-calendar-webhook]
+verify_jwt = false # Called by Google push notifications
+
+[functions.google-calendar-watch-register]
+verify_jwt = false # Called via service role from auth/cron flows
+
+[functions.google-calendar-watch-renew]
+verify_jwt = false # Called by cron
 
