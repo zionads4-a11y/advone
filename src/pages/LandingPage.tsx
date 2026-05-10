@@ -126,7 +126,7 @@ export default function LandingPage() {
           <img
             src="https://sabioadv.com.br/wp-content/uploads/2026/04/LOGO-1.png"
             alt="Sábio Adv"
-            className="h-10 w-auto transition-transform hover:scale-105"
+            className="h-10 w-auto md:h-12 transition-transform hover:scale-105"
           />
           <div className="hidden items-center gap-8 md:flex">
             <a href="#funcionalidades" className="text-sm text-[hsl(220,10%,70%)] transition-colors hover:text-[hsl(153,60%,45%)]">Funcionalidades</a>
