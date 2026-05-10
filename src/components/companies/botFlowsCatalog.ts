@@ -11,7 +11,8 @@ export type Niche =
   | "familia"
   | "criminal"
   | "tributario"
-  | "bancario_empresarial";
+  | "bancario_empresarial"
+  | "full_service";
 
 export interface BotFlowDefinition {
   flow_key: string;
@@ -98,5 +99,17 @@ export function getFlowCatalog(niche: Niche): BotFlowDefinition[] {
   if (niche === "criminal") return CRIMINAL_FLOWS;
   if (niche === "tributario") return TRIBUTARIO_FLOWS;
   if (niche === "bancario_empresarial") return BANCARIO_EMPRESARIAL_FLOWS;
+  if (niche === "full_service") {
+    // Para Full Service, unimos todos os fluxos de todos os nichos
+    return [
+      ...PREVIDENCIARIO_FLOWS,
+      ...TRABALHISTA_FLOWS,
+      ...CIVEL_FLOWS,
+      ...FAMILIA_FLOWS,
+      ...CRIMINAL_FLOWS,
+      ...TRIBUTARIO_FLOWS,
+      ...BANCARIO_EMPRESARIAL_FLOWS,
+    ];
+  }
   return PREVIDENCIARIO_FLOWS;
 }
