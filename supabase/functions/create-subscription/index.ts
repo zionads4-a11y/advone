@@ -14,7 +14,7 @@ const STANDARD_MAX_PROCESSES = 50;
 
 // Plan configuration:
 // - mensal:     R$ 997/mês recorrente (PIX ou cartão)
-// - trimestral: R$ 2.391 cobrança única (3x R$ 797 — equivalente a R$ 797/mês)
+// - semestral:  R$ 4.782 cobrança única (6x R$ 797 — equivalente a R$ 797/mês)
 // - anual:      R$ 7.164 cobrança única (12x R$ 597 — equivalente a R$ 597/mês)
 type BillingMode = "recurring_monthly" | "one_time";
 
