@@ -360,7 +360,7 @@ export default function LandingIA() {
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Button
                   size="lg"
-                  onClick={() => scrollToForm()}
+                  onClick={() => openWhatsApp("Hero - Agendar demonstração")}
                   className="gradient-primary text-primary-foreground"
                 >
                   Agendar demonstração grátis
