@@ -22,7 +22,8 @@ interface SubscriptionRow {
 
 const planLabels: Record<string, string> = {
   mensal: "Mensal",
-  trimestral: "Trimestral",
+  semestral: "Semestral",
+  trimestral: "Trimestral (legado)",
   anual: "Anual",
   // legacy plans (kept for read-only display of historical records)
   bimestral: "Bimestral (legado)",
