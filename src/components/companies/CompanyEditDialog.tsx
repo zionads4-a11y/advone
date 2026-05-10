@@ -156,6 +156,8 @@ export function CompanyEditDialog({
               bot_role_description: botRoleDescription,
               google_client_id: googleClientId || null,
               google_client_secret: googleClientSecret || null,
+              shared_whatsapp_number: sharedWhats,
+              client_support_responsible_phone: sharedWhats ? (supportPhone || null) : null,
             });
           }}
           className="space-y-4"
