@@ -80,12 +80,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
+      (event, currentSession) => {
         if (!mounted) return;
         console.log("[Auth] Event:", event);
 
         if (event === "SIGNED_OUT") {
-          console.log("[Auth] Handling signed out");
           setSession(null);
           setUser(null);
           setUserRole(null);
@@ -95,7 +94,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             console.log("[Auth] Active session:", currentSession.user.id);
             setSession(currentSession);
             setUser(currentSession.user);
-            await fetchUserRole(currentSession.user.id);
+            // Defer DB call to avoid deadlock inside the auth callback
+            setTimeout(() => {
+              if (mounted) fetchUserRole(currentSession.user.id);
+            }, 0);
           } else {
             setSession(null);
             setUser(null);
