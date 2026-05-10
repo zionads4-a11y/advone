@@ -101,7 +101,7 @@ export default function LegalAI() {
       let query = supabase
         .from("companies")
         .select("id, name, partnership_type, billing_model")
-        .eq("partnership_type", "mensalidade_zionads");
+        
       if (companyIds.length > 0) {
         query = query.in("id", companyIds);
       }
