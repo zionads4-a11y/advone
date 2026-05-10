@@ -2,7 +2,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { getErrorMessage } from "../_shared/errors.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
-import { log } from "../_shared/logger.ts";
 import { checkRateLimit } from "../_shared/rateLimit.ts";
 
 const SYSTEM_PROMPT = `Você é a Dra. Helena Vasconcellos, uma advogada brasileira sênior com mais de 30 anos de experiência prática em advocacia, doutora em Direito pela USP, com pós-doutorado em Direito Constitucional, Civil, Trabalhista, Previdenciário, Tributário e Processual.
@@ -39,26 +38,20 @@ async function handler(req: Request): Promise<Response> {
     return new Response(null, { headers: corsHeaders });
   }
 
-
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
-    console.log("[LegalAI] Function started. Method:", req.method);
-
     if (!LOVABLE_API_KEY) {
-      console.error("[LegalAI] LOVABLE_API_KEY missing");
       return jsonResponse(req, { error: "LOVABLE_API_KEY não configurada" }, 500);
     }
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      console.error("[LegalAI] No authorization header");
       return jsonResponse(req, { error: "Não autenticado" }, 401);
     }
-
 
     const accessToken = authHeader.replace("Bearer ", "");
     const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -67,12 +60,9 @@ async function handler(req: Request): Promise<Response> {
 
     const { data: claims, error: claimsError } = await userClient.auth.getClaims(accessToken);
     if (claimsError || !claims?.claims?.sub) {
-      console.error("[LegalAI] Claims error:", claimsError);
       return jsonResponse(req, { error: "Token inválido" }, 401);
     }
     const userId = claims.claims.sub as string;
-    console.log("[LegalAI] Authenticated user:", userId);
-
 
     const body = await req.json();
     const { conversationId, companyId, messages, documentType } = body as {
@@ -82,15 +72,8 @@ async function handler(req: Request): Promise<Response> {
       documentType?: string;
     };
 
-    console.log("[LegalAI] Request body:", { conversationId, companyId, documentType, messageCount: messages?.length });
-
     if (!companyId || !Array.isArray(messages) || messages.length === 0) {
-      console.error("[LegalAI] Invalid parameters");
       return jsonResponse(req, { error: "Parâmetros inválidos" }, 400);
-    }
-
-    if (typeof companyId !== "string" || !companyId.match(/^[0-9a-f-]{36}$/)) {
-      return jsonResponse(req, { error: "company_id inválido" }, 400);
     }
 
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -117,7 +100,7 @@ async function handler(req: Request): Promise<Response> {
     // Rate Limiting
     const isAllowed = await checkRateLimit(admin, userId, "legal-ai-chat", 60);
     if (!isAllowed) {
-      return jsonResponse(req, { error: "Limite de uso da IA atingido para esta hora (60/hora). Tente mais tarde." }, 429);
+      return jsonResponse(req, { error: "Limite de uso atingido" }, 429);
     }
 
     // Verifica acesso da empresa
@@ -142,47 +125,33 @@ async function handler(req: Request): Promise<Response> {
         .maybeSingle();
 
       if (sub?.status === "overdue" || sub?.status === "cancelled") {
-        return jsonResponse(req, { error: "Assinatura inativa ou com pendência" }, 403);
+        return jsonResponse(req, { error: "Assinatura inativa" }, 403);
       }
     }
 
-    // Partnership type check - updated to be more flexible if it's plan_free
+    // Partnership check
     if (company.partnership_type !== "mensalidade_zionads" && company.billing_model !== "plan_free") {
-      return jsonResponse(
-        req,
-        { error: "A IA Jurídica está disponível apenas para clientes do plano mensal. Fale com seu gestor para liberar." },
-        403
-      );
+      return jsonResponse(req, { error: "Acesso restrito ao plano mensal" }, 403);
     }
-
 
     // Garante conversa
     let convId = conversationId;
     const lastUser = messages[messages.length - 1];
     if (!convId) {
-      const title = lastUser.content.slice(0, 80);
       const { data: newConv, error: nErr } = await admin
         .from("legal_ai_conversations")
         .insert({
           company_id: companyId,
           user_id: userId,
-          title,
+          title: lastUser.content.slice(0, 80),
           document_type: documentType ?? null,
         })
         .select("id")
         .single();
-      if (nErr || !newConv) {
-        console.error("create conversation failed", nErr);
-        return jsonResponse(req, { error: "Falha ao criar conversa" }, 500);
-      }
-
+      if (nErr) return jsonResponse(req, { error: "Falha ao criar conversa" }, 500);
       convId = newConv.id;
     } else {
-      // Atualiza updated_at e document_type se vier
-      await admin
-        .from("legal_ai_conversations")
-        .update({ updated_at: new Date().toISOString(), ...(documentType ? { document_type: documentType } : {}) })
-        .eq("id", convId);
+      await admin.from("legal_ai_conversations").update({ updated_at: new Date().toISOString() }).eq("id", convId);
     }
 
     // Salva a mensagem do usuário
@@ -193,7 +162,6 @@ async function handler(req: Request): Promise<Response> {
       document_type: documentType ?? null,
     });
 
-    // Chama Lovable AI com streaming
     // Chama Lovable AI com streaming
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -209,31 +177,19 @@ async function handler(req: Request): Promise<Response> {
     });
 
     if (!aiResp.ok) {
-      if (aiResp.status === 429) {
-        return jsonResponse(req, { error: "Limite de requisições atingido. Tente novamente em instantes." }, 429);
-      }
-      if (aiResp.status === 402) {
-        return jsonResponse(req, { error: "Créditos da IA esgotados. Adicione créditos no workspace." }, 402);
-      }
-      const t = await aiResp.text();
-      console.error("AI gateway error:", aiResp.status, t);
       return jsonResponse(req, { error: "Erro no gateway de IA" }, 500);
     }
-    // Tee o stream para repassar ao cliente E coletar texto para salvar
-    const [browserStream, captureStream] = aiResp.body!.tee();
 
-    // Processa em background para salvar a mensagem completa
+    const [browserStream, captureStream] = aiResp.body!.tee();
     captureAndSave(captureStream, admin, convId!, documentType ?? null);
 
-    // Devolve com cabeçalhos x- para o cliente saber o conversationId
     const headers = new Headers({
-      ...getCorsHeaders(req),
+      ...corsHeaders,
       "Content-Type": "text/event-stream",
       "X-Conversation-Id": convId!,
     });
     return new Response(browserStream, { headers });
   } catch (e) {
-    console.error("legal-ai-chat error:", e);
     return jsonResponse(req, { error: getErrorMessage(e, "Erro inesperado") }, 500);
   }
 }
@@ -247,8 +203,8 @@ async function captureAndSave(
   try {
     const reader = stream.getReader();
     const decoder = new TextDecoder();
-    let buffer = "";
     let assistantText = "";
+    let buffer = "";
 
     while (true) {
       const { done, value } = await reader.read();
@@ -256,28 +212,22 @@ async function captureAndSave(
       buffer += decoder.decode(value, { stream: true });
       let idx: number;
       while ((idx = buffer.indexOf("\n")) !== -1) {
-        let line = buffer.slice(0, idx);
+        const line = buffer.slice(0, idx).trim();
         buffer = buffer.slice(idx + 1);
-        if (line.endsWith("\r")) line = line.slice(0, -1);
-        if (!line.startsWith("data: ")) continue;
-        const json = line.slice(6).trim();
-        if (json === "[DONE]") continue;
-        try {
-          const parsed = JSON.parse(json);
-          const c = parsed.choices?.[0]?.delta?.content;
-          if (c) assistantText += c;
-        } catch {
-          // ignore partial
+        if (line.startsWith("data: ")) {
+          const json = line.slice(6);
+          if (json === "[DONE]") continue;
+          try {
+            const parsed = JSON.parse(json);
+            const content = parsed.choices?.[0]?.delta?.content;
+            if (content) assistantText += content;
+          } catch { /* ignore */ }
         }
       }
     }
 
-    if (assistantText.trim().length > 0) {
-      // Heurística: se conteúdo longo ou começa com "EXCELENTÍSSIMO" ou "CONTRATO", marcar como documento
-      const isDoc =
-        documentType !== null ||
-        assistantText.length > 1500 ||
-        /^(EXCELENTÍSSIMO|EXCELENTISSIMO|CONTRATO|MANDADO|PROCURAÇÃO|PROCURACAO)/i.test(assistantText.trim());
+    if (assistantText.trim()) {
+      const isDoc = documentType !== null || assistantText.length > 1500;
       await admin.from("legal_ai_messages").insert({
         conversation_id: conversationId,
         role: "assistant",
@@ -298,6 +248,4 @@ function jsonResponse(req: Request, body: unknown, status: number) {
   });
 }
 
-
-// Deno serve
 Deno.serve(handler);
