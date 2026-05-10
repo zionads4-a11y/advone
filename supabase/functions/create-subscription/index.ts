@@ -27,7 +27,7 @@ interface PlanInfo {
 
 const PLAN_CONFIG: Record<string, PlanInfo> = {
   admin:      { monthlyEquivalent: 297, chargedValue: 297,  billing: "recurring_monthly", description: "AdvOne — Plano Admin (R$ 297/mês)" },
-  completo:   { monthlyEquivalent: 497, chargedValue: 497,  billing: "recurring_monthly", description: "AdvOne — Plano Completo (R$ 497/mês)" },
+  completo:   { monthlyEquivalent: 997, chargedValue: 997,  billing: "recurring_monthly", description: "AdvOne — Plano Completo (R$ 997/mês)" },
   // Compatibility with legacy frontend links
   mensal:     { monthlyEquivalent: 997, chargedValue: 997,  billing: "recurring_monthly", description: "AdvOne — Plano Completo (R$ 997/mês)" },
   semestral:  { monthlyEquivalent: 797, chargedValue: 4782, billing: "one_time",          description: "AdvOne — Plano Semestral (6x R$ 797 = R$ 4.782 à vista)" },
