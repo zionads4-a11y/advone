@@ -30,6 +30,7 @@ import { Trash2 } from "lucide-react";
 import { BusinessHoursConfig, type BusinessHours, parseBusinessHours, getDefaultBusinessHours } from "./BusinessHoursConfig";
 import { CompanyOfficesEditor } from "./CompanyOfficesEditor";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { BILLING_MODELS, getBillingModel, inferBillingModel, type BillingModel } from "@/lib/billingModels";
 
 export type PartnershipType = "exito" | "mensalidade_zionads";
@@ -52,6 +53,8 @@ interface Company {
   bot_role_description?: string | null;
   google_client_id?: string | null;
   google_client_secret?: string | null;
+  shared_whatsapp_number?: boolean | null;
+  client_support_responsible_phone?: string | null;
 }
 
 interface CompanyEditDialogProps {
@@ -75,6 +78,8 @@ interface CompanyEditDialogProps {
       bot_role_description: string;
       google_client_id: string | null;
       google_client_secret: string | null;
+      shared_whatsapp_number: boolean;
+      client_support_responsible_phone: string | null;
     }
   ) => void;
   onDelete: (id: string) => void;
@@ -99,6 +104,8 @@ export function CompanyEditDialog({
   const [officeLegalName, setOfficeLegalName] = useState("");
   const [officeCnpj, setOfficeCnpj] = useState("");
   const [officeAddress, setOfficeAddress] = useState("");
+  const [sharedWhats, setSharedWhats] = useState(false);
+  const [supportPhone, setSupportPhone] = useState("");
 
   useEffect(() => {
     if (company) {
@@ -117,6 +124,8 @@ export function CompanyEditDialog({
       setOfficeLegalName(company.office_legal_name || "");
       setOfficeCnpj(company.office_cnpj || "");
       setOfficeAddress(company.office_address || "");
+      setSharedWhats(!!company.shared_whatsapp_number);
+      setSupportPhone(company.client_support_responsible_phone || "");
     }
   }, [company]);
 
@@ -147,6 +156,8 @@ export function CompanyEditDialog({
               bot_role_description: botRoleDescription,
               google_client_id: googleClientId || null,
               google_client_secret: googleClientSecret || null,
+              shared_whatsapp_number: sharedWhats,
+              client_support_responsible_phone: sharedWhats ? (supportPhone || null) : null,
             });
           }}
           className="space-y-4"
@@ -162,6 +173,34 @@ export function CompanyEditDialog({
               onChange={(e) => setWhatsapp(e.target.value)}
               placeholder="5511999999999"
             />
+          </div>
+
+          <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-0.5">
+                <Label>Mesmo número para leads e clientes</Label>
+                <p className="text-[11px] text-muted-foreground">
+                  Ative se o escritório usa o MESMO WhatsApp para captar novos leads e
+                  atender clientes que já têm processo. O bot perguntará se a pessoa já é cliente
+                  antes de iniciar a qualificação.
+                </p>
+              </div>
+              <Switch checked={sharedWhats} onCheckedChange={setSharedWhats} />
+            </div>
+            {sharedWhats && (
+              <div className="space-y-2 animate-in fade-in">
+                <Label>WhatsApp do advogado responsável (alertas de clientes)</Label>
+                <Input
+                  value={supportPhone}
+                  onChange={(e) => setSupportPhone(e.target.value)}
+                  placeholder="5511988887777"
+                />
+                <p className="text-[10px] text-muted-foreground">
+                  Quando um cliente existente quiser falar, esse número recebe um
+                  alerta. Vazio = usa o WhatsApp principal da empresa.
+                </p>
+              </div>
+            )}
           </div>
           <div className="space-y-2">
             <Label>Nome Completo / Razão Social</Label>

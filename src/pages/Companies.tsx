@@ -70,6 +70,8 @@ export default function Companies() {
 
     const billingKey = (formData.get("billing_model") as BillingModel) || "plan_completo";
     const model = getBillingModel(billingKey);
+    const sharedWhats = formData.get("shared_whatsapp_number") === "true";
+    const supportPhone = (formData.get("client_support_responsible_phone") as string) || "";
 
     const { error } = await supabase.from("companies").insert({
       name: formData.get("name") as string,
@@ -81,6 +83,8 @@ export default function Companies() {
       service_mode: model.service_mode,
       billing_model: model.key,
       custom_base_value: formData.get("custom_base_value") ? parseFloat(formData.get("custom_base_value") as string) : null,
+      shared_whatsapp_number: sharedWhats,
+      client_support_responsible_phone: sharedWhats && supportPhone ? supportPhone : null,
       created_by: user.id,
     } as any);
 

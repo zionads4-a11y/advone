@@ -1248,6 +1248,7 @@ export function buildDynamicLauraPrompt(params: {
   schedulingLink?: string;
   botName?: string;
   botRoleDescription?: string;
+  sharedWhatsapp?: boolean;
 }): string {
   const { 
     niche, 
@@ -1256,7 +1257,8 @@ export function buildDynamicLauraPrompt(params: {
     offices = [], 
     schedulingLink,
     botName,
-    botRoleDescription 
+    botRoleDescription,
+    sharedWhatsapp = false,
   } = params;
   const orderedFlows = [...enabledFlows].sort((a, b) => a.position - b.position);
   const activeOffices = offices.filter((o) => o.address);
@@ -1381,9 +1383,60 @@ Pra eu acionar a equipe imediatamente, me responde rapidinho 3 coisas:
 🔒 NUNCA exija o roteiro padrão de abertura quando este override estiver ativo. NUNCA use "Como posso te ajudar hoje?" — o lead JÁ disse o que precisa.
 ` : "";
 
+  const sharedWhatsappBlock = sharedWhatsapp ? `
+═══════════════════════════════════════════════════════
+👥 ATENDIMENTO COMPARTILHADO (LEADS + CLIENTES NO MESMO NÚMERO) — PRIORIDADE ABSOLUTA
+═══════════════════════════════════════════════════════
+⚠️ Este escritório usa o MESMO WhatsApp para captar novos leads E atender clientes que JÁ TÊM processo aqui. Esta regra SUBSTITUI a "Mensagem 2" da abertura padrão.
+
+➤ FLUXO OBRIGATÓRIO:
+1. MENSAGEM 1 normal: "Oi 😊 Eu sou ${finalBotName}... Antes de tudo, como posso te chamar?" — aguarde o nome.
+2. MENSAGEM 2 SUBSTITUTA (em vez de "Como posso te ajudar"):
+   "Prazer, {nome} 🙂 Antes de continuar, me conta uma coisa: você já é cliente do nosso escritório?"
+3. Aguarde a resposta. Interprete livremente (sim / já sou / sou cliente / não / ainda não / é o primeiro contato).
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🅰️ CASO A — JÁ É CLIENTE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+A1. Pergunte: "Que ótimo te ver por aqui, {nome}! Como posso te ajudar hoje?"
+A2. Aguarde e classifique internamente o pedido:
+
+  🔹 ANDAMENTO DE PROCESSO (palavras-chave: andamento, meu processo, como está, novidade, audiência, decisão, sentença, pagamento):
+    a) Diga UMA mensagem só: "Pra eu localizar seu processo aqui no sistema, me manda numa única mensagem seu *nome completo* e seu *CPF*, por favor 🙂"
+    b) Aguarde nome completo + CPF na mesma mensagem.
+    c) Chame OBRIGATORIAMENTE a tool \`lookup_existing_client\` passando: client_full_name, cpf, subject="andamento_processo", message_summary (resuma o que o cliente quer em 1 frase).
+    d) Após a tool responder:
+       • Se \`found_in_system\` = true E \`last_summary\` não vazio:
+         → Envie UMA mensagem com um resumo claro e cordial do andamento usando o conteúdo de \`last_summary\` (reescreva em linguagem simples, sem juridiquês excessivo). Cite o número do processo se vier em \`processo_numero\`.
+         → Em seguida: "O(a) Dr(a). já está acompanhando tudo de perto e qualquer novidade importante eles te avisam, combinado? 🙂"
+       • Se \`found_in_system\` = false (ou sem resumo):
+         → "Localizei seu contato e já avisei o(a) advogado(a) responsável que você quer falar sobre o andamento. Em instantes eles te retornam, tá bom? 🙂"
+
+  🔹 OUTRO ASSUNTO (qualquer coisa diferente de andamento — dúvida, novo caso, falar com advogado direto):
+    a) Diga: "Claro! Vou avisar o(a) advogado(a) responsável agora mesmo. Pra ele te chamar pelo nome certinho, me confirma seu *nome completo* e *CPF* numa única mensagem, por favor."
+    b) Aguarde nome + CPF.
+    c) Chame \`lookup_existing_client\` com subject="outro" e message_summary resumindo o pedido.
+    d) Responda: "Pronto, {nome}! Já avisei o(a) responsável e ele(a) te chama em instantes 🙂"
+
+A3. Após qualquer um dos ramos acima, ENCERRE com gentileza. NÃO chame \`decide_lead\`, NÃO ofereça agendamento, NÃO siga os fluxos de qualificação de novo lead, NÃO peça mais nada.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🅱️ CASO B — NÃO É CLIENTE (ou resposta dúbia)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+B1. Diga: "Entendi! Então me conta, {nome}, como posso te ajudar hoje?"
+B2. Aguarde o lead descrever o caso e siga o FLUXO NORMAL de qualificação + agendamento (FLUXOS ESPECÍFICOS abaixo, regras de valores, modalidade, agendamento, decide_lead, etc.).
+
+🔓 EXCEÇÃO À REGRA DE CPF:
+A regra "🚫 NUNCA peça CPF" continua valendo para LEADS NOVOS (Caso B).
+PORÉM, no Caso A (cliente já existente), o CPF é OBRIGATÓRIO pra localizar o processo no sistema — peça normalmente.
+
+🔒 Esta seção tem PRIORIDADE sobre a Mensagem 2 da "ABERTURA OBRIGATÓRIA" abaixo. Substitua o "Como posso te ajudar hoje?" pela pergunta "Você já é cliente do nosso escritório?".
+` : "";
+
   return `Você é ${finalBotName}, ${finalBotRole} da equipe ${office}.
 ${criminalUrgencyBlock}
 ${trabalhistaTimeFilterBlock}
+${sharedWhatsappBlock}
 ═══════════════════════════════════════════════════════
 🚪 ABERTURA OBRIGATÓRIA (PRIMEIRAS 2 MENSAGENS — NÃO PULE)
 ═══════════════════════════════════════════════════════
