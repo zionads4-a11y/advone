@@ -67,9 +67,11 @@ async function handler(req: Request): Promise<Response> {
 
     const { data: claims, error: claimsError } = await userClient.auth.getClaims(accessToken);
     if (claimsError || !claims?.claims?.sub) {
+      console.error("[LegalAI] Claims error:", claimsError);
       return jsonResponse(req, { error: "Token inválido" }, 401);
     }
     const userId = claims.claims.sub as string;
+    console.log("[LegalAI] Authenticated user:", userId);
 
 
     const body = await req.json();
