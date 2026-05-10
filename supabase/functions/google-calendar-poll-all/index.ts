@@ -12,12 +12,11 @@ serve(async (req) => {
   }
 
   try {
-    const admin = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+    const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
-    // Pega todos os usuários com integração Google ativa
+    const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+
     const { data: integrations, error } = await admin
       .from("user_integrations")
       .select("user_id")
@@ -29,10 +28,25 @@ serve(async (req) => {
     const results: any[] = [];
     for (const integ of integrations ?? []) {
       try {
-        const { error: invokeErr } = await admin.functions.invoke("google-calendar-sync", {
-          body: { userId: integ.user_id },
+        // Chamada HTTP direta (mais confiável que functions.invoke entre edges)
+        const resp = await fetch(`${SUPABASE_URL}/functions/v1/google-calendar-sync`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${SERVICE_ROLE_KEY}`,
+            "apikey": SERVICE_ROLE_KEY,
+          },
+          body: JSON.stringify({ userId: integ.user_id }),
         });
-        results.push({ user_id: integ.user_id, ok: !invokeErr, error: invokeErr?.message });
+        const text = await resp.text();
+        let parsed: any = null;
+        try { parsed = JSON.parse(text); } catch { /* ignore */ }
+        results.push({
+          user_id: integ.user_id,
+          ok: resp.ok,
+          status: resp.status,
+          ...(resp.ok ? { count: parsed?.count } : { error: parsed?.error || text.slice(0, 200) }),
+        });
       } catch (e: any) {
         results.push({ user_id: integ.user_id, ok: false, error: e.message });
       }
