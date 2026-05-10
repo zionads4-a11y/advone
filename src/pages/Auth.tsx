@@ -45,9 +45,9 @@ export default function Auth() {
       <div className="w-full max-w-md space-y-6">
         <div className="flex flex-col items-center gap-2">
           <img 
-            src={logoAdvOne} 
-            alt="AdvOne" 
-            className="h-32 w-auto sm:h-40 drop-shadow-[0_0_20px_hsl(153,60%,45%/0.4)]" 
+            src="https://sabioadv.com.br/wp-content/uploads/2026/04/LOGO-1.png" 
+            alt="Sábio Adv" 
+            className="h-20 w-auto" 
           />
           <p className="text-sm text-[hsl(220,10%,55%)] font-medium">
             CRM inteligente para gestão de leads
