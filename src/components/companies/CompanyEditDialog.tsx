@@ -174,6 +174,34 @@ export function CompanyEditDialog({
               placeholder="5511999999999"
             />
           </div>
+
+          <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-0.5">
+                <Label>Mesmo número para leads e clientes</Label>
+                <p className="text-[11px] text-muted-foreground">
+                  Ative se o escritório usa o MESMO WhatsApp para captar novos leads e
+                  atender clientes que já têm processo. O bot perguntará se a pessoa já é cliente
+                  antes de iniciar a qualificação.
+                </p>
+              </div>
+              <Switch checked={sharedWhats} onCheckedChange={setSharedWhats} />
+            </div>
+            {sharedWhats && (
+              <div className="space-y-2 animate-in fade-in">
+                <Label>WhatsApp do advogado responsável (alertas de clientes)</Label>
+                <Input
+                  value={supportPhone}
+                  onChange={(e) => setSupportPhone(e.target.value)}
+                  placeholder="5511988887777"
+                />
+                <p className="text-[10px] text-muted-foreground">
+                  Quando um cliente existente quiser falar, esse número recebe um
+                  alerta. Vazio = usa o WhatsApp principal da empresa.
+                </p>
+              </div>
+            )}
+          </div>
           <div className="space-y-2">
             <Label>Nome Completo / Razão Social</Label>
             <Input
