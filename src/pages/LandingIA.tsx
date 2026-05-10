@@ -663,7 +663,7 @@ export default function LandingIA() {
 
                   <Button
                     size="lg"
-                    onClick={() => document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' })}
+                    onClick={() => openWhatsApp("Plano Anual - Quero economizar")}
                     className="w-full gradient-primary text-primary-foreground font-bold"
                   >
                     QUERO ECONOMIZAR
