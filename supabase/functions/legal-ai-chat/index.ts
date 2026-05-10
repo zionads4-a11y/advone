@@ -182,7 +182,7 @@ async function handler(req: Request): Promise<Response> {
       document_type: documentType ?? null,
     });
 
-    // Chama Lovable AI (sem streaming para teste de estabilidade)
+    // Chama Lovable AI com streaming
     // Chama Lovable AI com streaming
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
