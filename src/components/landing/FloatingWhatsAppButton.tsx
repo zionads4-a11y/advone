@@ -4,13 +4,15 @@ import { trackMetaEvent } from "@/lib/metaPixel";
 interface Props {
   phone?: string; // Apenas números, com DDI. Ex: "5511999999999"
   message?: string;
+  href?: string; // Se fornecido, sobrescreve o link gerado a partir de phone/message
 }
 
 export function FloatingWhatsAppButton({
   phone = "5511999999999",
   message = "Olá! Quero saber mais sobre a Laura SDR da AdvOne.",
+  href,
 }: Props) {
-  const href = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+  const finalHref = href ?? `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 
   const handleClick = () => {
     // Não bloqueia abertura: dispara fire-and-forget
