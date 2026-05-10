@@ -46,12 +46,16 @@ async function handler(req: Request): Promise<Response> {
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
+    console.log("[LegalAI] Function started. Method:", req.method);
+
     if (!LOVABLE_API_KEY) {
+      console.error("[LegalAI] LOVABLE_API_KEY missing");
       return jsonResponse(req, { error: "LOVABLE_API_KEY não configurada" }, 500);
     }
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
+      console.error("[LegalAI] No authorization header");
       return jsonResponse(req, { error: "Não autenticado" }, 401);
     }
 
