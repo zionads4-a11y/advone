@@ -124,8 +124,8 @@ export default function LandingPage() {
       <nav className="sticky top-0 z-50 border-b border-[hsl(220,20%,16%)] bg-[hsl(220,25%,4%)]/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <img
-            src="https://sabioadv.com.br/wp-content/uploads/2026/04/LOGO-1.png"
-            alt="Sábio Adv"
+            src={logoAdvOne}
+            alt="AdvOne"
             className="h-10 w-auto md:h-12 transition-transform hover:scale-105"
           />
           <div className="hidden items-center gap-8 md:flex">
