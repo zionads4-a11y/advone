@@ -216,6 +216,17 @@ export default function LandingIA() {
     trackMetaEvent("ViewContent", { contentName: "Landing IA - Laura SDR" });
   }, []);
 
+  const WA_LINK = "https://wa.link/gvgo7x";
+
+  function openWhatsApp(label = "CTA Landing IA") {
+    try {
+      trackMetaEvent("Contact", { contentName: label });
+    } catch (e) {
+      console.warn("[LandingIA] Meta Pixel falhou", e);
+    }
+    window.open(WA_LINK, "_blank", "noopener,noreferrer");
+  }
+
   function scrollToForm(plan?: string) {
     trackMetaEvent("InitiateCheckout", { contentName: "CTA Landing IA" });
     if (plan) {
@@ -314,7 +325,7 @@ export default function LandingIA() {
             <Button variant="ghost" onClick={() => navigate("/auth?mode=login")} className="hidden md:flex">
               Login
             </Button>
-            <Button onClick={() => scrollToForm()} className="gradient-primary text-primary-foreground">
+            <Button onClick={() => openWhatsApp("Header - Quero a Laura")} className="gradient-primary text-primary-foreground">
               Quero a Laura
             </Button>
           </div>
@@ -349,7 +360,7 @@ export default function LandingIA() {
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Button
                   size="lg"
-                  onClick={() => scrollToForm()}
+                  onClick={() => openWhatsApp("Hero - Agendar demonstração")}
                   className="gradient-primary text-primary-foreground"
                 >
                   Agendar demonstração grátis
@@ -562,7 +573,7 @@ export default function LandingIA() {
                   <Button
                     size="lg"
                     variant="outline"
-                    onClick={() => document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' })}
+                    onClick={() => openWhatsApp("Plano Mensal - Começar agora")}
                     className="w-full"
                   >
                     COMEÇAR AGORA
@@ -606,7 +617,7 @@ export default function LandingIA() {
                   <Button
                     size="lg"
                     variant="outline"
-                    onClick={() => document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' })}
+                    onClick={() => openWhatsApp("Plano Semestral - Começar agora")}
                     className="w-full"
                   >
                     COMEÇAR AGORA
@@ -652,7 +663,7 @@ export default function LandingIA() {
 
                   <Button
                     size="lg"
-                    onClick={() => document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' })}
+                    onClick={() => openWhatsApp("Plano Anual - Quero economizar")}
                     className="w-full gradient-primary text-primary-foreground font-bold"
                   >
                     QUERO ECONOMIZAR
@@ -926,7 +937,7 @@ export default function LandingIA() {
               </p>
               <Button
                 size="lg"
-                onClick={() => scrollToForm()}
+                onClick={() => openWhatsApp("CTA Final - Quero a Laura")}
                 className="gradient-primary text-primary-foreground"
               >
                 Quero a Laura no meu WhatsApp
@@ -957,7 +968,7 @@ export default function LandingIA() {
           </div>
         </div>
       </footer>
-      <FloatingWhatsAppButton />
+      <FloatingWhatsAppButton href={WA_LINK} />
     </div>
   );
 }
