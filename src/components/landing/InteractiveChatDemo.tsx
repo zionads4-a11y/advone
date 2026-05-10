@@ -101,7 +101,7 @@ export function InteractiveChatDemo() {
             <Bot className="h-5 w-5 text-[hsl(0,0%,100%)]" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-[hsl(0,0%,100%)]">Júlia · Secretária Virtual</p>
+            <p className="text-sm font-semibold text-[hsl(0,0%,100%)]">Laura · Secretária Virtual</p>
             <p className="text-xs text-[hsl(0,0%,100%)]/70">Mendes &amp; Vasconcelos · online</p>
           </div>
           <div className="ml-auto flex h-2.5 w-2.5 rounded-full bg-[hsl(120,60%,50%)]">
