@@ -19,7 +19,7 @@ export const BILLING_MODELS: BillingModelOption[] = [
   {
     key: "plan_completo",
     emoji: "🚀",
-    label: "Plano Completo (R$ 897/mês)",
+    label: "Plano Completo (R$ 997/mês)",
     description: "Tudo do Admin + Bot SDR (Laura), IA Jurídica Claude, Alertas de Fraude, Boards. 50 monitoramentos.",
     partnership_type: "mensalidade_zionads",
     service_mode: "full",
