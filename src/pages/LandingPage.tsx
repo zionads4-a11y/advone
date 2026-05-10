@@ -34,10 +34,10 @@ import {
 } from "lucide-react";
 
 const stats = [
-  { value: "100%", label: "Atendimento com IA" },
-  { value: "24/7", label: "Secretária Virtual no ar" },
-  { value: "5x", label: "Mais agendamentos" },
-  { value: "0", label: "Leads esquecidos" },
+  { value: "5 min", label: "Setup em tempo recorde" },
+  { value: "24/7", label: "Secretária Virtual sempre ativa" },
+  { value: "API", label: "Parceiro Oficial Meta" },
+  { value: "0", label: "Risco de bloqueio" },
 ];
 
 const features = [
@@ -124,9 +124,9 @@ export default function LandingPage() {
       <nav className="sticky top-0 z-50 border-b border-[hsl(220,20%,16%)] bg-[hsl(220,25%,6%)]/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <img
-            src={logoAdvOne}
-            alt="AdvOne"
-            className="h-16 w-auto md:h-20 drop-shadow-[0_0_24px_hsl(153,60%,45%/0.55)] transition-transform hover:scale-105"
+            src="https://sabioadv.com.br/wp-content/uploads/2026/04/LOGO-1.png"
+            alt="Sábio Adv"
+            className="h-10 w-auto transition-transform hover:scale-105"
           />
           <div className="hidden items-center gap-8 md:flex">
             <a href="#funcionalidades" className="text-sm text-[hsl(220,10%,70%)] transition-colors hover:text-[hsl(153,60%,45%)]">Funcionalidades</a>
@@ -171,10 +171,10 @@ export default function LandingPage() {
                 className="mb-6 text-4xl font-bold leading-tight tracking-tight md:text-5xl lg:text-6xl animate-slide-up"
                 style={{ fontFamily: "'Space Grotesk', sans-serif" }}
               >
-                <span className="gradient-text">CRM completo</span> para a gestão do seu escritório de advocacia.
+                Atendimento com <span className="gradient-text">IA para Advogados</span> via WhatsApp Oficial.
               </h1>
               <p className="mx-auto mb-8 max-w-xl text-lg text-[hsl(220,10%,55%)] lg:mx-0 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-                Sua Secretária Virtual atende, qualifica e agenda 24h por dia. E o CRM cuida do resto — cadência, agenda e financeiro num só lugar.
+                A inteligência artificial para advogados que atende seus clientes via WhatsApp com API Oficial da Meta, qualifica leads jurídicos, agenda reuniões e monitora processos — enquanto você advoga.
               </p>
               <div className="flex flex-col items-center gap-4 sm:flex-row lg:justify-start animate-slide-up" style={{ animationDelay: "0.2s" }}>
                 <Button
@@ -1006,7 +1006,7 @@ export default function LandingPage() {
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-8 md:flex-row">
           <img
             src={logoAdvOne}
-            alt="AdvOne"
+            alt="Sábio Adv"
             className="h-14 w-auto drop-shadow-[0_0_20px_hsl(153,60%,45%/0.5)]"
           />
           <p className="text-sm text-[hsl(220,10%,45%)]">
