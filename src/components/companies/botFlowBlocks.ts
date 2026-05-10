@@ -1248,6 +1248,7 @@ export function buildDynamicLauraPrompt(params: {
   schedulingLink?: string;
   botName?: string;
   botRoleDescription?: string;
+  sharedWhatsapp?: boolean;
 }): string {
   const { 
     niche, 
@@ -1256,7 +1257,8 @@ export function buildDynamicLauraPrompt(params: {
     offices = [], 
     schedulingLink,
     botName,
-    botRoleDescription 
+    botRoleDescription,
+    sharedWhatsapp = false,
   } = params;
   const orderedFlows = [...enabledFlows].sort((a, b) => a.position - b.position);
   const activeOffices = offices.filter((o) => o.address);
