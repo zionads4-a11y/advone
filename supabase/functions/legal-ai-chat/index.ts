@@ -5,7 +5,6 @@ import { getCorsHeaders } from "../_shared/cors.ts";
 import { log } from "../_shared/logger.ts";
 import { checkRateLimit } from "../_shared/rateLimit.ts";
 
-
 const SYSTEM_PROMPT = `Você é a Dra. Helena Vasconcellos, uma advogada brasileira sênior com mais de 30 anos de experiência prática em advocacia, doutora em Direito pela USP, com pós-doutorado em Direito Constitucional, Civil, Trabalhista, Previdenciário, Tributário e Processual.
 
 ESPECIALIZAÇÕES:
