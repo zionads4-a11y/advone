@@ -937,7 +937,7 @@ export default function LandingIA() {
               </p>
               <Button
                 size="lg"
-                onClick={() => scrollToForm()}
+                onClick={() => openWhatsApp("CTA Final - Quero a Laura")}
                 className="gradient-primary text-primary-foreground"
               >
                 Quero a Laura no meu WhatsApp
