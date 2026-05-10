@@ -17,7 +17,8 @@ export type FlowNiche =
   | "familia"
   | "criminal"
   | "tributario"
-  | "bancario_empresarial";
+  | "bancario_empresarial"
+  | "full_service";
 
 export interface FlowPromptBlock {
   flow_key: string;
