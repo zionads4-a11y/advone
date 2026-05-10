@@ -9,7 +9,7 @@ interface DemoMessage {
 
 const demoScript: DemoMessage[] = [
   { role: "user", text: "Oi, boa tarde. Vi o anúncio de vocês.", delay: 0 },
-  { role: "bot", text: "Boa tarde! 👋 Aqui é a Júlia, secretária virtual do escritório Mendes & Vasconcelos Advocacia. Que bom ter você por aqui! Pra eu te ajudar direitinho, me conta: o que aconteceu?", delay: 1400 },
+  { role: "bot", text: "Boa tarde! 👋 Aqui é a Laura, secretária virtual do escritório Mendes & Vasconcelos Advocacia. Que bom ter você por aqui! Pra eu te ajudar direitinho, me conta: o que aconteceu?", delay: 1400 },
   { role: "user", text: "Fui demitido semana passada e acho que não recebi tudo certo.", delay: 3600 },
   { role: "bot", text: "Imagino o quanto isso é estressante 😔 Fica tranquilo(a), vou te ajudar. Você trabalhou de carteira assinada?", delay: 5200 },
   { role: "user", text: "Sim, 4 anos e meio.", delay: 7000 },
@@ -101,7 +101,7 @@ export function InteractiveChatDemo() {
             <Bot className="h-5 w-5 text-[hsl(0,0%,100%)]" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-[hsl(0,0%,100%)]">Júlia · Secretária Virtual</p>
+            <p className="text-sm font-semibold text-[hsl(0,0%,100%)]">Laura · Secretária Virtual</p>
             <p className="text-xs text-[hsl(0,0%,100%)]/70">Mendes &amp; Vasconcelos · online</p>
           </div>
           <div className="ml-auto flex h-2.5 w-2.5 rounded-full bg-[hsl(120,60%,50%)]">
