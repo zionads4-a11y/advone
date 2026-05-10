@@ -968,7 +968,7 @@ export default function LandingIA() {
           </div>
         </div>
       </footer>
-      <FloatingWhatsAppButton />
+      <FloatingWhatsAppButton href={WA_LINK} />
     </div>
   );
 }
