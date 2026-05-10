@@ -203,6 +203,12 @@ export default function LegalAI() {
       if (!token) throw new Error("Não autenticado");
 
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/legal-ai-chat`;
+      console.log("[LegalAI] Sending request to:", url, {
+        conversationId: activeConvId,
+        companyId: activeCompanyId,
+        documentType: pendingDocType
+      });
+
       const resp = await fetch(url, {
         method: "POST",
         headers: {
@@ -216,6 +222,8 @@ export default function LegalAI() {
           documentType: pendingDocType,
         }),
       });
+
+      console.log("[LegalAI] Response status:", resp.status);
 
       if (!resp.ok) {
         const err = await resp.json().catch(() => ({ error: "Erro" }));
