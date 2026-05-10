@@ -107,7 +107,7 @@ export default function LegalAI() {
       }
       const { data } = await query;
       const list = (data || [])
-        .filter((c: any) => c.billing_model === 'plan_completo' || c.billing_model === 'crm_full' || c.billing_model === 'plan_free' || c.billing_model === 'plan_zionads')
+        .filter((c: any) => c.billing_model === 'plan_completo' || c.billing_model === 'crm_full' || c.billing_model === 'plan_free' || c.billing_model === 'plan_zionads' || (c.billing_model?.startsWith('plan_ia_') ?? false))
         .map((c) => ({ id: c.id, name: c.name }));
       setCompanies(list);
       if (list.length > 0) {

@@ -85,16 +85,23 @@ async function handler(req: Request): Promise<Response> {
 
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Multi-tenant check
-    const { data: membership } = await admin
-      .from("client_companies")
-      .select("id")
-      .eq("user_id", userId)
-      .eq("company_id", companyId)
-      .maybeSingle();
+    // Role check (Server-side)
+    const { data: roleData } = await admin.from("user_roles").select("role").eq("user_id", userId).maybeSingle();
+    const role = roleData?.role;
+    const isStaff = role === "admin" || role === "member";
 
-    if (!membership) {
-      return jsonResponse(req, { error: "Sem acesso a esta empresa" }, 403);
+    // Multi-tenant check (Bypassed for staff)
+    if (!isStaff) {
+      const { data: membership } = await admin
+        .from("client_companies")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("company_id", companyId)
+        .maybeSingle();
+
+      if (!membership) {
+        return jsonResponse(req, { error: "Sem acesso a esta empresa" }, 403);
+      }
     }
 
     // Rate Limiting
@@ -103,11 +110,10 @@ async function handler(req: Request): Promise<Response> {
       return jsonResponse(req, { error: "Limite de uso da IA atingido para esta hora (60/hora). Tente mais tarde." }, 429);
     }
 
-
-    // Verifica acesso da empresa (bloqueia êxito)
+    // Verifica acesso da empresa
     const { data: company, error: cErr } = await admin
       .from("companies")
-      .select("id, partnership_type")
+      .select("id, partnership_type, billing_model")
       .eq("id", companyId)
       .single();
 
@@ -115,24 +121,23 @@ async function handler(req: Request): Promise<Response> {
       return jsonResponse(req, { error: "Empresa não encontrada" }, 404);
     }
 
-    // Role check (Server-side)
-    const { data: roleData } = await admin.from("user_roles").select("role").eq("user_id", userId).maybeSingle();
-    const role = roleData?.role;
+    // Subscription Check (Bypassed for Staff and Plan Free)
+    if (!isStaff && company.billing_model !== "plan_free") {
+      const { data: sub } = await admin
+        .from("subscriptions")
+        .select("status")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
-    // Subscription Check
-    const { data: sub } = await admin
-      .from("subscriptions")
-      .select("status")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (sub?.status === "overdue" || sub?.status === "cancelled") {
-      return jsonResponse(req, { error: "Assinatura inativa ou com pendência" }, 403);
+      if (sub?.status === "overdue" || sub?.status === "cancelled") {
+        return jsonResponse(req, { error: "Assinatura inativa ou com pendência" }, 403);
+      }
     }
 
-    if (company.partnership_type !== "mensalidade_zionads") {
+    // Partnership type check - updated to be more flexible if it's plan_free
+    if (company.partnership_type !== "mensalidade_zionads" && company.billing_model !== "plan_free") {
       return jsonResponse(
         req,
         { error: "A IA Jurídica está disponível apenas para clientes do plano mensal. Fale com seu gestor para liberar." },
