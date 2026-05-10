@@ -497,7 +497,7 @@ export default function LandingIA() {
                   <li>✅ 5 follow-ups automáticos por lead</li>
                   <li>✅ Responde em até 30 segundos</li>
                   <li>✅ Qualifica e classifica viabilidade</li>
-                  <li>✅ Custo: R$ 497/mês — sem encargos</li>
+                  <li>✅ Custo: R$ 997/mês — sem encargos</li>
                 </ul>
               </CardContent>
             </Card>
