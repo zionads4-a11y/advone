@@ -41,14 +41,14 @@ const stats = [
 ];
 
 const features = [
-  { icon: Headphones, title: "Secretária Virtual com IA", desc: "Recebe, escuta, qualifica e agenda seu cliente pelo WhatsApp 24h por dia — com a empatia de uma humana e a precisão de uma máquina." },
-  { icon: Kanban, title: "Kanban Automatizado", desc: "Leads se movem automaticamente pelo funil com cadência de 5 tentativas de contato." },
-  { icon: CalendarDays, title: "Agenda Integrada", desc: "Agendamentos automáticos respeitando horários livres e expediente configurado." },
-  { icon: Wallet, title: "Financeiro com Asaas", desc: "Contas a pagar, receber e faturamento líquido integrado com o Asaas." },
-  { icon: MessageSquare, title: "Conversas Centralizadas", desc: "Todas as mensagens do WhatsApp em um só lugar com histórico completo." },
-  { icon: FileText, title: "Documentos e Petições", desc: "Upload de documentos até 600MB, petições e procurações organizadas." },
-  { icon: Briefcase, title: "Gestão de Processos", desc: "Cadastro de processos com pastas por cliente, documentos e acompanhamento." },
-  { icon: Users, title: "Equipe e Permissões", desc: "Gerentes, operadores e clientes com acessos personalizados por função." },
+  { icon: Headphones, title: "WhatsApp com IA 24/7", desc: "Chatbot que responde, qualifica e agenda — direto no WhatsApp Business API Oficial da Meta." },
+  { icon: Shield, title: "API Oficial Meta", desc: "Sua automação roda na infraestrutura oficial, com selo verde e zero risco de bloqueio." },
+  { icon: CalendarDays, title: "Qualificação e Agenda", desc: "A IA identifica o caso, avalia viabilidade e marca na sua agenda os horários disponíveis." },
+  { icon: Wallet, title: "Gestão Financeira", desc: "Controle de honorários, faturamento e integração completa com meios de pagamento." },
+  { icon: Sparkles, title: "IA Jurídica Avançada", desc: "Geração de petições, análise de documentos e resumos processuais com tecnologia de ponta." },
+  { icon: FileText, title: "Documentos Organizados", desc: "Centralize procurações, contratos e provas em pastas automáticas por cliente." },
+  { icon: Briefcase, title: "Acompanhamento Processual", desc: "Monitoramento automático de processos nos tribunais com alertas de movimentação." },
+  { icon: Users, title: "Multi-atendimento", desc: "Sua equipe e a IA trabalhando juntas em um único número oficial." },
 ];
 
 const valueProps = [
@@ -119,9 +119,9 @@ export default function LandingPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="dark min-h-screen bg-[hsl(220,25%,6%)] text-[hsl(220,10%,92%)]" id="home">
+    <div className="dark min-h-screen bg-[hsl(220,25%,4%)] text-[hsl(220,10%,92%)]" id="home">
       {/* Navbar */}
-      <nav className="sticky top-0 z-50 border-b border-[hsl(220,20%,16%)] bg-[hsl(220,25%,6%)]/90 backdrop-blur-xl">
+      <nav className="sticky top-0 z-50 border-b border-[hsl(220,20%,16%)] bg-[hsl(220,25%,4%)]/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <img
             src="https://sabioadv.com.br/wp-content/uploads/2026/04/LOGO-1.png"
@@ -168,7 +168,7 @@ export default function LandingPage() {
                 CRM com Inteligência Artificial
               </div>
               <h1
-                className="mb-6 text-4xl font-bold leading-tight tracking-tight md:text-5xl lg:text-6xl animate-slide-up"
+                className="mb-6 text-4xl font-extrabold leading-tight tracking-tight md:text-5xl lg:text-7xl animate-slide-up"
                 style={{ fontFamily: "'Space Grotesk', sans-serif" }}
               >
                 Atendimento com <span className="gradient-text">IA para Advogados</span> via WhatsApp Oficial.
@@ -193,9 +193,11 @@ export default function LandingPage() {
                   Ver a Secretária Virtual em ação
                 </a>
               </div>
-              <p className="mt-4 text-sm text-[hsl(220,10%,45%)]">
-                Modelo de parceria sob medida. Configure em minutos.
-              </p>
+              <div className="mt-4 flex flex-wrap gap-4 text-sm text-[hsl(220,10%,45%)]">
+                <span className="flex items-center gap-1">✓ Setup em 5 min</span>
+                <span className="flex items-center gap-1">✓ API Oficial WhatsApp</span>
+                <span className="flex items-center gap-1">✓ Assistente virtual 24/7</span>
+              </div>
             </div>
 
             {/* Right: Chat Demo */}
