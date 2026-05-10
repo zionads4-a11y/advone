@@ -34,21 +34,21 @@ import {
 } from "lucide-react";
 
 const stats = [
-  { value: "5 min", label: "Setup em tempo recorde" },
-  { value: "24/7", label: "Secretária Virtual sempre ativa" },
-  { value: "API", label: "Parceiro Oficial Meta" },
-  { value: "0", label: "Risco de bloqueio" },
+  { value: "100%", label: "Atendimento com IA" },
+  { value: "24/7", label: "Secretária Virtual no ar" },
+  { value: "5x", label: "Mais agendamentos" },
+  { value: "0", label: "Leads esquecidos" },
 ];
 
 const features = [
-  { icon: Headphones, title: "WhatsApp com IA 24/7", desc: "Chatbot que responde, qualifica e agenda — direto no WhatsApp Business API Oficial da Meta." },
-  { icon: Shield, title: "API Oficial Meta", desc: "Sua automação roda na infraestrutura oficial, com selo verde e zero risco de bloqueio." },
-  { icon: CalendarDays, title: "Qualificação e Agenda", desc: "A IA identifica o caso, avalia viabilidade e marca na sua agenda os horários disponíveis." },
-  { icon: Wallet, title: "Gestão Financeira", desc: "Controle de honorários, faturamento e integração completa com meios de pagamento." },
-  { icon: Sparkles, title: "IA Jurídica Avançada", desc: "Geração de petições, análise de documentos e resumos processuais com tecnologia de ponta." },
-  { icon: FileText, title: "Documentos Organizados", desc: "Centralize procurações, contratos e provas em pastas automáticas por cliente." },
-  { icon: Briefcase, title: "Acompanhamento Processual", desc: "Monitoramento automático de processos nos tribunais com alertas de movimentação." },
-  { icon: Users, title: "Multi-atendimento", desc: "Sua equipe e a IA trabalhando juntas em um único número oficial." },
+  { icon: Headphones, title: "Secretária Virtual com IA", desc: "Recebe, escuta, qualifica e agenda seu cliente pelo WhatsApp 24h por dia — com a empatia de uma humana e a precisão de uma máquina." },
+  { icon: Kanban, title: "Kanban Automatizado", desc: "Leads se movem automaticamente pelo funil com cadência de 5 tentativas de contato." },
+  { icon: CalendarDays, title: "Agenda Integrada", desc: "Agendamentos automáticos respeitando horários livres e expediente configurado." },
+  { icon: Wallet, title: "Financeiro com Asaas", desc: "Contas a pagar, receber e faturamento líquido integrado com o Asaas." },
+  { icon: MessageSquare, title: "Conversas Centralizadas", desc: "Todas as mensagens do WhatsApp em um só lugar com histórico completo." },
+  { icon: FileText, title: "Documentos e Petições", desc: "Upload de documentos até 600MB, petições e procurações organizadas." },
+  { icon: Briefcase, title: "Gestão de Processos", desc: "Cadastro de processos com pastas por cliente, documentos e acompanhamento." },
+  { icon: Users, title: "Equipe e Permissões", desc: "Gerentes, operadores e clientes com acessos personalizados por função." },
 ];
 
 const valueProps = [
@@ -119,14 +119,14 @@ export default function LandingPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="dark min-h-screen bg-[hsl(220,25%,4%)] text-[hsl(220,10%,92%)]" id="home">
+    <div className="dark min-h-screen bg-[hsl(220,25%,6%)] text-[hsl(220,10%,92%)]" id="home">
       {/* Navbar */}
-      <nav className="sticky top-0 z-50 border-b border-[hsl(220,20%,16%)] bg-[hsl(220,25%,4%)]/90 backdrop-blur-xl">
+      <nav className="sticky top-0 z-50 border-b border-[hsl(220,20%,16%)] bg-[hsl(220,25%,6%)]/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <img
             src={logoAdvOne}
             alt="AdvOne"
-            className="h-10 w-auto md:h-12 transition-transform hover:scale-105"
+            className="h-16 w-auto md:h-20 drop-shadow-[0_0_24px_hsl(153,60%,45%/0.55)] transition-transform hover:scale-105"
           />
           <div className="hidden items-center gap-8 md:flex">
             <a href="#funcionalidades" className="text-sm text-[hsl(220,10%,70%)] transition-colors hover:text-[hsl(153,60%,45%)]">Funcionalidades</a>
@@ -168,13 +168,13 @@ export default function LandingPage() {
                 CRM com Inteligência Artificial
               </div>
               <h1
-                className="mb-6 text-4xl font-extrabold leading-tight tracking-tight md:text-5xl lg:text-7xl animate-slide-up"
+                className="mb-6 text-4xl font-bold leading-tight tracking-tight md:text-5xl lg:text-6xl animate-slide-up"
                 style={{ fontFamily: "'Space Grotesk', sans-serif" }}
               >
-                Atendimento com IA para Advogados via <span className="gradient-text">WhatsApp Oficial</span> — 24h por dia.
+                <span className="gradient-text">CRM completo</span> para a gestão do seu escritório de advocacia.
               </h1>
               <p className="mx-auto mb-8 max-w-xl text-lg text-[hsl(220,10%,55%)] lg:mx-0 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-                A inteligência artificial para advogados que atende seus clientes via WhatsApp com API Oficial da Meta, qualifica leads jurídicos, agenda reuniões e monitora processos — enquanto você advoga.
+                Sua Secretária Virtual atende, qualifica e agenda 24h por dia. E o CRM cuida do resto — cadência, agenda e financeiro num só lugar.
               </p>
               <div className="flex flex-col items-center gap-4 sm:flex-row lg:justify-start animate-slide-up" style={{ animationDelay: "0.2s" }}>
                 <Button
@@ -193,11 +193,9 @@ export default function LandingPage() {
                   Ver a Secretária Virtual em ação
                 </a>
               </div>
-              <div className="mt-4 flex flex-wrap gap-4 text-sm text-[hsl(220,10%,45%)]">
-                <span className="flex items-center gap-1">✓ Setup em 5 min</span>
-                <span className="flex items-center gap-1">✓ API Oficial WhatsApp</span>
-                <span className="flex items-center gap-1">✓ Assistente virtual 24/7</span>
-              </div>
+              <p className="mt-4 text-sm text-[hsl(220,10%,45%)]">
+                Modelo de parceria sob medida. Configure em minutos.
+              </p>
             </div>
 
             {/* Right: Chat Demo */}
@@ -1008,7 +1006,7 @@ export default function LandingPage() {
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-8 md:flex-row">
           <img
             src={logoAdvOne}
-            alt="Sábio Adv"
+            alt="AdvOne"
             className="h-14 w-auto drop-shadow-[0_0_20px_hsl(153,60%,45%/0.5)]"
           />
           <p className="text-sm text-[hsl(220,10%,45%)]">

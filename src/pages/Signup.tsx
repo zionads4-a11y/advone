@@ -226,9 +226,9 @@ export default function Signup() {
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
         <div className="flex flex-col items-center gap-4 mb-10">
           <img
-            src="https://sabioadv.com.br/wp-content/uploads/2026/04/LOGO-1.png"
-            alt="Sábio Adv"
-            className="h-20 w-auto"
+            src={logoAdvOne}
+            alt="AdvOne"
+            className="h-20 w-auto sm:h-24 drop-shadow-[0_0_20px_hsl(153,60%,45%/0.4)]"
           />
           <div className="w-full max-w-md space-y-2">
             <div className="flex justify-between text-xs font-medium text-[hsl(220,10%,55%)] mb-1">

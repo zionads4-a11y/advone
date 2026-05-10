@@ -50,23 +50,9 @@ export function useCompanyBotFlows(companyId: string | null, niche: Niche) {
     // Lista de flows que faltam ser semeados (apenas do catálogo padrão)
     const toInsert: any[] = [];
     catalog.forEach((flow, idx) => {
-      let flowNiche = niche;
-      if (niche === "hibrido") {
-        flowNiche = flow.flow_key in PREV_KEYS ? "previdenciario" : "trabalhista";
-      } else if (niche === "full_service") {
-        // No full_service, preservamos o nicho original do fluxo se possível
-        // ou usamos um mapeamento para saber de onde ele veio.
-        // Como o catálogo já está unido, precisamos saber o nicho original.
-        // Mas para simplificar a semente, podemos usar o flow.flow_key para detectar.
-        if (flow.flow_key in PREV_KEYS) flowNiche = "previdenciario";
-        else if (TRAB_KEYS[flow.flow_key]) flowNiche = "trabalhista";
-        else if (CIVEL_KEYS[flow.flow_key]) flowNiche = "civel";
-        else if (FAMILIA_KEYS[flow.flow_key]) flowNiche = "familia";
-        else if (CRIMINAL_KEYS[flow.flow_key]) flowNiche = "criminal";
-        else if (TRIBUTARIO_KEYS[flow.flow_key]) flowNiche = "tributario";
-        else if (BANCARIO_KEYS[flow.flow_key]) flowNiche = "bancario_empresarial";
-      }
-      
+      const flowNiche = niche === "hibrido"
+        ? (flow.flow_key in PREV_KEYS ? "previdenciario" : "trabalhista")
+        : niche;
       const key = `${flowNiche}:${flow.flow_key}`;
       if (!existingMap.has(key)) {
         toInsert.push({
@@ -98,7 +84,7 @@ export function useCompanyBotFlows(companyId: string | null, niche: Niche) {
     // Fluxos customizados sempre aparecem para a empresa, independente do niche selecionado,
     // desde que a coluna niche bata com o nicho atual ou seja híbrido.
     const filtered = ((final || []) as unknown as CompanyBotFlow[]).filter((f) => {
-      if (niche === "hibrido" || niche === "full_service") return true;
+      if (niche === "hibrido") return true;
       return f.niche === niche;
     });
 
@@ -206,40 +192,14 @@ export function useCompanyBotFlows(companyId: string | null, niche: Niche) {
   return { flows, loading, toggleFlow, updateFlow, updateFlowPrompt, createCustomFlow, deleteFlow, refetch: seedAndLoad };
 }
 
-// Conjuntos de keys para desambiguar nichos no modo híbrido/full_service
+// Conjunto de keys previdenciárias (pra desambiguar no modo híbrido)
 const PREV_KEYS: Record<string, true> = {
-  aposentadoria: true, beneficio_negado: true, revisao_aposentadoria: true,
-  bpc_loas: true, auxilio_invalidez: true, rmc_rcc: true,
-  demora_inss: true, salario_maternidade: true, fallback_outros: true
-};
-
-const TRAB_KEYS: Record<string, true> = {
-  rescisao_verbas: true, horas_extras: true, vinculo_sem_carteira: true,
-  acidente_trabalho: true, assedio_moral: true
-};
-
-const CIVEL_KEYS: Record<string, true> = {
-  indenizacao_dano_moral: true, problema_banco: true, problema_loja_produto: true,
-  plano_saude: true, cia_aerea: true
-};
-
-const FAMILIA_KEYS: Record<string, true> = {
-  divorcio: true, pensao_alimenticia: true, guarda_visitas: true,
-  inventario: true, uniao_estavel: true
-};
-
-const CRIMINAL_KEYS: Record<string, true> = {
-  preso_flagrante: true, inquerito_intimacao: true, audiencia_processo: true,
-  recurso_habeas: true, execucao_penal: true
-};
-
-const TRIBUTARIO_KEYS: Record<string, true> = {
-  recuperacao_tributos: true, defesa_fiscal: true, planejamento_tributario: true,
-  contratos_empresariais: true, societario: true
-};
-
-const BANCARIO_KEYS: Record<string, true> = {
-  renegociacao_dividas_pj: true, revisao_contratos_bancarios: true,
-  recuperacao_judicial: true, execucao_bloqueio_bancario: true,
-  negativacao_serasa_pj: true, blindagem_patrimonial: true, agronegocio: true
+  aposentadoria: true,
+  beneficio_negado: true,
+  revisao_aposentadoria: true,
+  bpc_loas: true,
+  auxilio_invalidez: true,
+  rmc_rcc: true,
+  demora_inss: true,
+  salario_maternidade: true,
 };

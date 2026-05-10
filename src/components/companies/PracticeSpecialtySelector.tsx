@@ -138,23 +138,7 @@ export function PracticeSpecialtySelector({ companyId, onChange, compact = false
   }
 
   const grid = (
-    <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className={cn(
-            "text-xs gap-1.5",
-            value === "full_service" && "bg-primary/10 border-primary text-primary"
-          )}
-          onClick={() => setValue("full_service")}
-        >
-          <Layers className="h-3.5 w-3.5" />
-          Marcar todas as áreas (Full Service)
-        </Button>
-      </div>
-
+    <div className="space-y-3">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {OPTIONS.map((opt) => {
           const Icon = opt.icon;
