@@ -15,7 +15,8 @@ export type PracticeSpecialty =
   | "familia"
   | "criminal"
   | "tributario"
-  | "bancario_empresarial";
+  | "bancario_empresarial"
+  | "full_service";
 
 interface SpecialtyOption {
   value: PracticeSpecialty;
@@ -25,6 +26,12 @@ interface SpecialtyOption {
 }
 
 const OPTIONS: SpecialtyOption[] = [
+  {
+    value: "full_service",
+    label: "Full Service (Todas as Áreas)",
+    description: "Escritório atende todas as áreas do Direito sem restrição.",
+    icon: Layers,
+  },
   {
     value: "previdenciario",
     label: "Previdenciário / INSS",
