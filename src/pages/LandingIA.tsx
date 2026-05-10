@@ -296,7 +296,7 @@ export default function LandingIA() {
             onClick={() => navigate("/")}
             className="flex items-center gap-2 transition-opacity hover:opacity-80"
           >
-            <img src="https://sabioadv.com.br/wp-content/uploads/2026/04/LOGO-1.png" alt="Sábio Adv" className="h-8 w-auto" />
+            <img src={logoAdvOne} alt="AdvOne" className="h-8 w-auto" />
           </button>
           <nav className="hidden items-center gap-6 md:flex">
             <a href="#features" className="text-sm text-muted-foreground hover:text-foreground">
