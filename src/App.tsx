@@ -47,6 +47,7 @@ import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Tasks from "./pages/Tasks";
 import Boards from "./pages/Boards";
+import WebhookLogs from "./pages/WebhookLogs";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
