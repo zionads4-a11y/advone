@@ -579,10 +579,10 @@ export default function LandingIA() {
                       PAGAMENTO SEMESTRAL
                     </div>
                     <div className="mt-2 flex items-baseline justify-center gap-1">
-                      <span className="font-display text-4xl font-bold">6x R$ 497</span>
+                      <span className="font-display text-4xl font-bold">6x R$ 797</span>
                     </div>
                     <div className="mt-1 text-xs text-primary font-bold">
-                      Economize R$ 1.800 no semestre
+                      Economize R$ 1.200 no semestre
                     </div>
                   </div>
 
