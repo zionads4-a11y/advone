@@ -170,7 +170,7 @@ async function handler(req: Request): Promise<Response> {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o",
+        model: "google/gemini-2.5-flash",
         stream: true,
         messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
       }),
