@@ -69,7 +69,7 @@ export function useCompanyServiceMode() {
     serviceMode, 
     isAiOnly: serviceMode === "ai_only", 
     billingModel,
-    isPlanCompleto: billingModel === "plan_completo" || billingModel === "plan_zionads",
+    isPlanCompleto: billingModel === "plan_completo" || billingModel === "plan_zionads" || billingModel === "plan_free",
     loading 
   };
 }
