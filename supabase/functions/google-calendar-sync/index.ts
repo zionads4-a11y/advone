@@ -150,7 +150,7 @@ serve(async (req) => {
       } else {
         params.set("timeMin", fullWindowMin);
         params.set("timeMax", fullWindowMax);
-        params.set("orderBy", "startTime");
+        // NÃO usar orderBy aqui — Google só retorna nextSyncToken se não houver orderBy
       }
       if (pageToken) params.set("pageToken", pageToken);
       return fetch(
