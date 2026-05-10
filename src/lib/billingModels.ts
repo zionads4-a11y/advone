@@ -19,7 +19,7 @@ export const BILLING_MODELS: BillingModelOption[] = [
   {
     key: "plan_completo",
     emoji: "🚀",
-    label: "Plano Completo (R$ 897/mês)",
+    label: "Plano Completo (R$ 997/mês)",
     description: "Tudo do Admin + Bot SDR (Laura), IA Jurídica Claude, Alertas de Fraude, Boards. 50 monitoramentos.",
     partnership_type: "mensalidade_zionads",
     service_mode: "full",
@@ -28,7 +28,7 @@ export const BILLING_MODELS: BillingModelOption[] = [
   {
     key: "plan_ia_monthly",
     emoji: "🤖",
-    label: "Plano IA Mensal (R$ 797/mês)",
+    label: "Plano IA Mensal (R$ 997/mês)",
     description: "IA Laura, IA Jurídica, Boards e Agenda. Sem fidelidade. 30 monitoramentos.",
     partnership_type: "mensalidade_zionads",
     service_mode: "full",
@@ -37,7 +37,7 @@ export const BILLING_MODELS: BillingModelOption[] = [
   {
     key: "plan_ia_6m",
     emoji: "🤖",
-    label: "Plano IA 6 Meses (R$ 497/mês)",
+    label: "Plano IA 6 Meses (R$ 797/mês)",
     description: "IA Laura, IA Jurídica, Boards e Agenda. Fidelidade de 6 meses. 30 monitoramentos.",
     partnership_type: "mensalidade_zionads",
     service_mode: "full",
@@ -46,7 +46,7 @@ export const BILLING_MODELS: BillingModelOption[] = [
   {
     key: "plan_ia_12m",
     emoji: "🤖",
-    label: "Plano IA 12 Meses (R$ 297/mês)",
+    label: "Plano IA 12 Meses (R$ 597/mês)",
     description: "IA Laura, IA Jurídica, Boards e Agenda. Fidelidade de 12 meses. 30 monitoramentos.",
     partnership_type: "mensalidade_zionads",
     service_mode: "full",

@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import logoAdvOne from "@/assets/logo-advone.png";
 import { Progress } from "@/components/ui/progress";
 
-type PlanKey = "admin" | "completo" | "mensal" | "trimestral" | "anual";
+type PlanKey = "admin" | "completo" | "mensal" | "semestral" | "trimestral" | "anual";
 
 const FEATURES_ADMIN = [
   "CRM completo com Kanban",
@@ -55,10 +55,10 @@ const PLANS: Record<PlanKey, {
   },
   completo: {
     label: "Completo",
-    monthly: 497,
-    charged: 497,
+    monthly: 997,
+    charged: 997,
     billingLabel: "Recorrente mensal",
-    ctaSuffix: "R$ 497/mês",
+    ctaSuffix: "R$ 997/mês",
     color: "hsl(153,60%,45%)",
     features: FEATURES_COMPLETO,
   },
@@ -72,12 +72,21 @@ const PLANS: Record<PlanKey, {
     color: "hsl(210,80%,55%)",
     features: FEATURES_COMPLETO,
   },
-  trimestral: {
-    label: "Trimestral",
+  semestral: {
+    label: "Semestral",
     monthly: 797,
-    charged: 2391,
-    billingLabel: "R$ 2.391 (3x R$ 797)",
-    ctaSuffix: "R$ 2.391 à vista",
+    charged: 4782,
+    billingLabel: "R$ 4.782 (6x R$ 797)",
+    ctaSuffix: "R$ 4.782 à vista",
+    color: "hsl(153,60%,45%)",
+    features: FEATURES_COMPLETO,
+  },
+  trimestral: {
+    label: "Semestral",
+    monthly: 797,
+    charged: 4782,
+    billingLabel: "R$ 4.782 (6x R$ 797)",
+    ctaSuffix: "R$ 4.782 à vista",
     color: "hsl(153,60%,45%)",
     features: FEATURES_COMPLETO,
   },
