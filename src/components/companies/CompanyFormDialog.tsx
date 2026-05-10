@@ -27,6 +27,7 @@ interface CompanyFormDialogProps {
 
 export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormDialogProps) {
   const [selectedModel, setSelectedModel] = useState<BillingModel>("plan_ia_monthly");
+  const isFree = selectedModel === "plan_free";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
