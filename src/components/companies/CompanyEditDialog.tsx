@@ -30,6 +30,7 @@ import { Trash2 } from "lucide-react";
 import { BusinessHoursConfig, type BusinessHours, parseBusinessHours, getDefaultBusinessHours } from "./BusinessHoursConfig";
 import { CompanyOfficesEditor } from "./CompanyOfficesEditor";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { BILLING_MODELS, getBillingModel, inferBillingModel, type BillingModel } from "@/lib/billingModels";
 
 export type PartnershipType = "exito" | "mensalidade_zionads";
