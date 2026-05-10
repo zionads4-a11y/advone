@@ -124,13 +124,20 @@ export default function LegalAI() {
   useEffect(() => {
     if (!activeCompanyId || !user) return;
     const load = async () => {
-      const { data } = await supabase
+      console.log("[LegalAI] Loading conversations for company:", activeCompanyId);
+      const { data, error } = await supabase
         .from("legal_ai_conversations")
         .select("id, title, document_type, updated_at")
         .eq("company_id", activeCompanyId)
         .eq("user_id", user.id)
         .order("updated_at", { ascending: false });
-      setConversations(data || []);
+      
+      if (error) {
+        console.error("[LegalAI] Error loading conversations:", error);
+      } else {
+        console.log("[LegalAI] Conversations loaded:", data?.length);
+        setConversations(data || []);
+      }
     };
     load();
   }, [activeCompanyId, user]);
