@@ -222,18 +222,45 @@ export default function LegalAI() {
         throw new Error(err.error || `Erro ${resp.status}`);
       }
 
-      const respData = await resp.json();
-      const newConvId = respData.conversationId;
+      const newConvId = resp.headers.get("X-Conversation-Id");
       if (newConvId && !activeConvId) {
         setActiveConvId(newConvId);
       }
 
-      const assistantText = respData.content || "";
-      setMessages((prev) => {
-        const copy = [...prev];
-        copy[copy.length - 1] = { role: "assistant", content: assistantText };
-        return copy;
-      });
+      const reader = resp.body!.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let assistantText = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        let idx: number;
+        while ((idx = buffer.indexOf("\n")) !== -1) {
+          let line = buffer.slice(0, idx);
+          buffer = buffer.slice(idx + 1);
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (!line.startsWith("data: ")) continue;
+          const json = line.slice(6).trim();
+          if (json === "[DONE]") continue;
+          try {
+            const parsed = JSON.parse(json);
+            const c = parsed.choices?.[0]?.delta?.content;
+            if (c) {
+              assistantText += c;
+              setMessages((prev) => {
+                const copy = [...prev];
+                copy[copy.length - 1] = { role: "assistant", content: assistantText };
+                return copy;
+              });
+            }
+          } catch {
+            buffer = line + "\n" + buffer;
+            break;
+          }
+        }
+      }
 
       // Recarrega lista de conversas
       const { data } = await supabase
