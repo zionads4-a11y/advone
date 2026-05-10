@@ -183,6 +183,7 @@ async function handler(req: Request): Promise<Response> {
     });
 
     // Chama Lovable AI (sem streaming para teste de estabilidade)
+    // Chama Lovable AI com streaming
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -191,7 +192,7 @@ async function handler(req: Request): Promise<Response> {
       },
       body: JSON.stringify({
         model: "gpt-4o",
-        stream: false,
+        stream: true,
         messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
       }),
     });
