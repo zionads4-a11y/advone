@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import logoAdvOne from "@/assets/logo-advone.png";
 import { Progress } from "@/components/ui/progress";
 
-type PlanKey = "admin" | "completo" | "mensal" | "trimestral" | "anual";
+type PlanKey = "admin" | "completo" | "mensal" | "semestral" | "trimestral" | "anual";
 
 const FEATURES_ADMIN = [
   "CRM completo com Kanban",
