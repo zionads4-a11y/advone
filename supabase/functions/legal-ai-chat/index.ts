@@ -82,7 +82,10 @@ async function handler(req: Request): Promise<Response> {
       documentType?: string;
     };
 
+    console.log("[LegalAI] Request body:", { conversationId, companyId, documentType, messageCount: messages?.length });
+
     if (!companyId || !Array.isArray(messages) || messages.length === 0) {
+      console.error("[LegalAI] Invalid parameters");
       return jsonResponse(req, { error: "Parâmetros inválidos" }, 400);
     }
 
