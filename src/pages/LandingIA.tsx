@@ -626,10 +626,10 @@ export default function LandingIA() {
                       PAGAMENTO ANUAL
                     </div>
                     <div className="mt-2 flex items-baseline justify-center gap-1">
-                      <span className="font-display text-4xl font-bold">12x R$ 297</span>
+                      <span className="font-display text-4xl font-bold">12x R$ 597</span>
                     </div>
                     <div className="mt-1 text-xs text-primary font-bold">
-                      Economize R$ 6.000 por ano
+                      Economize R$ 4.800 por ano
                     </div>
                   </div>
 
