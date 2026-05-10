@@ -171,7 +171,7 @@ export default function LandingPage() {
                 className="mb-6 text-4xl font-extrabold leading-tight tracking-tight md:text-5xl lg:text-7xl animate-slide-up"
                 style={{ fontFamily: "'Space Grotesk', sans-serif" }}
               >
-                Atendimento com <span className="gradient-text">IA para Advogados</span> via WhatsApp Oficial.
+                Atendimento com IA para Advogados via <span className="gradient-text">WhatsApp Oficial</span> — 24h por dia.
               </h1>
               <p className="mx-auto mb-8 max-w-xl text-lg text-[hsl(220,10%,55%)] lg:mx-0 animate-slide-up" style={{ animationDelay: "0.1s" }}>
                 A inteligência artificial para advogados que atende seus clientes via WhatsApp com API Oficial da Meta, qualifica leads jurídicos, agenda reuniões e monitora processos — enquanto você advoga.
