@@ -177,7 +177,9 @@ async function handler(req: Request): Promise<Response> {
     });
 
     if (!aiResp.ok) {
-      return jsonResponse(req, { error: "Erro no gateway de IA" }, 500);
+      const errText = await aiResp.text().catch(() => "");
+      console.error("AI gateway error:", aiResp.status, errText);
+      return jsonResponse(req, { error: "Erro no gateway de IA", status: aiResp.status, detail: errText }, 500);
     }
 
     const [browserStream, captureStream] = aiResp.body!.tee();
