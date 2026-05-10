@@ -257,4 +257,50 @@ _______________________________________
 {{nome}}
 CPF: {{cpf}}`,
   },
+  {
+    name: "Petição Inicial",
+    category: "peticao",
+    description: "Modelo genérico de petição inicial cível",
+    content: `EXCELENTÍSSIMO(A) SENHOR(A) DOUTOR(A) JUIZ(A) DE DIREITO DA ___ª VARA CÍVEL DA COMARCA DE {{endereco_cidade}}/{{endereco_estado}}
+
+{{nome}}, {{nacionalidade}}, {{estado_civil}}, {{profissao}}, portador(a) do RG nº {{rg}} e inscrito(a) no CPF sob o nº {{cpf}}, residente e domiciliado(a) à {{endereco_completo}}, e-mail {{email}}, vem, respeitosamente, à presença de Vossa Excelência, por intermédio de seu(sua) advogado(a) que esta subscreve, conforme procuração anexa, com escritório profissional em {{escritorio_endereco}}, {{escritorio_cidade}}/{{escritorio_estado}}, onde recebe intimações, propor a presente
+
+AÇÃO {{tipo_caso_detalhado}}
+
+em face de {{nome_reu}}, {{qualificacao_reu}}, residente/sediado(a) em {{endereco_reu}}, pelos fatos e fundamentos jurídicos a seguir expostos.
+
+I — DOS FATOS
+
+{{descricao_fatos}}
+
+II — DO DIREITO
+
+{{fundamentacao_juridica}}
+
+III — DOS PEDIDOS
+
+Diante do exposto, requer a Vossa Excelência:
+
+a) A citação do(a) requerido(a) para, querendo, apresentar contestação no prazo legal, sob pena de revelia e confissão quanto à matéria de fato;
+
+b) A procedência total dos pedidos, condenando-se o(a) requerido(a) a {{pedido_principal}};
+
+c) A condenação do(a) requerido(a) ao pagamento das custas processuais e honorários advocatícios sucumbenciais, na forma do art. 85, §2º, do CPC;
+
+d) A produção de todas as provas em direito admitidas, especialmente documental, testemunhal e pericial;
+
+e) Os benefícios da gratuidade de justiça, nos termos do art. 98 do CPC, conforme declaração de hipossuficiência anexa.
+
+Dá-se à causa o valor de {{valor_causa}}.
+
+Termos em que,
+Pede deferimento.
+
+{{cidade_data}}.
+
+
+_______________________________________
+{{advogado_nome}}
+OAB/{{advogado_oab_uf}} nº {{advogado_oab}}`,
+  },
 ];
