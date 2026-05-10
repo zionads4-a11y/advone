@@ -208,29 +208,19 @@ async function handler(req: Request): Promise<Response> {
       console.error("AI gateway error:", aiResp.status, t);
       return jsonResponse(req, { error: "Erro no gateway de IA" }, 500);
     }
+    // Tee o stream para repassar ao cliente E coletar texto para salvar
+    const [browserStream, captureStream] = aiResp.body!.tee();
 
-    const aiData = await aiResp.json();
-    const assistantText = aiData.choices?.[0]?.message?.content || "";
+    // Processa em background para salvar a mensagem completa
+    captureAndSave(captureStream, admin, convId!, documentType ?? null);
 
-    if (assistantText.trim().length > 0) {
-      const isDoc =
-        documentType !== null ||
-        assistantText.length > 1500 ||
-        /^(EXCELENTÍSSIMO|EXCELENTISSIMO|CONTRATO|MANDADO|PROCURAÇÃO|PROCURACAO)/i.test(assistantText.trim());
-        
-      await admin.from("legal_ai_messages").insert({
-        conversation_id: convId,
-        role: "assistant",
-        content: assistantText,
-        document_type: documentType,
-        is_document: isDoc,
-      });
-    }
-
-    return jsonResponse(req, { 
-      content: assistantText,
-      conversationId: convId 
-    }, 200);
+    // Devolve com cabeçalhos x- para o cliente saber o conversationId
+    const headers = new Headers({
+      ...getCorsHeaders(req),
+      "Content-Type": "text/event-stream",
+      "X-Conversation-Id": convId!,
+    });
+    return new Response(browserStream, { headers });
   } catch (e) {
     console.error("legal-ai-chat error:", e);
     return jsonResponse(req, { error: getErrorMessage(e, "Erro inesperado") }, 500);
