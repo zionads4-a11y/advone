@@ -42,7 +42,7 @@ export function FloatingWhatsAppButton({
 
   return (
     <a
-      href={href}
+      href={finalHref}
       target="_blank"
       rel="noopener noreferrer"
       onClick={handleClick}
