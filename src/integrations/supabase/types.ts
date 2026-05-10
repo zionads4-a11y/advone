@@ -3632,7 +3632,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "member" | "client" | "gerente" | "operador"
-      billing_model: "exito" | "ia_only" | "crm_full"
+      billing_model: "exito" | "ia_only" | "crm_full" | "plan_free"
       bot_agent_type:
         | "document_collector"
         | "viability_analyzer"
@@ -3779,7 +3779,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "member", "client", "gerente", "operador"],
-      billing_model: ["exito", "ia_only", "crm_full"],
+      billing_model: ["exito", "ia_only", "crm_full", "plan_free"],
       bot_agent_type: [
         "document_collector",
         "viability_analyzer",
