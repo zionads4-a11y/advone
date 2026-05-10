@@ -33,8 +33,10 @@ FORMATAÇÃO:
 Aja como uma colega experiente respondendo a um(a) advogado(a). Seja direta, técnica e profunda.`;
 
 async function handler(req: Request): Promise<Response> {
+  const corsHeaders = getCorsHeaders(req);
+  
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: getCorsHeaders(req) });
+    return new Response(null, { headers: corsHeaders });
   }
 
 
