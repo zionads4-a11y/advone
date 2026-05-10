@@ -104,6 +104,8 @@ export function CompanyEditDialog({
   const [officeLegalName, setOfficeLegalName] = useState("");
   const [officeCnpj, setOfficeCnpj] = useState("");
   const [officeAddress, setOfficeAddress] = useState("");
+  const [sharedWhats, setSharedWhats] = useState(false);
+  const [supportPhone, setSupportPhone] = useState("");
 
   useEffect(() => {
     if (company) {
