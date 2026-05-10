@@ -18,6 +18,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Reveal } from "@/components/landing/useScrollReveal";
 import { InteractiveChatDemo } from "@/components/landing/InteractiveChatDemo";
+import { FloatingWhatsAppButton } from "@/components/landing/FloatingWhatsAppButton";
 import logoAdvOne from "@/assets/logo-advone-light.png";
 import heroBg from "@/assets/hero-bg-lp.jpg";
 import {
@@ -956,6 +957,7 @@ export default function LandingIA() {
           </div>
         </div>
       </footer>
+      <FloatingWhatsAppButton />
     </div>
   );
 }
