@@ -104,7 +104,11 @@ serve(async (req) => {
     if (localReminders && localReminders.length > 0) {
       for (const reminder of localReminders) {
         try {
+          // Idempotência: ID determinístico derivado do UUID do reminder
+          // (Google aceita base32hex 0-9 a-v; UUID hex é subconjunto válido)
+          const deterministicId = String(reminder.id).replace(/-/g, "").toLowerCase();
           const googleEvent = {
+            id: deterministicId,
             summary: reminder.title,
             description: reminder.description,
             start: { dateTime: reminder.due_at },
@@ -113,7 +117,7 @@ serve(async (req) => {
                 new Date(new Date(reminder.due_at).getTime() + 60 * 60 * 1000).toISOString(),
             },
           };
-          const pushResponse = await fetch(
+          let pushResponse = await fetch(
             "https://www.googleapis.com/calendar/v3/calendars/primary/events",
             {
               method: "POST",
@@ -121,11 +125,30 @@ serve(async (req) => {
               body: JSON.stringify(googleEvent),
             },
           );
+
+          let pushedId: string | null = null;
           if (pushResponse.ok) {
             const pushed = await pushResponse.json();
+            pushedId = pushed.id;
+          } else if (pushResponse.status === 409) {
+            // Já existe no Google (push duplicado) — recupera o evento existente
+            const getResp = await fetch(
+              `https://www.googleapis.com/calendar/v3/calendars/primary/events/${deterministicId}`,
+              { headers: { Authorization: `Bearer ${accessToken}` } },
+            );
+            if (getResp.ok) {
+              const existing = await getResp.json();
+              pushedId = existing.id;
+            }
+          } else {
+            const errText = await pushResponse.text();
+            console.error(`Push failed for ${reminder.id}: ${pushResponse.status} ${errText}`);
+          }
+
+          if (pushedId) {
             await supabaseClient
               .from("lead_reminders")
-              .update({ google_event_id: pushed.id })
+              .update({ google_event_id: pushedId })
               .eq("id", reminder.id);
           }
         } catch (e) {

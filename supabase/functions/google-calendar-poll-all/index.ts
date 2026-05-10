@@ -36,7 +36,7 @@ serve(async (req) => {
             "Authorization": `Bearer ${SERVICE_ROLE_KEY}`,
             "apikey": SERVICE_ROLE_KEY,
           },
-          body: JSON.stringify({ userId: integ.user_id }),
+          body: JSON.stringify({ userId: integ.user_id, incremental: true }),
         });
         const text = await resp.text();
         let parsed: any = null;
