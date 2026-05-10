@@ -52,35 +52,25 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const authHeader = req.headers.get("Authorization");
 
-    if (authHeader) {
-      const token = authHeader.replace("Bearer ", "");
-      
-      // Tenta primeiro autenticar como usuário normal (cliente passando seu JWT)
+    // 1) Prioridade: body.userId (chamadas server-to-server via poll-all/cron)
+    if (body?.userId) {
+      const { data: userData, error: fetchUserError } = await supabaseClient.auth.admin.getUserById(body.userId);
+      if (!fetchUserError && userData?.user) {
+        user = userData.user;
+      }
+    }
+
+    // 2) Fallback: resolver via JWT do usuário logado (chamada direta do front)
+    if (!user && authHeader) {
       const userClient = createClient(
         Deno.env.get("SUPABASE_URL") ?? "",
         Deno.env.get("SUPABASE_ANON_KEY") ?? "",
         { global: { headers: { Authorization: authHeader } } }
       );
-      
       const { data: { user: authUser }, error: userError } = await userClient.auth.getUser();
-      
       if (!userError && authUser) {
         user = authUser;
-      } else {
-        // Se falhar (ex: JWT de service_role ou inválido para o cliente anon), 
-        // tenta validar com o admin client se for um UUID válido
-        const { data: userData, error: adminError } = await supabaseClient.auth.admin.getUserById(token).catch(() => ({ data: { user: null }, error: true }));
-        if (!adminError && userData?.user) {
-          user = userData.user;
-        } else if (body.userId) {
-          const { data: fallbackData } = await supabaseClient.auth.admin.getUserById(body.userId);
-          if (fallbackData?.user) user = fallbackData.user;
-        }
       }
-    } else if (body.userId) {
-      const { data: userData, error: fetchUserError } = await supabaseClient.auth.admin.getUserById(body.userId);
-      if (fetchUserError || !userData.user) throw new Error("User not found");
-      user = userData.user;
     }
 
     if (!user) {
