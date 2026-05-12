@@ -603,25 +603,6 @@ const sdrTools = [
       }
     }
   },
-  {
-    type: "function",
-    function: {
-      name: "lookup_existing_client",
-      description:
-        "Use APENAS quando o lead confirmou que JÁ É CLIENTE do escritório (atendimento compartilhado). Busca o processo do cliente pelo CPF no sistema E avisa o advogado responsável por WhatsApp. Retorna { found_in_system, processo_numero, last_summary, notified_lawyer }.",
-      parameters: {
-        type: "object",
-        properties: {
-          client_full_name: { type: "string", description: "Nome completo do cliente existente." },
-          cpf: { type: "string", description: "CPF do cliente (com ou sem máscara)." },
-          subject: { type: "string", enum: ["andamento_processo", "outro"], description: "Tipo do pedido do cliente." },
-          message_summary: { type: "string", description: "Resumo curto (máx 200 chars) do que o cliente quer." }
-        },
-        required: ["client_full_name", "cpf", "subject", "message_summary"],
-        additionalProperties: false
-      }
-    }
-  }
 ];
 
 // ====== DOCUMENT COLLECTOR TOOLS ======
