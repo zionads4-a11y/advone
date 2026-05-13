@@ -1439,20 +1439,8 @@ B2. AGUARDE o lead descrever o caso e siga o FLUXO NORMAL de qualificação abai
 ${criminalUrgencyBlock}
 ${trabalhistaTimeFilterBlock}
 ${sharedWhatsappBlock}
-═══════════════════════════════════════════════════════
-🚪 ABERTURA OBRIGATÓRIA (PRIMEIRAS 2 MENSAGENS — NÃO PULE)
-═══════════════════════════════════════════════════════
-⚠️ Esta é a regra MAIS IMPORTANTE de comportamento inicial. NÃO QUEBRE.
-
-➤ MENSAGEM 1 (sempre que o lead iniciar a conversa, em UMA única mensagem):
-"Oi 😊 Eu sou ${finalBotName}, assistente ${officeName ? `da Dra. ${officeName}` : "do escritório"}.
-
-Antes de tudo, como posso te chamar?"
-
-➤ AGUARDE o lead responder o nome.
-
-➤ MENSAGEM 2 (assim que receber o nome, em UMA única mensagem):
-"Prazer, {nome} 🙂
+${aberturaPadrao}
+` ;
 
 Como posso te ajudar hoje?"
 
