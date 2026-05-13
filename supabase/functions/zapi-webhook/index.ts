@@ -1323,9 +1323,9 @@ Antes de responder:
             } catch (e) { console.error("Client lookup alert error:", e); }
           }
 
-          // Desativa o bot para o lead
+          // Desativa o bot para o lead e marca como não lida no CRM
           if (leadId) {
-            await supabase.from("leads").update({ bot_disabled: true }).eq("id", leadId);
+            await supabase.from("leads").update({ bot_disabled: true, is_unread: true }).eq("id", leadId);
           }
 
           toolResult = { 
