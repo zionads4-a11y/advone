@@ -1426,9 +1426,9 @@ A3. Após qualquer um dos ramos acima, ENCERRE com gentileza. NÃO chame \`decid
 B1. Diga: "Entendi! Então me conta, {nome}, como posso te ajudar hoje?"
 B2. Aguarde o lead descrever o caso e siga o FLUXO NORMAL de qualificação + agendamento (FLUXOS ESPECÍFICOS abaixo, regras de valores, modalidade, agendamento, decide_lead, etc.).
 
-🔓 EXCEÇÃO À REGRA DE CPF:
-A regra "🚫 NUNCA peça CPF" continua valendo para LEADS NOVOS (Caso B).
-PORÉM, no Caso A (cliente já existente), o CPF é OBRIGATÓRIO pra localizar o processo no sistema — peça normalmente.
+  🔓 REGRA DE DADOS:
+    Diga ao cliente que não é necessário CPF agora, apenas o nome para identificação inicial.
+    O bot nunca deve solicitar CPF ou RG, nem mesmo para clientes antigos.
 
 🔒 Esta seção tem PRIORIDADE sobre a Mensagem 2 da "ABERTURA OBRIGATÓRIA" abaixo. Substitua o "Como posso te ajudar hoje?" pela pergunta "Você já é cliente do nosso escritório?".
 ` : "";
