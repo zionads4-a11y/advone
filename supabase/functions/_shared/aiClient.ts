@@ -1,19 +1,5 @@
 // Helper compartilhado para chamadas de IA.
-// Lê company_ai_config para decidir entre Lovable AI Gateway (Gemini, grátis)
-// e OpenAI direta (chave do dono da plataforma, paga, mais sofisticada).
-//
-// Uso típico dentro de uma edge function:
-//
-//   import { chatCompletion } from "../_shared/aiClient.ts";
-//
-//   const resp = await chatCompletion({
-//     companyId,
-//     messages: [{ role: "system", content: "..." }, { role: "user", content: "..." }],
-//     tools,                       // opcional
-//     tool_choice,                 // opcional
-//     fallbackModel: "google/gemini-2.5-flash",  // se a empresa não tiver config
-//   });
-//   const reply = resp.choices?.[0]?.message?.content;
+// Lê company_ai_config para decidir entre Lovable AI Gateway, OpenAI e Anthropic.
 
 const LOVABLE_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
@@ -31,33 +17,44 @@ export interface CompanyAIConfig {
 export interface ChatMessage {
   role: "system" | "user" | "assistant" | "tool";
   content: string | null;
-  // OpenAI / Gemini extras
   tool_calls?: any;
   tool_call_id?: string;
   name?: string;
 }
 
 export interface ChatCompletionParams {
-  /** Carrega a config da empresa em company_ai_config para decidir provider/modelo. */
   companyId?: string;
-  /** Força um provider específico (ignora company config). Útil em chamadas internas. */
   forceProvider?: AIProvider;
-  /** Força um modelo específico (ignora company config). */
   forceModel?: string;
   messages: ChatMessage[];
   tools?: any;
   tool_choice?: any;
-  /** Modelo usado se a empresa não tiver registro em company_ai_config. */
   fallbackModel?: string;
-  /** Forçar streaming (default: false). */
   stream?: boolean;
-  /** Para reasoning models (gpt-5/gpt-5-mini). */
   reasoning?: { effort: "minimal" | "low" | "medium" | "high" | "xhigh" | "none" };
+  allowOpenAIFallback?: boolean;
 }
 
-/**
- * Busca a config de IA da empresa. Se não existir, retorna padrão (lovable + gemini flash).
- */
+function normalizeModelForProvider(provider: AIProvider, model: string): string {
+  if ((provider === "openai" || provider === "anthropic") && model.includes("/")) {
+    return model.split("/").pop()!;
+  }
+  return model;
+}
+
+function chooseFallbackOpenAIModel(model: string): string {
+  if (model.includes("gpt-5")) return "gpt-5-mini";
+  return "gpt-4o-mini";
+}
+
+function withProviderMeta(data: any, provider: AIProvider, model: string) {
+  return {
+    ...data,
+    _provider: provider,
+    _model: model,
+  };
+}
+
 export async function getCompanyAIConfig(companyId: string): Promise<CompanyAIConfig> {
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -81,109 +78,81 @@ export async function getCompanyAIConfig(companyId: string): Promise<CompanyAICo
   return row as CompanyAIConfig;
 }
 
-/**
- * Faz uma chamada de chat completion respeitando a configuração da empresa.
- * Retorna o JSON cru da API (formato compatível OpenAI).
- */
-export async function chatCompletion(params: ChatCompletionParams): Promise<any> {
-  let provider: AIProvider = params.forceProvider ?? "lovable";
-  let model: string = params.forceModel ?? params.fallbackModel ?? "google/gemini-2.5-flash";
+async function executeAnthropicRequest(model: string, params: ChatCompletionParams): Promise<any> {
+  const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
+  if (!apiKey) throw new Error("ANTHROPIC_API_KEY não configurada");
 
-  if (params.companyId && !params.forceProvider) {
-    const cfg = await getCompanyAIConfig(params.companyId);
-    provider = cfg.use_openai_for_testing ? "anthropic" : cfg.provider;
-    model = params.forceModel ?? cfg.model;
+  const systemMsg = params.messages.find((m) => m.role === "system");
+  const otherMessages = params.messages.filter((m) => m.role !== "system");
+
+  const body: any = {
+    model,
+    max_tokens: 4096,
+    messages: otherMessages.map((m) => ({
+      role: m.role === "tool" ? "user" : m.role,
+      content: m.content ?? "",
+    })),
+  };
+
+  if (systemMsg?.content) body.system = systemMsg.content;
+
+  if (params.reasoning && (model.includes("claude-opus") || model.includes("claude-sonnet"))) {
+    body.thinking = {
+      type: "enabled",
+      budget_tokens:
+        params.reasoning.effort === "high"
+          ? 8000
+          : params.reasoning.effort === "medium"
+            ? 4000
+            : 2000,
+    };
+    body.max_tokens += body.thinking.budget_tokens;
   }
 
-  if (provider === "anthropic") {
-    const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
-    if (!apiKey) throw new Error("ANTHROPIC_API_KEY não configurada");
+  if (params.stream) body.stream = true;
 
-    // Limpar prefixo se houver (ex: "anthropic/claude-sonnet-4-6" -> "claude-sonnet-4-6")
-    if (model.includes("/")) {
-      model = model.split("/").pop()!;
-    }
+  const resp = await fetch(ANTHROPIC_URL, {
+    method: "POST",
+    headers: {
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
 
-    // Separar system message das demais
-    const systemMsg = params.messages.find(m => m.role === "system");
-    const otherMessages = params.messages.filter(m => m.role !== "system");
-
-    const anthropicBody: any = {
-      model,
-      max_tokens: 4096,
-      messages: otherMessages.map(m => ({
-        role: m.role === "tool" ? "user" : m.role,
-        content: m.content ?? "",
-      })),
-    };
-
-    if (systemMsg?.content) {
-      anthropicBody.system = systemMsg.content;
-    }
-
-    // Suporte a extended thinking para modelos que suportam
-    if (params.reasoning && (model.includes("claude-opus") || model.includes("claude-sonnet"))) {
-      anthropicBody.thinking = {
-        type: "enabled",
-        budget_tokens: params.reasoning.effort === "high" ? 8000 : params.reasoning.effort === "medium" ? 4000 : 2000,
-      };
-      anthropicBody.max_tokens = anthropicBody.max_tokens + anthropicBody.thinking.budget_tokens;
-    }
-
-    if (params.stream) {
-      anthropicBody.stream = true;
-    }
-
-    const resp = await fetch(ANTHROPIC_URL, {
-      method: "POST",
-      headers: {
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(anthropicBody),
-    });
-
-    if (!resp.ok) {
-      const errText = await resp.text();
-      throw new Error(`AI anthropic ${resp.status}: ${errText}`);
-    }
-
-    if (params.stream) return resp;
-
-    // Converter resposta Anthropic para formato OpenAI (compatibilidade)
-    const anthropicData = await resp.json();
-    const textBlock = anthropicData.content?.find((b: any) => b.type === "text");
-
-    return {
-      choices: [{
-        message: {
-          role: "assistant",
-          content: textBlock?.text ?? "",
-        },
-        finish_reason: anthropicData.stop_reason === "end_turn" ? "stop" : anthropicData.stop_reason,
-      }],
-      usage: {
-        prompt_tokens: anthropicData.usage?.input_tokens ?? 0,
-        completion_tokens: anthropicData.usage?.output_tokens ?? 0,
-        total_tokens: (anthropicData.usage?.input_tokens ?? 0) + (anthropicData.usage?.output_tokens ?? 0),
-      },
-    };
+  if (!resp.ok) {
+    const errText = await resp.text();
+    throw new Error(`AI anthropic ${resp.status}: ${errText}`);
   }
 
+  if (params.stream) return resp;
+
+  const anthropicData = await resp.json();
+  const textBlock = anthropicData.content?.find((b: any) => b.type === "text");
+
+  return withProviderMeta({
+    choices: [{
+      message: {
+        role: "assistant",
+        content: textBlock?.text ?? "",
+      },
+      finish_reason: anthropicData.stop_reason === "end_turn" ? "stop" : anthropicData.stop_reason,
+    }],
+    usage: {
+      prompt_tokens: anthropicData.usage?.input_tokens ?? 0,
+      completion_tokens: anthropicData.usage?.output_tokens ?? 0,
+      total_tokens: (anthropicData.usage?.input_tokens ?? 0) + (anthropicData.usage?.output_tokens ?? 0),
+    },
+  }, "anthropic", model);
+}
+
+async function executeOpenAICompatibleRequest(provider: "lovable" | "openai", model: string, params: ChatCompletionParams): Promise<any> {
   const url = provider === "openai" ? OPENAI_URL : LOVABLE_URL;
-  const apiKey = provider === "openai"
-    ? Deno.env.get("OPENAI_API_KEY")
-    : Deno.env.get("LOVABLE_API_KEY");
+  const apiKey = provider === "openai" ? Deno.env.get("OPENAI_API_KEY") : Deno.env.get("LOVABLE_API_KEY");
 
   if (!apiKey) {
     throw new Error(`${provider === "openai" ? "OPENAI_API_KEY" : "LOVABLE_API_KEY"} não configurada`);
-  }
-
-  // Se foi escolhido OpenAI mas o modelo veio com prefixo "google/" ou "openai/",
-  // limpa o prefixo (OpenAI não aceita prefixo).
-  if (provider === "openai" && model.includes("/")) {
-    model = model.split("/").pop()!;
   }
 
   const body: any = {
@@ -193,9 +162,9 @@ export async function chatCompletion(params: ChatCompletionParams): Promise<any>
   };
   if (params.tools) body.tools = params.tools;
   if (params.tool_choice) body.tool_choice = params.tool_choice;
-  const reasoningModels = ["o1", "o3", "o4"];
-  const isReasoningModel = reasoningModels.some(m => model.includes(m));
 
+  const reasoningModels = ["o1", "o3", "o4"];
+  const isReasoningModel = reasoningModels.some((m) => model.includes(m));
   if (params.reasoning && provider === "openai" && isReasoningModel) {
     body.reasoning = params.reasoning;
   }
@@ -214,15 +183,45 @@ export async function chatCompletion(params: ChatCompletionParams): Promise<any>
     throw new Error(`AI ${provider} ${resp.status}: ${errText}`);
   }
 
-  // Streaming: devolve a Response inteira pra quem chamou processar
   if (params.stream) return resp;
 
-  return await resp.json();
+  const data = await resp.json();
+  return withProviderMeta(data, provider, model);
 }
 
-/**
- * Helper simples: retorna apenas o texto da primeira resposta.
- */
+export async function chatCompletion(params: ChatCompletionParams): Promise<any> {
+  let provider: AIProvider = params.forceProvider ?? "lovable";
+  let model: string = params.forceModel ?? params.fallbackModel ?? "google/gemini-2.5-flash";
+
+  if (params.companyId && !params.forceProvider) {
+    const cfg = await getCompanyAIConfig(params.companyId);
+    provider = cfg.use_openai_for_testing ? "openai" : cfg.provider;
+    model = params.forceModel ?? cfg.model;
+  }
+
+  const normalizedModel = normalizeModelForProvider(provider, model);
+
+  try {
+    if (provider === "anthropic") {
+      return await executeAnthropicRequest(normalizedModel, params);
+    }
+
+    return await executeOpenAICompatibleRequest(provider, normalizedModel, params);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    const canFallback =
+      params.allowOpenAIFallback !== false &&
+      provider === "lovable" &&
+      /\b402\b/.test(message) &&
+      !!Deno.env.get("OPENAI_API_KEY");
+
+    if (!canFallback) throw error;
+
+    const fallbackModel = chooseFallbackOpenAIModel(model);
+    return await executeOpenAICompatibleRequest("openai", fallbackModel, params);
+  }
+}
+
 export async function chatText(params: ChatCompletionParams): Promise<string> {
   const data = await chatCompletion({ ...params, stream: false });
   return data.choices?.[0]?.message?.content ?? "";

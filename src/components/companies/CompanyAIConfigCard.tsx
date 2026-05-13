@@ -262,9 +262,9 @@ export function CompanyAIConfigCard({ companyId }: Props) {
             onCheckedChange={(v) => setConfig((c) => ({ ...c, use_openai_for_testing: v }))}
           />
           <div className="flex-1">
-            <Label className="text-sm cursor-pointer">Forçar Claude no ambiente de teste</Label>
+            <Label className="text-sm cursor-pointer">Forçar OpenAI no ambiente de teste</Label>
             <p className="text-[11px] text-muted-foreground mt-0.5">
-              Mesmo que o provider acima esteja em "AdvOne IA", o ambiente de teste usará Claude. Ideal para comparar respostas.
+              Mesmo que o provider acima esteja em "AdvOne IA", o ambiente de teste usará OpenAI para comparação e como contingência quando a IA padrão ficar sem créditos.
             </p>
           </div>
         </div>
