@@ -1245,6 +1245,9 @@ Antes de responder:
 
         if (fnName === "transfer_to_human") {
           replyText = args.message_to_lead || "Um especialista irá atendê-lo em breve!";
+          if (leadId) {
+            await supabase.from("leads").update({ bot_disabled: true, is_unread: true }).eq("id", leadId);
+          }
           toolResult = { success: true };
         }
 
@@ -1323,9 +1326,9 @@ Antes de responder:
             } catch (e) { console.error("Client lookup alert error:", e); }
           }
 
-          // Desativa o bot para o lead
+          // Desativa o bot para o lead e marca como não lida no CRM
           if (leadId) {
-            await supabase.from("leads").update({ bot_disabled: true }).eq("id", leadId);
+            await supabase.from("leads").update({ bot_disabled: true, is_unread: true }).eq("id", leadId);
           }
 
           toolResult = { 
@@ -1639,7 +1642,41 @@ serve(async (req) => {
     }
 
     const isUaZapiMessage = body.EventType === "messages" && body.message && !body.message.fromMe;
+    const isUaZapiSentMessage = body.EventType === "messages" && body.message && body.message.fromMe;
     const isLegacyMessage = body.type === "ReceivedCallback";
+
+    // Handle human intervention from phone (fromMe = true)
+    if (isUaZapiSentMessage) {
+      const sentPhone = (body.message.phone || body.phone || "").replace("@c.us", "").replace("@s.whatsapp.net", "");
+      if (sentPhone) {
+        const cleanSentPhone = sentPhone.replace(/\D/g, "");
+        const messageId = body.message.messageId || body.message.id;
+        
+        // 🛡️ Anti-race condition: check if we just sent an IA message to this phone in the last 10s
+        const tenSecondsAgo = new Date(Date.now() - 10000).toISOString();
+        const { data: recentBotMsg } = await supabase
+          .from("whatsapp_messages")
+          .select("id")
+          .eq("phone", cleanSentPhone)
+          .eq("direction", "outgoing")
+          .ilike("sender_name", "IA%")
+          .gt("created_at", tenSecondsAgo)
+          .limit(1)
+          .maybeSingle();
+
+        // If no recent bot message found, it's human intervention
+        if (!recentBotMsg) {
+          console.log(`[human-intervention] Detected manual message from phone for ${cleanSentPhone}, disabling bot.`);
+          await supabase.from("leads")
+            .update({ bot_disabled: true, is_unread: false })
+            .or(`phone.eq.${cleanSentPhone},whatsapp.eq.${cleanSentPhone}`);
+        }
+      }
+      
+      return new Response(JSON.stringify({ ok: true, type: "sent_message_handled" }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     if (!isUaZapiMessage && !isLegacyMessage) {
       if (body.type === "ReadReceipt" || body.type === "SentCallback" || body.type === "MessageStatusCallback" || body.EventType === "messages_update") {
@@ -1853,7 +1890,7 @@ serve(async (req) => {
       }
     }
 
-    // Store incoming message
+    // Store incoming message and mark as unread
     const incomingTimestamp = body.mompiont ? new Date(body.mompiont * 1000).toISOString() : new Date().toISOString();
     await supabase.from("whatsapp_messages").insert({
       company_id: companyId, lead_id: leadId || null, phone: cleanPhone,
@@ -1861,6 +1898,10 @@ serve(async (req) => {
       message_id_external: messageIdExternal,
       timestamp: incomingTimestamp,
     });
+
+    if (leadId) {
+      await supabase.from("leads").update({ is_unread: true }).eq("id", leadId);
+    }
 
     // AI Auto-Reply with multi-agent support
     const isPlanCompleto = config.companies?.billing_model === 'plan_completo' || config.companies?.billing_model === 'crm_full' || config.companies?.billing_model === 'ia_only' || config.companies?.billing_model === 'plan_free';

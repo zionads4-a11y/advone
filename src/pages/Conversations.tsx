@@ -34,6 +34,7 @@ interface Lead {
   name: string;
   phone: string | null;
   bot_disabled: boolean;
+  is_unread: boolean;
 }
 
 interface Company {
@@ -71,6 +72,27 @@ export default function Conversations() {
     if (selectedCompanyId) fetchMessages();
   }, [selectedCompanyId]);
 
+  // Mark conversation as read when selected
+  useEffect(() => {
+    if (selectedPhone && leads[selectedPhone]?.is_unread) {
+      const markAsRead = async () => {
+        const lead = leads[selectedPhone];
+        const { error } = await supabase
+          .from("leads")
+          .update({ is_unread: false })
+          .eq("id", lead.id);
+
+        if (!error) {
+          setLeads(prev => ({
+            ...prev,
+            [selectedPhone]: { ...prev[selectedPhone], is_unread: false }
+          }));
+        }
+      };
+      markAsRead();
+    }
+  }, [selectedPhone, leads]);
+
   // Realtime subscription
   useEffect(() => {
     if (!selectedCompanyId) return;
@@ -96,6 +118,24 @@ export default function Conversations() {
             }
             return updated;
           });
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "leads",
+          filter: `company_id=eq.${selectedCompanyId}`,
+        },
+        (payload) => {
+          const updatedLead = payload.new as Lead;
+          if (updatedLead.phone) {
+            setLeads(prev => ({
+              ...prev,
+              [updatedLead.phone!]: updatedLead
+            }));
+          }
         }
       )
       .subscribe();
@@ -131,7 +171,7 @@ export default function Conversations() {
         .order("timestamp", { ascending: true }),
       supabase
         .from("leads")
-        .select("id, name, phone, bot_disabled")
+        .select("id, name, phone, bot_disabled, is_unread")
         .eq("company_id", selectedCompanyId),
     ]);
 
@@ -426,10 +466,15 @@ export default function Conversations() {
                             <User className="h-4 w-4 text-primary" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-foreground truncate">
-                              {lead?.name || lastMsg?.sender_name || phone}
-                            </p>
-                            <p className="text-[10px] text-muted-foreground truncate">
+                            <div className="flex items-center gap-1.5">
+                              <p className={`text-sm truncate ${lead?.is_unread ? "font-bold text-foreground" : "font-medium text-foreground"}`}>
+                                {lead?.name || lastMsg?.sender_name || phone}
+                              </p>
+                              {lead?.is_unread && (
+                                <div className="h-2 w-2 rounded-full bg-blue-500 shrink-0" title="Não lida" />
+                              )}
+                            </div>
+                            <p className={`text-[10px] truncate ${lead?.is_unread ? "font-semibold text-foreground/90" : "text-muted-foreground"}`}>
                               {lastMsg?.message_text || "..."}
                             </p>
                           </div>

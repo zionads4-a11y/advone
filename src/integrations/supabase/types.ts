@@ -2304,6 +2304,7 @@ export type Database = {
           honorarios_estimados: number | null
           id: string
           is_client: boolean
+          is_unread: boolean | null
           kanban_column_id: string | null
           lead_score: string | null
           message_count: number | null
@@ -2368,6 +2369,7 @@ export type Database = {
           honorarios_estimados?: number | null
           id?: string
           is_client?: boolean
+          is_unread?: boolean | null
           kanban_column_id?: string | null
           lead_score?: string | null
           message_count?: number | null
@@ -2432,6 +2434,7 @@ export type Database = {
           honorarios_estimados?: number | null
           id?: string
           is_client?: boolean
+          is_unread?: boolean | null
           kanban_column_id?: string | null
           lead_score?: string | null
           message_count?: number | null
