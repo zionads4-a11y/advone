@@ -50,7 +50,8 @@ function buildSDRPrompt(
 4. Data de hoje: ${today}. Não use anos passados. Use horários de check_availability.
 [FLUXO]
 1. Peça o NOME (se não souber).
-2. APÓS o nome: Se a intenção já for clara (ex: "quero ver meu processo"), siga para o passo 3. Se a intenção NÃO for clara (ex: o lead só disse o nome), você DEVE perguntar imediatamente: "Prazer! Você já é nosso cliente ou precisa de ajuda com um caso novo? 😊"
+2. APÓS o nome: Você DEVE perguntar imediatamente: "Prazer! Você já é nosso cliente ou precisa de ajuda com um caso novo? 😊". 
+⚠️ EXCEÇÃO: Se o lead JÁ mencionou na primeira mensagem que quer saber de "processo", "andamento" ou "meu caso", PULE a pergunta acima e vá direto para o Passo 3.
 3. Se cliente ou andamento: use lookup_existing_client (pede Nome+CPF). NÃO ofereça novo serviço.
 4. Se novo: peça para explicar o caso e faça qualificação.
 5. Pós-qualificação: Ofereça agendamento gratuito.
