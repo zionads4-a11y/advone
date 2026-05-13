@@ -870,15 +870,54 @@ Antes de responder:
             );
             toolResult = await decRes.json();
             if (toolResult?.classification) {
+              const classification = toolResult.classification;
               qualificationResult = {
                 status:
-                  toolResult.classification === "quente" ? "qualified"
-                  : toolResult.classification === "frio" ? "not_qualified"
+                  classification === "quente" ? "qualified"
+                  : classification === "frio" ? "not_qualified"
                   : "needs_more_info",
                 reason: toolResult.reason || "",
-                summary: `Decision Engine: ${toolResult.classification} (score ${toolResult.score})`,
-                lead_score: toolResult.classification === "invalido" ? "frio" : toolResult.classification,
+                summary: `Decision Engine: ${classification} (score ${toolResult.score})`,
+                lead_score: classification === "invalido" ? "frio" : classification,
               };
+
+              // 🔔 Notificação por Área (Nicho)
+              // Se for lead quente ou morno, notifica o advogado responsável
+              if ((classification === "quente" || classification === "morno") && args.niche) {
+                try {
+                  const { data: nicheAlert } = await supabase
+                    .from("company_niche_alerts")
+                    .select("whatsapp, lawyer_name")
+                    .eq("company_id", companyId)
+                    .eq("niche", args.niche)
+                    .eq("is_active", true)
+                    .maybeSingle();
+
+                  if (nicheAlert?.whatsapp) {
+                    const { data: leadInfo } = await supabase.from("leads").select("name").eq("id", leadId).single();
+                    const leadNameDisplay = leadInfo?.name || "Lead Novo";
+                    
+                    const SERVER_URL = "https://ziondigital.uazapi.com";
+                    const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+                    const alertPhone = String(nicheAlert.whatsapp).replace(/\D/g, "");
+                    const instanceId = config.zapi_instance_id;
+                    const tokenParam = encodeURIComponent(config.zapi_token || instanceId || "");
+                    const instanceParam = encodeURIComponent(instanceId || "");
+                    
+                    const alertMessage = `🔥 *Novo Lead Qualificado (${args.niche})*\n\n👤 Cliente: ${leadNameDisplay}\n📈 Score: ${classification.toUpperCase()}\n⚖️ Área: ${args.niche}\n📝 Motivo: ${toolResult.reason || "N/A"}\n\n_O lead acaba de ser classificado como ${classification} pelo Decision Engine._`;
+
+                    const alertHeaders: Record<string, string> = { "Content-Type": "application/json" };
+                    if (ADMIN_TOKEN) alertHeaders["admintoken"] = ADMIN_TOKEN;
+
+                    await fetch(`${SERVER_URL}/send/text?instance=${instanceParam}&token=${tokenParam}`, {
+                      method: "POST", headers: alertHeaders,
+                      body: JSON.stringify({ number: alertPhone, text: alertMessage }),
+                    });
+                  }
+                } catch (e) {
+                  console.error("Niche alert notification error:", e);
+                }
+              }
             }
             } catch (e) {
               console.error("decide_lead error:", e);
