@@ -1889,7 +1889,13 @@ serve(async (req) => {
             }
           } else {
             console.error(`[${effectivePhase}] AI returned null for lead ${leadId}. Sending fallback.`);
-            const fallbackText = "Deixa eu olhar isso aqui com calma e já te respondo, tá bom? 🙏";
+            // 🤖 Fallback inteligente: se for a 1ª interação (sem msg nossa anterior), usa abertura padrão da Laura
+            // pra qualificar o lead em vez do texto genérico que mata a conversa.
+            const hasPreviousOutgoing = (recentMsgs || []).some((m: any) => m.direction === "outgoing");
+            const firstName = (currentLeadName || "").trim().split(/\s+/)[0] || "";
+            const fallbackText = hasPreviousOutgoing
+              ? "Deixa eu olhar isso aqui com calma e já te respondo, tá bom? 🙏"
+              : `Oi${firstName ? `, ${firstName}` : ""}! Tudo bem? 😊 Sou a Laura, aqui da equipe do escritório. Me conta rapidinho o que está acontecendo no seu caso pra eu já te ajudar da melhor forma 🙂`;
             try {
               const fbResp = await fetch(sendUrl, {
                 method: "POST", headers: sendHeaders,
