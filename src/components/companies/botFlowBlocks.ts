@@ -1440,11 +1440,6 @@ ${criminalUrgencyBlock}
 ${trabalhistaTimeFilterBlock}
 ${sharedWhatsappBlock}
 ${aberturaPadrao}
-` ;
-
-Como posso te ajudar hoje?"
-
-➤ AGUARDE o lead descrever o motivo do contato.
 
 🔒 BLOQUEIO DE QUALIFICAÇÃO ANTES DA HORA:
 - Você está PROIBIDA de iniciar QUALQUER pergunta de qualificação (P1, P2, P3...) enquanto o lead ainda não tiver respondido "como posso te ajudar".
