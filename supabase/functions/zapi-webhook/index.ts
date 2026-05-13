@@ -1268,12 +1268,12 @@ Antes de responder:
 
 
         if (fnName === "lookup_existing_client") {
-          const { client_full_name, cpf, subject, message_summary } = args;
+          const { client_full_name, subject, message_summary } = args;
           const { data: leadClient } = await supabase
             .from("leads")
             .select("id, name")
             .eq("company_id", companyId)
-            .eq("cpf_cliente_final", cpf)
+            .ilike("name", `%${String(client_full_name).trim()}%`)
             .eq("is_client", true)
             .order("created_at", { ascending: false })
             .limit(1)
