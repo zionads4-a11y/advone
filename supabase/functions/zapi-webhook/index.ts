@@ -1245,6 +1245,9 @@ Antes de responder:
 
         if (fnName === "transfer_to_human") {
           replyText = args.message_to_lead || "Um especialista irá atendê-lo em breve!";
+          if (leadId) {
+            await supabase.from("leads").update({ bot_disabled: true, is_unread: true }).eq("id", leadId);
+          }
           toolResult = { success: true };
         }
 
