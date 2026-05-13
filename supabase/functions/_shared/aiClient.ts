@@ -53,7 +53,23 @@ export interface ChatCompletionParams {
   stream?: boolean;
   /** Para reasoning models (gpt-5/gpt-5-mini). */
   reasoning?: { effort: "minimal" | "low" | "medium" | "high" | "xhigh" | "none" };
+  /** Em caso de 402 no provider padrão, tenta OpenAI automaticamente se a chave existir. */
+  allowOpenAIFallback?: boolean;
 }
+
+function normalizeModelForProvider(provider: AIProvider, model: string): string {
+  if ((provider === "openai" || provider === "anthropic") && model.includes("/")) {
+    return model.split("/").pop()!;
+  }
+  return model;
+}
+
+async function executeProviderRequest(
+  provider: AIProvider,
+  model: string,
+  params: ChatCompletionParams,
+): Promise<any> {
+  model = normalizeModelForProvider(provider, model);
 
 /**
  * Busca a config de IA da empresa. Se não existir, retorna padrão (lovable + gemini flash).
@@ -180,12 +196,6 @@ export async function chatCompletion(params: ChatCompletionParams): Promise<any>
     throw new Error(`${provider === "openai" ? "OPENAI_API_KEY" : "LOVABLE_API_KEY"} não configurada`);
   }
 
-  // Se foi escolhido OpenAI mas o modelo veio com prefixo "google/" ou "openai/",
-  // limpa o prefixo (OpenAI não aceita prefixo).
-  if (provider === "openai" && model.includes("/")) {
-    model = model.split("/").pop()!;
-  }
-
   const body: any = {
     model,
     messages: params.messages,
@@ -218,6 +228,11 @@ export async function chatCompletion(params: ChatCompletionParams): Promise<any>
   if (params.stream) return resp;
 
   return await resp.json();
+}
+
+function chooseFallbackOpenAIModel(model: string): string {
+  if (model.includes("gpt-5")) return "gpt-5-mini";
+  return "gpt-4o-mini";
 }
 
 /**
