@@ -846,26 +846,43 @@ Antes de responder:
     while (maxIterations > 0) {
       maxIterations--;
 
-      const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
-          messages: aiMessages,
-          tools,
-        }),
-      });
+      // 🔁 Retry: 1 tentativa extra em caso de 429/5xx ou resposta vazia
+      let aiResponse: Response | null = null;
+      let aiData: any = null;
+      let message: any = null;
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash",
+            messages: aiMessages,
+            tools,
+          }),
+        });
 
-      if (!aiResponse.ok) {
-        console.error("AI error:", aiResponse.status, await aiResponse.text());
-        return null;
+        if (!aiResponse.ok) {
+          const errBody = await aiResponse.text();
+          console.error(`[handleAgentPhase] AI gateway error (attempt ${attempt}/2) phase=${phase} lead=${leadId} status=${aiResponse.status}: ${errBody.slice(0, 500)}`);
+          if (attempt < 2 && (aiResponse.status === 429 || aiResponse.status >= 500)) {
+            await new Promise((r) => setTimeout(r, 1500));
+            continue;
+          }
+          return null;
+        }
+
+        aiData = await aiResponse.json();
+        message = aiData.choices?.[0]?.message;
+        if (message) break;
+
+        console.error(`[handleAgentPhase] AI returned empty message (attempt ${attempt}/2) phase=${phase} lead=${leadId}: ${JSON.stringify(aiData).slice(0, 500)}`);
+        if (attempt < 2) {
+          await new Promise((r) => setTimeout(r, 1500));
+        }
       }
-
-      const aiData = await aiResponse.json();
-      const message = aiData.choices?.[0]?.message;
       if (!message) return null;
 
       if (!message.tool_calls || message.tool_calls.length === 0) {
