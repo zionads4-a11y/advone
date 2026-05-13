@@ -603,6 +603,24 @@ const sdrTools = [
       }
     }
   },
+  {
+    type: "function",
+    function: {
+      name: "lookup_existing_client",
+      description: "Verifica se o cliente já existe no sistema CRM ou se possui processos sendo monitorados pelo escritório. Peça o NOME COMPLETO e o CPF do cliente antes de chamar. Esta tool notifica o advogado responsável e desativa o bot para o contato.",
+      parameters: {
+        type: "object",
+        properties: {
+          client_full_name: { type: "string", description: "Nome completo do cliente" },
+          client_cpf: { type: "string", description: "CPF do cliente (opcional, mas recomendado)" },
+          subject: { type: "string", enum: ["andamento_processo", "outro"], description: "Assunto do contato" },
+          message_summary: { type: "string", description: "Breve resumo do que o cliente deseja" }
+        },
+        required: ["client_full_name", "subject"],
+        additionalProperties: false
+      }
+    }
+  }
 ];
 
 // ====== DOCUMENT COLLECTOR TOOLS ======
@@ -1271,13 +1289,28 @@ Antes de responder:
 
 
         if (fnName === "lookup_existing_client") {
-          const { client_full_name, subject, message_summary } = args;
+          const { client_full_name, client_cpf, subject, message_summary } = args;
+          
+          // 1. Tentar localizar o lead/cliente no CRM
           const { data: leadClient } = await supabase
             .rpc("find_client_by_name", { 
               _company_id: companyId, 
               _search_name: String(client_full_name).trim() 
             })
             .maybeSingle();
+
+          // 2. Tentar localizar processos monitorados
+          let monitoredProcesses: any[] = [];
+          if (client_cpf) {
+            const cleanCpf = client_cpf.replace(/\D/g, "");
+            const { data: procs } = await supabase
+              .from("monitored_processes")
+              .select("numero_cnj, tribunal_sigla, data_ultima_movimentacao, polo_ativo, polo_passivo")
+              .eq("company_id", companyId)
+              .eq("client_cpf", cleanCpf)
+              .eq("is_active", true);
+            monitoredProcesses = procs || [];
+          }
 
           let lastSummary = "";
           if (leadClient) {
@@ -1300,15 +1333,17 @@ Antes de responder:
               const instanceId = config.zapi_instance_id;
               const companyWhatsapp = String(config.whatsapp || "").replace(/\D/g, "");
               
-              const alertMessage = `👥 *Atendimento a Cliente Existente*\n\n👤 Cliente: ${client_full_name || leadClient?.name || "N/A"}\n📝 Assunto: ${subject === "andamento_processo" ? "Andamento de Processo" : "Outro Assunto"}\n💬 Resumo: ${message_summary || "(sem resumo)"}\n\n${leadClient ? "✅ Localizado no CRM" : "⚠️ Não localizado no CRM"}\n_O bot foi desativado para este contato._`;
+              const processesText = monitoredProcesses.length > 0 
+                ? `\n⚖️ *Processos Monitorados (${monitoredProcesses.length}):*\n` + monitoredProcesses.map(p => `- ${p.numero_cnj} (${p.tribunal_sigla})`).join("\n")
+                : "\n⚠️ Nenhum processo monitorado por CPF encontrado.";
+
+              const alertMessage = `👥 *Atendimento a Cliente Existente*\n\n👤 Cliente: ${client_full_name || leadClient?.name || "N/A"}\n📝 Assunto: ${subject === "andamento_processo" ? "Andamento de Processo" : "Outro Assunto"}\n💬 Resumo: ${message_summary || "(sem resumo)"}\n\n${leadClient ? "✅ Localizado no CRM" : "⚠️ Não localizado no CRM"}${processesText}\n\n_O bot foi desativado para este contato._`;
               
               const alertHeaders: Record<string, string> = { "Content-Type": "application/json" };
               if (ADMIN_TOKEN) alertHeaders["admintoken"] = ADMIN_TOKEN;
               const instanceParam = encodeURIComponent(instanceId || "");
               const tokenParam = encodeURIComponent(config.zapi_token || instanceId || "");
               
-              // ⚠️ Se o número de alerta for o MESMO da instância, o UaZapi não envia mensagem para si mesmo.
-              // Nesses casos, enviamos para o número "Mensagem para você mesmo" do WhatsApp (que aparece na lista de chats).
               const finalRecipient = alertPhone === companyWhatsapp ? "me" : alertPhone;
 
               await fetch(`${SERVER_URL}/send/text?instance=${instanceParam}&token=${tokenParam}`, {
@@ -1316,7 +1351,6 @@ Antes de responder:
                 body: JSON.stringify({ number: finalRecipient, text: alertMessage }),
               });
 
-              // 🔔 Tenta marcar como não lida no WhatsApp do advogado (se for o mesmo número da empresa)
               if (alertPhone === String(config.whatsapp || "").replace(/\D/g, "")) {
                 await fetch(`${SERVER_URL}/chat/unread?instance=${instanceParam}&token=${tokenParam}`, {
                   method: "POST", headers: alertHeaders,
@@ -1333,7 +1367,9 @@ Antes de responder:
 
           toolResult = { 
             success: true, 
-            found_in_system: !!leadClient,
+            found_in_crm: !!leadClient,
+            monitored_processes_found: monitoredProcesses.length,
+            processes: monitoredProcesses,
             last_summary: lastSummary,
             notified_lawyer: true
           };
