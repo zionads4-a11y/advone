@@ -72,6 +72,27 @@ export default function Conversations() {
     if (selectedCompanyId) fetchMessages();
   }, [selectedCompanyId]);
 
+  // Mark conversation as read when selected
+  useEffect(() => {
+    if (selectedPhone && leads[selectedPhone]?.is_unread) {
+      const markAsRead = async () => {
+        const lead = leads[selectedPhone];
+        const { error } = await supabase
+          .from("leads")
+          .update({ is_unread: false })
+          .eq("id", lead.id);
+
+        if (!error) {
+          setLeads(prev => ({
+            ...prev,
+            [selectedPhone]: { ...prev[selectedPhone], is_unread: false }
+          }));
+        }
+      };
+      markAsRead();
+    }
+  }, [selectedPhone, leads]);
+
   // Realtime subscription
   useEffect(() => {
     if (!selectedCompanyId) return;
@@ -97,6 +118,24 @@ export default function Conversations() {
             }
             return updated;
           });
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "leads",
+          filter: `company_id=eq.${selectedCompanyId}`,
+        },
+        (payload) => {
+          const updatedLead = payload.new as Lead;
+          if (updatedLead.phone) {
+            setLeads(prev => ({
+              ...prev,
+              [updatedLead.phone!]: updatedLead
+            }));
+          }
         }
       )
       .subscribe();
