@@ -1268,12 +1268,12 @@ Antes de responder:
 
 
         if (fnName === "lookup_existing_client") {
-          const { client_full_name, cpf, subject, message_summary } = args;
+          const { client_full_name, subject, message_summary } = args;
           const { data: leadClient } = await supabase
             .from("leads")
             .select("id, name")
             .eq("company_id", companyId)
-            .eq("cpf_cliente_final", cpf)
+            .ilike("name", `%${String(client_full_name).trim()}%`)
             .eq("is_client", true)
             .order("created_at", { ascending: false })
             .limit(1)
@@ -1300,7 +1300,7 @@ Antes de responder:
               const instanceId = config.zapi_instance_id;
               const companyWhatsapp = String(config.whatsapp || "").replace(/\D/g, "");
               
-              const alertMessage = `👥 *Atendimento a Cliente Existente*\n\n👤 Cliente: ${client_full_name || leadClient?.name || "N/A"}\n🆔 CPF: ${cpf || "N/A"}\n📝 Assunto: ${subject === "andamento_processo" ? "Andamento de Processo" : "Outro Assunto"}\n💬 Resumo: ${message_summary || "(sem resumo)"}\n\n${leadClient ? "✅ Localizado no CRM" : "⚠️ Não localizado no CRM"}\n_O bot foi desativado para este contato._`;
+              const alertMessage = `👥 *Atendimento a Cliente Existente*\n\n👤 Cliente: ${client_full_name || leadClient?.name || "N/A"}\n📝 Assunto: ${subject === "andamento_processo" ? "Andamento de Processo" : "Outro Assunto"}\n💬 Resumo: ${message_summary || "(sem resumo)"}\n\n${leadClient ? "✅ Localizado no CRM" : "⚠️ Não localizado no CRM"}\n_O bot foi desativado para este contato._`;
               
               const alertHeaders: Record<string, string> = { "Content-Type": "application/json" };
               if (ADMIN_TOKEN) alertHeaders["admintoken"] = ADMIN_TOKEN;
