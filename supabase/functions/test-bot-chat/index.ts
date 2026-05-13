@@ -437,8 +437,10 @@ serve(async (req) => {
     }
 
     const aiConfig = await getCompanyAIConfig(company_id);
-    const forceProvider = aiConfig.use_openai_for_testing ? "openai" as const : undefined;
-    const forceModel = aiConfig.use_openai_for_testing ? "gpt-4o-mini" : undefined;
+    // 🛡️ Ambiente de teste: SEMPRE força modelo leve para evitar estouro de TPM (rate limit).
+    // Gemini Flash Lite tem limites altíssimos e é praticamente gratuito.
+    const forceProvider = aiConfig.use_openai_for_testing ? "openai" as const : "lovable" as const;
+    const forceModel = aiConfig.use_openai_for_testing ? "gpt-4o-mini" : "google/gemini-2.5-flash-lite";
 
     let systemPrompt = buildSDRPrompt(config);
     if (aiConfig.custom_system_prompt) {
