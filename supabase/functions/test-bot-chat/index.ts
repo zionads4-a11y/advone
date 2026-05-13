@@ -427,6 +427,7 @@ serve(async (req) => {
 
     const aiConfig = await getCompanyAIConfig(company_id);
     const forceProvider = aiConfig.use_openai_for_testing ? "openai" as const : undefined;
+    const forceModel = aiConfig.use_openai_for_testing ? "gpt-4o-mini" : undefined;
 
     let systemPrompt = buildSDRPrompt(config);
     if (aiConfig.custom_system_prompt) {
@@ -504,9 +505,11 @@ serve(async (req) => {
         aiData = await chatCompletion({
           companyId: company_id,
           forceProvider,
+          forceModel,
           messages: aiMessages,
           tools,
           fallbackModel: "google/gemini-2.5-flash-lite",
+          allowOpenAIFallback: true,
         });
       } catch (e) {
         const msg = getErrorMessage(e);
@@ -588,8 +591,8 @@ serve(async (req) => {
       reply,
       parts,
       tool_actions: toolActions,
-      ai_provider: forceProvider ?? aiConfig.provider,
-      ai_model: aiConfig.model,
+      ai_provider: aiData?._provider ?? forceProvider ?? aiConfig.provider,
+      ai_model: aiData?._model ?? forceModel ?? aiConfig.model,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
