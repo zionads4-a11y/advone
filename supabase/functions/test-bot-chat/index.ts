@@ -52,10 +52,10 @@ NUNCA, JAMAIS, peça o CPF do cliente. Nem o RG. Peça apenas o NOME COMPLETO no
     }).join("\n\n");
 
     triagemBlock = `
-TRIAGEM INICIAL (na primeira mensagem do lead):
-Após cumprimentar, envie o menu assim — em mensagens SEPARADAS:
+TRIAGEM INICIAL (Somente para clientes NOVOS):
+Após o lead confirmar que é um CASO NOVO, envie o menu assim:
 
-Primeira mensagem: cumprimento + "Me conta, como posso te ajudar? 😊"
+Primeira mensagem: "Perfeito! Me conta, como posso te ajudar? 😊"
 
 Segunda mensagem (separada): 
 "Pra facilitar, me diz qual desses assuntos tem mais a ver com o seu caso:"
