@@ -1299,17 +1299,35 @@ Antes de responder:
             })
             .maybeSingle();
 
-          // 2. Tentar localizar processos monitorados
+          // 2. Tentar localizar processos monitorados e pegar movimentações recentes
           let monitoredProcesses: any[] = [];
           if (client_cpf) {
             const cleanCpf = client_cpf.replace(/\D/g, "");
             const { data: procs } = await supabase
               .from("monitored_processes")
-              .select("numero_cnj, tribunal_sigla, data_ultima_movimentacao, polo_ativo, polo_passivo")
+              .select(`
+                numero_cnj, 
+                tribunal_sigla, 
+                data_ultima_movimentacao, 
+                polo_ativo, 
+                polo_passivo,
+                status_predito,
+                case_movements (
+                  descricao,
+                  data_movimentacao
+                )
+              `)
               .eq("company_id", companyId)
               .eq("client_cpf", cleanCpf)
               .eq("is_active", true);
-            monitoredProcesses = procs || [];
+            
+            // Pega apenas os 2 processos mais relevantes/recentes para não estourar o contexto
+            monitoredProcesses = (procs || []).map(p => ({
+              ...p,
+              recent_movements: (p.case_movements || [])
+                .sort((a: any, b: any) => new Date(b.data_movimentacao).getTime() - new Date(a.data_movimentacao).getTime())
+                .slice(0, 2)
+            }));
           }
 
           let lastSummary = "";
@@ -1369,9 +1387,13 @@ Antes de responder:
             success: true, 
             found_in_crm: !!leadClient,
             monitored_processes_found: monitoredProcesses.length,
-            processes: monitoredProcesses,
-            last_summary: lastSummary,
-            notified_lawyer: true
+            processes_info: monitoredProcesses.map(p => ({
+              numero: p.numero_cnj,
+              tribunal: p.tribunal_sigla,
+              ultima_movimentacao: p.data_ultima_movimentacao,
+              resumo_movimentacoes: p.recent_movements.map((m: any) => m.descricao).join(" | ")
+            })),
+            instruction: "Se encontrou processos, faça um resumo MUITO SIMPLES e amigável da última movimentação encontrada para o cliente. Diga que o Dr. Daniel e a equipe estão acompanhando tudo de perto e que o advogado responsável já foi avisado para dar um retorno detalhado em breve. Seja acolhedor e passe segurança."
           };
         }
 
