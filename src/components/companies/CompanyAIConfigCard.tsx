@@ -62,7 +62,14 @@ export function CompanyAIConfigCard({ companyId }: Props) {
   const { userRole } = useAuth();
   
   const isAgencyStaff = userRole === "admin" || userRole === "member";
-  const isPlanCompleto = isAgencyStaff || billingModel === "plan_completo" || billingModel === "plan_zionads";
+  const isPlanCompleto =
+    isAgencyStaff ||
+    billingModel === "plan_completo" ||
+    billingModel === "plan_zionads" ||
+    billingModel === "plan_ia_monthly" ||
+    billingModel === "plan_ia_6m" ||
+    billingModel === "plan_ia_12m" ||
+    billingModel === "plan_free";
 
   useEffect(() => {
     void load();
