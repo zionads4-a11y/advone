@@ -1853,7 +1853,7 @@ serve(async (req) => {
       }
     }
 
-    // Store incoming message
+    // Store incoming message and mark as unread
     const incomingTimestamp = body.mompiont ? new Date(body.mompiont * 1000).toISOString() : new Date().toISOString();
     await supabase.from("whatsapp_messages").insert({
       company_id: companyId, lead_id: leadId || null, phone: cleanPhone,
@@ -1861,6 +1861,10 @@ serve(async (req) => {
       message_id_external: messageIdExternal,
       timestamp: incomingTimestamp,
     });
+
+    if (leadId) {
+      await supabase.from("leads").update({ is_unread: true }).eq("id", leadId);
+    }
 
     // AI Auto-Reply with multi-agent support
     const isPlanCompleto = config.companies?.billing_model === 'plan_completo' || config.companies?.billing_model === 'crm_full' || config.companies?.billing_model === 'ia_only' || config.companies?.billing_model === 'plan_free';
