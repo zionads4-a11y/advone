@@ -3705,6 +3705,13 @@ export type Database = {
         Args: { _company_id: string }
         Returns: boolean
       }
+      find_client_by_name: {
+        Args: { _company_id: string; _search_name: string }
+        Returns: {
+          id: string
+          name: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -3724,6 +3731,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      unaccent: { Args: { "": string }; Returns: string }
       user_belongs_to_company: {
         Args: { _company_id: string; _user_id: string }
         Returns: boolean
