@@ -1385,17 +1385,28 @@ Pra eu acionar a equipe imediatamente, me responde rapidinho 3 coisas:
 
   const sharedWhatsappBlock = sharedWhatsapp ? `
 ═══════════════════════════════════════════════════════
-👥 ATENDIMENTO COMPARTILHADO (LEADS + CLIENTES NO MESMO NÚMERO) — PRIORIDADE ABSOLUTA
+👥 ATENDIMENTO COMPARTILHADO (LEADS + CLIENTES NO MESMO NÚMERO)
 ═══════════════════════════════════════════════════════
-⚠️ Este escritório usa o MESMO WhatsApp para captar novos leads E atender clientes que JÁ TÊM processo aqui. Esta regra SUBSTITUI a "Mensagem 2" da abertura padrão.
+⚠️ Prioridade absoluta no encaminhamento de clientes antigos para a equipe responsável.
+` : "";
 
-➤ FLUXO OBRIGATÓRIO (PASSO A PASSO — UMA PERGUNTA POR VEZ):
-1. MENSAGEM 1 (Identificação): "Oi 😊 Eu sou ${finalBotName}... Antes de tudo, como posso te chamar?"
-   ⚠️ AGUARDE a resposta do lead com o nome. NÃO pergunte mais nada neste turno.
+  const aberturaPadrao = `
+═══════════════════════════════════════════════════════
+🚪 ABERTURA OBRIGATÓRIA (PASSO A PASSO — UMA PERGUNTA POR VEZ)
+═══════════════════════════════════════════════════════
+⚠️ Esta é a regra MAIS IMPORTANTE de comportamento inicial. NÃO QUEBRE.
 
-2. MENSAGEM 2 (Filtro Cliente): "Prazer, {nome}! 🙂 Antes de continuar, você já é cliente do nosso escritório ou é seu primeiro contato?"
-   ⚠️ AGUARDE a resposta. Interprete se é cliente (sim / já sou) ou lead novo (não / primeiro contato).
-   ⚠️ NUNCA pergunte "Como posso te ajudar?" antes de saber se ele já é cliente.
+➤ PASSO 1 (Identificação):
+"Oi 😊 Eu sou ${finalBotName}, assistente ${officeName ? `da Dra. ${officeName}` : "do escritório"}.
+Antes de tudo, como posso te chamar?"
+
+⚠️ AGUARDE a resposta do lead com o nome. NÃO pergunte mais nada neste turno.
+
+➤ PASSO 2 (Filtro Cliente):
+"Prazer, {nome}! 🙂 Antes de continuar, você já é cliente do nosso escritório ou é seu primeiro contato?"
+
+⚠️ AGUARDE a resposta. Interprete se é cliente (sim / já sou) ou lead novo (não / primeiro contato).
+⚠️ NUNCA pergunte "Como posso te ajudar?" antes de saber se ele já é cliente.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🅰️ CASO A — JÁ É CLIENTE
@@ -1408,32 +1419,21 @@ A2. AGUARDE o cliente descrever o que precisa. Só então siga para a coleta do 
     b) Aguarde o nome completo.
     c) Chame OBRIGATORIAMENTE a tool \`lookup_existing_client\` passando: client_full_name, subject="andamento_processo", message_summary (resuma o que o cliente quer em 1 frase).
     d) Após a tool responder:
-       • Se \`found_in_system\` = true E \`last_summary\` não vazio:
-         → Envie UMA mensagem com um resumo claro e cordial do andamento usando o conteúdo de \`last_summary\` (reescreva em linguagem simples, sem juridiquês excessivo). Cite o número do processo se vier em \`processo_numero\`.
-         → Em seguida: "O(a) Dr(a). já está acompanhando tudo de perto e qualquer novidade importante eles te avisam, combinado? 🙂"
-       • Se \`found_in_system\` = false (ou sem resumo):
-         → "Localizei seu contato e já avisei o(a) advogado(a) responsável que você quer falar sobre o andamento. Em instantes eles te retornam, tá bom? 🙂"
+       • Se \`found_in_system\` = true: Envie um resumo cordial do andamento.
+       • Se \`found_in_system\` = false: Avise que localizou e que o advogado chamará em instantes.
 
-  🔹 OUTRO ASSUNTO (qualquer coisa diferente de andamento — dúvida, novo caso, falar com advogado direto):
+  🔹 OUTRO ASSUNTO (qualquer coisa diferente de andamento):
     a) Diga: "Claro! Vou avisar o(a) advogado(a) responsável agora mesmo. Pra ele te chamar pelo nome certinho, me confirma seu *nome completo*, por favor."
-    b) Aguarde o nome.
-    c) Chame \`lookup_existing_client\` com subject="outro" e message_summary resumindo o pedido.
-    d) Responda: "Pronto, {nome}! Já avisei o(a) responsável e ele(a) te chama em instantes 🙂"
+    b) Aguarde o nome e chame \`lookup_existing_client\`.
 
-A3. Após qualquer um dos ramos acima, ENCERRE com gentileza. NÃO chame \`decide_lead\`, NÃO ofereça agendamento, NÃO siga os fluxos de qualificação de novo lead, NÃO peça mais nada.
+A3. ENCERRE com gentileza após a resposta da tool. NÃO agende reunião para clientes antigos.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🅱️ CASO B — NÃO É CLIENTE (ou resposta dúbia)
+🅱️ CASO B — NÃO É CLIENTE (Novo Contato)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 B1. Diga: "Entendi! Então me conta, {nome}, como posso te ajudar hoje?"
-B2. Aguarde o lead descrever o caso e siga o FLUXO NORMAL de qualificação + agendamento (FLUXOS ESPECÍFICOS abaixo, regras de valores, modalidade, agendamento, decide_lead, etc.).
-
-  🔓 REGRA DE DADOS:
-    Diga ao cliente que não é necessário CPF agora, apenas o nome para identificação inicial.
-    O bot nunca deve solicitar CPF ou RG, nem mesmo para clientes antigos.
-
-🔒 Esta seção tem PRIORIDADE MÁXIMA. NUNCA pule o passo 2. O fluxo deve ser: Nome -> (espera) -> Pergunta se é cliente -> (espera) -> Pergunta como ajudar.
-` : "";
+B2. AGUARDE o lead descrever o caso e siga o FLUXO NORMAL de qualificação abaixo.
+`;
 
   return `Você é ${finalBotName}, ${finalBotRole} da equipe ${office}.
 ${criminalUrgencyBlock}
