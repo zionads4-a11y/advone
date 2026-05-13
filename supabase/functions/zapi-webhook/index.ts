@@ -1647,21 +1647,26 @@ serve(async (req) => {
 
     // Handle human intervention from phone (fromMe = true)
     if (isUaZapiSentMessage) {
-      const sentPhone = body.message.phone || body.phone;
+      const sentPhone = (body.message.phone || body.phone || "").replace("@c.us", "").replace("@s.whatsapp.net", "");
       if (sentPhone) {
-        const cleanSentPhone = sentPhone.replace("@c.us", "").replace("@s.whatsapp.net", "");
+        const cleanSentPhone = sentPhone.replace(/\D/g, "");
         const messageId = body.message.messageId || body.message.id;
         
-        // Check if this was a bot message
-        const { data: existingMsg } = await supabase
+        // 🛡️ Anti-race condition: check if we just sent an IA message to this phone in the last 10s
+        const tenSecondsAgo = new Date(Date.now() - 10000).toISOString();
+        const { data: recentBotMsg } = await supabase
           .from("whatsapp_messages")
-          .select("sender_name")
-          .eq("message_id_external", messageId)
+          .select("id")
+          .eq("phone", cleanSentPhone)
+          .eq("direction", "outgoing")
+          .ilike("sender_name", "IA%")
+          .gt("created_at", tenSecondsAgo)
+          .limit(1)
           .maybeSingle();
 
-        // If message not found yet or not sent by IA, it's human intervention
-        if (!existingMsg || !existingMsg.sender_name?.startsWith("IA")) {
-          console.log(`[human-intervention] Detected message from phone for ${cleanSentPhone}, disabling bot.`);
+        // If no recent bot message found, it's human intervention
+        if (!recentBotMsg) {
+          console.log(`[human-intervention] Detected manual message from phone for ${cleanSentPhone}, disabling bot.`);
           await supabase.from("leads")
             .update({ bot_disabled: true, is_unread: false })
             .or(`phone.eq.${cleanSentPhone},whatsapp.eq.${cleanSentPhone}`);
