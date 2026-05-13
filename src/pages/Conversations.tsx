@@ -466,10 +466,15 @@ export default function Conversations() {
                             <User className="h-4 w-4 text-primary" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-foreground truncate">
-                              {lead?.name || lastMsg?.sender_name || phone}
-                            </p>
-                            <p className="text-[10px] text-muted-foreground truncate">
+                            <div className="flex items-center gap-1.5">
+                              <p className={`text-sm truncate ${lead?.is_unread ? "font-bold text-foreground" : "font-medium text-foreground"}`}>
+                                {lead?.name || lastMsg?.sender_name || phone}
+                              </p>
+                              {lead?.is_unread && (
+                                <div className="h-2 w-2 rounded-full bg-blue-500 shrink-0" title="Não lida" />
+                              )}
+                            </div>
+                            <p className={`text-[10px] truncate ${lead?.is_unread ? "font-semibold text-foreground/90" : "text-muted-foreground"}`}>
                               {lastMsg?.message_text || "..."}
                             </p>
                           </div>
