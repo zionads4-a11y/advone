@@ -1639,7 +1639,36 @@ serve(async (req) => {
     }
 
     const isUaZapiMessage = body.EventType === "messages" && body.message && !body.message.fromMe;
+    const isUaZapiSentMessage = body.EventType === "messages" && body.message && body.message.fromMe;
     const isLegacyMessage = body.type === "ReceivedCallback";
+
+    // Handle human intervention from phone (fromMe = true)
+    if (isUaZapiSentMessage) {
+      const sentPhone = body.message.phone || body.phone;
+      if (sentPhone) {
+        const cleanSentPhone = sentPhone.replace("@c.us", "").replace("@s.whatsapp.net", "");
+        const messageId = body.message.messageId || body.message.id;
+        
+        // Check if this was a bot message
+        const { data: existingMsg } = await supabase
+          .from("whatsapp_messages")
+          .select("sender_name")
+          .eq("message_id_external", messageId)
+          .maybeSingle();
+
+        // If message not found yet or not sent by IA, it's human intervention
+        if (!existingMsg || !existingMsg.sender_name?.startsWith("IA")) {
+          console.log(`[human-intervention] Detected message from phone for ${cleanSentPhone}, disabling bot.`);
+          await supabase.from("leads")
+            .update({ bot_disabled: true, is_unread: false })
+            .or(`phone.eq.${cleanSentPhone},whatsapp.eq.${cleanSentPhone}`);
+        }
+      }
+      
+      return new Response(JSON.stringify({ ok: true, type: "sent_message_handled" }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     if (!isUaZapiMessage && !isLegacyMessage) {
       if (body.type === "ReadReceipt" || body.type === "SentCallback" || body.type === "MessageStatusCallback" || body.EventType === "messages_update") {
