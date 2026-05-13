@@ -603,6 +603,24 @@ const sdrTools = [
       }
     }
   },
+  {
+    type: "function",
+    function: {
+      name: "lookup_existing_client",
+      description: "Verifica se o cliente já existe no sistema CRM ou se possui processos sendo monitorados pelo escritório. Peça o NOME COMPLETO e o CPF do cliente antes de chamar. Esta tool notifica o advogado responsável e desativa o bot para o contato.",
+      parameters: {
+        type: "object",
+        properties: {
+          client_full_name: { type: "string", description: "Nome completo do cliente" },
+          client_cpf: { type: "string", description: "CPF do cliente (opcional, mas recomendado)" },
+          subject: { type: "string", enum: ["andamento_processo", "outro"], description: "Assunto do contato" },
+          message_summary: { type: "string", description: "Breve resumo do que o cliente deseja" }
+        },
+        required: ["client_full_name", "subject"],
+        additionalProperties: false
+      }
+    }
+  }
 ];
 
 // ====== DOCUMENT COLLECTOR TOOLS ======
