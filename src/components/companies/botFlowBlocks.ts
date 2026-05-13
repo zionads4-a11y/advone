@@ -1432,7 +1432,7 @@ B2. Aguarde o lead descrever o caso e siga o FLUXO NORMAL de qualificação + ag
     Diga ao cliente que não é necessário CPF agora, apenas o nome para identificação inicial.
     O bot nunca deve solicitar CPF ou RG, nem mesmo para clientes antigos.
 
-🔒 Esta seção tem PRIORIDADE sobre a Mensagem 2 da "ABERTURA OBRIGATÓRIA" abaixo. Substitua o "Como posso te ajudar hoje?" pela pergunta "Você já é cliente do nosso escritório?".
+🔒 Esta seção tem PRIORIDADE MÁXIMA. NUNCA pule o passo 2. O fluxo deve ser: Nome -> (espera) -> Pergunta se é cliente -> (espera) -> Pergunta como ajudar.
 ` : "";
 
   return `Você é ${finalBotName}, ${finalBotRole} da equipe ${office}.
