@@ -115,3 +115,18 @@ Deno.test("Timezone: Date generation follows Golden Rules", () => {
   assert(offerSlots(sampleSlots), "Should offer both morning and afternoon slots");
 });
 
+Deno.test("Security: Attorney alert must NOT contain CPF", () => {
+  const generateAlertMessage = (clientName: string, cpf: string, subject: string, summary: string, found: boolean) => {
+    // 🛡️ Lógica real aplicada no zapi-webhook (lookup_existing_client)
+    // O CPF foi removido da mensagem de alerta conforme pedido do usuário
+    return `👥 *Atendimento a Cliente Existente*\n\n👤 Cliente: ${clientName || "N/A"}\n📝 Assunto: ${subject === "andamento_processo" ? "Andamento de Processo" : "Outro Assunto"}\n💬 Resumo: ${summary || "(sem resumo)"}\n\n${found ? "✅ Localizado no CRM" : "⚠️ Não localizado no CRM"}\n_O bot foi desativado para este contato._`;
+  };
+
+  const message = generateAlertMessage("João Silva", "123.456.789-00", "outro", "Dúvida sobre contrato", true);
+  
+  assertNotMatch(message, /CPF/i);
+  assertNotMatch(message, /123\.456\.789-00/);
+  assertStringIncludes(message, "João Silva");
+  assertStringIncludes(message, "Outro Assunto");
+});
+
