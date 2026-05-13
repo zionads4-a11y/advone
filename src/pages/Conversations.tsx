@@ -34,6 +34,7 @@ interface Lead {
   name: string;
   phone: string | null;
   bot_disabled: boolean;
+  is_unread: boolean;
 }
 
 interface Company {
