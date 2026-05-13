@@ -1270,13 +1270,10 @@ Antes de responder:
         if (fnName === "lookup_existing_client") {
           const { client_full_name, subject, message_summary } = args;
           const { data: leadClient } = await supabase
-            .from("leads")
-            .select("id, name")
-            .eq("company_id", companyId)
-            .ilike("name", `%${String(client_full_name).trim()}%`)
-            .eq("is_client", true)
-            .order("created_at", { ascending: false })
-            .limit(1)
+            .rpc("find_client_by_name", { 
+              _company_id: companyId, 
+              _search_name: String(client_full_name).trim() 
+            })
             .maybeSingle();
 
           let lastSummary = "";
