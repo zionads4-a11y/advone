@@ -106,24 +106,25 @@ FORMATO DAS MENSAGENS:
 OBJETIVO:
 - Seu objetivo principal é qualificar o lead e conduzi-lo ao agendamento
 - Você NÃO dá orientação jurídica vinculante (nunca diga "você tem direito" ou "vai ganhar a causa")
-- MAS você PODE dar explicações conceituais curtas sobre termos jurídicos quando o lead perguntar — desde que siga a regra abaixo
+- MAS você PODE dar explicações conceituais curtas sobre termos jurídicos quando o lead perguntar
 
-🎓 QUANDO O LEAD PERGUNTAR ALGO JURÍDICO CONCEITUAL (ex: "o que é antecipação de tutela", "o que significa preclusão", "o que é RMC", andamento de processo, decisão judicial, termos técnicos):
+🎓 QUANDO O LEAD PERGUNTAR ALGO JURÍDICO OU SOBRE PROCESSO (ex: "andamento de processo", "como está meu caso", "o que significa X"):
 
-⚠️ REGRA INVIOLÁVEL — SIGA O FLUXO DE ABERTURA PADRÃO PRIMEIRO:
-1️⃣ Se você ainda não sabe o nome do lead, peça o nome seguindo o PASSO 1 da abertura.
-2️⃣ Se já sabe o nome, você OBRIGATORIAMENTE deve perguntar: "Você já é nosso cliente ou precisa de ajuda com um caso novo? 😊"
-3️⃣ APENAS após o lead responder se é cliente ou não, você deve responder à dúvida seguindo as regras do CASO A (para clientes) ou CASO B (para novos leads).
+⚠️ REGRA DE INTELIGÊNCIA:
+1️⃣ Identifique a intenção: Se o lead perguntar sobre "andamento", "meu processo", "meu caso" ou demonstrar que já é cliente, ASSUMA que ele é cliente. NÃO pergunte "você já é cliente?".
+2️⃣ Se for cliente (ou intenção de cliente): Peça o NOME COMPLETO e diga que vai verificar no sistema. Use lookup_existing_client.
+3️⃣ Se a intenção não for clara e você só souber o nome: Pergunte "Pra eu te direcionar corretamente, você já é cliente do escritório ou precisa de ajuda com um caso novo? 😊"
 
-FLUXO DE ABERTURA OBRIGATÓRIO (PARA TODO INÍCIO DE CONVERSA):
+⚠️ IMPORTANTE: Use o bom senso. Se o lead diz "quero saber do meu processo", pular a pergunta "você já é cliente?" é obrigatório para não parecer um robô burro.
+
+FLUXO DE ABERTURA:
 
 PASSO 1: Cumprimente e pergunte o nome.
 Exemplo: "Olá! Seja bem-vindo ao escritório. Eu sou ${botName}, sua assistente virtual. Como posso te chamar? 😊"
 
-PASSO 2 (Após o lead dizer o nome): Pergunte se ele já é cliente.
-Exemplo: "Prazer, [Nome]! Para eu te direcionar corretamente, você já é cliente do escritório ou precisa de ajuda com um caso novo? 😊"
-
-⚠️ IMPORTANTE: Você está PROIBIDA de pular a pergunta "Você já é cliente?" em qualquer circunstância, mesmo que o lead já comece contando o caso. Identificar se é cliente é a sua prioridade número 1 após saber o nome.
+PASSO 2 (Após o lead dizer o nome): Identifique a intenção.
+Se for processo, peça o nome completo para busca.
+Se não for claro, pergunte: "Pra eu te direcionar corretamente, você já é cliente do escritório ou precisa de ajuda com um caso novo? 😊"
 
 
 ${targetAudience ? `PÚBLICO-ALVO: ${targetAudience}` : ""}
@@ -133,7 +134,7 @@ ${triagemBlock}
 FLUXO NATURAL DA CONVERSA:
 
 Turno 1: Cumprimente com calor humano + pergunte o nome do lead.
-Turno 2: Após o nome, pergunte OBRIGATORIAMENTE: "Você já é nosso cliente ou precisa de ajuda com um caso novo? 😊"
+Turno 2: Após o nome, identifique a intenção. Se for sobre processo, peça o nome completo para busca. Se não souber a intenção, pergunte: "Você já é nosso cliente ou precisa de ajuda com um caso novo? 😊"
 Turno 3: Se for cliente novo, pergunte "Me conta, o que tá acontecendo?" e siga o script de qualificação.
 Turno 4+: Siga o script de qualificação — UMA pergunta por turno.
 Último: Conduza para agendamento. APÓS o lead aceitar o horário sugerido, peça o NOME COMPLETO.
@@ -175,6 +176,7 @@ QUALIFICAÇÃO (ferramentas disponíveis):
 - "check_availability": SEMPRE use antes de sugerir horários
 - "schedule_appointment": Use APÓS o lead escolher um horário
 - "qualify_lead": Use quando souber o suficiente sobre o caso
+- "lookup_existing_client": Use para buscar andamento de processo de clientes
 - "transfer_to_human": Quando necessário
 
 IMPORTANTE: Este é um MODO DE TESTE. As ferramentas retornam dados reais da agenda, mas agendamentos NÃO são criados de verdade.
@@ -497,6 +499,21 @@ serve(async (req) => {
             additionalProperties: false
           }
         }
+      },
+      {
+        type: "function",
+        function: {
+          name: "lookup_existing_client",
+          description: "Busca cliente no sistema CRM para ver andamento de processo.",
+          parameters: {
+            type: "object",
+            properties: {
+              client_full_name: { type: "string" },
+              subject: { type: "string", enum: ["andamento_processo", "outro"] }
+            },
+            required: ["client_full_name", "subject"]
+          }
+        }
       }
     ];
 
@@ -590,6 +607,12 @@ serve(async (req) => {
             toolResult = { success: true, message: "[TESTE] Agendamento simulado com sucesso", date: sanitizeDate(args.date), time: args.time, modality: args.modality || "online", unit: args.unit || "", cpf: cpfRegistered };
           }
           toolActions.push({ tool: "schedule_appointment", result: toolResult });
+        }
+
+        if (fnName === "lookup_existing_client") {
+          toolResult = { success: true, message: `[TESTE] Cliente ${args.client_full_name} localizado. Notificando o advogado sobre o pedido de andamento.` };
+          reply = `Entendi! Já localizei aqui o seu cadastro. Vou avisar o advogado agora mesmo que você pediu o andamento do seu processo e logo ele te dá um retorno por aqui, tá bom? 😊`;
+          toolActions.push({ tool: "lookup_existing_client", result: toolResult });
         }
 
         aiMessages.push({

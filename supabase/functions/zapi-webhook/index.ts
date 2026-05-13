@@ -50,10 +50,9 @@ function buildSDRPrompt(
 4. Data de hoje: ${today}. Não use anos passados. Use horários de check_availability.
 [FLUXO]
 1. Peça o NOME (se não souber).
-2. Pergunte: "Você já é cliente ou primeiro contato?"
-3. Se cliente: use lookup_existing_client (pede Nome+CPF).
-4. Se andamento: NÃO ofereça novo serviço. Use lookup_existing_client.
-5. Se novo: peça para explicar o caso e faça qualificação.
+2. INTELIGÊNCIA: Se o lead perguntar sobre "andamento", "meu processo" ou demonstrar que já é cliente, ASSUMA que é cliente e vá para o passo 3. Caso contrário, pergunte: "Você já é cliente ou primeiro contato?"
+3. Se cliente ou andamento: use lookup_existing_client (pede Nome+CPF). NÃO ofereça novo serviço.
+4. Se novo: peça para explicar o caso e faça qualificação.
 5. Pós-qualificação: Ofereça agendamento gratuito.
 6. Agendamento: Pergunte turno -> check_availability -> Ofereça 2 opções -> Se aceitar, peça NOME COMPLETO -> chame register_client_name e schedule_appointment.
 [MODALIDADE] ${modalidadeBlock}
