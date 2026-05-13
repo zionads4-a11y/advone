@@ -248,7 +248,7 @@ serve(async (req) => {
       zapiResult = await zapiResponse.json();
     }
 
-    // Store outgoing message in database
+    // Store outgoing message in database and update lead status
     const { error: msgError } = await adminClient
       .from("whatsapp_messages")
       .insert({
@@ -263,6 +263,20 @@ serve(async (req) => {
 
     if (msgError) {
       console.error("Error storing outgoing message:", msgError);
+    }
+
+    // Disable bot and mark as read when human intervenes
+    const { error: leadUpdateError } = await adminClient
+      .from("leads")
+      .update({ 
+        bot_disabled: true,
+        is_unread: false 
+      })
+      .eq("company_id", company_id)
+      .or(`phone.eq.${phone},whatsapp.eq.${phone}`);
+
+    if (leadUpdateError) {
+      console.error("Error updating lead status:", leadUpdateError);
     }
 
     return new Response(
