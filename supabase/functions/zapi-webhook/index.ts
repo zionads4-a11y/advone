@@ -1297,16 +1297,23 @@ Antes de responder:
               const SERVER_URL = "https://ziondigital.uazapi.com";
               const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
               const alertPhone = String(config.client_support_responsible_phone || config.alert_whatsapp).replace(/\D/g, "");
+              const instanceId = config.zapi_instance_id;
+              const companyWhatsapp = String(config.whatsapp || "").replace(/\D/g, "");
+              
               const alertMessage = `👥 *Atendimento a Cliente Existente*\n\n👤 Cliente: ${client_full_name || leadClient?.name || "N/A"}\n🆔 CPF: ${cpf || "N/A"}\n📝 Assunto: ${subject === "andamento_processo" ? "Andamento de Processo" : "Outro Assunto"}\n💬 Resumo: ${message_summary || "(sem resumo)"}\n\n${leadClient ? "✅ Localizado no CRM" : "⚠️ Não localizado no CRM"}\n_O bot foi desativado para este contato._`;
               
               const alertHeaders: Record<string, string> = { "Content-Type": "application/json" };
               if (ADMIN_TOKEN) alertHeaders["admintoken"] = ADMIN_TOKEN;
-              const instanceParam = encodeURIComponent(config.zapi_instance_id || "");
-              const tokenParam = encodeURIComponent(config.zapi_token || config.zapi_instance_id || "");
+              const instanceParam = encodeURIComponent(instanceId || "");
+              const tokenParam = encodeURIComponent(config.zapi_token || instanceId || "");
               
+              // ⚠️ Se o número de alerta for o MESMO da instância, o UaZapi não envia mensagem para si mesmo.
+              // Nesses casos, enviamos para o número "Mensagem para você mesmo" do WhatsApp (que aparece na lista de chats).
+              const finalRecipient = alertPhone === companyWhatsapp ? "me" : alertPhone;
+
               await fetch(`${SERVER_URL}/send/text?instance=${instanceParam}&token=${tokenParam}`, {
                 method: "POST", headers: alertHeaders,
-                body: JSON.stringify({ number: alertPhone, text: alertMessage }),
+                body: JSON.stringify({ number: finalRecipient, text: alertMessage }),
               });
 
               // 🔔 Tenta marcar como não lida no WhatsApp do advogado (se for o mesmo número da empresa)
