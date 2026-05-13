@@ -496,6 +496,7 @@ serve(async (req) => {
     let toolActions: any[] = [];
     let cpfRegistered = "";
     let maxIterations = 3;
+    let lastAiData: any = null;
 
     while (maxIterations > 0) {
       maxIterations--;
@@ -511,6 +512,7 @@ serve(async (req) => {
           fallbackModel: "google/gemini-2.5-flash-lite",
           allowOpenAIFallback: true,
         });
+        lastAiData = aiData;
       } catch (e) {
         const msg = getErrorMessage(e);
         console.error("AI error:", msg);
@@ -591,8 +593,8 @@ serve(async (req) => {
       reply,
       parts,
       tool_actions: toolActions,
-      ai_provider: aiData?._provider ?? forceProvider ?? aiConfig.provider,
-      ai_model: aiData?._model ?? forceModel ?? aiConfig.model,
+      ai_provider: lastAiData?._provider ?? forceProvider ?? aiConfig.provider,
+      ai_model: lastAiData?._model ?? forceModel ?? aiConfig.model,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
