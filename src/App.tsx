@@ -44,6 +44,9 @@ import CrmAdvogados from "./pages/CrmAdvogados";
 import WhatsappAdvogados from "./pages/WhatsappAdvogados";
 import SdrIaJuridico from "./pages/SdrIaJuridico";
 import Blog from "./pages/Blog";
+import PostQualificarLeads from "./pages/PostQualificarLeads";
+import PostSdrHumanoVsIa from "./pages/PostSdrHumanoVsIa";
+import PostLgpdEscritorios from "./pages/PostLgpdEscritorios";
 import AppLayout from "./components/layout/AppLayout";
 import ProfileCheck from "./pages/ProfileCheck";
 import NotFound from "./pages/NotFound";
@@ -78,6 +81,9 @@ const App = () => (
             <Route path="/whatsapp-advogados" element={<WhatsappAdvogados />} />
             <Route path="/sdr-ia-juridico" element={<SdrIaJuridico />} />
             <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/como-qualificar-leads-advocacia-whatsapp" element={<PostQualificarLeads />} />
+            <Route path="/blog/sdr-humano-vs-ia-escritorio-advocacia" element={<PostSdrHumanoVsIa />} />
+            <Route path="/blog/lgpd-escritorios-advocacia-atendimento" element={<PostLgpdEscritorios />} />
             <Route path="/connect/:token" element={<ConnectWhatsApp />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
