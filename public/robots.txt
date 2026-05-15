@@ -12,3 +12,37 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /dashboard
+Disallow: /leads
+Disallow: /clientes
+Disallow: /kanban
+Disallow: /conversations
+Disallow: /campaigns
+Disallow: /companies
+Disallow: /tracking
+Disallow: /agenda
+Disallow: /access-management
+Disallow: /profile
+Disallow: /bot-config
+Disallow: /company-settings
+Disallow: /financeiro
+Disallow: /documentos
+Disallow: /modelos-documentos
+Disallow: /processos
+Disallow: /monitoramento
+Disallow: /busca-processos
+Disallow: /assinatura
+Disallow: /webhook-logs
+Disallow: /fraudes
+Disallow: /historico-leads
+Disallow: /leads-landing-ia
+Disallow: /ia-juridica
+Disallow: /tarefas
+Disallow: /boards
+Disallow: /perfil-check
+Disallow: /client-users
+Disallow: /auth
+Disallow: /signup
+Disallow: /connect/
+
+Sitemap: https://advone.online/sitemap.xml

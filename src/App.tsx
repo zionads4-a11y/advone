@@ -40,6 +40,10 @@ import LegalAI from "./pages/LegalAI";
 import LandingIA from "./pages/LandingIA";
 import LandingIALeads from "./pages/LandingIALeads";
 import LandingPage from "./pages/LandingPage";
+import CrmAdvogados from "./pages/CrmAdvogados";
+import WhatsappAdvogados from "./pages/WhatsappAdvogados";
+import SdrIaJuridico from "./pages/SdrIaJuridico";
+import Blog from "./pages/Blog";
 import AppLayout from "./components/layout/AppLayout";
 import ProfileCheck from "./pages/ProfileCheck";
 import NotFound from "./pages/NotFound";
@@ -70,6 +74,10 @@ const App = () => (
                 <Route path="/signup" element={<Navigate to="/auth" replace />} />
             <Route path="/IA" element={<LandingIA />} />
             <Route path="/ia" element={<LandingIA />} />
+            <Route path="/crm-advogados" element={<CrmAdvogados />} />
+            <Route path="/whatsapp-advogados" element={<WhatsappAdvogados />} />
+            <Route path="/sdr-ia-juridico" element={<SdrIaJuridico />} />
+            <Route path="/blog" element={<Blog />} />
             <Route path="/connect/:token" element={<ConnectWhatsApp />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
