@@ -8,20 +8,23 @@ const posts = [
   {
     slug: "como-qualificar-leads-advocacia-whatsapp",
     title: "Como qualificar leads de advocacia pelo WhatsApp em 2026",
-    excerpt: "Passo a passo para usar IA e roteiros para transformar conversas frias em reuniões agendadas.",
-    date: "Em breve",
+    excerpt: "Aprenda a estratégia definitiva para qualificar leads jurídicos no WhatsApp usando IA e roteiros de atendimento que convertem curiosos em clientes.",
+    date: "15 de Maio, 2026",
+    category: "Vendas",
   },
   {
     slug: "sdr-humano-vs-ia-escritorio-advocacia",
     title: "SDR humano vs IA: qual escolher para escritório de advocacia",
-    excerpt: "Comparativo de custo, conversão e escalabilidade entre SDR humana e IA jurídica.",
-    date: "Em breve",
+    excerpt: "Comparativo de custo, conversão e escalabilidade entre SDR humana e IA jurídica para o atendimento jurídico.",
+    date: "16 de Maio, 2026",
+    category: "Gestão",
   },
   {
     slug: "lgpd-escritorios-advocacia-atendimento",
-    title: "LGPD para escritórios: como atender no WhatsApp sem multa",
-    excerpt: "Guia prático de compliance LGPD no atendimento jurídico digital.",
-    date: "Em breve",
+    title: "LGPD para escritórios: como atender no WhatsApp sem riscos",
+    excerpt: "Guia prático de compliance LGPD no atendimento jurídico digital para proteger os dados dos seus clientes.",
+    date: "17 de Maio, 2026",
+    category: "Compliance",
   },
 ];
 
@@ -55,11 +58,17 @@ export default function Blog() {
 
         <section className="grid gap-6">
           {posts.map((post) => (
-            <article key={post.slug} className="rounded-xl border border-border bg-card p-6 hover:border-primary/40 transition-colors">
-              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">{post.date}</p>
-              <h2 className="text-xl md:text-2xl font-semibold mb-2">{post.title}</h2>
-              <p className="text-muted-foreground">{post.excerpt}</p>
-            </article>
+            <Link key={post.slug} to={`/blog/${post.slug}`}>
+              <article className="rounded-xl border border-border bg-card p-6 hover:border-primary/40 transition-colors group">
+                <div className="flex items-center gap-2 mb-2">
+                  <p className="text-xs uppercase tracking-wider text-primary font-semibold">{post.category}</p>
+                  <span className="text-muted-foreground text-xs">•</span>
+                  <p className="text-xs text-muted-foreground">{post.date}</p>
+                </div>
+                <h2 className="text-xl md:text-2xl font-semibold mb-2 group-hover:text-primary transition-colors">{post.title}</h2>
+                <p className="text-muted-foreground">{post.excerpt}</p>
+              </article>
+            </Link>
           ))}
         </section>
 
