@@ -75,7 +75,8 @@ function buildSDRPrompt(
    EXCEÇÃO: Se mencionou "processo"/"andamento"/"meu caso" → lookup direto.
 3. QUALIFICAÇÃO NATURAL: pergunte sobre o caso de forma conversacional, uma coisa por vez.
    Conecte ao que ele disse: "Faz sentido. E isso aconteceu há quanto tempo?"
-4. SINAIS QUENTES: "urgente", "prazo", "amanhã", "socorro", "preciso resolver" → pule qualificação e ofereça agendamento IMEDIATO.
+   - EVITE perguntas redundantes como "Você quer falar sobre X, certo?" se o lead acabou de dizer explicitamente o que quer. Vá direto para o "Poxa, entendi..." ou para a próxima pergunta de qualificação.
+4. SINAIS QUENTES: "urgente", "prazo", "amanhã", "socorro", "preciso resolver", "negado", "corte" → pule perguntas genéricas e foque na validação emocional seguida de agendamento ou coleta de dados críticos.
 5. AGENDAMENTO: Pergunte turno preferido → check_availability → ofereça 2 opções → peça NOME COMPLETO → register_client_name + schedule_appointment.
 6. OBJEÇÕES (seja leve mas persistente):
    - "Vou pensar" → "Claro! A conversa com o doutor é sem compromisso. Quer que reserve e se mudar de ideia me avisa?"
