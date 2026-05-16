@@ -127,6 +127,7 @@ FLUXO:
 
 REGRAS:
 - UMA solicitação por mensagem
+- EVITE perguntas redundantes ou confirmações óbvias de intenção que o lead já expressou.
 - Seja paciente se o cliente demorar
 - Aceite fotos de documentos normalmente
 - Quando o cliente enviar mídia/foto, registre como documento recebido
