@@ -1708,15 +1708,24 @@ serve(async (req) => {
               if (!whisperResp.ok) {
                 const errTxt = await whisperResp.text();
                 console.error(`[audio] Whisper falhou ${whisperResp.status}: ${errTxt}`);
-                messageText = "[áudio recebido — não foi possível transcrever]";
+                messageText = "[O lead enviou um áudio que não pude entender. Peça educadamente que repita por texto ou envie novamente.]";
               } else {
                 const whisperData = await whisperResp.json();
                 const transcription = (whisperData.text || "").trim();
+                const audioDuration = whisperData.duration || null;
+                
                 if (transcription) {
                   console.log(`[audio] Transcrição (${transcription.length} chars): ${transcription.substring(0, 120)}...`);
-                  messageText = `🎤 [áudio transcrito]: ${transcription}`;
+                  messageText = transcription; // SEM prefixo "🎤 [áudio transcrito]:"
+                  const wordCount = transcription.split(/\s+/).length;
+                  audioMetadata = {
+                    wasAudio: true,
+                    duration: audioDuration,
+                    isShort: audioDuration != null && audioDuration < 5,
+                    isMinimal: wordCount <= 3,
+                  };
                 } else {
-                  messageText = "[áudio sem fala detectada]";
+                  messageText = "[O lead enviou um áudio silencioso ou inaudível. Pergunte gentilmente se pode repetir.]";
                 }
               }
             }
