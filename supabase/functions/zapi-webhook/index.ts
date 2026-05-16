@@ -1695,7 +1695,8 @@ serve(async (req) => {
               fd.append("file", audioBlob, "audio.ogg");
               fd.append("model", "whisper-1");
               fd.append("language", "pt");
-              fd.append("response_format", "json");
+              fd.append("response_format", "verbose_json");
+              fd.append("prompt", "advogado processo INSS aposentadoria benefício previdenciário trabalhista demissão");
               fd.append("temperature", "0");
 
               const whisperResp = await fetch("https://api.openai.com/v1/audio/transcriptions", {
