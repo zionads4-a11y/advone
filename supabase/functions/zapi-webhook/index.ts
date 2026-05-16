@@ -1733,7 +1733,7 @@ serve(async (req) => {
         }
       } catch (audioErr) {
         console.error("[audio] Erro inesperado na transcrição:", audioErr);
-        messageText = "[áudio recebido — erro ao transcrever]";
+        messageText = "[O lead enviou um áudio que não pude entender. Peça educadamente que repita por texto ou envie novamente.]";
       }
     }
 
