@@ -1913,6 +1913,18 @@ serve(async (req) => {
             content: m.message_text || "",
           }));
 
+          // Injetar contexto de áudio no histórico
+          if (audioMetadata?.wasAudio && history.length > 0) {
+            const lastIdx = history.length - 1;
+            if (history[lastIdx].role === "user") {
+              const durationNote = audioMetadata.duration
+                ? ` (${Math.round(audioMetadata.duration)}s)`
+                : "";
+              const hint = audioMetadata.isMinimal ? " [resposta curta — seja conciso]" : "";
+              history[lastIdx].content = `[interno: msg veio de áudio${durationNote}${hint}] ${history[lastIdx].content}`;
+            }
+          }
+
           const aiReply = await handleAgentPhase(
             effectivePhase, config, agentConfigs, history,
             companyId, leadId, supabase, currentLeadName, cleanPhone,
