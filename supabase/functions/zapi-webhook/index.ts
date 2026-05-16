@@ -1949,8 +1949,11 @@ serve(async (req) => {
               const chunk = splitMessages[i].trim();
               if (!chunk) continue;
 
-              const delayMs = Math.floor(Math.random() * (8000 - 4000 + 1)) + 4000;
-              await new Promise((r) => setTimeout(r, delayMs));
+              const baseDelay = 2000;
+              const perChar = 40; // ms por caractere (~25 WPM)
+              const delay = Math.min(baseDelay + (chunk.length * perChar), 8000);
+              const jitter = Math.floor(Math.random() * 800) - 400;
+              await new Promise((r) => setTimeout(r, Math.max(1500, delay + jitter)));
 
               const sendResponse = await fetch(sendUrl, {
                 method: "POST", headers: sendHeaders,
