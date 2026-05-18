@@ -21,7 +21,10 @@ function buildSDRPrompt(
   const botName = company?.bot_name || "Laura";
   const botRole = company?.bot_role_description || "atendente virtual";
 
-  const lostBlock = `\n[TRAVA: DESISTÊNCIA] Se manifestar desinteresse ('não quero', 'resolvi'), chame mark_lead_lost e despeça-se.`;
+  const lostBlock = `\n[TRAVA: DESISTÊNCIA — REGRA RÍGIDA]
+SÓ chame mark_lead_lost quando o lead RECUSAR EXPLICITAMENTE o serviço. Exemplos válidos: 'não quero mais', 'desisti', 'não tenho interesse', 'já contratei outro advogado', 'já resolvi por fora', 'pode parar', 'mudei de ideia e não vou seguir'.
+NUNCA chame mark_lead_lost se o lead apenas disser que está ocupado, sem tempo, vai pensar, vai ver depois, está em reunião, dirigindo, no trabalho, ou pedir para falar mais tarde. Frases como 'tô ocupado(a)', 'agora não posso', 'depois te respondo', 'me liga mais tarde', 'tô no serviço', 'vou pensar', 'preciso ver com a família', 'só estou pesquisando preço' → NÃO são desistência. Responda com leveza ('Tranquilo, fico no aguardo então 🙂') e o sistema de follow-up cuidará do resto.
+Lead silencioso (não respondeu) TAMBÉM não é desistência — a cadência automática chama de volta. Só marque lost com recusa em palavras claras.`;
 
   if (customPrompt.startsWith("Você é")) {
     return customPrompt + lostBlock + (flowsBlock ? `\n[FLUXOS]\n${flowsBlock}` : "") + (triageBlock ? `\n[TRIAGEM]\n${triageBlock}` : "");
@@ -83,7 +86,9 @@ function buildSDRPrompt(
    - "Depois eu vejo" → "Tranquilo! Só fica ligado que [prazo legal se aplicável]. Me chama quando quiser 😊"
    - "É caro?" → "Essa primeira conversa é gratuita. O doutor explica tudo sem compromisso."
 7. URGÊNCIA LEGAL: Se caso tem prazo (prescrição, recurso), mencione: "Importante: esse tipo de caso tem prazo. Bom que tá correndo atrás."
-[TRAVA: DESISTÊNCIA] Se manifestar desinteresse claro, chame mark_lead_lost e despeça com leveza.
+[TRAVA: DESISTÊNCIA — REGRA RÍGIDA]
+SÓ chame mark_lead_lost com recusa EXPLÍCITA: 'não quero mais', 'desisti', 'não tenho interesse', 'já contratei outro', 'já resolvi'.
+NÃO marque lost se for: 'tô ocupado', 'agora não', 'depois te respondo', 'me liga mais tarde', 'vou pensar', 'preciso ver com a família', 'tô no trabalho/dirigindo', 'só pesquisando preço'. Nesses casos responda com leveza e deixe a cadência de follow-up agir. Silêncio também NÃO é desistência.
 [MODALIDADE] ${modalidadeBlock}
 ${flowsBlock ? `\n[FLUXOS]\n${flowsBlock}` : ""}${triageBlock ? `\n[TRIAGEM]\n${triageBlock}` : ""}${company?.decision_rules ? `\n[REGRAS]\n${company.decision_rules}` : ""}${customPrompt ? `\n[CUSTOM]\n${customPrompt}` : ""}
 Responda em PT-BR.`;
@@ -470,7 +475,7 @@ const sdrTools = [
     function: {
       name: "mark_lead_lost",
       description:
-        "Marca o lead como PERDIDO e ENCERRA o atendimento automaticamente. Use SEMPRE que o lead manifestar desinteresse, desistência ou recusa explícita ou implícita, como por exemplo: 'não quero mais', 'não tenho interesse', 'desisti', 'vou querer não', 'pode parar', 'não preciso mais', 'mudei de ideia', 'já resolvi', 'já contratei outro advogado', 'não vou seguir', 'obrigado, mas não', 'estou só pesquisando' ou qualquer variação semelhante. Após chamar esta tool, envie UMA única mensagem curta de despedida cordial (sem perguntar mais nada, sem oferecer ajuda futura como pergunta) e o bot ficará desativado para este lead.",
+        "Marca o lead como PERDIDO e ENCERRA o atendimento. Use SOMENTE quando o lead RECUSAR EXPLICITAMENTE o serviço com frases inequívocas como: 'não quero mais', 'não tenho interesse', 'desisti', 'pode parar', 'não preciso mais', 'mudei de ideia e não vou seguir', 'já contratei outro advogado', 'já resolvi por fora'. ⚠️ NÃO use esta tool se o lead apenas disser que está ocupado, sem tempo, no trabalho, dirigindo, em reunião, vai pensar, vai ver com a família, pediu para responder depois, ou disse que está 'só pesquisando preço'. NÃO use por silêncio do lead (a cadência automática cuida disso). Em caso de dúvida, NÃO chame — prefira deixar o lead em follow-up. Após chamar, envie UMA mensagem curta de despedida cordial.",
       parameters: {
         type: "object",
         properties: {
