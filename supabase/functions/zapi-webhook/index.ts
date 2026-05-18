@@ -475,7 +475,7 @@ const sdrTools = [
     function: {
       name: "mark_lead_lost",
       description:
-        "Marca o lead como PERDIDO e ENCERRA o atendimento automaticamente. Use SEMPRE que o lead manifestar desinteresse, desistência ou recusa explícita ou implícita, como por exemplo: 'não quero mais', 'não tenho interesse', 'desisti', 'vou querer não', 'pode parar', 'não preciso mais', 'mudei de ideia', 'já resolvi', 'já contratei outro advogado', 'não vou seguir', 'obrigado, mas não', 'estou só pesquisando' ou qualquer variação semelhante. Após chamar esta tool, envie UMA única mensagem curta de despedida cordial (sem perguntar mais nada, sem oferecer ajuda futura como pergunta) e o bot ficará desativado para este lead.",
+        "Marca o lead como PERDIDO e ENCERRA o atendimento. Use SOMENTE quando o lead RECUSAR EXPLICITAMENTE o serviço com frases inequívocas como: 'não quero mais', 'não tenho interesse', 'desisti', 'pode parar', 'não preciso mais', 'mudei de ideia e não vou seguir', 'já contratei outro advogado', 'já resolvi por fora'. ⚠️ NÃO use esta tool se o lead apenas disser que está ocupado, sem tempo, no trabalho, dirigindo, em reunião, vai pensar, vai ver com a família, pediu para responder depois, ou disse que está 'só pesquisando preço'. NÃO use por silêncio do lead (a cadência automática cuida disso). Em caso de dúvida, NÃO chame — prefira deixar o lead em follow-up. Após chamar, envie UMA mensagem curta de despedida cordial.",
       parameters: {
         type: "object",
         properties: {
