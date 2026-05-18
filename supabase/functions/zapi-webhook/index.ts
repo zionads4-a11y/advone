@@ -21,7 +21,10 @@ function buildSDRPrompt(
   const botName = company?.bot_name || "Laura";
   const botRole = company?.bot_role_description || "atendente virtual";
 
-  const lostBlock = `\n[TRAVA: DESISTÊNCIA] Se manifestar desinteresse ('não quero', 'resolvi'), chame mark_lead_lost e despeça-se.`;
+  const lostBlock = `\n[TRAVA: DESISTÊNCIA — REGRA RÍGIDA]
+SÓ chame mark_lead_lost quando o lead RECUSAR EXPLICITAMENTE o serviço. Exemplos válidos: 'não quero mais', 'desisti', 'não tenho interesse', 'já contratei outro advogado', 'já resolvi por fora', 'pode parar', 'mudei de ideia e não vou seguir'.
+NUNCA chame mark_lead_lost se o lead apenas disser que está ocupado, sem tempo, vai pensar, vai ver depois, está em reunião, dirigindo, no trabalho, ou pedir para falar mais tarde. Frases como 'tô ocupado(a)', 'agora não posso', 'depois te respondo', 'me liga mais tarde', 'tô no serviço', 'vou pensar', 'preciso ver com a família', 'só estou pesquisando preço' → NÃO são desistência. Responda com leveza ('Tranquilo, fico no aguardo então 🙂') e o sistema de follow-up cuidará do resto.
+Lead silencioso (não respondeu) TAMBÉM não é desistência — a cadência automática chama de volta. Só marque lost com recusa em palavras claras.`;
 
   if (customPrompt.startsWith("Você é")) {
     return customPrompt + lostBlock + (flowsBlock ? `\n[FLUXOS]\n${flowsBlock}` : "") + (triageBlock ? `\n[TRIAGEM]\n${triageBlock}` : "");
