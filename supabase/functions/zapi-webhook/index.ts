@@ -1640,26 +1640,39 @@ serve(async (req) => {
       const sentPhone = (body.message.phone || body.phone || "").replace("@c.us", "").replace("@s.whatsapp.net", "");
       if (sentPhone) {
         const cleanSentPhone = sentPhone.replace(/\D/g, "");
-        const messageId = body.message.messageId || body.message.id;
         
-        // 🛡️ Anti-race condition: check if we just sent an IA message to this phone in the last 10s
-        const tenSecondsAgo = new Date(Date.now() - 10000).toISOString();
+        // 🛡️ Anti-race condition: check if we just sent an IA message to this phone in the last 15s
+        const fifteenSecondsAgo = new Date(Date.now() - 15000).toISOString();
         const { data: recentBotMsg } = await supabase
           .from("whatsapp_messages")
           .select("id")
           .eq("phone", cleanSentPhone)
           .eq("direction", "outgoing")
           .ilike("sender_name", "IA%")
-          .gt("created_at", tenSecondsAgo)
+          .gt("created_at", fifteenSecondsAgo)
           .limit(1)
           .maybeSingle();
 
         // If no recent bot message found, it's human intervention
         if (!recentBotMsg) {
           console.log(`[human-intervention] Detected manual message from phone for ${cleanSentPhone}, disabling bot.`);
+          // Disabilita o bot e marca como lida (pois o humano está respondendo)
           await supabase.from("leads")
             .update({ bot_disabled: true, is_unread: false })
             .or(`phone.eq.${cleanSentPhone},whatsapp.eq.${cleanSentPhone}`);
+          
+          // Cancela qualquer mensagem de cadência pendente
+          const { data: leadToCancel } = await supabase.from("leads")
+            .select("id")
+            .or(`phone.eq.${cleanSentPhone},whatsapp.eq.${cleanSentPhone}`)
+            .maybeSingle();
+            
+          if (leadToCancel?.id) {
+            await supabase.from("cadence_messages")
+              .update({ status: "cancelled" })
+              .eq("lead_id", leadToCancel.id)
+              .eq("status", "pending");
+          }
         }
       }
       
