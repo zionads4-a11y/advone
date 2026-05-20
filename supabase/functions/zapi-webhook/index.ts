@@ -1623,7 +1623,7 @@ serve(async (req) => {
     (agentRows || []).forEach((a: any) => { agentConfigs[a.agent_type] = a; });
 
     const body = await req.json();
-    console.log("Z-API webhook payload:", JSON.stringify(body).substring(0, 500));
+    console.log("Z-API webhook payload:", JSON.stringify(body).substring(0, 1500));
 
     if (!body) {
       return new Response(JSON.stringify({ ok: true }), {
@@ -1631,51 +1631,90 @@ serve(async (req) => {
       });
     }
 
-    const isUaZapiMessage = body.EventType === "messages" && body.message && !body.message.fromMe;
-    const isUaZapiSentMessage = body.EventType === "messages" && body.message && body.message.fromMe;
+    // Detect fromMe across UaZapi field-name variants
+    const rawMsg: any = body.message || {};
+    const fromMeFlag = Boolean(
+      rawMsg.fromMe ?? rawMsg.FromMe ?? rawMsg.fromme ?? rawMsg.isFromMe ?? rawMsg.from_me ?? false
+    );
+
+    const isUaZapiMessage = body.EventType === "messages" && body.message && !fromMeFlag;
+    const isUaZapiSentMessage = body.EventType === "messages" && body.message && fromMeFlag;
     const isLegacyMessage = body.type === "ReceivedCallback";
 
     // Handle human intervention from phone (fromMe = true)
     if (isUaZapiSentMessage) {
-      const sentPhone = (body.message.phone || body.phone || "").replace("@c.us", "").replace("@s.whatsapp.net", "");
+      const sentPhone = (
+        rawMsg.sender_pn || rawMsg.chatid || rawMsg.phone || body.phone || body.chat?.id || ""
+      ).toString().replace("@c.us", "").replace("@s.whatsapp.net", "").replace("@lid", "");
+      const sentMsgId = rawMsg.messageid || rawMsg.id || rawMsg.message_id || "";
+      console.log(`[human-intervention?] fromMe=true phone=${sentPhone} msgId=${sentMsgId}`);
+
       if (sentPhone) {
         const cleanSentPhone = sentPhone.replace(/\D/g, "");
-        
-        // 🛡️ Anti-race condition: check if we just sent an IA message to this phone in the last 15s
-        const fifteenSecondsAgo = new Date(Date.now() - 15000).toISOString();
-        const { data: recentBotMsg } = await supabase
-          .from("whatsapp_messages")
-          .select("id")
-          .eq("phone", cleanSentPhone)
-          .eq("direction", "outgoing")
-          .ilike("sender_name", "IA%")
-          .gt("created_at", fifteenSecondsAgo)
-          .limit(1)
-          .maybeSingle();
 
-        // If no recent bot message found, it's human intervention
-        if (!recentBotMsg) {
-          console.log(`[human-intervention] Detected manual message from phone for ${cleanSentPhone}, disabling bot.`);
-          // Disabilita o bot e marca como lida (pois o humano está respondendo)
+        // 🛡️ Anti-eco: se esse messageid foi enviado pelo bot/atendente via API, ignora
+        let isBotEcho = false;
+        if (sentMsgId) {
+          const { data: knownMsg } = await supabase
+            .from("whatsapp_messages")
+            .select("id")
+            .eq("message_id_external", sentMsgId)
+            .limit(1)
+            .maybeSingle();
+          if (knownMsg) isBotEcho = true;
+        }
+
+        // Fallback: se nos últimos 8s saiu mensagem da IA pra esse número, ainda é eco
+        if (!isBotEcho) {
+          const eightSecAgo = new Date(Date.now() - 8000).toISOString();
+          const { data: recentBotMsg } = await supabase
+            .from("whatsapp_messages")
+            .select("id")
+            .eq("phone", cleanSentPhone)
+            .eq("direction", "outgoing")
+            .ilike("sender_name", "IA%")
+            .gt("created_at", eightSecAgo)
+            .limit(1)
+            .maybeSingle();
+          if (recentBotMsg) isBotEcho = true;
+        }
+
+        if (!isBotEcho) {
+          console.log(`[human-intervention] Manual message detected for ${cleanSentPhone}, disabling bot.`);
           await supabase.from("leads")
             .update({ bot_disabled: true, is_unread: false })
+            .eq("company_id", companyId)
             .or(`phone.eq.${cleanSentPhone},whatsapp.eq.${cleanSentPhone}`);
-          
-          // Cancela qualquer mensagem de cadência pendente
+
+          // Registra a mensagem manual no histórico
+          await supabase.from("whatsapp_messages").insert({
+            company_id: companyId,
+            phone: cleanSentPhone,
+            message_text: rawMsg.text || rawMsg.content || rawMsg.caption || "[mensagem manual]",
+            direction: "outgoing",
+            sender_name: "Atendente",
+            message_id_external: sentMsgId || null,
+            timestamp: new Date().toISOString(),
+          });
+
+          // Cancela cadências pendentes
           const { data: leadToCancel } = await supabase.from("leads")
             .select("id")
+            .eq("company_id", companyId)
             .or(`phone.eq.${cleanSentPhone},whatsapp.eq.${cleanSentPhone}`)
             .maybeSingle();
-            
+
           if (leadToCancel?.id) {
             await supabase.from("cadence_messages")
               .update({ status: "cancelled" })
               .eq("lead_id", leadToCancel.id)
               .eq("status", "pending");
           }
+        } else {
+          console.log(`[human-intervention] Ignored bot echo for ${cleanSentPhone}`);
         }
       }
-      
+
       return new Response(JSON.stringify({ ok: true, type: "sent_message_handled" }), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
