@@ -169,17 +169,21 @@ export function AppSidebar() {
   const [companyName, setCompanyName] = useState<string | null>(null);
 
   useEffect(() => {
-    const checkAiDisabled = async () => {
-      if (userRole === "client" && companyIds.length > 0) {
+    const fetchCompanyData = async () => {
+      if (companyIds.length > 0) {
         const { data } = await supabase
           .from("companies")
-          .select("ai_disabled")
+          .select("name, ai_disabled")
           .eq("id", companyIds[0])
           .maybeSingle();
-        if (data?.ai_disabled) setIsAiDisabled(true);
+        
+        if (data) {
+          if (data.ai_disabled && userRole === "client") setIsAiDisabled(true);
+          setCompanyName(data.name);
+        }
       }
     };
-    checkAiDisabled();
+    fetchCompanyData();
   }, [userRole, companyIds]);
 
   const baseItems = getMenuItems(userRole);
