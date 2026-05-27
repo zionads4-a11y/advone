@@ -55,7 +55,9 @@ interface Company {
   google_client_secret?: string | null;
   shared_whatsapp_number?: boolean | null;
   client_support_responsible_phone?: string | null;
+  ai_disabled?: boolean | null;
 }
+
 
 interface CompanyEditDialogProps {
   open: boolean;
@@ -80,7 +82,9 @@ interface CompanyEditDialogProps {
       google_client_secret: string | null;
       shared_whatsapp_number: boolean;
       client_support_responsible_phone: string | null;
+      ai_disabled: boolean;
     }
+
   ) => void;
   onDelete: (id: string) => void;
 }
@@ -106,6 +110,8 @@ export function CompanyEditDialog({
   const [officeAddress, setOfficeAddress] = useState("");
   const [sharedWhats, setSharedWhats] = useState(false);
   const [supportPhone, setSupportPhone] = useState("");
+  const [aiDisabled, setAiDisabled] = useState(false);
+
 
   useEffect(() => {
     if (company) {
@@ -126,7 +132,9 @@ export function CompanyEditDialog({
       setOfficeAddress(company.office_address || "");
       setSharedWhats(!!company.shared_whatsapp_number);
       setSupportPhone(company.client_support_responsible_phone || "");
+      setAiDisabled(!!company.ai_disabled);
     }
+
   }, [company]);
 
   if (!company) return null;
@@ -158,7 +166,9 @@ export function CompanyEditDialog({
               google_client_secret: googleClientSecret || null,
               shared_whatsapp_number: sharedWhats,
               client_support_responsible_phone: sharedWhats ? (supportPhone || null) : null,
+              ai_disabled: aiDisabled,
             });
+
           }}
           className="space-y-4"
         >
@@ -166,6 +176,20 @@ export function CompanyEditDialog({
             <Label>Nome da Empresa *</Label>
             <Input value={name} onChange={(e) => setName(e.target.value)} required />
           </div>
+
+          <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-0.5">
+                <Label>Desativar IA Laura</Label>
+                <p className="text-[11px] text-muted-foreground">
+                  Desativa completamente a IA para esta empresa. O cliente poderá atender
+                  manualmente via Kanban/Conversas, mas o robô não responderá.
+                </p>
+              </div>
+              <Switch checked={aiDisabled} onCheckedChange={setAiDisabled} />
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label>Telefone / WhatsApp</Label>
             <Input

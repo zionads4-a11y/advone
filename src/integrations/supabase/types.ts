@@ -707,6 +707,7 @@ export type Database = {
       }
       companies: {
         Row: {
+          ai_disabled: boolean | null
           billing_model: Database["public"]["Enums"]["billing_model"]
           bot_name: string | null
           bot_prompt: string | null
@@ -746,6 +747,7 @@ export type Database = {
           whatsapp: string | null
         }
         Insert: {
+          ai_disabled?: boolean | null
           billing_model?: Database["public"]["Enums"]["billing_model"]
           bot_name?: string | null
           bot_prompt?: string | null
@@ -785,6 +787,7 @@ export type Database = {
           whatsapp?: string | null
         }
         Update: {
+          ai_disabled?: boolean | null
           billing_model?: Database["public"]["Enums"]["billing_model"]
           bot_name?: string | null
           bot_prompt?: string | null
@@ -3390,6 +3393,7 @@ export type Database = {
       whatsapp_configs: {
         Row: {
           ai_auto_reply: boolean
+          ai_disabled: boolean | null
           ai_enabled: boolean
           ai_objective: string | null
           ai_prompt: string | null
@@ -3415,6 +3419,7 @@ export type Database = {
         }
         Insert: {
           ai_auto_reply?: boolean
+          ai_disabled?: boolean | null
           ai_enabled?: boolean
           ai_objective?: string | null
           ai_prompt?: string | null
@@ -3440,6 +3445,7 @@ export type Database = {
         }
         Update: {
           ai_auto_reply?: boolean
+          ai_disabled?: boolean | null
           ai_enabled?: boolean
           ai_objective?: string | null
           ai_prompt?: string | null

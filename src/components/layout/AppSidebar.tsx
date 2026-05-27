@@ -1,4 +1,7 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import {
+
   Building2,
   LogOut,
   Users,
@@ -43,7 +46,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useNewMessageNotifications } from "@/hooks/useNewMessageNotifications";
 import { useCompanyServiceMode } from "@/hooks/useCompanyServiceMode";
 import { useModulePermissions } from "@/hooks/useModulePermissions";
+import { useUserCompanies } from "@/hooks/useUserCompanies";
 import { MODULE_BY_ROUTE, type ModuleKey } from "@/lib/modulePermissions";
+
 
 import { LayoutDashboard, Kanban, MessageSquare } from "lucide-react";
 
@@ -157,7 +162,25 @@ export function AppSidebar() {
   const { profile, initials } = useUserProfile();
   const { isAiOnly, isPlanCompleto } = useCompanyServiceMode();
   const { can, isUnrestricted } = useModulePermissions();
+  const { companyIds } = useUserCompanies();
+  const [isAiDisabled, setIsAiDisabled] = useState(false);
+
+  useEffect(() => {
+    const checkAiDisabled = async () => {
+      if (userRole === "client" && companyIds.length > 0) {
+        const { data } = await supabase
+          .from("companies")
+          .select("ai_disabled")
+          .eq("id", companyIds[0])
+          .maybeSingle();
+        if (data?.ai_disabled) setIsAiDisabled(true);
+      }
+    };
+    checkAiDisabled();
+  }, [userRole, companyIds]);
+
   const baseItems = getMenuItems(userRole);
+
   
   // Se for gerente, mas NÃO for o super_admin (zionads4@gmail.com), remove o item de Configurações e Bot SDR
   const filteredBaseItems = userRole === "gerente" && user?.email !== "zionads4@gmail.com"
@@ -168,10 +191,16 @@ export function AppSidebar() {
     ? filteredBaseItems.filter((item) => AI_ONLY_ROUTES.has(item.url))
     : filteredBaseItems;
 
-  const planFiltered = aiFiltered.filter((item) => {
+  // Se o cliente estiver com IA desativada, mostra apenas Kanban e Conversas
+  const clientAiFiltered = isAiDisabled && userRole === "client"
+    ? aiFiltered.filter(item => item.url === "/kanban" || item.url === "/conversations")
+    : aiFiltered;
+
+  const planFiltered = clientAiFiltered.filter((item) => {
     if ((item as any).premium && !isPlanCompleto) return false;
     return true;
   });
+
     
   // Para operador, filtra também pelos módulos liberados pelo gerente
   const menuItems =

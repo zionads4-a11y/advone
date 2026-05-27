@@ -14,7 +14,9 @@ import {
   Pencil,
   Eye,
   Trash2,
+  BotOff,
 } from "lucide-react";
+
 
 interface CompanyMetrics {
   leads: number;
@@ -30,7 +32,9 @@ interface CompanyCardProps {
     whatsapp: string | null;
     created_at: string;
     partnership_type?: "exito" | "mensalidade_zionads" | null;
+    ai_disabled?: boolean | null;
   };
+
   hasWhatsApp: boolean;
   metrics: CompanyMetrics;
   onConfigureWhatsApp: () => void;
@@ -106,7 +110,13 @@ export function CompanyCard({
           <Badge variant="outline" className="border-primary/30 text-primary text-[10px]">
             💼 Mensalidade ZionAds
           </Badge>
+          {company.ai_disabled && (
+            <Badge variant="outline" className="border-destructive/30 text-destructive text-[10px]">
+              <BotOff className="mr-1 h-3 w-3" /> IA Desativada
+            </Badge>
+          )}
         </div>
+
 
         <div className="flex gap-2">
           <Button
