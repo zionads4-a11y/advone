@@ -98,8 +98,14 @@ export default function Companies() {
     fetchData();
   };
 
-  const handleUpdate = async (id: string, data: { name: string; whatsapp: string | null; business_hours?: Record<string, unknown[]>; partnership_type?: "exito" | "mensalidade_zionads"; service_mode?: "full" | "ai_only"; billing_model?: BillingModel; custom_base_value?: number | null }) => {
+  const handleUpdate = async (id: string, data: { name: string; whatsapp: string | null; business_hours?: Record<string, unknown[]>; partnership_type?: "exito" | "mensalidade_zionads"; service_mode?: "full" | "ai_only"; billing_model?: BillingModel; custom_base_value?: number | null; ai_disabled?: boolean }) => {
+    // Ao atualizar a empresa, também sincronizamos com whatsapp_configs para a trava global no webhook
     const { error } = await supabase.from("companies").update(data as any).eq("id", id);
+    
+    if (data.ai_disabled !== undefined) {
+      await supabase.from("whatsapp_configs").update({ ai_disabled: data.ai_disabled }).eq("company_id", id);
+    }
+
 
     if (error) {
       toast.error("Erro: " + error.message);
