@@ -145,7 +145,9 @@ function getRoleLabel(role: string | null) {
   }
 }
 
-function getGroupLabel(role: string | null) {
+function getGroupLabel(role: string | null, companyName?: string | null) {
+  if (companyName) return companyName;
+
   switch (role) {
     case "admin":
     case "member":
@@ -164,19 +166,24 @@ export function AppSidebar() {
   const { can, isUnrestricted } = useModulePermissions();
   const { companyIds } = useUserCompanies();
   const [isAiDisabled, setIsAiDisabled] = useState(false);
+  const [companyName, setCompanyName] = useState<string | null>(null);
 
   useEffect(() => {
-    const checkAiDisabled = async () => {
-      if (userRole === "client" && companyIds.length > 0) {
+    const fetchCompanyData = async () => {
+      if (companyIds.length > 0) {
         const { data } = await supabase
           .from("companies")
-          .select("ai_disabled")
+          .select("name, ai_disabled")
           .eq("id", companyIds[0])
           .maybeSingle();
-        if (data?.ai_disabled) setIsAiDisabled(true);
+        
+        if (data) {
+          if (data.ai_disabled && userRole === "client") setIsAiDisabled(true);
+          setCompanyName(data.name);
+        }
       }
     };
-    checkAiDisabled();
+    fetchCompanyData();
   }, [userRole, companyIds]);
 
   const baseItems = getMenuItems(userRole);
@@ -220,7 +227,7 @@ export function AppSidebar() {
       <SidebarContent className="px-2 py-3">
         <SidebarGroup>
           <SidebarGroupLabel className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-sidebar-foreground/40">
-            {getGroupLabel(userRole)}
+            {getGroupLabel(userRole, companyName)}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="gap-0.5">
