@@ -145,7 +145,9 @@ function getRoleLabel(role: string | null) {
   }
 }
 
-function getGroupLabel(role: string | null) {
+function getGroupLabel(role: string | null, companyName?: string | null) {
+  if (companyName) return companyName;
+
   switch (role) {
     case "admin":
     case "member":
@@ -164,6 +166,7 @@ export function AppSidebar() {
   const { can, isUnrestricted } = useModulePermissions();
   const { companyIds } = useUserCompanies();
   const [isAiDisabled, setIsAiDisabled] = useState(false);
+  const [companyName, setCompanyName] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAiDisabled = async () => {
