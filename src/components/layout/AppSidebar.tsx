@@ -227,7 +227,7 @@ export function AppSidebar() {
       <SidebarContent className="px-2 py-3">
         <SidebarGroup>
           <SidebarGroupLabel className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-sidebar-foreground/40">
-            {getGroupLabel(userRole)}
+            {getGroupLabel(userRole, companyName)}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="gap-0.5">
