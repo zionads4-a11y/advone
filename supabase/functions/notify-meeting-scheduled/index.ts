@@ -142,8 +142,53 @@ serve(async (req) => {
     const cpf = lead.cpf_cliente_final || lead.cpf || "não informado";
     const leadPhone = lead.whatsapp || lead.phone || "não informado";
 
-    // Resumo da conversa removido por solicitação do usuário para evitar poluição na mensagem.
-    const conversationSummary = "";
+    // ===== Resumo da conversa via IA =====
+    let conversationSummary = "";
+    try {
+      const phoneForLookup = lead.whatsapp || lead.phone;
+      if (phoneForLookup) {
+        const { data: msgs } = await supabase
+          .from("whatsapp_messages")
+          .select("direction, sender_name, message_text, timestamp")
+          .eq("company_id", reminder.company_id)
+          .eq("phone", String(phoneForLookup).replace(/\D/g, ""))
+          .order("timestamp", { ascending: true })
+          .limit(30);
+
+        if (msgs && msgs.length > 0) {
+          const transcript = msgs
+            .map((m: any) => {
+              const who = m.direction === "incoming" ? "Cliente" : (m.sender_name === "IA" ? "IA" : "Atendente");
+              return `[${who}]: ${m.message_text || "[mídia]"}`;
+            })
+            .join("\n");
+
+          const lovableKey = Deno.env.get("LOVABLE_API_KEY");
+          if (lovableKey) {
+            const sumResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+              method: "POST",
+              headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
+              body: JSON.stringify({
+                model: "google/gemini-2.5-flash-lite",
+                messages: [
+                  {
+                    role: "system",
+                    content: "Resuma a conversa (máx. 5 bullets) cobrindo: tipo de caso, dados, dores e ponto crítico. Use '•'.",
+                  },
+                  { role: "user", content: `Conversa:\n${transcript}` },
+                ],
+              }),
+            });
+            if (sumResp.ok) {
+              const sumData = await sumResp.json();
+              conversationSummary = sumData.choices?.[0]?.message?.content?.trim() || "";
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Erro resumo:", err);
+    }
 
     const message = `🔔 *Novo Agendamento Confirmado*
 📅 *Data:* ${date} (Segunda-feira)
@@ -151,7 +196,8 @@ serve(async (req) => {
 👤 *Cliente:* ${lead.name}
 📱 *Contato:* ${leadPhone}` +
       (reminder.title ? `\n📝 *Compromisso:* ${reminder.title}` : "") +
-      `\n💡 O cliente já foi notificado.`;
+      (conversationSummary ? `\n\n📋 *Resumo da conversa:*\n${conversationSummary}` : "") +
+      `\n\n💡 O cliente já foi notificado.`;
 
     const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN") || "";
     const instanceParam = encodeURIComponent(config.zapi_instance_id);
