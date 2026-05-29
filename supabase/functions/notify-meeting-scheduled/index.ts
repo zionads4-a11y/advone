@@ -145,14 +145,13 @@ serve(async (req) => {
     // Resumo da conversa removido por solicitação do usuário para evitar poluição na mensagem.
     const conversationSummary = "";
 
-    const message =
-      `🔔 *Novo Agendamento Confirmado*\n\n` +
-      `📅 *Data:* ${date} (Segunda-feira)\n` +
-      `⏰ *Horário:* ${time}\n` +
-      `👤 *Cliente:* ${lead.name}\n` +
-      `📱 *Contato:* ${leadPhone}` +
+    const message = `🔔 *Novo Agendamento Confirmado*
+📅 *Data:* ${date} (Segunda-feira)
+⏰ *Horário:* ${time}
+👤 *Cliente:* ${lead.name}
+📱 *Contato:* ${leadPhone}` +
       (reminder.title ? `\n📝 *Compromisso:* ${reminder.title}` : "") +
-      `\n\n💡 O cliente já foi notificado.`;
+      `\n💡 O cliente já foi notificado.`;
 
     const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN") || "";
     const instanceParam = encodeURIComponent(config.zapi_instance_id);
