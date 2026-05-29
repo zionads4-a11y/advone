@@ -205,15 +205,13 @@ serve(async (req) => {
     }
 
     const message =
-      `🔔 *Novo agendamento confirmado*\n\n` +
-      `📅 *Data:* ${date}\n` +
+      `🔔 *Novo Agendamento Confirmado*\n\n` +
+      `📅 *Data:* ${date} (Segunda-feira)\n` +
       `⏰ *Horário:* ${time}\n` +
       `👤 *Cliente:* ${lead.name}\n` +
-      `🆔 *CPF:* ${cpf}\n` +
       `📱 *Contato:* ${leadPhone}` +
       (reminder.title ? `\n📝 *Compromisso:* ${reminder.title}` : "") +
-      (conversationSummary ? `\n\n📋 *Resumo da conversa:*\n${conversationSummary}` : "") +
-      `\n\n💡 _Lembre-se de acessar a agenda do AdvOne para marcar novas atividades, conferir os horários disponíveis e manter seus compromissos sempre atualizados._`;
+      `\n\n💡 O cliente já foi notificado.`;
 
     const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN") || "";
     const instanceParam = encodeURIComponent(config.zapi_instance_id);
