@@ -1742,11 +1742,41 @@ serve(async (req) => {
     let audioMetadata: { wasAudio: boolean; duration: number | null; isShort: boolean; isMinimal: boolean } | null = null;
     let messageType: string = "text";
 
+    // Helper: extrai texto de campos que podem vir como string OU objeto
+    // (UaZapi às vezes manda {message: "..."} ou {body: "..."} ou button/list reply)
+    const extractText = (v: unknown): string => {
+      if (v == null) return "";
+      if (typeof v === "string") return v;
+      if (typeof v === "number" || typeof v === "boolean") return String(v);
+      if (typeof v === "object") {
+        const o = v as Record<string, unknown>;
+        const candidates = [
+          o.message, o.text, o.body, o.caption, o.content,
+          o.selectedDisplayText, o.selectedButtonId, o.selectedRowId,
+          o.title, o.displayText,
+        ];
+        for (const c of candidates) {
+          if (typeof c === "string" && c.trim()) return c;
+        }
+        return "";
+      }
+      return "";
+    };
+
     if (isUaZapiMessage) {
       const msg = body.message;
       phone = msg.sender_pn || msg.chatid || "";
       senderName = msg.senderName || body.chat?.name || body.chat?.wa_contactName || "";
-      messageText = msg.text || msg.content || msg.caption || "";
+      messageText =
+        extractText(msg.text) ||
+        extractText(msg.content) ||
+        extractText(msg.caption) ||
+        extractText(msg.body) ||
+        extractText(msg.buttonsResponseMessage) ||
+        extractText(msg.listResponseMessage) ||
+        extractText(msg.templateButtonReplyMessage) ||
+        extractText(msg.interactiveResponseMessage) ||
+        "";
       messageIdExternal = msg.messageid || msg.id || "";
       isGroup = msg.isGroup || false;
       messageType = (msg.type || msg.messageType || "").toString().toLowerCase();
@@ -1757,7 +1787,13 @@ serve(async (req) => {
     } else {
       phone = body.phone || "";
       senderName = body.senderName || body.chatName || "";
-      messageText = body.text?.message || body.image?.caption || body.video?.caption || "";
+      messageText =
+        extractText(body.text) ||
+        extractText(body.image?.caption) ||
+        extractText(body.video?.caption) ||
+        extractText(body.buttonsResponseMessage) ||
+        extractText(body.listResponseMessage) ||
+        "";
       messageIdExternal = body.messageId || "";
       isGroup = body.isGroup || false;
       if (body.audio || body.ptt) {
