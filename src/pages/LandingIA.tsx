@@ -549,7 +549,7 @@ export default function LandingIA() {
                     </div>
                     <div className="mt-2 flex items-baseline justify-center gap-1">
                       <span className="text-4xl font-bold">R$</span>
-                      <span className="font-display text-5xl font-bold">997</span>
+                      <span className="font-display text-5xl font-bold">697</span>
                       <span className="text-muted-foreground">/mês</span>
                     </div>
                   </div>
@@ -591,10 +591,11 @@ export default function LandingIA() {
                       PAGAMENTO SEMESTRAL
                     </div>
                     <div className="mt-2 flex items-baseline justify-center gap-1">
-                      <span className="font-display text-4xl font-bold">6x R$ 797</span>
+                      <span className="font-display text-4xl font-bold">R$ 497</span>
+                      <span className="text-muted-foreground">/mês</span>
                     </div>
                     <div className="mt-1 text-xs text-primary font-bold">
-                      Economize R$ 1.200 no semestre
+                      Plano 6 meses — economize R$ 1.200
                     </div>
                   </div>
 
@@ -638,10 +639,11 @@ export default function LandingIA() {
                       PAGAMENTO ANUAL
                     </div>
                     <div className="mt-2 flex items-baseline justify-center gap-1">
-                      <span className="font-display text-4xl font-bold">12x R$ 597</span>
+                      <span className="font-display text-4xl font-bold">R$ 299</span>
+                      <span className="text-muted-foreground">/mês</span>
                     </div>
                     <div className="mt-1 text-xs text-primary font-bold">
-                      Economize R$ 4.800 por ano
+                      Plano 12 meses — economize R$ 4.776
                     </div>
                   </div>
 
@@ -932,7 +934,7 @@ export default function LandingIA() {
                 Pare de perder leads enquanto você dorme.
               </h2>
               <p className="mx-auto max-w-2xl text-muted-foreground">
-                A Laura está pronta para começar a atender no seu WhatsApp em 24h. Planos a partir de R$ 597/mês,
+                A Laura está pronta para começar a atender no seu WhatsApp em 24h. Planos a partir de R$ 299/mês,
                 sem fidelidade.
               </p>
               <Button
