@@ -56,11 +56,11 @@ import { LayoutDashboard, Kanban, MessageSquare } from "lucide-react";
 // Acesso: Kanban, Agenda, Conversas, Clientes e Configuração do Escritório.
 const AI_ONLY_ROUTES = new Set([
   "/dashboard",
-  "/conversations",
   "/kanban",
   "/clientes",
   "/agenda",
-  "/tarefas",
+  "/conversations",
+  "/financeiro",
   "/monitoramento",
   "/company-settings",
 ]);
