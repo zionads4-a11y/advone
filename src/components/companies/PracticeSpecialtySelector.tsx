@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Briefcase, Loader2, Save, Scale, Shield, Layers, Gavel, Heart, ShieldAlert, Building2, Landmark } from "lucide-react";
+import { Briefcase, Check, Loader2, Save, Scale, Shield, Layers, Gavel, Heart, ShieldAlert, Building2, Landmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -18,8 +18,18 @@ export type PracticeSpecialty =
   | "bancario_empresarial"
   | "full_service";
 
+// Áreas base que o usuário pode combinar (hibrido/full_service são derivados)
+type BaseArea =
+  | "previdenciario"
+  | "trabalhista"
+  | "civel"
+  | "familia"
+  | "criminal"
+  | "tributario"
+  | "bancario_empresarial";
+
 interface SpecialtyOption {
-  value: PracticeSpecialty;
+  value: BaseArea | "full_service";
   label: string;
   description: string;
   icon: typeof Shield;
@@ -43,12 +53,6 @@ const OPTIONS: SpecialtyOption[] = [
     label: "Trabalhista / CLT",
     description: "Rescisão, horas extras, vínculo, acidente, assédio.",
     icon: Scale,
-  },
-  {
-    value: "hibrido",
-    label: "Previdenciário + Trabalhista",
-    description: "Escritório atende casos previdenciários e trabalhistas.",
-    icon: Layers,
   },
   {
     value: "civel",
@@ -84,15 +88,29 @@ const OPTIONS: SpecialtyOption[] = [
 
 interface Props {
   companyId: string;
-  /** Quando salva, pode notificar o pai para refiltrar templates */
   onChange?: (value: PracticeSpecialty) => void;
-  /** Esconde o card e renderiza inline (usado no BotConfig) */
   compact?: boolean;
 }
 
+// Converte o valor armazenado (single) para conjunto de áreas base selecionadas
+function storedToSet(stored: PracticeSpecialty): Set<BaseArea | "full_service"> {
+  if (stored === "full_service") return new Set(["full_service"]);
+  if (stored === "hibrido") return new Set(["previdenciario", "trabalhista"]);
+  return new Set([stored as BaseArea]);
+}
+
+// Converte o conjunto selecionado no valor a persistir na coluna practice_specialty
+function setToStored(selected: Set<BaseArea | "full_service">): PracticeSpecialty {
+  if (selected.has("full_service") || selected.size >= 3) return "full_service";
+  if (selected.size === 2 && selected.has("previdenciario") && selected.has("trabalhista")) return "hibrido";
+  if (selected.size === 1) return Array.from(selected)[0] as PracticeSpecialty;
+  // 2 áreas quaisquer que não sejam prev+trab → full_service (para carregar ambos os fluxos)
+  return "full_service";
+}
+
 export function PracticeSpecialtySelector({ companyId, onChange, compact = false }: Props) {
-  const [value, setValue] = useState<PracticeSpecialty>("previdenciario");
-  const [original, setOriginal] = useState<PracticeSpecialty>("previdenciario");
+  const [selected, setSelected] = useState<Set<BaseArea | "full_service">>(new Set(["previdenciario"]));
+  const [originalStored, setOriginalStored] = useState<PracticeSpecialty>("previdenciario");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -104,8 +122,8 @@ export function PracticeSpecialtySelector({ companyId, onChange, compact = false
         .eq("id", companyId)
         .maybeSingle();
       const v = ((data as any)?.practice_specialty || "previdenciario") as PracticeSpecialty;
-      setValue(v);
-      setOriginal(v);
+      setSelected(storedToSet(v));
+      setOriginalStored(v);
       onChange?.(v);
       setLoading(false);
     };
@@ -113,20 +131,41 @@ export function PracticeSpecialtySelector({ companyId, onChange, compact = false
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [companyId]);
 
+  const toggle = (val: BaseArea | "full_service") => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (val === "full_service") {
+        return next.has("full_service") ? new Set(["previdenciario"]) : new Set(["full_service"]);
+      }
+      // Ao escolher uma área específica, remove full_service
+      next.delete("full_service");
+      if (next.has(val)) {
+        next.delete(val);
+        if (next.size === 0) next.add("previdenciario");
+      } else {
+        next.add(val);
+      }
+      return next;
+    });
+  };
+
+  const currentStored = setToStored(selected);
+  const dirty = currentStored !== originalStored;
+
   const handleSave = async () => {
     setSaving(true);
     const { error } = await supabase
       .from("companies")
-      .update({ practice_specialty: value } as any)
+      .update({ practice_specialty: currentStored } as any)
       .eq("id", companyId);
     setSaving(false);
     if (error) {
-      toast.error("Erro ao salvar área de atuação");
+      toast.error("Erro ao salvar áreas de atuação");
       return;
     }
-    setOriginal(value);
-    onChange?.(value);
-    toast.success("Área de atuação atualizada");
+    setOriginalStored(currentStored);
+    onChange?.(currentStored);
+    toast.success("Áreas de atuação atualizadas");
   };
 
   if (loading) {
@@ -139,26 +178,34 @@ export function PracticeSpecialtySelector({ companyId, onChange, compact = false
 
   const grid = (
     <div className="space-y-3">
+      <p className="text-[11px] text-muted-foreground">
+        Selecione uma ou mais áreas. Escolhendo várias, o bot carrega os fluxos de todas elas.
+      </p>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {OPTIONS.map((opt) => {
           const Icon = opt.icon;
-          const selected = value === opt.value;
+          const isSelected = selected.has(opt.value);
           return (
             <button
               key={opt.value}
               type="button"
-              onClick={() => setValue(opt.value)}
+              onClick={() => toggle(opt.value)}
               className={cn(
-                "flex flex-col items-start gap-2 rounded-xl border-2 p-4 text-left transition-all",
-                selected
+                "relative flex flex-col items-start gap-2 rounded-xl border-2 p-4 text-left transition-all",
+                isSelected
                   ? "border-primary bg-primary/10 shadow-sm"
                   : "border-border bg-muted/30 hover:border-primary/40"
               )}
             >
+              {isSelected && (
+                <span className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  <Check className="h-3 w-3" />
+                </span>
+              )}
               <div
                 className={cn(
                   "flex h-9 w-9 items-center justify-center rounded-full",
-                  selected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                  isSelected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -170,7 +217,7 @@ export function PracticeSpecialtySelector({ companyId, onChange, compact = false
         })}
       </div>
 
-      {value !== original && (
+      {dirty && (
         <Button
           onClick={handleSave}
           disabled={saving}
@@ -178,7 +225,7 @@ export function PracticeSpecialtySelector({ companyId, onChange, compact = false
           className="gradient-primary text-primary-foreground gap-2"
         >
           {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
-          Salvar área de atuação
+          Salvar áreas de atuação
         </Button>
       )}
     </div>
@@ -189,7 +236,7 @@ export function PracticeSpecialtySelector({ companyId, onChange, compact = false
       <div className="space-y-2">
         <Label className="flex items-center gap-1.5 text-xs">
           <Briefcase className="h-3.5 w-3.5 text-muted-foreground" />
-          Área de atuação do escritório
+          Áreas de atuação do escritório
         </Label>
         {grid}
       </div>
@@ -201,10 +248,10 @@ export function PracticeSpecialtySelector({ companyId, onChange, compact = false
       <CardHeader>
         <CardTitle className="font-display text-lg flex items-center gap-2">
           <Briefcase className="h-5 w-5 text-primary" />
-          Área de Atuação
+          Áreas de Atuação
         </CardTitle>
         <p className="text-xs text-muted-foreground">
-          Define quais nichos o escritório atende. Filtra templates de bot e regras do Decision Engine.
+          Define quais nichos o escritório atende. Pode escolher várias — filtra templates de bot e regras do Decision Engine.
         </p>
       </CardHeader>
       <CardContent>{grid}</CardContent>
