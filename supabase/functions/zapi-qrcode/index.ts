@@ -48,6 +48,46 @@ async function readResponsePayload(response: Response) {
   }
 }
 
+async function getAuthenticatedUserId(
+  supabaseUrl: string,
+  supabaseAnonKey: string,
+  supabaseServiceKey: string,
+  authHeader: string,
+) {
+  const accessToken = authHeader.replace("Bearer ", "").trim();
+
+  const callerClient = createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: authHeader, apikey: supabaseAnonKey } },
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+  try {
+    const { data: claimsData, error: claimsError } = await callerClient.auth.getClaims(accessToken);
+    const userId = claimsData?.claims?.sub;
+    if (!claimsError && userId) return { userId, error: null };
+
+    console.error("JWT claims validation failed:", claimsError?.message || "missing sub claim");
+  } catch (err) {
+    console.error("JWT claims validation threw:", getErrorMessage(err, "Erro ao validar claims"));
+  }
+
+  try {
+    const serviceClient = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data: userData, error: userError } = await serviceClient.auth.getUser(accessToken);
+    const userId = userData?.user?.id;
+    if (!userError && userId) return { userId, error: null };
+
+    console.error("JWT user validation failed:", userError?.message || "missing user id");
+    return { userId: null, error: userError?.message || "Token inválido" };
+  } catch (err) {
+    const message = getErrorMessage(err, "Erro ao validar usuário");
+    console.error("JWT user validation threw:", message);
+    return { userId: null, error: message };
+  }
+}
+
 function isGenericHealthCheckPayload(payload: any) {
   const info = normalizeUaZapiValue(payload?.info);
   const checkedInstanceMessage = normalizeUaZapiValue(payload?.status?.checked_instance?.message);
@@ -329,16 +369,15 @@ serve(async (req) => {
       );
     }
 
-    const callerClient = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
+    const { userId, error: authError } = await getAuthenticatedUserId(
+      supabaseUrl,
+      supabaseAnonKey,
+      supabaseServiceKey,
+      authHeader,
+    );
 
-    const accessToken = authHeader.replace("Bearer ", "").trim();
-    const { data: userData, error: userError } = await callerClient.auth.getUser(accessToken);
-    const userId = userData?.user?.id;
-
-    if (userError || !userId) {
-      console.error("JWT validation failed:", userError);
+    if (!userId) {
+      console.error("JWT validation failed:", authError);
       return new Response(
         JSON.stringify({ error: "Token inválido" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
