@@ -62,7 +62,6 @@ const AI_ONLY_ROUTES = new Set([
   "/conversations",
   "/financeiro",
   "/monitoramento",
-  "/company-settings",
 ]);
 
 const adminItems = [
