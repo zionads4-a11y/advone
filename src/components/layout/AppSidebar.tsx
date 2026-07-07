@@ -72,7 +72,7 @@ const adminItems = [
   { title: "Usuários", url: "/client-users", icon: Users },
   { title: "Acessos", url: "/access-management", icon: KeyRound },
   { title: "Assinaturas", url: "/assinatura", icon: CreditCard },
-  { title: "Histórico de Leads", url: "/historico-leads", icon: History },
+  
   { title: "Leads Landing IA", url: "/leads-landing-ia", icon: History },
   { title: "Alertas de Fraude", url: "/fraudes", icon: ShieldAlert, premium: true },
   { title: "Logs de Webhook", url: "/webhook-logs", icon: Activity },
