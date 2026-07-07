@@ -334,11 +334,11 @@ serve(async (req) => {
     });
 
     const accessToken = authHeader.replace("Bearer ", "").trim();
-    const { data: claimsData, error: claimsError } = await callerClient.auth.getClaims(accessToken);
-    const userId = claimsData?.claims?.sub;
+    const { data: userData, error: userError } = await callerClient.auth.getUser(accessToken);
+    const userId = userData?.user?.id;
 
-    if (claimsError || !userId || typeof userId !== "string") {
-      console.error("JWT validation failed:", claimsError);
+    if (userError || !userId) {
+      console.error("JWT validation failed:", userError);
       return new Response(
         JSON.stringify({ error: "Token inválido" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
