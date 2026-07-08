@@ -281,7 +281,7 @@ export default function LandingIA() {
         email: parsed.data.email || undefined,
         phone: parsed.data.whatsapp,
         contentName: "Landing IA - Form Submit",
-        value: 997,
+        value: 797,
         currency: "BRL",
         customData: {
           practice_area: parsed.data.practice_area || undefined,
