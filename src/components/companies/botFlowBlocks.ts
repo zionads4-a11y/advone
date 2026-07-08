@@ -1588,4 +1588,14 @@ ${fechamentoBlock}
 
 ${schedulingLink ? `Se ONLINE: envie o link ${schedulingLink}` : ""}
 `;
+
+  // Ajuste de tratamento (Dra. / Dr.) — corrige preposições quando masculino
+  if (lawyerTitle === "Dr.") {
+    return raw
+      .replace(/da Dra\./g, "do Dr.")
+      .replace(/à Dra\./g, "ao Dr.")
+      .replace(/Dra\./g, "Dr.")
+      .replace(/\{advogada\}/g, "{advogado}");
+  }
+  return raw;
 }
