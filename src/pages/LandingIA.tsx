@@ -638,11 +638,11 @@ export default function LandingIA() {
                       PAGAMENTO ANUAL
                     </div>
                     <div className="mt-2 flex items-baseline justify-center gap-1">
-                      <span className="font-display text-4xl font-bold">R$ 299</span>
+                      <span className="font-display text-4xl font-bold">R$ 397</span>
                       <span className="text-muted-foreground">/mês</span>
                     </div>
                     <div className="mt-1 text-xs text-primary font-bold">
-                      Plano 12 meses — economize R$ 4.776
+                      Plano 12 meses — economize R$ 4.800
                     </div>
                   </div>
 
