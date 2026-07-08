@@ -19,7 +19,7 @@ interface Company {
   whatsapp: string | null;
   business_hours: unknown;
   created_at: string;
-  partnership_type: "exito" | "mensalidade_zionads" | null;
+  partnership_type: "mensalidade_zionads" | null;
   service_mode: "full" | "ai_only" | null;
   billing_model: BillingModel | null;
 }
@@ -98,7 +98,7 @@ export default function Companies() {
     fetchData();
   };
 
-  const handleUpdate = async (id: string, data: { name: string; whatsapp: string | null; business_hours?: Record<string, unknown[]>; partnership_type?: "exito" | "mensalidade_zionads"; service_mode?: "full" | "ai_only"; billing_model?: BillingModel; custom_base_value?: number | null; ai_disabled?: boolean }) => {
+  const handleUpdate = async (id: string, data: { name: string; whatsapp: string | null; business_hours?: Record<string, unknown[]>; partnership_type?: "mensalidade_zionads"; service_mode?: "full" | "ai_only"; billing_model?: BillingModel; custom_base_value?: number | null; ai_disabled?: boolean }) => {
     // Ao atualizar a empresa, também sincronizamos com whatsapp_configs para a trava global no webhook
     const { error } = await supabase.from("companies").update(data as any).eq("id", id);
     

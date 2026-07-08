@@ -31,7 +31,7 @@ interface CompanyCardProps {
     website: string | null;
     whatsapp: string | null;
     created_at: string;
-    partnership_type?: "exito" | "mensalidade_zionads" | null;
+    partnership_type?: "mensalidade_zionads" | null;
     ai_disabled?: boolean | null;
   };
 

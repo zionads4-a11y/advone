@@ -33,7 +33,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { BILLING_MODELS, getBillingModel, inferBillingModel, type BillingModel } from "@/lib/billingModels";
 
-export type PartnershipType = "exito" | "mensalidade_zionads";
+export type PartnershipType = "mensalidade_zionads";
 export type ServiceMode = "full" | "ai_only";
 
 interface Company {
