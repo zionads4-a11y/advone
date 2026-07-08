@@ -13,9 +13,9 @@ const getResponseHeaders = (req: Request) => {
 const STANDARD_MAX_PROCESSES = 50;
 
 // Plan configuration:
-// - mensal:     R$ 997/mês recorrente (PIX ou cartão)
-// - semestral:  R$ 4.782 cobrança única (6x R$ 797 — equivalente a R$ 797/mês)
-// - anual:      R$ 7.164 cobrança única (12x R$ 597 — equivalente a R$ 597/mês)
+// - mensal:     R$ 797/mês recorrente (PIX ou cartão)
+// - semestral:  R$ 3.582 cobrança única (6x R$ 597 — equivalente a R$ 597/mês)
+// - anual:      R$ 4.764 cobrança única (12x R$ 397 — equivalente a R$ 397/mês)
 type BillingMode = "recurring_monthly" | "one_time";
 
 interface PlanInfo {
@@ -27,12 +27,12 @@ interface PlanInfo {
 
 const PLAN_CONFIG: Record<string, PlanInfo> = {
   admin:      { monthlyEquivalent: 297, chargedValue: 297,  billing: "recurring_monthly", description: "AdvOne — Plano Admin (R$ 297/mês)" },
-  completo:   { monthlyEquivalent: 997, chargedValue: 997,  billing: "recurring_monthly", description: "AdvOne — Plano Completo (R$ 997/mês)" },
+  completo:   { monthlyEquivalent: 797, chargedValue: 797,  billing: "recurring_monthly", description: "AdvOne — Plano Completo (R$ 797/mês)" },
   // Compatibility with legacy frontend links
-  mensal:     { monthlyEquivalent: 997, chargedValue: 997,  billing: "recurring_monthly", description: "AdvOne — Plano Completo (R$ 997/mês)" },
-  semestral:  { monthlyEquivalent: 797, chargedValue: 4782, billing: "one_time",          description: "AdvOne — Plano Semestral (6x R$ 797 = R$ 4.782 à vista)" },
-  trimestral: { monthlyEquivalent: 797, chargedValue: 4782, billing: "one_time",          description: "AdvOne — Plano Semestral (6x R$ 797 = R$ 4.782 à vista)" },
-  anual:      { monthlyEquivalent: 597, chargedValue: 7164, billing: "one_time",          description: "AdvOne — Plano Anual (12x R$ 597 = R$ 7.164 à vista)" },
+  mensal:     { monthlyEquivalent: 797, chargedValue: 797,  billing: "recurring_monthly", description: "AdvOne — Plano Completo (R$ 797/mês)" },
+  semestral:  { monthlyEquivalent: 597, chargedValue: 3582, billing: "one_time",          description: "AdvOne — Plano Semestral (6x R$ 597 = R$ 3.582 à vista)" },
+  trimestral: { monthlyEquivalent: 597, chargedValue: 3582, billing: "one_time",          description: "AdvOne — Plano Semestral (6x R$ 597 = R$ 3.582 à vista)" },
+  anual:      { monthlyEquivalent: 397, chargedValue: 4764, billing: "one_time",          description: "AdvOne — Plano Anual (12x R$ 397 = R$ 4.764 à vista)" },
 };
 
 Deno.serve(async (req) => {
