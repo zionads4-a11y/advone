@@ -1301,16 +1301,19 @@ export function buildDynamicLauraPrompt(params: {
   botName?: string;
   botRoleDescription?: string;
   sharedWhatsapp?: boolean;
+  /** Tratamento do(a) advogado(a): "Dra." (feminino) ou "Dr." (masculino). Default: "Dra." */
+  lawyerTitle?: "Dra." | "Dr.";
 }): string {
-  const { 
-    niche, 
-    officeName, 
-    enabledFlows, 
-    offices = [], 
+  const {
+    niche,
+    officeName,
+    enabledFlows,
+    offices = [],
     schedulingLink,
     botName,
     botRoleDescription,
     sharedWhatsapp = false,
+    lawyerTitle = "Dra.",
   } = params;
   const orderedFlows = [...enabledFlows].sort((a, b) => a.position - b.position);
   const activeOffices = offices.filter((o) => o.address);
