@@ -12,17 +12,37 @@ serve(async (req) => {
   }
 
   try {
+    // 1) Validate caller JWT FIRST (before touching Google or body)
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const accessToken = authHeader.replace("Bearer ", "").trim();
+
+    const anonClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+    );
+    const { data: claimsData, error: claimsError } = await anonClient.auth.getClaims(accessToken);
+    const userId = claimsData?.claims?.sub;
+    if (claimsError || !userId || typeof userId !== "string") {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const body = await req.json();
-    console.log("Auth request body:", body);
     const { code, redirectUri } = body;
 
     const clientId = Deno.env.get("GOOGLE_CLIENT_ID");
     const clientSecret = Deno.env.get("GOOGLE_CLIENT_SECRET");
 
-    console.log("Credentials check:", { hasClientId: !!clientId, hasClientSecret: !!clientSecret });
-
     if (!clientId || !clientSecret) {
-      throw new Error("Google credentials not configured in edge function environment variables (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET)");
+      throw new Error("Google credentials not configured");
     }
 
     // Exchange code for tokens
@@ -44,19 +64,12 @@ serve(async (req) => {
       throw new Error(`Google error: ${tokens.error_description || tokens.error}`);
     }
 
-    // Initialize Supabase client
+    // Service-role client for token persistence (RLS bypass required)
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
-
-    // Get user from Authorization header
-    const authHeader = req.headers.get("Authorization")!;
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(authHeader.replace("Bearer ", ""));
-
-    if (userError || !user) {
-      throw new Error("Unauthorized");
-    }
+    const user = { id: userId };
 
     // Get existing integration to avoid overwriting refresh_token if it's not provided in this call
     const { data: existingIntegration } = await supabaseClient

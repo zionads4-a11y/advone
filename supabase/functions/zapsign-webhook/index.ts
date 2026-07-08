@@ -10,12 +10,14 @@ serve(async (req) => {
 
   try {
     const expectedToken = Deno.env.get("ZAPSIGN_WEBHOOK_TOKEN");
-    if (expectedToken) {
-      const received = req.headers.get("authorization");
-      if (received !== expectedToken && received !== `Bearer ${expectedToken}`) {
-        log("warn", "zapsign-webhook", "Unauthorized attempt");
-        return new Response("Unauthorized", { status: 401, headers: corsHeaders });
-      }
+    if (!expectedToken) {
+      log("error", "zapsign-webhook", "ZAPSIGN_WEBHOOK_TOKEN not configured — rejecting");
+      return new Response("Service Unavailable", { status: 503, headers: corsHeaders });
+    }
+    const received = req.headers.get("authorization");
+    if (received !== expectedToken && received !== `Bearer ${expectedToken}`) {
+      log("warn", "zapsign-webhook", "Unauthorized attempt");
+      return new Response("Unauthorized", { status: 401, headers: corsHeaders });
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
