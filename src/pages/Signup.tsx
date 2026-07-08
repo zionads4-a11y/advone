@@ -32,7 +32,12 @@ const FEATURES_COMPLETO = [
   "Boards e Tarefas avançadas",
   "50 monitoramentos inclusos",
   "Adicional: R$ 2,58/processo",
-  "Suporte prioritário",
+];
+
+const FEATURES_COMPLETO_ANUAL = [
+  ...FEATURES_COMPLETO,
+  "Suporte prioritário exclusivo",
+  "Gerente de conta dedicado",
 ];
 
 const PLANS: Record<PlanKey, {
@@ -97,7 +102,7 @@ const PLANS: Record<PlanKey, {
     billingLabel: "R$ 3.588 (12x R$ 299)",
     ctaSuffix: "R$ 3.588 à vista",
     color: "hsl(38,90%,55%)",
-    features: FEATURES_COMPLETO,
+    features: FEATURES_COMPLETO_ANUAL,
   },
 };
 
