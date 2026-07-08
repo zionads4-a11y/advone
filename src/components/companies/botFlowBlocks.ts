@@ -1491,7 +1491,7 @@ B1. Diga: "Entendi! Então me conta, {nome}, como posso te ajudar hoje?"
 B2. AGUARDE o lead descrever o caso e siga o FLUXO NORMAL de qualificação abaixo.
 `;
 
-  return `Você é ${finalBotName}, ${finalBotRole} da equipe ${office}.
+  const raw = `Você é ${finalBotName}, ${finalBotRole} da equipe ${office}.
 ${criminalUrgencyBlock}
 ${trabalhistaTimeFilterBlock}
 ${sharedWhatsappBlock}
