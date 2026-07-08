@@ -62,7 +62,7 @@ export function LawyerContractDataCard({ companyId }: Props) {
       const { data } = await supabase
         .from("companies")
         .select(
-          "office_legal_name, office_cnpj, office_address, office_city, office_state, office_cep, lawyer_name, lawyer_oab, lawyer_oab_uf, lawyer_cpf, lawyer_nationality, lawyer_marital_status, lawyer_email, lawyer_phone"
+          "office_legal_name, office_cnpj, office_address, office_city, office_state, office_cep, lawyer_title, lawyer_name, lawyer_oab, lawyer_oab_uf, lawyer_cpf, lawyer_nationality, lawyer_marital_status, lawyer_email, lawyer_phone"
         )
         .eq("id", companyId)
         .maybeSingle();
