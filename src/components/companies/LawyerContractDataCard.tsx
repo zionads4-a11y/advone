@@ -166,9 +166,30 @@ export function LawyerContractDataCard({ companyId }: Props) {
                 Advogado(a) responsável
               </h4>
               <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Label className="text-xs">Tratamento (usado nos prompts do bot)</Label>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={form.lawyer_title === "Dra." ? "default" : "outline"}
+                      onClick={() => set("lawyer_title", "Dra.")}
+                    >
+                      Dra. (feminino)
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={form.lawyer_title === "Dr." ? "default" : "outline"}
+                      onClick={() => set("lawyer_title", "Dr.")}
+                    >
+                      Dr. (masculino)
+                    </Button>
+                  </div>
+                </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs">Nome completo</Label>
-                  <Input value={form.lawyer_name} onChange={(e) => set("lawyer_name", e.target.value)} placeholder="Ex: Dra. Gisele Torres" />
+                  <Input value={form.lawyer_name} onChange={(e) => set("lawyer_name", e.target.value)} placeholder="Ex: Gisele Torres" />
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs">CPF</Label>
