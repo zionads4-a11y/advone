@@ -6,14 +6,14 @@ const corsHeaders = {
 };
 
 // Charged value per plan (NOT the monthly equivalent)
-// mensal:     R$ 997 recorrente mensal
-// semestral:  R$ 4.782 à vista (6x R$ 797)
-// anual:      R$ 7.164 à vista (12x R$ 597)
+// mensal:     R$ 797 recorrente mensal
+// semestral:  R$ 3.582 à vista (6x R$ 597)
+// anual:      R$ 4.764 à vista (12x R$ 397)
 const PLAN_VALUES: Record<string, number> = {
-  mensal: 997,
-  semestral: 4782,
-  trimestral: 4782, // for compatibility
-  anual: 7164,
+  mensal: 797,
+  semestral: 3582,
+  trimestral: 3582, // for compatibility
+  anual: 4764,
 };
 
 const STANDARD_MAX_PROCESSES = 50;

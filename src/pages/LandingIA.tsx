@@ -200,7 +200,7 @@ export default function LandingIA() {
     document.title = "Laura SDR — Secretária Virtual com IA para Advogados | AdvOne";
     const meta = document.querySelector('meta[name="description"]');
     const desc =
-      "Escolha o plano ideal para seu escritório: Admin por R$ 297/mês ou Completo por R$ 997/mês. CRM jurídico com IA, WhatsApp e automação.";
+      "Escolha o plano ideal para seu escritório: Admin por R$ 297/mês ou Completo por R$ 797/mês. CRM jurídico com IA, WhatsApp e automação.";
     if (meta) {
       meta.setAttribute("content", desc);
     } else {
@@ -281,7 +281,7 @@ export default function LandingIA() {
         email: parsed.data.email || undefined,
         phone: parsed.data.whatsapp,
         contentName: "Landing IA - Form Submit",
-        value: 997,
+        value: 797,
         currency: "BRL",
         customData: {
           practice_area: parsed.data.practice_area || undefined,
@@ -509,7 +509,7 @@ export default function LandingIA() {
                   <li>✅ 5 follow-ups automáticos por lead</li>
                   <li>✅ Responde em até 30 segundos</li>
                   <li>✅ Qualifica e classifica viabilidade</li>
-                  <li>✅ Custo: R$ 997/mês — sem encargos</li>
+                  <li>✅ Custo: R$ 797/mês — sem encargos</li>
                 </ul>
               </CardContent>
             </Card>
@@ -549,7 +549,7 @@ export default function LandingIA() {
                     </div>
                     <div className="mt-2 flex items-baseline justify-center gap-1">
                       <span className="text-4xl font-bold">R$</span>
-                      <span className="font-display text-5xl font-bold">697</span>
+                      <span className="font-display text-5xl font-bold">797</span>
                       <span className="text-muted-foreground">/mês</span>
                     </div>
                   </div>
@@ -591,7 +591,7 @@ export default function LandingIA() {
                       PAGAMENTO SEMESTRAL
                     </div>
                     <div className="mt-2 flex items-baseline justify-center gap-1">
-                      <span className="font-display text-4xl font-bold">R$ 497</span>
+                      <span className="font-display text-4xl font-bold">R$ 597</span>
                       <span className="text-muted-foreground">/mês</span>
                     </div>
                     <div className="mt-1 text-xs text-primary font-bold">
@@ -638,11 +638,11 @@ export default function LandingIA() {
                       PAGAMENTO ANUAL
                     </div>
                     <div className="mt-2 flex items-baseline justify-center gap-1">
-                      <span className="font-display text-4xl font-bold">R$ 299</span>
+                      <span className="font-display text-4xl font-bold">R$ 397</span>
                       <span className="text-muted-foreground">/mês</span>
                     </div>
                     <div className="mt-1 text-xs text-primary font-bold">
-                      Plano 12 meses — economize R$ 4.776
+                      Plano 12 meses — economize R$ 4.800
                     </div>
                   </div>
 
@@ -932,7 +932,7 @@ export default function LandingIA() {
                 Pare de perder leads enquanto você dorme.
               </h2>
               <p className="mx-auto max-w-2xl text-muted-foreground">
-                A Laura está pronta para começar a atender no seu WhatsApp em 24h. Planos a partir de R$ 299/mês,
+                A Laura está pronta para começar a atender no seu WhatsApp em 24h. Planos a partir de R$ 397/mês,
                 sem fidelidade.
               </p>
               <Button
