@@ -74,6 +74,7 @@ export function LawyerContractDataCard({ companyId }: Props) {
           office_city: (data as any).office_city || "",
           office_state: (data as any).office_state || "",
           office_cep: (data as any).office_cep || "",
+          lawyer_title: ((data as any).lawyer_title === "Dr." ? "Dr." : "Dra.") as "Dra." | "Dr.",
           lawyer_name: (data as any).lawyer_name || "",
           lawyer_oab: (data as any).lawyer_oab || "",
           lawyer_oab_uf: (data as any).lawyer_oab_uf || "",
