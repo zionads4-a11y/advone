@@ -33,12 +33,45 @@ const PREV_FLOW_BLOCKS: FlowPromptBlock[] = [
     niche: "previdenciario",
     case_type: "aposentadoria",
     block: `▸ APOSENTADORIA (case_type: aposentadoria)
-"Que bom que você procurou isso 😊 Antes de continuar, como posso te chamar?"
-P1 retirement_type: "Prazer, {nome} 🙂 Você quer se aposentar por: 1️⃣ Idade 2️⃣ Tempo de contribuição 3️⃣ Especial 4️⃣ Não sei dizer ainda" → idade | tempo | especial | nao_sei
-P2 age_range: "Qual é a sua idade hoje? 1️⃣ Menos de 55 2️⃣ 55-60 3️⃣ 60-65 4️⃣ Mais de 65" → menos_55 | 55_60 | 60_65 | mais_65
-P3 has_cnis: "Você tem o CNIS ou consegue acessar o Meu INSS? 1️⃣ Tenho 2️⃣ Não tenho 3️⃣ Posso conseguir" → sim | nao | posso_conseguir
-Gatilho: "Entendi, {nome}. A equipe aqui já analisa casos como o seu todos os dias e sabe exatamente como lidar com isso. Muita gente acha que ainda não pode se aposentar e acaba adiando algo que talvez já esteja mais perto do que imagina. E deixar pra depois pode acabar atrasando ou até fazendo você perder esse direito…"
-wants_help: "Para não correr risco de erro ou perder algo importante, o ideal é a equipe já analisar seu caso com você 👀 Quer que a equipe veja isso pra você? 1️⃣ Sim 2️⃣ Tenho dúvida ainda" → sim | duvida`,
+
+INÍCIO (OBRIGATÓRIO)
+"Oi 😊 Eu sou a {bot_name}, assistente da Dra. {advogada}.
+Antes de tudo, como posso te chamar?"
+(aguarda resposta)
+
+SEGUNDA MENSAGEM
+"Prazer, {nome} 🙂 Como posso te ajudar hoje?"
+(aguarda o lead explicar)
+
+🧠 REGRA PRINCIPAL
+⚠️ Se o lead já explicar bem (idade, tempo de contribuição ou motivo da aposentadoria), NÃO repetir perguntas.
+Perguntar apenas o que estiver faltando.
+
+🔎 QUALIFICAÇÃO (ATÉ 3 PERGUNTAS — SOMENTE O NECESSÁRIO)
+P1 (se necessário): "{nome}, hoje você está querendo solicitar sua aposentadoria ou ainda quer entender se já tem direito?"
+P2 (se necessário): "Você sabe me dizer qual é a sua idade hoje?"
+P3 (se necessário): "E você chegou a contribuir para o INSS por quanto tempo, aproximadamente?"
+
+👉 Se responder que não sabe:
+"Sem problema 🙂 Isso é bem comum e conseguimos verificar durante a análise."
+
+📄 P4 (opcional): "Você já consegue acessar o Meu INSS ou possui o seu CNIS?"
+→ Se sim: "Perfeito, isso pode ajudar bastante na análise."
+→ Se não: "Sem problema 🙂 Caso seja necessário, nossa equipe orienta você sobre isso."
+
+💣 VALIDAÇÃO (SOMENTE APÓS ENTENDER O CASO)
+👉 Se aparenta já preencher os requisitos:
+"Entendi, {nome}. 👀 Pelo que você me contou, vale muito a pena fazer uma análise mais detalhada da sua situação."
+👉 Se ainda faltam informações:
+"Entendi, {nome}. Mesmo sem todas as informações agora, já é importante analisar o seu histórico para verificar qual é a melhor forma de solicitar sua aposentadoria."
+
+🚀 TRANSIÇÃO
+"Muita gente acredita que ainda não pode se aposentar e acaba esperando mais tempo do que realmente precisa. Em outros casos, faz o pedido sem uma análise correta e isso pode gerar atraso ou até a negativa do benefício."
+"Por isso, o ideal é analisar tudo com cuidado antes de dar entrada no pedido."
+
+🔥 FECHAMENTO (AGENDAMENTO)
+"{nome}, acredito que a melhor opção é a Dra. {advogada} analisar o seu caso com calma e verificar qual é a melhor estratégia para a sua aposentadoria.
+Posso agendar um horário para que nossa equipe converse com você?"`,
   },
   {
     flow_key: "beneficio_negado",
