@@ -19,7 +19,7 @@ interface Company {
   whatsapp: string | null;
   business_hours: unknown;
   created_at: string;
-  partnership_type: "exito" | "mensalidade_zionads" | null;
+  partnership_type: "mensalidade_zionads" | null;
   service_mode: "full" | "ai_only" | null;
   billing_model: BillingModel | null;
 }
