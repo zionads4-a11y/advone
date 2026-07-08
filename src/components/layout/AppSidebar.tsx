@@ -62,6 +62,7 @@ const AI_ONLY_ROUTES = new Set([
   "/conversations",
   "/financeiro",
   "/monitoramento",
+  "/jurisprudencia",
 ]);
 
 const adminItems = [
@@ -87,6 +88,7 @@ const gerenteItems = [
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
   { title: "Bot SDR", url: "/bot-config", icon: Bot, premium: true },
   { title: "IA Jurídica", url: "/ia-juridica", icon: Scale, premium: true },
+  { title: "Jurisprudência", url: "/jurisprudencia", icon: Search },
   { title: "Financeiro", url: "/financeiro", icon: Wallet },
   { title: "Monitoramento", url: "/monitoramento", icon: Radar },
   { title: "Modelos de Documentos", url: "/modelos-documentos", icon: FileText },
@@ -102,6 +104,7 @@ const operadorItems = [
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
   { title: "Monitoramento", url: "/monitoramento", icon: Radar },
   { title: "IA Jurídica", url: "/ia-juridica", icon: Scale, premium: true },
+  { title: "Jurisprudência", url: "/jurisprudencia", icon: Search },
 ];
 
 const clientItems = [
