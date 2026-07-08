@@ -1301,16 +1301,19 @@ export function buildDynamicLauraPrompt(params: {
   botName?: string;
   botRoleDescription?: string;
   sharedWhatsapp?: boolean;
+  /** Tratamento do(a) advogado(a): "Dra." (feminino) ou "Dr." (masculino). Default: "Dra." */
+  lawyerTitle?: "Dra." | "Dr.";
 }): string {
-  const { 
-    niche, 
-    officeName, 
-    enabledFlows, 
-    offices = [], 
+  const {
+    niche,
+    officeName,
+    enabledFlows,
+    offices = [],
     schedulingLink,
     botName,
     botRoleDescription,
     sharedWhatsapp = false,
+    lawyerTitle = "Dra.",
   } = params;
   const orderedFlows = [...enabledFlows].sort((a, b) => a.position - b.position);
   const activeOffices = offices.filter((o) => o.address);
@@ -1488,7 +1491,7 @@ B1. Diga: "Entendi! Então me conta, {nome}, como posso te ajudar hoje?"
 B2. AGUARDE o lead descrever o caso e siga o FLUXO NORMAL de qualificação abaixo.
 `;
 
-  return `Você é ${finalBotName}, ${finalBotRole} da equipe ${office}.
+  const raw = `Você é ${finalBotName}, ${finalBotRole} da equipe ${office}.
 ${criminalUrgencyBlock}
 ${trabalhistaTimeFilterBlock}
 ${sharedWhatsappBlock}
@@ -1585,4 +1588,14 @@ ${fechamentoBlock}
 
 ${schedulingLink ? `Se ONLINE: envie o link ${schedulingLink}` : ""}
 `;
+
+  // Ajuste de tratamento (Dra. / Dr.) — corrige preposições quando masculino
+  if (lawyerTitle === "Dr.") {
+    return raw
+      .replace(/da Dra\./g, "do Dr.")
+      .replace(/à Dra\./g, "ao Dr.")
+      .replace(/Dra\./g, "Dr.")
+      .replace(/\{advogada\}/g, "{advogado}");
+  }
+  return raw;
 }

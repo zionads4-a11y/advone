@@ -729,6 +729,7 @@ export type Database = {
           lawyer_oab: string | null
           lawyer_oab_uf: string | null
           lawyer_phone: string | null
+          lawyer_title: string
           logo_url: string | null
           name: string
           office_address: string | null
@@ -769,6 +770,7 @@ export type Database = {
           lawyer_oab?: string | null
           lawyer_oab_uf?: string | null
           lawyer_phone?: string | null
+          lawyer_title?: string
           logo_url?: string | null
           name: string
           office_address?: string | null
@@ -809,6 +811,7 @@ export type Database = {
           lawyer_oab?: string | null
           lawyer_oab_uf?: string | null
           lawyer_phone?: string | null
+          lawyer_title?: string
           logo_url?: string | null
           name?: string
           office_address?: string | null
