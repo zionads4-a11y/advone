@@ -591,7 +591,7 @@ export default function LandingIA() {
                       PAGAMENTO SEMESTRAL
                     </div>
                     <div className="mt-2 flex items-baseline justify-center gap-1">
-                      <span className="font-display text-4xl font-bold">R$ 497</span>
+                      <span className="font-display text-4xl font-bold">R$ 597</span>
                       <span className="text-muted-foreground">/mês</span>
                     </div>
                     <div className="mt-1 text-xs text-primary font-bold">
