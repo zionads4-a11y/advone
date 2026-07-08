@@ -890,7 +890,6 @@ export default function LandingPage() {
                 <ul className="mb-8 flex-1 space-y-3">
                   {[
                     "Mesmo acesso completo",
-                    "Suporte prioritário",
                     "Compromisso de 6 meses",
                     "Ativação rápida"
                   ].map((item) => (
@@ -928,7 +927,8 @@ export default function LandingPage() {
                 <ul className="mb-8 flex-1 space-y-3">
                   {[
                     "Acesso completo vitalício (no período)",
-                    "Melhor suporte da plataforma",
+                    "Suporte prioritário exclusivo",
+                    "Gerente de conta dedicado",
                     "Sistema completo AdvOne",
                     "Todas as funcionalidades inclusas"
                   ].map((item) => (
@@ -959,7 +959,6 @@ export default function LandingPage() {
               "CRM Jurídico completo com Kanban",
               "Agenda + Financeiro integrados",
               "Templates e documentos ilimitados",
-              "Suporte prioritário",
               "Monitoramento de Processos (R$ 2,50/processo)"
             ].map((feature) => (
               <div key={feature} className="flex items-center gap-3 p-4 rounded-xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)]">

@@ -604,7 +604,6 @@ export default function LandingIA() {
                   <ul className="space-y-3 flex-1">
                     {[
                       "Mesmo acesso completo",
-                      "Suporte prioritário",
                       "Compromisso de 6 meses",
                       "Ativação rápida"
                     ].map((item) => (
@@ -651,10 +650,10 @@ export default function LandingIA() {
 
                   <ul className="space-y-3 flex-1">
                     {[
-                      "Tudo exatamente igual ao plano mensal",
-                      "Mesmo suporte",
-                      "Mesmo sistema completo",
-                      "Mesmo funcionalidades"
+                      "Tudo do plano mensal",
+                      "Suporte prioritário exclusivo",
+                      "Gerente de conta dedicado",
+                      "Sistema completo AdvOne"
                     ].map((item) => (
                       <li key={item} className="flex items-start gap-3 text-sm">
                         <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
@@ -686,7 +685,6 @@ export default function LandingIA() {
               "CRM Jurídico completo com Kanban",
               "Agenda + Financeiro integrados",
               "Templates e documentos ilimitados",
-              "Suporte prioritário",
               "Monitoramento de Processos (R$ 2,50/processo)"
             ].map((feature) => (
               <div key={feature} className="flex items-center gap-3 p-4 rounded-xl border border-border/60 bg-card/40">
