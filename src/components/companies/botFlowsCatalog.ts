@@ -100,8 +100,10 @@ export function getFlowCatalog(niche: Niche): BotFlowDefinition[] {
   if (niche === "tributario") return TRIBUTARIO_FLOWS;
   if (niche === "bancario_empresarial") return BANCARIO_EMPRESARIAL_FLOWS;
   if (niche === "full_service") {
-    // Para Full Service, unimos todos os fluxos de todos os nichos
-    return [
+    // Full Service: une todos os fluxos, deduplicando por flow_key
+    // (vários nichos têm "fallback_outros" — mantemos só o primeiro pra não
+    // violar a unique constraint (company_id, niche, flow_key) no seed).
+    const all = [
       ...PREVIDENCIARIO_FLOWS,
       ...TRABALHISTA_FLOWS,
       ...CIVEL_FLOWS,
@@ -110,6 +112,12 @@ export function getFlowCatalog(niche: Niche): BotFlowDefinition[] {
       ...TRIBUTARIO_FLOWS,
       ...BANCARIO_EMPRESARIAL_FLOWS,
     ];
+    const seen = new Set<string>();
+    return all.filter((f) => {
+      if (seen.has(f.flow_key)) return false;
+      seen.add(f.flow_key);
+      return true;
+    });
   }
   return PREVIDENCIARIO_FLOWS;
 }
