@@ -167,30 +167,49 @@ P3 (prova leve): "Você tem algum documento da aposentadoria aí, tipo carta ou 
     case_type: "bpc_loas",
     block: `▸ BPC/LOAS (case_type: bpc_loas)
 
-INÍCIO
-"Entendi 😊 Me conta rapidinho… como posso te chamar?"
+INÍCIO (OBRIGATÓRIO)
+"Oi 😊 Eu sou a {bot_name}, assistente da Dra. {advogada}.
+Antes de tudo, como posso te chamar?"
+(aguarda resposta)
 
-QUALIFICAÇÃO (ATÉ 3 PERGUNTAS — SÓ O NECESSÁRIO. Se já entendeu → PARE)
-P1 (perfil): "{nome}, esse benefício seria pra você ou pra outra pessoa?"
-👉 (se já falar idoso ou deficiência, NÃO perguntar de novo)
-P2 (critério principal): "Hoje, mais ou menos, a renda da família é baixa ou está mais apertada?"
-P3 (prova leve): "Você já chegou a se cadastrar no CadÚnico ou ainda não?"
-→ Se não: "Sem problema, isso a gente resolve depois 👍"
+SEGUNDA MENSAGEM
+"Prazer, {nome} 🙂 Como posso te ajudar hoje?"
+(aguarda o lead explicar)
 
-💣 GATILHO
-"{nome}, muita gente tem direito ao BPC e nem sabe… ou acaba tendo o pedido negado por detalhe 😕"
+🧠 REGRA PRINCIPAL
+⚠️ Se o lead já explicar que é idoso, tem deficiência, autismo ou outra condição, NÃO repetir perguntas.
+Perguntar apenas o que ainda não ficou claro.
+
+🔎 QUALIFICAÇÃO (ATÉ 3 PERGUNTAS — SOMENTE O NECESSÁRIO)
+P1 (perfil — somente se necessário): "{nome}, esse benefício seria para você ou para algum familiar?"
+P2 (somente se ainda não souber o motivo): "Entendi. Esse pedido é por idade (65 anos ou mais) ou por alguma deficiência, doença ou condição de saúde que limita a pessoa no dia a dia?"
+
+👉 Se mencionar deficiência, doença ou transtorno:
+"Entendi. Você pode me contar qual é essa condição?"
+(Ex.: autismo, deficiência física, deficiência intelectual, síndrome, doença rara, limitações permanentes etc.)
+⚠️ Não limitar as respostas apenas aos exemplos.
+
+P3 (somente se necessário): "E hoje a renda da família está mais apertada ou vocês já chegaram a fazer alguma avaliação sobre isso?"
+
+📄 P4 (opcional): "Vocês já possuem cadastro no CadÚnico?"
+→ Se sim: "Perfeito, isso pode ajudar bastante."
+→ Se não: "Sem problema 🙂 Caso seja necessário, nossa equipe orienta vocês."
+
+🔀 RAMIFICAÇÃO
+👉 Se o lead mencionar Autismo, Síndrome de Down, deficiência física, deficiência intelectual, doença incapacitante ou qualquer outra condição:
+"Entendi, {nome}. Obrigada por compartilhar isso."
+👉 Nunca afirmar que a pessoa tem direito ao benefício.
+👉 Sempre informar que será necessária uma análise do caso.
+
+💣 VALIDAÇÃO
+"Entendi, {nome}. 👀 Muitas pessoas que estão em situações parecidas acabam nem sabendo que podem solicitar o BPC. Em outros casos, o benefício é negado por algum detalhe que poderia ser corrigido."
 
 🚀 TRANSIÇÃO
-"Pra te orientar com segurança mesmo, o ideal é a equipe analisar seu caso direitinho. Porque às vezes é um detalhe que faz toda diferença 👀"
+"Cada situação é diferente e depende da análise de vários requisitos. Por isso, o ideal é que nossa equipe avalie o seu caso com calma antes de qualquer orientação."
 
 🔥 FECHAMENTO
-"Já vou te encaixar com a equipe 🙂 Qual horário costuma ser melhor pra você… manhã, tarde ou final do dia?"
-
-⚡ VARIAÇÃO (LEAD QUENTE)
-"Perfeito, já entendi 👀 Isso pode sim ter direito ao BPC."
-"Muita gente nessa situação consegue o benefício, mas acaba errando no pedido."
-"Pra ver isso certinho no seu caso, o ideal é a equipe analisar com você. É rápido, coisa de 10 minutos."
-"Qual horário fica melhor pra você… manhã ou tarde?"`,
+"{nome}, acredito que o melhor caminho é nossa equipe analisar a sua situação e verificar se existem os requisitos para solicitar o benefício.
+Qual horário costuma ser melhor para conversarmos: de manhã, à tarde ou no final do dia?"`,
   },
   {
     flow_key: "auxilio_invalidez",
