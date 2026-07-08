@@ -229,9 +229,7 @@ OBJETO: Prestação de serviços jurídicos relativos a causa de natureza {{area
 
 CLÁUSULA 1ª — Dos honorários: O(a) CONTRATANTE pagará ao(à) CONTRATADO(A) a título de honorários advocatícios o valor de {{valor_honorarios}}, na forma de pagamento {{forma_pagamento}}.
 
-CLÁUSULA 2ª — Êxito: Em caso de êxito na demanda, será devido adicional de {{percentual_exito}}% sobre o valor obtido.
-
-CLÁUSULA 3ª — Despesas processuais: Custas, emolumentos e demais despesas processuais correrão por conta do(a) CONTRATANTE.
+CLÁUSULA 2ª — Despesas processuais: Custas, emolumentos e demais despesas processuais correrão por conta do(a) CONTRATANTE.
 
 {{cidade_data}}.
 
