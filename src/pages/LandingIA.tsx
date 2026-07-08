@@ -549,7 +549,7 @@ export default function LandingIA() {
                     </div>
                     <div className="mt-2 flex items-baseline justify-center gap-1">
                       <span className="text-4xl font-bold">R$</span>
-                      <span className="font-display text-5xl font-bold">697</span>
+                      <span className="font-display text-5xl font-bold">797</span>
                       <span className="text-muted-foreground">/mês</span>
                     </div>
                   </div>
