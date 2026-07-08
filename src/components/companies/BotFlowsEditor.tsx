@@ -78,7 +78,7 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
 
     const { data: companyData } = await supabase
       .from("companies")
-      .select("bot_name, bot_role_description, shared_whatsapp_number")
+      .select("bot_name, bot_role_description, shared_whatsapp_number, lawyer_title")
       .eq("id", companyId)
       .maybeSingle();
 
@@ -101,6 +101,7 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
       botName: (companyData as any)?.bot_name || undefined,
       botRoleDescription: (companyData as any)?.bot_role_description || undefined,
       sharedWhatsapp: !!(companyData as any)?.shared_whatsapp_number,
+      lawyerTitle: (companyData as any)?.lawyer_title === "Dr." ? "Dr." : "Dra.",
     });
 
     const { error } = await supabase
