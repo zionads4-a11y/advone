@@ -1559,12 +1559,14 @@ serve(async (req) => {
 
   try {
     const expectedToken = Deno.env.get("ZAPI_WEBHOOK_SECRET");
-    if (expectedToken) {
-      const received = req.headers.get("x-webhook-secret") || req.headers.get("authorization");
-      if (received !== expectedToken && received !== `Bearer ${expectedToken}`) {
-        log("warn", "zapi-webhook", "Unauthorized attempt");
-        return new Response("Unauthorized", { status: 401, headers: corsHeaders });
-      }
+    if (!expectedToken) {
+      log("error", "zapi-webhook", "ZAPI_WEBHOOK_SECRET not configured — rejecting");
+      return new Response("Service Unavailable", { status: 503, headers: corsHeaders });
+    }
+    const received = req.headers.get("x-webhook-secret") || req.headers.get("authorization");
+    if (received !== expectedToken && received !== `Bearer ${expectedToken}`) {
+      log("warn", "zapi-webhook", "Unauthorized attempt");
+      return new Response("Unauthorized", { status: 401, headers: corsHeaders });
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
