@@ -37,6 +37,7 @@ import Subscription from "./pages/Subscription";
 import FraudAlerts from "./pages/FraudAlerts";
 
 import LegalAI from "./pages/LegalAI";
+import Jurisprudencia from "./pages/Jurisprudencia";
 import LandingIA from "./pages/LandingIA";
 import LandingIALeads from "./pages/LandingIALeads";
 import LandingPage from "./pages/LandingPage";
@@ -159,6 +160,7 @@ const App = () => (
               
               <Route path="/leads-landing-ia" element={<LandingIALeads />} />
               <Route path="/ia-juridica" element={<LegalAI />} />
+              <Route path="/jurisprudencia" element={<Jurisprudencia />} />
               <Route path="/tarefas" element={<Tasks />} />
               <Route path="/boards" element={<Boards />} />
               <Route path="/perfil-check" element={<ProfileCheck />} />
