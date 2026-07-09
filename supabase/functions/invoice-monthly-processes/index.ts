@@ -141,11 +141,13 @@ Deno.serve(async (req) => {
 
         // Quota mensal incluída por plano (acima disso é cobrado por processo)
         const quotaByPlan: Record<string, number> = {
+          plan_ia: 10,
           plan_completo: 10,
+          // legado
           plan_ia_monthly: 10,
           plan_ia_6m: 10,
           plan_ia_12m: 10,
-          plan_zionads: 0, // plano zionads: cobra todo processo monitorado
+          plan_zionads: 0,
         };
         const quota = quotaByPlan[company.billing_model as string] ?? 0;
         const excess = Math.max(0, count - quota);

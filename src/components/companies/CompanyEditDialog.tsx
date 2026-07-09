@@ -272,21 +272,6 @@ export function CompanyEditDialog({
             </p>
           </div>
 
-          {billingModel === "plan_zionads" && (
-            <div className="space-y-2 p-3 rounded-lg border border-primary/20 bg-primary/5 animate-in fade-in">
-              <Label>Valor Base Customizado (R$)</Label>
-              <Input 
-                value={customBaseValue} 
-                onChange={(e) => setCustomBaseValue(e.target.value)} 
-                type="number" 
-                step="0.01" 
-                placeholder="0,00"
-              />
-              <p className="text-[10px] text-muted-foreground">
-                Valor manual para ser incluído na cobrança (ex: tráfego pago).
-              </p>
-            </div>
-          )}
           <BusinessHoursConfig value={businessHours} onChange={setBusinessHours} />
 
           <Separator className="my-2" />
