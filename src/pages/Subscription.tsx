@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, AlertTriangle, XCircle, Clock, Crown, Building2 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Navigate } from "react-router-dom";
+import { NewSubscriptionDialog } from "@/components/subscription/NewSubscriptionDialog";
 
 interface SubscriptionRow {
   id: string;
