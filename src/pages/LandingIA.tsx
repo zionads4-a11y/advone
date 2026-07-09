@@ -98,7 +98,7 @@ const beneficiosAdmin = [
   "Gestão Financeira",
   "Documentos e Templates ilimitados",
   "IA com Gemini Flash",
-  "20 monitoramentos de processos inclusos",
+  "30 monitoramentos de processos inclusos",
   "R$ 2,58 por processo extra",
 ];
 
@@ -109,7 +109,7 @@ const beneficiosCompleto = [
   "IA Jurídica com Claude (Peças, Análises, Resumos)",
   "Alertas de Fraude em tempo real",
   "Boards e Tarefas avançadas",
-  "50 monitoramentos de processos inclusos",
+  "30 monitoramentos de processos inclusos",
   "R$ 2,58 por processo extra",
 ];
 

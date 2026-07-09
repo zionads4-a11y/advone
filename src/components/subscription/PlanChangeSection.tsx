@@ -21,7 +21,7 @@ const COMMON_FEATURES = [
   "Bot com IA no WhatsApp",
   "Cadência automática",
   "Agenda integrada",
-  "Monitoramento de até 50 processos",
+  "Monitoramento de até 30 processos",
   "Alertas automáticos de movimentação",
 ];
 
