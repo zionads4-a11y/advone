@@ -127,10 +127,6 @@ const faq = [
     a: "Sim. Você tem acesso a um editor de fluxos, prompts e perguntas. Pode mudar o tom, adicionar fluxos personalizados (ex: FGTS, INSS, etc.) e ajustar o que ela pergunta.",
   },
   {
-    q: "E se eu quiser cancelar?",
-    a: "Sem fidelidade. Você pode cancelar a qualquer momento direto no painel de assinatura.",
-  },
-  {
     q: "A IA entende meu nicho específico?",
     a: "Sim. A Laura vem treinada para previdenciário, trabalhista, cível, criminal, família, consumidor e tributário. Você pode adicionar fluxos custom para teses específicas do seu escritório.",
   },
