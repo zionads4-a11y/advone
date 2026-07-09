@@ -141,7 +141,7 @@ Deno.serve(async (req) => {
 
         // Quota mensal incluída por plano (acima disso é cobrado por processo)
         const quotaByPlan: Record<string, number> = {
-          plan_completo: 50,
+          plan_completo: 30,
           plan_ia_monthly: 30,
           plan_ia_6m: 30,
           plan_ia_12m: 30,
