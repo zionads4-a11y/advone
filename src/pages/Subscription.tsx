@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, AlertTriangle, XCircle, Clock, Crown, Building2 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Navigate } from "react-router-dom";
+import { NewSubscriptionDialog } from "@/components/subscription/NewSubscriptionDialog";
 
 interface SubscriptionRow {
   id: string;
@@ -115,9 +116,12 @@ export default function Subscription() {
 
   return (
     <div className="p-4 md:p-6 space-y-6">
-      <div className="flex items-center gap-3">
-        <Crown className="h-6 w-6 text-primary" />
-        <h1 className="text-2xl font-bold text-foreground">Gerenciar Assinaturas</h1>
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-3">
+          <Crown className="h-6 w-6 text-primary" />
+          <h1 className="text-2xl font-bold text-foreground">Gerenciar Assinaturas</h1>
+        </div>
+        <NewSubscriptionDialog onCreated={() => window.location.reload()} />
       </div>
 
       {/* Stats */}
