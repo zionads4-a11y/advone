@@ -216,7 +216,7 @@ export default function LandingIA() {
     trackMetaEvent("ViewContent", { contentName: "Landing IA - Laura SDR" });
   }, []);
 
-  const WA_LINK = "https://wa.link/gvgo7x";
+  const WA_LINK = "https://wa.link/didraw";
 
   function openWhatsApp(label = "CTA Landing IA") {
     try {
