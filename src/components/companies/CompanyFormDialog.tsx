@@ -27,10 +27,10 @@ interface CompanyFormDialogProps {
 }
 
 export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormDialogProps) {
-  const [selectedModel, setSelectedModel] = useState<BillingModel>("plan_ia_monthly");
+  const [selectedModel, setSelectedModel] = useState<BillingModel>("plan_ia");
   const [sharedWhats, setSharedWhats] = useState(false);
   const [supportPhone, setSupportPhone] = useState("");
-  const isFree = selectedModel === "plan_free";
+  const isFree = false;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -131,21 +131,6 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
             )}
           </div>
 
-          {selectedModel === "plan_zionads" && (
-            <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
-              <Label>Valor Base Customizado (R$)</Label>
-              <Input 
-                name="custom_base_value" 
-                type="number" 
-                step="0.01" 
-                placeholder="0,00" 
-                className="bg-background"
-              />
-              <p className="text-[10px] text-muted-foreground">
-                Este valor será somado à fatura mensal da empresa no Asaas.
-              </p>
-            </div>
-          )}
 
           <Button type="submit" className="w-full gradient-primary text-primary-foreground">
             Adicionar Empresa

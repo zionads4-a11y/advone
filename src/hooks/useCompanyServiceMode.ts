@@ -65,11 +65,15 @@ export function useCompanyServiceMode() {
     };
   }, [companyIds, companiesLoading, isAgencyStaff]);
 
-  return { 
-    serviceMode, 
-    isAiOnly: serviceMode === "ai_only", 
+  return {
+    serviceMode,
+    isAiOnly: serviceMode === "ai_only",
     billingModel,
-    isPlanCompleto: billingModel === "plan_completo" || billingModel === "plan_zionads" || billingModel === "plan_free" || (billingModel?.startsWith("plan_ia_") ?? false),
-    loading 
+    // Só o Plano Completo (e legados full/plan_free) liberam módulos "Pro".
+    isPlanCompleto:
+      billingModel === "plan_completo" ||
+      billingModel === "plan_free" ||
+      (billingModel?.startsWith("plan_ia_") ?? false),
+    loading,
   };
 }
