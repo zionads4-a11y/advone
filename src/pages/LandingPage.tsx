@@ -168,7 +168,7 @@ export default function LandingPage() {
                 CRM com Inteligência Artificial
               </div>
               <h1
-                className="mb-6 text-4xl font-bold leading-tight tracking-tight md:text-5xl lg:text-6xl animate-slide-up"
+                className="mb-6 text-2xl font-bold leading-tight tracking-tight sm:text-3xl md:text-5xl lg:text-6xl animate-slide-up"
                 style={{ fontFamily: "'Space Grotesk', sans-serif" }}
               >
                 <span className="gradient-text">CRM completo</span> para a gestão do seu escritório de advocacia.
