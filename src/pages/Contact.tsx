@@ -49,7 +49,7 @@ export default function Contact() {
             <p className="text-muted-foreground">
               Atendimento comercial via WhatsApp em horário comercial.
             </p>
-            <p className="text-primary font-medium">[COMPLETAR TELEFONE COMERCIAL]</p>
+            <p className="text-primary font-medium">Em breve</p>
           </article>
 
           <article className="rounded-xl border border-border bg-card p-6 space-y-3">
@@ -59,7 +59,7 @@ export default function Contact() {
               Solicitações relativas à LGPD e proteção de dados pessoais.
             </p>
             <p className="text-sm">
-              <strong>Nome:</strong> [COMPLETAR NOME DPO]<br />
+              <strong>Nome:</strong> Daniel Felipe Viana Manaces<br />
               <strong>E-mail:</strong> <a href="mailto:dpo@advone.online" className="text-primary hover:underline">dpo@advone.online</a>
             </p>
           </article>
@@ -68,8 +68,8 @@ export default function Contact() {
             <MapPin className="h-8 w-8 text-primary" />
             <h2 className="text-xl font-semibold">Endereço</h2>
             <p className="text-muted-foreground">
-              [COMPLETAR ENDEREÇO COMPLETO]<br />
-              [COMPLETAR CIDADE/UF - CEP]<br />
+              Rua José Bartolota, 40<br />
+              Glória — Belo Horizonte/MG — CEP 30.830-440<br />
               Brasil
             </p>
           </article>
@@ -78,8 +78,8 @@ export default function Contact() {
         <section className="rounded-2xl bg-primary/5 border border-primary/20 p-8 space-y-3">
           <h2 className="text-2xl font-bold">Dados Corporativos</h2>
           <p className="text-sm text-muted-foreground">
-            <strong>Razão social:</strong> [COMPLETAR RAZÃO SOCIAL]<br />
-            <strong>CNPJ:</strong> [COMPLETAR CNPJ]<br />
+            <strong>Razão social:</strong> 54.253.906 DANIEL FELIPE VIANA MANACES<br />
+            <strong>CNPJ:</strong> 54.253.906/0001-47<br />
             <strong>Site oficial:</strong> <a href="https://advone.online" className="text-primary hover:underline">https://advone.online</a>
           </p>
         </section>

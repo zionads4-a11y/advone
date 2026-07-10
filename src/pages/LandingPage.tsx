@@ -1041,11 +1041,11 @@ export default function LandingPage() {
 
           <div className="mt-10 border-t border-[hsl(220,20%,16%)] pt-6 space-y-2 text-center text-xs text-[hsl(220,10%,45%)]">
             <p>
-              <strong className="text-[hsl(220,10%,65%)]">AdvOne</strong> — [COMPLETAR RAZÃO SOCIAL] ·
-              CNPJ [COMPLETAR CNPJ]
+              <strong className="text-[hsl(220,10%,65%)]">AdvOne</strong> — 54.253.906 DANIEL FELIPE VIANA MANACES ·
+              CNPJ 54.253.906/0001-47
             </p>
             <p>
-              [COMPLETAR ENDEREÇO COMPLETO — Rua, número, cidade/UF, CEP] · Brasil
+              Rua José Bartolota, 40 — Glória, Belo Horizonte/MG — CEP 30.830-440 · Brasil
             </p>
             <p>
               Contato: <a href="mailto:contato@advone.online" className="hover:text-[hsl(153,60%,45%)]">contato@advone.online</a> ·
