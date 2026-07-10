@@ -1049,6 +1049,7 @@ export default function LandingPage() {
             </p>
             <p>
               Contato: <a href="mailto:contato@advone.online" className="hover:text-[hsl(153,60%,45%)]">contato@advone.online</a> ·
+              Telefone: <a href="tel:+553198051061" className="hover:text-[hsl(153,60%,45%)]">(31) 9805-1061</a> ·
               DPO/LGPD: <a href="mailto:dpo@advone.online" className="hover:text-[hsl(153,60%,45%)]">dpo@advone.online</a>
             </p>
             <p className="pt-2">
