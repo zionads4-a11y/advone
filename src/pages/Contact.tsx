@@ -45,11 +45,11 @@ export default function Contact() {
 
           <article className="rounded-xl border border-border bg-card p-6 space-y-3">
             <MessageSquare className="h-8 w-8 text-primary" />
-            <h2 className="text-xl font-semibold">WhatsApp</h2>
+            <h2 className="text-xl font-semibold">Telefone / WhatsApp</h2>
             <p className="text-muted-foreground">
-              Atendimento comercial via WhatsApp em horário comercial.
+              Atendimento comercial em horário comercial (seg-sex, 9h-18h BRT).
             </p>
-            <p className="text-primary font-medium">Em breve</p>
+            <a href="tel:+553198051061" className="text-primary font-medium hover:underline">(31) 9805-1061</a>
           </article>
 
           <article className="rounded-xl border border-border bg-card p-6 space-y-3">
