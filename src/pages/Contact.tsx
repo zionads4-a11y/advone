@@ -80,6 +80,9 @@ export default function Contact() {
           <p className="text-sm text-muted-foreground">
             <strong>Razão social:</strong> 54.253.906 DANIEL FELIPE VIANA MANACES<br />
             <strong>CNPJ:</strong> 54.253.906/0001-47<br />
+            <strong>Porte:</strong> ME (Microempresa) · <strong>Natureza jurídica:</strong> Empresário Individual<br />
+            <strong>Data de abertura:</strong> 08/03/2024<br />
+            <strong>CNAE principal:</strong> 73.19-0-02 — Promoção de vendas<br />
             <strong>Site oficial:</strong> <a href="https://advone.online" className="text-primary hover:underline">https://advone.online</a>
           </p>
         </section>
