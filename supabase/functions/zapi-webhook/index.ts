@@ -1596,7 +1596,15 @@ serve(async (req) => {
       hdrSecret === `Bearer ${config.zapi_token}`
     );
     if (!matchesGlobal && !matchesInstance) {
-      log("warn", "zapi-webhook", "Unauthorized attempt", { companyId, hasGlobal: !!expectedToken, hasInstanceHdr: !!hdrInstanceToken });
+      const headerNames = Array.from(req.headers.keys());
+      log("warn", "zapi-webhook", "Unauthorized attempt", {
+        companyId,
+        hasGlobal: !!expectedToken,
+        hasInstanceHdr: !!hdrInstanceToken,
+        headerNames,
+        hdrSecretPreview: hdrSecret ? hdrSecret.substring(0, 8) + "..." : null,
+        hdrInstanceTokenPreview: hdrInstanceToken ? hdrInstanceToken.substring(0, 8) + "..." : null,
+      });
       return new Response("Unauthorized", { status: 401, headers: corsHeaders });
     }
 
