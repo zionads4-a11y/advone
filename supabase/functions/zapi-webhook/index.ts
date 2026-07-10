@@ -2022,7 +2022,7 @@ serve(async (req) => {
 
     // AI Auto-Reply with multi-agent support
     const bm = config.companies?.billing_model;
-    const isPlanCompleto = bm === 'plan_completo' || bm === 'crm_full' || bm === 'ia_only' || bm === 'plan_free' || bm === 'plan_zionads' || (bm?.startsWith?.('plan_ia_') ?? false);
+    const isPlanCompleto = bm === 'plan_completo' || bm === 'crm_full' || bm === 'ia_only' || bm === 'plan_free' || bm === 'plan_zionads' || bm === 'plan_ia' || (bm?.startsWith?.('plan_ia_') ?? false);
     if (config.ai_enabled && config.ai_auto_reply && leadId && !existingLead?.bot_disabled && isPlanCompleto) {
       try {
         const leadStatus = existingLead?.status;
