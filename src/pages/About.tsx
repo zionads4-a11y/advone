@@ -67,9 +67,9 @@ export default function About() {
             <Building2 className="h-8 w-8 text-primary" />
             <h2 className="text-xl font-semibold">Dados da Empresa</h2>
             <p className="text-muted-foreground text-sm space-y-1">
-              <strong>Razão social:</strong> [COMPLETAR RAZÃO SOCIAL]<br />
-              <strong>CNPJ:</strong> [COMPLETAR CNPJ]<br />
-              <strong>Endereço:</strong> [COMPLETAR ENDEREÇO COMPLETO]<br />
+              <strong>Razão social:</strong> 54.253.906 DANIEL FELIPE VIANA MANACES<br />
+              <strong>CNPJ:</strong> 54.253.906/0001-47<br />
+              <strong>Endereço:</strong> Rua José Bartolota, 40<br />
               <strong>E-mail:</strong> contato@advone.online<br />
               <strong>Site:</strong> advone.online
             </p>
