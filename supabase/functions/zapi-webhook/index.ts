@@ -1585,25 +1585,31 @@ serve(async (req) => {
       .eq("company_id", companyId)
       .maybeSingle();
 
-    // Auth: accept global ZAPI_WEBHOOK_SECRET OR the per-instance token that UaZapi
-    // sends by default in the `token` header. This avoids requiring a custom header in UaZapi.
+    // Auth: UaZapi does NOT send custom headers on webhook calls. We accept:
+    //  - header `x-webhook-secret`/`authorization` matching global ZAPI_WEBHOOK_SECRET
+    //  - header `token`/`x-instance-token` matching the per-company zapi_token
+    //  - URL query `?token=...` or `?webhook_secret=...` matching either of the above
+    //    (recommended for UaZapi: append &token=<zapi_token> to the webhook URL)
     const hdrSecret = req.headers.get("x-webhook-secret") || req.headers.get("authorization");
     const hdrInstanceToken = req.headers.get("token") || req.headers.get("x-instance-token");
-    const matchesGlobal = !!expectedToken && (hdrSecret === expectedToken || hdrSecret === `Bearer ${expectedToken}`);
+    const qsToken = url.searchParams.get("token") || url.searchParams.get("webhook_secret");
+    const matchesGlobal = !!expectedToken && (
+      hdrSecret === expectedToken ||
+      hdrSecret === `Bearer ${expectedToken}` ||
+      qsToken === expectedToken
+    );
     const matchesInstance = !!config?.zapi_token && (
       hdrInstanceToken === config.zapi_token ||
       hdrSecret === config.zapi_token ||
-      hdrSecret === `Bearer ${config.zapi_token}`
+      hdrSecret === `Bearer ${config.zapi_token}` ||
+      qsToken === config.zapi_token
     );
     if (!matchesGlobal && !matchesInstance) {
-      const headerNames = Array.from(req.headers.keys());
       log("warn", "zapi-webhook", "Unauthorized attempt", {
         companyId,
         hasGlobal: !!expectedToken,
         hasInstanceHdr: !!hdrInstanceToken,
-        headerNames,
-        hdrSecretPreview: hdrSecret ? hdrSecret.substring(0, 8) + "..." : null,
-        hdrInstanceTokenPreview: hdrInstanceToken ? hdrInstanceToken.substring(0, 8) + "..." : null,
+        hasQsToken: !!qsToken,
       });
       return new Response("Unauthorized", { status: 401, headers: corsHeaders });
     }
