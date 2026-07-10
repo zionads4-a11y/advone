@@ -1559,15 +1559,6 @@ serve(async (req) => {
 
   try {
     const expectedToken = Deno.env.get("ZAPI_WEBHOOK_SECRET");
-    if (!expectedToken) {
-      log("error", "zapi-webhook", "ZAPI_WEBHOOK_SECRET not configured — rejecting");
-      return new Response("Service Unavailable", { status: 503, headers: corsHeaders });
-    }
-    const received = req.headers.get("x-webhook-secret") || req.headers.get("authorization");
-    if (received !== expectedToken && received !== `Bearer ${expectedToken}`) {
-      log("warn", "zapi-webhook", "Unauthorized attempt");
-      return new Response("Unauthorized", { status: 401, headers: corsHeaders });
-    }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -1593,6 +1584,21 @@ serve(async (req) => {
       `)
       .eq("company_id", companyId)
       .maybeSingle();
+
+    // Auth: accept global ZAPI_WEBHOOK_SECRET OR the per-instance token that UaZapi
+    // sends by default in the `token` header. This avoids requiring a custom header in UaZapi.
+    const hdrSecret = req.headers.get("x-webhook-secret") || req.headers.get("authorization");
+    const hdrInstanceToken = req.headers.get("token") || req.headers.get("x-instance-token");
+    const matchesGlobal = !!expectedToken && (hdrSecret === expectedToken || hdrSecret === `Bearer ${expectedToken}`);
+    const matchesInstance = !!config?.zapi_token && (
+      hdrInstanceToken === config.zapi_token ||
+      hdrSecret === config.zapi_token ||
+      hdrSecret === `Bearer ${config.zapi_token}`
+    );
+    if (!matchesGlobal && !matchesInstance) {
+      log("warn", "zapi-webhook", "Unauthorized attempt", { companyId, hasGlobal: !!expectedToken, hasInstanceHdr: !!hdrInstanceToken });
+      return new Response("Unauthorized", { status: 401, headers: corsHeaders });
+    }
 
     if (!config) {
       return new Response(JSON.stringify({ error: "Company not configured" }), {
