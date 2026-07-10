@@ -1002,21 +1002,58 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-[hsl(220,20%,16%)] bg-[hsl(220,28%,5%)]">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-8 md:flex-row">
-          <img
-            src={logoAdvOne}
-            alt="AdvOne"
-            className="h-14 w-auto drop-shadow-[0_0_20px_hsl(153,60%,45%/0.5)]"
-          />
-          <p className="text-sm text-[hsl(220,10%,45%)]">
-            © {new Date().getFullYear()} AdvOne. Todos os direitos reservados.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-6">
-            <a href="#funcionalidades" className="text-sm text-[hsl(220,10%,55%)] hover:text-[hsl(153,60%,45%)]">Funcionalidades</a>
-            <a href="#demo" className="text-sm text-[hsl(220,10%,55%)] hover:text-[hsl(153,60%,45%)]">Demo</a>
-            <Link to="/privacy" className="text-sm text-[hsl(220,10%,55%)] hover:text-[hsl(153,60%,45%)]">Política de Privacidade</Link>
-            <Link to="/terms" className="text-sm text-[hsl(220,10%,55%)] hover:text-[hsl(153,60%,45%)]">Termos de Uso</Link>
-            <button onClick={() => navigate("/auth")} className="text-sm text-[hsl(220,10%,55%)] hover:text-[hsl(153,60%,45%)]">Login</button>
+        <div className="mx-auto max-w-7xl px-6 py-12">
+          <div className="grid gap-8 md:grid-cols-4">
+            <div className="space-y-3">
+              <img
+                src={logoAdvOne}
+                alt="AdvOne"
+                className="h-14 w-auto drop-shadow-[0_0_20px_hsl(153,60%,45%/0.5)]"
+              />
+              <p className="text-xs text-[hsl(220,10%,55%)] leading-relaxed">
+                CRM jurídico com IA no WhatsApp para escritórios de advocacia brasileiros.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-white">Produto</h3>
+              <a href="#funcionalidades" className="block text-sm text-[hsl(220,10%,55%)] hover:text-[hsl(153,60%,45%)]">Funcionalidades</a>
+              <a href="#demo" className="block text-sm text-[hsl(220,10%,55%)] hover:text-[hsl(153,60%,45%)]">Demo</a>
+              <Link to="/crm-advogados" className="block text-sm text-[hsl(220,10%,55%)] hover:text-[hsl(153,60%,45%)]">CRM para advogados</Link>
+              <Link to="/whatsapp-advogados" className="block text-sm text-[hsl(220,10%,55%)] hover:text-[hsl(153,60%,45%)]">WhatsApp com IA</Link>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-white">Empresa</h3>
+              <Link to="/sobre" className="block text-sm text-[hsl(220,10%,55%)] hover:text-[hsl(153,60%,45%)]">Sobre a AdvOne</Link>
+              <Link to="/contato" className="block text-sm text-[hsl(220,10%,55%)] hover:text-[hsl(153,60%,45%)]">Contato</Link>
+              <Link to="/blog" className="block text-sm text-[hsl(220,10%,55%)] hover:text-[hsl(153,60%,45%)]">Blog</Link>
+              <button onClick={() => navigate("/auth")} className="block text-sm text-[hsl(220,10%,55%)] hover:text-[hsl(153,60%,45%)]">Login</button>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-white">Legal</h3>
+              <Link to="/privacy" className="block text-sm text-[hsl(220,10%,55%)] hover:text-[hsl(153,60%,45%)]">Política de Privacidade</Link>
+              <Link to="/terms" className="block text-sm text-[hsl(220,10%,55%)] hover:text-[hsl(153,60%,45%)]">Termos de Uso</Link>
+              <Link to="/seguranca" className="block text-sm text-[hsl(220,10%,55%)] hover:text-[hsl(153,60%,45%)]">Segurança e LGPD</Link>
+            </div>
+          </div>
+
+          <div className="mt-10 border-t border-[hsl(220,20%,16%)] pt-6 space-y-2 text-center text-xs text-[hsl(220,10%,45%)]">
+            <p>
+              <strong className="text-[hsl(220,10%,65%)]">AdvOne</strong> — [COMPLETAR RAZÃO SOCIAL] ·
+              CNPJ [COMPLETAR CNPJ]
+            </p>
+            <p>
+              [COMPLETAR ENDEREÇO COMPLETO — Rua, número, cidade/UF, CEP] · Brasil
+            </p>
+            <p>
+              Contato: <a href="mailto:contato@advone.online" className="hover:text-[hsl(153,60%,45%)]">contato@advone.online</a> ·
+              DPO/LGPD: <a href="mailto:dpo@advone.online" className="hover:text-[hsl(153,60%,45%)]">dpo@advone.online</a>
+            </p>
+            <p className="pt-2">
+              © {new Date().getFullYear()} AdvOne. Todos os direitos reservados. WhatsApp é marca registrada da Meta Platforms, Inc.
+            </p>
           </div>
         </div>
       </footer>

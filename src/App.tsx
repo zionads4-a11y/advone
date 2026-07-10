@@ -53,6 +53,9 @@ import ProfileCheck from "./pages/ProfileCheck";
 import NotFound from "./pages/NotFound";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import Security from "./pages/Security";
 import Tasks from "./pages/Tasks";
 import Boards from "./pages/Boards";
 import WebhookLogs from "./pages/WebhookLogs";
@@ -88,6 +91,9 @@ const App = () => (
             <Route path="/connect/:token" element={<ConnectWhatsApp />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/sobre" element={<About />} />
+            <Route path="/contato" element={<Contact />} />
+            <Route path="/seguranca" element={<Security />} />
             <Route
               element={
                 <ProtectedRoute>
