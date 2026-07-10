@@ -80,9 +80,39 @@ export default function Terms() {
           <section className="space-y-3">
             <h2 className="text-2xl font-bold">6. Integrações de Terceiros</h2>
             <p>
-              O AdvOne integra-se com serviços de terceiros, incluindo Google Calendar, WhatsApp (UaZapi),
-              Asaas, ZapSign e Escavador. O uso dessas integrações está sujeito aos termos e políticas
-              dos respectivos provedores. Não nos responsabilizamos por interrupções ou falhas desses serviços externos.
+              O AdvOne integra-se com serviços de terceiros, incluindo Google Calendar, WhatsApp Business Platform (Meta),
+              UaZapi, Asaas, ZapSign, Escavador e provedores de inteligência artificial. O uso dessas integrações está
+              sujeito aos termos e políticas dos respectivos provedores. Não nos responsabilizamos por interrupções ou
+              falhas desses serviços externos.
+            </p>
+          </section>
+
+          <section className="space-y-3" id="whatsapp">
+            <h2 className="text-2xl font-bold">6.1 Uso do WhatsApp Business Platform</h2>
+            <p>
+              Ao conectar um número de WhatsApp ao AdvOne (via API Oficial do WhatsApp Business, fornecida pela Meta,
+              ou via conector UaZapi), o Usuário declara e concorda que:
+            </p>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>É o titular ou possui autorização expressa para operar o número conectado;</li>
+              <li>Obtém consentimento prévio dos contatos antes de enviar mensagens automatizadas, em conformidade com a LGPD;</li>
+              <li>Cumpre integralmente a{" "}
+                <a href="https://www.whatsapp.com/legal/business-policy" className="text-primary underline" target="_blank" rel="noreferrer">
+                  Política Comercial do WhatsApp
+                </a>{" "}
+                e os{" "}
+                <a href="https://developers.facebook.com/terms/" className="text-primary underline" target="_blank" rel="noreferrer">
+                  Termos da Plataforma da Meta
+                </a>;
+              </li>
+              <li>Não utilizará a plataforma para envio de spam, mensagens não solicitadas, conteúdo enganoso, ilegal, discriminatório ou que viole direitos de terceiros;</li>
+              <li>Não utilizará a AdvOne para setores restritos pela Meta (tabaco, armas, drogas, jogos ilegais, esquemas fraudulentos, etc.);</li>
+              <li>Reconhece que o descumprimento pode resultar em bloqueio do número pela Meta, sem que a AdvOne tenha responsabilidade sobre essa decisão.</li>
+            </ul>
+            <p>
+              A AdvOne pode, a seu critério, suspender ou encerrar o acesso do Usuário à integração WhatsApp em caso de
+              suspeita ou constatação de violação dessas condições, com o objetivo de proteger a integridade da plataforma
+              e a conformidade com Meta.
             </p>
           </section>
 

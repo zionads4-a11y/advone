@@ -106,6 +106,42 @@ export default function Privacy() {
             </p>
           </section>
 
+          <section className="space-y-3" id="whatsapp-meta">
+            <h2 className="text-2xl font-bold">4.1 Uso dos Dados do WhatsApp Business Platform (Meta)</h2>
+            <p>
+              A AdvOne integra-se ao <strong>WhatsApp Business Platform</strong>, fornecido pela Meta Platforms Ireland Ltd.
+              Quando um escritório conecta seu número de WhatsApp à plataforma, atuamos como <strong>provedor de tecnologia</strong>
+              (Tech Provider) autorizado, processando mensagens em nome do escritório para as seguintes finalidades:
+            </p>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>Receber e enviar mensagens entre o escritório e seus leads/clientes;</li>
+              <li>Aplicar inteligência artificial para responder, qualificar e agendar reuniões;</li>
+              <li>Armazenar histórico de conversas para consulta pelo próprio escritório;</li>
+              <li>Enviar lembretes automáticos de reuniões e follow-ups configurados pelo escritório.</li>
+            </ul>
+            <p>
+              <strong>Não utilizamos dados de conversas do WhatsApp para:</strong> publicidade de terceiros,
+              venda de dados, treinamento de modelos de IA de terceiros sem consentimento, ou qualquer
+              finalidade não diretamente relacionada à prestação do serviço contratado pelo escritório.
+            </p>
+            <p>
+              Ao usar o WhatsApp através da AdvOne, o escritório e seus contatos também estão sujeitos à{" "}
+              <a href="https://www.whatsapp.com/legal/business-policy" className="text-primary underline" target="_blank" rel="noreferrer">
+                Política Comercial do WhatsApp
+              </a>{" "}
+              e à{" "}
+              <a href="https://www.whatsapp.com/legal/privacy-policy" className="text-primary underline" target="_blank" rel="noreferrer">
+                Política de Privacidade do WhatsApp
+              </a>. O escritório é responsável por obter o consentimento prévio dos contatos antes de iniciar
+              comunicações automatizadas, conforme a LGPD.
+            </p>
+            <p>
+              Os dados trocados via WhatsApp Business Platform são transmitidos pela infraestrutura da Meta,
+              que pode processá-los fora do Brasil. A Meta declara operar com salvaguardas adequadas de
+              transferência internacional de dados.
+            </p>
+          </section>
+
           <section className="space-y-3">
             <h2 className="text-2xl font-bold">5. Base Legal (LGPD)</h2>
             <ul className="list-disc pl-6 space-y-2">
