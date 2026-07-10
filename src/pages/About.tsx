@@ -69,7 +69,12 @@ export default function About() {
             <p className="text-muted-foreground text-sm space-y-1">
               <strong>Razão social:</strong> 54.253.906 DANIEL FELIPE VIANA MANACES<br />
               <strong>CNPJ:</strong> 54.253.906/0001-47<br />
-              <strong>Endereço:</strong> Rua José Bartolota, 40<br />
+              <strong>Porte:</strong> ME (Microempresa)<br />
+              <strong>Natureza jurídica:</strong> Empresário Individual<br />
+              <strong>Data de abertura:</strong> 08/03/2024<br />
+              <strong>CNAE principal:</strong> 73.19-0-02 — Promoção de vendas<br />
+              <strong>Endereço:</strong> Rua José Bartolota, 40 — Glória, Belo Horizonte/MG — CEP 30.830-440<br />
+              <strong>Telefone:</strong> (31) 9805-1061<br />
               <strong>E-mail:</strong> contato@advone.online<br />
               <strong>Site:</strong> advone.online
             </p>
