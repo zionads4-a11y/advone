@@ -4126,6 +4126,7 @@ export type Database = {
         | "plan_ia_6m"
         | "plan_ia_12m"
         | "plan_zionads"
+        | "plan_ia"
       bot_agent_type:
         | "document_collector"
         | "viability_analyzer"
@@ -4282,6 +4283,7 @@ export const Constants = {
         "plan_ia_6m",
         "plan_ia_12m",
         "plan_zionads",
+        "plan_ia",
       ],
       bot_agent_type: [
         "document_collector",
