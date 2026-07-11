@@ -535,19 +535,20 @@ export default function LandingPage() {
       <section className="border-y border-[hsl(220,20%,16%)] bg-[hsl(220,25%,8%)]">
         <div className="mx-auto max-w-5xl px-6 py-24">
           <Reveal className="mb-16 text-center">
-            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">A jornada do lead</p>
+            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Fluxo operacional</p>
             <h2 className="text-3xl font-bold md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Do clique no Google Ads ao contrato assinado — em 24h.
+              Do primeiro contato ao contrato assinado — com processo estruturado.
             </h2>
           </Reveal>
           <div className="grid gap-6 md:grid-cols-5">
             {[
-              { step: "1", title: "Lead clica no anúncio", desc: "Google Ads ou Meta Ads com link UTM AdvOne — atribuição 100% rastreada." },
-              { step: "2", title: "Cai no WhatsApp", desc: "A Laura recebe em <5s, transcreve áudio, apresenta o escritório." },
-              { step: "3", title: "Qualifica o caso", desc: "Identifica nicho (prev, trab, cível…), colhe dados e classifica temperatura." },
-              { step: "4", title: "Marca na agenda", desc: "Reunião direto no Google Calendar do advogado da área. Sem overbooking." },
-              { step: "5", title: "Advogado recebe alerta", desc: "WhatsApp na hora. Lembretes automáticos 6h, 2h e 30min antes pro cliente." },
+              { step: "1", title: "Captação", desc: "Recepção do contato originado por indicação, site institucional ou campanhas de mídia paga, com atribuição de origem." },
+              { step: "2", title: "Triagem", desc: "Registro do caso no CRM, identificação da área do direito envolvida e coleta das informações essenciais." },
+              { step: "3", title: "Qualificação", desc: "Análise de viabilidade, classificação da prioridade e distribuição ao advogado responsável pela matéria." },
+              { step: "4", title: "Agendamento", desc: "Reunião marcada no Google Calendar do advogado, com envio automatizado de lembretes ao cliente." },
+              { step: "5", title: "Contratação", desc: "Envio de proposta, assinatura eletrônica do contrato e emissão de cobrança recorrente pelo módulo financeiro." },
             ].map((s, i) => (
+
               <Reveal key={s.step} delay={i * 120}>
                 <div className="relative text-center group">
                   <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border-2 border-[hsl(153,60%,45%)] bg-[hsl(153,60%,45%)]/10 text-xl font-bold text-[hsl(153,60%,45%)] transition-all duration-300 group-hover:bg-[hsl(153,60%,45%)]/20 group-hover:scale-110" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
