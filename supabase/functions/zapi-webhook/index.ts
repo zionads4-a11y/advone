@@ -2267,6 +2267,67 @@ REGRAS:
 
     const cleanPhone = phone.replace("@c.us", "").replace("@s.whatsapp.net", "");
 
+    // ===== APROVAÇÃO DE OCR PELO OPERADOR (via WhatsApp do escritório) =====
+    // Formato esperado: "OK <TOKEN>" ou "APROVAR <TOKEN>" ou "CORRIGIR <TOKEN> <texto>"
+    // Enviado pelo número cadastrado em whatsapp_configs.alert_whatsapp.
+    try {
+      const alertRaw = (config.alert_whatsapp || "").replace(/\D/g, "");
+      const senderRaw = cleanPhone.replace(/\D/g, "");
+      const isOperator = alertRaw && (
+        senderRaw === alertRaw ||
+        senderRaw === `55${alertRaw}` ||
+        `55${senderRaw}` === alertRaw ||
+        senderRaw.endsWith(alertRaw.slice(-10)) ||
+        alertRaw.endsWith(senderRaw.slice(-10))
+      );
+      if (isOperator) {
+        const approvalMatch = messageText.match(/\b(OK|APROVAR|CONFIRMAR|CONFIRMO|LIBERAR)\s+([A-Z0-9]{5,8})\b/i);
+        const rejectMatch = messageText.match(/\b(CORRIGIR|REJEITAR|REFAZER)\s+([A-Z0-9]{5,8})\b/i);
+        const token = (approvalMatch?.[2] || rejectMatch?.[2] || "").toUpperCase();
+        if (token) {
+          const { data: pendingLead } = await supabase.from("leads")
+            .select("id, name, phone, whatsapp, ocr_document_type")
+            .eq("company_id", companyId).eq("ocr_review_token", token).maybeSingle();
+          if (pendingLead) {
+            const approved = !!approvalMatch;
+            await supabase.from("leads").update({
+              ocr_pending_review: false,
+              ocr_review_token: null,
+              ...(approved ? {} : { ocr_extracted_data: null }),
+            }).eq("id", pendingLead.id);
+
+            const SERVER_URL = "https://ziondigital.uazapi.com";
+            const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+            const sendHeaders: Record<string, string> = { "Content-Type": "application/json" };
+            if (ADMIN_TOKEN) sendHeaders["admintoken"] = ADMIN_TOKEN;
+            const sendUrl = `${SERVER_URL}/send/text?instance=${encodeURIComponent(config.zapi_instance_id)}&token=${encodeURIComponent(config.zapi_token || config.zapi_instance_id)}`;
+            const ackText = approved
+              ? `✅ OCR aprovado para ${pendingLead.name || "lead"} (${pendingLead.ocr_document_type?.toUpperCase() || "documento"}). Laura liberada para enviar o parecer.`
+              : `↩️ OCR de ${pendingLead.name || "lead"} descartado. Peça ao lead para reenviar o documento.`;
+            await fetch(sendUrl, { method: "POST", headers: sendHeaders, body: JSON.stringify({ number: cleanPhone, text: ackText }) });
+
+            // Se aprovado, dá um empurrão na Laura enviando um "hint" interno pro lead (mensagem-sistema no histórico)
+            if (approved && (pendingLead.phone || pendingLead.whatsapp)) {
+              await supabase.from("whatsapp_messages").insert({
+                company_id: companyId, lead_id: pendingLead.id, phone: pendingLead.phone || pendingLead.whatsapp,
+                message_text: `[sistema] OCR revisado e aprovado pelo operador. Prossiga com o parecer usando os dados extraídos.`,
+                direction: "incoming", sender_name: "sistema",
+                timestamp: new Date().toISOString(),
+              });
+            }
+
+            return new Response(JSON.stringify({ ok: true, ocr_review: approved ? "approved" : "rejected", lead_id: pendingLead.id }), {
+              status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+        }
+      }
+    } catch (opErr) {
+      console.error("[ocr-approval] erro:", opErr);
+    }
+
+
+
     // Extract tracking code
     let trackingCode: string | null = null;
     let utmData: any = {};
