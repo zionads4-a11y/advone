@@ -2033,6 +2033,114 @@ serve(async (req) => {
       }
     }
 
+    // ===== VISÃO DE IMAGEM (GPT-4o-mini) — OCR de RG/CNH, laudos, prints de negativa INSS, etc. =====
+    if (imageUrl) {
+      try {
+        const openaiKey = Deno.env.get("OPENAI_API_KEY");
+        if (!openaiKey) {
+          console.error("[image] OPENAI_API_KEY não configurada");
+          messageText = "[O lead enviou uma imagem. Agradeça e diga que a equipe vai analisar em seguida.]";
+        } else {
+          console.log(`[image] Analisando imagem: ${imageUrl}`);
+          const caption = messageText && messageText !== "[mídia]" ? messageText : "";
+          const visionResp = await fetch("https://api.openai.com/v1/chat/completions", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${openaiKey}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              model: "gpt-4o-mini",
+              max_tokens: 800,
+              messages: [
+                {
+                  role: "system",
+                  content: "Você analisa imagens enviadas por leads a um escritório de advocacia (previdenciário, trabalhista, cível). Descreva objetivamente em PT-BR o que a imagem mostra. Se for documento (RG, CNH, CTPS, contracheque, carta do INSS, laudo, extrato, print de app Meu INSS, holerite, contrato), extraia TODOS os textos, números, datas e valores relevantes de forma estruturada. Se for foto pessoal/lesão/local, descreva o que é visível. Máx 500 palavras. Não invente dados.",
+                },
+                {
+                  role: "user",
+                  content: [
+                    { type: "text", text: caption ? `Legenda do lead: "${caption}". Analise a imagem:` : "Analise a imagem enviada pelo lead:" },
+                    { type: "image_url", image_url: { url: imageUrl } },
+                  ],
+                },
+              ],
+            }),
+          });
+          if (!visionResp.ok) {
+            const errTxt = await visionResp.text();
+            console.error(`[image] Vision falhou ${visionResp.status}: ${errTxt}`);
+            messageText = "[O lead enviou uma imagem que não consegui analisar. Peça educadamente que descreva ou reenvie.]";
+          } else {
+            const visionData = await visionResp.json();
+            const desc = (visionData.choices?.[0]?.message?.content || "").trim();
+            if (desc) {
+              console.log(`[image] Descrição: ${desc.substring(0, 150)}...`);
+              messageText = `📷 [imagem recebida do lead${caption ? ` — legenda: "${caption}"` : ""}]\nConteúdo extraído:\n${desc}`;
+            } else {
+              messageText = "[O lead enviou uma imagem sem conteúdo legível. Peça que reenvie com mais nitidez.]";
+            }
+          }
+        }
+      } catch (imgErr) {
+        console.error("[image] Erro inesperado:", imgErr);
+        messageText = "[O lead enviou uma imagem que não consegui analisar. Peça educadamente que descreva ou reenvie.]";
+      }
+    }
+
+    // ===== DOCUMENTOS (PDF / DOCX / etc.) — extrai texto de PDFs pequenos via OpenAI Files API =====
+    if (documentUrl) {
+      try {
+        const openaiKey = Deno.env.get("OPENAI_API_KEY");
+        const fname = documentFilename || "documento";
+        const caption = messageText && messageText !== "[mídia]" && !messageText.startsWith("📷") ? messageText : "";
+        const isPdf = (documentMime || "").includes("pdf") || fname.toLowerCase().endsWith(".pdf");
+
+        if (!openaiKey || !isPdf) {
+          console.log(`[doc] Documento não-PDF ou sem chave: ${fname} (${documentMime})`);
+          messageText = `📎 [documento recebido do lead: "${fname}"${caption ? ` — legenda: "${caption}"` : ""}]\nRegistre como documento recebido e siga o fluxo (não é possível ler o conteúdo automaticamente).`;
+        } else {
+          console.log(`[doc] Baixando PDF: ${documentUrl}`);
+          const docResp = await fetch(documentUrl);
+          if (!docResp.ok) throw new Error(`download falhou ${docResp.status}`);
+          const docBlob = await docResp.blob();
+          if (docBlob.size > 15 * 1024 * 1024) {
+            messageText = `📎 [documento recebido: "${fname}" — muito grande para análise automática]${caption ? ` Legenda: "${caption}"` : ""}. Registre como recebido.`;
+          } else {
+            const b64 = btoa(new Uint8Array(await docBlob.arrayBuffer()).reduce((s, b) => s + String.fromCharCode(b), ""));
+            const dataUrl = `data:application/pdf;base64,${b64}`;
+            const docAiResp = await fetch("https://api.openai.com/v1/chat/completions", {
+              method: "POST",
+              headers: { Authorization: `Bearer ${openaiKey}`, "Content-Type": "application/json" },
+              body: JSON.stringify({
+                model: "gpt-4o-mini",
+                max_tokens: 1200,
+                messages: [
+                  { role: "system", content: "Você analisa documentos jurídicos enviados por leads (contratos, carta do INSS, sentença, laudo médico, holerite, CTPS, extrato). Resuma em PT-BR: (1) tipo de documento, (2) partes/envolvidos, (3) datas e valores relevantes, (4) o que o documento diz na prática. Máx 600 palavras. Não invente." },
+                  { role: "user", content: [
+                    { type: "text", text: `Arquivo: ${fname}${caption ? ` — Legenda: "${caption}"` : ""}. Analise:` },
+                    { type: "file", file: { filename: fname, file_data: dataUrl } },
+                  ]},
+                ],
+              }),
+            });
+            if (!docAiResp.ok) {
+              const t = await docAiResp.text();
+              console.error(`[doc] AI falhou ${docAiResp.status}: ${t}`);
+              messageText = `📎 [documento recebido: "${fname}"] Não foi possível ler automaticamente. Registre como recebido.`;
+            } else {
+              const dj = await docAiResp.json();
+              const summary = (dj.choices?.[0]?.message?.content || "").trim();
+              messageText = summary
+                ? `📎 [documento recebido do lead: "${fname}"${caption ? ` — legenda: "${caption}"` : ""}]\nResumo do conteúdo:\n${summary}`
+                : `📎 [documento recebido: "${fname}"] sem conteúdo extraível.`;
+            }
+          }
+        }
+      } catch (docErr) {
+        console.error("[doc] Erro inesperado:", docErr);
+        messageText = `📎 [documento recebido do lead${documentFilename ? `: "${documentFilename}"` : ""}] Não foi possível ler o conteúdo. Registre como recebido e siga o fluxo.`;
+      }
+    }
+
+
     if (typeof messageText !== "string") {
       messageText = String(messageText ?? "");
     }
