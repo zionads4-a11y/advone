@@ -859,7 +859,12 @@ export default function LandingPage() {
                 </div>
                 <div className="mb-6">
                   <h3 className="text-xl font-bold text-[hsl(220,10%,92%)] mb-2">Mais flexibilidade</h3>
+                  <div className="mt-4 flex items-baseline gap-1">
+                    <span className="text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 997</span>
+                    <span className="text-sm text-[hsl(220,10%,60%)]">/mês</span>
+                  </div>
                 </div>
+
                 <ul className="mb-8 flex-1 space-y-3">
                   {[
                     "Mesmo acesso completo à plataforma",
@@ -890,8 +895,13 @@ export default function LandingPage() {
                 </div>
                 <div className="mb-6">
                   <h3 className="text-xl font-bold text-[hsl(220,10%,92%)] mb-2">Economia intermediária</h3>
-                  <p className="mt-2 text-[hsl(153,60%,45%)] font-bold text-sm">Plano 6 meses</p>
+                  <div className="mt-4 flex items-baseline gap-1">
+                    <span className="text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 797</span>
+                    <span className="text-sm text-[hsl(220,10%,60%)]">/mês</span>
+                  </div>
+                  <p className="mt-2 text-[hsl(153,60%,45%)] font-bold text-sm">Plano 6 meses · R$ 4.782 à vista</p>
                 </div>
+
                 <ul className="mb-8 flex-1 space-y-3">
                   {[
                     "Mesmo acesso completo",
@@ -923,9 +933,14 @@ export default function LandingPage() {
                   <span className="inline-block rounded-full bg-[hsl(153,60%,45%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(153,60%,45%)]">PAGAMENTO ANUAL</span>
                 </div>
                 <div className="mb-6">
-                  <h3 className="text-xl font-bold text-[hsl(220,10%,92%)] mb-2 text-[hsl(153,60%,45%)]">Economia máxima</h3>
-                  <p className="mt-2 text-[hsl(153,60%,45%)] font-bold text-sm">Plano 12 meses</p>
+                  <h3 className="text-xl font-bold mb-2 text-[hsl(153,60%,45%)]">Economia máxima</h3>
+                  <div className="mt-4 flex items-baseline gap-1">
+                    <span className="text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 597</span>
+                    <span className="text-sm text-[hsl(220,10%,60%)]">/mês</span>
+                  </div>
+                  <p className="mt-2 text-[hsl(153,60%,45%)] font-bold text-sm">Plano 12 meses · R$ 7.164 à vista</p>
                 </div>
+
                 <ul className="mb-8 flex-1 space-y-3">
                   {[
                     "Acesso completo vitalício (no período)",
