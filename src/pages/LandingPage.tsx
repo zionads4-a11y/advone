@@ -164,17 +164,17 @@ export default function LandingPage() {
               <div
                 className="mb-6 inline-flex items-center gap-2 rounded-full border border-[hsl(153,60%,45%)]/30 bg-[hsl(153,60%,45%)]/10 px-4 py-1.5 text-sm text-[hsl(153,60%,45%)] animate-fade-in"
               >
-                <Zap className="h-4 w-4" />
-                A SDR jurídica com IA que nunca dorme
+                <Scale className="h-4 w-4" />
+                Plataforma de gestão para escritórios de advocacia
               </div>
               <h1
                 className="mb-6 text-2xl font-bold leading-tight tracking-tight sm:text-3xl md:text-5xl lg:text-6xl animate-slide-up"
                 style={{ fontFamily: "'Space Grotesk', sans-serif" }}
               >
-                Enquanto seu concorrente <span className="gradient-text">dorme</span>,<br />a Laura fecha reunião.
+                A gestão completa do seu <span className="gradient-text">escritório</span>,<br />em uma única plataforma.
               </h1>
               <p className="mx-auto mb-8 max-w-xl text-lg text-[hsl(220,10%,55%)] lg:mx-0 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-                Laura é a SDR com IA treinada em Direito brasileiro. Responde cada lead do WhatsApp em <strong className="text-[hsl(220,10%,80%)]">menos de 5 segundos</strong>, qualifica o caso, agenda na sua agenda Google e chama o advogado responsável. 24h por dia. Por <strong className="text-[hsl(153,60%,55%)]">R$ 597/mês</strong> — o preço de meia diária de uma secretária humana.
+                O AdvOne integra <strong className="text-[hsl(220,10%,80%)]">CRM jurídico, agenda, financeiro, gestão de processos e atendimento via WhatsApp</strong> em um único ambiente seguro e auditável. Uma solução desenvolvida para escritórios que buscam eficiência operacional, previsibilidade de receita e conformidade com a LGPD.
               </p>
               <div className="flex flex-col items-center gap-4 sm:flex-row lg:justify-start animate-slide-up" style={{ animationDelay: "0.2s" }}>
                 <Button
@@ -182,7 +182,7 @@ export default function LandingPage() {
                   onClick={() => navigate("/signup?plan=admin")}
                   className="gradient-primary glow-primary px-8 py-6 text-lg font-semibold text-[hsl(0,0%,100%)] group"
                 >
-                  Quero ativar a Laura agora
+                  Solicitar apresentação
                   <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Button>
                 <a
@@ -190,12 +190,13 @@ export default function LandingPage() {
                   className="flex items-center gap-2 text-sm text-[hsl(220,10%,70%)] transition-colors hover:text-[hsl(153,60%,45%)]"
                 >
                   <Play className="h-4 w-4" />
-                  Ver a Laura atendendo um lead real
+                  Conhecer a plataforma
                 </a>
               </div>
               <p className="mt-4 text-sm text-[hsl(220,10%,45%)]">
-                Ativação em até 72h · Sem taxa de setup · Cancele quando quiser
+                Implantação assistida em até 72h · Suporte especializado · Dados sob padrão LGPD
               </p>
+
             </div>
 
             {/* Right: Chat Demo */}
