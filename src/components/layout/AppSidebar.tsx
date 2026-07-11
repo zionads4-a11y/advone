@@ -23,6 +23,7 @@ import {
   CheckSquare,
   Layers,
   Activity,
+  Calculator,
 } from "lucide-react";
 import logoAdvOne from "@/assets/logo-advone-light.png";
 import { NavLink } from "@/components/NavLink";
@@ -86,6 +87,7 @@ const gerenteItems = [
   { title: "Bot SDR", url: "/bot-config", icon: Bot, premium: true },
   { title: "IA Jurídica", url: "/ia-juridica", icon: Scale, premium: true },
   { title: "Jurisprudência", url: "/jurisprudencia", icon: Search },
+  { title: "AdvCalc", url: "/calculadoras", icon: Calculator },
   { title: "Financeiro", url: "/financeiro", icon: Wallet },
   { title: "Monitoramento", url: "/monitoramento", icon: Radar },
   { title: "Modelos de Documentos", url: "/modelos-documentos", icon: FileText },
@@ -102,6 +104,7 @@ const operadorItems = [
   { title: "Monitoramento", url: "/monitoramento", icon: Radar },
   { title: "IA Jurídica", url: "/ia-juridica", icon: Scale, premium: true },
   { title: "Jurisprudência", url: "/jurisprudencia", icon: Search },
+  { title: "AdvCalc", url: "/calculadoras", icon: Calculator },
 ];
 
 const clientItems = [
