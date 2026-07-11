@@ -566,14 +566,13 @@ export default function LandingPage() {
         <div className="relative mx-auto max-w-6xl px-6 py-24">
           <Reveal className="mb-14 text-center">
             <p className="mb-3 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">
-              Gestão Completa · ADM
+              Plano CRM Full · R$ 897/mês
             </p>
             <h2 className="mx-auto max-w-3xl text-3xl font-bold leading-tight md:text-5xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Seu escritório inteiro em <span className="text-[hsl(153,60%,45%)]">um só lugar</span>
+              O escritório inteiro rodando em <span className="text-[hsl(153,60%,45%)]">um único painel</span>
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-base text-[hsl(220,10%,65%)] md:text-lg">
-              Da captação do lead até a entrega final do processo. Centralize processos, prazos, financeiro,
-              equipe e clientes em uma plataforma conectada e sincronizada — controle total sem perder agilidade.
+              Chega de planilha, WhatsApp bagunçado, agenda no papel e financeiro no Excel. Do primeiro clique do lead ao último honorário recebido — tudo conectado, auditado e visível em tempo real. É assim que escritório grande opera.
             </p>
           </Reveal>
 
