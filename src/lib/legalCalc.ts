@@ -612,6 +612,22 @@ const TIPOS_CONSIGNADO: TipoContrato[] = ["consignado", "cartao_rmc", "cartao_rc
 
 export function calcSuperendividamento(i: SuperendividamentoInput): SuperendividamentoResult {
   const info = CONSIGNAVEL_POR_CATEGORIA[i.categoria];
+
+  // Determina o teto consignável efetivo:
+  // 1) override manual (se preenchido) tem prioridade absoluta;
+  // 2) para servidor público, se houver UF selecionada, usa a margem estadual;
+  // 3) caso contrário, usa a margem padrão da categoria.
+  let limitePct = info.limite;
+  let limiteNota = info.nota;
+  if (i.categoria === "servidor_publico" && i.uf && MARGEM_CONSIGNAVEL_UF_SERVIDOR[i.uf]) {
+    limitePct = MARGEM_CONSIGNAVEL_UF_SERVIDOR[i.uf].total;
+    limiteNota = MARGEM_CONSIGNAVEL_UF_SERVIDOR[i.uf].nota;
+  }
+  if (typeof i.margemConsignavelOverridePct === "number" && i.margemConsignavelOverridePct > 0) {
+    limitePct = Math.min(100, Math.max(0, i.margemConsignavelOverridePct));
+    limiteNota = `Margem personalizada informada pelo(a) operador(a)${i.uf ? ` — ${i.uf}` : ""}`;
+  }
+
   const rendaTotal = +(Number(i.rendaLiquidaMensal || 0) + Number(i.outrasRendasMensais || 0)).toFixed(2);
   const dividas = (i.dividas || []).filter((d) => d && Number(d.parcelaMensal) > 0);
   const totalParcelas = +dividas.reduce((s, d) => s + Number(d.parcelaMensal || 0), 0).toFixed(2);
@@ -623,7 +639,7 @@ export function calcSuperendividamento(i: SuperendividamentoInput): Superendivid
 
   const pctComprometimento = rendaTotal > 0 ? +((totalParcelas / rendaTotal) * 100).toFixed(2) : 0;
   const consignadoPct = rendaTotal > 0 ? +((consignadoValor / rendaTotal) * 100).toFixed(2) : 0;
-  const limiteConsignavelValor = +(rendaTotal * (info.limite / 100)).toFixed(2);
+  const limiteConsignavelValor = +(rendaTotal * (limitePct / 100)).toFixed(2);
   const excedenteConsignavel = Math.max(0, +(consignadoValor - limiteConsignavelValor).toFixed(2));
 
   // Mínimo existencial (Dec. 11.150/2022 art. 3º): garantia de 25% do SM,
