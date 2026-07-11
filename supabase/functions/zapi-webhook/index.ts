@@ -2140,6 +2140,120 @@ serve(async (req) => {
       }
     }
 
+    // ===== OCR ESTRUTURADO — RG, CNH, CTPS, HOLERITE (auto-preenche cadastro do cliente) =====
+    // Roda em paralelo ao resumo genérico; só ativa fluxo de revisão se doc_type ∈ {rg,cnh,ctps,holerite}.
+    let ocrStructured: {
+      doc_type: string;
+      confidence: number;
+      human_summary: string;
+      fields: Record<string, string | null>;
+    } | null = null;
+
+    if (imageUrl || documentUrl) {
+      try {
+        const openaiKey = Deno.env.get("OPENAI_API_KEY");
+        if (openaiKey) {
+          const isPdf = !!documentUrl && ((documentMime || "").includes("pdf") || (documentFilename || "").toLowerCase().endsWith(".pdf"));
+          const userContent: any[] = [
+            { type: "text", text: "Classifique este documento e extraia todos os campos legíveis. Retorne JSON estrito." }
+          ];
+          if (imageUrl) {
+            userContent.push({ type: "image_url", image_url: { url: imageUrl } });
+          } else if (isPdf && documentUrl) {
+            try {
+              const r = await fetch(documentUrl);
+              if (r.ok) {
+                const buf = new Uint8Array(await r.arrayBuffer());
+                if (buf.byteLength <= 15 * 1024 * 1024) {
+                  const b64 = btoa(buf.reduce((s, b) => s + String.fromCharCode(b), ""));
+                  userContent.push({ type: "file", file: { filename: documentFilename || "doc.pdf", file_data: `data:application/pdf;base64,${b64}` } });
+                }
+              }
+            } catch (_e) { /* ignore */ }
+          }
+
+          if (userContent.length > 1) {
+            const structResp = await fetch("https://api.openai.com/v1/chat/completions", {
+              method: "POST",
+              headers: { Authorization: `Bearer ${openaiKey}`, "Content-Type": "application/json" },
+              body: JSON.stringify({
+                model: "gpt-4o-mini",
+                temperature: 0,
+                max_tokens: 900,
+                response_format: { type: "json_object" },
+                messages: [
+                  {
+                    role: "system",
+                    content: `Você é um extrator OCR jurídico brasileiro. Analise a imagem/PDF e retorne JSON com o formato:
+{
+ "doc_type": "rg" | "cnh" | "ctps" | "holerite" | "outro",
+ "confidence": 0.0-1.0,
+ "human_summary": "resumo curto do que foi lido (2-4 linhas)",
+ "fields": {
+   "name": string|null,               // nome completo
+   "cpf": string|null,                // apenas dígitos ou formato 000.000.000-00
+   "rg": string|null,                 // número RG com órgão emissor se visível
+   "birth_date": string|null,         // DD/MM/AAAA
+   "nacionalidade": string|null,
+   "estado_civil": string|null,
+   "profissao": string|null,          // ou cargo (holerite/CTPS)
+   "pis_pasep": string|null,          // CTPS/holerite
+   "cnh_categoria": string|null,      // CNH
+   "cnh_validade": string|null,       // CNH DD/MM/AAAA
+   "empregador": string|null,         // CTPS/holerite (razão social)
+   "empregador_cnpj": string|null,
+   "admissao": string|null,           // CTPS DD/MM/AAAA
+   "salario_base": string|null,       // holerite/CTPS ex "R$ 2.500,00"
+   "salario_liquido": string|null,    // holerite
+   "competencia": string|null,        // holerite MM/AAAA
+   "endereco_rua": string|null,
+   "endereco_numero": string|null,
+   "endereco_bairro": string|null,
+   "endereco_cidade": string|null,
+   "endereco_estado": string|null,    // UF
+   "endereco_cep": string|null
+ }
+}
+REGRAS:
+- Só preencha campos com dados VISÍVEIS. Nunca invente. Se não achar, use null.
+- doc_type = "rg" para RG/Carteira de Identidade; "cnh" para CNH/Carteira de Motorista; "ctps" para Carteira de Trabalho; "holerite" para contracheque/folha de pagamento; senão "outro".
+- confidence baixa (<0.5) se a imagem estiver ilegível ou não for documento reconhecível.
+- Responda APENAS JSON válido.`,
+                  },
+                  { role: "user", content: userContent },
+                ],
+              }),
+            });
+
+            if (structResp.ok) {
+              const sj = await structResp.json();
+              const raw = sj.choices?.[0]?.message?.content || "";
+              try {
+                const parsed = JSON.parse(raw);
+                if (parsed && typeof parsed === "object" && parsed.doc_type) {
+                  ocrStructured = {
+                    doc_type: String(parsed.doc_type).toLowerCase(),
+                    confidence: Number(parsed.confidence ?? 0),
+                    human_summary: String(parsed.human_summary || ""),
+                    fields: parsed.fields || {},
+                  };
+                  console.log(`[ocr-struct] type=${ocrStructured.doc_type} conf=${ocrStructured.confidence}`);
+                }
+              } catch (pe) {
+                console.error("[ocr-struct] JSON parse fail:", pe, raw.slice(0, 200));
+              }
+            } else {
+              console.error("[ocr-struct] request fail", structResp.status, await structResp.text());
+            }
+          }
+        }
+      } catch (e) {
+        console.error("[ocr-struct] erro:", e);
+      }
+    }
+
+
+
 
     if (typeof messageText !== "string") {
       messageText = String(messageText ?? "");
