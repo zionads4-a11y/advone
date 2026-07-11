@@ -144,7 +144,7 @@ export default function LandingPage() {
               Login
             </Button>
             <Button onClick={() => navigate("/signup?plan=admin")} className="gradient-primary text-[hsl(0,0%,100%)] font-semibold">
-              Começar agora
+              Ativar Laura em 72h
             </Button>
           </div>
         </div>
