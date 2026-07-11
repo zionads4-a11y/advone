@@ -1367,7 +1367,11 @@ Antes de responder:
               resumo_movimentacoes: p.recent_movements.map((m: any) => m.descricao).join(" | ")
             })),
             instruction: foundInSystem
-              ? `Faça um resumo MUITO SIMPLES e amigável da última movimentação encontrada. Diga que o(a) advogado(a) ${responsibleLawyerName} e a equipe estão acompanhando de perto e que o(a) responsável já foi avisado(a) para dar retorno detalhado em breve. Seja acolhedor.`
+              ? `Faça um RESUMO SUPER SIMPLES do processo para o cliente, em linguagem do dia a dia (PROIBIDO juridiquês — nada de "autos", "citação", "despacho saneador", "trânsito em julgado", "intimação", "conclusos", etc.). Estrutura em 2 partes CURTAS, no máximo 2 linhas cada:
+1) "O que aconteceu de mais recente:" — explique a última movimentação com palavras simples (ex.: "o juiz pediu mais documentos", "a outra parte foi avisada", "marcaram uma audiência pra tal dia").
+2) "Próximos passos:" — em 1 a 3 bullets curtos, diga em linguagem simples o que costuma vir depois nessa fase (ex.: "• A outra parte tem prazo pra responder • Depois o juiz analisa • Se precisar, marcam uma audiência").
+Feche com UMA frase acolhedora: "O(a) advogado(a) ${responsibleLawyerName} e a equipe estão acompanhando tudo de pertinho e te avisam assim que tiver novidade. 🙂"
+NÃO cite número de processo, tribunal, nem termos técnicos. NÃO invente datas ou fatos que não estão nos dados. Se a movimentação for técnica demais, traduza pro simples ou diga apenas "o processo está andando normalmente".`
               : `Nenhum processo foi localizado para este CPF. Responda EXATAMENTE (adaptando o primeiro nome do cliente): "Seu processo ainda está na fase inicial. O(a) advogado(a) ${responsibleLawyerName} vai entrar em contato assim que houver novas atualizações. Se preferir, você também pode nos chamar por aqui novamente sempre que precisar. 🙂". NÃO chame transfer_to_human, NÃO diga "vou avisar o advogado agora", NÃO agende reunião.`
           };
         }
