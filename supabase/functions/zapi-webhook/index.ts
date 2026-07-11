@@ -1878,8 +1878,13 @@ serve(async (req) => {
 
     let phone: string, senderName: string, messageText: string, messageIdExternal: string, isGroup: boolean;
     let audioUrl: string | null = null;
+    let imageUrl: string | null = null;
+    let documentUrl: string | null = null;
+    let documentFilename: string | null = null;
+    let documentMime: string | null = null;
     let audioMetadata: { wasAudio: boolean; duration: number | null; isShort: boolean; isMinimal: boolean } | null = null;
     let messageType: string = "text";
+
 
     // Helper: extrai texto de campos que podem vir como string OU objeto
     // (UaZapi às vezes manda {message: "..."} ou {body: "..."} ou button/list reply)
