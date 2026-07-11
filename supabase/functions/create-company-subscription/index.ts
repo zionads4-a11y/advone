@@ -271,6 +271,26 @@ Deno.serve(async (req) => {
       return json({ error: "Assinatura criada no Asaas mas falhou ao gravar local: " + insErr.message, asaas_subscription_id: asaasSub.id }, 500);
     }
 
+    // ---- registra o desconto (auditoria) — só se houve
+    if (discountRecord && approverId && approverRole) {
+      const { error: dErr } = await admin.from("subscription_discounts").insert({
+        company_id,
+        subscription_id: inserted.id,
+        requester_user_id: requesterId,
+        approver_user_id: approverId,
+        approver_role: approverRole,
+        plan,
+        original_value: basePrice,
+        discounted_value: valueNum,
+        discount_type: discountRecord.type,
+        discount_value: discountRecord.value,
+        discount_percent: discountRecord.percent,
+        reason: discountRecord.reason,
+        valid_until: discountRecord.valid_until,
+      });
+      if (dErr) console.error("subscription_discounts insert error:", dErr);
+    }
+
     return json({
       ok: true,
       subscription_id: inserted.id,
@@ -278,6 +298,12 @@ Deno.serve(async (req) => {
       asaas_customer_id: customerId,
       next_due_date: nextDueDate,
       invoice_url: invoiceUrl,
+      discount_applied: discountRecord ? {
+        approver_role: approverRole,
+        percent: discountRecord.percent,
+        original_value: basePrice,
+        final_value: valueNum,
+      } : null,
     });
   } catch (e) {
     console.error(e);
