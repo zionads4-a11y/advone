@@ -56,10 +56,14 @@ interface ProcessCard {
 interface Member { user_id: string; full_name: string | null; email: string | null; }
 interface TeamRow { id: string; card_id: string; user_id: string; role_on_card: string; }
 
+interface CompanyLite { id: string; name: string; }
+
 export default function ProcessKanban() {
   const { user } = useAuth();
-  const { companyIds } = useUserCompanies();
-  const companyId = companyIds[0];
+  const { companyIds, isClient } = useUserCompanies();
+
+  const [companies, setCompanies] = useState<CompanyLite[]>([]);
+  const [companyId, setCompanyId] = useState<string>("");
 
   const [areas, setAreas] = useState<LegalArea[]>([]);
   const [boards, setBoards] = useState<Board[]>([]);
@@ -80,6 +84,18 @@ export default function ProcessKanban() {
 
   const [activeDrag, setActiveDrag] = useState<ProcessCard | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
+
+  // Load companies list (admin/member = all; gerente/operador = only theirs)
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase.from("companies").select("id, name").order("name");
+      const list = (data || []) as CompanyLite[];
+      const filtered = isClient ? list.filter(c => companyIds.includes(c.id)) : list;
+      setCompanies(filtered);
+      setCompanyId((cur) => cur || filtered[0]?.id || "");
+    })();
+  }, [user, isClient, companyIds]);
 
   const loadAll = useCallback(async () => {
     if (!companyId) { setLoading(false); return; }
@@ -271,8 +287,8 @@ export default function ProcessKanban() {
     if (cur && cur.column_id !== colId) moveCard(active.id as string, colId);
   };
 
+  if (!companyId) return <div className="p-8 text-muted-foreground">Nenhuma empresa disponível.</div>;
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
-  if (!companyId) return <div className="p-8 text-muted-foreground">Nenhuma empresa vinculada ao seu usuário.</div>;
 
   const selectedArea = areas.find(a => a.id === selectedAreaId);
   const selectedBoard = areaBoards.find(b => b.id === selectedBoardId);
@@ -281,6 +297,17 @@ export default function ProcessKanban() {
     <div className="flex h-[calc(100vh-4rem)] flex-col gap-4 lg:flex-row">
       {/* SIDEBAR ÁREAS */}
       <div className="w-full shrink-0 rounded-lg border bg-card p-3 lg:w-64">
+        {companies.length > 1 && (
+          <div className="mb-3">
+            <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Empresa</label>
+            <Select value={companyId} onValueChange={(v) => { setCompanyId(v); setSelectedAreaId(null); setSelectedBoardId(null); }}>
+              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {companies.map(c => <SelectItem key={c.id} value={c.id} className="text-xs">{c.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
         <div className="mb-3 flex items-center justify-between">
           <h3 className="flex items-center gap-2 text-sm font-semibold">
             <Scale className="h-4 w-4 text-primary" /> Áreas
