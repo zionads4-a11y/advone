@@ -61,6 +61,11 @@ const AI_ONLY_ROUTES = new Set([
   "/agenda",
   "/conversations",
   "/monitoramento",
+  // Plano IA também pode gerenciar equipe e permissões de operadores,
+  // igual ao CRM Completo (gerente cadastra operadores e libera módulos).
+  "/client-users",
+  "/access-management",
+  "/company-settings",
 ]);
 
 const adminItems = [
