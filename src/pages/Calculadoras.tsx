@@ -17,11 +17,12 @@ import { toast } from "@/hooks/use-toast";
 import {
   brl,
   calcRescisao,
-  calcRMI,
+  calcPrevidenciaria,
   calcPensao,
   calcRevisional,
   type RescisaoResult,
-  type RMIResult,
+  type PrevResult,
+  type PrevModalidade,
   type PensaoResult,
   type RevisionalResult,
 } from "@/lib/legalCalc";
