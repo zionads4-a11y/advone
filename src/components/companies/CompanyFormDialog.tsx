@@ -36,7 +36,22 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
   const [supportPhone, setSupportPhone] = useState("");
   const [dueDay, setDueDay] = useState("10");
   const [billingType, setBillingType] = useState("UNDEFINED");
+  const [discountType, setDiscountType] = useState<"percent" | "fixed">("percent");
+  const [discountValue, setDiscountValue] = useState("");
+  const [discountReason, setDiscountReason] = useState("");
+  const [discountValidUntil, setDiscountValidUntil] = useState("");
+  const [approverEmail, setApproverEmail] = useState("");
+  const [approverPassword, setApproverPassword] = useState("");
   const isFree = false;
+
+  const currentModel = BILLING_MODELS.find((m) => m.key === selectedModel) ?? BILLING_MODELS[0];
+  const basePrice = currentModel.monthly_value;
+  const dValNum = parseFloat(discountValue) || 0;
+  const discountAmount =
+    discountType === "percent" ? +((basePrice * dValNum) / 100).toFixed(2) : dValNum;
+  const finalPrice = Math.max(0, +(basePrice - discountAmount).toFixed(2));
+  const discountPercent = basePrice > 0 ? +((discountAmount / basePrice) * 100).toFixed(2) : 0;
+  const hasDiscount = dValNum > 0 && finalPrice < basePrice;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
