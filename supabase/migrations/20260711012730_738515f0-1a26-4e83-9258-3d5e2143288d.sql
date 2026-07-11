@@ -1,0 +1,1 @@
+UPDATE public.leads SET bot_disabled=false, is_unread=false WHERE id='37a29f55-9f7c-40bd-a42d-d2a7112e99a2';
