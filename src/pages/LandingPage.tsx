@@ -444,20 +444,21 @@ export default function LandingPage() {
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <Reveal direction="left">
             <div>
-              <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Veja em ação</p>
+              <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Veja a Laura em ação</p>
               <h2 className="text-3xl font-bold md:text-4xl mb-6" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                Sua Secretária Virtual <span className="gradient-text">nunca tira folga.</span>
+                Ela atende como <span className="gradient-text">gente boa</span> — e converte como máquina.
               </h2>
               <p className="text-[hsl(220,10%,55%)] leading-relaxed mb-6">
-                Veja abaixo um atendimento real do escritório fictício <strong className="text-[hsl(220,10%,85%)]">Mendes &amp; Vasconcelos Advocacia</strong>. A IA conversa com empatia, qualifica o caso, oferece horário e agenda — em segundos, sem intervenção humana.
+                Aperte play e veja um atendimento real do escritório <strong className="text-[hsl(220,10%,85%)]">Mendes &amp; Vasconcelos Advocacia</strong>. A Laura escuta, entende o caso, identifica o nicho, oferece horário e agenda — tudo em segundos, sem intervenção humana. Nada de fluxo rígido, nada de "digite 1 para…".
               </p>
               <ul className="space-y-4">
                 {[
-                  "Recebe o lead em até 3 segundos, dia ou noite",
-                  "Faz triagem jurídica e identifica o tipo de caso",
-                  "Agenda respeitando o expediente do escritório",
-                  "5 tentativas automáticas se o lead sumir",
-                  "Avisa a equipe na hora que a consulta é fechada",
+                  "Resposta em menos de 5 segundos — dia, madrugada, feriado",
+                  "Transcreve áudio e entende gíria jurídica",
+                  "Identifica se é lead novo ou cliente antigo pelo CPF",
+                  "Marca na agenda Google do advogado responsável",
+                  "5 tentativas automáticas se o lead sumir (30min, 90min, 24h, 48h, 5 dias)",
+                  "Avisa o escritório por WhatsApp no segundo em que fecha a reunião",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3 text-[hsl(220,10%,75%)]">
                     <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[hsl(153,60%,45%)]" />
