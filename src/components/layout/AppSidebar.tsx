@@ -108,6 +108,7 @@ const operadorItems = [
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
   { title: "Monitoramento", url: "/monitoramento", icon: Radar },
+  { title: "Processos (Kanban)", url: "/processos-kanban", icon: Briefcase },
   { title: "IA Jurídica", url: "/ia-juridica", icon: Scale, premium: true },
   { title: "Jurisprudência", url: "/jurisprudencia", icon: Search },
   { title: "AdvCalc", url: "/calculadoras", icon: Calculator },
