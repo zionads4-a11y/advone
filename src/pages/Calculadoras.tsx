@@ -310,7 +310,29 @@ export default function Calculadoras() {
 
                 {/* ===== PREVIDENCIÁRIA ===== */}
                 <TabsContent value="previdenciaria" className="m-0 space-y-3">
-                  <h2 className="text-sm font-semibold">Aposentadoria — RMI (EC 103/2019)</h2>
+                  <h2 className="text-sm font-semibold">Calculadoras Previdenciárias (INSS)</h2>
+
+                  <div>
+                    <Label>Modalidade do benefício</Label>
+                    <Select
+                      value={rmi.modalidade}
+                      onValueChange={(v: PrevModalidade) => setRmi({ ...rmi, modalidade: v })}
+                    >
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="idade">Aposentadoria por Idade</SelectItem>
+                        <SelectItem value="tempo_contribuicao">Aposentadoria por Tempo de Contribuição</SelectItem>
+                        <SelectItem value="especial">Aposentadoria Especial (insalubre/perigosa)</SelectItem>
+                        <SelectItem value="invalidez">Aposentadoria por Invalidez</SelectItem>
+                        <SelectItem value="incapacidade_permanente">Incapacidade Permanente</SelectItem>
+                        <SelectItem value="auxilio_doenca">Auxílio-Doença (Incapacidade Temporária)</SelectItem>
+                        <SelectItem value="planejamento">Planejamento Previdenciário</SelectItem>
+                        <SelectItem value="revisao_vida_toda">Revisão da Vida Toda (Tema 1.102 STF)</SelectItem>
+                        <SelectItem value="liquidacao_sentenca">Liquidação de Sentença</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <Label>Sexo</Label>
@@ -333,39 +355,69 @@ export default function Calculadoras() {
                         onChange={(e) => setRmi({ ...rmi, tempoContribuicaoAnos: +e.target.value })} />
                     </div>
                     <div>
-                      <Label>Média salários (R$)</Label>
+                      <Label>Média salários pós 07/1994 (R$)</Label>
                       <Input type="number" value={rmi.mediaSalariosContribuicao}
                         onChange={(e) => setRmi({ ...rmi, mediaSalariosContribuicao: +e.target.value })} />
                     </div>
-                    <div className="col-span-2">
-                      <Label>Regra aplicável</Label>
-                      <Select value={rmi.regra} onValueChange={(v: any) => setRmi({ ...rmi, regra: v })}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="EC103_pontos">EC 103 — Pontuação</SelectItem>
-                          <SelectItem value="EC103_idade">EC 103 — Idade mínima</SelectItem>
-                          <SelectItem value="media_geral">Média geral (cálculo básico)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+
+                    {rmi.modalidade === "revisao_vida_toda" && (
+                      <div className="col-span-2">
+                        <Label>Média salários antes de 07/1994 (R$)</Label>
+                        <Input type="number" value={rmi.mediaPreJulho94}
+                          onChange={(e) => setRmi({ ...rmi, mediaPreJulho94: +e.target.value })} />
+                        <p className="mt-1 text-[11px] text-muted-foreground">
+                          Deixe 0 para simular estimativa automática de 15% de ganho.
+                        </p>
+                      </div>
+                    )}
+
+                    {rmi.modalidade === "liquidacao_sentenca" && (
+                      <>
+                        <div>
+                          <Label>Meses atrasados</Label>
+                          <Input type="number" value={rmi.atrasadosMeses}
+                            onChange={(e) => setRmi({ ...rmi, atrasadosMeses: +e.target.value })} />
+                        </div>
+                        <div>
+                          <Label>Juros mensais Selic (%)</Label>
+                          <Input type="number" step="0.01" value={rmi.jurosMensalPct}
+                            onChange={(e) => setRmi({ ...rmi, jurosMensalPct: +e.target.value })} />
+                        </div>
+                        <div className="col-span-2">
+                          <Label>Correção acumulada no período (%)</Label>
+                          <Input type="number" step="0.1" value={rmi.correcaoAcumuladaPct}
+                            onChange={(e) => setRmi({ ...rmi, correcaoAcumuladaPct: +e.target.value })} />
+                        </div>
+                      </>
+                    )}
                   </div>
+
                   <Button onClick={executarRMI} className="w-full">
-                    <Calculator className="mr-2 h-4 w-4" /> Calcular RMI
+                    <Calculator className="mr-2 h-4 w-4" /> Calcular benefício
                   </Button>
+
                   {rmiResult && (
                     <>
                       <Separator />
+                      <p className="text-xs font-semibold text-primary">{rmiResult.modalidadeLabel}</p>
                       <ResultBlock
                         itens={rmiResult.detalhes.map((x) => ({ label: x.label, valor: x.valor }))}
                         destaques={[
                           { label: "Coeficiente aplicado", valor: `${rmiResult.coeficiente}%` },
                           { label: "RENDA MENSAL INICIAL", valor: brl(rmiResult.rmi), highlight: true },
+                          ...(rmiResult.atrasados
+                            ? [{ label: "Atrasados apurados", valor: brl(rmiResult.atrasados) }]
+                            : []),
+                          ...(rmiResult.totalDevido
+                            ? [{ label: "TOTAL DEVIDO", valor: brl(rmiResult.totalDevido), highlight: true }]
+                            : []),
                         ]}
                       />
                       <p className="text-[11px] italic text-muted-foreground">{rmiResult.observacoes}</p>
                     </>
                   )}
                 </TabsContent>
+
 
                 {/* ===== PENSÃO ===== */}
                 <TabsContent value="pensao" className="m-0 space-y-3">
