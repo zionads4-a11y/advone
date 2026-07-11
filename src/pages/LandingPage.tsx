@@ -478,9 +478,9 @@ export default function LandingPage() {
       <section id="vantagens" className="border-y border-[hsl(220,20%,16%)] bg-[hsl(220,25%,8%)]">
         <div className="mx-auto max-w-6xl px-6 py-24">
           <Reveal className="mb-16 text-center">
-            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Isso significa</p>
+            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">A conta que ninguém te mostrou</p>
             <h2 className="text-3xl font-bold md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Pare de perder leads e tempo com tarefas manuais.
+              Cada lead que não é respondido em 5 minutos vale <span className="gradient-text">metade</span>.
             </h2>
           </Reveal>
           <div className="grid gap-8 md:grid-cols-3">
