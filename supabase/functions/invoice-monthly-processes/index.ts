@@ -1,11 +1,11 @@
 // Cobrança mensal de monitoramento de processos
-// R$ 3,50 × processos ativos por empresa, consolidado em 1 cobrança Asaas/mês.
+// R$ 2,50 × processos ativos por empresa, consolidado em 1 cobrança Asaas/mês.
 //
 // Body: { month?: string ('YYYY-MM', default = mês atual), company_id?: string }
 //
 // Para cada empresa com processos ativos:
 //   1. conta processos ativos
-//   2. calcula total = 3.50 × count
+//   2. calcula total = 2.50 × count
 //   3. cria/garante customer no Asaas
 //   4. cria 1 payment com vencimento dia 10 do mês seguinte
 //   5. registra em process_monitoring_charges (idempotente por company_id+month)
