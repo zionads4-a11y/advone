@@ -2056,8 +2056,58 @@ serve(async (req) => {
             );
           }
 
-          const { data: leadData } = await supabase.from("leads").select("name").eq("id", leadId).single();
+          const { data: leadData } = await supabase
+            .from("leads")
+            .select("name, is_client, cpf_cliente_final, assigned_to")
+            .eq("id", leadId)
+            .single();
           const currentLeadName = leadData?.name || senderName || undefined;
+
+          // Contexto de cliente existente — orienta o bot a NÃO perguntar "é cliente?" e
+          // a responder com boas-vindas quando este contato já é cliente cadastrado.
+          let clientContextBlock: string | undefined;
+          if (leadData?.is_client) {
+            let lawyerName = "";
+            if (leadData?.assigned_to) {
+              const { data: lawyerProfile } = await supabase
+                .from("profiles")
+                .select("full_name")
+                .eq("user_id", leadData.assigned_to)
+                .maybeSingle();
+              lawyerName = lawyerProfile?.full_name || "";
+            }
+            if (!lawyerName) {
+              lawyerName = (config.companies as any)?.owner_name
+                || (config.office_name || "")
+                || "responsável";
+            }
+            const cpfCad = leadData?.cpf_cliente_final ? ` (CPF cadastrado: ${leadData.cpf_cliente_final})` : "";
+            clientContextBlock = `
+
+═══════════════════════════════════════════════════════
+👤 CONTEXTO INTERNO — ESTE CONTATO JÁ É CLIENTE DO ESCRITÓRIO
+═══════════════════════════════════════════════════════
+Nome: ${currentLeadName || "(cliente cadastrado)"}${cpfCad}
+Advogado(a) responsável: ${lawyerName}
+
+REGRAS INVIOLÁVEIS PARA ESTE CONTATO:
+1. 🚫 NÃO pergunte "você já é cliente ou é seu primeiro contato?". Ele JÁ é cliente.
+2. ✅ SEMPRE que ele iniciar a conversa (ex.: "oi", "boa tarde"), responda em UMA mensagem:
+   "Olá, ${currentLeadName?.split(" ")[0] || "tudo bem"}! 😊 Como posso te ajudar hoje?" — e AGUARDE.
+3. 🚫 NÃO ofereça agendamento, NÃO faça qualificação (P1/P2/P3), NÃO chame decide_lead.
+4. Se ele pedir andamento do processo / novidade / audiência / sentença / pagamento:
+   a) Peça em UMA única mensagem: "Pra eu localizar seu processo aqui no sistema, me confirma seu *nome completo* e o *CPF*, por favor 🙂"
+   b) Aguarde o nome completo E o CPF (os dois juntos).
+   c) Chame OBRIGATORIAMENTE a tool \`lookup_existing_client\` passando client_full_name, client_cpf, subject="andamento_processo" e message_summary.
+   d) Se a tool retornar found_in_system=false OU monitored_processes_found=0, responda EXATAMENTE (adaptando só o nome do advogado):
+      "Seu processo ainda está na fase inicial. O(a) advogado(a) ${lawyerName} vai entrar em contato assim que houver novas atualizações. Se preferir, você também pode nos chamar por aqui novamente sempre que precisar. 🙂"
+      NÃO chame transfer_to_human depois dessa resposta. NÃO diga "vou avisar o advogado".
+   e) Se retornar found_in_system=true, faça um resumo simples e amigável e finalize com gentileza.
+5. Se o assunto NÃO for andamento de processo (ex.: dúvida sobre pagamento, documento, agendar reunião de acompanhamento):
+   a) Peça nome completo + CPF na mesma mensagem, chame \`lookup_existing_client\` com subject="outro" e message_summary.
+   b) Depois, avise cordialmente que a equipe/advogado(a) responsável dará retorno em breve.
+`;
+          }
 
           const { data: recentMsgs } = await supabase.from("whatsapp_messages")
             .select("message_text, direction").eq("company_id", companyId)
