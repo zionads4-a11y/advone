@@ -397,7 +397,7 @@ export default function ProcessKanban() {
               </Tabs>
             ) : (
               <Card><CardContent className="py-10 text-center text-sm text-muted-foreground">
-                Sem quadros nesta área. Clique em "Novo quadro".
+                Esta área ainda não tem funil. Clique em "Criar funil desta área" — cada setor terá seu próprio quadro isolado.
               </CardContent></Card>
             )}
 
