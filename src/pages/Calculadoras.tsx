@@ -605,6 +605,39 @@ export default function Calculadoras() {
                       <Input type="number" max="60" value={sup.prazoRepactuacaoMeses}
                         onChange={(e) => setSup({ ...sup, prazoRepactuacaoMeses: +e.target.value })} />
                     </div>
+                    <div>
+                      <Label>UF do vínculo {sup.categoria === "servidor_publico" ? "(servidor)" : "(referência)"}</Label>
+                      <Select value={sup.uf} onValueChange={(v: UF) => setSup({ ...sup, uf: v, margemConsignavelOverridePct: 0 })}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent className="max-h-64">
+                          {(Object.keys(MARGEM_CONSIGNAVEL_UF_SERVIDOR) as UF[]).map((uf) => (
+                            <SelectItem key={uf} value={uf}>
+                              {uf} — teto {MARGEM_CONSIGNAVEL_UF_SERVIDOR[uf].total}%
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {sup.categoria === "servidor_publico" && (
+                        <p className="mt-1 text-[10px] leading-tight text-muted-foreground">
+                          {MARGEM_CONSIGNAVEL_UF_SERVIDOR[sup.uf].nota}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <Label>Margem consignável personalizada (%)</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="70"
+                        step="0.5"
+                        placeholder="0 = usa padrão da UF/categoria"
+                        value={sup.margemConsignavelOverridePct || ""}
+                        onChange={(e) => setSup({ ...sup, margemConsignavelOverridePct: +e.target.value })}
+                      />
+                      <p className="mt-1 text-[10px] leading-tight text-muted-foreground">
+                        Sobrescreve o teto legal quando o ente federado tem regra própria (ex.: municípios, autarquias).
+                      </p>
+                    </div>
                   </div>
 
                   <div className="rounded-md border border-border bg-muted/20 p-3 space-y-2">
