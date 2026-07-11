@@ -34,10 +34,10 @@ import {
 } from "lucide-react";
 
 const stats = [
-  { value: "100%", label: "Atendimento com IA" },
-  { value: "24/7", label: "Secretária Virtual no ar" },
-  { value: "5x", label: "Mais agendamentos" },
-  { value: "0", label: "Leads esquecidos" },
+  { value: "24/7", label: "Laura no ar, sem folga" },
+  { value: "<5s", label: "Resposta na 1ª mensagem" },
+  { value: "3x", label: "Mais reuniões com o mesmo tráfego" },
+  { value: "72h", label: "Ativação completa do escritório" },
 ];
 
 const features = [
