@@ -140,6 +140,8 @@ export default function Calculadoras() {
   // ===== Superendividamento =====
   const [sup, setSup] = useState({
     categoria: "servidor_publico" as CategoriaDevedor,
+    uf: "FEDERAL" as UF,
+    margemConsignavelOverridePct: 0, // 0 = usa o padrão da categoria/UF
     rendaLiquidaMensal: 6000,
     outrasRendasMensais: 0,
     dependentes: 1,
