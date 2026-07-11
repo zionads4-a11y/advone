@@ -2134,7 +2134,8 @@ REGRAS INVIOLÁVEIS PARA ESTE CONTATO:
             effectivePhase, config, agentConfigs, history,
             companyId, leadId, supabase, currentLeadName, cleanPhone,
             flowsBlock, triageBlock,
-            (config.companies as any)?.timezone || "America/Sao_Paulo"
+            (config.companies as any)?.timezone || "America/Sao_Paulo",
+            clientContextBlock
           );
 
           const SERVER_URL = "https://ziondigital.uazapi.com";
