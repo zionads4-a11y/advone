@@ -1878,8 +1878,13 @@ serve(async (req) => {
 
     let phone: string, senderName: string, messageText: string, messageIdExternal: string, isGroup: boolean;
     let audioUrl: string | null = null;
+    let imageUrl: string | null = null;
+    let documentUrl: string | null = null;
+    let documentFilename: string | null = null;
+    let documentMime: string | null = null;
     let audioMetadata: { wasAudio: boolean; duration: number | null; isShort: boolean; isMinimal: boolean } | null = null;
     let messageType: string = "text";
+
 
     // Helper: extrai texto de campos que podem vir como string OU objeto
     // (UaZapi às vezes manda {message: "..."} ou {body: "..."} ou button/list reply)
@@ -1922,6 +1927,14 @@ serve(async (req) => {
       if (messageType.includes("audio") || messageType === "ptt" || messageType === "voice") {
         audioUrl = msg.audio?.url || msg.audio?.audioUrl || msg.mediaUrl || msg.fileURL || msg.url || msg.media?.url || null;
       }
+      if (messageType.includes("image") || messageType.includes("photo") || messageType.includes("sticker")) {
+        imageUrl = msg.image?.url || msg.image?.imageUrl || msg.photo?.url || msg.mediaUrl || msg.fileURL || msg.url || msg.media?.url || null;
+      }
+      if (messageType.includes("document") || messageType.includes("file") || messageType.includes("pdf")) {
+        documentUrl = msg.document?.url || msg.document?.documentUrl || msg.file?.url || msg.mediaUrl || msg.fileURL || msg.url || msg.media?.url || null;
+        documentFilename = msg.document?.filename || msg.document?.fileName || msg.file?.filename || msg.filename || msg.fileName || null;
+        documentMime = msg.document?.mimetype || msg.document?.mimeType || msg.mimetype || msg.mimeType || null;
+      }
       if (!messageText) messageText = "[mídia]";
     } else {
       phone = body.phone || "";
@@ -1930,6 +1943,7 @@ serve(async (req) => {
         extractText(body.text) ||
         extractText(body.image?.caption) ||
         extractText(body.video?.caption) ||
+        extractText(body.document?.caption) ||
         extractText(body.buttonsResponseMessage) ||
         extractText(body.listResponseMessage) ||
         "";
@@ -1939,8 +1953,19 @@ serve(async (req) => {
         audioUrl = body.audio?.audioUrl || body.audio?.url || body.ptt?.audioUrl || body.ptt?.url || null;
         messageType = "audio";
       }
+      if (body.image) {
+        imageUrl = body.image?.imageUrl || body.image?.url || null;
+        messageType = "image";
+      }
+      if (body.document) {
+        documentUrl = body.document?.documentUrl || body.document?.url || null;
+        documentFilename = body.document?.fileName || body.document?.filename || null;
+        documentMime = body.document?.mimeType || body.document?.mimetype || null;
+        messageType = "document";
+      }
       if (!messageText) messageText = "[mídia]";
     }
+
 
     // ===== TRANSCRIÇÃO DE ÁUDIO (Whisper) =====
     if (audioUrl) {
@@ -2007,6 +2032,114 @@ serve(async (req) => {
         messageText = "[O lead enviou um áudio que não pude entender. Peça educadamente que repita por texto ou envie novamente.]";
       }
     }
+
+    // ===== VISÃO DE IMAGEM (GPT-4o-mini) — OCR de RG/CNH, laudos, prints de negativa INSS, etc. =====
+    if (imageUrl) {
+      try {
+        const openaiKey = Deno.env.get("OPENAI_API_KEY");
+        if (!openaiKey) {
+          console.error("[image] OPENAI_API_KEY não configurada");
+          messageText = "[O lead enviou uma imagem. Agradeça e diga que a equipe vai analisar em seguida.]";
+        } else {
+          console.log(`[image] Analisando imagem: ${imageUrl}`);
+          const caption = messageText && messageText !== "[mídia]" ? messageText : "";
+          const visionResp = await fetch("https://api.openai.com/v1/chat/completions", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${openaiKey}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              model: "gpt-4o-mini",
+              max_tokens: 800,
+              messages: [
+                {
+                  role: "system",
+                  content: "Você analisa imagens enviadas por leads a um escritório de advocacia (previdenciário, trabalhista, cível). Descreva objetivamente em PT-BR o que a imagem mostra. Se for documento (RG, CNH, CTPS, contracheque, carta do INSS, laudo, extrato, print de app Meu INSS, holerite, contrato), extraia TODOS os textos, números, datas e valores relevantes de forma estruturada. Se for foto pessoal/lesão/local, descreva o que é visível. Máx 500 palavras. Não invente dados.",
+                },
+                {
+                  role: "user",
+                  content: [
+                    { type: "text", text: caption ? `Legenda do lead: "${caption}". Analise a imagem:` : "Analise a imagem enviada pelo lead:" },
+                    { type: "image_url", image_url: { url: imageUrl } },
+                  ],
+                },
+              ],
+            }),
+          });
+          if (!visionResp.ok) {
+            const errTxt = await visionResp.text();
+            console.error(`[image] Vision falhou ${visionResp.status}: ${errTxt}`);
+            messageText = "[O lead enviou uma imagem que não consegui analisar. Peça educadamente que descreva ou reenvie.]";
+          } else {
+            const visionData = await visionResp.json();
+            const desc = (visionData.choices?.[0]?.message?.content || "").trim();
+            if (desc) {
+              console.log(`[image] Descrição: ${desc.substring(0, 150)}...`);
+              messageText = `📷 [imagem recebida do lead${caption ? ` — legenda: "${caption}"` : ""}]\nConteúdo extraído:\n${desc}`;
+            } else {
+              messageText = "[O lead enviou uma imagem sem conteúdo legível. Peça que reenvie com mais nitidez.]";
+            }
+          }
+        }
+      } catch (imgErr) {
+        console.error("[image] Erro inesperado:", imgErr);
+        messageText = "[O lead enviou uma imagem que não consegui analisar. Peça educadamente que descreva ou reenvie.]";
+      }
+    }
+
+    // ===== DOCUMENTOS (PDF / DOCX / etc.) — extrai texto de PDFs pequenos via OpenAI Files API =====
+    if (documentUrl) {
+      try {
+        const openaiKey = Deno.env.get("OPENAI_API_KEY");
+        const fname = documentFilename || "documento";
+        const caption = messageText && messageText !== "[mídia]" && !messageText.startsWith("📷") ? messageText : "";
+        const isPdf = (documentMime || "").includes("pdf") || fname.toLowerCase().endsWith(".pdf");
+
+        if (!openaiKey || !isPdf) {
+          console.log(`[doc] Documento não-PDF ou sem chave: ${fname} (${documentMime})`);
+          messageText = `📎 [documento recebido do lead: "${fname}"${caption ? ` — legenda: "${caption}"` : ""}]\nRegistre como documento recebido e siga o fluxo (não é possível ler o conteúdo automaticamente).`;
+        } else {
+          console.log(`[doc] Baixando PDF: ${documentUrl}`);
+          const docResp = await fetch(documentUrl);
+          if (!docResp.ok) throw new Error(`download falhou ${docResp.status}`);
+          const docBlob = await docResp.blob();
+          if (docBlob.size > 15 * 1024 * 1024) {
+            messageText = `📎 [documento recebido: "${fname}" — muito grande para análise automática]${caption ? ` Legenda: "${caption}"` : ""}. Registre como recebido.`;
+          } else {
+            const b64 = btoa(new Uint8Array(await docBlob.arrayBuffer()).reduce((s, b) => s + String.fromCharCode(b), ""));
+            const dataUrl = `data:application/pdf;base64,${b64}`;
+            const docAiResp = await fetch("https://api.openai.com/v1/chat/completions", {
+              method: "POST",
+              headers: { Authorization: `Bearer ${openaiKey}`, "Content-Type": "application/json" },
+              body: JSON.stringify({
+                model: "gpt-4o-mini",
+                max_tokens: 1200,
+                messages: [
+                  { role: "system", content: "Você analisa documentos jurídicos enviados por leads (contratos, carta do INSS, sentença, laudo médico, holerite, CTPS, extrato). Resuma em PT-BR: (1) tipo de documento, (2) partes/envolvidos, (3) datas e valores relevantes, (4) o que o documento diz na prática. Máx 600 palavras. Não invente." },
+                  { role: "user", content: [
+                    { type: "text", text: `Arquivo: ${fname}${caption ? ` — Legenda: "${caption}"` : ""}. Analise:` },
+                    { type: "file", file: { filename: fname, file_data: dataUrl } },
+                  ]},
+                ],
+              }),
+            });
+            if (!docAiResp.ok) {
+              const t = await docAiResp.text();
+              console.error(`[doc] AI falhou ${docAiResp.status}: ${t}`);
+              messageText = `📎 [documento recebido: "${fname}"] Não foi possível ler automaticamente. Registre como recebido.`;
+            } else {
+              const dj = await docAiResp.json();
+              const summary = (dj.choices?.[0]?.message?.content || "").trim();
+              messageText = summary
+                ? `📎 [documento recebido do lead: "${fname}"${caption ? ` — legenda: "${caption}"` : ""}]\nResumo do conteúdo:\n${summary}`
+                : `📎 [documento recebido: "${fname}"] sem conteúdo extraível.`;
+            }
+          }
+        }
+      } catch (docErr) {
+        console.error("[doc] Erro inesperado:", docErr);
+        messageText = `📎 [documento recebido do lead${documentFilename ? `: "${documentFilename}"` : ""}] Não foi possível ler o conteúdo. Registre como recebido e siga o fluxo.`;
+      }
+    }
+
 
     if (typeof messageText !== "string") {
       messageText = String(messageText ?? "");
