@@ -34,56 +34,56 @@ import {
 } from "lucide-react";
 
 const stats = [
-  { value: "100%", label: "Atendimento com IA" },
-  { value: "24/7", label: "Secretária Virtual no ar" },
-  { value: "5x", label: "Mais agendamentos" },
-  { value: "0", label: "Leads esquecidos" },
+  { value: "24/7", label: "Laura no ar, sem folga" },
+  { value: "<5s", label: "Resposta na 1ª mensagem" },
+  { value: "3x", label: "Mais reuniões com o mesmo tráfego" },
+  { value: "72h", label: "Ativação completa do escritório" },
 ];
 
 const features = [
-  { icon: Headphones, title: "Secretária Virtual com IA", desc: "Recebe, escuta, qualifica e agenda seu cliente pelo WhatsApp 24h por dia — com a empatia de uma humana e a precisão de uma máquina." },
-  { icon: Kanban, title: "Kanban Automatizado", desc: "Leads se movem automaticamente pelo funil com cadência de 5 tentativas de contato." },
-  { icon: CalendarDays, title: "Agenda Integrada", desc: "Agendamentos automáticos respeitando horários livres e expediente configurado." },
-  { icon: Wallet, title: "Financeiro com Asaas", desc: "Contas a pagar, receber e faturamento líquido integrado com o Asaas." },
-  { icon: MessageSquare, title: "Conversas Centralizadas", desc: "Todas as mensagens do WhatsApp em um só lugar com histórico completo." },
-  { icon: FileText, title: "Documentos e Petições", desc: "Upload de documentos até 600MB, petições e procurações organizadas." },
-  { icon: Briefcase, title: "Gestão de Processos", desc: "Cadastro de processos com pastas por cliente, documentos e acompanhamento." },
-  { icon: Users, title: "Equipe e Permissões", desc: "Gerentes, operadores e clientes com acessos personalizados por função." },
+  { icon: Headphones, title: "Laura — sua SDR jurídica com IA", desc: "Recebe cada lead no WhatsApp em segundos, transcreve áudio, qualifica o caso e agenda a reunião — 24h por dia, sem férias, sem custo trabalhista." },
+  { icon: Kanban, title: "Kanban jurídico de 9 etapas", desc: "Pipeline pronto para advocacia: Novo → Atendimento → Qualificado → Agendado → Reunião → Ganho ou Perdido. Nada escapa, nada trava." },
+  { icon: CalendarDays, title: "Agenda Google integrada", desc: "A Laura marca a reunião direto na agenda do advogado responsável. Lembretes automáticos por WhatsApp 6h, 2h e 30min antes. Cliente aparece." },
+  { icon: Wallet, title: "Financeiro com Asaas nativo", desc: "Cobrança recorrente em PIX, cartão e boleto. Conciliação automática por webhook. Zero planilha, zero honorário esquecido." },
+  { icon: MessageSquare, title: "Modo compartilhado leads + clientes", desc: "Um único número de WhatsApp para novos casos e clientes ativos. A IA identifica pelo CPF, resgata o processo e chama o advogado responsável." },
+  { icon: FileText, title: "IA Jurídica — peças em minutos", desc: "Dra. Helena escreve petição inicial, contestação, recurso, MS e contrato em .docx padrão ABNT. Já com fundamentação e jurisprudência." },
+  { icon: Briefcase, title: "Processos com monitoramento diário", desc: "Cadastre o CNJ uma vez. O Escavador consulta TODO dia e dispara alerta a cada nova movimentação. Cliente informado antes de perguntar." },
+  { icon: Users, title: "Multi-tenant, 5 níveis de acesso", desc: "Admin, Membro, Gerente, Operador e Cliente. Cada advogado vê apenas o que precisa. Isolamento total por escritório (RLS no banco)." },
 ];
 
 const valueProps = [
   {
     icon: Clock,
-    title: "Mais tempo para o que importa",
-    desc: "Automatize cadências, agendamentos e follow-ups. Seu time foca em fechar contratos enquanto sua Secretária Virtual cuida do primeiro contato.",
+    title: "O lead que chegou às 22h de sábado já era seu.",
+    desc: "Enquanto o concorrente responde na segunda de manhã, a Laura já qualificou, agendou e mandou o link. Você abre o CRM e o contrato está pronto pra assinar.",
   },
   {
     icon: Target,
-    title: "Nenhum lead fica para trás",
-    desc: "Com 5 tentativas automáticas de contato, cadência inteligente e movimentação automática no Kanban, todo lead recebe atenção.",
+    title: "Pare de pagar tráfego pra alimentar concorrente.",
+    desc: "Google Ads e Meta custam caro. A cada lead perdido por demora, seu CPA dobra. Com resposta em <5s e 5 tentativas de cadência, você converte 3x mais com o mesmo investimento.",
   },
   {
     icon: TrendingUp,
-    title: "Controle financeiro real",
-    desc: "Integração direta com Asaas para sincronizar pagamentos. Veja contas a pagar, recebidas e faturamento líquido em tempo real.",
+    title: "Uma SDR humana custa R$ 3.500 a R$ 5.000/mês.",
+    desc: "A Laura custa R$ 597 — trabalha 24h, atende leads simultâneos, não tira férias, não pede aumento e nunca esquece de dar retorno. Faça a conta.",
   },
 ];
 
 const testimonials = [
   {
-    text: "O AdvOne transformou nosso atendimento. Agendamentos automáticos pelo WhatsApp 24 horas por dia, sem perder nenhum lead.",
-    name: "Dra. Maria Silva",
-    role: "Advogada Trabalhista",
+    text: "Recebia 80 leads/mês do Meta Ads e convertia 8. Coloquei a Laura, ela responde em segundos e faz a triagem. Este mês fechei 27 contratos — meu ROI triplicou sem gastar 1 real a mais em tráfego.",
+    name: "Dr. Rafael Andrade",
+    role: "Direito Previdenciário · São Paulo/SP",
   },
   {
-    text: "A cadência automática é incrível. Antes perdíamos leads por falta de follow-up, agora o sistema cuida de tudo automaticamente.",
-    name: "Dr. Carlos Mendes",
-    role: "Advogado Cível",
+    text: "Tinha uma secretária que respondia WhatsApp das 9h às 18h. Perdia todo lead de madrugada e fim de semana. Hoje a Laura fecha reunião às 23h de domingo. Cancelei o SDR humano e economizei R$ 4.800/mês.",
+    name: "Dra. Camila Peixoto",
+    role: "Direito Trabalhista · Belo Horizonte/MG",
   },
   {
-    text: "Ter o financeiro integrado com Asaas simplificou demais. Vejo tudo em um só lugar: leads, processos e faturamento.",
-    name: "Dra. Ana Costa",
-    role: "Advogada Previdenciária",
+    text: "O que me fez migrar foi o modo compartilhado: cliente antigo escreve, a IA já puxa o processo pelo CPF e aciona o advogado responsável. Meu NPS saltou de 6 pra 9 em 60 dias.",
+    name: "Dr. Eduardo Ramalho",
+    role: "Cível e Família · Curitiba/PR",
   },
 ];
 
@@ -144,7 +144,7 @@ export default function LandingPage() {
               Login
             </Button>
             <Button onClick={() => navigate("/signup?plan=admin")} className="gradient-primary text-[hsl(0,0%,100%)] font-semibold">
-              Começar agora
+              Ativar Laura em 72h
             </Button>
           </div>
         </div>
@@ -165,16 +165,16 @@ export default function LandingPage() {
                 className="mb-6 inline-flex items-center gap-2 rounded-full border border-[hsl(153,60%,45%)]/30 bg-[hsl(153,60%,45%)]/10 px-4 py-1.5 text-sm text-[hsl(153,60%,45%)] animate-fade-in"
               >
                 <Zap className="h-4 w-4" />
-                CRM com Inteligência Artificial
+                A SDR jurídica com IA que nunca dorme
               </div>
               <h1
                 className="mb-6 text-2xl font-bold leading-tight tracking-tight sm:text-3xl md:text-5xl lg:text-6xl animate-slide-up"
                 style={{ fontFamily: "'Space Grotesk', sans-serif" }}
               >
-                <span className="gradient-text">CRM completo</span> para a gestão do seu escritório de advocacia.
+                Enquanto seu concorrente <span className="gradient-text">dorme</span>,<br />a Laura fecha reunião.
               </h1>
               <p className="mx-auto mb-8 max-w-xl text-lg text-[hsl(220,10%,55%)] lg:mx-0 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-                Sua Secretária Virtual atende, qualifica e agenda 24h por dia. E o CRM cuida do resto — cadência, agenda e financeiro num só lugar.
+                Laura é a SDR com IA treinada em Direito brasileiro. Responde cada lead do WhatsApp em <strong className="text-[hsl(220,10%,80%)]">menos de 5 segundos</strong>, qualifica o caso, agenda na sua agenda Google e chama o advogado responsável. 24h por dia. Por <strong className="text-[hsl(153,60%,55%)]">R$ 597/mês</strong> — o preço de meia diária de uma secretária humana.
               </p>
               <div className="flex flex-col items-center gap-4 sm:flex-row lg:justify-start animate-slide-up" style={{ animationDelay: "0.2s" }}>
                 <Button
@@ -182,7 +182,7 @@ export default function LandingPage() {
                   onClick={() => navigate("/signup?plan=admin")}
                   className="gradient-primary glow-primary px-8 py-6 text-lg font-semibold text-[hsl(0,0%,100%)] group"
                 >
-                  Começar agora
+                  Quero ativar a Laura agora
                   <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Button>
                 <a
@@ -190,11 +190,11 @@ export default function LandingPage() {
                   className="flex items-center gap-2 text-sm text-[hsl(220,10%,70%)] transition-colors hover:text-[hsl(153,60%,45%)]"
                 >
                   <Play className="h-4 w-4" />
-                  Ver a Secretária Virtual em ação
+                  Ver a Laura atendendo um lead real
                 </a>
               </div>
               <p className="mt-4 text-sm text-[hsl(220,10%,45%)]">
-                Modelo de parceria sob medida. Configure em minutos.
+                Ativação em até 72h · Sem taxa de setup · Cancele quando quiser
               </p>
             </div>
 
@@ -218,12 +218,12 @@ export default function LandingPage() {
       {/* Dashboard Mockup */}
       <section className="mx-auto max-w-6xl px-6 py-20">
         <Reveal className="text-center mb-12">
-          <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Nós temos o</p>
+          <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">O painel do gerente</p>
           <h2 className="text-3xl font-bold md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            CRM completo para seu escritório de advocacia.
+            Você acorda e o escritório já rendeu.
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-[hsl(220,10%,55%)]">
-            Da captação do lead ao agendamento final, centralize toda a operação do seu escritório em uma única plataforma.
+            Enquanto você dorme, a Laura atende, qualifica e agenda. Você abre o app e vê exatamente quanto entrou de honorário, quantas reuniões foram marcadas e qual campanha do Google/Meta está de fato pagando.
           </p>
         </Reveal>
         <Reveal delay={200}>
@@ -415,18 +415,18 @@ export default function LandingPage() {
         <Reveal>
           <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-3 px-6">
             {[
-              "Secretária Virtual com IA",
-              "Cadência Automática",
-              "Kanban Inteligente",
-              "Agenda Integrada",
+              "Laura SDR 24/7 no WhatsApp",
+              "Transcrição de áudio",
+              "Kanban jurídico de 9 etapas",
+              "Cadência de 5 tentativas",
+              "Agenda Google integrada",
+              "Lembretes automáticos",
               "Financeiro + Asaas",
-              "Gestão de Processos",
-              "Documentos até 600MB",
-              "CRM Nativo",
-              "Relatórios",
-              "Equipe e Permissões",
-              "Tracking Links",
-              "Campanhas Google/Meta",
+              "IA Jurídica (peças ABNT)",
+              "Monitoramento Escavador",
+              "Modo compartilhado leads+clientes",
+              "Multi-tenant + 5 níveis",
+              "Ativação em 72h",
             ].map((f) => (
               <span
                 key={f}
@@ -444,20 +444,21 @@ export default function LandingPage() {
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <Reveal direction="left">
             <div>
-              <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Veja em ação</p>
+              <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Veja a Laura em ação</p>
               <h2 className="text-3xl font-bold md:text-4xl mb-6" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                Sua Secretária Virtual <span className="gradient-text">nunca tira folga.</span>
+                Ela atende como <span className="gradient-text">gente boa</span> — e converte como máquina.
               </h2>
               <p className="text-[hsl(220,10%,55%)] leading-relaxed mb-6">
-                Veja abaixo um atendimento real do escritório fictício <strong className="text-[hsl(220,10%,85%)]">Mendes &amp; Vasconcelos Advocacia</strong>. A IA conversa com empatia, qualifica o caso, oferece horário e agenda — em segundos, sem intervenção humana.
+                Aperte play e veja um atendimento real do escritório <strong className="text-[hsl(220,10%,85%)]">Mendes &amp; Vasconcelos Advocacia</strong>. A Laura escuta, entende o caso, identifica o nicho, oferece horário e agenda — tudo em segundos, sem intervenção humana. Nada de fluxo rígido, nada de "digite 1 para…".
               </p>
               <ul className="space-y-4">
                 {[
-                  "Recebe o lead em até 3 segundos, dia ou noite",
-                  "Faz triagem jurídica e identifica o tipo de caso",
-                  "Agenda respeitando o expediente do escritório",
-                  "5 tentativas automáticas se o lead sumir",
-                  "Avisa a equipe na hora que a consulta é fechada",
+                  "Resposta em menos de 5 segundos — dia, madrugada, feriado",
+                  "Transcreve áudio e entende gíria jurídica",
+                  "Identifica se é lead novo ou cliente antigo pelo CPF",
+                  "Marca na agenda Google do advogado responsável",
+                  "5 tentativas automáticas se o lead sumir (30min, 90min, 24h, 48h, 5 dias)",
+                  "Avisa o escritório por WhatsApp no segundo em que fecha a reunião",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3 text-[hsl(220,10%,75%)]">
                     <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[hsl(153,60%,45%)]" />
@@ -477,9 +478,9 @@ export default function LandingPage() {
       <section id="vantagens" className="border-y border-[hsl(220,20%,16%)] bg-[hsl(220,25%,8%)]">
         <div className="mx-auto max-w-6xl px-6 py-24">
           <Reveal className="mb-16 text-center">
-            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Isso significa</p>
+            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">A conta que ninguém te mostrou</p>
             <h2 className="text-3xl font-bold md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Pare de perder leads e tempo com tarefas manuais.
+              Cada lead que não é respondido em 5 minutos vale <span className="gradient-text">metade</span>.
             </h2>
           </Reveal>
           <div className="grid gap-8 md:grid-cols-3">
@@ -504,9 +505,9 @@ export default function LandingPage() {
       <section id="funcionalidades">
         <div className="mx-auto max-w-6xl px-6 py-24">
           <Reveal className="mb-16 text-center">
-            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Funcionalidades</p>
+            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">O sistema por dentro</p>
             <h2 className="text-3xl font-bold md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Tudo que seu escritório precisa. Em um só lugar.
+              Tudo que seu escritório precisa. Sem 12 abas abertas.
             </h2>
           </Reveal>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -527,18 +528,18 @@ export default function LandingPage() {
       <section className="border-y border-[hsl(220,20%,16%)] bg-[hsl(220,25%,8%)]">
         <div className="mx-auto max-w-5xl px-6 py-24">
           <Reveal className="mb-16 text-center">
-            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Atendimento Inteligente</p>
+            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">A jornada do lead</p>
             <h2 className="text-3xl font-bold md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Como sua Secretária Virtual transforma leads em consultas
+              Do clique no Google Ads ao contrato assinado — em 24h.
             </h2>
           </Reveal>
           <div className="grid gap-6 md:grid-cols-5">
             {[
-              { step: "1", title: "Lead entra", desc: "Novo cliente chega pelo WhatsApp ou campanha" },
-              { step: "2", title: "Secretária responde", desc: "Recebe na hora, escuta o caso e faz a triagem" },
-              { step: "3", title: "Cadência", desc: "5 tentativas automáticas se o lead sumir" },
-              { step: "4", title: "Agendamento", desc: "Marca a consulta e avisa o escritório" },
-              { step: "5", title: "Resultado", desc: "Lead movido para Ganho ou Perdido no Kanban" },
+              { step: "1", title: "Lead clica no anúncio", desc: "Google Ads ou Meta Ads com link UTM AdvOne — atribuição 100% rastreada." },
+              { step: "2", title: "Cai no WhatsApp", desc: "A Laura recebe em <5s, transcreve áudio, apresenta o escritório." },
+              { step: "3", title: "Qualifica o caso", desc: "Identifica nicho (prev, trab, cível…), colhe dados e classifica temperatura." },
+              { step: "4", title: "Marca na agenda", desc: "Reunião direto no Google Calendar do advogado da área. Sem overbooking." },
+              { step: "5", title: "Advogado recebe alerta", desc: "WhatsApp na hora. Lembretes automáticos 6h, 2h e 30min antes pro cliente." },
             ].map((s, i) => (
               <Reveal key={s.step} delay={i * 120}>
                 <div className="relative text-center group">
@@ -565,49 +566,48 @@ export default function LandingPage() {
         <div className="relative mx-auto max-w-6xl px-6 py-24">
           <Reveal className="mb-14 text-center">
             <p className="mb-3 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">
-              Gestão Completa · ADM
+              Plano CRM Full · R$ 897/mês
             </p>
             <h2 className="mx-auto max-w-3xl text-3xl font-bold leading-tight md:text-5xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Seu escritório inteiro em <span className="text-[hsl(153,60%,45%)]">um só lugar</span>
+              O escritório inteiro rodando em <span className="text-[hsl(153,60%,45%)]">um único painel</span>
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-base text-[hsl(220,10%,65%)] md:text-lg">
-              Da captação do lead até a entrega final do processo. Centralize processos, prazos, financeiro,
-              equipe e clientes em uma plataforma conectada e sincronizada — controle total sem perder agilidade.
+              Chega de planilha, WhatsApp bagunçado, agenda no papel e financeiro no Excel. Do primeiro clique do lead ao último honorário recebido — tudo conectado, auditado e visível em tempo real. É assim que escritório grande opera.
             </p>
           </Reveal>
 
           <Reveal>
             <div className="mb-16 grid grid-cols-2 gap-4 rounded-2xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,8%)]/60 p-6 backdrop-blur md:grid-cols-4 md:gap-8 md:p-10">
               <div className="text-center">
-                <p className="text-3xl font-bold text-[hsl(153,60%,45%)] md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>+1.200</p>
-                <p className="mt-1 text-xs text-[hsl(220,10%,55%)] md:text-sm">Escritórios atendidos</p>
+                <p className="text-3xl font-bold text-[hsl(153,60%,45%)] md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>-90%</p>
+                <p className="mt-1 text-xs text-[hsl(220,10%,55%)] md:text-sm">custo vs SDR humana</p>
               </div>
               <div className="text-center">
-                <p className="text-3xl font-bold text-[hsl(153,60%,45%)] md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>+50 mil</p>
-                <p className="mt-1 text-xs text-[hsl(220,10%,55%)] md:text-sm">Leads gerenciados</p>
+                <p className="text-3xl font-bold text-[hsl(153,60%,45%)] md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>3x</p>
+                <p className="mt-1 text-xs text-[hsl(220,10%,55%)] md:text-sm">mais reuniões marcadas</p>
               </div>
               <div className="text-center">
-                <p className="text-3xl font-bold text-[hsl(153,60%,45%)] md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>+R$ 80mi</p>
-                <p className="mt-1 text-xs text-[hsl(220,10%,55%)] md:text-sm">Em honorários gestionados</p>
+                <p className="text-3xl font-bold text-[hsl(153,60%,45%)] md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>&lt;5s</p>
+                <p className="mt-1 text-xs text-[hsl(220,10%,55%)] md:text-sm">resposta na 1ª mensagem</p>
               </div>
               <div className="text-center">
-                <p className="text-3xl font-bold text-[hsl(153,60%,45%)] md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>98%</p>
-                <p className="mt-1 text-xs text-[hsl(220,10%,55%)] md:text-sm">Satisfação dos gestores</p>
+                <p className="text-3xl font-bold text-[hsl(153,60%,45%)] md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>72h</p>
+                <p className="mt-1 text-xs text-[hsl(220,10%,55%)] md:text-sm">ativação porta a porta</p>
               </div>
             </div>
           </Reveal>
 
           <div className="grid gap-6 md:grid-cols-3">
             {[
-              { icon: Briefcase, title: "Workflow Jurídico", desc: "Pastas por cliente, processos vinculados, andamentos e prazos em um pipeline visual que sua equipe entende em segundos.", items: ["Pasta digital por cliente", "Vínculo lead → processo", "Andamentos centralizados"] },
-              { icon: Wallet, title: "Financeiro Avançado", desc: "Contas a pagar, a receber, comissões e faturamento líquido com integração nativa Asaas — boletos, Pix e cobrança automática.", items: ["Integração Asaas nativa", "Comissões por contrato", "Faturamento em tempo real"] },
-              { icon: BarChart3, title: "Business Intelligence", desc: "Dashboards com taxa de conversão, origem de leads, faturamento, pipeline e produtividade — tudo em tempo real.", items: ["Conversão por etapa", "ROI por campanha", "Performance da equipe"] },
-              { icon: Users, title: "CRM Nativo + Equipe", desc: "Gerentes, operadores e clientes com acessos personalizados. Cada perfil vê apenas o que precisa, sem ruído.", items: ["5 níveis de permissão", "RLS por empresa", "Auditoria de ações"] },
-              { icon: Kanban, title: "Kanban + Cadência", desc: "Pipeline padronizado com 9 colunas e cadência automática de 5 tentativas. Nenhum lead esquecido — nunca mais.", items: ["Pipeline padrão pronto", "5 follow-ups automáticos", "Movimentação automática"] },
-              { icon: CalendarDays, title: "Agenda + Lembretes", desc: "Reuniões agendadas pela IA respeitando seu expediente. Lembretes automáticos por WhatsApp em 6h, 2h e 30min antes.", items: ["Agenda mensal/semanal", "Lembretes WhatsApp", "Recorrência configurável"] },
-              { icon: FileText, title: "Documentos + Petições", desc: "Upload de documentos até 600MB, contratos por ZapSign, procurações e modelos prontos organizados por pasta.", items: ["ZapSign integrado", "Storage por empresa", "Modelos de contrato"] },
-              { icon: Shield, title: "Monitoramento de Processos", desc: "Acompanhamento semanal automático via Escavador. Alertas de movimentações novas direto no painel do cliente.", items: ["Sincronização semanal", "Alertas automáticos", "Pacotes adicionais"] },
-              { icon: Target, title: "Tracking + Atribuição", desc: "Links rastreáveis com UTMs por campanha. Saiba exatamente quanto cada anúncio do Meta ou Google rendeu de fato.", items: ["UTMs automáticos", "Origem por lead", "ROI por campanha"] },
+              { icon: Briefcase, title: "Clientes e processos sob controle", desc: "Ficha completa por cliente com CPF/CNPJ, contratos, processos CNJ e histórico. Todo lead que fecha vira cliente com um clique — sem redigitar nada.", items: ["Ficha 360° por cliente", "Vínculo lead → cliente → processo", "Contratos via ZapSign"] },
+              { icon: Wallet, title: "Financeiro que se lança sozinho", desc: "Cobrança recorrente no Asaas em PIX, boleto ou cartão. Baixa automática por webhook. Você acompanha receita líquida, vencidos e previstos no dashboard.", items: ["Asaas em produção", "Conciliação por webhook", "Receita líquida em tempo real"] },
+              { icon: BarChart3, title: "Dashboards que respondem em 3 segundos", desc: "Quantos leads entraram? Qual campanha converteu? Quanto entrou de honorário? Tudo visível — por escritório, por advogado, por origem, por período.", items: ["Conversão por etapa", "ROI por campanha", "Ranking por advogado"] },
+              { icon: Users, title: "Multi-tenant + 5 níveis de acesso", desc: "Admin, Membro, Gerente, Operador e Cliente. Cada advogado enxerga só o que precisa. Isolamento no banco (RLS) — auditoria de tudo que muda.", items: ["Row-Level Security", "Auditoria automática", "Ideal para grupos e franquias"] },
+              { icon: Kanban, title: "Kanban de 9 etapas + cadência", desc: "Pipeline jurídico já pronto no dia 1. 5 tentativas automáticas de follow-up com tempos e textos editáveis pelo gerente. Nenhum lead esfria.", items: ["Etapas configuráveis", "Cadência editável na UI", "Movimentação automática"] },
+              { icon: CalendarDays, title: "Agenda Google + lembretes WhatsApp", desc: "OAuth per-user por advogado. Reunião marcada pela Laura vira evento no Google Calendar dele. 3 lembretes automáticos pro cliente aparecer.", items: ["OAuth por advogado", "Push bidirecional", "Lembretes 6h/2h/30min"] },
+              { icon: FileText, title: "IA Jurídica + documentos até 600MB", desc: "Dra. Helena escreve petição, contestação, recurso, MS e contratos em .docx ABNT. Upload de documentos grandes com storage por escritório.", items: ["Peças em .docx ABNT", "Modelos por escritório", "Storage isolado"] },
+              { icon: Shield, title: "Monitoramento de processos diário", desc: "Escavador consulta cada CNJ TODO dia. Nova movimentação vira alerta no CRM. Consulta semanal por CPF encontra processos novos vinculados ao cliente.", items: ["Consulta diária CNJ", "Consulta semanal por CPF", "Alertas no CRM e WhatsApp"] },
+              { icon: Target, title: "Tracking + atribuição real", desc: "Gere links UTM por campanha do Google/Meta em 2 cliques. Cada lead chega com origem, campanha, criativo. Você saber o que realmente vale seu tráfego.", items: ["UTMs automáticos", "Origem por lead", "ROI por criativo"] },
             ].map((pillar, i) => (
               <Reveal key={pillar.title} delay={i * 70}>
                 <div className="group h-full rounded-xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] p-6 transition-all duration-500 hover:-translate-y-1 hover:border-[hsl(153,60%,45%)]/40 hover:shadow-[0_20px_60px_-20px_hsl(153,60%,45%/0.25)]">
@@ -631,13 +631,13 @@ export default function LandingPage() {
 
           <div className="mt-20 grid gap-6 md:grid-cols-3">
             {[
-              { icon: Clock, title: "Mais tempo para estratégia, menos burocracia", desc: "Automatize prazos, follow-ups e tarefas repetitivas. Sua equipe foca em construir casos sólidos e relacionamento." },
-              { icon: BarChart3, title: "Mais controle, menos margem para erro", desc: "Visibilidade completa da operação com métricas em tempo real, financeiro integrado e indicadores de produtividade." },
-              { icon: TrendingUp, title: "Mais clientes com a mesma equipe", desc: "Quando a operação roda automaticamente, você aceita mais casos sem comprometer qualidade nem sobrecarregar o time." },
+              { icon: Clock, title: "Você trabalha ON no que gera honorário.", desc: "Chega de perder 2 horas por dia respondendo WhatsApp de curioso. A Laura filtra, qualifica e entrega só o lead pronto pra fechar." },
+              { icon: BarChart3, title: "O escritório para de depender de gente.", desc: "Ninguém falta, ninguém sai, ninguém pede aumento. A operação roda no piloto automático — e ainda melhora com cada ajuste de prompt." },
+              { icon: TrendingUp, title: "Escala sem contratar mais advogado.", desc: "Quando o gargalo do atendimento cai, seu escritório aceita 3x mais casos com o mesmo time. É assim que sócio vira empresário." },
             ].map((b, i) => (
               <Reveal key={b.title} delay={i * 100}>
                 <div className="rounded-xl border border-[hsl(220,20%,16%)] bg-gradient-to-br from-[hsl(220,25%,9%)] to-[hsl(220,25%,7%)] p-6">
-                  <p className="mb-2 text-xs font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Isso significa</p>
+                  <p className="mb-2 text-xs font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Na prática</p>
                   <div className="mb-3 flex items-center gap-3">
                     <b.icon className="h-5 w-5 text-[hsl(153,60%,45%)]" />
                     <h4 className="text-base font-semibold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{b.title}</h4>
@@ -650,10 +650,10 @@ export default function LandingPage() {
 
           <Reveal className="mt-16 text-center">
             <Button size="lg" onClick={() => navigate("/signup?plan=mensal")} className="gradient-primary text-[hsl(0,0%,100%)] font-semibold shadow-[0_10px_40px_-10px_hsl(153,60%,45%/0.5)]">
-              Quero ter o controle total do meu escritório
+              Quero o CRM Full por R$ 897/mês
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-            <p className="mt-3 text-xs text-[hsl(220,10%,55%)]">Sem cartão de crédito • Setup guiado • Migração assistida</p>
+            <p className="mt-3 text-xs text-[hsl(220,10%,55%)]">Ativação em 72h · Sem taxa de setup · Cancele quando quiser</p>
           </Reveal>
         </div>
       </section>
