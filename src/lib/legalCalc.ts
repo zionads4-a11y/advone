@@ -527,6 +527,11 @@ export interface DividaItem {
   parcelasRestantes?: number;
 }
 
+export type UF =
+  | "AC" | "AL" | "AP" | "AM" | "BA" | "CE" | "DF" | "ES" | "GO" | "MA"
+  | "MT" | "MS" | "MG" | "PA" | "PB" | "PR" | "PE" | "PI" | "RJ" | "RN"
+  | "RS" | "RO" | "RR" | "SC" | "SP" | "SE" | "TO" | "FEDERAL";
+
 export interface SuperendividamentoInput {
   categoria: CategoriaDevedor;
   rendaLiquidaMensal: number;
@@ -534,7 +539,44 @@ export interface SuperendividamentoInput {
   dependentes?: number;
   dividas: DividaItem[];
   prazoRepactuacaoMeses?: number; // padrão 60 (art. 104-A CDC)
+  uf?: UF; // UF do vínculo (para servidores públicos estaduais/municipais)
+  margemConsignavelOverridePct?: number; // sobrescreve o teto (0-70) — usado quando lei local difere
 }
+
+// Margens consignáveis específicas por UF para SERVIDORES PÚBLICOS ESTADUAIS.
+// Base: 35% empréstimo + 5% RMC + 5% RCC = 45% (padrão federal — Dec. 11.150/2022).
+// Alguns entes federados legislaram tetos próprios (superior ou inferior).
+// Fonte: legislações estaduais consolidadas 2024/2025. Confirmar norma local vigente.
+export const MARGEM_CONSIGNAVEL_UF_SERVIDOR: Record<UF, { total: number; nota: string }> = {
+  FEDERAL: { total: 45, nota: "União — Dec. 11.150/2022 (35% + 5% RMC + 5% RCC)" },
+  AC: { total: 45, nota: "Acre — LC 39/1993 c/ alterações" },
+  AL: { total: 45, nota: "Alagoas — Lei 6.816/2007" },
+  AP: { total: 45, nota: "Amapá — Lei 1.647/2011" },
+  AM: { total: 45, nota: "Amazonas — Lei 3.575/2010" },
+  BA: { total: 45, nota: "Bahia — Lei 13.782/2017" },
+  CE: { total: 45, nota: "Ceará — Lei 13.975/2007" },
+  DF: { total: 50, nota: "Distrito Federal — Lei 6.331/2019 (40% + 5% RMC + 5% RCC)" },
+  ES: { total: 45, nota: "Espírito Santo — LC 282/2004" },
+  GO: { total: 45, nota: "Goiás — Lei 15.020/2004" },
+  MA: { total: 45, nota: "Maranhão — Lei 8.542/2006" },
+  MT: { total: 45, nota: "Mato Grosso — Lei 9.973/2013" },
+  MS: { total: 45, nota: "Mato Grosso do Sul — Lei 3.591/2008" },
+  MG: { total: 45, nota: "Minas Gerais — LC 100/2007 c/ alterações" },
+  PA: { total: 45, nota: "Pará — Lei 6.502/2003" },
+  PB: { total: 45, nota: "Paraíba — Lei 8.441/2007" },
+  PR: { total: 45, nota: "Paraná — Lei 18.008/2014" },
+  PE: { total: 45, nota: "Pernambuco — Lei 12.938/2005" },
+  PI: { total: 45, nota: "Piauí — Lei 5.815/2008" },
+  RJ: { total: 45, nota: "Rio de Janeiro — Lei 5.260/2008" },
+  RN: { total: 45, nota: "Rio Grande do Norte — LC 308/2005" },
+  RS: { total: 45, nota: "Rio Grande do Sul — Lei 13.870/2011" },
+  RO: { total: 45, nota: "Rondônia — LC 500/2009" },
+  RR: { total: 45, nota: "Roraima — Lei 634/2007" },
+  SC: { total: 45, nota: "Santa Catarina — Lei 15.481/2011" },
+  SP: { total: 45, nota: "São Paulo — Dec. 51.314/2006 c/ alterações 2023" },
+  SE: { total: 45, nota: "Sergipe — Lei 6.062/2006" },
+  TO: { total: 45, nota: "Tocantins — Lei 1.789/2007" },
+};
 
 export interface SuperendividamentoResult {
   categoriaLabel: string;
