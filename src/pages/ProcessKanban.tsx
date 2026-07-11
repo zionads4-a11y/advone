@@ -56,10 +56,14 @@ interface ProcessCard {
 interface Member { user_id: string; full_name: string | null; email: string | null; }
 interface TeamRow { id: string; card_id: string; user_id: string; role_on_card: string; }
 
+interface CompanyLite { id: string; name: string; }
+
 export default function ProcessKanban() {
   const { user } = useAuth();
-  const { companyIds } = useUserCompanies();
-  const companyId = companyIds[0];
+  const { companyIds, isClient } = useUserCompanies();
+
+  const [companies, setCompanies] = useState<CompanyLite[]>([]);
+  const [companyId, setCompanyId] = useState<string>("");
 
   const [areas, setAreas] = useState<LegalArea[]>([]);
   const [boards, setBoards] = useState<Board[]>([]);
@@ -80,6 +84,18 @@ export default function ProcessKanban() {
 
   const [activeDrag, setActiveDrag] = useState<ProcessCard | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
+
+  // Load companies list (admin/member = all; gerente/operador = only theirs)
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase.from("companies").select("id, name").order("name");
+      const list = (data || []) as CompanyLite[];
+      const filtered = isClient ? list.filter(c => companyIds.includes(c.id)) : list;
+      setCompanies(filtered);
+      setCompanyId((cur) => cur || filtered[0]?.id || "");
+    })();
+  }, [user, isClient, companyIds]);
 
   const loadAll = useCallback(async () => {
     if (!companyId) { setLoading(false); return; }
