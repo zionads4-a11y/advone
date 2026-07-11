@@ -795,9 +795,9 @@ export default function LandingPage() {
                   className="bg-gradient-to-r from-[hsl(38,90%,55%)] to-[hsl(45,95%,60%)] hover:opacity-90 text-[hsl(220,25%,6%)] font-bold px-8 py-6 text-base shadow-lg shadow-[hsl(38,90%,55%)]/20"
                 >
                   <Sparkles className="mr-2 h-5 w-5" />
-                  Quero a IA Jurídica no meu escritório
+                  Solicitar demonstração do módulo
                 </Button>
-                <p className="text-xs text-[hsl(220,10%,50%)]">Disponível nos planos Mensal, Trimestral e Anual</p>
+                <p className="text-xs text-[hsl(220,10%,50%)]">Disponível como módulo complementar em todos os planos</p>
               </div>
             </div>
           </Reveal>
@@ -808,11 +808,12 @@ export default function LandingPage() {
       <section id="depoimentos">
         <div className="mx-auto max-w-6xl px-6 py-24">
           <Reveal className="mb-16 text-center">
-            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Depoimentos</p>
+            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Escritórios que utilizam o AdvOne</p>
             <h2 className="text-3xl font-bold md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Escritórios que já transformaram sua gestão.
+              Referências no mercado da advocacia.
             </h2>
           </Reveal>
+
           <div className="grid gap-8 md:grid-cols-3">
             {testimonials.map((t, i) => (
               <Reveal key={t.name} delay={i * 150}>
