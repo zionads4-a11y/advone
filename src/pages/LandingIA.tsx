@@ -132,7 +132,7 @@ const faq = [
   },
   {
     q: "Esse plano serve para escritório grande?",
-    a: "O plano Laura SDR é otimizado para advogados solo e escritórios pequenos (até 3 advogados). Para times maiores, recomendamos o plano AdvOne completo.",
+    a: "O AdvOne IA (R$ 397/mês) é otimizado para advogados solo e escritórios pequenos (até 3 advogados). Para times maiores que precisam de CRM, pipeline e gestão de equipe, recomendamos o AdvOne Gestão (R$ 597) ou o Complete (R$ 897).",
   },
 ];
 
@@ -196,7 +196,7 @@ export default function LandingIA() {
     document.title = "Laura SDR — Secretária Virtual com IA para Advogados | AdvOne";
     const meta = document.querySelector('meta[name="description"]');
     const desc =
-      "Escolha o plano ideal para seu escritório: Admin por R$ 297/mês ou Completo por R$ 797/mês. CRM jurídico com IA, WhatsApp e automação.";
+      "AdvOne IA por R$ 397/mês: SDR virtual Laura que atende, qualifica e agenda no WhatsApp 24h. Também disponível nos planos Gestão (R$ 597) e Complete (R$ 897).";
     if (meta) {
       meta.setAttribute("content", desc);
     } else {
@@ -277,7 +277,7 @@ export default function LandingIA() {
         email: parsed.data.email || undefined,
         phone: parsed.data.whatsapp,
         contentName: "Landing IA - Form Submit",
-        value: 797,
+        value: 397,
         currency: "BRL",
         customData: {
           practice_area: parsed.data.practice_area || undefined,
@@ -505,7 +505,7 @@ export default function LandingIA() {
                   <li>✅ 5 follow-ups automáticos por lead</li>
                   <li>✅ Responde em até 30 segundos</li>
                   <li>✅ Qualifica e classifica viabilidade</li>
-                  <li>✅ Custo: R$ 797/mês — sem encargos</li>
+                  <li>✅ Custo: a partir de R$ 397/mês — sem encargos</li>
                 </ul>
               </CardContent>
             </Card>
@@ -526,27 +526,30 @@ export default function LandingIA() {
                 Oferta exclusiva desta página
               </div>
               <h2 className="mt-4 font-display text-3xl font-bold md:text-4xl">
-                ESCOLHA SUA FORMA DE PAGAMENTO
+                ESCOLHA O PLANO IDEAL PARA SEU ESCRITÓRIO
               </h2>
               <p className="mt-4 text-muted-foreground">
-                Tudo que seu escritório precisa para nunca mais perder um lead.
+                Comece pela IA, evolua para Gestão e chegue no Complete quando fizer sentido.
               </p>
             </div>
           </Reveal>
 
           <div className="mt-12 grid gap-8 md:grid-cols-3 max-w-6xl mx-auto">
-            {/* Plano Mensal */}
+            {/* AdvOne IA */}
             <Reveal delay={120}>
               <Card className="h-full border-border/60 bg-card/40 hover:border-primary/20 transition-all">
                 <CardContent className="space-y-6 p-8 flex flex-col h-full">
                   <div className="text-center">
                     <div className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                      PAGAMENTO MENSAL
+                      ADVONE IA
                     </div>
                     <div className="mt-2 flex items-baseline justify-center gap-1">
-                      <span className="text-4xl font-bold">R$</span>
-                      <span className="font-display text-5xl font-bold">797</span>
+                      <span className="text-3xl font-bold">R$</span>
+                      <span className="font-display text-5xl font-bold">397</span>
                       <span className="text-muted-foreground">/mês</span>
+                    </div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      Para parar de perder lead no WhatsApp
                     </div>
                   </div>
 
@@ -554,10 +557,10 @@ export default function LandingIA() {
 
                   <ul className="space-y-3 flex-1">
                     {[
-                      "Mesmo acesso completo à plataforma",
-                      "Sem fidelidade",
-                      "Cancele quando quiser",
-                      "Ativação rápida em até 24h"
+                      "Atendimento no WhatsApp 24h",
+                      "Qualificação inteligente de leads",
+                      "Agendamento automático na sua agenda",
+                      "Atendimento a clientes atuais",
                     ].map((item) => (
                       <li key={item} className="flex items-start gap-3 text-sm">
                         <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
@@ -569,76 +572,33 @@ export default function LandingIA() {
                   <Button
                     size="lg"
                     variant="outline"
-                    onClick={() => openWhatsApp("Plano Mensal - Começar agora")}
+                    onClick={() => openWhatsApp("AdvOne IA - Começar")}
                     className="w-full"
                   >
-                    COMEÇAR AGORA
+                    COMEÇAR COM IA
                   </Button>
                 </CardContent>
               </Card>
             </Reveal>
 
-            {/* Plano Semestral */}
+            {/* AdvOne Gestão */}
             <Reveal delay={180}>
-              <Card className="h-full border-border/60 bg-card/40 hover:border-primary/20 transition-all">
-                <CardContent className="space-y-6 p-8 flex flex-col h-full">
-                  <div className="text-center">
-                    <div className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                      PAGAMENTO SEMESTRAL
-                    </div>
-                    <div className="mt-2 flex items-baseline justify-center gap-1">
-                      <span className="font-display text-4xl font-bold">R$ 597</span>
-                      <span className="text-muted-foreground">/mês</span>
-                    </div>
-                    <div className="mt-1 text-xs text-primary font-bold">
-                      Plano 6 meses — economize R$ 1.200
-                    </div>
-                  </div>
-
-                  <div className="h-px bg-border" />
-
-                  <ul className="space-y-3 flex-1">
-                    {[
-                      "Mesmo acesso completo",
-                      "Compromisso de 6 meses",
-                      "Ativação rápida"
-                    ].map((item) => (
-                      <li key={item} className="flex items-start gap-3 text-sm">
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    onClick={() => openWhatsApp("Plano Semestral - Começar agora")}
-                    className="w-full"
-                  >
-                    COMEÇAR AGORA
-                  </Button>
-                </CardContent>
-              </Card>
-            </Reveal>
-
-            {/* Plano Anual */}
-            <Reveal delay={240}>
               <Card className="h-full border-primary/40 bg-card shadow-2xl shadow-primary/10 relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-primary px-3 py-1 text-[10px] font-bold text-primary-foreground uppercase tracking-widest rounded-bl-lg">
-                  Melhor Custo-Benefício
+                  Mais Popular
                 </div>
                 <CardContent className="space-y-6 p-8 flex flex-col h-full">
                   <div className="text-center">
                     <div className="text-sm font-semibold uppercase tracking-wide text-primary">
-                      PAGAMENTO ANUAL
+                      ADVONE GESTÃO
                     </div>
                     <div className="mt-2 flex items-baseline justify-center gap-1">
-                      <span className="font-display text-4xl font-bold">R$ 397</span>
+                      <span className="text-3xl font-bold">R$</span>
+                      <span className="font-display text-5xl font-bold">597</span>
                       <span className="text-muted-foreground">/mês</span>
                     </div>
                     <div className="mt-1 text-xs text-primary font-bold">
-                      Plano 12 meses — economize R$ 4.800
+                      Escritório organizado de verdade
                     </div>
                   </div>
 
@@ -646,10 +606,11 @@ export default function LandingIA() {
 
                   <ul className="space-y-3 flex-1">
                     {[
-                      "Tudo do plano mensal",
-                      "Suporte prioritário exclusivo",
-                      "Gerente de conta dedicado",
-                      "Sistema completo AdvOne"
+                      "CRM jurídico completo",
+                      "Pipeline (Kanban de leads e casos)",
+                      "Automações e cadências",
+                      "Gestão da equipe (papéis e permissões)",
+                      "Relatórios e indicadores",
                     ].map((item) => (
                       <li key={item} className="flex items-start gap-3 text-sm">
                         <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
@@ -660,11 +621,58 @@ export default function LandingIA() {
 
                   <Button
                     size="lg"
-                    onClick={() => openWhatsApp("Plano Anual - Quero economizar")}
+                    onClick={() => openWhatsApp("AdvOne Gestão - Quero organizar")}
                     className="w-full gradient-primary text-primary-foreground font-bold"
                   >
-                    QUERO ECONOMIZAR
+                    QUERO ORGANIZAR
                     <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </CardContent>
+              </Card>
+            </Reveal>
+
+            {/* AdvOne Complete */}
+            <Reveal delay={240}>
+              <Card className="h-full border-border/60 bg-card/40 hover:border-primary/20 transition-all">
+                <CardContent className="space-y-6 p-8 flex flex-col h-full">
+                  <div className="text-center">
+                    <div className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                      ADVONE COMPLETE
+                    </div>
+                    <div className="mt-2 flex items-baseline justify-center gap-1">
+                      <span className="text-3xl font-bold">R$</span>
+                      <span className="font-display text-5xl font-bold">897</span>
+                      <span className="text-muted-foreground">/mês</span>
+                    </div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      Tudo em um só lugar
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-border" />
+
+                  <ul className="space-y-3 flex-1">
+                    {[
+                      "Tudo do plano IA",
+                      "Tudo do plano Gestão",
+                      "Integrações avançadas (Google, Asaas, ZapSign)",
+                      "Recursos exclusivos (IA jurídica, jurisprudência, calculadoras)",
+                      "Suporte prioritário",
+                    ].map((item) => (
+                      <li key={item} className="flex items-start gap-3 text-sm">
+                        <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={() => openWhatsApp("AdvOne Complete - Falar com especialista")}
+                    className="w-full"
+                  >
+                    FALAR COM ESPECIALISTA
                   </Button>
                 </CardContent>
               </Card>

@@ -30,7 +30,7 @@ export default function CrmAdvogados() {
           name: "AdvOne — CRM para Advogados",
           description: "Software jurídico com CRM, IA no WhatsApp, agenda e gestão de processos.",
           brand: { "@type": "Brand", name: "AdvOne" },
-          offers: { "@type": "Offer", price: "397", priceCurrency: "BRL", url: "https://advone.online/crm-advogados" },
+          offers: { "@type": "Offer", price: "597", priceCurrency: "BRL", url: "https://advone.online/crm-advogados" },
         })}</script>
       </Helmet>
 

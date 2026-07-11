@@ -843,34 +843,35 @@ export default function LandingPage() {
           <Reveal className="mb-16 text-center">
             <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Planos</p>
             <h2 className="text-3xl font-bold md:text-4xl mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              ESCOLHA SUA FORMA DE PAGAMENTO
+              ESCOLHA O PLANO IDEAL PARA SEU ESCRITÓRIO
             </h2>
             <p className="text-[hsl(220,10%,60%)] max-w-2xl mx-auto">
-              Tudo que seu escritório precisa para nunca mais perder um lead.
+              Comece pela IA, evolua para Gestão e chegue no Complete quando fizer sentido. Você cresce, o AdvOne cresce com você.
             </p>
           </Reveal>
 
           <div className="grid gap-8 md:grid-cols-3 max-w-6xl mx-auto">
-            {/* Plano Mensal */}
+            {/* AdvOne IA */}
             <Reveal delay={0}>
               <div className="rounded-2xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col h-full transition-all duration-500 hover:border-[hsl(153,60%,45%)]/30 hover:-translate-y-1">
                 <div className="mb-6 flex items-center justify-between">
-                  <span className="inline-block rounded-full bg-[hsl(220,20%,16%)] px-3 py-1 text-xs font-semibold text-[hsl(220,10%,75%)]">PAGAMENTO MENSAL</span>
+                  <span className="inline-block rounded-full bg-[hsl(220,20%,16%)] px-3 py-1 text-xs font-semibold text-[hsl(220,10%,75%)]">ADVONE IA</span>
                 </div>
                 <div className="mb-6">
-                  <h3 className="text-xl font-bold text-[hsl(220,10%,92%)] mb-2">Mais flexibilidade</h3>
+                  <h3 className="text-xl font-bold text-[hsl(220,10%,92%)] mb-2">Sua secretária virtual 24h</h3>
                   <div className="mt-4 flex items-baseline gap-1">
-                    <span className="text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 997</span>
+                    <span className="text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 397</span>
                     <span className="text-sm text-[hsl(220,10%,60%)]">/mês</span>
                   </div>
+                  <p className="mt-2 text-sm text-[hsl(220,10%,60%)]">Para quem quer parar de perder lead no WhatsApp.</p>
                 </div>
 
                 <ul className="mb-8 flex-1 space-y-3">
                   {[
-                    "Mesmo acesso completo à plataforma",
-                    "Sem fidelidade",
-                    "Cancele quando quiser",
-                    "Ativação rápida em até 24h"
+                    "Atendimento no WhatsApp 24h",
+                    "Qualificação inteligente de leads",
+                    "Agendamento automático na sua agenda",
+                    "Atendimento a clientes atuais",
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2 text-sm text-[hsl(220,10%,75%)]">
                       <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(153,60%,45%)]" />
@@ -878,76 +879,40 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <Button 
-                  onClick={() => document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' })} 
+                <Button
+                  onClick={() => document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' })}
                   className="w-full bg-transparent border border-[hsl(220,20%,16%)] hover:bg-[hsl(220,20%,16%)] text-[hsl(220,10%,92%)] font-bold py-6"
                 >
-                  COMEÇAR AGORA
+                  COMEÇAR COM IA
                 </Button>
               </div>
             </Reveal>
 
-            {/* Plano Semestral */}
+            {/* AdvOne Gestão — destaque */}
             <Reveal delay={100}>
-              <div className="rounded-2xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col h-full transition-all duration-500 hover:border-[hsl(153,60%,45%)]/30 hover:-translate-y-1">
-                <div className="mb-6 flex items-center justify-between">
-                  <span className="inline-block rounded-full bg-[hsl(220,20%,16%)] px-3 py-1 text-xs font-semibold text-[hsl(220,10%,75%)]">PAGAMENTO SEMESTRAL</span>
-                </div>
-                <div className="mb-6">
-                  <h3 className="text-xl font-bold text-[hsl(220,10%,92%)] mb-2">Economia intermediária</h3>
-                  <div className="mt-4 flex items-baseline gap-1">
-                    <span className="text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 797</span>
-                    <span className="text-sm text-[hsl(220,10%,60%)]">/mês</span>
-                  </div>
-                  <p className="mt-2 text-[hsl(153,60%,45%)] font-bold text-sm">Plano 6 meses · R$ 4.782 à vista</p>
-                </div>
-
-                <ul className="mb-8 flex-1 space-y-3">
-                  {[
-                    "Mesmo acesso completo",
-                    "Compromisso de 6 meses",
-                    "Ativação rápida"
-                  ].map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-sm text-[hsl(220,10%,75%)]">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(153,60%,45%)]" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <Button 
-                  onClick={() => document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' })} 
-                  className="w-full bg-transparent border border-[hsl(220,20%,16%)] hover:bg-[hsl(220,20%,16%)] text-[hsl(220,10%,92%)] font-bold py-6"
-                >
-                  COMEÇAR AGORA
-                </Button>
-              </div>
-            </Reveal>
-
-            {/* Plano Anual */}
-            <Reveal delay={200}>
               <div className="relative rounded-2xl border-2 border-[hsl(153,60%,45%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col h-full shadow-xl shadow-[hsl(153,60%,45%)]/10 transition-all duration-500 hover:-translate-y-2">
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[hsl(153,60%,45%)] px-4 py-1 text-xs font-bold text-[hsl(220,25%,6%)]">
-                  MELHOR CUSTO-BENEFÍCIO
+                  MAIS POPULAR
                 </div>
                 <div className="mb-6 flex items-center justify-between">
-                  <span className="inline-block rounded-full bg-[hsl(153,60%,45%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(153,60%,45%)]">PAGAMENTO ANUAL</span>
+                  <span className="inline-block rounded-full bg-[hsl(153,60%,45%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(153,60%,45%)]">ADVONE GESTÃO</span>
                 </div>
                 <div className="mb-6">
-                  <h3 className="text-xl font-bold mb-2 text-[hsl(153,60%,45%)]">Economia máxima</h3>
+                  <h3 className="text-xl font-bold mb-2 text-[hsl(153,60%,45%)]">Escritório organizado de verdade</h3>
                   <div className="mt-4 flex items-baseline gap-1">
                     <span className="text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 597</span>
                     <span className="text-sm text-[hsl(220,10%,60%)]">/mês</span>
                   </div>
-                  <p className="mt-2 text-[hsl(153,60%,45%)] font-bold text-sm">Plano 12 meses · R$ 7.164 à vista</p>
+                  <p className="mt-2 text-sm text-[hsl(220,10%,60%)]">Para escritórios que precisam de processo e time alinhado.</p>
                 </div>
 
                 <ul className="mb-8 flex-1 space-y-3">
                   {[
-                    "Acesso completo vitalício (no período)",
-                    "Suporte prioritário exclusivo",
-                    "Gerente de conta dedicado",
-                    "Sistema completo AdvOne",
-                    "Todas as funcionalidades inclusas"
+                    "CRM jurídico completo",
+                    "Pipeline (Kanban de leads e casos)",
+                    "Automações e cadências",
+                    "Gestão da equipe (papéis e permissões)",
+                    "Relatórios e indicadores",
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2 text-sm text-[hsl(220,10%,75%)]">
                       <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(153,60%,45%)]" />
@@ -955,36 +920,53 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <Button 
-                  onClick={() => document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' })} 
+                <Button
+                  onClick={() => document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' })}
                   size="lg"
                   className="w-full bg-gradient-to-r from-[hsl(153,60%,45%)] to-[hsl(153,70%,55%)] hover:opacity-90 text-[hsl(220,25%,6%)] font-bold text-lg py-6 shadow-lg shadow-[hsl(153,60%,45%)]/20"
                 >
-                  QUERO ECONOMIZAR
+                  QUERO ORGANIZAR
                 </Button>
               </div>
             </Reveal>
-          </div>
 
-          <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
-            {[
-              "Secretária Virtual Jurídica com IA 24h",
-              "Atendimento automático no seu WhatsApp",
-              "Qualificação inteligente dos leads",
-              "Agendamento automático na sua agenda",
-              "Follow-up automático",
-              "CRM Jurídico completo com Kanban",
-              "Agenda + Financeiro integrados",
-              "Templates e documentos ilimitados",
-              "Monitoramento de Processos (R$ 2,50/processo)"
-            ].map((feature) => (
-              <div key={feature} className="flex items-center gap-3 p-4 rounded-xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)]">
-                <div className="h-5 w-5 flex items-center justify-center rounded-full bg-[hsl(153,60%,45%)]/20 text-[hsl(153,60%,45%)]">
-                  <CheckCircle2 className="h-4 w-4" />
+            {/* AdvOne Complete */}
+            <Reveal delay={200}>
+              <div className="rounded-2xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col h-full transition-all duration-500 hover:border-[hsl(153,60%,45%)]/30 hover:-translate-y-1">
+                <div className="mb-6 flex items-center justify-between">
+                  <span className="inline-block rounded-full bg-[hsl(220,20%,16%)] px-3 py-1 text-xs font-semibold text-[hsl(220,10%,75%)]">ADVONE COMPLETE</span>
                 </div>
-                <span className="text-sm font-medium text-[hsl(220,10%,80%)]">{feature}</span>
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold text-[hsl(220,10%,92%)] mb-2">Tudo em um só lugar</h3>
+                  <div className="mt-4 flex items-baseline gap-1">
+                    <span className="text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 897</span>
+                    <span className="text-sm text-[hsl(220,10%,60%)]">/mês</span>
+                  </div>
+                  <p className="mt-2 text-sm text-[hsl(220,10%,60%)]">Para escritórios que querem escalar sem limite.</p>
+                </div>
+
+                <ul className="mb-8 flex-1 space-y-3">
+                  {[
+                    "Tudo do plano IA",
+                    "Tudo do plano Gestão",
+                    "Integrações avançadas (Google, Asaas, ZapSign)",
+                    "Recursos exclusivos (IA jurídica, jurisprudência, calculadoras)",
+                    "Suporte prioritário",
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-sm text-[hsl(220,10%,75%)]">
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(153,60%,45%)]" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  onClick={() => document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="w-full bg-transparent border border-[hsl(220,20%,16%)] hover:bg-[hsl(220,20%,16%)] text-[hsl(220,10%,92%)] font-bold py-6"
+                >
+                  FALAR COM ESPECIALISTA
+                </Button>
               </div>
-            ))}
+            </Reveal>
           </div>
         </div>
       </section>

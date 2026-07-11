@@ -78,7 +78,7 @@ export default function PostSdrHumanoVsIa() {
               <tr>
                 <td className="border border-border p-2 font-medium">Salário + Encargos</td>
                 <td className="border border-border p-2">R$ 3.500 - R$ 5.500</td>
-                <td className="border border-border p-2">R$ 397 (Plano Base)</td>
+                <td className="border border-border p-2">R$ 397 (AdvOne IA)</td>
               </tr>
               <tr>
                 <td className="border border-border p-2 font-medium">Treinamento</td>
