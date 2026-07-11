@@ -135,8 +135,17 @@ export default function Kanban() {
   };
 
   const initDefaultColumns = async () => {
+    if (!selectedBoardId) {
+      toast.error("Selecione um quadro antes de criar o funil.");
+      return;
+    }
+
     for (const col of DEFAULT_COLUMNS) {
-      await supabase.from("kanban_columns").insert({ company_id: selectedCompanyId, ...col });
+      const { error } = await supabase.from("kanban_columns").insert({ company_id: selectedCompanyId, board_id: selectedBoardId, ...col });
+      if (error) {
+        toast.error("Erro ao criar funil padrão", { description: error.message });
+        return;
+      }
     }
     toast.success("Funil padrão criado!");
     fetchColumnsAndLeads();
@@ -295,6 +304,7 @@ export default function Kanban() {
             <KanbanColumnSettings
               companyId={selectedCompanyId}
               companyName={selectedCompany?.name || ""}
+              boardId={selectedBoardId}
               columns={kanbanColumns}
               onUpdate={fetchColumnsAndLeads}
             />
@@ -317,7 +327,7 @@ export default function Kanban() {
                 <button onClick={initDefaultColumns} className="gradient-primary rounded-lg px-4 py-2 text-sm font-medium text-primary-foreground transition-all hover:opacity-90">
                   Criar Funil Padrão
                 </button>
-                <KanbanColumnSettings companyId={selectedCompanyId} companyName={selectedCompany?.name || ""} columns={[]} onUpdate={fetchColumnsAndLeads} />
+                <KanbanColumnSettings companyId={selectedCompanyId} companyName={selectedCompany?.name || ""} boardId={selectedBoardId} columns={[]} onUpdate={fetchColumnsAndLeads} />
               </div>
             )}
           </CardContent>

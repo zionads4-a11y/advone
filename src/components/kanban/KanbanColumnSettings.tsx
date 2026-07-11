@@ -23,6 +23,7 @@ export interface KanbanColumn {
 interface KanbanColumnSettingsProps {
   companyId: string;
   companyName: string;
+  boardId?: string;
   columns: KanbanColumn[];
   onUpdate: () => void;
 }
@@ -33,7 +34,7 @@ const PRESET_COLORS = [
   "#14b8a6", "#6366f1", "#84cc16", "#a855f7",
 ];
 
-export function KanbanColumnSettings({ companyId, companyName, columns, onUpdate }: KanbanColumnSettingsProps) {
+export function KanbanColumnSettings({ companyId, companyName, boardId, columns, onUpdate }: KanbanColumnSettingsProps) {
   const [open, setOpen] = useState(false);
   const [editColumns, setEditColumns] = useState<KanbanColumn[]>([]);
   const [saving, setSaving] = useState(false);
@@ -100,22 +101,35 @@ export function KanbanColumnSettings({ companyId, companyName, columns, onUpdate
     const toDelete = existingIds.filter((id) => !keepIds.includes(id));
 
     for (const id of toDelete) {
-      await supabase.from("kanban_columns").delete().eq("id", id);
+      const { error } = await supabase.from("kanban_columns").delete().eq("id", id);
+      if (error) {
+        toast.error("Erro ao excluir coluna", { description: error.message });
+        setSaving(false);
+        return;
+      }
     }
 
     // Upsert columns
     for (const col of editColumns) {
       if (col.id.startsWith("new-")) {
-        await supabase.from("kanban_columns").insert({
+        const payload: Record<string, string | number | boolean> = {
           company_id: companyId,
           name: col.name,
           color: col.color,
           position: col.position,
           is_won: col.is_won,
           is_lost: col.is_lost,
-        });
+        };
+        if (boardId) payload.board_id = boardId;
+
+        const { error } = await supabase.from("kanban_columns").insert(payload);
+        if (error) {
+          toast.error("Erro ao criar coluna", { description: error.message });
+          setSaving(false);
+          return;
+        }
       } else {
-        await supabase
+        const { error } = await supabase
           .from("kanban_columns")
           .update({
             name: col.name,
@@ -125,6 +139,11 @@ export function KanbanColumnSettings({ companyId, companyName, columns, onUpdate
             is_lost: col.is_lost,
           })
           .eq("id", col.id);
+        if (error) {
+          toast.error("Erro ao atualizar coluna", { description: error.message });
+          setSaving(false);
+          return;
+        }
       }
     }
 
