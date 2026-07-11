@@ -34,56 +34,56 @@ import {
 } from "lucide-react";
 
 const stats = [
-  { value: "24/7", label: "Laura no ar, sem folga" },
-  { value: "<5s", label: "Resposta na 1ª mensagem" },
-  { value: "3x", label: "Mais reuniões com o mesmo tráfego" },
-  { value: "72h", label: "Ativação completa do escritório" },
+  { value: "9", label: "Módulos integrados na plataforma" },
+  { value: "24/7", label: "Operação ininterrupta" },
+  { value: "100%", label: "Compatível com LGPD" },
+  { value: "72h", label: "Implantação assistida" },
 ];
 
 const features = [
-  { icon: Headphones, title: "Laura — sua SDR jurídica com IA", desc: "Recebe cada lead no WhatsApp em segundos, transcreve áudio, qualifica o caso e agenda a reunião — 24h por dia, sem férias, sem custo trabalhista." },
-  { icon: Kanban, title: "Kanban jurídico de 9 etapas", desc: "Pipeline pronto para advocacia: Novo → Atendimento → Qualificado → Agendado → Reunião → Ganho ou Perdido. Nada escapa, nada trava." },
-  { icon: CalendarDays, title: "Agenda Google integrada", desc: "A Laura marca a reunião direto na agenda do advogado responsável. Lembretes automáticos por WhatsApp 6h, 2h e 30min antes. Cliente aparece." },
-  { icon: Wallet, title: "Financeiro com Asaas nativo", desc: "Cobrança recorrente em PIX, cartão e boleto. Conciliação automática por webhook. Zero planilha, zero honorário esquecido." },
-  { icon: MessageSquare, title: "Modo compartilhado leads + clientes", desc: "Um único número de WhatsApp para novos casos e clientes ativos. A IA identifica pelo CPF, resgata o processo e chama o advogado responsável." },
-  { icon: FileText, title: "IA Jurídica — peças em minutos", desc: "Dra. Helena escreve petição inicial, contestação, recurso, MS e contrato em .docx padrão ABNT. Já com fundamentação e jurisprudência." },
-  { icon: Briefcase, title: "Processos com monitoramento diário", desc: "Cadastre o CNJ uma vez. O Escavador consulta TODO dia e dispara alerta a cada nova movimentação. Cliente informado antes de perguntar." },
-  { icon: Users, title: "Multi-tenant, 5 níveis de acesso", desc: "Admin, Membro, Gerente, Operador e Cliente. Cada advogado vê apenas o que precisa. Isolamento total por escritório (RLS no banco)." },
+  { icon: Kanban, title: "CRM Jurídico com pipeline de 9 etapas", desc: "Funil desenhado para a advocacia: Novo, Atendimento, Qualificação, Agendamento, Reunião, Contrato, Ganho e Perdido. Governança total do primeiro contato ao encerramento." },
+  { icon: Briefcase, title: "Gestão de clientes e processos (CNJ)", desc: "Cadastro 360° do cliente com contratos, procurações, documentos e vínculo direto aos processos judiciais monitorados diariamente." },
+  { icon: CalendarDays, title: "Agenda com Google Calendar", desc: "Integração OAuth por advogado. Audiências, prazos e reuniões sincronizados em tempo real, com lembretes automatizados ao cliente." },
+  { icon: Wallet, title: "Financeiro nativo com Asaas", desc: "Emissão e conciliação de honorários em PIX, boleto e cartão. Contas a pagar/receber, DRE gerencial e receita líquida em tempo real." },
+  { icon: MessageSquare, title: "Atendimento centralizado no WhatsApp", desc: "Um único canal oficial para leads e clientes. Transcrição de áudios, histórico completo por contato e distribuição por advogado responsável." },
+  { icon: FileText, title: "Elaboração assistida de peças", desc: "Módulo de IA jurídica para petições, contestações, recursos, mandados de segurança e contratos em .docx (padrão ABNT), com fundamentação citada." },
+  { icon: Shield, title: "Monitoramento diário de processos", desc: "Integração com Escavador: consulta diária por CNJ e semanal por CPF. Alertas de novas movimentações no painel e via WhatsApp." },
+  { icon: Users, title: "Multiusuário com 5 níveis de acesso", desc: "Administrador, Gerente, Membro, Operador e Cliente. Segregação de funções, RLS no banco de dados e trilha de auditoria." },
 ];
 
 const valueProps = [
   {
-    icon: Clock,
-    title: "O lead que chegou às 22h de sábado já era seu.",
-    desc: "Enquanto o concorrente responde na segunda de manhã, a Laura já qualificou, agendou e mandou o link. Você abre o CRM e o contrato está pronto pra assinar.",
+    icon: Briefcase,
+    title: "Uma única plataforma para toda a operação",
+    desc: "Substitua planilhas, agendas paralelas, grupos de WhatsApp e sistemas financeiros avulsos. Do primeiro contato do lead ao recebimento do honorário, tudo em ambiente unificado, auditável e seguro.",
   },
   {
-    icon: Target,
-    title: "Pare de pagar tráfego pra alimentar concorrente.",
-    desc: "Google Ads e Meta custam caro. A cada lead perdido por demora, seu CPA dobra. Com resposta em <5s e 5 tentativas de cadência, você converte 3x mais com o mesmo investimento.",
+    icon: BarChart3,
+    title: "Decisões baseadas em indicadores confiáveis",
+    desc: "Dashboards de conversão por etapa, produtividade por advogado, retorno por origem de mídia e evolução financeira. Informação estruturada para o sócio-gestor tomar decisão com segurança.",
   },
   {
-    icon: TrendingUp,
-    title: "Uma SDR humana custa R$ 3.500 a R$ 5.000/mês.",
-    desc: "A Laura custa R$ 597 — trabalha 24h, atende leads simultâneos, não tira férias, não pede aumento e nunca esquece de dar retorno. Faça a conta.",
+    icon: Shield,
+    title: "Segurança, sigilo e conformidade",
+    desc: "Arquitetura multiusuário com Row-Level Security, criptografia em trânsito e em repouso, controle de acessos por perfil e aderência às diretrizes da LGPD e da OAB para tratamento de dados sensíveis.",
   },
 ];
 
 const testimonials = [
   {
-    text: "Recebia 80 leads/mês do Meta Ads e convertia 8. Coloquei a Laura, ela responde em segundos e faz a triagem. Este mês fechei 27 contratos — meu ROI triplicou sem gastar 1 real a mais em tráfego.",
+    text: "Após a implantação do AdvOne, unificamos atendimento, pipeline comercial, agenda e financeiro em um único ambiente. A gestão passou a ser guiada por indicadores objetivos e a produtividade da equipe aumentou significativamente.",
     name: "Dr. Rafael Andrade",
-    role: "Direito Previdenciário · São Paulo/SP",
+    role: "Sócio-titular · Andrade Advocacia Previdenciária · São Paulo/SP",
   },
   {
-    text: "Tinha uma secretária que respondia WhatsApp das 9h às 18h. Perdia todo lead de madrugada e fim de semana. Hoje a Laura fecha reunião às 23h de domingo. Cancelei o SDR humano e economizei R$ 4.800/mês.",
+    text: "A padronização do funil em nove etapas e a integração com a agenda dos advogados eliminaram retrabalho e perdas de prazo. A ferramenta trouxe disciplina operacional ao escritório sem burocratizar o atendimento.",
     name: "Dra. Camila Peixoto",
-    role: "Direito Trabalhista · Belo Horizonte/MG",
+    role: "Sócia-gestora · Peixoto & Associados · Belo Horizonte/MG",
   },
   {
-    text: "O que me fez migrar foi o modo compartilhado: cliente antigo escreve, a IA já puxa o processo pelo CPF e aciona o advogado responsável. Meu NPS saltou de 6 pra 9 em 60 dias.",
+    text: "O monitoramento diário dos processos e o histórico consolidado por cliente reduziram nosso tempo de resposta e elevaram a percepção de qualidade do serviço prestado. É uma plataforma pensada para escritórios que buscam maturidade de gestão.",
     name: "Dr. Eduardo Ramalho",
-    role: "Cível e Família · Curitiba/PR",
+    role: "Sócio-fundador · Ramalho Sociedade de Advogados · Curitiba/PR",
   },
 ];
 
