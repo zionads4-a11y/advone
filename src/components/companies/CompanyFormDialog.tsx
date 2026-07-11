@@ -140,6 +140,42 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
                 <Label>Telefone / WhatsApp</Label>
                 <Input name="whatsapp" placeholder="5511999999999" />
               </div>
+              <div className="space-y-2">
+                <Label>E-mail para cobrança</Label>
+                <Input name="customer_email" type="email" placeholder="financeiro@empresa.com" />
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <Label>Dia do vencimento *</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={28}
+                    required
+                    value={dueDay}
+                    onChange={(e) => setDueDay(e.target.value)}
+                  />
+                  <p className="text-[10px] text-muted-foreground">Entre 1 e 28.</p>
+                </div>
+                <div className="space-y-1">
+                  <Label>Forma de pagamento</Label>
+                  <Select value={billingType} onValueChange={setBillingType}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="UNDEFINED">PIX ou Cartão (cliente escolhe)</SelectItem>
+                      <SelectItem value="PIX">Somente PIX</SelectItem>
+                      <SelectItem value="CREDIT_CARD">Somente Cartão</SelectItem>
+                      <SelectItem value="BOLETO">Boleto</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <p className="text-[11px] text-muted-foreground -mt-1">
+                Ao salvar, a assinatura recorrente é criada automaticamente no Asaas com o
+                plano selecionado.
+              </p>
             </>
           )}
 
