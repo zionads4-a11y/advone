@@ -159,14 +159,17 @@ export default function ProcessKanban() {
 
   const createBoard = async (name: string, description: string, color: string) => {
     if (!companyId || !user || !selectedAreaId) return;
+    if (areaBoards.length > 0) {
+      return toast.error("Esta área já tem um funil", { description: "Cada setor pode ter apenas 1 quadro. Edite as colunas do funil existente." });
+    }
     const { data, error } = await supabase.from("process_boards").insert({
       company_id: companyId, legal_area_id: selectedAreaId, name, description, color,
-      position: areaBoards.length, created_by: user.id,
+      position: areaBoards.length, created_by: user.id, is_default: true,
     }).select().single();
     if (error) return toast.error("Erro ao criar quadro", { description: error.message });
     setBoards(prev => [...prev, data as Board]);
     setSelectedBoardId((data as Board).id);
-    toast.success("Quadro criado");
+    toast.success("Funil criado para esta área");
   };
 
   const createColumn = async (name: string, color: string, stage_type: string) => {
