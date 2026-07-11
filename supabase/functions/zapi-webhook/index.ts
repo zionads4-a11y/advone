@@ -43,6 +43,13 @@ Lead silencioso (não respondeu) TAMBÉM não é desistência — a cadência au
 
   const nowBR = getNowBrasilia(timezone);
   const today = `${String(nowBR.getDate()).padStart(2, "0")}/${String(nowBR.getMonth() + 1).padStart(2, "0")}/${nowBR.getFullYear()}`;
+  const hourBR = nowBR.getHours();
+  const nowTime = `${String(hourBR).padStart(2, "0")}:${String(nowBR.getMinutes()).padStart(2, "0")}`;
+  const periodo =
+    hourBR >= 5 && hourBR < 12 ? "manhã (use 'bom dia')"
+    : hourBR >= 12 && hourBR < 18 ? "tarde (use 'boa tarde')"
+    : "noite (use 'boa noite')";
+
 
   return `Você é ${botName}, ${botRole} de ${officeName}.
 [OBJETIVO PRINCIPAL]
