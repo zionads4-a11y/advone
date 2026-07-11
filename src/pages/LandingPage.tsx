@@ -579,20 +579,20 @@ export default function LandingPage() {
           <Reveal>
             <div className="mb-16 grid grid-cols-2 gap-4 rounded-2xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,8%)]/60 p-6 backdrop-blur md:grid-cols-4 md:gap-8 md:p-10">
               <div className="text-center">
-                <p className="text-3xl font-bold text-[hsl(153,60%,45%)] md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>+1.200</p>
-                <p className="mt-1 text-xs text-[hsl(220,10%,55%)] md:text-sm">Escritórios atendidos</p>
+                <p className="text-3xl font-bold text-[hsl(153,60%,45%)] md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>-90%</p>
+                <p className="mt-1 text-xs text-[hsl(220,10%,55%)] md:text-sm">custo vs SDR humana</p>
               </div>
               <div className="text-center">
-                <p className="text-3xl font-bold text-[hsl(153,60%,45%)] md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>+50 mil</p>
-                <p className="mt-1 text-xs text-[hsl(220,10%,55%)] md:text-sm">Leads gerenciados</p>
+                <p className="text-3xl font-bold text-[hsl(153,60%,45%)] md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>3x</p>
+                <p className="mt-1 text-xs text-[hsl(220,10%,55%)] md:text-sm">mais reuniões marcadas</p>
               </div>
               <div className="text-center">
-                <p className="text-3xl font-bold text-[hsl(153,60%,45%)] md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>+R$ 80mi</p>
-                <p className="mt-1 text-xs text-[hsl(220,10%,55%)] md:text-sm">Em honorários gestionados</p>
+                <p className="text-3xl font-bold text-[hsl(153,60%,45%)] md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>&lt;5s</p>
+                <p className="mt-1 text-xs text-[hsl(220,10%,55%)] md:text-sm">resposta na 1ª mensagem</p>
               </div>
               <div className="text-center">
-                <p className="text-3xl font-bold text-[hsl(153,60%,45%)] md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>98%</p>
-                <p className="mt-1 text-xs text-[hsl(220,10%,55%)] md:text-sm">Satisfação dos gestores</p>
+                <p className="text-3xl font-bold text-[hsl(153,60%,45%)] md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>72h</p>
+                <p className="mt-1 text-xs text-[hsl(220,10%,55%)] md:text-sm">ativação porta a porta</p>
               </div>
             </div>
           </Reveal>
