@@ -945,8 +945,10 @@ Antes de responder:
               };
 
               // 🔔 Notificação por Área (Nicho)
-              // Se for lead quente ou morno, notifica o advogado responsável
-              if ((classification === "quente" || classification === "morno") && args.niche) {
+              // Apenas leads QUENTES geram alerta ao advogado — mornos/frios seguem no fluxo silenciosamente.
+              // Também evita duplicidade: só notifica se ainda não havia score definido (primeira classificação).
+              const alreadyClassified = !!existingLead?.lead_score;
+              if (classification === "quente" && !alreadyClassified && args.niche) {
                 try {
                   const { data: nicheAlert } = await supabase
                     .from("company_niche_alerts")
@@ -967,7 +969,7 @@ Antes de responder:
                     const tokenParam = encodeURIComponent(config.zapi_token || instanceId || "");
                     const instanceParam = encodeURIComponent(instanceId || "");
                     
-                    const alertMessage = `🔥 *Novo Lead Qualificado (${args.niche})*\n\n👤 Cliente: ${leadNameDisplay}\n📈 Score: ${classification.toUpperCase()}\n⚖️ Área: ${args.niche}\n📝 Motivo: ${toolResult.reason || "N/A"}\n\n_O lead acaba de ser classificado como ${classification} pelo Decision Engine._`;
+                    const alertMessage = `🔥 *Novo Lead Qualificado (${args.niche})*\n\n👤 Cliente: ${leadNameDisplay}\n📈 Score: ${classification.toUpperCase()}\n⚖️ Área: ${args.niche}\n📝 Motivo: ${toolResult.reason || "N/A"}`;
 
                     const alertHeaders: Record<string, string> = { "Content-Type": "application/json" };
                     if (ADMIN_TOKEN) alertHeaders["admintoken"] = ADMIN_TOKEN;
