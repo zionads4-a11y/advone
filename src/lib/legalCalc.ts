@@ -109,7 +109,264 @@ export function calcRescisao(i: RescisaoInput): RescisaoResult {
   return { itens, totalBruto, fgtsDeposito: fgtsMes, multaFgts, totalReceber };
 }
 
-// ============ PREVIDENCIÁRIA — RMI SIMPLIFICADA ============
+// ============ PREVIDENCIÁRIA — MODALIDADES ============
+export type PrevModalidade =
+  | "idade"
+  | "tempo_contribuicao"
+  | "especial"
+  | "invalidez"
+  | "auxilio_doenca"
+  | "incapacidade_permanente"
+  | "planejamento"
+  | "revisao_vida_toda"
+  | "liquidacao_sentenca";
+
+export interface PrevInput {
+  modalidade: PrevModalidade;
+  sexo: "M" | "F";
+  idade: number;
+  tempoContribuicaoAnos: number;
+  mediaSalariosContribuicao: number;
+  // opcionais por modalidade
+  mediaPreJulho94?: number;      // revisão da vida toda
+  atrasadosMeses?: number;       // liquidação
+  jurosMensalPct?: number;       // liquidação
+  correcaoAcumuladaPct?: number; // liquidação
+}
+
+export interface PrevResult {
+  modalidadeLabel: string;
+  coeficiente: number;
+  rmi: number;
+  rmiComparativa?: number;
+  atrasados?: number;
+  totalDevido?: number;
+  detalhes: { label: string; valor: string }[];
+  observacoes: string;
+}
+
+const SM_2026 = 1518;
+const TETO_INSS = 8157.41;
+
+function clampBenef(v: number) {
+  return Math.min(TETO_INSS, Math.max(SM_2026, +v.toFixed(2)));
+}
+
+function coefEC103(tempoAnos: number, sexo: "M" | "F") {
+  const tempoMin = sexo === "F" ? 15 : 20;
+  const excedente = Math.max(0, tempoAnos - tempoMin);
+  return { coef: Math.min(1, 0.6 + excedente * 0.02), tempoMin, excedente };
+}
+
+export function calcPrevidenciaria(i: PrevInput): PrevResult {
+  const media = i.mediaSalariosContribuicao;
+
+  switch (i.modalidade) {
+    case "idade": {
+      const idadeMin = i.sexo === "F" ? 62 : 65;
+      const tempoMin = 15;
+      const { coef } = coefEC103(i.tempoContribuicaoAnos, i.sexo);
+      const rmi = clampBenef(media * coef);
+      const atende = i.idade >= idadeMin && i.tempoContribuicaoAnos >= tempoMin;
+      return {
+        modalidadeLabel: "Aposentadoria por Idade (EC 103/2019)",
+        coeficiente: +(coef * 100).toFixed(2),
+        rmi,
+        detalhes: [
+          { label: "Idade mínima exigida", valor: `${idadeMin} anos` },
+          { label: "Idade atual", valor: `${i.idade} anos` },
+          { label: "Tempo mínimo de contribuição", valor: `${tempoMin} anos` },
+          { label: "Tempo contribuído", valor: `${i.tempoContribuicaoAnos} anos` },
+          { label: "Coeficiente (60% + 2%/ano excedente)", valor: `${(coef * 100).toFixed(0)}%` },
+          { label: "Média salarial", valor: brl(media) },
+          { label: "RMI", valor: brl(rmi) },
+          { label: "Status dos requisitos", valor: atende ? "✅ Preenchidos" : "❌ Faltam requisitos" },
+        ],
+        observacoes:
+          "Regra permanente (EC 103/2019, art. 18): 62F/65M + 15 anos de contribuição. Coeficiente = 60% + 2% por ano excedente.",
+      };
+    }
+
+    case "tempo_contribuicao": {
+      // Regra de transição de pontos (EC 103, art. 15). Pontuação 2026: F=91 / M=101.
+      const pontosMin = i.sexo === "F" ? 91 : 101;
+      const pontos = i.idade + i.tempoContribuicaoAnos;
+      const { coef } = coefEC103(i.tempoContribuicaoAnos, i.sexo);
+      const rmi = clampBenef(media * coef);
+      return {
+        modalidadeLabel: "Aposentadoria por Tempo de Contribuição (Transição - Pontos)",
+        coeficiente: +(coef * 100).toFixed(2),
+        rmi,
+        detalhes: [
+          { label: "Pontuação mínima 2026", valor: `${pontosMin} pts` },
+          { label: "Sua pontuação (idade + tempo)", valor: `${pontos} pts` },
+          { label: "Tempo mínimo", valor: i.sexo === "F" ? "30 anos" : "35 anos" },
+          { label: "Tempo contribuído", valor: `${i.tempoContribuicaoAnos} anos` },
+          { label: "Coeficiente", valor: `${(coef * 100).toFixed(0)}%` },
+          { label: "Média salarial", valor: brl(media) },
+          { label: "RMI", valor: brl(rmi) },
+          { label: "Status", valor: pontos >= pontosMin ? "✅ Atinge pontuação" : `❌ Faltam ${pontosMin - pontos} pts` },
+        ],
+        observacoes:
+          "Regra de transição por pontos (EC 103, art. 15). Pontuação sobe 1 ponto por ano até 100F/105M em 2033.",
+      };
+    }
+
+    case "especial": {
+      // Aposentadoria especial: 25/20/15 anos conforme exposição. Usamos 25 (padrão).
+      const tempoMin = 25;
+      const { coef } = coefEC103(Math.max(20, i.tempoContribuicaoAnos), i.sexo);
+      const rmi = clampBenef(media * coef);
+      return {
+        modalidadeLabel: "Aposentadoria Especial (atividade insalubre/perigosa)",
+        coeficiente: +(coef * 100).toFixed(2),
+        rmi,
+        detalhes: [
+          { label: "Tempo mínimo de exposição", valor: `${tempoMin} anos (grau médio)` },
+          { label: "Tempo comprovado", valor: `${i.tempoContribuicaoAnos} anos` },
+          { label: "Idade mínima (EC 103)", valor: "55 anos (após 13/11/2019)" },
+          { label: "Coeficiente", valor: `${(coef * 100).toFixed(0)}%` },
+          { label: "Média salarial", valor: brl(media) },
+          { label: "RMI", valor: brl(rmi) },
+        ],
+        observacoes:
+          "Aposentadoria especial (Lei 8.213/91, art. 57). Exige PPP + LTCAT comprovando exposição habitual e permanente a agentes nocivos.",
+      };
+    }
+
+    case "invalidez":
+    case "incapacidade_permanente": {
+      // 100% da média (Lei 14.331/2022, EC 103 art. 26 §3º-I) para invalidez decorrente de acidente do trabalho
+      // ou doença profissional. Para demais causas: 60% + 2% por ano excedente.
+      const { coef } = coefEC103(i.tempoContribuicaoAnos, i.sexo);
+      const rmi = clampBenef(media * coef);
+      const rmiAcidente = clampBenef(media * 1.0);
+      return {
+        modalidadeLabel: "Aposentadoria por Incapacidade Permanente (Invalidez)",
+        coeficiente: +(coef * 100).toFixed(2),
+        rmi,
+        rmiComparativa: rmiAcidente,
+        detalhes: [
+          { label: "Média salarial", valor: brl(media) },
+          { label: "Coeficiente doença comum", valor: `${(coef * 100).toFixed(0)}%` },
+          { label: "RMI — doença comum", valor: brl(rmi) },
+          { label: "Coeficiente acidente/doença ocupacional", valor: "100%" },
+          { label: "RMI — se acidentário", valor: brl(rmiAcidente) },
+        ],
+        observacoes:
+          "EC 103/2019 art. 26 §3º-I: incapacidade permanente = 60% + 2%/ano excedente. Se decorrente de acidente do trabalho, doença ocupacional ou profissional: 100% da média (Lei 14.331/22).",
+      };
+    }
+
+    case "auxilio_doenca": {
+      // Auxílio por incapacidade temporária: 91% da média, limitada à média dos últimos 12 salários (Lei 13.135/15)
+      const rmi = clampBenef(media * 0.91);
+      return {
+        modalidadeLabel: "Auxílio por Incapacidade Temporária (Auxílio-Doença)",
+        coeficiente: 91,
+        rmi,
+        detalhes: [
+          { label: "Média salarial", valor: brl(media) },
+          { label: "Coeficiente", valor: "91%" },
+          { label: "Renda mensal do benefício", valor: brl(rmi) },
+          { label: "Carência", valor: "12 contribuições (dispensada em acidente)" },
+        ],
+        observacoes:
+          "Lei 8.213/91 art. 61 c/c EC 103 art. 26 §2º-II: 91% da média aritmética dos salários de contribuição, limitada à média dos últimos 12.",
+      };
+    }
+
+    case "planejamento": {
+      // Compara: aposentar hoje x esperar 1, 3 e 5 anos.
+      const linhas = [0, 1, 3, 5].map((add) => {
+        const t = i.tempoContribuicaoAnos + add;
+        const { coef } = coefEC103(t, i.sexo);
+        const rmi = clampBenef(media * coef);
+        return {
+          label: add === 0 ? "Hoje" : `Daqui a ${add} ano${add > 1 ? "s" : ""}`,
+          valor: `${brl(rmi)} (coef ${(coef * 100).toFixed(0)}%)`,
+        };
+      });
+      const melhor = coefEC103(i.tempoContribuicaoAnos + 5, i.sexo);
+      const rmiMelhor = clampBenef(media * melhor.coef);
+      return {
+        modalidadeLabel: "Planejamento Previdenciário",
+        coeficiente: +(melhor.coef * 100).toFixed(2),
+        rmi: rmiMelhor,
+        detalhes: [
+          { label: "Sexo / Idade", valor: `${i.sexo === "F" ? "Feminino" : "Masculino"} · ${i.idade} anos` },
+          { label: "Tempo contribuído hoje", valor: `${i.tempoContribuicaoAnos} anos` },
+          { label: "Média salarial", valor: brl(media) },
+          ...linhas,
+          { label: "Melhor cenário (+5 anos)", valor: brl(rmiMelhor) },
+        ],
+        observacoes:
+          "Simulação comparativa. Para o cenário ótimo, também avalie: descarte das menores contribuições (EC 103 art. 26 §6º), regra 85/95, revisão da vida toda e regime de tributação (IR × contribuições sindicais).",
+      };
+    }
+
+    case "revisao_vida_toda": {
+      // Compara média EC 103 (a partir de 07/1994) com média incluindo TODAS as contribuições.
+      const mediaAtual = media;
+      const mediaTotal = i.mediaPreJulho94 && i.mediaPreJulho94 > 0
+        ? +((mediaAtual + i.mediaPreJulho94) / 2).toFixed(2)
+        : mediaAtual * 1.15; // estimativa se não informado
+      const { coef } = coefEC103(i.tempoContribuicaoAnos, i.sexo);
+      const rmiAtual = clampBenef(mediaAtual * coef);
+      const rmiRevisado = clampBenef(mediaTotal * coef);
+      const ganhoMensal = +(rmiRevisado - rmiAtual).toFixed(2);
+      const ganho60m = +(ganhoMensal * 60).toFixed(2);
+      return {
+        modalidadeLabel: "Revisão da Vida Toda (Tema 1.102 STF)",
+        coeficiente: +(coef * 100).toFixed(2),
+        rmi: rmiRevisado,
+        rmiComparativa: rmiAtual,
+        atrasados: ganho60m,
+        detalhes: [
+          { label: "Média atual (pós-07/1994)", valor: brl(mediaAtual) },
+          { label: "Média incluindo contribuições anteriores", valor: brl(mediaTotal) },
+          { label: "Coeficiente", valor: `${(coef * 100).toFixed(0)}%` },
+          { label: "RMI atual", valor: brl(rmiAtual) },
+          { label: "RMI revisada", valor: brl(rmiRevisado) },
+          { label: "Ganho mensal", valor: brl(ganhoMensal) },
+          { label: "Atrasados (60 meses)", valor: brl(ganho60m) },
+        ],
+        observacoes:
+          "STF Tema 1.102 (RE 1.276.977): direito à opção pela regra do art. 29 da Lei 8.213/91 (média de toda a vida contributiva) quando mais benéfica. Atenção ao julgamento do STF em 2024 sobre modulação de efeitos.",
+      };
+    }
+
+    case "liquidacao_sentenca": {
+      // Liquidação de sentença: RMI × meses atrasados + juros + correção
+      const { coef } = coefEC103(i.tempoContribuicaoAnos, i.sexo);
+      const rmi = clampBenef(media * coef);
+      const meses = i.atrasadosMeses ?? 0;
+      const bruto = +(rmi * meses).toFixed(2);
+      const juros = +(bruto * ((i.jurosMensalPct ?? 0.5) / 100) * (meses / 2)).toFixed(2);
+      const correcao = +(bruto * ((i.correcaoAcumuladaPct ?? 0) / 100)).toFixed(2);
+      const total = +(bruto + juros + correcao).toFixed(2);
+      return {
+        modalidadeLabel: "Liquidação de Sentença Previdenciária",
+        coeficiente: +(coef * 100).toFixed(2),
+        rmi,
+        atrasados: bruto,
+        totalDevido: total,
+        detalhes: [
+          { label: "RMI apurada", valor: brl(rmi) },
+          { label: "Meses em atraso", valor: `${meses}` },
+          { label: "Atrasados (RMI × meses)", valor: brl(bruto) },
+          { label: `Juros de mora (${i.jurosMensalPct ?? 0.5}% a.m., Selic)`, valor: brl(juros) },
+          { label: `Correção monetária (${i.correcaoAcumuladaPct ?? 0}%)`, valor: brl(correcao) },
+          { label: "TOTAL A EXECUTAR", valor: brl(total) },
+        ],
+        observacoes:
+          "Após EC 113/2021: juros e correção pela Selic (índice único). Antes: TR + 1% a.m. Aplicar conforme período de cada parcela vencida.",
+      };
+    }
+  }
+}
+
+// Wrapper legado (mantém compatibilidade com quem importa calcRMI)
 export interface RMIInput {
   sexo: "M" | "F";
   tempoContribuicaoAnos: number;
@@ -117,38 +374,21 @@ export interface RMIInput {
   regra: "EC103_pontos" | "EC103_idade" | "media_geral";
   idade?: number;
 }
-
 export interface RMIResult {
   coeficiente: number;
   rmi: number;
   detalhes: { label: string; valor: string }[];
   observacoes: string;
 }
-
 export function calcRMI(i: RMIInput): RMIResult {
-  const tempoMin = i.sexo === "F" ? 15 : 20;
-  const excedente = Math.max(0, i.tempoContribuicaoAnos - tempoMin);
-  const coeficiente = Math.min(1, 0.6 + excedente * 0.02);
-  const rmi = +(i.mediaSalariosContribuicao * coeficiente).toFixed(2);
-  const salMin = 1518;
-  const teto = 8157.41; // teto INSS 2025
-  const rmiFinal = Math.min(teto, Math.max(salMin, rmi));
-
-  return {
-    coeficiente: +(coeficiente * 100).toFixed(2),
-    rmi: rmiFinal,
-    detalhes: [
-      { label: "Tempo mínimo exigido", valor: `${tempoMin} anos` },
-      { label: "Tempo contribuído", valor: `${i.tempoContribuicaoAnos} anos` },
-      { label: "Excedente sobre o mínimo", valor: `${excedente} anos` },
-      { label: "Coeficiente (60% + 2%/ano)", valor: `${(coeficiente * 100).toFixed(0)}%` },
-      { label: "Média salários de contribuição", valor: brl(i.mediaSalariosContribuicao) },
-      { label: "RMI calculada", valor: brl(rmi) },
-      { label: "RMI após pisos (SM/teto)", valor: brl(rmiFinal) },
-    ],
-    observacoes:
-      "Cálculo aplica a fórmula da EC 103/2019 (art. 26): 60% da média + 2% por ano de contribuição excedente ao mínimo (15/20 anos). Verifique regras de transição aplicáveis ao caso concreto.",
-  };
+  const r = calcPrevidenciaria({
+    modalidade: i.regra === "EC103_idade" ? "idade" : "tempo_contribuicao",
+    sexo: i.sexo,
+    idade: i.idade ?? 0,
+    tempoContribuicaoAnos: i.tempoContribuicaoAnos,
+    mediaSalariosContribuicao: i.mediaSalariosContribuicao,
+  });
+  return { coeficiente: r.coeficiente, rmi: r.rmi, detalhes: r.detalhes, observacoes: r.observacoes };
 }
 
 // ============ PENSÃO ALIMENTÍCIA ============
