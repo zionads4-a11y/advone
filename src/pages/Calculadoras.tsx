@@ -30,6 +30,8 @@ import {
   type CategoriaDevedor,
   type TipoContrato,
   type DividaItem,
+  type UF,
+  MARGEM_CONSIGNAVEL_UF_SERVIDOR,
 } from "@/lib/legalCalc";
 
 type CalcTipo = "trabalhista" | "previdenciaria" | "pensao" | "revisional" | "superendividamento";
