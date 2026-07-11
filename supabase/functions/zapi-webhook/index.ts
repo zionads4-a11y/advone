@@ -1927,6 +1927,14 @@ serve(async (req) => {
       if (messageType.includes("audio") || messageType === "ptt" || messageType === "voice") {
         audioUrl = msg.audio?.url || msg.audio?.audioUrl || msg.mediaUrl || msg.fileURL || msg.url || msg.media?.url || null;
       }
+      if (messageType.includes("image") || messageType.includes("photo") || messageType.includes("sticker")) {
+        imageUrl = msg.image?.url || msg.image?.imageUrl || msg.photo?.url || msg.mediaUrl || msg.fileURL || msg.url || msg.media?.url || null;
+      }
+      if (messageType.includes("document") || messageType.includes("file") || messageType.includes("pdf")) {
+        documentUrl = msg.document?.url || msg.document?.documentUrl || msg.file?.url || msg.mediaUrl || msg.fileURL || msg.url || msg.media?.url || null;
+        documentFilename = msg.document?.filename || msg.document?.fileName || msg.file?.filename || msg.filename || msg.fileName || null;
+        documentMime = msg.document?.mimetype || msg.document?.mimeType || msg.mimetype || msg.mimeType || null;
+      }
       if (!messageText) messageText = "[mídia]";
     } else {
       phone = body.phone || "";
@@ -1935,6 +1943,7 @@ serve(async (req) => {
         extractText(body.text) ||
         extractText(body.image?.caption) ||
         extractText(body.video?.caption) ||
+        extractText(body.document?.caption) ||
         extractText(body.buttonsResponseMessage) ||
         extractText(body.listResponseMessage) ||
         "";
@@ -1944,8 +1953,19 @@ serve(async (req) => {
         audioUrl = body.audio?.audioUrl || body.audio?.url || body.ptt?.audioUrl || body.ptt?.url || null;
         messageType = "audio";
       }
+      if (body.image) {
+        imageUrl = body.image?.imageUrl || body.image?.url || null;
+        messageType = "image";
+      }
+      if (body.document) {
+        documentUrl = body.document?.documentUrl || body.document?.url || null;
+        documentFilename = body.document?.fileName || body.document?.filename || null;
+        documentMime = body.document?.mimeType || body.document?.mimetype || null;
+        messageType = "document";
+      }
       if (!messageText) messageText = "[mídia]";
     }
+
 
     // ===== TRANSCRIÇÃO DE ÁUDIO (Whisper) =====
     if (audioUrl) {
