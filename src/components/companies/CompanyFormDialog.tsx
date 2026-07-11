@@ -9,6 +9,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { BILLING_MODELS, type BillingModel } from "@/lib/billingModels";
 import { CheckCircle2, Plus } from "lucide-react";
 import { useState } from "react";
