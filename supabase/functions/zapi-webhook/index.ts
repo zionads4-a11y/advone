@@ -1317,22 +1317,48 @@ Antes de responder:
             } catch (e) { console.error("Client lookup alert error:", e); }
           }
 
-          // Desativa o bot para o lead e marca como não lida no CRM
-          if (leadId) {
+          const foundInSystem = !!leadClient || monitoredProcesses.length > 0;
+
+          // Buscar nome do advogado responsável para personalizar a resposta
+          let responsibleLawyerName = "";
+          const assignedTo = leadClient?.assigned_to;
+          if (assignedTo) {
+            const { data: lp } = await supabase
+              .from("profiles")
+              .select("full_name")
+              .eq("user_id", assignedTo)
+              .maybeSingle();
+            responsibleLawyerName = lp?.full_name || "";
+          }
+          if (!responsibleLawyerName) {
+            responsibleLawyerName = (config.companies as any)?.owner_name
+              || config.office_name
+              || "responsável";
+          }
+
+          // Só desativa o bot se REALMENTE precisa de handoff humano
+          // (assunto ≠ andamento, OU processo foi encontrado). Se subject=andamento e
+          // não encontrou nada, o bot deve responder a mensagem de "fase inicial".
+          const shouldHandoffHuman = subject !== "andamento_processo" || foundInSystem;
+          if (leadId && shouldHandoffHuman) {
             await supabase.from("leads").update({ bot_disabled: true, is_unread: true }).eq("id", leadId);
           }
 
-          toolResult = { 
-            success: true, 
+          toolResult = {
+            success: true,
+            found_in_system: foundInSystem,
             found_in_crm: !!leadClient,
             monitored_processes_found: monitoredProcesses.length,
+            responsible_lawyer_name: responsibleLawyerName,
             processes_info: monitoredProcesses.map(p => ({
               numero: p.numero_cnj,
               tribunal: p.tribunal_sigla,
               ultima_movimentacao: p.data_ultima_movimentacao,
               resumo_movimentacoes: p.recent_movements.map((m: any) => m.descricao).join(" | ")
             })),
-            instruction: "Se encontrou processos, faça um resumo MUITO SIMPLES e amigável da última movimentação encontrada para o cliente. Diga que o Dr. Daniel e a equipe estão acompanhando tudo de perto e que o advogado responsável já foi avisado para dar um retorno detalhado em breve. Seja acolhedor e passe segurança."
+            instruction: foundInSystem
+              ? `Faça um resumo MUITO SIMPLES e amigável da última movimentação encontrada. Diga que o(a) advogado(a) ${responsibleLawyerName} e a equipe estão acompanhando de perto e que o(a) responsável já foi avisado(a) para dar retorno detalhado em breve. Seja acolhedor.`
+              : `Nenhum processo foi localizado para este CPF. Responda EXATAMENTE (adaptando o primeiro nome do cliente): "Seu processo ainda está na fase inicial. O(a) advogado(a) ${responsibleLawyerName} vai entrar em contato assim que houver novas atualizações. Se preferir, você também pode nos chamar por aqui novamente sempre que precisar. 🙂". NÃO chame transfer_to_human, NÃO diga "vou avisar o advogado agora", NÃO agende reunião.`
           };
         }
 
