@@ -574,48 +574,48 @@ export default function LandingPage() {
         <div className="relative mx-auto max-w-6xl px-6 py-24">
           <Reveal className="mb-14 text-center">
             <p className="mb-3 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">
-              Plano CRM Full · R$ 897/mês
+              Gestão integrada do escritório
             </p>
             <h2 className="mx-auto max-w-3xl text-3xl font-bold leading-tight md:text-5xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              O escritório inteiro rodando em <span className="text-[hsl(153,60%,45%)]">um único painel</span>
+              Toda a operação do escritório em <span className="text-[hsl(153,60%,45%)]">um único ambiente</span>
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-base text-[hsl(220,10%,65%)] md:text-lg">
-              Chega de planilha, WhatsApp bagunçado, agenda no papel e financeiro no Excel. Do primeiro clique do lead ao último honorário recebido — tudo conectado, auditado e visível em tempo real. É assim que escritório grande opera.
+              Substitua planilhas paralelas, controles manuais e sistemas desconectados por uma plataforma única que integra captação, atendimento, agenda, financeiro, processos judiciais e gestão documental — com trilha de auditoria e conformidade com a LGPD.
             </p>
           </Reveal>
 
           <Reveal>
             <div className="mb-16 grid grid-cols-2 gap-4 rounded-2xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,8%)]/60 p-6 backdrop-blur md:grid-cols-4 md:gap-8 md:p-10">
               <div className="text-center">
-                <p className="text-3xl font-bold text-[hsl(153,60%,45%)] md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>-90%</p>
-                <p className="mt-1 text-xs text-[hsl(220,10%,55%)] md:text-sm">custo vs SDR humana</p>
+                <p className="text-3xl font-bold text-[hsl(153,60%,45%)] md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>9</p>
+                <p className="mt-1 text-xs text-[hsl(220,10%,55%)] md:text-sm">módulos integrados</p>
               </div>
               <div className="text-center">
-                <p className="text-3xl font-bold text-[hsl(153,60%,45%)] md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>3x</p>
-                <p className="mt-1 text-xs text-[hsl(220,10%,55%)] md:text-sm">mais reuniões marcadas</p>
+                <p className="text-3xl font-bold text-[hsl(153,60%,45%)] md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>5</p>
+                <p className="mt-1 text-xs text-[hsl(220,10%,55%)] md:text-sm">níveis de acesso</p>
               </div>
               <div className="text-center">
-                <p className="text-3xl font-bold text-[hsl(153,60%,45%)] md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>&lt;5s</p>
-                <p className="mt-1 text-xs text-[hsl(220,10%,55%)] md:text-sm">resposta na 1ª mensagem</p>
+                <p className="text-3xl font-bold text-[hsl(153,60%,45%)] md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>100%</p>
+                <p className="mt-1 text-xs text-[hsl(220,10%,55%)] md:text-sm">aderência à LGPD</p>
               </div>
               <div className="text-center">
                 <p className="text-3xl font-bold text-[hsl(153,60%,45%)] md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>72h</p>
-                <p className="mt-1 text-xs text-[hsl(220,10%,55%)] md:text-sm">ativação porta a porta</p>
+                <p className="mt-1 text-xs text-[hsl(220,10%,55%)] md:text-sm">implantação assistida</p>
               </div>
             </div>
           </Reveal>
 
           <div className="grid gap-6 md:grid-cols-3">
             {[
-              { icon: Briefcase, title: "Clientes e processos sob controle", desc: "Ficha completa por cliente com CPF/CNPJ, contratos, processos CNJ e histórico. Todo lead que fecha vira cliente com um clique — sem redigitar nada.", items: ["Ficha 360° por cliente", "Vínculo lead → cliente → processo", "Contratos via ZapSign"] },
-              { icon: Wallet, title: "Financeiro que se lança sozinho", desc: "Cobrança recorrente no Asaas em PIX, boleto ou cartão. Baixa automática por webhook. Você acompanha receita líquida, vencidos e previstos no dashboard.", items: ["Asaas em produção", "Conciliação por webhook", "Receita líquida em tempo real"] },
-              { icon: BarChart3, title: "Dashboards que respondem em 3 segundos", desc: "Quantos leads entraram? Qual campanha converteu? Quanto entrou de honorário? Tudo visível — por escritório, por advogado, por origem, por período.", items: ["Conversão por etapa", "ROI por campanha", "Ranking por advogado"] },
-              { icon: Users, title: "Multi-tenant + 5 níveis de acesso", desc: "Admin, Membro, Gerente, Operador e Cliente. Cada advogado enxerga só o que precisa. Isolamento no banco (RLS) — auditoria de tudo que muda.", items: ["Row-Level Security", "Auditoria automática", "Ideal para grupos e franquias"] },
-              { icon: Kanban, title: "Kanban de 9 etapas + cadência", desc: "Pipeline jurídico já pronto no dia 1. 5 tentativas automáticas de follow-up com tempos e textos editáveis pelo gerente. Nenhum lead esfria.", items: ["Etapas configuráveis", "Cadência editável na UI", "Movimentação automática"] },
-              { icon: CalendarDays, title: "Agenda Google + lembretes WhatsApp", desc: "OAuth per-user por advogado. Reunião marcada pela Laura vira evento no Google Calendar dele. 3 lembretes automáticos pro cliente aparecer.", items: ["OAuth por advogado", "Push bidirecional", "Lembretes 6h/2h/30min"] },
-              { icon: FileText, title: "IA Jurídica + documentos até 600MB", desc: "Dra. Helena escreve petição, contestação, recurso, MS e contratos em .docx ABNT. Upload de documentos grandes com storage por escritório.", items: ["Peças em .docx ABNT", "Modelos por escritório", "Storage isolado"] },
-              { icon: Shield, title: "Monitoramento de processos diário", desc: "Escavador consulta cada CNJ TODO dia. Nova movimentação vira alerta no CRM. Consulta semanal por CPF encontra processos novos vinculados ao cliente.", items: ["Consulta diária CNJ", "Consulta semanal por CPF", "Alertas no CRM e WhatsApp"] },
-              { icon: Target, title: "Tracking + atribuição real", desc: "Gere links UTM por campanha do Google/Meta em 2 cliques. Cada lead chega com origem, campanha, criativo. Você saber o que realmente vale seu tráfego.", items: ["UTMs automáticos", "Origem por lead", "ROI por criativo"] },
+              { icon: Briefcase, title: "Clientes, contratos e processos", desc: "Cadastro estruturado do cliente com CPF/CNPJ, procurações, contratos e vínculo aos processos judiciais. Conversão do lead em cliente sem retrabalho.", items: ["Ficha 360° do cliente", "Vínculo lead → cliente → processo", "Contratos com assinatura eletrônica"] },
+              { icon: Wallet, title: "Financeiro e cobrança recorrente", desc: "Módulo financeiro nativo integrado ao Asaas. Emissão, conciliação, contas a pagar e receber, DRE gerencial e visão de receita líquida em tempo real.", items: ["PIX, boleto e cartão", "Conciliação automatizada", "Indicadores em tempo real"] },
+              { icon: BarChart3, title: "Dashboards e relatórios gerenciais", desc: "Indicadores de captação, conversão, produtividade e resultado financeiro consolidados por advogado, unidade, área de atuação e origem de mídia.", items: ["Conversão por etapa do funil", "Retorno por origem", "Produtividade por advogado"] },
+              { icon: Users, title: "Multiusuário com governança", desc: "Cinco perfis de acesso (Administrador, Gerente, Membro, Operador e Cliente) com segregação de funções, Row-Level Security e trilha de auditoria completa.", items: ["Segregação de funções", "Auditoria de alterações", "Adequado a grupos e franquias"] },
+              { icon: Kanban, title: "CRM Jurídico configurável", desc: "Pipeline padrão da advocacia em nove etapas, com cadência de follow-up parametrizável pelo gerente. Nenhum atendimento é esquecido ou perdido.", items: ["Etapas configuráveis", "Cadência parametrizável", "Distribuição por advogado"] },
+              { icon: CalendarDays, title: "Agenda e compromissos", desc: "Integração OAuth por advogado com o Google Calendar. Audiências, prazos e reuniões sincronizados, com envio automatizado de lembretes ao cliente.", items: ["OAuth por advogado", "Sincronização bidirecional", "Lembretes automatizados"] },
+              { icon: FileText, title: "Gestão documental e peças", desc: "Repositório documental por escritório com suporte a arquivos de grande porte. Elaboração assistida de peças no padrão ABNT com fundamentação citada.", items: ["Peças em .docx (ABNT)", "Modelos por escritório", "Armazenamento isolado por tenant"] },
+              { icon: Shield, title: "Monitoramento processual (CNJ)", desc: "Integração com Escavador para consulta diária dos processos cadastrados e consulta semanal por CPF, com alertas de novas movimentações no painel.", items: ["Consulta diária por CNJ", "Consulta semanal por CPF", "Alertas no painel e no WhatsApp"] },
+              { icon: Target, title: "Captação e atribuição de origem", desc: "Geração de links rastreáveis para campanhas em Google e Meta. Cada contato chega com origem, campanha e criativo identificados para análise de retorno.", items: ["Links UTM automatizados", "Origem por contato", "Análise de retorno por criativo"] },
             ].map((pillar, i) => (
               <Reveal key={pillar.title} delay={i * 70}>
                 <div className="group h-full rounded-xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] p-6 transition-all duration-500 hover:-translate-y-1 hover:border-[hsl(153,60%,45%)]/40 hover:shadow-[0_20px_60px_-20px_hsl(153,60%,45%/0.25)]">
@@ -639,13 +639,13 @@ export default function LandingPage() {
 
           <div className="mt-20 grid gap-6 md:grid-cols-3">
             {[
-              { icon: Clock, title: "Você trabalha ON no que gera honorário.", desc: "Chega de perder 2 horas por dia respondendo WhatsApp de curioso. A Laura filtra, qualifica e entrega só o lead pronto pra fechar." },
-              { icon: BarChart3, title: "O escritório para de depender de gente.", desc: "Ninguém falta, ninguém sai, ninguém pede aumento. A operação roda no piloto automático — e ainda melhora com cada ajuste de prompt." },
-              { icon: TrendingUp, title: "Escala sem contratar mais advogado.", desc: "Quando o gargalo do atendimento cai, seu escritório aceita 3x mais casos com o mesmo time. É assim que sócio vira empresário." },
+              { icon: Clock, title: "Foco do advogado no que é técnico-jurídico", desc: "A triagem, o agendamento e as rotinas administrativas são conduzidos pela plataforma. O tempo dos sócios e associados fica preservado para a atividade-fim." },
+              { icon: BarChart3, title: "Gestão baseada em dados", desc: "O sócio-gestor deixa de decidir por percepção. Indicadores objetivos de captação, conversão e resultado financeiro guiam a alocação de recursos e o planejamento do escritório." },
+              { icon: TrendingUp, title: "Escalabilidade com controle", desc: "A padronização de processos e a segregação de acessos permitem que o escritório cresça em volume e em número de unidades sem perda de qualidade ou de governança." },
             ].map((b, i) => (
               <Reveal key={b.title} delay={i * 100}>
                 <div className="rounded-xl border border-[hsl(220,20%,16%)] bg-gradient-to-br from-[hsl(220,25%,9%)] to-[hsl(220,25%,7%)] p-6">
-                  <p className="mb-2 text-xs font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Na prática</p>
+                  <p className="mb-2 text-xs font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Benefício</p>
                   <div className="mb-3 flex items-center gap-3">
                     <b.icon className="h-5 w-5 text-[hsl(153,60%,45%)]" />
                     <h4 className="text-base font-semibold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{b.title}</h4>
@@ -658,11 +658,12 @@ export default function LandingPage() {
 
           <Reveal className="mt-16 text-center">
             <Button size="lg" onClick={() => navigate("/signup?plan=mensal")} className="gradient-primary text-[hsl(0,0%,100%)] font-semibold shadow-[0_10px_40px_-10px_hsl(153,60%,45%/0.5)]">
-              Quero o CRM Full por R$ 897/mês
+              Solicitar uma apresentação
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-            <p className="mt-3 text-xs text-[hsl(220,10%,55%)]">Ativação em 72h · Sem taxa de setup · Cancele quando quiser</p>
+            <p className="mt-3 text-xs text-[hsl(220,10%,55%)]">Implantação assistida em 72h · Suporte especializado</p>
           </Reveal>
+
         </div>
       </section>
 
