@@ -212,6 +212,22 @@ export default function Calculadoras() {
     setParecer("");
     gerarParecer("revisional", rev, r);
   };
+  const executarSuper = () => {
+    const r = calcSuperendividamento(sup);
+    setSupResult(r);
+    setParecer("");
+    gerarParecer("superendividamento" as CalcTipo, sup, r);
+  };
+  const addDivida = () => setSup((s) => ({
+    ...s,
+    dividas: [...s.dividas, { credor: "", tipo: "emprestimo_pessoal", parcelaMensal: 0, saldoDevedor: 0 }],
+  }));
+  const removeDivida = (idx: number) => setSup((s) => ({ ...s, dividas: s.dividas.filter((_, i) => i !== idx) }));
+  const updateDivida = (idx: number, patch: Partial<DividaItem>) => setSup((s) => ({
+    ...s,
+    dividas: s.dividas.map((d, i) => (i === idx ? { ...d, ...patch } : d)),
+  }));
+
 
   return (
     <div className="flex h-[calc(100vh-3.5rem)] flex-col gap-4 p-4 md:p-6">
