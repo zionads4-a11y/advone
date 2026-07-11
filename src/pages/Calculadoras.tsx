@@ -172,7 +172,7 @@ export default function Calculadoras() {
     gerarParecer("trabalhista", resc, r);
   };
   const executarRMI = () => {
-    const r = calcRMI(rmi);
+    const r = calcPrevidenciaria(rmi);
     setRmiResult(r);
     setParecer("");
     gerarParecer("previdenciaria", rmi, r);
