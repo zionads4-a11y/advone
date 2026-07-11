@@ -312,7 +312,7 @@ export default function Kanban() {
         <Card className="glass-card">
           <CardContent className="flex flex-col items-center justify-center gap-4 py-16 text-muted-foreground">
             <p>Esta empresa ainda não tem um funil configurado</p>
-            {!isClient && (
+            {userRole !== "client" && (
               <div className="flex gap-2">
                 <button onClick={initDefaultColumns} className="gradient-primary rounded-lg px-4 py-2 text-sm font-medium text-primary-foreground transition-all hover:opacity-90">
                   Criar Funil Padrão
