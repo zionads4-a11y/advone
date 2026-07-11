@@ -218,12 +218,12 @@ export default function LandingPage() {
       {/* Dashboard Mockup */}
       <section className="mx-auto max-w-6xl px-6 py-20">
         <Reveal className="text-center mb-12">
-          <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Nós temos o</p>
+          <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">O painel do gerente</p>
           <h2 className="text-3xl font-bold md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            CRM completo para seu escritório de advocacia.
+            Você acorda e o escritório já rendeu.
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-[hsl(220,10%,55%)]">
-            Da captação do lead ao agendamento final, centralize toda a operação do seu escritório em uma única plataforma.
+            Enquanto você dorme, a Laura atende, qualifica e agenda. Você abre o app e vê exatamente quanto entrou de honorário, quantas reuniões foram marcadas e qual campanha do Google/Meta está de fato pagando.
           </p>
         </Reveal>
         <Reveal delay={200}>
