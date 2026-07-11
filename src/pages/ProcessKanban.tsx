@@ -532,7 +532,7 @@ function ProcessCardView({ card, memberById, teamByCard, isDragOverlay }: {
 // ============ DIALOGS ============
 function AreaDialog({ open, onOpenChange, onCreate, existingNames }: {
   open: boolean; onOpenChange: (v: boolean) => void;
-  onCreate: (name: string, color: string, icon: string) => Promise<void>;
+  onCreate: (name: string, color: string, icon: string) => Promise<any>;
   existingNames: string[];
 }) {
   const [name, setName] = useState("");
@@ -614,7 +614,7 @@ function AreaDialog({ open, onOpenChange, onCreate, existingNames }: {
 
 function BoardDialog({ open, onOpenChange, onCreate }: {
   open: boolean; onOpenChange: (v: boolean) => void;
-  onCreate: (name: string, description: string, color: string) => Promise<void>;
+  onCreate: (name: string, description: string, color: string) => Promise<any>;
 }) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -653,7 +653,7 @@ function BoardDialog({ open, onOpenChange, onCreate }: {
 
 function ColumnDialog({ open, onOpenChange, onCreate }: {
   open: boolean; onOpenChange: (v: boolean) => void;
-  onCreate: (name: string, color: string, stage_type: string) => Promise<void>;
+  onCreate: (name: string, color: string, stage_type: string) => Promise<any>;
 }) {
   const [name, setName] = useState("");
   const [color, setColor] = useState(COLUMN_COLORS[0]);
@@ -700,7 +700,7 @@ function ColumnDialog({ open, onOpenChange, onCreate }: {
 
 function CardCreateDialog({ open, onOpenChange, onCreate, members }: {
   open: boolean; onOpenChange: (v: boolean) => void;
-  onCreate: (payload: Partial<ProcessCard>) => Promise<void>;
+  onCreate: (payload: Partial<ProcessCard>) => Promise<any>;
   members: Member[];
 }) {
   const [title, setTitle] = useState("");
@@ -768,10 +768,10 @@ function CardCreateDialog({ open, onOpenChange, onCreate, members }: {
 function CardDrawer({ card, onClose, members, teamRows, memberById, onUpdate, onDelete, onAddMember, onRemoveMember }: {
   card: ProcessCard | null; onClose: () => void; members: Member[]; teamRows: TeamRow[];
   memberById: Record<string, Member>;
-  onUpdate: (id: string, patch: Partial<ProcessCard>) => Promise<void>;
-  onDelete: (id: string) => Promise<void>;
-  onAddMember: (cardId: string, userId: string, role: string) => Promise<void>;
-  onRemoveMember: (rowId: string) => Promise<void>;
+  onUpdate: (id: string, patch: Partial<ProcessCard>) => Promise<any>;
+  onDelete: (id: string) => Promise<any>;
+  onAddMember: (cardId: string, userId: string, role: string) => Promise<any>;
+  onRemoveMember: (rowId: string) => Promise<any>;
 }) {
   const [addUserId, setAddUserId] = useState("");
   const [addRole, setAddRole] = useState("coautor");
