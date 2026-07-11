@@ -245,8 +245,8 @@ export default function Kanban() {
   };
 
   const selectedCompany = companies.find((c) => c.id === selectedCompanyId);
-  const title = isClient ? "Seus Leads" : "Kanban";
-  const subtitle = isClient ? "Acompanhe e atualize o status dos seus leads" : "Arraste os leads entre as etapas do funil";
+  const title = userRole === "client" ? "Seus Leads" : "Kanban";
+  const subtitle = userRole === "client" ? "Acompanhe e atualize o status dos seus leads" : "Arraste os leads entre as etapas do funil";
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -267,7 +267,7 @@ export default function Kanban() {
               <SelectItem value="meta">Meta Ads</SelectItem>
             </SelectContent>
           </Select>
-          {!isClient && companies.length > 1 && (
+          {userRole !== "client" && companies.length > 1 && (
             <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
               <SelectTrigger className="w-full sm:w-[200px]">
                 <SelectValue placeholder="Selecione a empresa" />
@@ -291,7 +291,7 @@ export default function Kanban() {
               </SelectContent>
             </Select>
           )}
-          {!isClient && selectedCompanyId && (
+          {userRole !== "client" && selectedCompanyId && (
             <KanbanColumnSettings
               companyId={selectedCompanyId}
               companyName={selectedCompany?.name || ""}
@@ -312,7 +312,7 @@ export default function Kanban() {
         <Card className="glass-card">
           <CardContent className="flex flex-col items-center justify-center gap-4 py-16 text-muted-foreground">
             <p>Esta empresa ainda não tem um funil configurado</p>
-            {!isClient && (
+            {userRole !== "client" && (
               <div className="flex gap-2">
                 <button onClick={initDefaultColumns} className="gradient-primary rounded-lg px-4 py-2 text-sm font-medium text-primary-foreground transition-all hover:opacity-90">
                   Criar Funil Padrão
