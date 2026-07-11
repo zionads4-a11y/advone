@@ -859,7 +859,12 @@ export default function LandingPage() {
                 </div>
                 <div className="mb-6">
                   <h3 className="text-xl font-bold text-[hsl(220,10%,92%)] mb-2">Mais flexibilidade</h3>
+                  <div className="mt-4 flex items-baseline gap-1">
+                    <span className="text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 997</span>
+                    <span className="text-sm text-[hsl(220,10%,60%)]">/mês</span>
+                  </div>
                 </div>
+
                 <ul className="mb-8 flex-1 space-y-3">
                   {[
                     "Mesmo acesso completo à plataforma",
