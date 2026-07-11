@@ -231,6 +231,100 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
             )}
           </div>
 
+          <div className="space-y-3 rounded-lg border border-dashed border-primary/40 bg-primary/5 p-3">
+            <div className="flex items-baseline justify-between">
+              <Label className="text-sm font-semibold">Aplicar desconto (opcional)</Label>
+              <span className="text-[11px] text-muted-foreground">
+                Preço de tabela: R$ {basePrice.toFixed(2)}
+              </span>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Tipo</Label>
+                <Select value={discountType} onValueChange={(v) => setDiscountType(v as "percent" | "fixed")}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="percent">Percentual (%)</SelectItem>
+                    <SelectItem value="fixed">Valor fixo (R$)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Desconto</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={discountValue}
+                  onChange={(e) => setDiscountValue(e.target.value)}
+                  placeholder={discountType === "percent" ? "10" : "50.00"}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Vale até (opcional)</Label>
+                <Input
+                  type="date"
+                  value={discountValidUntil}
+                  onChange={(e) => setDiscountValidUntil(e.target.value)}
+                />
+              </div>
+            </div>
+            {hasDiscount && (
+              <>
+                <div className="rounded-md bg-background/60 p-2 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Valor final:</span>
+                    <span className="font-bold text-primary">R$ {finalPrice.toFixed(2)}/mês</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                    <span>Desconto aplicado:</span>
+                    <span>-R$ {discountAmount.toFixed(2)} ({discountPercent}%)</span>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Motivo do desconto *</Label>
+                  <Input
+                    value={discountReason}
+                    onChange={(e) => setDiscountReason(e.target.value)}
+                    required={hasDiscount}
+                    placeholder="Ex: cliente parceiro, campanha de lançamento…"
+                    maxLength={500}
+                  />
+                </div>
+                <div className="rounded-md border border-amber-500/40 bg-amber-500/5 p-2 space-y-2">
+                  <p className="text-[11px] font-semibold text-amber-600 dark:text-amber-400">
+                    🔒 Autorização do gerente obrigatória
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">
+                    Gerente aprova até 20%. Admin aprova qualquer valor. A aprovação fica registrada em auditoria.
+                  </p>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <div className="space-y-1">
+                      <Label className="text-xs">E-mail do aprovador *</Label>
+                      <Input
+                        type="email"
+                        value={approverEmail}
+                        onChange={(e) => setApproverEmail(e.target.value)}
+                        required={hasDiscount}
+                        placeholder="gerente@escritorio.com"
+                        autoComplete="off"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Senha *</Label>
+                      <Input
+                        type="password"
+                        value={approverPassword}
+                        onChange={(e) => setApproverPassword(e.target.value)}
+                        required={hasDiscount}
+                        autoComplete="new-password"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
 
           <Button type="submit" className="w-full gradient-primary text-primary-foreground">
             Adicionar Empresa
