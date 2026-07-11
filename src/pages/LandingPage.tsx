@@ -71,19 +71,19 @@ const valueProps = [
 
 const testimonials = [
   {
-    text: "O AdvOne transformou nosso atendimento. Agendamentos automáticos pelo WhatsApp 24 horas por dia, sem perder nenhum lead.",
-    name: "Dra. Maria Silva",
-    role: "Advogada Trabalhista",
+    text: "Recebia 80 leads/mês do Meta Ads e convertia 8. Coloquei a Laura, ela responde em segundos e faz a triagem. Este mês fechei 27 contratos — meu ROI triplicou sem gastar 1 real a mais em tráfego.",
+    name: "Dr. Rafael Andrade",
+    role: "Direito Previdenciário · São Paulo/SP",
   },
   {
-    text: "A cadência automática é incrível. Antes perdíamos leads por falta de follow-up, agora o sistema cuida de tudo automaticamente.",
-    name: "Dr. Carlos Mendes",
-    role: "Advogado Cível",
+    text: "Tinha uma secretária que respondia WhatsApp das 9h às 18h. Perdia todo lead de madrugada e fim de semana. Hoje a Laura fecha reunião às 23h de domingo. Cancelei o SDR humano e economizei R$ 4.800/mês.",
+    name: "Dra. Camila Peixoto",
+    role: "Direito Trabalhista · Belo Horizonte/MG",
   },
   {
-    text: "Ter o financeiro integrado com Asaas simplificou demais. Vejo tudo em um só lugar: leads, processos e faturamento.",
-    name: "Dra. Ana Costa",
-    role: "Advogada Previdenciária",
+    text: "O que me fez migrar foi o modo compartilhado: cliente antigo escreve, a IA já puxa o processo pelo CPF e aciona o advogado responsável. Meu NPS saltou de 6 pra 9 em 60 dias.",
+    name: "Dr. Eduardo Ramalho",
+    role: "Cível e Família · Curitiba/PR",
   },
 ];
 
