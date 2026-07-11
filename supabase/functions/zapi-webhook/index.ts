@@ -1402,12 +1402,34 @@ Antes de responder:
               ultima_movimentacao: p.data_ultima_movimentacao,
               resumo_movimentacoes: p.recent_movements.map((m: any) => m.descricao).join(" | ")
             })),
+            pending_documents: pendingDocs.map((d: any) => ({
+              tipo: d.document_type,
+              status: d.status,
+              observacao: d.notes || null,
+            })),
+            upcoming_meetings: upcomingMeetings.map((m: any) => ({
+              titulo: m.title,
+              descricao: m.description || null,
+              data_hora: m.due_at,
+              data_hora_br: new Date(m.due_at).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", dateStyle: "short", timeStyle: "short" }),
+              tipo: m.reminder_type,
+            })),
             instruction: foundInSystem
-              ? `Faça um RESUMO SUPER SIMPLES do processo para o cliente, em linguagem do dia a dia (PROIBIDO juridiquês — nada de "autos", "citação", "despacho saneador", "trânsito em julgado", "intimação", "conclusos", etc.). Estrutura em 2 partes CURTAS, no máximo 2 linhas cada:
-1) "O que aconteceu de mais recente:" — explique a última movimentação com palavras simples (ex.: "o juiz pediu mais documentos", "a outra parte foi avisada", "marcaram uma audiência pra tal dia").
-2) "Próximos passos:" — em 1 a 3 bullets curtos, diga em linguagem simples o que costuma vir depois nessa fase (ex.: "• A outra parte tem prazo pra responder • Depois o juiz analisa • Se precisar, marcam uma audiência").
-Feche com UMA frase acolhedora: "O(a) advogado(a) ${responsibleLawyerName} e a equipe estão acompanhando tudo de pertinho e te avisam assim que tiver novidade. 🙂"
-NÃO cite número de processo, tribunal, nem termos técnicos. NÃO invente datas ou fatos que não estão nos dados. Se a movimentação for técnica demais, traduza pro simples ou diga apenas "o processo está andando normalmente".`
+              ? `Responda ao cliente em UMA mensagem curta, acolhedora e em linguagem simples (PROIBIDO juridiquês — nada de "autos", "citação", "despacho", "trânsito em julgado", "intimação", "conclusos", etc.). Monte a resposta apenas com os blocos que tiverem dados:
+
+BLOCO A — "Sobre o seu processo" (só se houver processos_info):
+  • "O que aconteceu de mais recente:" — traduza a última movimentação em 1 linha simples (ex.: "o juiz pediu mais documentos", "marcaram uma audiência", "a outra parte foi avisada"). Se for técnica demais, diga só "o processo está andando normalmente".
+  • "Próximos passos:" — 1 a 3 bullets curtos do que costuma vir depois nessa fase, em linguagem do dia a dia.
+
+BLOCO B — "📄 Documentos pendentes" (só se pending_documents não estiver vazio):
+  liste em bullets os tipos de documento que ainda faltam, ex.: "• RG • Comprovante de endereço". Peça gentilmente pra enviar quando puder.
+
+BLOCO C — "📅 Próximos compromissos" (só se upcoming_meetings não estiver vazio):
+  liste em bullets cada compromisso no formato "• 15/07 às 14:00 — Audiência" usando data_hora_br. Lembre o cliente de anotar.
+
+Feche com UMA frase: "O(a) advogado(a) ${responsibleLawyerName} e a equipe estão acompanhando tudo de pertinho e te avisam assim que tiver novidade. 🙂"
+
+REGRAS: NÃO cite número de processo, tribunal, nem termos técnicos. NÃO invente datas nem fatos. Se um bloco não tiver dados, simplesmente OMITA aquele bloco (não escreva "não há documentos pendentes" nem "sem compromissos").`
               : `Nenhum processo foi localizado para este CPF. Responda EXATAMENTE (adaptando o primeiro nome do cliente): "Seu processo ainda está na fase inicial. O(a) advogado(a) ${responsibleLawyerName} vai entrar em contato assim que houver novas atualizações. Se preferir, você também pode nos chamar por aqui novamente sempre que precisar. 🙂". NÃO chame transfer_to_human, NÃO diga "vou avisar o advogado agora", NÃO agende reunião.`
           };
         }
