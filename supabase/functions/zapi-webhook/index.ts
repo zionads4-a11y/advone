@@ -2446,10 +2446,90 @@ REGRAS:
       await supabase.from("leads").update({ is_unread: true }).eq("id", leadId);
     }
 
+    // ===== APLICA OCR ESTRUTURADO NO LEAD + ABRE REVISÃO PELO OPERADOR =====
+    const RECOGNIZED_TYPES = ["rg", "cnh", "ctps", "holerite"];
+    if (leadId && ocrStructured && RECOGNIZED_TYPES.includes(ocrStructured.doc_type) && ocrStructured.confidence >= 0.4) {
+      try {
+        const f = ocrStructured.fields || {};
+        const patch: Record<string, any> = {};
+        const setIfEmpty = async (col: string, val: any) => {
+          if (val == null || val === "") return;
+          patch[col] = val;
+        };
+        // Só sobrescreve campos vazios do lead — nunca apaga dado já cadastrado.
+        const { data: leadNow } = await supabase.from("leads").select(
+          "name, cpf_cliente_final, rg, nacionalidade, estado_civil, profissao, endereco_rua, endereco_numero, endereco_bairro, endereco_cidade, endereco_estado, endereco_cep"
+        ).eq("id", leadId).maybeSingle();
+        const isEmpty = (v: any) => v == null || String(v).trim() === "";
+        if (leadNow) {
+          if (isEmpty(leadNow.name) && f.name) patch.name = f.name;
+          if (isEmpty(leadNow.cpf_cliente_final) && f.cpf) patch.cpf_cliente_final = String(f.cpf).replace(/\D/g, "");
+          if (isEmpty(leadNow.rg) && f.rg) patch.rg = f.rg;
+          if (isEmpty(leadNow.nacionalidade) && f.nacionalidade) patch.nacionalidade = f.nacionalidade;
+          if (isEmpty(leadNow.estado_civil) && f.estado_civil) patch.estado_civil = f.estado_civil;
+          if (isEmpty(leadNow.profissao) && f.profissao) patch.profissao = f.profissao;
+          if (isEmpty(leadNow.endereco_rua) && f.endereco_rua) patch.endereco_rua = f.endereco_rua;
+          if (isEmpty(leadNow.endereco_numero) && f.endereco_numero) patch.endereco_numero = f.endereco_numero;
+          if (isEmpty(leadNow.endereco_bairro) && f.endereco_bairro) patch.endereco_bairro = f.endereco_bairro;
+          if (isEmpty(leadNow.endereco_cidade) && f.endereco_cidade) patch.endereco_cidade = f.endereco_cidade;
+          if (isEmpty(leadNow.endereco_estado) && f.endereco_estado) patch.endereco_estado = String(f.endereco_estado).toUpperCase().slice(0, 2);
+          if (isEmpty(leadNow.endereco_cep) && f.endereco_cep) patch.endereco_cep = f.endereco_cep;
+        }
+
+        const token = Math.random().toString(36).replace(/[^A-Z0-9]/gi, "").toUpperCase().slice(0, 6) || "REV" + Date.now().toString(36).toUpperCase().slice(-3);
+        patch.ocr_pending_review = true;
+        patch.ocr_extracted_data = { ...ocrStructured, applied_patch: Object.keys(patch) };
+        patch.ocr_document_type = ocrStructured.doc_type;
+        patch.ocr_review_token = token;
+        patch.ocr_last_extracted_at = new Date().toISOString();
+
+        await supabase.from("leads").update(patch).eq("id", leadId);
+
+        // Monta resumo pro operador
+        const fieldLines = Object.entries(f)
+          .filter(([, v]) => v != null && String(v).trim() !== "")
+          .map(([k, v]) => `• ${k}: ${v}`).join("\n");
+        const leadDisplayName = (leadNow?.name && !leadNow.name.startsWith("Lead ")) ? leadNow.name : (f.name || cleanPhone);
+        const alertMsg = `📄 *Documento recebido de ${leadDisplayName}*
+Tipo: *${ocrStructured.doc_type.toUpperCase()}* (confiança ${(ocrStructured.confidence * 100).toFixed(0)}%)
+
+${ocrStructured.human_summary}
+
+*Campos extraídos:*
+${fieldLines || "(nenhum campo estruturado)"}
+
+Responda:
+✅ *OK ${token}* — para aprovar e liberar a Laura
+↩️ *CORRIGIR ${token}* — para descartar e pedir reenvio`;
+
+        const alertRawTo = (config.alert_whatsapp || "").replace(/\D/g, "");
+        if (alertRawTo) {
+          const to = alertRawTo.startsWith("55") ? alertRawTo : `55${alertRawTo}`;
+          const SERVER_URL = "https://ziondigital.uazapi.com";
+          const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+          const sendHeaders: Record<string, string> = { "Content-Type": "application/json" };
+          if (ADMIN_TOKEN) sendHeaders["admintoken"] = ADMIN_TOKEN;
+          const sendUrl = `${SERVER_URL}/send/text?instance=${encodeURIComponent(config.zapi_instance_id)}&token=${encodeURIComponent(config.zapi_token || config.zapi_instance_id)}`;
+          await fetch(sendUrl, { method: "POST", headers: sendHeaders, body: JSON.stringify({ number: to, text: alertMsg }) });
+          console.log(`[ocr] revisão pendente enviada para ${to} token=${token} lead=${leadId}`);
+        } else {
+          console.warn("[ocr] alert_whatsapp não configurado — OCR salvo mas operador não foi notificado.");
+        }
+
+        // Bloqueia Laura até o operador aprovar
+        return new Response(JSON.stringify({ ok: true, ocr_pending: true, doc_type: ocrStructured.doc_type, token, lead_id: leadId }), {
+          status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      } catch (applyErr) {
+        console.error("[ocr] falha ao aplicar/notificar:", applyErr);
+      }
+    }
+
     // AI Auto-Reply with multi-agent support
     const bm = config.companies?.billing_model;
     const isPlanCompleto = bm === 'plan_completo' || bm === 'crm_full' || bm === 'ia_only' || bm === 'plan_free' || bm === 'plan_zionads' || bm === 'plan_ia' || (bm?.startsWith?.('plan_ia_') ?? false);
-    if (config.ai_enabled && config.ai_auto_reply && leadId && !existingLead?.bot_disabled && isPlanCompleto) {
+    if (config.ai_enabled && config.ai_auto_reply && leadId && !existingLead?.bot_disabled && !existingLead?.ocr_pending_review && isPlanCompleto) {
+
       try {
         const leadStatus = existingLead?.status;
         const isCompleted = currentPhase === "completed";
