@@ -1363,7 +1363,7 @@ Antes de responder:
             } catch (e) { console.error("Client lookup alert error:", e); }
           }
 
-          const foundInSystem = !!leadClient || monitoredProcesses.length > 0;
+          const foundInSystem = !!leadClient || monitoredProcesses.length > 0 || pendingDocs.length > 0 || upcomingMeetings.length > 0;
 
           // Buscar nome do advogado responsável para personalizar a resposta
           let responsibleLawyerName = "";
