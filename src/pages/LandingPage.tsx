@@ -54,18 +54,18 @@ const features = [
 const valueProps = [
   {
     icon: Clock,
-    title: "Mais tempo para o que importa",
-    desc: "Automatize cadências, agendamentos e follow-ups. Seu time foca em fechar contratos enquanto sua Secretária Virtual cuida do primeiro contato.",
+    title: "O lead que chegou às 22h de sábado já era seu.",
+    desc: "Enquanto o concorrente responde na segunda de manhã, a Laura já qualificou, agendou e mandou o link. Você abre o CRM e o contrato está pronto pra assinar.",
   },
   {
     icon: Target,
-    title: "Nenhum lead fica para trás",
-    desc: "Com 5 tentativas automáticas de contato, cadência inteligente e movimentação automática no Kanban, todo lead recebe atenção.",
+    title: "Pare de pagar tráfego pra alimentar concorrente.",
+    desc: "Google Ads e Meta custam caro. A cada lead perdido por demora, seu CPA dobra. Com resposta em <5s e 5 tentativas de cadência, você converte 3x mais com o mesmo investimento.",
   },
   {
     icon: TrendingUp,
-    title: "Controle financeiro real",
-    desc: "Integração direta com Asaas para sincronizar pagamentos. Veja contas a pagar, recebidas e faturamento líquido em tempo real.",
+    title: "Uma SDR humana custa R$ 3.500 a R$ 5.000/mês.",
+    desc: "A Laura custa R$ 597 — trabalha 24h, atende leads simultâneos, não tira férias, não pede aumento e nunca esquece de dar retorno. Faça a conta.",
   },
 ];
 
