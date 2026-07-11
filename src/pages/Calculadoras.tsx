@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Calculator, Loader2, Sparkles, Briefcase, Landmark, HeartHandshake, Banknote } from "lucide-react";
+import { Calculator, Loader2, Sparkles, Briefcase, Landmark, HeartHandshake, Banknote, ShieldAlert, Plus, Trash2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,14 +20,20 @@ import {
   calcPrevidenciaria,
   calcPensao,
   calcRevisional,
+  calcSuperendividamento,
   type RescisaoResult,
   type PrevResult,
   type PrevModalidade,
   type PensaoResult,
   type RevisionalResult,
+  type SuperendividamentoResult,
+  type CategoriaDevedor,
+  type TipoContrato,
+  type DividaItem,
 } from "@/lib/legalCalc";
 
-type CalcTipo = "trabalhista" | "previdenciaria" | "pensao" | "revisional";
+type CalcTipo = "trabalhista" | "previdenciaria" | "pensao" | "revisional" | "superendividamento";
+
 
 interface ResultBlockProps {
   itens: { label: string; valor?: string | number; formula?: string }[];
