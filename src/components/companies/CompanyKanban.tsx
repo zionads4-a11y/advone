@@ -50,9 +50,17 @@ interface CompanyKanbanProps {
   companyName: string;
 }
 
+interface Board {
+  id: string;
+  name: string;
+  is_default: boolean;
+  position: number;
+}
+
 export function CompanyKanban({ companyId, companyName }: CompanyKanbanProps) {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [kanbanColumns, setKanbanColumns] = useState<KanbanColumn[]>([]);
+  const [boardId, setBoardId] = useState<string>("");
   const [filterSource, setFilterSource] = useState<string>("all");
   const [activeDragLead, setActiveDragLead] = useState<Lead | null>(null);
   const [overColumnId, setOverColumnId] = useState<string | null>(null);
@@ -66,9 +74,50 @@ export function CompanyKanban({ companyId, companyName }: CompanyKanbanProps) {
     fetchColumnsAndLeads();
   }, [companyId]);
 
+  const getOrCreateDefaultBoard = async () => {
+    const { data: boards, error } = await supabase
+      .from("kanban_boards")
+      .select("id, name, is_default, position")
+      .eq("company_id", companyId)
+      .order("position");
+
+    if (error) {
+      toast.error("Erro ao carregar quadro", { description: error.message });
+      return "";
+    }
+
+    const existing = ((boards || []) as Board[]).find((b) => b.is_default) || ((boards || []) as Board[])[0];
+    if (existing) return existing.id;
+
+    const { data, error: createError } = await supabase
+      .from("kanban_boards")
+      .insert({
+        company_id: companyId,
+        name: "Pipeline Comercial",
+        description: "Funil principal de leads",
+        color: "#0ea5a4",
+        is_default: true,
+        position: 0,
+      })
+      .select("id")
+      .single();
+
+    if (createError) {
+      toast.error("Erro ao criar quadro", { description: createError.message });
+      return "";
+    }
+
+    return data.id;
+  };
+
   const fetchColumnsAndLeads = async () => {
+    const currentBoardId = await getOrCreateDefaultBoard();
+    setBoardId(currentBoardId);
+
     const [columnsRes, leadsRes] = await Promise.all([
-      supabase.from("kanban_columns").select("*").eq("company_id", companyId).order("position"),
+      currentBoardId
+        ? supabase.from("kanban_columns").select("*").eq("company_id", companyId).eq("board_id", currentBoardId).order("position")
+        : Promise.resolve({ data: [], error: null }),
       supabase.from("leads").select("id, name, email, phone, value, source, company_id, kanban_column_id, created_at, lead_score").eq("company_id", companyId).order("created_at", { ascending: false }),
     ]);
     if (columnsRes.data) setKanbanColumns(columnsRes.data as KanbanColumn[]);
@@ -76,8 +125,15 @@ export function CompanyKanban({ companyId, companyName }: CompanyKanbanProps) {
   };
 
   const initDefaultColumns = async () => {
+    const currentBoardId = boardId || await getOrCreateDefaultBoard();
+    if (!currentBoardId) return;
+
     for (const col of DEFAULT_COLUMNS) {
-      await supabase.from("kanban_columns").insert({ company_id: companyId, ...col });
+      const { error } = await supabase.from("kanban_columns").insert({ company_id: companyId, board_id: currentBoardId, ...col });
+      if (error) {
+        toast.error("Erro ao criar funil padrão", { description: error.message });
+        return;
+      }
     }
     toast.success("Funil padrão criado!");
     fetchColumnsAndLeads();
@@ -163,7 +219,7 @@ export function CompanyKanban({ companyId, companyName }: CompanyKanbanProps) {
             <button onClick={initDefaultColumns} className="gradient-primary rounded-lg px-4 py-2 text-sm font-medium text-primary-foreground transition-all hover:opacity-90">
               Criar Funil Padrão
             </button>
-            <KanbanColumnSettings companyId={companyId} companyName={companyName} columns={[]} onUpdate={fetchColumnsAndLeads} />
+            <KanbanColumnSettings companyId={companyId} companyName={companyName} boardId={boardId} columns={[]} onUpdate={fetchColumnsAndLeads} />
           </div>
         </CardContent>
       </Card>
@@ -186,7 +242,7 @@ export function CompanyKanban({ companyId, companyName }: CompanyKanbanProps) {
               <SelectItem value="meta">Meta Ads</SelectItem>
             </SelectContent>
           </Select>
-          <KanbanColumnSettings companyId={companyId} companyName={companyName} columns={kanbanColumns} onUpdate={fetchColumnsAndLeads} />
+          <KanbanColumnSettings companyId={companyId} companyName={companyName} boardId={boardId} columns={kanbanColumns} onUpdate={fetchColumnsAndLeads} />
         </div>
       </div>
 
