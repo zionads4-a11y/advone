@@ -361,9 +361,11 @@ export default function ProcessKanban() {
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
-                <Button size="sm" variant="outline" onClick={() => setBoardDialogOpen(true)}>
-                  <Plus className="mr-1 h-4 w-4" /> Novo quadro
-                </Button>
+                {areaBoards.length === 0 && (
+                  <Button size="sm" variant="outline" onClick={() => setBoardDialogOpen(true)}>
+                    <Plus className="mr-1 h-4 w-4" /> Criar funil desta área
+                  </Button>
+                )}
                 {selectedBoard && (
                   <>
                     <Button size="sm" variant="outline" onClick={() => setColumnDialogOpen(true)}>
