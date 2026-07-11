@@ -498,4 +498,210 @@ export function calcRevisional(i: RevisionalInput): RevisionalResult {
   };
 }
 
+// ============ SUPERENDIVIDAMENTO (Lei 14.181/2021 — CDC arts. 54-A a 54-G) ============
+export type CategoriaDevedor =
+  | "servidor_publico"
+  | "aposentado_pensionista"
+  | "militar"
+  | "celetista"
+  | "empresario_mei"
+  | "autonomo";
+
+export type TipoContrato =
+  | "consignado"
+  | "cartao_rmc"
+  | "cartao_rcc"
+  | "cartao_credito"
+  | "cheque_especial"
+  | "emprestimo_pessoal"
+  | "financiamento_veiculo"
+  | "financiamento_imovel"
+  | "outros";
+
+export interface DividaItem {
+  credor: string;
+  tipo: TipoContrato;
+  parcelaMensal: number;
+  saldoDevedor: number;
+  taxaMensalPct?: number;
+  parcelasRestantes?: number;
+}
+
+export interface SuperendividamentoInput {
+  categoria: CategoriaDevedor;
+  rendaLiquidaMensal: number;
+  outrasRendasMensais?: number;
+  dependentes?: number;
+  dividas: DividaItem[];
+  prazoRepactuacaoMeses?: number; // padrão 60 (art. 104-A CDC)
+}
+
+export interface SuperendividamentoResult {
+  categoriaLabel: string;
+  elegivelLei14181: boolean;
+  rendaTotal: number;
+  totalParcelas: number;
+  totalSaldoDevedor: number;
+  pctComprometimentoRenda: number;
+  consignadoUsadoValor: number;
+  consignadoUsadoPct: number;
+  limiteConsignavelPct: number;
+  excedenteConsignavel: number;
+  minimoExistencial: number;
+  sobraAposMinimoExistencial: number;
+  parcelaRepactuadaProposta: number;
+  prazoRepactuacaoMeses: number;
+  diagnostico: "superendividado" | "endividado_atencao" | "saudavel" | "inelegivel";
+  detalhes: { label: string; valor: string }[];
+  itensDivida: { label: string; valor: number; formula: string }[];
+  observacoes: string;
+}
+
+const CONSIGNAVEL_POR_CATEGORIA: Record<CategoriaDevedor, { limite: number; nota: string }> = {
+  servidor_publico: { limite: 45, nota: "35% empréstimo + 5% cartão RMC + 5% cartão RCC (Dec. 11.150/2022)" },
+  aposentado_pensionista: { limite: 45, nota: "35% + 5% RMC + 5% RCC (Lei 14.431/2022)" },
+  militar: { limite: 70, nota: "Militares FFAA: até 70% (regramento próprio MD)" },
+  celetista: { limite: 35, nota: "35% da remuneração (Lei 10.820/2003 art. 1º §1º)" },
+  empresario_mei: { limite: 0, nota: "Não há consignação — dívidas pessoais podem invocar Lei 14.181 (pessoa física)" },
+  autonomo: { limite: 0, nota: "Sem margem consignável — protegido pela Lei 14.181 como consumidor" },
+};
+
+const TIPOS_CONSIGNADO: TipoContrato[] = ["consignado", "cartao_rmc", "cartao_rcc"];
+
+export function calcSuperendividamento(i: SuperendividamentoInput): SuperendividamentoResult {
+  const info = CONSIGNAVEL_POR_CATEGORIA[i.categoria];
+  const rendaTotal = +(Number(i.rendaLiquidaMensal || 0) + Number(i.outrasRendasMensais || 0)).toFixed(2);
+  const dividas = (i.dividas || []).filter((d) => d && Number(d.parcelaMensal) > 0);
+  const totalParcelas = +dividas.reduce((s, d) => s + Number(d.parcelaMensal || 0), 0).toFixed(2);
+  const totalSaldo = +dividas.reduce((s, d) => s + Number(d.saldoDevedor || 0), 0).toFixed(2);
+  const consignadoValor = +dividas
+    .filter((d) => TIPOS_CONSIGNADO.includes(d.tipo))
+    .reduce((s, d) => s + Number(d.parcelaMensal || 0), 0)
+    .toFixed(2);
+
+  const pctComprometimento = rendaTotal > 0 ? +((totalParcelas / rendaTotal) * 100).toFixed(2) : 0;
+  const consignadoPct = rendaTotal > 0 ? +((consignadoValor / rendaTotal) * 100).toFixed(2) : 0;
+  const limiteConsignavelValor = +(rendaTotal * (info.limite / 100)).toFixed(2);
+  const excedenteConsignavel = Math.max(0, +(consignadoValor - limiteConsignavelValor).toFixed(2));
+
+  // Mínimo existencial (Dec. 11.150/2022 art. 3º): garantia de 25% do SM,
+  // mas STJ tem admitido percentual da própria renda (25%-30%) para preservar dignidade.
+  const dependentes = Math.max(0, Number(i.dependentes || 0));
+  const baseMinimo = Math.max(SM_2026 * 0.25, rendaTotal * 0.25);
+  const minimoExistencial = +(baseMinimo + dependentes * (SM_2026 * 0.1)).toFixed(2);
+  const sobraMinimo = +(rendaTotal - minimoExistencial).toFixed(2);
+
+  const prazo = i.prazoRepactuacaoMeses ?? 60;
+  // Proposta de repactuação: dilui saldo total no prazo máximo (sem juros — art. 104-A permite plano até 5 anos)
+  const parcelaRepactuadaBase = totalSaldo > 0 ? +(totalSaldo / prazo).toFixed(2) : 0;
+  // Cap na sobra do mínimo existencial (não pode superar o que o devedor tem disponível)
+  const parcelaRepactuada = Math.max(
+    0,
+    Math.min(parcelaRepactuadaBase, Math.max(0, sobraMinimo)),
+  );
+
+  // Elegibilidade da Lei 14.181/2021: pessoa física consumidora de boa-fé.
+  // PJ pura não é elegível. MEI/empresário podem se dívida for pessoal.
+  const elegivel = i.categoria !== "empresario_mei"
+    ? true
+    : true; // MEI pessoa física É elegível para dívidas pessoais — só a PJ pura não é. Deixamos true e alertamos na observação.
+
+  let diagnostico: SuperendividamentoResult["diagnostico"];
+  if (!elegivel) diagnostico = "inelegivel";
+  else if (totalParcelas > rendaTotal - minimoExistencial) diagnostico = "superendividado";
+  else if (pctComprometimento > 30 || excedenteConsignavel > 0) diagnostico = "endividado_atencao";
+  else diagnostico = "saudavel";
+
+  const itensDivida = dividas.map((d) => ({
+    label: `${d.credor} (${labelTipo(d.tipo)})`,
+    valor: Number(d.parcelaMensal),
+    formula: `Saldo ${brl(d.saldoDevedor)}${d.taxaMensalPct ? ` · ${d.taxaMensalPct}% a.m.` : ""}${d.parcelasRestantes ? ` · ${d.parcelasRestantes} parc.` : ""}`,
+  }));
+
+  return {
+    categoriaLabel: labelCategoria(i.categoria),
+    elegivelLei14181: elegivel,
+    rendaTotal,
+    totalParcelas,
+    totalSaldoDevedor: totalSaldo,
+    pctComprometimentoRenda: pctComprometimento,
+    consignadoUsadoValor: consignadoValor,
+    consignadoUsadoPct: consignadoPct,
+    limiteConsignavelPct: info.limite,
+    excedenteConsignavel,
+    minimoExistencial,
+    sobraAposMinimoExistencial: sobraMinimo,
+    parcelaRepactuadaProposta: parcelaRepactuada,
+    prazoRepactuacaoMeses: prazo,
+    diagnostico,
+    itensDivida,
+    detalhes: [
+      { label: "Categoria do devedor", valor: labelCategoria(i.categoria) },
+      { label: "Renda líquida total mensal", valor: brl(rendaTotal) },
+      { label: "Dependentes", valor: String(dependentes) },
+      { label: "Total de parcelas mensais", valor: brl(totalParcelas) },
+      { label: "Saldo devedor total", valor: brl(totalSaldo) },
+      { label: "% da renda comprometida", valor: `${pctComprometimento.toFixed(1)}%` },
+      { label: "Consignado usado (R$)", valor: brl(consignadoValor) },
+      { label: "Consignado usado (%)", valor: `${consignadoPct.toFixed(1)}%` },
+      { label: "Limite consignável legal", valor: `${info.limite}% — ${info.nota}` },
+      { label: "Limite consignável em R$", valor: brl(limiteConsignavelValor) },
+      { label: "Excedente ao teto consignável", valor: brl(excedenteConsignavel) },
+      { label: "Mínimo existencial preservado", valor: `${brl(minimoExistencial)} (25% renda + 10% SM/dependente)` },
+      { label: "Sobra após mínimo existencial", valor: brl(sobraMinimo) },
+      { label: `Plano de repactuação (${prazo} meses)`, valor: `${brl(parcelaRepactuada)}/mês` },
+      { label: "Diagnóstico", valor: labelDiagnostico(diagnostico) },
+    ],
+    observacoes: buildObservacoes(i.categoria, diagnostico, excedenteConsignavel),
+  };
+}
+
+function labelCategoria(c: CategoriaDevedor) {
+  return ({
+    servidor_publico: "Servidor Público",
+    aposentado_pensionista: "Aposentado / Pensionista INSS",
+    militar: "Militar (FFAA)",
+    celetista: "Trabalhador CLT",
+    empresario_mei: "Empresário / MEI (dívidas pessoais)",
+    autonomo: "Autônomo / Profissional Liberal",
+  } as const)[c];
+}
+function labelTipo(t: TipoContrato) {
+  return ({
+    consignado: "Consignado",
+    cartao_rmc: "Cartão RMC",
+    cartao_rcc: "Cartão Benefício RCC",
+    cartao_credito: "Cartão de Crédito",
+    cheque_especial: "Cheque Especial",
+    emprestimo_pessoal: "Empréstimo Pessoal",
+    financiamento_veiculo: "Financiamento Veículo",
+    financiamento_imovel: "Financiamento Imóvel",
+    outros: "Outros",
+  } as const)[t];
+}
+function labelDiagnostico(d: SuperendividamentoResult["diagnostico"]) {
+  return ({
+    superendividado: "🚨 SUPERENDIVIDADO — cabe ação de repactuação (art. 104-A CDC)",
+    endividado_atencao: "⚠️ Endividamento em zona crítica — cabe revisão/consignado excedente",
+    saudavel: "✅ Endividamento dentro do limite legal",
+    inelegivel: "❌ Sem elegibilidade à Lei 14.181 (PJ pura)",
+  } as const)[d];
+}
+function buildObservacoes(cat: CategoriaDevedor, d: SuperendividamentoResult["diagnostico"], excedente: number): string {
+  const base = "Lei 14.181/2021 (arts. 54-A a 54-G do CDC): superendividamento é a impossibilidade manifesta do consumidor pessoa física de boa-fé pagar dívidas de consumo sem comprometer o mínimo existencial. Repactuação global em juízo por até 60 meses (art. 104-A). Preserva-se garantia do mínimo existencial (Dec. 11.150/2022).";
+  const consig = excedente > 0 ? ` Consignado excede o teto legal em ${brl(excedente)} — cabe ação para devolução em dobro (art. 42 §único CDC) e limitação dos descontos.` : "";
+  let extra = "";
+  if (cat === "empresario_mei") {
+    extra = " ATENÇÃO: MEI/empresário individual pode invocar a Lei 14.181 SOMENTE para dívidas pessoais (não empresariais). Dívidas contraídas pela PJ ou para o negócio seguem regime de recuperação empresarial (Lei 11.101/2005).";
+  }
+  if (cat === "autonomo") {
+    extra = " Autônomo/profissional liberal é consumidor pessoa física para fins da Lei 14.181, desde que a dívida seja de consumo (não profissional).";
+  }
+  if (d === "superendividado") {
+    extra += " Cabe ajuizar ação de repactuação (art. 104-A CDC) ou requerer instauração de processo administrativo no PROCON.";
+  }
+  return base + consig + extra;
+}
+
 export { brl };
+
