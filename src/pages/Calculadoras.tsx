@@ -150,11 +150,7 @@ export default function Calculadoras() {
   });
   const [supResult, setSupResult] = useState<SuperendividamentoResult | null>(null);
 
-    taxaContratadaMensal: 3.5,
-    taxaMediaBacenMensal: 1.8,
-    parcelaContratual: 1650,
-  });
-  const [revResult, setRevResult] = useState<RevisionalResult | null>(null);
+
 
   // ===== IA parecer =====
   const [aiLoading, setAiLoading] = useState(false);
