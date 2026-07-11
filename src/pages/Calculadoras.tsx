@@ -252,7 +252,7 @@ export default function Calculadoras() {
       </div>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as CalcTipo)} className="flex flex-1 flex-col overflow-hidden">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5">
           <TabsTrigger value="trabalhista" className="gap-2">
             <Briefcase className="h-4 w-4" /> Trabalhista
           </TabsTrigger>
@@ -265,7 +265,11 @@ export default function Calculadoras() {
           <TabsTrigger value="revisional" className="gap-2">
             <Banknote className="h-4 w-4" /> Revisional
           </TabsTrigger>
+          <TabsTrigger value="superendividamento" className="gap-2">
+            <ShieldAlert className="h-4 w-4" /> Superendiv.
+          </TabsTrigger>
         </TabsList>
+
 
         <div className="mt-3 grid flex-1 grid-cols-1 gap-4 overflow-hidden lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
           {/* Formulário */}
