@@ -2791,6 +2791,60 @@ export type Database = {
           },
         ]
       }
+      legal_areas: {
+        Row: {
+          color: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          icon: string | null
+          id: string
+          is_active: boolean
+          name: string
+          position: number
+          updated_at: string
+        }
+        Insert: {
+          color?: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          position?: number
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          position?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_areas_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legal_areas_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       meeting_charges: {
         Row: {
           amount: number
@@ -3141,6 +3195,356 @@ export type Database = {
           triggered_by?: string | null
         }
         Relationships: []
+      }
+      process_board_columns: {
+        Row: {
+          board_id: string
+          color: string
+          company_id: string
+          created_at: string
+          id: string
+          name: string
+          position: number
+          stage_type: string
+          updated_at: string
+        }
+        Insert: {
+          board_id: string
+          color?: string
+          company_id: string
+          created_at?: string
+          id?: string
+          name: string
+          position?: number
+          stage_type?: string
+          updated_at?: string
+        }
+        Update: {
+          board_id?: string
+          color?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          position?: number
+          stage_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "process_board_columns_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: false
+            referencedRelation: "process_boards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_board_columns_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_board_columns_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      process_boards: {
+        Row: {
+          color: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_default: boolean
+          legal_area_id: string
+          name: string
+          position: number
+          updated_at: string
+        }
+        Insert: {
+          color?: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_default?: boolean
+          legal_area_id: string
+          name: string
+          position?: number
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_default?: boolean
+          legal_area_id?: string
+          name?: string
+          position?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "process_boards_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_boards_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_boards_legal_area_id_fkey"
+            columns: ["legal_area_id"]
+            isOneToOne: false
+            referencedRelation: "legal_areas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      process_card_activity: {
+        Row: {
+          activity_type: string
+          actor_id: string | null
+          card_id: string
+          company_id: string
+          created_at: string
+          from_column_id: string | null
+          id: string
+          message: string | null
+          metadata: Json | null
+          to_column_id: string | null
+        }
+        Insert: {
+          activity_type: string
+          actor_id?: string | null
+          card_id: string
+          company_id: string
+          created_at?: string
+          from_column_id?: string | null
+          id?: string
+          message?: string | null
+          metadata?: Json | null
+          to_column_id?: string | null
+        }
+        Update: {
+          activity_type?: string
+          actor_id?: string | null
+          card_id?: string
+          company_id?: string
+          created_at?: string
+          from_column_id?: string | null
+          id?: string
+          message?: string | null
+          metadata?: Json | null
+          to_column_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "process_card_activity_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "process_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_card_activity_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_card_activity_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      process_card_team: {
+        Row: {
+          added_by: string | null
+          card_id: string
+          company_id: string
+          created_at: string
+          id: string
+          role_on_card: string
+          user_id: string
+        }
+        Insert: {
+          added_by?: string | null
+          card_id: string
+          company_id: string
+          created_at?: string
+          id?: string
+          role_on_card?: string
+          user_id: string
+        }
+        Update: {
+          added_by?: string | null
+          card_id?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          role_on_card?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "process_card_team_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "process_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_card_team_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_card_team_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      process_cards: {
+        Row: {
+          board_id: string
+          client_name: string | null
+          cnj_number: string | null
+          column_id: string | null
+          company_id: string
+          court: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          last_movement_at: string | null
+          last_movement_text: string | null
+          lead_id: string | null
+          monitored_process_id: string | null
+          next_deadline_at: string | null
+          next_deadline_label: string | null
+          position: number
+          priority: string
+          responsible_id: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          board_id: string
+          client_name?: string | null
+          cnj_number?: string | null
+          column_id?: string | null
+          company_id: string
+          court?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          last_movement_at?: string | null
+          last_movement_text?: string | null
+          lead_id?: string | null
+          monitored_process_id?: string | null
+          next_deadline_at?: string | null
+          next_deadline_label?: string | null
+          position?: number
+          priority?: string
+          responsible_id?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          board_id?: string
+          client_name?: string | null
+          cnj_number?: string | null
+          column_id?: string | null
+          company_id?: string
+          court?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          last_movement_at?: string | null
+          last_movement_text?: string | null
+          lead_id?: string | null
+          monitored_process_id?: string | null
+          next_deadline_at?: string | null
+          next_deadline_label?: string | null
+          position?: number
+          priority?: string
+          responsible_id?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "process_cards_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: false
+            referencedRelation: "process_boards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_cards_column_id_fkey"
+            columns: ["column_id"]
+            isOneToOne: false
+            referencedRelation: "process_board_columns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_cards_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_cards_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_cards_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_cards_monitored_process_id_fkey"
+            columns: ["monitored_process_id"]
+            isOneToOne: false
+            referencedRelation: "monitored_processes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       process_monitoring_charges: {
         Row: {

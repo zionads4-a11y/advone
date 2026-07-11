@@ -1,53 +1,106 @@
+# Kanban de Processos — Gestão Jurídica Full Service
+
 ## Objetivo
-Reestruturar o pricing de todas as landing pages públicas do AdvOne para a nova escada de 3 planos:
+Criar módulo de **gestão de processos por área jurídica** com quadros kanban dedicados, advogado responsável, equipe atribuída e automação via Escavador. Escritório inteiro enxerga tudo; controle granular fica com papel (gerente/operador).
 
-- **AdvOne IA — R$ 397/mês**: Atendimento 24h, Qualificação, Agendamento, Atendimento a clientes atuais
-- **AdvOne Gestão — R$ 597/mês**: CRM jurídico, Pipeline, Automações, Gestão da equipe, Relatórios
-- **AdvOne Complete — R$ 897/mês**: Tudo da IA + tudo da Gestão + Integrações + Recursos exclusivos
+## Escopo aprovado
+- **7 áreas + espaço para novas**: Previdenciário, Trabalhista, Cível/Consumidor, Família, Criminal, Tributário, Empresarial (+ botão "nova área")
+- **Visibilidade**: todos do escritório veem todos os processos (RLS por company_id apenas)
+- **Colunas**: quadro nasce vazio; gerente monta as fases do zero (com botão opcional "usar template" no futuro)
+- **Escavador**: auto-move card + notifica equipe quando detecta nova movimentação
 
-## Escopo (somente frontend / conteúdo)
+## Modelo de dados
 
-Vou alterar apenas a camada de apresentação das landing pages públicas. Backend (Asaas, `create-subscription`, `billing/platform-plans`, tabelas `subscriptions`) **não** será tocado nesta etapa — os planos atuais (Mensal/Trimestral/Anual R$997/797/597) continuam funcionando no fluxo de checkout. Isso evita quebrar assinaturas ativas. Assim que você validar a nova narrativa, faço uma segunda etapa mexendo em Asaas/Signup.
+### Novas tabelas
+- `legal_areas` — áreas jurídicas por empresa (nome, cor, ícone, ativa)
+- `process_boards` — quadros kanban de processos (1 por área, ou múltiplos se o escritório quiser subdividir)
+- `process_board_columns` — colunas do quadro (nome, cor, posição, `stage_type`: inicial/andamento/final/arquivo)
+- `process_cards` — o processo em si dentro do quadro (vincula a `monitored_processes` + coluna atual + responsável)
+- `process_card_team` — N:N de membros da equipe do card (user_id + papel: responsável, coautor, estagiário, revisor)
+- `process_card_activity` — log de tudo (movimentação, comentário, upload, movimentação Escavador)
 
-### Arquivos a editar
+### Reaproveitamento
+- `monitored_processes` continua sendo a fonte da verdade do CNJ; `process_cards` referencia
+- `process_movements` já existe → dispara webhook para auto-mover
+- `documents` já anexa por lead → estender para `process_card_id`
 
-1. **`src/pages/LandingPage.tsx`** — substituir a seção de pricing atual (Mensal/Trimestral/Anual R$997/797/597) pelos 3 novos cards (IA / Gestão / Complete). Ajustar copy do hero se mencionar preço antigo.
-2. **`src/pages/LandingIA.tsx`** — hoje vende só "Laura SDR R$ 397". Vou reposicionar como **AdvOne IA R$ 397** mantendo a mesma captura em `landing_ia_leads`, e adicionar um bloco "Precisa de mais? Conheça Gestão e Complete" com link para `/`.
-3. **`src/pages/CrmAdvogados.tsx`** — atualizar JSON-LD `offers.price` de `"397"` para `"597"` (agora é o plano Gestão), atualizar CTA/copy para refletir "AdvOne Gestão".
-4. **`src/pages/WhatsappAdvogados.tsx`** — reforçar que essa página vende AdvOne IA (R$ 397), CTA "Ativar no meu WhatsApp" segue apontando para `/auth`.
-5. **`src/pages/SdrIaJuridico.tsx`** — mesma linha da WhatsappAdvogados (é venda de IA R$ 397). Ajustar preço/nome se houver menção.
-6. **`src/pages/Index.tsx`** — se tiver seção de pricing, alinhar aos 3 novos planos.
-7. **`src/pages/About.tsx`, `Blog.tsx`, `PostLgpdEscritorios.tsx`, `PostQualificarLeads.tsx`, `PostSdrHumanoVsIa.tsx`** — varrer com `rg` por "997", "797", "597", "Mensal", "Trimestral", "Anual", "Essencial", "Profissional", "Elite" e ajustar somente ocorrências de pricing/nome de plano.
+### RLS
+Todos os membros da empresa (`user_belongs_to_company`) leem/editam. Apenas gerente/admin criam áreas e quadros. Log em `audit_logs` de quem moveu cada card.
 
-### Estrutura visual dos 3 cards (padrão em todas as LPs)
+## UI/UX
 
+### Nova rota `/processos-kanban`
 ```text
-┌────────────────┐ ┌────────────────┐ ┌────────────────┐
-│  AdvOne IA     │ │ AdvOne Gestão  │ │ AdvOne Complete│
-│  R$ 397/mês    │ │  R$ 597/mês    │ │  R$ 897/mês    │
-│                │ │  ★ Popular     │ │  Tudo incluso  │
-│ • Atend. 24h   │ │ • CRM jurídico │ │ • Tudo da IA   │
-│ • Qualificação │ │ • Pipeline     │ │ • Tudo Gestão  │
-│ • Agendamento  │ │ • Automações   │ │ • Integrações  │
-│ • Clientes     │ │ • Gestão time  │ │ • Recursos     │
-│                │ │ • Relatórios   │ │   exclusivos   │
-│ [Começar]      │ │ [Começar]      │ │ [Falar comigo] │
-└────────────────┘ └────────────────┘ └────────────────┘
+┌─ Sidebar áreas ─┬─ Quadro selecionado ────────────────────┐
+│ ⚖  Previdenc.  │  [Filtro: responsável ▾] [Buscar CNJ]   │
+│ 👷 Trabalhista │  ┌─Inicial─┬─Instr.─┬─Sent.─┬─Arquiv.─┐ │
+│ 🏛  Cível      │  │ Card... │ Card.. │ Card..│  ...    │ │
+│ 👨‍👩 Família    │  │ [👤 Dr. │        │       │         │ │
+│ 🚨 Criminal   │  │  Silva] │        │       │         │ │
+│ 💰 Tributário │  └─────────┴────────┴───────┴─────────┘ │
+│ 🏢 Empresarial│                                          │
+│ + Nova área   │                                          │
+└───────────────┴──────────────────────────────────────────┘
 ```
 
-Gestão será marcado como "Mais popular" (destaque com borda primária) — é a âncora psicológica clássica de escada de 3 planos.
+### Card do processo mostra
+- Nº CNJ + cliente + vara
+- **Avatar do responsável** + badges da equipe
+- Prazo mais próximo (audiência/petição) com cor
+- Última movimentação Escavador (data + resumo)
+- Ícones: 📎 docs, 💬 comentários, ⚠️ alerta
 
-### Detalhes técnicos
+### Drawer ao clicar no card
+Abas: **Resumo** · **Movimentações** (Escavador em tempo real) · **Equipe** (add/remove) · **Documentos** · **Comentários internos** · **Atividade** (log completo)
 
-- Usar tokens semânticos do design system (`bg-card`, `border-primary`, `text-primary`) — nada de cor hardcoded.
-- Todos os CTAs continuam apontando para `/auth` (fluxo de signup atual), exceto Complete que pode apontar para `/contact` ou WhatsApp comercial se você preferir venda consultiva (me confirma na aprovação).
-- SEO: atualizar `<meta description>` e JSON-LD com o novo preço mínimo (`"397"`) em toda LP para refletir o menor ticket possível.
-- Nenhuma mudança em rotas, backend, migrations, edge functions ou `billingModels.ts`.
+### Fluxo do gerente
+1. `/processos-kanban` → "Criar área" → nome + cor + ícone
+2. Dentro da área → "Criar quadro" → nome (pode ter "Judicial" e "Administrativo" separados)
+3. Adiciona colunas do zero (nome, cor, tipo)
+4. Ao vincular um processo já monitorado → escolhe o card, responsável e equipe
 
-### Fora do escopo desta etapa
+## Automação Escavador
 
-- Alterar Asaas / `create-subscription` / `Signup.tsx` (fluxo de compra real).
-- Criar novos `billing_model` no banco.
-- Mexer em `mem://billing/platform-plans` (atualizo a memória só depois que o backend for migrado, para não descrever algo que não existe no código).
+Trigger em `process_movements` quando novo evento entra:
+1. Busca `process_cards` do CNJ
+2. Aplica **regras de mapeamento** (opcional, configurável por coluna: "palavras-chave → mover para X")
+3. Move o card + registra em `process_card_activity`
+4. Notifica **responsável + equipe** via WhatsApp (reaproveita `notify-meeting-scheduled` como base) + sino no app
 
-Me aprove que já implemento a troca das LPs. Depois disso, se quiser, planejo a segunda etapa (Signup + Asaas) num plano separado.
+Sem regra configurada = só notifica sem mover.
+
+## Notificações
+- Nova movimentação → WhatsApp + sino p/ responsável + equipe
+- Card atribuído a você → sino
+- Comentário mencionando @você → sino
+- Prazo em 3d/1d/hoje → WhatsApp
+
+## Entrega em fases
+
+**Fase 1 — Fundação (esta implementação)**
+- Migração: `legal_areas`, `process_boards`, `process_board_columns`, `process_cards`, `process_card_team`, `process_card_activity` + RLS + grants
+- Página `/processos-kanban` com sidebar de áreas + kanban drag-drop (reaproveita `DroppableColumn`/`DraggableLeadCard`)
+- CRUD de áreas/quadros/colunas para gerente
+- Vincular processo monitorado a um card + atribuir responsável/equipe
+- Drawer do card com abas Resumo/Movimentações/Equipe/Documentos
+- Item no menu lateral "Processos (Kanban)"
+
+**Fase 2 — Automação (próxima)**
+- Regras de auto-move por palavra-chave nas colunas
+- Notificações WhatsApp/sino para equipe
+- Prazos e alertas
+- Comentários com @menção
+- Templates prontos de coluna por área (opcional)
+
+**Fase 3 — Extras**
+- Dashboard do sócio (produtividade por advogado, distribuição de carga, funil de resultados)
+- Visão do cliente (link público simplificado)
+- Relatórios exportáveis
+
+## Detalhes técnicos
+- Reaproveita `@dnd-kit` já instalado (`DndContext`, `useDroppable`, `useSortable`)
+- Componentes: `ProcessKanbanPage`, `LegalAreaSidebar`, `ProcessBoard`, `ProcessCard`, `ProcessCardDrawer`, `TeamPicker`, `NewLegalAreaDialog`, `NewProcessBoardDialog`, `ColumnSettingsDialog`
+- Realtime: `ALTER PUBLICATION supabase_realtime ADD TABLE process_cards, process_card_activity` para atualização ao vivo entre a equipe
+- Trigger `on_process_movement_insert` para futura automação (na fase 2)
+
+Confirma que posso seguir com a **Fase 1** exatamente assim?
