@@ -678,16 +678,17 @@ export default function LandingPage() {
           <Reveal className="text-center mb-14">
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[hsl(38,90%,55%)]/40 bg-[hsl(38,90%,55%)]/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-[hsl(38,90%,55%)]">
               <Sparkles className="h-3.5 w-3.5" />
-              Exclusivo Premium
+              Módulo complementar
             </div>
             <h2 className="text-3xl font-bold md:text-5xl mb-5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              <span className="bg-gradient-to-r from-[hsl(38,90%,55%)] via-[hsl(45,95%,60%)] to-[hsl(38,90%,55%)] bg-clip-text text-transparent">IA Jurídica</span> integrada
+              <span className="bg-gradient-to-r from-[hsl(38,90%,55%)] via-[hsl(45,95%,60%)] to-[hsl(38,90%,55%)] bg-clip-text text-transparent">Inteligência artificial</span> aplicada
               <br />
-              ao seu CRM.
+              à produção jurídica.
             </h2>
             <p className="mx-auto max-w-2xl text-lg text-[hsl(220,10%,65%)] leading-relaxed">
-              Uma <strong className="text-[hsl(220,10%,85%)]">assistente jurídica com IA</strong> treinada para redigir petições, contratos, mandados de segurança e pareceres em segundos — direto dentro do seu CRM.
+              Assistente de redação treinada em legislação brasileira e jurisprudência dos tribunais superiores para apoiar a elaboração de petições, contestações, recursos, mandados de segurança, contratos e pareceres — sempre com revisão final do advogado.
             </p>
+
           </Reveal>
 
           <div className="grid gap-10 lg:grid-cols-2 items-center mb-16">
