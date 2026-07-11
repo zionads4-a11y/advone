@@ -752,7 +752,7 @@ Antes de responder:
 
   try {
     const aiMessages: any[] = [
-      { role: "system", content: systemPrompt + coherenceGuard },
+      { role: "system", content: systemPrompt + (clientContextBlock || "") + coherenceGuard },
       ...conversationHistory,
     ];
 
