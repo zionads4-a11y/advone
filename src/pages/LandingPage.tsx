@@ -41,14 +41,14 @@ const stats = [
 ];
 
 const features = [
-  { icon: Headphones, title: "Secretária Virtual com IA", desc: "Recebe, escuta, qualifica e agenda seu cliente pelo WhatsApp 24h por dia — com a empatia de uma humana e a precisão de uma máquina." },
-  { icon: Kanban, title: "Kanban Automatizado", desc: "Leads se movem automaticamente pelo funil com cadência de 5 tentativas de contato." },
-  { icon: CalendarDays, title: "Agenda Integrada", desc: "Agendamentos automáticos respeitando horários livres e expediente configurado." },
-  { icon: Wallet, title: "Financeiro com Asaas", desc: "Contas a pagar, receber e faturamento líquido integrado com o Asaas." },
-  { icon: MessageSquare, title: "Conversas Centralizadas", desc: "Todas as mensagens do WhatsApp em um só lugar com histórico completo." },
-  { icon: FileText, title: "Documentos e Petições", desc: "Upload de documentos até 600MB, petições e procurações organizadas." },
-  { icon: Briefcase, title: "Gestão de Processos", desc: "Cadastro de processos com pastas por cliente, documentos e acompanhamento." },
-  { icon: Users, title: "Equipe e Permissões", desc: "Gerentes, operadores e clientes com acessos personalizados por função." },
+  { icon: Headphones, title: "Laura — sua SDR jurídica com IA", desc: "Recebe cada lead no WhatsApp em segundos, transcreve áudio, qualifica o caso e agenda a reunião — 24h por dia, sem férias, sem custo trabalhista." },
+  { icon: Kanban, title: "Kanban jurídico de 9 etapas", desc: "Pipeline pronto para advocacia: Novo → Atendimento → Qualificado → Agendado → Reunião → Ganho ou Perdido. Nada escapa, nada trava." },
+  { icon: CalendarDays, title: "Agenda Google integrada", desc: "A Laura marca a reunião direto na agenda do advogado responsável. Lembretes automáticos por WhatsApp 6h, 2h e 30min antes. Cliente aparece." },
+  { icon: Wallet, title: "Financeiro com Asaas nativo", desc: "Cobrança recorrente em PIX, cartão e boleto. Conciliação automática por webhook. Zero planilha, zero honorário esquecido." },
+  { icon: MessageSquare, title: "Modo compartilhado leads + clientes", desc: "Um único número de WhatsApp para novos casos e clientes ativos. A IA identifica pelo CPF, resgata o processo e chama o advogado responsável." },
+  { icon: FileText, title: "IA Jurídica — peças em minutos", desc: "Dra. Helena escreve petição inicial, contestação, recurso, MS e contrato em .docx padrão ABNT. Já com fundamentação e jurisprudência." },
+  { icon: Briefcase, title: "Processos com monitoramento diário", desc: "Cadastre o CNJ uma vez. O Escavador consulta TODO dia e dispara alerta a cada nova movimentação. Cliente informado antes de perguntar." },
+  { icon: Users, title: "Multi-tenant, 5 níveis de acesso", desc: "Admin, Membro, Gerente, Operador e Cliente. Cada advogado vê apenas o que precisa. Isolamento total por escritório (RLS no banco)." },
 ];
 
 const valueProps = [
