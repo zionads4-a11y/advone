@@ -132,7 +132,7 @@ const faq = [
   },
   {
     q: "Esse plano serve para escritório grande?",
-    a: "O plano Laura SDR é otimizado para advogados solo e escritórios pequenos (até 3 advogados). Para times maiores, recomendamos o plano AdvOne completo.",
+    a: "O AdvOne IA (R$ 397/mês) é otimizado para advogados solo e escritórios pequenos (até 3 advogados). Para times maiores que precisam de CRM, pipeline e gestão de equipe, recomendamos o AdvOne Gestão (R$ 597) ou o Complete (R$ 897).",
   },
 ];
 
