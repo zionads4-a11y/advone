@@ -196,7 +196,7 @@ export default function LandingIA() {
     document.title = "Laura SDR — Secretária Virtual com IA para Advogados | AdvOne";
     const meta = document.querySelector('meta[name="description"]');
     const desc =
-      "Escolha o plano ideal para seu escritório: Admin por R$ 297/mês ou Completo por R$ 797/mês. CRM jurídico com IA, WhatsApp e automação.";
+      "AdvOne IA por R$ 397/mês: SDR virtual Laura que atende, qualifica e agenda no WhatsApp 24h. Também disponível nos planos Gestão (R$ 597) e Complete (R$ 897).";
     if (meta) {
       meta.setAttribute("content", desc);
     } else {
