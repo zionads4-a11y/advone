@@ -1329,7 +1329,18 @@ Antes de responder:
                 ? `\n⚖️ *Processos Monitorados (${monitoredProcesses.length}):*\n` + monitoredProcesses.map(p => `- ${p.numero_cnj} (${p.tribunal_sigla})`).join("\n")
                 : "\n⚠️ Nenhum processo monitorado por CPF encontrado.";
 
-              const alertMessage = `👥 *Atendimento a Cliente Existente*\n\n👤 Cliente: ${client_full_name || leadClient?.name || "N/A"}\n📝 Assunto: ${subject === "andamento_processo" ? "Andamento de Processo" : "Outro Assunto"}\n💬 Resumo: ${message_summary || "(sem resumo)"}\n\n${leadClient ? "✅ Localizado no CRM" : "⚠️ Não localizado no CRM"}${processesText}\n\n_O bot foi desativado para este contato._`;
+              const docsText = pendingDocs.length > 0
+                ? `\n📄 *Documentos pendentes (${pendingDocs.length}):*\n` + pendingDocs.map((d: any) => `- ${d.document_type}${d.status ? ` (${d.status})` : ""}`).join("\n")
+                : "";
+
+              const meetingsText = upcomingMeetings.length > 0
+                ? `\n📅 *Próximos compromissos:*\n` + upcomingMeetings.map((m: any) => {
+                    const dt = new Date(m.due_at).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", dateStyle: "short", timeStyle: "short" });
+                    return `- ${dt} — ${m.title}`;
+                  }).join("\n")
+                : "";
+
+              const alertMessage = `👥 *Atendimento a Cliente Existente*\n\n👤 Cliente: ${client_full_name || leadClient?.name || "N/A"}\n📝 Assunto: ${subject === "andamento_processo" ? "Andamento de Processo" : "Outro Assunto"}\n💬 Solicitação: ${message_summary || "(sem resumo)"}\n\n${leadClient ? "✅ Localizado no CRM" : "⚠️ Não localizado no CRM"}${processesText}${docsText}${meetingsText}\n\n_O bot foi desativado para este contato._`;
               
               const alertHeaders: Record<string, string> = { "Content-Type": "application/json" };
               if (ADMIN_TOKEN) alertHeaders["admintoken"] = ADMIN_TOKEN;
