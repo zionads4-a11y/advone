@@ -135,6 +135,27 @@ export default function Calculadoras() {
   });
   const [revResult, setRevResult] = useState<RevisionalResult | null>(null);
 
+  // ===== Superendividamento =====
+  const [sup, setSup] = useState({
+    categoria: "servidor_publico" as CategoriaDevedor,
+    rendaLiquidaMensal: 6000,
+    outrasRendasMensais: 0,
+    dependentes: 1,
+    prazoRepactuacaoMeses: 60,
+    dividas: [
+      { credor: "Banco X", tipo: "consignado" as TipoContrato, parcelaMensal: 1200, saldoDevedor: 35000, taxaMensalPct: 1.9, parcelasRestantes: 40 },
+      { credor: "Cartão RMC", tipo: "cartao_rmc" as TipoContrato, parcelaMensal: 300, saldoDevedor: 8000, taxaMensalPct: 3.5, parcelasRestantes: 0 },
+      { credor: "Empréstimo pessoal", tipo: "emprestimo_pessoal" as TipoContrato, parcelaMensal: 850, saldoDevedor: 20000, taxaMensalPct: 5.9, parcelasRestantes: 30 },
+    ] as DividaItem[],
+  });
+  const [supResult, setSupResult] = useState<SuperendividamentoResult | null>(null);
+
+    taxaContratadaMensal: 3.5,
+    taxaMediaBacenMensal: 1.8,
+    parcelaContratual: 1650,
+  });
+  const [revResult, setRevResult] = useState<RevisionalResult | null>(null);
+
   // ===== IA parecer =====
   const [aiLoading, setAiLoading] = useState(false);
   const [parecer, setParecer] = useState("");
