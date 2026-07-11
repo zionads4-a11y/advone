@@ -159,14 +159,17 @@ export default function ProcessKanban() {
 
   const createBoard = async (name: string, description: string, color: string) => {
     if (!companyId || !user || !selectedAreaId) return;
+    if (areaBoards.length > 0) {
+      return toast.error("Esta área já tem um funil", { description: "Cada setor pode ter apenas 1 quadro. Edite as colunas do funil existente." });
+    }
     const { data, error } = await supabase.from("process_boards").insert({
       company_id: companyId, legal_area_id: selectedAreaId, name, description, color,
-      position: areaBoards.length, created_by: user.id,
+      position: areaBoards.length, created_by: user.id, is_default: true,
     }).select().single();
     if (error) return toast.error("Erro ao criar quadro", { description: error.message });
     setBoards(prev => [...prev, data as Board]);
     setSelectedBoardId((data as Board).id);
-    toast.success("Quadro criado");
+    toast.success("Funil criado para esta área");
   };
 
   const createColumn = async (name: string, color: string, stage_type: string) => {
@@ -361,9 +364,11 @@ export default function ProcessKanban() {
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
-                <Button size="sm" variant="outline" onClick={() => setBoardDialogOpen(true)}>
-                  <Plus className="mr-1 h-4 w-4" /> Novo quadro
-                </Button>
+                {areaBoards.length === 0 && (
+                  <Button size="sm" variant="outline" onClick={() => setBoardDialogOpen(true)}>
+                    <Plus className="mr-1 h-4 w-4" /> Criar funil desta área
+                  </Button>
+                )}
                 {selectedBoard && (
                   <>
                     <Button size="sm" variant="outline" onClick={() => setColumnDialogOpen(true)}>
@@ -395,7 +400,7 @@ export default function ProcessKanban() {
               </Tabs>
             ) : (
               <Card><CardContent className="py-10 text-center text-sm text-muted-foreground">
-                Sem quadros nesta área. Clique em "Novo quadro".
+                Esta área ainda não tem funil. Clique em "Criar funil desta área" — cada setor terá seu próprio quadro isolado.
               </CardContent></Card>
             )}
 
