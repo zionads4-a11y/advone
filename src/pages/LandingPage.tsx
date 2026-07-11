@@ -984,20 +984,20 @@ export default function LandingPage() {
         <Reveal>
           <div className="relative mx-auto max-w-4xl px-6 py-24 text-center md:py-32">
             <h2 className="mb-6 text-3xl font-bold md:text-5xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              O AdvOne é uma plataforma completa de{" "}
-              <span className="gradient-text">gestão e inteligência</span> para escritórios de advocacia.
+              A plataforma de <span className="gradient-text">gestão e tecnologia</span> desenvolvida para escritórios de advocacia.
             </h2>
             <p className="mx-auto mb-10 max-w-2xl text-lg text-[hsl(220,10%,55%)]">
-              Automatize o atendimento, organize seus leads, controle o financeiro e gerencie processos — tudo em um único CRM com inteligência artificial.
+              CRM Jurídico, gestão de clientes e processos, agenda, financeiro, atendimento oficial via WhatsApp e módulo de inteligência artificial — integrados em um único ambiente seguro, auditável e em conformidade com a LGPD.
             </p>
             <Button
               size="lg"
               onClick={() => navigate("/signup?plan=mensal")}
               className="gradient-primary glow-primary px-10 py-6 text-lg font-semibold text-[hsl(0,0%,100%)] group"
             >
-              Começar agora
+              Solicitar apresentação
               <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
             </Button>
+
           </div>
         </Reveal>
       </section>
