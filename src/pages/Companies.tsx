@@ -68,10 +68,15 @@ export default function Companies() {
   const handleAdd = async (formData: FormData) => {
     if (!user) return;
 
-    const billingKey = (formData.get("billing_model") as BillingModel) || "plan_completo";
+    const billingKey = (formData.get("billing_model") as BillingModel) || "plan_gestao";
     const model = getBillingModel(billingKey);
     const sharedWhats = formData.get("shared_whatsapp_number") === "true";
     const supportPhone = (formData.get("client_support_responsible_phone") as string) || "";
+    const overrideBaseValue = formData.get("custom_base_value");
+    const baseValue =
+      overrideBaseValue && String(overrideBaseValue).trim().length > 0
+        ? parseFloat(overrideBaseValue as string)
+        : model.monthly_value || null;
 
     const { error } = await supabase.from("companies").insert({
       name: formData.get("name") as string,
@@ -82,7 +87,7 @@ export default function Companies() {
       partnership_type: model.partnership_type,
       service_mode: model.service_mode,
       billing_model: model.key,
-      custom_base_value: formData.get("custom_base_value") ? parseFloat(formData.get("custom_base_value") as string) : null,
+      custom_base_value: baseValue,
       shared_whatsapp_number: sharedWhats,
       client_support_responsible_phone: sharedWhats && supportPhone ? supportPhone : null,
       created_by: user.id,
