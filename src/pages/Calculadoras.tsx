@@ -97,13 +97,17 @@ export default function Calculadoras() {
 
   // ===== Previdenciária =====
   const [rmi, setRmi] = useState({
+    modalidade: "idade" as PrevModalidade,
     sexo: "M" as "M" | "F",
     tempoContribuicaoAnos: 25,
     mediaSalariosContribuicao: 3500,
-    regra: "EC103_pontos" as const,
-    idade: 62,
+    idade: 65,
+    mediaPreJulho94: 0,
+    atrasadosMeses: 24,
+    jurosMensalPct: 0.5,
+    correcaoAcumuladaPct: 8,
   });
-  const [rmiResult, setRmiResult] = useState<RMIResult | null>(null);
+  const [rmiResult, setRmiResult] = useState<PrevResult | null>(null);
 
   // ===== Pensão =====
   const [pen, setPen] = useState({
