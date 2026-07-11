@@ -26,9 +26,20 @@ SÓ chame mark_lead_lost quando o lead RECUSAR EXPLICITAMENTE o serviço. Exempl
 NUNCA chame mark_lead_lost se o lead apenas disser que está ocupado, sem tempo, vai pensar, vai ver depois, está em reunião, dirigindo, no trabalho, ou pedir para falar mais tarde. Frases como 'tô ocupado(a)', 'agora não posso', 'depois te respondo', 'me liga mais tarde', 'tô no serviço', 'vou pensar', 'preciso ver com a família', 'só estou pesquisando preço' → NÃO são desistência. Responda com leveza ('Tranquilo, fico no aguardo então 🙂') e o sistema de follow-up cuidará do resto.
 Lead silencioso (não respondeu) TAMBÉM não é desistência — a cadência automática chama de volta. Só marque lost com recusa em palavras claras.`;
 
+  const _nowBR = getNowBrasilia(timezone);
+  const _hourBR = _nowBR.getHours();
+  const _todayStr = `${String(_nowBR.getDate()).padStart(2, "0")}/${String(_nowBR.getMonth() + 1).padStart(2, "0")}/${_nowBR.getFullYear()}`;
+  const _nowTimeStr = `${String(_hourBR).padStart(2, "0")}:${String(_nowBR.getMinutes()).padStart(2, "0")}`;
+  const _periodoStr =
+    _hourBR >= 5 && _hourBR < 12 ? "manhã (use 'bom dia')"
+    : _hourBR >= 12 && _hourBR < 18 ? "tarde (use 'boa tarde')"
+    : "noite (use 'boa noite')";
+  const timeHeader = `\n[HORÁRIO ATUAL — Brasília]\nHoje é ${_todayStr}, agora são ${_nowTimeStr}. Estamos no período da ${_periodoStr}. SEMPRE cumprimente e se despeça de acordo com o período do dia. NUNCA diga "bom dia" à tarde/noite, nem "boa tarde" de manhã/noite, nem "tenha um bom dia" à noite.`;
+
   if (customPrompt.startsWith("Você é")) {
-    return customPrompt + lostBlock + (flowsBlock ? `\n[FLUXOS]\n${flowsBlock}` : "") + (triageBlock ? `\n[TRIAGEM]\n${triageBlock}` : "");
+    return customPrompt + timeHeader + lostBlock + (flowsBlock ? `\n[FLUXOS]\n${flowsBlock}` : "") + (triageBlock ? `\n[TRIAGEM]\n${triageBlock}` : "");
   }
+
 
   const activeOffices = (offices || []).filter((o: any) => o && o.is_active !== false);
   const officesCount = activeOffices.length;
