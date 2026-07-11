@@ -32,6 +32,7 @@ import Documents from "./pages/Documents";
 import DocumentTemplates from "./pages/DocumentTemplates";
 import Cases from "./pages/Cases";
 import ProcessMonitoring from "./pages/ProcessMonitoring";
+import ProcessKanban from "./pages/ProcessKanban";
 import ProcessSearch from "./pages/ProcessSearch";
 import Subscription from "./pages/Subscription";
 import FraudAlerts from "./pages/FraudAlerts";
