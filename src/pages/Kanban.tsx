@@ -245,7 +245,7 @@ export default function Kanban() {
   };
 
   const selectedCompany = companies.find((c) => c.id === selectedCompanyId);
-  const title = isClient ? "Seus Leads" : "Kanban";
+  const title = userRole === "client" ? "Seus Leads" : "Kanban";
   const subtitle = isClient ? "Acompanhe e atualize o status dos seus leads" : "Arraste os leads entre as etapas do funil";
 
   return (
