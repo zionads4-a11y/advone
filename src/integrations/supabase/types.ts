@@ -3335,6 +3335,82 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_discounts: {
+        Row: {
+          approver_role: string
+          approver_user_id: string
+          company_id: string
+          created_at: string
+          discount_percent: number
+          discount_type: string
+          discount_value: number
+          discounted_value: number
+          id: string
+          original_value: number
+          plan: string
+          reason: string | null
+          requester_user_id: string
+          subscription_id: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          approver_role: string
+          approver_user_id: string
+          company_id: string
+          created_at?: string
+          discount_percent: number
+          discount_type: string
+          discount_value: number
+          discounted_value: number
+          id?: string
+          original_value: number
+          plan: string
+          reason?: string | null
+          requester_user_id: string
+          subscription_id?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          approver_role?: string
+          approver_user_id?: string
+          company_id?: string
+          created_at?: string
+          discount_percent?: number
+          discount_type?: string
+          discount_value?: number
+          discounted_value?: number
+          id?: string
+          original_value?: number
+          plan?: string
+          reason?: string | null
+          requester_user_id?: string
+          subscription_id?: string | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_discounts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_discounts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_discounts_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           asaas_customer_id: string | null
