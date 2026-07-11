@@ -60,8 +60,14 @@ Deno.serve(async (req) => {
     // ---- validações
     if (!company_id) return json({ error: "company_id obrigatório" }, 400);
     if (!user_id) return json({ error: "user_id (gerente) obrigatório" }, 400);
-    if (!["plan_ia", "plan_completo"].includes(plan))
-      return json({ error: "plan deve ser plan_ia ou plan_completo" }, 400);
+    const PLAN_LABELS: Record<string, string> = {
+      plan_ia: "AdvOne IA",
+      plan_gestao: "AdvOne Gestão",
+      plan_complete: "AdvOne Complete",
+      plan_completo: "Plano Completo",
+    };
+    if (!PLAN_LABELS[plan])
+      return json({ error: "plan inválido" }, 400);
     const valueNum = Number(value);
     if (!Number.isFinite(valueNum) || valueNum <= 0)
       return json({ error: "value inválido" }, 400);
