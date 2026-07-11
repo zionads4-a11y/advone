@@ -9,6 +9,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { BILLING_MODELS, type BillingModel } from "@/lib/billingModels";
 import { CheckCircle2, Plus } from "lucide-react";
 import { useState } from "react";
@@ -27,6 +34,8 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
   const [selectedModel, setSelectedModel] = useState<BillingModel>("plan_gestao");
   const [sharedWhats, setSharedWhats] = useState(false);
   const [supportPhone, setSupportPhone] = useState("");
+  const [dueDay, setDueDay] = useState("10");
+  const [billingType, setBillingType] = useState("UNDEFINED");
   const isFree = false;
 
   return (
@@ -47,6 +56,8 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
             fd.set("billing_model", selectedModel);
             fd.set("shared_whatsapp_number", sharedWhats ? "true" : "false");
             fd.set("client_support_responsible_phone", sharedWhats ? supportPhone : "");
+            fd.set("due_day", dueDay);
+            fd.set("billing_type", billingType);
             onSubmit(fd);
           }}
           className="space-y-4"
@@ -129,6 +140,42 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
                 <Label>Telefone / WhatsApp</Label>
                 <Input name="whatsapp" placeholder="5511999999999" />
               </div>
+              <div className="space-y-2">
+                <Label>E-mail para cobrança</Label>
+                <Input name="customer_email" type="email" placeholder="financeiro@empresa.com" />
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <Label>Dia do vencimento *</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={28}
+                    required
+                    value={dueDay}
+                    onChange={(e) => setDueDay(e.target.value)}
+                  />
+                  <p className="text-[10px] text-muted-foreground">Entre 1 e 28.</p>
+                </div>
+                <div className="space-y-1">
+                  <Label>Forma de pagamento</Label>
+                  <Select value={billingType} onValueChange={setBillingType}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="UNDEFINED">PIX ou Cartão (cliente escolhe)</SelectItem>
+                      <SelectItem value="PIX">Somente PIX</SelectItem>
+                      <SelectItem value="CREDIT_CARD">Somente Cartão</SelectItem>
+                      <SelectItem value="BOLETO">Boleto</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <p className="text-[11px] text-muted-foreground -mt-1">
+                Ao salvar, a assinatura recorrente é criada automaticamente no Asaas com o
+                plano selecionado.
+              </p>
             </>
           )}
 

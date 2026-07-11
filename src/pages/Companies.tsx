@@ -78,27 +78,73 @@ export default function Companies() {
         ? parseFloat(overrideBaseValue as string)
         : model.monthly_value || null;
 
-    const { error } = await supabase.from("companies").insert({
-      name: formData.get("name") as string,
-      whatsapp: (formData.get("whatsapp") as string) || null,
-      office_legal_name: (formData.get("office_legal_name") as string) || null,
-      office_cnpj: (formData.get("office_cnpj") as string) || null,
-      office_address: (formData.get("office_address") as string) || null,
-      partnership_type: model.partnership_type,
-      service_mode: model.service_mode,
-      billing_model: model.key,
-      custom_base_value: baseValue,
-      shared_whatsapp_number: sharedWhats,
-      client_support_responsible_phone: sharedWhats && supportPhone ? supportPhone : null,
-      created_by: user.id,
-    } as any);
+    const legalName = (formData.get("office_legal_name") as string) || null;
+    const cnpj = (formData.get("office_cnpj") as string) || null;
+    const address = (formData.get("office_address") as string) || null;
+    const whatsapp = (formData.get("whatsapp") as string) || null;
+    const customerEmail = (formData.get("customer_email") as string) || null;
+    const dueDay = parseInt((formData.get("due_day") as string) || "10", 10);
+    const billingType = (formData.get("billing_type") as string) || "UNDEFINED";
 
-    if (error) {
-      toast.error("Erro: " + error.message);
+    const { data: created, error } = await supabase
+      .from("companies")
+      .insert({
+        name: formData.get("name") as string,
+        whatsapp,
+        office_legal_name: legalName,
+        office_cnpj: cnpj,
+        office_address: address,
+        partnership_type: model.partnership_type,
+        service_mode: model.service_mode,
+        billing_model: model.key,
+        custom_base_value: baseValue,
+        shared_whatsapp_number: sharedWhats,
+        client_support_responsible_phone: sharedWhats && supportPhone ? supportPhone : null,
+        created_by: user.id,
+      } as any)
+      .select("id")
+      .single();
+
+    if (error || !created) {
+      toast.error("Erro: " + (error?.message ?? "falha ao criar empresa"));
       return;
     }
 
-    toast.success("Empresa criada com sucesso!");
+    // Cria assinatura recorrente no Asaas automaticamente
+    if (baseValue && baseValue > 0 && legalName && cnpj) {
+      try {
+        const { data: subData, error: subErr } = await supabase.functions.invoke(
+          "create-company-subscription",
+          {
+            body: {
+              company_id: created.id,
+              user_id: user.id,
+              plan: model.key,
+              value: baseValue,
+              due_day: dueDay,
+              billing_type: billingType,
+              customer_name: legalName,
+              customer_email: customerEmail,
+              customer_phone: whatsapp,
+              customer_cpf_cnpj: cnpj,
+            },
+          },
+        );
+        if (subErr || (subData as { error?: string })?.error) {
+          const msg = subErr?.message || (subData as { error?: string })?.error || "";
+          toast.warning("Empresa criada, mas falhou ao gerar assinatura Asaas: " + msg);
+        } else {
+          toast.success("Empresa criada e assinatura recorrente gerada no Asaas!");
+        }
+      } catch (e) {
+        toast.warning(
+          "Empresa criada, mas falhou ao gerar assinatura Asaas: " + (e as Error).message,
+        );
+      }
+    } else {
+      toast.success("Empresa criada com sucesso!");
+    }
+
     setDialogOpen(false);
     fetchData();
   };
