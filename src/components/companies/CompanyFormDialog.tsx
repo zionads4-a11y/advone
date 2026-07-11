@@ -56,6 +56,8 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
             fd.set("billing_model", selectedModel);
             fd.set("shared_whatsapp_number", sharedWhats ? "true" : "false");
             fd.set("client_support_responsible_phone", sharedWhats ? supportPhone : "");
+            fd.set("due_day", dueDay);
+            fd.set("billing_type", billingType);
             onSubmit(fd);
           }}
           className="space-y-4"
