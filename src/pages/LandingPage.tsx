@@ -1013,8 +1013,9 @@ export default function LandingPage() {
                 className="h-14 w-auto drop-shadow-[0_0_20px_hsl(153,60%,45%/0.5)]"
               />
               <p className="text-xs text-[hsl(220,10%,55%)] leading-relaxed">
-                CRM jurídico com IA no WhatsApp para escritórios de advocacia brasileiros.
+                Plataforma de gestão para escritórios de advocacia. CRM Jurídico, agenda, financeiro, processos e atendimento integrados.
               </p>
+
             </div>
 
             <div className="space-y-2">
