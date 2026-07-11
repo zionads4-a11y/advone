@@ -9,16 +9,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { BILLING_MODELS, type BillingModel } from "@/lib/billingModels";
-import { Plus } from "lucide-react";
+import { CheckCircle2, Plus } from "lucide-react";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface CompanyFormDialogProps {
   open: boolean;
@@ -26,8 +20,11 @@ interface CompanyFormDialogProps {
   onSubmit: (formData: FormData) => void;
 }
 
+const brl = (n: number) =>
+  n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+
 export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormDialogProps) {
-  const [selectedModel, setSelectedModel] = useState<BillingModel>("plan_ia");
+  const [selectedModel, setSelectedModel] = useState<BillingModel>("plan_gestao");
   const [sharedWhats, setSharedWhats] = useState(false);
   const [supportPhone, setSupportPhone] = useState("");
   const isFree = false;
@@ -39,7 +36,7 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
           <Plus className="mr-2 h-4 w-4" /> Nova Empresa
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-card text-foreground max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-card text-foreground max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="font-display">Adicionar Empresa</DialogTitle>
         </DialogHeader>
@@ -47,6 +44,7 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
           onSubmit={(e) => {
             e.preventDefault();
             const fd = new FormData(e.currentTarget);
+            fd.set("billing_model", selectedModel);
             fd.set("shared_whatsapp_number", sharedWhats ? "true" : "false");
             fd.set("client_support_responsible_phone", sharedWhats ? supportPhone : "");
             onSubmit(fd);
@@ -54,27 +52,59 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
           className="space-y-4"
         >
           <div className="space-y-2">
-            <Label>Modelo de Cobrança *</Label>
-            <Select 
-              name="billing_model" 
-              defaultValue={selectedModel}
-              onValueChange={(v) => setSelectedModel(v as BillingModel)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o modelo de cobrança" />
-              </SelectTrigger>
-              <SelectContent>
-                {BILLING_MODELS.map((m) => (
-                  <SelectItem key={m.key} value={m.key}>
-                    {m.emoji} {m.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label>Plano da empresa *</Label>
+            <div className="grid gap-3 md:grid-cols-3">
+              {BILLING_MODELS.map((m) => {
+                const active = selectedModel === m.key;
+                const highlight = m.key === "plan_gestao";
+                return (
+                  <button
+                    key={m.key}
+                    type="button"
+                    onClick={() => setSelectedModel(m.key)}
+                    className={cn(
+                      "relative flex flex-col rounded-xl border p-4 text-left transition-all",
+                      active
+                        ? "border-primary bg-primary/5 shadow-md"
+                        : "border-border bg-background hover:border-primary/40",
+                    )}
+                  >
+                    {highlight && (
+                      <span className="absolute -top-2 right-3 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary-foreground">
+                        Popular
+                      </span>
+                    )}
+                    <div className="flex items-center gap-2 text-sm font-semibold">
+                      <span>{m.emoji}</span>
+                      <span>{m.label}</span>
+                    </div>
+                    <div className="mt-2 flex items-baseline gap-1">
+                      <span className="text-2xl font-bold">{brl(m.monthly_value)}</span>
+                      <span className="text-xs text-muted-foreground">/mês</span>
+                    </div>
+                    <p className="mt-2 text-[11px] text-muted-foreground">{m.description}</p>
+                    <ul className="mt-3 space-y-1 flex-1">
+                      {m.features.slice(0, 4).map((f) => (
+                        <li key={f} className="flex items-start gap-1.5 text-[11px] text-muted-foreground">
+                          <CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0 text-primary" />
+                          <span>{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    {active && (
+                      <div className="mt-3 rounded-md bg-primary/10 px-2 py-1 text-[10px] font-semibold text-primary">
+                        ✓ Selecionado
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
             <p className="text-xs text-muted-foreground">
-              Define como a empresa será cobrada e quais módulos ela enxerga no sistema.
+              O valor mensal escolhido é salvo automaticamente como base de cobrança da empresa.
             </p>
           </div>
+
 
           <div className="space-y-2">
             <Label>Nome da Empresa *</Label>

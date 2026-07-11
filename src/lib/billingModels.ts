@@ -1,17 +1,19 @@
 // Modelos de cobrança disponíveis ao cadastrar uma empresa.
-// Simplificado para 2 opções:
-//   - plan_ia       → Só IA (menu enxuto): Dashboard, Kanban, Clientes, Agenda, Conversas, Monitoramento
-//   - plan_completo → CRM completo (todos os módulos)
-// A cobrança em si é lançada por fora (não pela plataforma).
+// Estrutura em 3 planos (a mesma escada exibida nas landing pages):
+//   - plan_ia       → AdvOne IA        · R$ 397/mês · menu enxuto (Dashboard, Kanban, Clientes, Agenda, Conversas, Monitoramento)
+//   - plan_gestao   → AdvOne Gestão    · R$ 597/mês · CRM completo sem os recursos exclusivos (IA jurídica, jurisprudência etc.)
+//   - plan_complete → AdvOne Complete  · R$ 897/mês · tudo incluso
 //
-// Chaves legadas (plan_ia_monthly, plan_ia_6m, plan_ia_12m, plan_zionads, plan_free)
+// Chaves legadas (plan_completo, plan_ia_monthly, plan_ia_6m, plan_ia_12m, plan_zionads, plan_free)
 // continuam válidas em tempo de execução para não quebrar empresas existentes,
 // mas não aparecem mais na UI de cadastro/edição.
 
 export type BillingModel =
   | "plan_ia"
-  | "plan_completo"
+  | "plan_gestao"
+  | "plan_complete"
   // legado — mantido apenas para compatibilidade de leitura
+  | "plan_completo"
   | "plan_ia_monthly"
   | "plan_ia_6m"
   | "plan_ia_12m"
@@ -23,80 +25,133 @@ export interface BillingModelOption {
   label: string;
   emoji: string;
   description: string;
+  monthly_value: number;
   partnership_type: "mensalidade_zionads";
   service_mode: "full" | "ai_only";
   monitoring_quota: number;
+  features: string[];
 }
 
 export const BILLING_MODELS: BillingModelOption[] = [
   {
     key: "plan_ia",
     emoji: "🤖",
-    label: "Plano IA",
-    description:
-      "Acesso enxuto: Dashboard, Kanban, Clientes, Agenda, Conversas e Monitoramento de processos. Cobrança lançada por fora.",
+    label: "AdvOne IA",
+    monthly_value: 397,
+    description: "Sua secretária virtual 24h no WhatsApp — para parar de perder lead.",
     partnership_type: "mensalidade_zionads",
     service_mode: "ai_only",
     monitoring_quota: 10,
+    features: [
+      "Atendimento no WhatsApp 24h",
+      "Qualificação inteligente de leads",
+      "Agendamento automático na agenda",
+      "Atendimento a clientes atuais",
+    ],
   },
   {
-    key: "plan_completo",
-    emoji: "🚀",
-    label: "Plano Completo",
-    description:
-      "CRM completo com todos os módulos (IA Jurídica, Boards, Financeiro, Documentos, etc). Cobrança lançada por fora.",
+    key: "plan_gestao",
+    emoji: "📊",
+    label: "AdvOne Gestão",
+    monthly_value: 597,
+    description: "CRM jurídico completo para organizar escritório e time.",
     partnership_type: "mensalidade_zionads",
     service_mode: "full",
     monitoring_quota: 10,
+    features: [
+      "CRM jurídico completo",
+      "Pipeline (Kanban de leads e casos)",
+      "Automações e cadências",
+      "Gestão da equipe (papéis e permissões)",
+      "Relatórios e indicadores",
+    ],
+  },
+  {
+    key: "plan_complete",
+    emoji: "🚀",
+    label: "AdvOne Complete",
+    monthly_value: 897,
+    description: "Tudo do IA + tudo do Gestão + integrações e recursos exclusivos.",
+    partnership_type: "mensalidade_zionads",
+    service_mode: "full",
+    monitoring_quota: 10,
+    features: [
+      "Tudo do plano IA",
+      "Tudo do plano Gestão",
+      "Integrações avançadas (Google, Asaas, ZapSign)",
+      "IA jurídica, jurisprudência e calculadoras",
+      "Suporte prioritário",
+    ],
   },
 ];
 
 // Legado — usado apenas para exibir label/description de empresas antigas.
 const LEGACY_BILLING_MODELS: BillingModelOption[] = [
   {
+    key: "plan_completo",
+    emoji: "🚀",
+    label: "Plano Completo (legado)",
+    monthly_value: 897,
+    description: "Legado — substituído pelo AdvOne Complete.",
+    partnership_type: "mensalidade_zionads",
+    service_mode: "full",
+    monitoring_quota: 10,
+    features: [],
+  },
+  {
     key: "plan_ia_monthly",
     emoji: "🤖",
     label: "Plano IA Mensal (legado)",
+    monthly_value: 397,
     description: "Legado.",
     partnership_type: "mensalidade_zionads",
     service_mode: "full",
     monitoring_quota: 10,
+    features: [],
   },
   {
     key: "plan_ia_6m",
     emoji: "🤖",
     label: "Plano IA 6 Meses (legado)",
+    monthly_value: 397,
     description: "Legado.",
     partnership_type: "mensalidade_zionads",
     service_mode: "full",
     monitoring_quota: 10,
+    features: [],
   },
   {
     key: "plan_ia_12m",
     emoji: "🤖",
     label: "Plano IA 12 Meses (legado)",
+    monthly_value: 397,
     description: "Legado.",
     partnership_type: "mensalidade_zionads",
     service_mode: "full",
     monitoring_quota: 10,
+    features: [],
   },
   {
     key: "plan_zionads",
     emoji: "🚀",
     label: "Plano ZionAds (legado)",
+    monthly_value: 0,
     description: "Legado.",
     partnership_type: "mensalidade_zionads",
     service_mode: "ai_only",
     monitoring_quota: 0,
+    features: [],
   },
   {
     key: "plan_free",
     emoji: "🆓",
     label: "Acesso Livre (legado)",
+    monthly_value: 0,
     description: "Legado.",
     partnership_type: "mensalidade_zionads",
     service_mode: "full",
     monitoring_quota: 0,
+    features: [],
   },
 ];
 
@@ -113,5 +168,5 @@ export function inferBillingModel(
   _partnership_type?: string | null,
   service_mode?: string | null,
 ): BillingModel {
-  return service_mode === "ai_only" ? "plan_ia" : "plan_completo";
+  return service_mode === "ai_only" ? "plan_ia" : "plan_complete";
 }
