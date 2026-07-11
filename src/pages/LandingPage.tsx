@@ -528,18 +528,18 @@ export default function LandingPage() {
       <section className="border-y border-[hsl(220,20%,16%)] bg-[hsl(220,25%,8%)]">
         <div className="mx-auto max-w-5xl px-6 py-24">
           <Reveal className="mb-16 text-center">
-            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Atendimento Inteligente</p>
+            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">A jornada do lead</p>
             <h2 className="text-3xl font-bold md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Como sua Secretária Virtual transforma leads em consultas
+              Do clique no Google Ads ao contrato assinado — em 24h.
             </h2>
           </Reveal>
           <div className="grid gap-6 md:grid-cols-5">
             {[
-              { step: "1", title: "Lead entra", desc: "Novo cliente chega pelo WhatsApp ou campanha" },
-              { step: "2", title: "Secretária responde", desc: "Recebe na hora, escuta o caso e faz a triagem" },
-              { step: "3", title: "Cadência", desc: "5 tentativas automáticas se o lead sumir" },
-              { step: "4", title: "Agendamento", desc: "Marca a consulta e avisa o escritório" },
-              { step: "5", title: "Resultado", desc: "Lead movido para Ganho ou Perdido no Kanban" },
+              { step: "1", title: "Lead clica no anúncio", desc: "Google Ads ou Meta Ads com link UTM AdvOne — atribuição 100% rastreada." },
+              { step: "2", title: "Cai no WhatsApp", desc: "A Laura recebe em <5s, transcreve áudio, apresenta o escritório." },
+              { step: "3", title: "Qualifica o caso", desc: "Identifica nicho (prev, trab, cível…), colhe dados e classifica temperatura." },
+              { step: "4", title: "Marca na agenda", desc: "Reunião direto no Google Calendar do advogado da área. Sem overbooking." },
+              { step: "5", title: "Advogado recebe alerta", desc: "WhatsApp na hora. Lembretes automáticos 6h, 2h e 30min antes pro cliente." },
             ].map((s, i) => (
               <Reveal key={s.step} delay={i * 120}>
                 <div className="relative text-center group">
