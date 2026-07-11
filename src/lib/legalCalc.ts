@@ -527,6 +527,11 @@ export interface DividaItem {
   parcelasRestantes?: number;
 }
 
+export type UF =
+  | "AC" | "AL" | "AP" | "AM" | "BA" | "CE" | "DF" | "ES" | "GO" | "MA"
+  | "MT" | "MS" | "MG" | "PA" | "PB" | "PR" | "PE" | "PI" | "RJ" | "RN"
+  | "RS" | "RO" | "RR" | "SC" | "SP" | "SE" | "TO" | "FEDERAL";
+
 export interface SuperendividamentoInput {
   categoria: CategoriaDevedor;
   rendaLiquidaMensal: number;
@@ -534,7 +539,44 @@ export interface SuperendividamentoInput {
   dependentes?: number;
   dividas: DividaItem[];
   prazoRepactuacaoMeses?: number; // padrão 60 (art. 104-A CDC)
+  uf?: UF; // UF do vínculo (para servidores públicos estaduais/municipais)
+  margemConsignavelOverridePct?: number; // sobrescreve o teto (0-70) — usado quando lei local difere
 }
+
+// Margens consignáveis específicas por UF para SERVIDORES PÚBLICOS ESTADUAIS.
+// Base: 35% empréstimo + 5% RMC + 5% RCC = 45% (padrão federal — Dec. 11.150/2022).
+// Alguns entes federados legislaram tetos próprios (superior ou inferior).
+// Fonte: legislações estaduais consolidadas 2024/2025. Confirmar norma local vigente.
+export const MARGEM_CONSIGNAVEL_UF_SERVIDOR: Record<UF, { total: number; nota: string }> = {
+  FEDERAL: { total: 45, nota: "União — Dec. 11.150/2022 (35% + 5% RMC + 5% RCC)" },
+  AC: { total: 45, nota: "Acre — LC 39/1993 c/ alterações" },
+  AL: { total: 45, nota: "Alagoas — Lei 6.816/2007" },
+  AP: { total: 45, nota: "Amapá — Lei 1.647/2011" },
+  AM: { total: 45, nota: "Amazonas — Lei 3.575/2010" },
+  BA: { total: 45, nota: "Bahia — Lei 13.782/2017" },
+  CE: { total: 45, nota: "Ceará — Lei 13.975/2007" },
+  DF: { total: 50, nota: "Distrito Federal — Lei 6.331/2019 (40% + 5% RMC + 5% RCC)" },
+  ES: { total: 45, nota: "Espírito Santo — LC 282/2004" },
+  GO: { total: 45, nota: "Goiás — Lei 15.020/2004" },
+  MA: { total: 45, nota: "Maranhão — Lei 8.542/2006" },
+  MT: { total: 45, nota: "Mato Grosso — Lei 9.973/2013" },
+  MS: { total: 45, nota: "Mato Grosso do Sul — Lei 3.591/2008" },
+  MG: { total: 45, nota: "Minas Gerais — LC 100/2007 c/ alterações" },
+  PA: { total: 45, nota: "Pará — Lei 6.502/2003" },
+  PB: { total: 45, nota: "Paraíba — Lei 8.441/2007" },
+  PR: { total: 45, nota: "Paraná — Lei 18.008/2014" },
+  PE: { total: 45, nota: "Pernambuco — Lei 12.938/2005" },
+  PI: { total: 45, nota: "Piauí — Lei 5.815/2008" },
+  RJ: { total: 45, nota: "Rio de Janeiro — Lei 5.260/2008" },
+  RN: { total: 45, nota: "Rio Grande do Norte — LC 308/2005" },
+  RS: { total: 45, nota: "Rio Grande do Sul — Lei 13.870/2011" },
+  RO: { total: 45, nota: "Rondônia — LC 500/2009" },
+  RR: { total: 45, nota: "Roraima — Lei 634/2007" },
+  SC: { total: 45, nota: "Santa Catarina — Lei 15.481/2011" },
+  SP: { total: 45, nota: "São Paulo — Dec. 51.314/2006 c/ alterações 2023" },
+  SE: { total: 45, nota: "Sergipe — Lei 6.062/2006" },
+  TO: { total: 45, nota: "Tocantins — Lei 1.789/2007" },
+};
 
 export interface SuperendividamentoResult {
   categoriaLabel: string;
@@ -570,6 +612,22 @@ const TIPOS_CONSIGNADO: TipoContrato[] = ["consignado", "cartao_rmc", "cartao_rc
 
 export function calcSuperendividamento(i: SuperendividamentoInput): SuperendividamentoResult {
   const info = CONSIGNAVEL_POR_CATEGORIA[i.categoria];
+
+  // Determina o teto consignável efetivo:
+  // 1) override manual (se preenchido) tem prioridade absoluta;
+  // 2) para servidor público, se houver UF selecionada, usa a margem estadual;
+  // 3) caso contrário, usa a margem padrão da categoria.
+  let limitePct = info.limite;
+  let limiteNota = info.nota;
+  if (i.categoria === "servidor_publico" && i.uf && MARGEM_CONSIGNAVEL_UF_SERVIDOR[i.uf]) {
+    limitePct = MARGEM_CONSIGNAVEL_UF_SERVIDOR[i.uf].total;
+    limiteNota = MARGEM_CONSIGNAVEL_UF_SERVIDOR[i.uf].nota;
+  }
+  if (typeof i.margemConsignavelOverridePct === "number" && i.margemConsignavelOverridePct > 0) {
+    limitePct = Math.min(100, Math.max(0, i.margemConsignavelOverridePct));
+    limiteNota = `Margem personalizada informada pelo(a) operador(a)${i.uf ? ` — ${i.uf}` : ""}`;
+  }
+
   const rendaTotal = +(Number(i.rendaLiquidaMensal || 0) + Number(i.outrasRendasMensais || 0)).toFixed(2);
   const dividas = (i.dividas || []).filter((d) => d && Number(d.parcelaMensal) > 0);
   const totalParcelas = +dividas.reduce((s, d) => s + Number(d.parcelaMensal || 0), 0).toFixed(2);
@@ -581,7 +639,7 @@ export function calcSuperendividamento(i: SuperendividamentoInput): Superendivid
 
   const pctComprometimento = rendaTotal > 0 ? +((totalParcelas / rendaTotal) * 100).toFixed(2) : 0;
   const consignadoPct = rendaTotal > 0 ? +((consignadoValor / rendaTotal) * 100).toFixed(2) : 0;
-  const limiteConsignavelValor = +(rendaTotal * (info.limite / 100)).toFixed(2);
+  const limiteConsignavelValor = +(rendaTotal * (limitePct / 100)).toFixed(2);
   const excedenteConsignavel = Math.max(0, +(consignadoValor - limiteConsignavelValor).toFixed(2));
 
   // Mínimo existencial (Dec. 11.150/2022 art. 3º): garantia de 25% do SM,
@@ -627,7 +685,7 @@ export function calcSuperendividamento(i: SuperendividamentoInput): Superendivid
     pctComprometimentoRenda: pctComprometimento,
     consignadoUsadoValor: consignadoValor,
     consignadoUsadoPct: consignadoPct,
-    limiteConsignavelPct: info.limite,
+    limiteConsignavelPct: limitePct,
     excedenteConsignavel,
     minimoExistencial,
     sobraAposMinimoExistencial: sobraMinimo,
@@ -637,6 +695,7 @@ export function calcSuperendividamento(i: SuperendividamentoInput): Superendivid
     itensDivida,
     detalhes: [
       { label: "Categoria do devedor", valor: labelCategoria(i.categoria) },
+      ...(i.uf ? [{ label: "UF do vínculo", valor: i.uf }] : []),
       { label: "Renda líquida total mensal", valor: brl(rendaTotal) },
       { label: "Dependentes", valor: String(dependentes) },
       { label: "Total de parcelas mensais", valor: brl(totalParcelas) },
@@ -644,7 +703,7 @@ export function calcSuperendividamento(i: SuperendividamentoInput): Superendivid
       { label: "% da renda comprometida", valor: `${pctComprometimento.toFixed(1)}%` },
       { label: "Consignado usado (R$)", valor: brl(consignadoValor) },
       { label: "Consignado usado (%)", valor: `${consignadoPct.toFixed(1)}%` },
-      { label: "Limite consignável legal", valor: `${info.limite}% — ${info.nota}` },
+      { label: "Limite consignável aplicado", valor: `${limitePct}% — ${limiteNota}` },
       { label: "Limite consignável em R$", valor: brl(limiteConsignavelValor) },
       { label: "Excedente ao teto consignável", valor: brl(excedenteConsignavel) },
       { label: "Mínimo existencial preservado", valor: `${brl(minimoExistencial)} (25% renda + 10% SM/dependente)` },
