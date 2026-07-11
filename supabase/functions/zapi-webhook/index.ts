@@ -504,16 +504,16 @@ const sdrTools = [
     type: "function",
     function: {
       name: "lookup_existing_client",
-      description: "Verifica se o cliente já existe no sistema CRM ou se possui processos sendo monitorados pelo escritório. Peça o NOME COMPLETO e o CPF do cliente antes de chamar. Esta tool notifica o advogado responsável e desativa o bot para o contato.",
+      description: "Localiza o processo/cliente no CRM ou nos processos monitorados. SEMPRE peça NOME COMPLETO e CPF ao cliente na MESMA mensagem ANTES de chamar. Ambos são obrigatórios.",
       parameters: {
         type: "object",
         properties: {
           client_full_name: { type: "string", description: "Nome completo do cliente" },
-          client_cpf: { type: "string", description: "CPF do cliente (opcional, mas recomendado)" },
+          client_cpf: { type: "string", description: "CPF do cliente (obrigatório, só dígitos ou formatado)" },
           subject: { type: "string", enum: ["andamento_processo", "outro"], description: "Assunto do contato" },
           message_summary: { type: "string", description: "Breve resumo do que o cliente deseja" }
         },
-        required: ["client_full_name", "subject"],
+        required: ["client_full_name", "client_cpf", "subject"],
         additionalProperties: false
       }
     }
@@ -690,6 +690,7 @@ async function handleAgentPhase(
   flowsBlock?: string,
   triageBlock?: string,
   timezone: string = "America/Sao_Paulo",
+  clientContextBlock?: string,
 ): Promise<string | null> {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!LOVABLE_API_KEY) return null;
@@ -751,7 +752,7 @@ Antes de responder:
 
   try {
     const aiMessages: any[] = [
-      { role: "system", content: systemPrompt + coherenceGuard },
+      { role: "system", content: systemPrompt + (clientContextBlock || "") + coherenceGuard },
       ...conversationHistory,
     ];
 
@@ -1230,12 +1231,22 @@ Antes de responder:
           const { client_full_name, client_cpf, subject, message_summary } = args;
           
           // 1. Tentar localizar o lead/cliente no CRM
-          const { data: leadClient } = await supabase
-            .rpc("find_client_by_name", { 
-              _company_id: companyId, 
-              _search_name: String(client_full_name).trim() 
+          const { data: leadClientBase } = await supabase
+            .rpc("find_client_by_name", {
+              _company_id: companyId,
+              _search_name: String(client_full_name).trim()
             })
             .maybeSingle();
+          // Buscar assigned_to (advogado responsável) do lead encontrado
+          let leadClient: any = leadClientBase;
+          if (leadClientBase?.id) {
+            const { data: full } = await supabase
+              .from("leads")
+              .select("id, name, assigned_to")
+              .eq("id", leadClientBase.id)
+              .maybeSingle();
+            if (full) leadClient = full;
+          }
 
           // 2. Tentar localizar processos monitorados e pegar movimentações recentes
           let monitoredProcesses: any[] = [];
@@ -1316,22 +1327,48 @@ Antes de responder:
             } catch (e) { console.error("Client lookup alert error:", e); }
           }
 
-          // Desativa o bot para o lead e marca como não lida no CRM
-          if (leadId) {
+          const foundInSystem = !!leadClient || monitoredProcesses.length > 0;
+
+          // Buscar nome do advogado responsável para personalizar a resposta
+          let responsibleLawyerName = "";
+          const assignedTo = leadClient?.assigned_to;
+          if (assignedTo) {
+            const { data: lp } = await supabase
+              .from("profiles")
+              .select("full_name")
+              .eq("user_id", assignedTo)
+              .maybeSingle();
+            responsibleLawyerName = lp?.full_name || "";
+          }
+          if (!responsibleLawyerName) {
+            responsibleLawyerName = (config.companies as any)?.owner_name
+              || config.office_name
+              || "responsável";
+          }
+
+          // Só desativa o bot se REALMENTE precisa de handoff humano
+          // (assunto ≠ andamento, OU processo foi encontrado). Se subject=andamento e
+          // não encontrou nada, o bot deve responder a mensagem de "fase inicial".
+          const shouldHandoffHuman = subject !== "andamento_processo" || foundInSystem;
+          if (leadId && shouldHandoffHuman) {
             await supabase.from("leads").update({ bot_disabled: true, is_unread: true }).eq("id", leadId);
           }
 
-          toolResult = { 
-            success: true, 
+          toolResult = {
+            success: true,
+            found_in_system: foundInSystem,
             found_in_crm: !!leadClient,
             monitored_processes_found: monitoredProcesses.length,
+            responsible_lawyer_name: responsibleLawyerName,
             processes_info: monitoredProcesses.map(p => ({
               numero: p.numero_cnj,
               tribunal: p.tribunal_sigla,
               ultima_movimentacao: p.data_ultima_movimentacao,
               resumo_movimentacoes: p.recent_movements.map((m: any) => m.descricao).join(" | ")
             })),
-            instruction: "Se encontrou processos, faça um resumo MUITO SIMPLES e amigável da última movimentação encontrada para o cliente. Diga que o Dr. Daniel e a equipe estão acompanhando tudo de perto e que o advogado responsável já foi avisado para dar um retorno detalhado em breve. Seja acolhedor e passe segurança."
+            instruction: foundInSystem
+              ? `Faça um resumo MUITO SIMPLES e amigável da última movimentação encontrada. Diga que o(a) advogado(a) ${responsibleLawyerName} e a equipe estão acompanhando de perto e que o(a) responsável já foi avisado(a) para dar retorno detalhado em breve. Seja acolhedor.`
+              : `Nenhum processo foi localizado para este CPF. Responda EXATAMENTE (adaptando o primeiro nome do cliente): "Seu processo ainda está na fase inicial. O(a) advogado(a) ${responsibleLawyerName} vai entrar em contato assim que houver novas atualizações. Se preferir, você também pode nos chamar por aqui novamente sempre que precisar. 🙂". NÃO chame transfer_to_human, NÃO diga "vou avisar o advogado agora", NÃO agende reunião.`
           };
         }
 
@@ -2056,8 +2093,58 @@ serve(async (req) => {
             );
           }
 
-          const { data: leadData } = await supabase.from("leads").select("name").eq("id", leadId).single();
+          const { data: leadData } = await supabase
+            .from("leads")
+            .select("name, is_client, cpf_cliente_final, assigned_to")
+            .eq("id", leadId)
+            .single();
           const currentLeadName = leadData?.name || senderName || undefined;
+
+          // Contexto de cliente existente — orienta o bot a NÃO perguntar "é cliente?" e
+          // a responder com boas-vindas quando este contato já é cliente cadastrado.
+          let clientContextBlock: string | undefined;
+          if (leadData?.is_client) {
+            let lawyerName = "";
+            if (leadData?.assigned_to) {
+              const { data: lawyerProfile } = await supabase
+                .from("profiles")
+                .select("full_name")
+                .eq("user_id", leadData.assigned_to)
+                .maybeSingle();
+              lawyerName = lawyerProfile?.full_name || "";
+            }
+            if (!lawyerName) {
+              lawyerName = (config.companies as any)?.owner_name
+                || (config.office_name || "")
+                || "responsável";
+            }
+            const cpfCad = leadData?.cpf_cliente_final ? ` (CPF cadastrado: ${leadData.cpf_cliente_final})` : "";
+            clientContextBlock = `
+
+═══════════════════════════════════════════════════════
+👤 CONTEXTO INTERNO — ESTE CONTATO JÁ É CLIENTE DO ESCRITÓRIO
+═══════════════════════════════════════════════════════
+Nome: ${currentLeadName || "(cliente cadastrado)"}${cpfCad}
+Advogado(a) responsável: ${lawyerName}
+
+REGRAS INVIOLÁVEIS PARA ESTE CONTATO:
+1. 🚫 NÃO pergunte "você já é cliente ou é seu primeiro contato?". Ele JÁ é cliente.
+2. ✅ SEMPRE que ele iniciar a conversa (ex.: "oi", "boa tarde"), responda em UMA mensagem:
+   "Olá, ${currentLeadName?.split(" ")[0] || "tudo bem"}! 😊 Como posso te ajudar hoje?" — e AGUARDE.
+3. 🚫 NÃO ofereça agendamento, NÃO faça qualificação (P1/P2/P3), NÃO chame decide_lead.
+4. Se ele pedir andamento do processo / novidade / audiência / sentença / pagamento:
+   a) Peça em UMA única mensagem: "Pra eu localizar seu processo aqui no sistema, me confirma seu *nome completo* e o *CPF*, por favor 🙂"
+   b) Aguarde o nome completo E o CPF (os dois juntos).
+   c) Chame OBRIGATORIAMENTE a tool \`lookup_existing_client\` passando client_full_name, client_cpf, subject="andamento_processo" e message_summary.
+   d) Se a tool retornar found_in_system=false OU monitored_processes_found=0, responda EXATAMENTE (adaptando só o nome do advogado):
+      "Seu processo ainda está na fase inicial. O(a) advogado(a) ${lawyerName} vai entrar em contato assim que houver novas atualizações. Se preferir, você também pode nos chamar por aqui novamente sempre que precisar. 🙂"
+      NÃO chame transfer_to_human depois dessa resposta. NÃO diga "vou avisar o advogado".
+   e) Se retornar found_in_system=true, faça um resumo simples e amigável e finalize com gentileza.
+5. Se o assunto NÃO for andamento de processo (ex.: dúvida sobre pagamento, documento, agendar reunião de acompanhamento):
+   a) Peça nome completo + CPF na mesma mensagem, chame \`lookup_existing_client\` com subject="outro" e message_summary.
+   b) Depois, avise cordialmente que a equipe/advogado(a) responsável dará retorno em breve.
+`;
+          }
 
           const { data: recentMsgs } = await supabase.from("whatsapp_messages")
             .select("message_text, direction").eq("company_id", companyId)
@@ -2084,7 +2171,8 @@ serve(async (req) => {
             effectivePhase, config, agentConfigs, history,
             companyId, leadId, supabase, currentLeadName, cleanPhone,
             flowsBlock, triageBlock,
-            (config.companies as any)?.timezone || "America/Sao_Paulo"
+            (config.companies as any)?.timezone || "America/Sao_Paulo",
+            clientContextBlock
           );
 
           const SERVER_URL = "https://ziondigital.uazapi.com";
