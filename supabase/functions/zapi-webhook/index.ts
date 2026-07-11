@@ -1231,12 +1231,22 @@ Antes de responder:
           const { client_full_name, client_cpf, subject, message_summary } = args;
           
           // 1. Tentar localizar o lead/cliente no CRM
-          const { data: leadClient } = await supabase
-            .rpc("find_client_by_name", { 
-              _company_id: companyId, 
-              _search_name: String(client_full_name).trim() 
+          const { data: leadClientBase } = await supabase
+            .rpc("find_client_by_name", {
+              _company_id: companyId,
+              _search_name: String(client_full_name).trim()
             })
             .maybeSingle();
+          // Buscar assigned_to (advogado responsável) do lead encontrado
+          let leadClient: any = leadClientBase;
+          if (leadClientBase?.id) {
+            const { data: full } = await supabase
+              .from("leads")
+              .select("id, name, assigned_to")
+              .eq("id", leadClientBase.id)
+              .maybeSingle();
+            if (full) leadClient = full;
+          }
 
           // 2. Tentar localizar processos monitorados e pegar movimentações recentes
           let monitoredProcesses: any[] = [];
