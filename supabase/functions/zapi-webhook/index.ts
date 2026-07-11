@@ -504,16 +504,16 @@ const sdrTools = [
     type: "function",
     function: {
       name: "lookup_existing_client",
-      description: "Verifica se o cliente já existe no sistema CRM ou se possui processos sendo monitorados pelo escritório. Peça o NOME COMPLETO e o CPF do cliente antes de chamar. Esta tool notifica o advogado responsável e desativa o bot para o contato.",
+      description: "Localiza o processo/cliente no CRM ou nos processos monitorados. SEMPRE peça NOME COMPLETO e CPF ao cliente na MESMA mensagem ANTES de chamar. Ambos são obrigatórios.",
       parameters: {
         type: "object",
         properties: {
           client_full_name: { type: "string", description: "Nome completo do cliente" },
-          client_cpf: { type: "string", description: "CPF do cliente (opcional, mas recomendado)" },
+          client_cpf: { type: "string", description: "CPF do cliente (obrigatório, só dígitos ou formatado)" },
           subject: { type: "string", enum: ["andamento_processo", "outro"], description: "Assunto do contato" },
           message_summary: { type: "string", description: "Breve resumo do que o cliente deseja" }
         },
-        required: ["client_full_name", "subject"],
+        required: ["client_full_name", "client_cpf", "subject"],
         additionalProperties: false
       }
     }
