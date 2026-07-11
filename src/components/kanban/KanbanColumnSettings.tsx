@@ -112,15 +112,15 @@ export function KanbanColumnSettings({ companyId, companyName, boardId, columns,
     // Upsert columns
     for (const col of editColumns) {
       if (col.id.startsWith("new-")) {
-        const payload: Record<string, string | number | boolean> = {
+        const payload = {
           company_id: companyId,
           name: col.name,
           color: col.color,
           position: col.position,
           is_won: col.is_won,
           is_lost: col.is_lost,
+          ...(boardId ? { board_id: boardId } : {}),
         };
-        if (boardId) payload.board_id = boardId;
 
         const { error } = await supabase.from("kanban_columns").insert(payload);
         if (error) {
