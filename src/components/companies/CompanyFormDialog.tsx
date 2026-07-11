@@ -34,6 +34,8 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
   const [selectedModel, setSelectedModel] = useState<BillingModel>("plan_gestao");
   const [sharedWhats, setSharedWhats] = useState(false);
   const [supportPhone, setSupportPhone] = useState("");
+  const [dueDay, setDueDay] = useState("10");
+  const [billingType, setBillingType] = useState("UNDEFINED");
   const isFree = false;
 
   return (
