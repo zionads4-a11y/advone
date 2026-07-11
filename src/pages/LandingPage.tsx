@@ -415,18 +415,18 @@ export default function LandingPage() {
         <Reveal>
           <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-3 px-6">
             {[
-              "Secretária Virtual com IA",
-              "Cadência Automática",
-              "Kanban Inteligente",
-              "Agenda Integrada",
+              "Laura SDR 24/7 no WhatsApp",
+              "Transcrição de áudio",
+              "Kanban jurídico de 9 etapas",
+              "Cadência de 5 tentativas",
+              "Agenda Google integrada",
+              "Lembretes automáticos",
               "Financeiro + Asaas",
-              "Gestão de Processos",
-              "Documentos até 600MB",
-              "CRM Nativo",
-              "Relatórios",
-              "Equipe e Permissões",
-              "Tracking Links",
-              "Campanhas Google/Meta",
+              "IA Jurídica (peças ABNT)",
+              "Monitoramento Escavador",
+              "Modo compartilhado leads+clientes",
+              "Multi-tenant + 5 níveis",
+              "Ativação em 72h",
             ].map((f) => (
               <span
                 key={f}
