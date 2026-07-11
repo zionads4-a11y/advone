@@ -220,14 +220,15 @@ export default function LandingPage() {
       {/* Dashboard Mockup */}
       <section className="mx-auto max-w-6xl px-6 py-20">
         <Reveal className="text-center mb-12">
-          <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">O painel do gerente</p>
+          <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Painel de gestão</p>
           <h2 className="text-3xl font-bold md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            Você acorda e o escritório já rendeu.
+            Visão consolidada da operação do escritório.
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-[hsl(220,10%,55%)]">
-            Enquanto você dorme, a Laura atende, qualifica e agenda. Você abre o app e vê exatamente quanto entrou de honorário, quantas reuniões foram marcadas e qual campanha do Google/Meta está de fato pagando.
+            Indicadores de captação, conversão, produtividade e resultado financeiro reunidos em um único painel — com recortes por advogado, unidade, área de atuação e origem de mídia.
           </p>
         </Reveal>
+
         <Reveal delay={200}>
           <div className="relative">
             <div className="absolute -inset-6 bg-gradient-to-r from-[hsl(153,60%,45%)]/10 via-[hsl(38,90%,55%)]/10 to-[hsl(153,60%,45%)]/10 blur-3xl rounded-3xl" />
