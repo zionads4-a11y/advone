@@ -137,7 +137,7 @@ Deno.serve(async (req) => {
     }
 
     // ---- cria subscription no Asaas
-    const desc = description || `AdvOne — ${plan === "plan_ia" ? "Plano IA" : "Plano Completo"} — ${company.name}`;
+    const desc = description || `AdvOne — ${PLAN_LABELS[plan]} — ${company.name}`;
     const subRes = await fetch(`${asaasBase}/subscriptions`, {
       method: "POST",
       headers: { "Content-Type": "application/json", access_token: asaasApiKey },
