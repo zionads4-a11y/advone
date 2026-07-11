@@ -2367,7 +2367,8 @@ REGRAS:
 
     // Find or create lead
     const { data: existingLead } = await supabase.from("leads")
-      .select("id, status, bot_disabled, bot_agent_phase")
+      .select("id, status, bot_disabled, bot_agent_phase, ocr_pending_review")
+
       .eq("company_id", companyId)
       .or(`phone.eq.${cleanPhone},whatsapp.eq.${cleanPhone}`)
       .maybeSingle();
