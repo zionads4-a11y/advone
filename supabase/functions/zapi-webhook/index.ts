@@ -2140,6 +2140,120 @@ serve(async (req) => {
       }
     }
 
+    // ===== OCR ESTRUTURADO — RG, CNH, CTPS, HOLERITE (auto-preenche cadastro do cliente) =====
+    // Roda em paralelo ao resumo genérico; só ativa fluxo de revisão se doc_type ∈ {rg,cnh,ctps,holerite}.
+    let ocrStructured: {
+      doc_type: string;
+      confidence: number;
+      human_summary: string;
+      fields: Record<string, string | null>;
+    } | null = null;
+
+    if (imageUrl || documentUrl) {
+      try {
+        const openaiKey = Deno.env.get("OPENAI_API_KEY");
+        if (openaiKey) {
+          const isPdf = !!documentUrl && ((documentMime || "").includes("pdf") || (documentFilename || "").toLowerCase().endsWith(".pdf"));
+          const userContent: any[] = [
+            { type: "text", text: "Classifique este documento e extraia todos os campos legíveis. Retorne JSON estrito." }
+          ];
+          if (imageUrl) {
+            userContent.push({ type: "image_url", image_url: { url: imageUrl } });
+          } else if (isPdf && documentUrl) {
+            try {
+              const r = await fetch(documentUrl);
+              if (r.ok) {
+                const buf = new Uint8Array(await r.arrayBuffer());
+                if (buf.byteLength <= 15 * 1024 * 1024) {
+                  const b64 = btoa(buf.reduce((s, b) => s + String.fromCharCode(b), ""));
+                  userContent.push({ type: "file", file: { filename: documentFilename || "doc.pdf", file_data: `data:application/pdf;base64,${b64}` } });
+                }
+              }
+            } catch (_e) { /* ignore */ }
+          }
+
+          if (userContent.length > 1) {
+            const structResp = await fetch("https://api.openai.com/v1/chat/completions", {
+              method: "POST",
+              headers: { Authorization: `Bearer ${openaiKey}`, "Content-Type": "application/json" },
+              body: JSON.stringify({
+                model: "gpt-4o-mini",
+                temperature: 0,
+                max_tokens: 900,
+                response_format: { type: "json_object" },
+                messages: [
+                  {
+                    role: "system",
+                    content: `Você é um extrator OCR jurídico brasileiro. Analise a imagem/PDF e retorne JSON com o formato:
+{
+ "doc_type": "rg" | "cnh" | "ctps" | "holerite" | "outro",
+ "confidence": 0.0-1.0,
+ "human_summary": "resumo curto do que foi lido (2-4 linhas)",
+ "fields": {
+   "name": string|null,               // nome completo
+   "cpf": string|null,                // apenas dígitos ou formato 000.000.000-00
+   "rg": string|null,                 // número RG com órgão emissor se visível
+   "birth_date": string|null,         // DD/MM/AAAA
+   "nacionalidade": string|null,
+   "estado_civil": string|null,
+   "profissao": string|null,          // ou cargo (holerite/CTPS)
+   "pis_pasep": string|null,          // CTPS/holerite
+   "cnh_categoria": string|null,      // CNH
+   "cnh_validade": string|null,       // CNH DD/MM/AAAA
+   "empregador": string|null,         // CTPS/holerite (razão social)
+   "empregador_cnpj": string|null,
+   "admissao": string|null,           // CTPS DD/MM/AAAA
+   "salario_base": string|null,       // holerite/CTPS ex "R$ 2.500,00"
+   "salario_liquido": string|null,    // holerite
+   "competencia": string|null,        // holerite MM/AAAA
+   "endereco_rua": string|null,
+   "endereco_numero": string|null,
+   "endereco_bairro": string|null,
+   "endereco_cidade": string|null,
+   "endereco_estado": string|null,    // UF
+   "endereco_cep": string|null
+ }
+}
+REGRAS:
+- Só preencha campos com dados VISÍVEIS. Nunca invente. Se não achar, use null.
+- doc_type = "rg" para RG/Carteira de Identidade; "cnh" para CNH/Carteira de Motorista; "ctps" para Carteira de Trabalho; "holerite" para contracheque/folha de pagamento; senão "outro".
+- confidence baixa (<0.5) se a imagem estiver ilegível ou não for documento reconhecível.
+- Responda APENAS JSON válido.`,
+                  },
+                  { role: "user", content: userContent },
+                ],
+              }),
+            });
+
+            if (structResp.ok) {
+              const sj = await structResp.json();
+              const raw = sj.choices?.[0]?.message?.content || "";
+              try {
+                const parsed = JSON.parse(raw);
+                if (parsed && typeof parsed === "object" && parsed.doc_type) {
+                  ocrStructured = {
+                    doc_type: String(parsed.doc_type).toLowerCase(),
+                    confidence: Number(parsed.confidence ?? 0),
+                    human_summary: String(parsed.human_summary || ""),
+                    fields: parsed.fields || {},
+                  };
+                  console.log(`[ocr-struct] type=${ocrStructured.doc_type} conf=${ocrStructured.confidence}`);
+                }
+              } catch (pe) {
+                console.error("[ocr-struct] JSON parse fail:", pe, raw.slice(0, 200));
+              }
+            } else {
+              console.error("[ocr-struct] request fail", structResp.status, await structResp.text());
+            }
+          }
+        }
+      } catch (e) {
+        console.error("[ocr-struct] erro:", e);
+      }
+    }
+
+
+
 
     if (typeof messageText !== "string") {
       messageText = String(messageText ?? "");
@@ -2152,6 +2266,67 @@ serve(async (req) => {
     }
 
     const cleanPhone = phone.replace("@c.us", "").replace("@s.whatsapp.net", "");
+
+    // ===== APROVAÇÃO DE OCR PELO OPERADOR (via WhatsApp do escritório) =====
+    // Formato esperado: "OK <TOKEN>" ou "APROVAR <TOKEN>" ou "CORRIGIR <TOKEN> <texto>"
+    // Enviado pelo número cadastrado em whatsapp_configs.alert_whatsapp.
+    try {
+      const alertRaw = (config.alert_whatsapp || "").replace(/\D/g, "");
+      const senderRaw = cleanPhone.replace(/\D/g, "");
+      const isOperator = alertRaw && (
+        senderRaw === alertRaw ||
+        senderRaw === `55${alertRaw}` ||
+        `55${senderRaw}` === alertRaw ||
+        senderRaw.endsWith(alertRaw.slice(-10)) ||
+        alertRaw.endsWith(senderRaw.slice(-10))
+      );
+      if (isOperator) {
+        const approvalMatch = messageText.match(/\b(OK|APROVAR|CONFIRMAR|CONFIRMO|LIBERAR)\s+([A-Z0-9]{5,8})\b/i);
+        const rejectMatch = messageText.match(/\b(CORRIGIR|REJEITAR|REFAZER)\s+([A-Z0-9]{5,8})\b/i);
+        const token = (approvalMatch?.[2] || rejectMatch?.[2] || "").toUpperCase();
+        if (token) {
+          const { data: pendingLead } = await supabase.from("leads")
+            .select("id, name, phone, whatsapp, ocr_document_type")
+            .eq("company_id", companyId).eq("ocr_review_token", token).maybeSingle();
+          if (pendingLead) {
+            const approved = !!approvalMatch;
+            await supabase.from("leads").update({
+              ocr_pending_review: false,
+              ocr_review_token: null,
+              ...(approved ? {} : { ocr_extracted_data: null }),
+            }).eq("id", pendingLead.id);
+
+            const SERVER_URL = "https://ziondigital.uazapi.com";
+            const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+            const sendHeaders: Record<string, string> = { "Content-Type": "application/json" };
+            if (ADMIN_TOKEN) sendHeaders["admintoken"] = ADMIN_TOKEN;
+            const sendUrl = `${SERVER_URL}/send/text?instance=${encodeURIComponent(config.zapi_instance_id)}&token=${encodeURIComponent(config.zapi_token || config.zapi_instance_id)}`;
+            const ackText = approved
+              ? `✅ OCR aprovado para ${pendingLead.name || "lead"} (${pendingLead.ocr_document_type?.toUpperCase() || "documento"}). Laura liberada para enviar o parecer.`
+              : `↩️ OCR de ${pendingLead.name || "lead"} descartado. Peça ao lead para reenviar o documento.`;
+            await fetch(sendUrl, { method: "POST", headers: sendHeaders, body: JSON.stringify({ number: cleanPhone, text: ackText }) });
+
+            // Se aprovado, dá um empurrão na Laura enviando um "hint" interno pro lead (mensagem-sistema no histórico)
+            if (approved && (pendingLead.phone || pendingLead.whatsapp)) {
+              await supabase.from("whatsapp_messages").insert({
+                company_id: companyId, lead_id: pendingLead.id, phone: pendingLead.phone || pendingLead.whatsapp,
+                message_text: `[sistema] OCR revisado e aprovado pelo operador. Prossiga com o parecer usando os dados extraídos.`,
+                direction: "incoming", sender_name: "sistema",
+                timestamp: new Date().toISOString(),
+              });
+            }
+
+            return new Response(JSON.stringify({ ok: true, ocr_review: approved ? "approved" : "rejected", lead_id: pendingLead.id }), {
+              status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+        }
+      }
+    } catch (opErr) {
+      console.error("[ocr-approval] erro:", opErr);
+    }
+
+
 
     // Extract tracking code
     let trackingCode: string | null = null;
@@ -2192,7 +2367,8 @@ serve(async (req) => {
 
     // Find or create lead
     const { data: existingLead } = await supabase.from("leads")
-      .select("id, status, bot_disabled, bot_agent_phase")
+      .select("id, status, bot_disabled, bot_agent_phase, ocr_pending_review")
+
       .eq("company_id", companyId)
       .or(`phone.eq.${cleanPhone},whatsapp.eq.${cleanPhone}`)
       .maybeSingle();
@@ -2270,10 +2446,90 @@ serve(async (req) => {
       await supabase.from("leads").update({ is_unread: true }).eq("id", leadId);
     }
 
+    // ===== APLICA OCR ESTRUTURADO NO LEAD + ABRE REVISÃO PELO OPERADOR =====
+    const RECOGNIZED_TYPES = ["rg", "cnh", "ctps", "holerite"];
+    if (leadId && ocrStructured && RECOGNIZED_TYPES.includes(ocrStructured.doc_type) && ocrStructured.confidence >= 0.4) {
+      try {
+        const f = ocrStructured.fields || {};
+        const patch: Record<string, any> = {};
+        const setIfEmpty = async (col: string, val: any) => {
+          if (val == null || val === "") return;
+          patch[col] = val;
+        };
+        // Só sobrescreve campos vazios do lead — nunca apaga dado já cadastrado.
+        const { data: leadNow } = await supabase.from("leads").select(
+          "name, cpf_cliente_final, rg, nacionalidade, estado_civil, profissao, endereco_rua, endereco_numero, endereco_bairro, endereco_cidade, endereco_estado, endereco_cep"
+        ).eq("id", leadId).maybeSingle();
+        const isEmpty = (v: any) => v == null || String(v).trim() === "";
+        if (leadNow) {
+          if (isEmpty(leadNow.name) && f.name) patch.name = f.name;
+          if (isEmpty(leadNow.cpf_cliente_final) && f.cpf) patch.cpf_cliente_final = String(f.cpf).replace(/\D/g, "");
+          if (isEmpty(leadNow.rg) && f.rg) patch.rg = f.rg;
+          if (isEmpty(leadNow.nacionalidade) && f.nacionalidade) patch.nacionalidade = f.nacionalidade;
+          if (isEmpty(leadNow.estado_civil) && f.estado_civil) patch.estado_civil = f.estado_civil;
+          if (isEmpty(leadNow.profissao) && f.profissao) patch.profissao = f.profissao;
+          if (isEmpty(leadNow.endereco_rua) && f.endereco_rua) patch.endereco_rua = f.endereco_rua;
+          if (isEmpty(leadNow.endereco_numero) && f.endereco_numero) patch.endereco_numero = f.endereco_numero;
+          if (isEmpty(leadNow.endereco_bairro) && f.endereco_bairro) patch.endereco_bairro = f.endereco_bairro;
+          if (isEmpty(leadNow.endereco_cidade) && f.endereco_cidade) patch.endereco_cidade = f.endereco_cidade;
+          if (isEmpty(leadNow.endereco_estado) && f.endereco_estado) patch.endereco_estado = String(f.endereco_estado).toUpperCase().slice(0, 2);
+          if (isEmpty(leadNow.endereco_cep) && f.endereco_cep) patch.endereco_cep = f.endereco_cep;
+        }
+
+        const token = Math.random().toString(36).replace(/[^A-Z0-9]/gi, "").toUpperCase().slice(0, 6) || "REV" + Date.now().toString(36).toUpperCase().slice(-3);
+        patch.ocr_pending_review = true;
+        patch.ocr_extracted_data = { ...ocrStructured, applied_patch: Object.keys(patch) };
+        patch.ocr_document_type = ocrStructured.doc_type;
+        patch.ocr_review_token = token;
+        patch.ocr_last_extracted_at = new Date().toISOString();
+
+        await supabase.from("leads").update(patch).eq("id", leadId);
+
+        // Monta resumo pro operador
+        const fieldLines = Object.entries(f)
+          .filter(([, v]) => v != null && String(v).trim() !== "")
+          .map(([k, v]) => `• ${k}: ${v}`).join("\n");
+        const leadDisplayName = (leadNow?.name && !leadNow.name.startsWith("Lead ")) ? leadNow.name : (f.name || cleanPhone);
+        const alertMsg = `📄 *Documento recebido de ${leadDisplayName}*
+Tipo: *${ocrStructured.doc_type.toUpperCase()}* (confiança ${(ocrStructured.confidence * 100).toFixed(0)}%)
+
+${ocrStructured.human_summary}
+
+*Campos extraídos:*
+${fieldLines || "(nenhum campo estruturado)"}
+
+Responda:
+✅ *OK ${token}* — para aprovar e liberar a Laura
+↩️ *CORRIGIR ${token}* — para descartar e pedir reenvio`;
+
+        const alertRawTo = (config.alert_whatsapp || "").replace(/\D/g, "");
+        if (alertRawTo) {
+          const to = alertRawTo.startsWith("55") ? alertRawTo : `55${alertRawTo}`;
+          const SERVER_URL = "https://ziondigital.uazapi.com";
+          const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+          const sendHeaders: Record<string, string> = { "Content-Type": "application/json" };
+          if (ADMIN_TOKEN) sendHeaders["admintoken"] = ADMIN_TOKEN;
+          const sendUrl = `${SERVER_URL}/send/text?instance=${encodeURIComponent(config.zapi_instance_id)}&token=${encodeURIComponent(config.zapi_token || config.zapi_instance_id)}`;
+          await fetch(sendUrl, { method: "POST", headers: sendHeaders, body: JSON.stringify({ number: to, text: alertMsg }) });
+          console.log(`[ocr] revisão pendente enviada para ${to} token=${token} lead=${leadId}`);
+        } else {
+          console.warn("[ocr] alert_whatsapp não configurado — OCR salvo mas operador não foi notificado.");
+        }
+
+        // Bloqueia Laura até o operador aprovar
+        return new Response(JSON.stringify({ ok: true, ocr_pending: true, doc_type: ocrStructured.doc_type, token, lead_id: leadId }), {
+          status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      } catch (applyErr) {
+        console.error("[ocr] falha ao aplicar/notificar:", applyErr);
+      }
+    }
+
     // AI Auto-Reply with multi-agent support
     const bm = config.companies?.billing_model;
     const isPlanCompleto = bm === 'plan_completo' || bm === 'crm_full' || bm === 'ia_only' || bm === 'plan_free' || bm === 'plan_zionads' || bm === 'plan_ia' || (bm?.startsWith?.('plan_ia_') ?? false);
-    if (config.ai_enabled && config.ai_auto_reply && leadId && !existingLead?.bot_disabled && isPlanCompleto) {
+    if (config.ai_enabled && config.ai_auto_reply && leadId && !existingLead?.bot_disabled && !existingLead?.ocr_pending_review && isPlanCompleto) {
+
       try {
         const leadStatus = existingLead?.status;
         const isCompleted = currentPhase === "completed";

@@ -2513,6 +2513,11 @@ export type Database = {
           nacionalidade: string | null
           name: string
           notes: string | null
+          ocr_document_type: string | null
+          ocr_extracted_data: Json | null
+          ocr_last_extracted_at: string | null
+          ocr_pending_review: boolean
+          ocr_review_token: string | null
           pending_data_warning: string | null
           phone: string | null
           processo_numero: string | null
@@ -2578,6 +2583,11 @@ export type Database = {
           nacionalidade?: string | null
           name: string
           notes?: string | null
+          ocr_document_type?: string | null
+          ocr_extracted_data?: Json | null
+          ocr_last_extracted_at?: string | null
+          ocr_pending_review?: boolean
+          ocr_review_token?: string | null
           pending_data_warning?: string | null
           phone?: string | null
           processo_numero?: string | null
@@ -2643,6 +2653,11 @@ export type Database = {
           nacionalidade?: string | null
           name?: string
           notes?: string | null
+          ocr_document_type?: string | null
+          ocr_extracted_data?: Json | null
+          ocr_last_extracted_at?: string | null
+          ocr_pending_review?: boolean
+          ocr_review_token?: string | null
           pending_data_warning?: string | null
           phone?: string | null
           processo_numero?: string | null
