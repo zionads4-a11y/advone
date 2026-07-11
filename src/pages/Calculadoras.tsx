@@ -559,6 +559,141 @@ export default function Calculadoras() {
                     </>
                   )}
                 </TabsContent>
+
+                {/* ===== SUPERENDIVIDAMENTO ===== */}
+                <TabsContent value="superendividamento" className="m-0 space-y-3">
+                  <h2 className="text-sm font-semibold">Superendividamento (Lei 14.181/2021)</h2>
+                  <p className="text-xs text-muted-foreground">
+                    Servidor público, aposentado, militar, CLT, autônomo, MEI/empresário (dívidas pessoais). Calcula limite consignável, mínimo existencial e plano de repactuação em até 60 meses (art. 104-A CDC).
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="col-span-2">
+                      <Label>Categoria do devedor</Label>
+                      <Select value={sup.categoria} onValueChange={(v: CategoriaDevedor) => setSup({ ...sup, categoria: v })}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="servidor_publico">Servidor Público (45% consignável)</SelectItem>
+                          <SelectItem value="aposentado_pensionista">Aposentado/Pensionista INSS (45%)</SelectItem>
+                          <SelectItem value="militar">Militar FFAA (até 70%)</SelectItem>
+                          <SelectItem value="celetista">CLT (35% consignável)</SelectItem>
+                          <SelectItem value="empresario_mei">Empresário/MEI (dívidas pessoais)</SelectItem>
+                          <SelectItem value="autonomo">Autônomo / Profissional liberal</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Renda líquida (R$/mês)</Label>
+                      <Input type="number" value={sup.rendaLiquidaMensal}
+                        onChange={(e) => setSup({ ...sup, rendaLiquidaMensal: +e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>Outras rendas (R$/mês)</Label>
+                      <Input type="number" value={sup.outrasRendasMensais}
+                        onChange={(e) => setSup({ ...sup, outrasRendasMensais: +e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>Dependentes</Label>
+                      <Input type="number" min="0" value={sup.dependentes}
+                        onChange={(e) => setSup({ ...sup, dependentes: +e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>Prazo repactuação (meses)</Label>
+                      <Input type="number" max="60" value={sup.prazoRepactuacaoMeses}
+                        onChange={(e) => setSup({ ...sup, prazoRepactuacaoMeses: +e.target.value })} />
+                    </div>
+                  </div>
+
+                  <div className="rounded-md border border-border bg-muted/20 p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Dívidas</h3>
+                      <Button size="sm" variant="outline" onClick={addDivida} className="h-7 gap-1">
+                        <Plus className="h-3 w-3" /> Adicionar
+                      </Button>
+                    </div>
+                    {sup.dividas.map((d, idx) => (
+                      <div key={idx} className="rounded-md border border-border/60 bg-card p-2 space-y-2">
+                        <div className="grid grid-cols-6 gap-2">
+                          <div className="col-span-3">
+                            <Label className="text-[10px]">Credor</Label>
+                            <Input className="h-8" value={d.credor}
+                              onChange={(e) => updateDivida(idx, { credor: e.target.value })} />
+                          </div>
+                          <div className="col-span-3">
+                            <Label className="text-[10px]">Tipo</Label>
+                            <Select value={d.tipo} onValueChange={(v: TipoContrato) => updateDivida(idx, { tipo: v })}>
+                              <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="consignado">Consignado</SelectItem>
+                                <SelectItem value="cartao_rmc">Cartão RMC</SelectItem>
+                                <SelectItem value="cartao_rcc">Cartão Benefício RCC</SelectItem>
+                                <SelectItem value="cartao_credito">Cartão de crédito</SelectItem>
+                                <SelectItem value="cheque_especial">Cheque especial</SelectItem>
+                                <SelectItem value="emprestimo_pessoal">Empréstimo pessoal</SelectItem>
+                                <SelectItem value="financiamento_veiculo">Financ. veículo</SelectItem>
+                                <SelectItem value="financiamento_imovel">Financ. imóvel</SelectItem>
+                                <SelectItem value="outros">Outros</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="col-span-2">
+                            <Label className="text-[10px]">Parcela R$/mês</Label>
+                            <Input className="h-8" type="number" value={d.parcelaMensal}
+                              onChange={(e) => updateDivida(idx, { parcelaMensal: +e.target.value })} />
+                          </div>
+                          <div className="col-span-2">
+                            <Label className="text-[10px]">Saldo devedor</Label>
+                            <Input className="h-8" type="number" value={d.saldoDevedor}
+                              onChange={(e) => updateDivida(idx, { saldoDevedor: +e.target.value })} />
+                          </div>
+                          <div className="col-span-1">
+                            <Label className="text-[10px]">Taxa %a.m.</Label>
+                            <Input className="h-8" type="number" step="0.01" value={d.taxaMensalPct ?? 0}
+                              onChange={(e) => updateDivida(idx, { taxaMensalPct: +e.target.value })} />
+                          </div>
+                          <div className="col-span-1 flex items-end">
+                            <Button size="sm" variant="ghost" onClick={() => removeDivida(idx)} className="h-8 w-full text-destructive">
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <Button onClick={executarSuper} className="w-full">
+                    <Calculator className="mr-2 h-4 w-4" /> Analisar superendividamento
+                  </Button>
+
+                  {supResult && (
+                    <>
+                      <Separator />
+                      <ResultBlock
+                        itens={supResult.detalhes.map((x) => ({ label: x.label, valor: x.valor }))}
+                        destaques={[
+                          { label: "Comprometimento", valor: `${supResult.pctComprometimentoRenda.toFixed(1)}%` },
+                          { label: "Excedente consignável", valor: brl(supResult.excedenteConsignavel) },
+                          { label: `Parcela repactuada (${supResult.prazoRepactuacaoMeses}m)`, valor: brl(supResult.parcelaRepactuadaProposta), highlight: true },
+                          { label: "Diagnóstico", valor: supResult.diagnostico === "superendividado" ? "🚨 SUPERENDIVIDADO" : supResult.diagnostico === "endividado_atencao" ? "⚠️ Atenção" : supResult.diagnostico === "saudavel" ? "✅ Saudável" : "❌ Inelegível", highlight: supResult.diagnostico === "superendividado" },
+                        ]}
+                      />
+                      <div className="rounded-md border border-border bg-muted/30 p-3">
+                        <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Dívidas analisadas</h4>
+                        <div className="space-y-1 text-xs">
+                          {supResult.itensDivida.map((d, i) => (
+                            <div key={i} className="flex justify-between border-b border-border/40 pb-1 last:border-0">
+                              <div>
+                                <p className="font-medium">{d.label}</p>
+                                <p className="text-[10px] text-muted-foreground">{d.formula}</p>
+                              </div>
+                              <p className="font-mono font-semibold">{brl(d.valor)}/mês</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </TabsContent>
+
               </div>
             </ScrollArea>
           </Card>
