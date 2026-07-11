@@ -1280,6 +1280,8 @@ Antes de responder:
           }
 
           let lastSummary = "";
+          let pendingDocs: any[] = [];
+          let upcomingMeetings: any[] = [];
           if (leadClient) {
             const { data: summary } = await supabase
               .from("lead_summaries")
@@ -1289,6 +1291,29 @@ Antes de responder:
               .limit(1)
               .maybeSingle();
             lastSummary = summary?.summary_text || "";
+
+            // Documentos pendentes (ainda não recebidos/aprovados)
+            const { data: docs } = await supabase
+              .from("lead_document_requests")
+              .select("document_type, status, notes, requested_at")
+              .eq("lead_id", leadClient.id)
+              .in("status", ["requested", "pending", "rejected"])
+              .order("requested_at", { ascending: false })
+              .limit(10);
+            pendingDocs = docs || [];
+
+            // Próximas audiências / compromissos (futuros e não realizados)
+            const nowIso = new Date().toISOString();
+            const { data: meets } = await supabase
+              .from("lead_reminders")
+              .select("title, description, due_at, reminder_type")
+              .eq("lead_id", leadClient.id)
+              .eq("completed", false)
+              .eq("meeting_held", false)
+              .gte("due_at", nowIso)
+              .order("due_at", { ascending: true })
+              .limit(5);
+            upcomingMeetings = meets || [];
           }
 
           // Notifica advogado responsável
