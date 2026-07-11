@@ -73,6 +73,14 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
             fd.set("client_support_responsible_phone", sharedWhats ? supportPhone : "");
             fd.set("due_day", dueDay);
             fd.set("billing_type", billingType);
+            fd.set("has_discount", hasDiscount ? "true" : "false");
+            fd.set("discount_type", discountType);
+            fd.set("discount_value", String(dValNum));
+            fd.set("discount_final_price", String(finalPrice));
+            fd.set("discount_reason", discountReason);
+            fd.set("discount_valid_until", discountValidUntil);
+            fd.set("approver_email", approverEmail);
+            fd.set("approver_password", approverPassword);
             onSubmit(fd);
           }}
           className="space-y-4"
