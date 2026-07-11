@@ -631,13 +631,13 @@ export default function LandingPage() {
 
           <div className="mt-20 grid gap-6 md:grid-cols-3">
             {[
-              { icon: Clock, title: "Mais tempo para estratégia, menos burocracia", desc: "Automatize prazos, follow-ups e tarefas repetitivas. Sua equipe foca em construir casos sólidos e relacionamento." },
-              { icon: BarChart3, title: "Mais controle, menos margem para erro", desc: "Visibilidade completa da operação com métricas em tempo real, financeiro integrado e indicadores de produtividade." },
-              { icon: TrendingUp, title: "Mais clientes com a mesma equipe", desc: "Quando a operação roda automaticamente, você aceita mais casos sem comprometer qualidade nem sobrecarregar o time." },
+              { icon: Clock, title: "Você trabalha ON no que gera honorário.", desc: "Chega de perder 2 horas por dia respondendo WhatsApp de curioso. A Laura filtra, qualifica e entrega só o lead pronto pra fechar." },
+              { icon: BarChart3, title: "O escritório para de depender de gente.", desc: "Ninguém falta, ninguém sai, ninguém pede aumento. A operação roda no piloto automático — e ainda melhora com cada ajuste de prompt." },
+              { icon: TrendingUp, title: "Escala sem contratar mais advogado.", desc: "Quando o gargalo do atendimento cai, seu escritório aceita 3x mais casos com o mesmo time. É assim que sócio vira empresário." },
             ].map((b, i) => (
               <Reveal key={b.title} delay={i * 100}>
                 <div className="rounded-xl border border-[hsl(220,20%,16%)] bg-gradient-to-br from-[hsl(220,25%,9%)] to-[hsl(220,25%,7%)] p-6">
-                  <p className="mb-2 text-xs font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Isso significa</p>
+                  <p className="mb-2 text-xs font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Na prática</p>
                   <div className="mb-3 flex items-center gap-3">
                     <b.icon className="h-5 w-5 text-[hsl(153,60%,45%)]" />
                     <h4 className="text-base font-semibold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{b.title}</h4>
@@ -650,10 +650,10 @@ export default function LandingPage() {
 
           <Reveal className="mt-16 text-center">
             <Button size="lg" onClick={() => navigate("/signup?plan=mensal")} className="gradient-primary text-[hsl(0,0%,100%)] font-semibold shadow-[0_10px_40px_-10px_hsl(153,60%,45%/0.5)]">
-              Quero ter o controle total do meu escritório
+              Quero o CRM Full por R$ 897/mês
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-            <p className="mt-3 text-xs text-[hsl(220,10%,55%)]">Sem cartão de crédito • Setup guiado • Migração assistida</p>
+            <p className="mt-3 text-xs text-[hsl(220,10%,55%)]">Ativação em 72h · Sem taxa de setup · Cancele quando quiser</p>
           </Reveal>
         </div>
       </section>
