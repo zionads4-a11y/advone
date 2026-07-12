@@ -159,6 +159,7 @@ export default function ClientConversations() {
 
   async function sendReply() {
     if (!selectedId || !reply.trim()) return;
+    const conv = conversations.find((c) => c.id === selectedId);
     const text = reply.trim();
     setReply("");
     const { error } = await supabase.from("client_conversation_messages").insert({
@@ -174,8 +175,18 @@ export default function ClientConversations() {
       setReply(text);
       return;
     }
-    // TODO: invocar edge function send-whatsapp para entregar ao cliente
-    toast.success("Mensagem registrada");
+    // Entrega no WhatsApp do cliente
+    const phone = conv?.lead?.phone;
+    if (phone && companyId) {
+      const { error: sendErr } = await supabase.functions.invoke("send-whatsapp", {
+        body: { company_id: companyId, phone, message: text },
+      });
+      if (sendErr) {
+        toast.warning("Registrado no histórico, mas falha ao enviar no WhatsApp: " + sendErr.message);
+        return;
+      }
+    }
+    toast.success("Mensagem enviada ao cliente");
   }
 
   async function submitTransfer() {
