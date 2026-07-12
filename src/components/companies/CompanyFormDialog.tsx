@@ -138,7 +138,7 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
                   <button
                     key={m.key}
                     type="button"
-                    onClick={() => setSelectedModel(m.key)}
+                    onClick={() => handleSelectPlan(m.key)}
                     className={cn(
                       "relative flex flex-col rounded-xl border p-4 text-left transition-all",
                       active
