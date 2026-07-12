@@ -402,6 +402,40 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
           </Button>
         </form>
       </DialogContent>
+
+      <Dialog open={showEnterprisePwd} onOpenChange={(o) => { if (!o) { setShowEnterprisePwd(false); setEnterprisePwd(""); } }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 font-display">
+              <Lock className="h-4 w-4 text-amber-500" /> Liberar plano Enterprise
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              O plano Enterprise só pode ser ativado com a senha do gerente responsável. Digite sua senha para continuar.
+            </p>
+            <div className="space-y-1">
+              <Label>Senha do gerente</Label>
+              <Input
+                type="password"
+                autoFocus
+                value={enterprisePwd}
+                onChange={(e) => setEnterprisePwd(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); verifyEnterprisePassword(); } }}
+                placeholder="••••••••"
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="ghost" onClick={() => { setShowEnterprisePwd(false); setEnterprisePwd(""); }}>
+                Cancelar
+              </Button>
+              <Button type="button" onClick={verifyEnterprisePassword} disabled={verifyingPwd || !enterprisePwd}>
+                {verifyingPwd ? "Verificando..." : "Liberar Enterprise"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }
