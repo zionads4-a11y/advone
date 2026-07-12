@@ -391,6 +391,21 @@ export default function Kanban() {
         onOpenChange={setDrawerOpen}
         onLeadUpdate={fetchColumnsAndLeads}
       />
+
+      {wonHandoff && (
+        <WonHandoffDialog
+          open={!!wonHandoff}
+          onOpenChange={(o) => !o && setWonHandoff(null)}
+          leadId={wonHandoff.lead.id}
+          leadName={wonHandoff.lead.name}
+          companyId={wonHandoff.lead.company_id}
+          targetColumnId={wonHandoff.columnId}
+          onCompleted={() => {
+            setWonHandoff(null);
+            fetchColumnsAndLeads();
+          }}
+        />
+      )}
     </div>
   );
 }
