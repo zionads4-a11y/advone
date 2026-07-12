@@ -628,9 +628,16 @@ function ProcessCardView({ card, memberById, teamByCard, weekCount = 0, isDragOv
   const priorityColor = card.priority === "urgente" ? "bg-red-500" : card.priority === "alta" ? "bg-orange-500" : card.priority === "baixa" ? "bg-slate-400" : "bg-blue-500";
   const health = getCardHealth(card, weekCount);
   const hc = HEALTH_COLORS[health.level];
+  const hasUnread = !!card.has_unread_movements;
+  const unreadCount = card.unread_movements_count || 0;
   return (
-    <Card className={`cursor-pointer border-l-4 transition hover:shadow-md ${hc.ring} ${isDragOverlay ? "shadow-lg" : ""}`}>
+    <Card className={`cursor-pointer border-l-4 transition hover:shadow-md ${hc.ring} ${isDragOverlay ? "shadow-lg" : ""} ${hasUnread ? "ring-2 ring-amber-400 shadow-amber-200/60" : ""}`}>
       <CardContent className="space-y-2 p-3">
+        {hasUnread && (
+          <div className="flex items-center gap-1.5 rounded-md border border-amber-400 bg-amber-50 px-2 py-1 text-[11px] font-semibold text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+            🔔 {unreadCount} nova{unreadCount === 1 ? "" : "s"} movimentaç{unreadCount === 1 ? "ão" : "ões"} do tribunal
+          </div>
+        )}
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
             <div className="truncate text-sm font-semibold">{card.title || card.client_name || "Sem título"}</div>
