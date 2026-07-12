@@ -52,7 +52,7 @@ import { MODULE_BY_ROUTE, type ModuleKey } from "@/lib/modulePermissions";
 import { OPERATOR_PROFILE_ROUTES } from "@/lib/operatorProfiles";
 
 
-import { LayoutDashboard, Kanban, MessageSquare } from "lucide-react";
+import { LayoutDashboard, Kanban, MessageSquare, Headphones } from "lucide-react";
 
 // Rotas permitidas no Plano IA (menu enxuto).
 const AI_ONLY_ROUTES = new Set([
