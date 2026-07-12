@@ -617,15 +617,27 @@ const TIPOS_CONSIGNADO: TipoContrato[] = ["consignado", "cartao_rmc", "cartao_rc
 export function calcSuperendividamento(i: SuperendividamentoInput): SuperendividamentoResult {
   const info = CONSIGNAVEL_POR_CATEGORIA[i.categoria];
 
-  // Determina o teto consignável efetivo:
+  // Determina o teto consignável efetivo, considerando a esfera do servidor:
   // 1) override manual (se preenchido) tem prioridade absoluta;
-  // 2) para servidor público, se houver UF selecionada, usa a margem estadual;
-  // 3) caso contrário, usa a margem padrão da categoria.
+  // 2) servidor FEDERAL: 45% (Dec. 11.150/2022);
+  // 3) servidor ESTADUAL: usa a tabela por UF (leis estaduais próprias);
+  // 4) servidor MUNICIPAL: 45% aplicável subsidiariamente (Lei 14.131/2021) — cada município pode legislar teto próprio (usar override);
+  // 5) demais categorias: padrão da categoria.
   let limitePct = info.limite;
   let limiteNota = info.nota;
-  if (i.categoria === "servidor_publico" && i.uf && MARGEM_CONSIGNAVEL_UF_SERVIDOR[i.uf]) {
-    limitePct = MARGEM_CONSIGNAVEL_UF_SERVIDOR[i.uf].total;
-    limiteNota = MARGEM_CONSIGNAVEL_UF_SERVIDOR[i.uf].nota;
+  if (i.categoria === "servidor_publico") {
+    const esfera = i.esferaServidor ?? (i.uf && i.uf !== "FEDERAL" ? "estadual" : "federal");
+    if (esfera === "federal") {
+      limitePct = MARGEM_CONSIGNAVEL_UF_SERVIDOR.FEDERAL.total;
+      limiteNota = `Servidor federal — ${MARGEM_CONSIGNAVEL_UF_SERVIDOR.FEDERAL.nota}`;
+    } else if (esfera === "estadual" && i.uf && i.uf !== "FEDERAL" && MARGEM_CONSIGNAVEL_UF_SERVIDOR[i.uf]) {
+      limitePct = MARGEM_CONSIGNAVEL_UF_SERVIDOR[i.uf].total;
+      limiteNota = `Servidor estadual — ${MARGEM_CONSIGNAVEL_UF_SERVIDOR[i.uf].nota}`;
+    } else if (esfera === "municipal") {
+      limitePct = 45;
+      const cidade = i.municipio ? ` (${i.municipio}${i.uf && i.uf !== "FEDERAL" ? "/" + i.uf : ""})` : i.uf && i.uf !== "FEDERAL" ? ` (${i.uf})` : "";
+      limiteNota = `Servidor municipal${cidade} — 45% padrão (Lei 14.131/2021 aplicável subsidiariamente). Confirmar lei orgânica municipal; usar override quando o município tiver teto próprio.`;
+    }
   }
   if (typeof i.margemConsignavelOverridePct === "number" && i.margemConsignavelOverridePct > 0) {
     limitePct = Math.min(100, Math.max(0, i.margemConsignavelOverridePct));
