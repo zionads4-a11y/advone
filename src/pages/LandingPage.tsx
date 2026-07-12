@@ -990,6 +990,8 @@ export default function LandingPage() {
                 <ul className="mb-8 flex-1 space-y-3">
                   {[
                     "Tudo do plano Complete incluso",
+                    "Áreas de atuação ilimitadas (a partir de 4)",
+                    "Equipe ilimitada por área de atuação",
                     "Atendimento a clientes atuais no mesmo número da captação",
                     "Identificação automática do cliente (nome + CPF)",
                     "Roteamento inteligente por área (Trabalhista, Cível, Previdenciário…)",
