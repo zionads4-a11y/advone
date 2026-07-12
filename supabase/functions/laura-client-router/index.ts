@@ -325,7 +325,7 @@ ${clientContext}`;
       });
     }
 
-    // 8) Grava resposta da Laura
+    // 8) Grava resposta da Laura + dispara no WhatsApp
     if (conversation && assistantText) {
       await supabase.from("client_conversation_messages").insert({
         conversation_id: conversation.id,
@@ -334,6 +334,25 @@ ${clientContext}`;
         sender_type: "laura",
         content: assistantText,
       });
+
+      // Envia no WhatsApp do cliente (só quando o canal é WhatsApp)
+      if ((body.channel ?? "whatsapp") === "whatsapp" && clientLeadId) {
+        try {
+          const { data: leadRow } = await supabase
+            .from("leads")
+            .select("phone, whatsapp")
+            .eq("id", clientLeadId)
+            .maybeSingle();
+          const phone = leadRow?.whatsapp || leadRow?.phone || body.phone;
+          if (phone) {
+            await supabase.functions.invoke("send-whatsapp", {
+              body: { company_id: body.company_id, phone, message: assistantText },
+            });
+          }
+        } catch (e) {
+          console.error("[laura-client-router] send-whatsapp failed:", e);
+        }
+      }
     }
 
     return new Response(

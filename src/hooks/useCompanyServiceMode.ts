@@ -72,8 +72,11 @@ export function useCompanyServiceMode() {
     // Só o Plano Completo (e legados full/plan_free) liberam módulos "Pro".
     isPlanCompleto:
       billingModel === "plan_completo" ||
+      billingModel === "plan_complete" ||
+      billingModel === "plan_enterprise" ||
       billingModel === "plan_free" ||
       (billingModel?.startsWith("plan_ia_") ?? false),
+    isEnterprise: billingModel === "plan_enterprise",
     loading,
   };
 }
