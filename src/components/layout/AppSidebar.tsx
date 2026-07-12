@@ -218,15 +218,20 @@ export function AppSidebar() {
     return true;
   });
 
-    
+
   // Para operador, filtra também pelos módulos liberados pelo gerente
-  const menuItems =
-    userRole === "operador" && !isUnrestricted
-      ? planFiltered.filter((item) => {
-          const moduleKey = MODULE_BY_ROUTE[item.url] as ModuleKey | undefined;
-          return moduleKey ? can(moduleKey) : true;
-        })
-      : planFiltered;
+  // e, se tem perfil operacional, restringe às rotas do perfil.
+  let menuItems = userRole === "operador" && !isUnrestricted
+    ? planFiltered.filter((item) => {
+        const moduleKey = MODULE_BY_ROUTE[item.url] as ModuleKey | undefined;
+        return moduleKey ? can(moduleKey) : true;
+      })
+    : planFiltered;
+
+  if (userRole === "operador" && operatorProfile && operatorProfile !== "master") {
+    const allowedRoutes = new Set(OPERATOR_PROFILE_ROUTES[operatorProfile]);
+    menuItems = menuItems.filter((item) => allowedRoutes.has(item.url));
+  }
 
   return (
     <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border bg-sidebar">
