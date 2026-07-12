@@ -76,7 +76,7 @@ export function FinanceiroDashboard() {
 
       <div className="grid gap-4 sm:grid-cols-3">
         <MetricCard title="A receber" value={brl(aReceber)} icon={ArrowUpCircle} variant="info" />
-        <MetricCard title="A pagar" value={brl(aPagar)} icon={ArrowDownCircle} variant="destructive" />
+        <MetricCard title="A pagar" value={brl(aPagar)} icon={ArrowDownCircle} variant="warning" />
         <MetricCard title="Inadimplência" value={brl(inadimplencia)} icon={PiggyBank} variant="accent" subtitle="Recebíveis vencidos" />
       </div>
     </div>

@@ -68,7 +68,7 @@ export function AreasDashboard() {
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard title="Processos ativos" value={totals.ativos} icon={Layers} variant="info" />
-        <MetricCard title="Em atraso" value={totals.atrasados} icon={AlertTriangle} variant="destructive" />
+        <MetricCard title="Em atraso" value={totals.atrasados} icon={AlertTriangle} variant="warning" />
         <MetricCard title="Atenção" value={totals.atencao} icon={Clock} variant="accent" />
         <MetricCard title="Em dia" value={totals.emDia} icon={CheckCircle2} variant="success" />
       </div>
