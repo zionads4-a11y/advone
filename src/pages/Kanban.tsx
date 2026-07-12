@@ -10,6 +10,7 @@ import { KanbanColumnSettings, type KanbanColumn } from "@/components/kanban/Kan
 import { LeadDetailDrawer } from "@/components/leads/LeadDetailDrawer";
 import { DraggableLeadCard } from "@/components/kanban/DraggableLeadCard";
 import { DroppableColumn } from "@/components/kanban/DroppableColumn";
+import { WonHandoffDialog } from "@/components/kanban/WonHandoffDialog";
 import {
   DndContext,
   DragOverlay,
@@ -79,6 +80,7 @@ export default function Kanban() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeDragLead, setActiveDragLead] = useState<Lead | null>(null);
   const [overColumnId, setOverColumnId] = useState<string | null>(null);
+  const [wonHandoff, setWonHandoff] = useState<{ lead: Lead; columnId: string } | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -153,20 +155,28 @@ export default function Kanban() {
 
   const moveLeadToColumn = useCallback(async (leadId: string, columnId: string) => {
     const targetColumn = kanbanColumns.find(c => c.id === columnId);
+
+    // Interceptar movimentação para coluna "Ganho": abrir modal de encaminhamento
+    if (targetColumn?.is_won) {
+      const lead = leads.find((l) => l.id === leadId);
+      if (lead) {
+        setWonHandoff({ lead, columnId });
+      }
+      return;
+    }
+
     let newStatus: "won" | "lost" | "contacted" | undefined;
-    
-    if (targetColumn?.is_won) newStatus = "won";
-    else if (targetColumn?.is_lost) newStatus = "lost";
+    if (targetColumn?.is_lost) newStatus = "lost";
     else if (targetColumn?.position === 0) newStatus = "contacted";
 
     // Optimistic update
-    setLeads((prev) => prev.map((l) => (l.id === leadId ? { 
-      ...l, 
+    setLeads((prev) => prev.map((l) => (l.id === leadId ? {
+      ...l,
       kanban_column_id: columnId,
       ...(newStatus ? { status: newStatus } : {})
     } : l)));
 
-    const { error } = await supabase.from("leads").update({ 
+    const { error } = await supabase.from("leads").update({
       kanban_column_id: columnId,
       ...(newStatus ? { status: newStatus } : {})
     }).eq("id", leadId);
@@ -182,7 +192,7 @@ export default function Kanban() {
       }
       fetchColumnsAndLeads(); // Revert
     }
-  }, [kanbanColumns]);
+  }, [kanbanColumns, leads]);
 
   const sortedColumns = useMemo(() => [...kanbanColumns].sort((a, b) => a.position - b.position), [kanbanColumns]);
   const filteredLeads = useMemo(() => filterSource === "all" ? leads : leads.filter((l) => l.source === filterSource), [leads, filterSource]);
@@ -381,6 +391,21 @@ export default function Kanban() {
         onOpenChange={setDrawerOpen}
         onLeadUpdate={fetchColumnsAndLeads}
       />
+
+      {wonHandoff && (
+        <WonHandoffDialog
+          open={!!wonHandoff}
+          onOpenChange={(o) => !o && setWonHandoff(null)}
+          leadId={wonHandoff.lead.id}
+          leadName={wonHandoff.lead.name}
+          companyId={wonHandoff.lead.company_id}
+          targetColumnId={wonHandoff.columnId}
+          onCompleted={() => {
+            setWonHandoff(null);
+            fetchColumnsAndLeads();
+          }}
+        />
+      )}
     </div>
   );
 }

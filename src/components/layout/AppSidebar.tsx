@@ -49,6 +49,7 @@ import { useCompanyServiceMode } from "@/hooks/useCompanyServiceMode";
 import { useModulePermissions } from "@/hooks/useModulePermissions";
 import { useUserCompanies } from "@/hooks/useUserCompanies";
 import { MODULE_BY_ROUTE, type ModuleKey } from "@/lib/modulePermissions";
+import { OPERATOR_PROFILE_ROUTES } from "@/lib/operatorProfiles";
 
 
 import { LayoutDashboard, Kanban, MessageSquare } from "lucide-react";
@@ -172,7 +173,7 @@ export function AppSidebar() {
   const { unreadCount } = useNewMessageNotifications();
   const { profile, initials } = useUserProfile();
   const { isAiOnly, isPlanCompleto } = useCompanyServiceMode();
-  const { can, isUnrestricted } = useModulePermissions();
+  const { can, isUnrestricted, operatorProfile } = useModulePermissions();
   const { companyIds } = useUserCompanies();
   const [isAiDisabled, setIsAiDisabled] = useState(false);
   const [companyName, setCompanyName] = useState<string | null>(null);
@@ -217,15 +218,20 @@ export function AppSidebar() {
     return true;
   });
 
-    
+
   // Para operador, filtra também pelos módulos liberados pelo gerente
-  const menuItems =
-    userRole === "operador" && !isUnrestricted
-      ? planFiltered.filter((item) => {
-          const moduleKey = MODULE_BY_ROUTE[item.url] as ModuleKey | undefined;
-          return moduleKey ? can(moduleKey) : true;
-        })
-      : planFiltered;
+  // e, se tem perfil operacional, restringe às rotas do perfil.
+  let menuItems = userRole === "operador" && !isUnrestricted
+    ? planFiltered.filter((item) => {
+        const moduleKey = MODULE_BY_ROUTE[item.url] as ModuleKey | undefined;
+        return moduleKey ? can(moduleKey) : true;
+      })
+    : planFiltered;
+
+  if (userRole === "operador" && operatorProfile && operatorProfile !== "master") {
+    const allowedRoutes = new Set(OPERATOR_PROFILE_ROUTES[operatorProfile]);
+    menuItems = menuItems.filter((item) => allowedRoutes.has(item.url));
+  }
 
   return (
     <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border bg-sidebar">

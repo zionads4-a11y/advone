@@ -3685,6 +3685,9 @@ export type Database = {
           lawyer_nationality: string | null
           lawyer_oab: string | null
           lawyer_oab_uf: string | null
+          operator_profile:
+            | Database["public"]["Enums"]["operator_profile"]
+            | null
           phone: string | null
           updated_at: string
           user_id: string
@@ -3703,6 +3706,9 @@ export type Database = {
           lawyer_nationality?: string | null
           lawyer_oab?: string | null
           lawyer_oab_uf?: string | null
+          operator_profile?:
+            | Database["public"]["Enums"]["operator_profile"]
+            | null
           phone?: string | null
           updated_at?: string
           user_id: string
@@ -3721,6 +3727,9 @@ export type Database = {
           lawyer_nationality?: string | null
           lawyer_oab?: string | null
           lawyer_oab_uf?: string | null
+          operator_profile?:
+            | Database["public"]["Enums"]["operator_profile"]
+            | null
           phone?: string | null
           updated_at?: string
           user_id?: string
@@ -4072,6 +4081,64 @@ export type Database = {
           watch_token?: string | null
         }
         Relationships: []
+      }
+      user_legal_areas: {
+        Row: {
+          area_id: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          role_in_area: string
+          sees_all_area_cards: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          area_id: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          role_in_area: string
+          sees_all_area_cards?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          area_id?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          role_in_area?: string
+          sees_all_area_cards?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_legal_areas_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "legal_areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_legal_areas_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_legal_areas_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_module_permissions: {
         Row: {
@@ -4589,6 +4656,10 @@ export type Database = {
           name: string
         }[]
       }
+      get_operator_profile: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["operator_profile"]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -4615,6 +4686,18 @@ export type Database = {
       unaccent: { Args: { "": string }; Returns: string }
       user_belongs_to_company: {
         Args: { _company_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_can_see_process_board: {
+        Args: { _board_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_can_see_process_card: {
+        Args: { _card_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_has_area_access: {
+        Args: { _area_id: string; _user_id: string }
         Returns: boolean
       }
       user_has_module: {
@@ -4654,6 +4737,12 @@ export type Database = {
         | "negotiating"
         | "won"
         | "lost"
+      operator_profile:
+        | "master"
+        | "advogado_responsavel"
+        | "estagiario"
+        | "sdr_closer"
+        | "financeiro"
       partnership_type: "exito" | "mensalidade_zionads"
     }
     CompositeTypes: {
@@ -4816,6 +4905,13 @@ export const Constants = {
         "negotiating",
         "won",
         "lost",
+      ],
+      operator_profile: [
+        "master",
+        "advogado_responsavel",
+        "estagiario",
+        "sdr_closer",
+        "financeiro",
       ],
       partnership_type: ["exito", "mensalidade_zionads"],
     },
