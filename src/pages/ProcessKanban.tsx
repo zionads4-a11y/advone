@@ -525,12 +525,13 @@ export default function ProcessKanban() {
                           onOpenCard={setOpenedCard}
                           memberById={memberById}
                           teamByCard={teamByCard}
+                          weekCounts={weekCounts}
                         />
                       );
                     })}
                   </div>
                   <DragOverlay>
-                    {activeDrag && <ProcessCardView card={activeDrag} memberById={memberById} teamByCard={teamByCard} isDragOverlay />}
+                    {activeDrag && <ProcessCardView card={activeDrag} memberById={memberById} teamByCard={teamByCard} weekCount={weekCounts[activeDrag.id] || 0} isDragOverlay />}
                   </DragOverlay>
                 </DndContext>
               )
