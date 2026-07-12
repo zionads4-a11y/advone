@@ -174,7 +174,7 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const { unreadCount } = useNewMessageNotifications();
   const { profile, initials } = useUserProfile();
-  const { isAiOnly, isPlanCompleto } = useCompanyServiceMode();
+  const { isAiOnly, isPlanCompleto, isEnterprise } = useCompanyServiceMode();
   const { can, isUnrestricted, operatorProfile } = useModulePermissions();
   const { companyIds } = useUserCompanies();
   const [isAiDisabled, setIsAiDisabled] = useState(false);
