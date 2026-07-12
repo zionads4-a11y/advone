@@ -10,6 +10,7 @@ import { KanbanColumnSettings, type KanbanColumn } from "@/components/kanban/Kan
 import { LeadDetailDrawer } from "@/components/leads/LeadDetailDrawer";
 import { DraggableLeadCard } from "@/components/kanban/DraggableLeadCard";
 import { DroppableColumn } from "@/components/kanban/DroppableColumn";
+import { WonHandoffDialog } from "@/components/kanban/WonHandoffDialog";
 import {
   DndContext,
   DragOverlay,
