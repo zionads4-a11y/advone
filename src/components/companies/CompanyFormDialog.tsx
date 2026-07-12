@@ -42,10 +42,13 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
   const [discountValidUntil, setDiscountValidUntil] = useState("");
   const [approverEmail, setApproverEmail] = useState("");
   const [approverPassword, setApproverPassword] = useState("");
+  const [customBaseValue, setCustomBaseValue] = useState("");
   const isFree = false;
 
   const currentModel = BILLING_MODELS.find((m) => m.key === selectedModel) ?? BILLING_MODELS[0];
-  const basePrice = currentModel.monthly_value;
+  const isEnterprise = currentModel.key === "plan_enterprise";
+  const customNum = parseFloat(customBaseValue) || 0;
+  const basePrice = isEnterprise ? customNum : currentModel.monthly_value;
   const dValNum = parseFloat(discountValue) || 0;
   const discountAmount =
     discountType === "percent" ? +((basePrice * dValNum) / 100).toFixed(2) : dValNum;
