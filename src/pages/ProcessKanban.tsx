@@ -167,7 +167,34 @@ export default function ProcessKanban() {
       setMembers(m);
     }
     setLoading(false);
+
+    // load weekly activity counts (Mon-Sun BRT)
+    const weekStart = getWeekStartBRT().toISOString();
+    const { data: acts } = await supabase
+      .from("process_card_activity")
+      .select("card_id")
+      .eq("company_id", companyId)
+      .gte("created_at", weekStart);
+    if (acts) {
+      const counts: Record<string, number> = {};
+      (acts as any[]).forEach(a => { counts[a.card_id] = (counts[a.card_id] || 0) + 1; });
+      setWeekCounts(counts);
+    }
   }, [companyId]);
+
+  // Load activities for opened card
+  useEffect(() => {
+    if (!openedCard) { setCardActivities([]); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("process_card_activity")
+        .select("*")
+        .eq("card_id", openedCard.id)
+        .order("created_at", { ascending: false })
+        .limit(100);
+      setCardActivities((data || []) as CardActivity[]);
+    })();
+  }, [openedCard?.id]);
 
   useEffect(() => { loadAll(); }, [loadAll]);
 
