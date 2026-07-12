@@ -51,7 +51,8 @@ type Message = {
 type Lawyer = { user_id: string; full_name: string };
 
 export default function ClientConversations() {
-  const { user, companyId } = useAuth();
+  const { user, userRole } = useAuth();
+  const [companyId, setCompanyId] = useState<string | null>(null);
   const [areas, setAreas] = useState<LegalArea[]>([]);
   const [lawyers, setLawyers] = useState<Lawyer[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
