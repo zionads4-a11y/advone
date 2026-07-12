@@ -188,7 +188,7 @@ export default function ProcessKanban() {
     }
   }, [companyId]);
 
-  // Load activities for opened card
+  // Load activities for opened card + mark court movements as read
   useEffect(() => {
     if (!openedCard) { setCardActivities([]); return; }
     (async () => {
@@ -199,6 +199,12 @@ export default function ProcessKanban() {
         .order("created_at", { ascending: false })
         .limit(100);
       setCardActivities((data || []) as CardActivity[]);
+
+      if (openedCard.has_unread_movements) {
+        await supabase.rpc("mark_process_card_movements_read" as any, { _card_id: openedCard.id });
+        setCards((prev) => prev.map((c) => c.id === openedCard.id
+          ? { ...c, has_unread_movements: false, unread_movements_count: 0 } : c));
+      }
     })();
   }, [openedCard?.id]);
 
