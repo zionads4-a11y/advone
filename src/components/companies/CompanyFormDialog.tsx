@@ -85,6 +85,7 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
             fd.set("approver_email", approverEmail);
             fd.set("approver_password", approverPassword);
             fd.set("custom_base_value", isEnterprise ? String(customNum) : "");
+            onSubmit(fd);
           }}
           className="space-y-4"
         >
