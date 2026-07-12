@@ -83,6 +83,23 @@ export const BILLING_MODELS: BillingModelOption[] = [
       "IA jurídica, jurisprudência e calculadoras",
       "Suporte prioritário",
     ],
+  {
+    key: "plan_enterprise",
+    emoji: "🏛️",
+    label: "AdvOne Enterprise",
+    monthly_value: 0,
+    description: "Sob medida — atendimento humano a clientes ativos, separado do funil, com auditoria completa.",
+    partnership_type: "mensalidade_zionads",
+    service_mode: "full",
+    monitoring_quota: 100,
+    features: [
+      "Tudo do plano Complete",
+      "Módulo Conversas de Clientes (atendimento humano)",
+      "Transferência entre áreas e advogados com log auditável",
+      "Downloads de transcrição em PDF",
+      "Conversas imutáveis (append-only, LGPD)",
+      "SLA e onboarding dedicados",
+    ],
   },
 ];
 
