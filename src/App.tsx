@@ -126,6 +126,7 @@ const App = () => (
               <Route path="/tracking" element={<TrackingLinks />} />
               <Route path="/agenda" element={<Agenda />} />
               <Route path="/client-users" element={<ClientUsers />} />
+              <Route path="/time-interno" element={<InternalStaff />} />
               <Route 
                 path="/access-management" 
                 element={
