@@ -90,6 +90,7 @@ const gerenteItems = [
   { title: "Clientes", url: "/clientes", icon: UserCheck },
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
+  { title: "Conversas de Clientes", url: "/conversas-clientes", icon: Headphones, premium: true },
   { title: "Bot SDR", url: "/bot-config", icon: Bot, premium: true },
   { title: "IA Jurídica", url: "/ia-juridica", icon: Scale, premium: true },
   { title: "Jurisprudência", url: "/jurisprudencia", icon: Search },
