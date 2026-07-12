@@ -69,6 +69,19 @@ export default function ClientConversations() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (!user?.id) return;
+    (async () => {
+      const { data } = await supabase
+        .from("client_companies")
+        .select("company_id")
+        .eq("user_id", user.id)
+        .limit(1)
+        .maybeSingle();
+      setCompanyId(data?.company_id ?? null);
+    })();
+  }, [user?.id]);
+
+  useEffect(() => {
     if (!companyId) return;
     loadAreas();
     loadLawyers();
