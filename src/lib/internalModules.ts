@@ -21,6 +21,7 @@ export type InternalModuleKey =
   | "billing_plans"
   | "subscriptions"
   | "financial_global"
+  | "collections_overdue"
   | "support_ops"
   | "monitoring_global"
   | "fraud_alerts"
