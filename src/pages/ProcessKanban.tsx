@@ -614,8 +614,10 @@ function ProcessCardView({ card, memberById, teamByCard, weekCount = 0, isDragOv
   const team = teamByCard[card.id] ?? [];
   const others = team.filter(t => t.user_id !== card.responsible_id).slice(0, 3);
   const priorityColor = card.priority === "urgente" ? "bg-red-500" : card.priority === "alta" ? "bg-orange-500" : card.priority === "baixa" ? "bg-slate-400" : "bg-blue-500";
+  const health = getCardHealth(card, weekCount);
+  const hc = HEALTH_COLORS[health.level];
   return (
-    <Card className={`cursor-pointer border-l-4 transition hover:shadow-md ${isDragOverlay ? "shadow-lg" : ""}`} style={{ borderLeftColor: "var(--primary)" }}>
+    <Card className={`cursor-pointer border-l-4 transition hover:shadow-md ${hc.ring} ${isDragOverlay ? "shadow-lg" : ""}`}>
       <CardContent className="space-y-2 p-3">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
@@ -623,6 +625,14 @@ function ProcessCardView({ card, memberById, teamByCard, weekCount = 0, isDragOv
             {card.cnj_number && <div className="mt-0.5 font-mono text-[10px] text-muted-foreground">{card.cnj_number}</div>}
           </div>
           <span className={`h-2 w-2 shrink-0 rounded-full ${priorityColor}`} title={`Prioridade: ${card.priority}`} />
+        </div>
+        <div className={`flex items-center gap-1.5 rounded-md border px-1.5 py-1 text-[10px] ${hc.chip}`}>
+          <span className={`h-1.5 w-1.5 rounded-full ${hc.bg}`} />
+          <Activity className="h-3 w-3" />
+          <span className="font-medium">{health.label}</span>
+          <span className="opacity-70">
+            • {card.last_activity_at ? `${health.days}d sem mexer` : "sem histórico"} • {weekCount}/{card.weekly_target || 1} semana
+          </span>
         </div>
         {card.client_name && card.title && (
           <div className="truncate text-xs text-muted-foreground">👤 {card.client_name}</div>
