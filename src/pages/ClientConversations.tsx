@@ -236,12 +236,24 @@ export default function ClientConversations() {
     loadConversations();
   }
 
-  function downloadTranscript() {
+  async function downloadTranscript() {
     if (!selectedId) return;
     const conv = conversations.find((c) => c.id === selectedId);
     if (!conv) return;
+    const { jsPDF } = await import("jspdf");
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 40;
+    let y = margin;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text("AdvOne — Transcrição de conversa com cliente", margin, y);
+    y += 20;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
     const header = [
-      `AdvOne — Transcrição de conversa com cliente`,
       `Cliente: ${conv.lead?.name ?? "-"}`,
       `Telefone: ${conv.lead?.phone ?? "-"}`,
       `CPF: ${conv.lead?.cpf_cliente_final ?? "-"}`,
@@ -249,30 +261,60 @@ export default function ClientConversations() {
       `Assunto: ${conv.subject ?? "-"}`,
       `Advogado responsável: ${conv.assigned?.full_name ?? "-"}`,
       `Gerado em: ${format(new Date(), "dd/MM/yyyy HH:mm", { locale: ptBR })}`,
-      `--------------------------------------------`,
-      "",
-    ].join("\n");
-    const body = messages
-      .map((m) => {
-        const who =
-          m.sender_type === "client"
-            ? "Cliente"
-            : m.sender_type === "laura"
-              ? "Laura (IA)"
-              : m.sender_type === "lawyer"
-                ? "Advogado"
-                : "Sistema";
-        const when = format(new Date(m.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR });
-        return `[${when}] ${who}:\n${m.content ?? m.media_url ?? ""}\n`;
-      })
-      .join("\n");
-    const blob = new Blob([header + body], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `conversa-${conv.lead?.name?.replace(/\s+/g, "_") ?? conv.id}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+    ];
+    header.forEach((line) => {
+      doc.text(line, margin, y);
+      y += 14;
+    });
+    y += 6;
+    doc.setDrawColor(180);
+    doc.line(margin, y, pageW - margin, y);
+    y += 14;
+
+    const write = (text: string, bold = false) => {
+      doc.setFont("helvetica", bold ? "bold" : "normal");
+      const wrapped = doc.splitTextToSize(text, pageW - margin * 2);
+      wrapped.forEach((ln: string) => {
+        if (y > pageH - margin) {
+          doc.addPage();
+          y = margin;
+        }
+        doc.text(ln, margin, y);
+        y += 13;
+      });
+    };
+
+    messages.forEach((m) => {
+      const who =
+        m.sender_type === "client"
+          ? "Cliente"
+          : m.sender_type === "laura"
+            ? "Laura (IA)"
+            : m.sender_type === "lawyer"
+              ? "Advogado"
+              : "Sistema";
+      const when = format(new Date(m.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR });
+      write(`[${when}] ${who}:`, true);
+      write(m.content ?? m.media_url ?? "", false);
+      y += 4;
+    });
+
+    // Rodapé de conformidade em todas as páginas
+    const totalPages = (doc as any).internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(120);
+      doc.text(
+        `Documento imutável — conversas não podem ser apagadas (LGPD / conformidade AdvOne).  Página ${i}/${totalPages}`,
+        margin,
+        pageH - 20,
+      );
+      doc.setTextColor(0);
+    }
+
+    const safeName = (conv.lead?.name ?? conv.id).replace(/\s+/g, "_");
+    doc.save(`conversa-${safeName}.pdf`);
   }
 
   const filteredConvs = useMemo(() => {
