@@ -16,6 +16,7 @@ import Clients from "./pages/Clients";
 import ClientDetail from "./pages/ClientDetail";
 import Kanban from "./pages/Kanban";
 import Conversations from "./pages/Conversations";
+import ClientConversations from "./pages/ClientConversations";
 import Campaigns from "./pages/Campaigns";
 import Companies from "./pages/Companies";
 import CompanyDetail from "./pages/CompanyDetail";
