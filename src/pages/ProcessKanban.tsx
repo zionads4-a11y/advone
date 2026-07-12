@@ -210,7 +210,15 @@ export default function ProcessKanban() {
   }, [areaBoards, selectedBoardId]);
 
   const boardColumns = useMemo(() => columns.filter(c => c.board_id === selectedBoardId).sort((a,b) => a.position - b.position), [columns, selectedBoardId]);
-  const boardCards = useMemo(() => cards.filter(c => c.board_id === selectedBoardId), [cards, selectedBoardId]);
+  const boardCards = useMemo(() => {
+    const all = cards.filter(c => c.board_id === selectedBoardId);
+    if (!onlyStale) return all;
+    return all.filter(c => getCardHealth(c, weekCounts[c.id] || 0).level !== "green");
+  }, [cards, selectedBoardId, onlyStale, weekCounts]);
+  const staleCount = useMemo(
+    () => cards.filter(c => c.board_id === selectedBoardId && getCardHealth(c, weekCounts[c.id] || 0).level !== "green").length,
+    [cards, selectedBoardId, weekCounts]
+  );
 
   const memberById = useMemo(() => Object.fromEntries(members.map(m => [m.user_id, m])), [members]);
   const teamByCard = useMemo(() => {
