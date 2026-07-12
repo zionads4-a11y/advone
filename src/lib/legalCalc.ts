@@ -711,6 +711,8 @@ export function calcSuperendividamento(i: SuperendividamentoInput): Superendivid
     itensDivida,
     detalhes: [
       { label: "Categoria do devedor", valor: labelCategoria(i.categoria) },
+      ...(i.categoria === "servidor_publico" && i.esferaServidor ? [{ label: "Esfera do servidor", valor: labelEsfera(i.esferaServidor) }] : []),
+      ...(i.municipio && i.esferaServidor === "municipal" ? [{ label: "Município", valor: i.municipio }] : []),
       ...(i.uf ? [{ label: "UF do vínculo", valor: i.uf }] : []),
       { label: "Renda líquida total mensal", valor: brl(rendaTotal) },
       { label: "Dependentes", valor: String(dependentes) },
