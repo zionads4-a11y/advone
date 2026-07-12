@@ -52,7 +52,13 @@ interface ProcessCard {
   client_name: string | null; court: string | null; title: string | null; description: string | null;
   responsible_id: string | null; priority: string; next_deadline_at: string | null;
   next_deadline_label: string | null; last_movement_at: string | null; last_movement_text: string | null;
+  last_activity_at: string | null; last_activity_type: string | null; weekly_target: number;
   position: number;
+}
+interface CardActivity {
+  id: string; card_id: string; actor_id: string | null; activity_type: string;
+  message: string | null; metadata: any; created_at: string;
+  from_column_id?: string | null; to_column_id?: string | null;
 }
 interface Member { user_id: string; full_name: string | null; email: string | null; }
 interface TeamRow { id: string; card_id: string; user_id: string; role_on_card: string; }
