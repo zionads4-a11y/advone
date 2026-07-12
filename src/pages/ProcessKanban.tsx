@@ -460,7 +460,14 @@ export default function ProcessKanban() {
                   Gestão de processos • {areaBoards.length} quadro(s) • {boardCards.length} processo(s) no quadro atual
                 </p>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                {selectedBoard && (
+                  <label className={`flex items-center gap-2 rounded-md border px-2 py-1 text-xs cursor-pointer transition ${onlyStale ? "border-red-500/40 bg-red-500/5 text-red-700" : "hover:bg-muted"}`}>
+                    <Switch checked={onlyStale} onCheckedChange={setOnlyStale} />
+                    <AlertTriangle className="h-3.5 w-3.5" />
+                    Só parados {staleCount > 0 && <Badge variant="secondary" className="h-4 px-1.5 text-[10px]">{staleCount}</Badge>}
+                  </label>
+                )}
                 {areaBoards.length === 0 && (
                   <Button size="sm" variant="outline" onClick={() => setBoardDialogOpen(true)}>
                     <Plus className="mr-1 h-4 w-4" /> Criar funil desta área
