@@ -351,6 +351,21 @@ export default function ProcessKanban() {
     setTeamRows(prev => prev.filter(t => t.id !== rowId));
   };
 
+  const logActivity = async (cardId: string, activityType: string, message: string) => {
+    if (!companyId || !user) return;
+    const { data, error } = await supabase.from("process_card_activity").insert({
+      card_id: cardId, company_id: companyId, actor_id: user.id,
+      activity_type: activityType, message: message || null,
+    }).select().single();
+    if (error) return toast.error("Erro ao registrar", { description: error.message });
+    const now = new Date().toISOString();
+    setCards(prev => prev.map(c => c.id === cardId ? { ...c, last_activity_at: now, last_activity_type: activityType } : c));
+    setWeekCounts(prev => ({ ...prev, [cardId]: (prev[cardId] || 0) + 1 }));
+    setCardActivities(prev => [data as CardActivity, ...prev]);
+    toast.success("Registro adicionado ao diário");
+  };
+
+
   // ------- DND -------
   const handleDragStart = (e: DragStartEvent) => {
     const c = cards.find(x => x.id === e.active.id);
