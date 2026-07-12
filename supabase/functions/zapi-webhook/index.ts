@@ -2369,11 +2369,40 @@ REGRAS:
 
     // Find or create lead
     const { data: existingLead } = await supabase.from("leads")
-      .select("id, status, bot_disabled, bot_agent_phase, ocr_pending_review")
+      .select("id, status, bot_disabled, bot_agent_phase, ocr_pending_review, is_client")
 
       .eq("company_id", companyId)
       .or(`phone.eq.${cleanPhone},whatsapp.eq.${cleanPhone}`)
       .maybeSingle();
+
+    // ✨ ENTERPRISE: número compartilhado + cliente existente → roteia p/ Laura modo cliente
+    const sharedWhatsApp = (config as any)?.companies?.shared_whatsapp_number === true;
+    if (existingLead?.is_client && sharedWhatsApp) {
+      try {
+        const routerUrl = `${supabaseUrl}/functions/v1/laura-client-router`;
+        await fetch(routerUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${supabaseServiceKey}`,
+          },
+          body: JSON.stringify({
+            company_id: companyId,
+            client_lead_id: existingLead.id,
+            phone: cleanPhone,
+            message: messageText,
+            channel: "whatsapp",
+          }),
+        });
+        console.log(`[client-router] Roteado cliente ${existingLead.id} para Laura modo cliente.`);
+      } catch (e) {
+        console.error("[client-router] Falha ao invocar laura-client-router:", e);
+      }
+      return new Response(
+        JSON.stringify({ ok: true, routed_to: "client_conversations", lead_id: existingLead.id }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     let leadId = existingLead?.id;
     let currentPhase = existingLead?.bot_agent_phase || "sdr";
