@@ -80,6 +80,7 @@ export default function Kanban() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeDragLead, setActiveDragLead] = useState<Lead | null>(null);
   const [overColumnId, setOverColumnId] = useState<string | null>(null);
+  const [wonHandoff, setWonHandoff] = useState<{ lead: Lead; columnId: string } | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
