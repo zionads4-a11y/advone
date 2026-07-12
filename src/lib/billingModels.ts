@@ -61,10 +61,10 @@ export const BILLING_MODELS: BillingModelOption[] = [
     monitoring_quota: 10,
     features: [
       "CRM jurídico completo",
+      "Até 3 áreas de atuação",
+      "Até 3 advogados por área",
       "Pipeline (Kanban de leads e casos)",
-      "Automações e cadências",
-      "Gestão da equipe (papéis e permissões)",
-      "Relatórios e indicadores",
+      "Automações, cadências e relatórios",
     ],
   },
   {
@@ -95,10 +95,10 @@ export const BILLING_MODELS: BillingModelOption[] = [
     monitoring_quota: 100,
     features: [
       "Tudo do plano Complete",
+      "Áreas de atuação ilimitadas (4+)",
+      "Equipe ilimitada por área",
       "Módulo Conversas de Clientes (atendimento humano)",
       "Transferência entre áreas e advogados com log auditável",
-      "Downloads de transcrição em PDF",
-      "Conversas imutáveis (append-only, LGPD)",
       "SLA e onboarding dedicados",
     ],
   },

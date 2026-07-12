@@ -909,10 +909,10 @@ export default function LandingPage() {
                 <ul className="mb-8 flex-1 space-y-3">
                   {[
                     "CRM jurídico completo",
+                    "Até 3 áreas de atuação",
+                    "Até 3 advogados por área",
                     "Pipeline (Kanban de leads e casos)",
-                    "Automações e cadências",
-                    "Gestão da equipe (papéis e permissões)",
-                    "Relatórios e indicadores",
+                    "Automações, cadências e relatórios",
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2 text-sm text-[hsl(220,10%,75%)]">
                       <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(153,60%,45%)]" />
@@ -990,6 +990,8 @@ export default function LandingPage() {
                 <ul className="mb-8 flex-1 space-y-3">
                   {[
                     "Tudo do plano Complete incluso",
+                    "Áreas de atuação ilimitadas (a partir de 4)",
+                    "Equipe ilimitada por área de atuação",
                     "Atendimento a clientes atuais no mesmo número da captação",
                     "Identificação automática do cliente (nome + CPF)",
                     "Roteamento inteligente por área (Trabalhista, Cível, Previdenciário…)",
