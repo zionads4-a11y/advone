@@ -17,8 +17,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import {
   Scale, Plus, Loader2, Trash2, Pencil, Users, GripVertical, Briefcase,
-  Calendar, AlertTriangle, ChevronRight, UserPlus, X,
+  Calendar, AlertTriangle, ChevronRight, UserPlus, X, Activity, CheckCircle2, Clock, FileText, MessageSquare, Upload,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import {
   DndContext, DragOverlay, PointerSensor, useSensor, useSensors,
   closestCorners, useDroppable, type DragStartEvent, type DragEndEvent,
