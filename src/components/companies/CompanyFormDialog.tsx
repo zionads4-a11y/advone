@@ -45,7 +45,44 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
   const [approverEmail, setApproverEmail] = useState("");
   const [approverPassword, setApproverPassword] = useState("");
   const [customBaseValue, setCustomBaseValue] = useState("");
+  const [enterpriseUnlocked, setEnterpriseUnlocked] = useState(false);
+  const [showEnterprisePwd, setShowEnterprisePwd] = useState(false);
+  const [enterprisePwd, setEnterprisePwd] = useState("");
+  const [verifyingPwd, setVerifyingPwd] = useState(false);
   const isFree = false;
+
+  const handleSelectPlan = async (key: BillingModel) => {
+    if (key === "plan_enterprise" && !enterpriseUnlocked) {
+      setShowEnterprisePwd(true);
+      return;
+    }
+    setSelectedModel(key);
+  };
+
+  const verifyEnterprisePassword = async () => {
+    if (!enterprisePwd) return;
+    setVerifyingPwd(true);
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      const email = userData.user?.email;
+      if (!email) {
+        toast.error("Sessão expirada");
+        return;
+      }
+      const { error } = await supabase.auth.signInWithPassword({ email, password: enterprisePwd });
+      if (error) {
+        toast.error("Senha do gerente incorreta");
+        return;
+      }
+      setEnterpriseUnlocked(true);
+      setSelectedModel("plan_enterprise");
+      setShowEnterprisePwd(false);
+      setEnterprisePwd("");
+      toast.success("Plano Enterprise liberado");
+    } finally {
+      setVerifyingPwd(false);
+    }
+  };
 
   const currentModel = BILLING_MODELS.find((m) => m.key === selectedModel) ?? BILLING_MODELS[0];
   const isEnterprise = currentModel.key === "plan_enterprise";
