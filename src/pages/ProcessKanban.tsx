@@ -56,14 +56,18 @@ function getWeekStartBRT(): Date {
   return monday;
 }
 function getCardHealth(card: ProcessCard, weekCount: number): {
-  level: "green" | "yellow" | "red"; label: string; days: number;
+  level: "green" | "yellow" | "red"; label: string; days: number; daysLeft: number;
 } {
   const last = card.last_activity_at ? new Date(card.last_activity_at) : null;
   const days = last ? Math.floor((Date.now() - last.getTime()) / 86400000) : 99;
   const target = card.weekly_target || 1;
-  if (weekCount >= target && days <= 4) return { level: "green", label: "Em dia", days };
-  if (days >= 7 || (weekCount < target && new Date().getDay() >= 5)) return { level: "red", label: "Parado", days };
-  return { level: "yellow", label: "Atenção", days };
+  // Semana vence no domingo 23:59 (reset segunda). dow: 0=dom,1=seg,...,6=sáb
+  const dow = new Date().getDay();
+  const daysLeft = dow === 0 ? 0 : 7 - dow; // seg=6, ter=5, qua=4, qui=3, sex=2, sáb=1, dom=0
+  if (weekCount >= target) return { level: "green", label: "Em dia", days, daysLeft };
+  if (daysLeft <= 0) return { level: "red", label: "Atrasado", days, daysLeft };
+  if (daysLeft <= 2) return { level: "yellow", label: "Atenção", days, daysLeft };
+  return { level: "green", label: "Em dia", days, daysLeft };
 }
 const HEALTH_COLORS = {
   green: { bg: "bg-emerald-500", ring: "border-l-emerald-500", text: "text-emerald-600", chip: "bg-emerald-500/10 text-emerald-700 border-emerald-500/30" },
