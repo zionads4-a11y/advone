@@ -1699,7 +1699,7 @@ serve(async (req) => {
         id, company_id, zapi_instance_id, zapi_token, ai_enabled, ai_prompt, ai_auto_reply, 
         office_name, practice_area, communication_tone, scheduling_link, consultation_duration, 
         target_audience, alert_whatsapp, triage_options, debug_mode,
-        companies (name, bot_name, bot_role_description, timezone, decision_rules, billing_model)
+        companies (name, bot_name, bot_role_description, timezone, decision_rules, billing_model, shared_whatsapp_number)
       `)
       .eq("company_id", companyId)
       .maybeSingle();
@@ -2369,11 +2369,40 @@ REGRAS:
 
     // Find or create lead
     const { data: existingLead } = await supabase.from("leads")
-      .select("id, status, bot_disabled, bot_agent_phase, ocr_pending_review")
+      .select("id, status, bot_disabled, bot_agent_phase, ocr_pending_review, is_client")
 
       .eq("company_id", companyId)
       .or(`phone.eq.${cleanPhone},whatsapp.eq.${cleanPhone}`)
       .maybeSingle();
+
+    // ✨ ENTERPRISE: número compartilhado + cliente existente → roteia p/ Laura modo cliente
+    const sharedWhatsApp = (config as any)?.companies?.shared_whatsapp_number === true;
+    if (existingLead?.is_client && sharedWhatsApp) {
+      try {
+        const routerUrl = `${supabaseUrl}/functions/v1/laura-client-router`;
+        await fetch(routerUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${supabaseServiceKey}`,
+          },
+          body: JSON.stringify({
+            company_id: companyId,
+            client_lead_id: existingLead.id,
+            phone: cleanPhone,
+            message: messageText,
+            channel: "whatsapp",
+          }),
+        });
+        console.log(`[client-router] Roteado cliente ${existingLead.id} para Laura modo cliente.`);
+      } catch (e) {
+        console.error("[client-router] Falha ao invocar laura-client-router:", e);
+      }
+      return new Response(
+        JSON.stringify({ ok: true, routed_to: "client_conversations", lead_id: existingLead.id }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     let leadId = existingLead?.id;
     let currentPhase = existingLead?.bot_agent_phase || "sdr";
