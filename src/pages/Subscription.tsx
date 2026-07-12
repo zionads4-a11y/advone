@@ -121,7 +121,7 @@ export default function Subscription() {
           <Crown className="h-6 w-6 text-primary" />
           <h1 className="text-2xl font-bold text-foreground">Gerenciar Assinaturas</h1>
         </div>
-        <NewSubscriptionDialog onCreated={() => window.location.reload()} />
+        
       </div>
 
       {/* Stats */}
