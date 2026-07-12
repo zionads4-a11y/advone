@@ -49,6 +49,7 @@ import { useCompanyServiceMode } from "@/hooks/useCompanyServiceMode";
 import { useModulePermissions } from "@/hooks/useModulePermissions";
 import { useUserCompanies } from "@/hooks/useUserCompanies";
 import { MODULE_BY_ROUTE, type ModuleKey } from "@/lib/modulePermissions";
+import { OPERATOR_PROFILE_ROUTES } from "@/lib/operatorProfiles";
 
 
 import { LayoutDashboard, Kanban, MessageSquare } from "lucide-react";
