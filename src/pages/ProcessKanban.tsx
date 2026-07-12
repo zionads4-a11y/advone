@@ -44,6 +44,43 @@ const AREA_PRESETS = [
   { name: "Empresarial", icon: "🏢", color: "#8b5cf6" },
 ];
 
+// -------- HEALTH (movimentação semanal) --------
+function getWeekStartBRT(): Date {
+  // Monday 00:00 in America/Sao_Paulo, expressed in UTC
+  const nowBrt = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
+  const day = nowBrt.getDay(); // 0=Sun..6=Sat
+  const diff = (day === 0 ? -6 : 1 - day);
+  const monday = new Date(nowBrt);
+  monday.setDate(monday.getDate() + diff);
+  monday.setHours(0, 0, 0, 0);
+  return monday;
+}
+function getCardHealth(card: ProcessCard, weekCount: number): {
+  level: "green" | "yellow" | "red"; label: string; days: number;
+} {
+  const last = card.last_activity_at ? new Date(card.last_activity_at) : null;
+  const days = last ? Math.floor((Date.now() - last.getTime()) / 86400000) : 99;
+  const target = card.weekly_target || 1;
+  if (weekCount >= target && days <= 4) return { level: "green", label: "Em dia", days };
+  if (days >= 7 || (weekCount < target && new Date().getDay() >= 5)) return { level: "red", label: "Parado", days };
+  return { level: "yellow", label: "Atenção", days };
+}
+const HEALTH_COLORS = {
+  green: { bg: "bg-emerald-500", ring: "border-l-emerald-500", text: "text-emerald-600", chip: "bg-emerald-500/10 text-emerald-700 border-emerald-500/30" },
+  yellow: { bg: "bg-amber-500", ring: "border-l-amber-500", text: "text-amber-600", chip: "bg-amber-500/10 text-amber-700 border-amber-500/30" },
+  red: { bg: "bg-red-500 animate-pulse", ring: "border-l-red-500", text: "text-red-600", chip: "bg-red-500/10 text-red-700 border-red-500/30" },
+};
+
+const ACTIVITY_TYPES = [
+  { value: "daily_check", label: "Consulta ao andamento", icon: "🔍" },
+  { value: "petition_filed", label: "Petição protocolada", icon: "📝" },
+  { value: "client_contact", label: "Contato com cliente", icon: "📞" },
+  { value: "internal_meeting", label: "Reunião interna", icon: "👥" },
+  { value: "waiting_deadline", label: "Aguardando prazo", icon: "⏳" },
+  { value: "other", label: "Outro", icon: "✏️" },
+];
+
+
 interface LegalArea { id: string; name: string; color: string; icon: string | null; position: number; is_active: boolean; }
 interface Board { id: string; legal_area_id: string; name: string; description: string | null; color: string; position: number; is_default: boolean; }
 interface Column { id: string; board_id: string; name: string; color: string; position: number; stage_type: string; }
