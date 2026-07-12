@@ -149,6 +149,23 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
             </p>
           </div>
 
+          {isEnterprise && (
+            <div className="space-y-2 rounded-lg border border-primary/30 bg-primary/5 p-3">
+              <Label>Valor mensal Enterprise (R$) *</Label>
+              <Input
+                type="number"
+                step="0.01"
+                min="1"
+                required
+                placeholder="Ex: 2500.00"
+                value={customBaseValue}
+                onChange={(e) => setCustomBaseValue(e.target.value)}
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Plano sob medida — defina aqui o valor mensal negociado com o cliente.
+              </p>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label>Nome da Empresa *</Label>
