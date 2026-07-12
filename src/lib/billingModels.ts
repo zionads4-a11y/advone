@@ -95,10 +95,10 @@ export const BILLING_MODELS: BillingModelOption[] = [
     monitoring_quota: 100,
     features: [
       "Tudo do plano Complete",
+      "Áreas de atuação ilimitadas (4+)",
+      "Equipe ilimitada por área",
       "Módulo Conversas de Clientes (atendimento humano)",
       "Transferência entre áreas e advogados com log auditável",
-      "Downloads de transcrição em PDF",
-      "Conversas imutáveis (append-only, LGPD)",
       "SLA e onboarding dedicados",
     ],
   },
