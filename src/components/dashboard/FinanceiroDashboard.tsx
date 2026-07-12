@@ -8,7 +8,7 @@ import { ArrowDownCircle, ArrowUpCircle, DollarSign, PiggyBank, Wallet, FileSign
 const brl = (v: number) => `R$ ${Number(v || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 export function FinanceiroDashboard() {
-  const { filterByCompany, loading } = useUserCompanies();
+  const { filterByCompany, companyIds, loading } = useUserCompanies();
   const [recebidoMes, setRecebidoMes] = useState(0);
   const [fechadoMes, setFechadoMes] = useState(0);
   const [aReceber, setAReceber] = useState(0);
