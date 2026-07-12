@@ -17,9 +17,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { BILLING_MODELS, type BillingModel } from "@/lib/billingModels";
-import { CheckCircle2, Plus } from "lucide-react";
+import { CheckCircle2, Lock, Plus } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface CompanyFormDialogProps {
   open: boolean;
@@ -43,7 +45,44 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
   const [approverEmail, setApproverEmail] = useState("");
   const [approverPassword, setApproverPassword] = useState("");
   const [customBaseValue, setCustomBaseValue] = useState("");
+  const [enterpriseUnlocked, setEnterpriseUnlocked] = useState(false);
+  const [showEnterprisePwd, setShowEnterprisePwd] = useState(false);
+  const [enterprisePwd, setEnterprisePwd] = useState("");
+  const [verifyingPwd, setVerifyingPwd] = useState(false);
   const isFree = false;
+
+  const handleSelectPlan = async (key: BillingModel) => {
+    if (key === "plan_enterprise" && !enterpriseUnlocked) {
+      setShowEnterprisePwd(true);
+      return;
+    }
+    setSelectedModel(key);
+  };
+
+  const verifyEnterprisePassword = async () => {
+    if (!enterprisePwd) return;
+    setVerifyingPwd(true);
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      const email = userData.user?.email;
+      if (!email) {
+        toast.error("Sessão expirada");
+        return;
+      }
+      const { error } = await supabase.auth.signInWithPassword({ email, password: enterprisePwd });
+      if (error) {
+        toast.error("Senha do gerente incorreta");
+        return;
+      }
+      setEnterpriseUnlocked(true);
+      setSelectedModel("plan_enterprise");
+      setShowEnterprisePwd(false);
+      setEnterprisePwd("");
+      toast.success("Plano Enterprise liberado");
+    } finally {
+      setVerifyingPwd(false);
+    }
+  };
 
   const currentModel = BILLING_MODELS.find((m) => m.key === selectedModel) ?? BILLING_MODELS[0];
   const isEnterprise = currentModel.key === "plan_enterprise";
@@ -99,7 +138,7 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
                   <button
                     key={m.key}
                     type="button"
-                    onClick={() => setSelectedModel(m.key)}
+                    onClick={() => handleSelectPlan(m.key)}
                     className={cn(
                       "relative flex flex-col rounded-xl border p-4 text-left transition-all",
                       active
@@ -110,6 +149,11 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
                     {highlight && (
                       <span className="absolute -top-2 right-3 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary-foreground">
                         Popular
+                      </span>
+                    )}
+                    {m.key === "plan_enterprise" && !enterpriseUnlocked && (
+                      <span className="absolute -top-2 right-3 flex items-center gap-1 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+                        <Lock className="h-2.5 w-2.5" /> Gerente
                       </span>
                     )}
                     <div className="flex items-center gap-2 text-sm font-semibold">
@@ -358,6 +402,40 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
           </Button>
         </form>
       </DialogContent>
+
+      <Dialog open={showEnterprisePwd} onOpenChange={(o) => { if (!o) { setShowEnterprisePwd(false); setEnterprisePwd(""); } }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 font-display">
+              <Lock className="h-4 w-4 text-amber-500" /> Liberar plano Enterprise
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              O plano Enterprise só pode ser ativado com a senha do gerente responsável. Digite sua senha para continuar.
+            </p>
+            <div className="space-y-1">
+              <Label>Senha do gerente</Label>
+              <Input
+                type="password"
+                autoFocus
+                value={enterprisePwd}
+                onChange={(e) => setEnterprisePwd(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); verifyEnterprisePassword(); } }}
+                placeholder="••••••••"
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="ghost" onClick={() => { setShowEnterprisePwd(false); setEnterprisePwd(""); }}>
+                Cancelar
+              </Button>
+              <Button type="button" onClick={verifyEnterprisePassword} disabled={verifyingPwd || !enterprisePwd}>
+                {verifyingPwd ? "Verificando..." : "Liberar Enterprise"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }
