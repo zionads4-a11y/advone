@@ -95,6 +95,8 @@ interface ProcessCard {
   next_deadline_label: string | null; last_movement_at: string | null; last_movement_text: string | null;
   last_activity_at: string | null; last_activity_type: string | null; weekly_target: number;
   position: number;
+  has_unread_movements?: boolean; unread_movements_count?: number;
+  last_court_movement_at?: string | null; last_court_movement_text?: string | null;
 }
 interface CardActivity {
   id: string; card_id: string; actor_id: string | null; activity_type: string;
@@ -186,7 +188,7 @@ export default function ProcessKanban() {
     }
   }, [companyId]);
 
-  // Load activities for opened card
+  // Load activities for opened card + mark court movements as read
   useEffect(() => {
     if (!openedCard) { setCardActivities([]); return; }
     (async () => {
@@ -197,6 +199,12 @@ export default function ProcessKanban() {
         .order("created_at", { ascending: false })
         .limit(100);
       setCardActivities((data || []) as CardActivity[]);
+
+      if (openedCard.has_unread_movements) {
+        await supabase.rpc("mark_process_card_movements_read" as any, { _card_id: openedCard.id });
+        setCards((prev) => prev.map((c) => c.id === openedCard.id
+          ? { ...c, has_unread_movements: false, unread_movements_count: 0 } : c));
+      }
     })();
   }, [openedCard?.id]);
 
@@ -620,9 +628,16 @@ function ProcessCardView({ card, memberById, teamByCard, weekCount = 0, isDragOv
   const priorityColor = card.priority === "urgente" ? "bg-red-500" : card.priority === "alta" ? "bg-orange-500" : card.priority === "baixa" ? "bg-slate-400" : "bg-blue-500";
   const health = getCardHealth(card, weekCount);
   const hc = HEALTH_COLORS[health.level];
+  const hasUnread = !!card.has_unread_movements;
+  const unreadCount = card.unread_movements_count || 0;
   return (
-    <Card className={`cursor-pointer border-l-4 transition hover:shadow-md ${hc.ring} ${isDragOverlay ? "shadow-lg" : ""}`}>
+    <Card className={`cursor-pointer border-l-4 transition hover:shadow-md ${hc.ring} ${isDragOverlay ? "shadow-lg" : ""} ${hasUnread ? "ring-2 ring-amber-400 shadow-amber-200/60" : ""}`}>
       <CardContent className="space-y-2 p-3">
+        {hasUnread && (
+          <div className="flex items-center gap-1.5 rounded-md border border-amber-400 bg-amber-50 px-2 py-1 text-[11px] font-semibold text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+            🔔 {unreadCount} nova{unreadCount === 1 ? "" : "s"} movimentaç{unreadCount === 1 ? "ão" : "ões"} do tribunal
+          </div>
+        )}
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
             <div className="truncate text-sm font-semibold">{card.title || card.client_name || "Sem título"}</div>

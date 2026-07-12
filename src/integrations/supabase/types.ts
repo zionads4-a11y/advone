@@ -3442,9 +3442,12 @@ export type Database = {
           created_at: string
           created_by: string | null
           description: string | null
+          has_unread_movements: boolean
           id: string
           last_activity_at: string | null
           last_activity_type: string | null
+          last_court_movement_at: string | null
+          last_court_movement_text: string | null
           last_movement_at: string | null
           last_movement_text: string | null
           lead_id: string | null
@@ -3455,6 +3458,7 @@ export type Database = {
           priority: string
           responsible_id: string | null
           title: string | null
+          unread_movements_count: number
           updated_at: string
           weekly_target: number
         }
@@ -3468,9 +3472,12 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          has_unread_movements?: boolean
           id?: string
           last_activity_at?: string | null
           last_activity_type?: string | null
+          last_court_movement_at?: string | null
+          last_court_movement_text?: string | null
           last_movement_at?: string | null
           last_movement_text?: string | null
           lead_id?: string | null
@@ -3481,6 +3488,7 @@ export type Database = {
           priority?: string
           responsible_id?: string | null
           title?: string | null
+          unread_movements_count?: number
           updated_at?: string
           weekly_target?: number
         }
@@ -3494,9 +3502,12 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          has_unread_movements?: boolean
           id?: string
           last_activity_at?: string | null
           last_activity_type?: string | null
+          last_court_movement_at?: string | null
+          last_court_movement_text?: string | null
           last_movement_at?: string | null
           last_movement_text?: string | null
           lead_id?: string | null
@@ -3507,6 +3518,7 @@ export type Database = {
           priority?: string
           responsible_id?: string | null
           title?: string | null
+          unread_movements_count?: number
           updated_at?: string
           weekly_target?: number
         }
@@ -4677,6 +4689,10 @@ export type Database = {
           _old_values?: Json
           _user_id: string
         }
+        Returns: undefined
+      }
+      mark_process_card_movements_read: {
+        Args: { _card_id: string }
         Returns: undefined
       }
       process_card_weekly_activity_count: {
