@@ -33,6 +33,17 @@ const AREA_COLORS = ["#0ea5a4", "#3b82f6", "#a855f7", "#f59e0b", "#ef4444", "#10
 const AREA_ICONS = ["⚖️", "👷", "🏛️", "👨‍👩‍👧", "🚨", "💰", "🏢", "👴", "🛒"];
 const COLUMN_COLORS = ["#94a3b8", "#60a5fa", "#a78bfa", "#f59e0b", "#10b981", "#22c55e", "#ef4444", "#0ea5a4"];
 
+// Colunas padrão criadas junto com o quadro (fluxo processual jurídico)
+const DEFAULT_PROCESS_COLUMNS = [
+  { name: "Petição Inicial", color: "#60a5fa", stage_type: "inicial" },
+  { name: "Citação", color: "#a78bfa", stage_type: "citacao" },
+  { name: "Instrução", color: "#f59e0b", stage_type: "instrucao" },
+  { name: "Sentença", color: "#10b981", stage_type: "sentenca" },
+  { name: "Recurso", color: "#ef4444", stage_type: "recurso" },
+  { name: "Trânsito em Julgado", color: "#22c55e", stage_type: "transito" },
+  { name: "Arquivado", color: "#94a3b8", stage_type: "arquivado" },
+];
+
 // Templates de área para one-click
 const AREA_PRESETS = [
   { name: "Previdenciário", icon: "👴", color: "#0ea5a4" },
