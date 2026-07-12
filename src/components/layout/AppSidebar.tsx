@@ -215,8 +215,11 @@ export function AppSidebar() {
     ? aiFiltered.filter(item => item.url === "/kanban" || item.url === "/conversations")
     : aiFiltered;
 
+  const isAgencyStaff = userRole === "admin" || userRole === "member";
   const planFiltered = clientAiFiltered.filter((item) => {
     if ((item as any).premium && !isPlanCompleto) return false;
+    // Conversas de Clientes é exclusivo do plano Enterprise
+    if (item.url === "/conversas-clientes" && !isEnterprise && !isAgencyStaff) return false;
     return true;
   });
 
