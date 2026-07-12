@@ -532,6 +532,8 @@ export type UF =
   | "MT" | "MS" | "MG" | "PA" | "PB" | "PR" | "PE" | "PI" | "RJ" | "RN"
   | "RS" | "RO" | "RR" | "SC" | "SP" | "SE" | "TO" | "FEDERAL";
 
+export type EsferaServidor = "federal" | "estadual" | "municipal";
+
 export interface SuperendividamentoInput {
   categoria: CategoriaDevedor;
   rendaLiquidaMensal: number;
@@ -539,7 +541,9 @@ export interface SuperendividamentoInput {
   dependentes?: number;
   dividas: DividaItem[];
   prazoRepactuacaoMeses?: number; // padrão 60 (art. 104-A CDC)
+  esferaServidor?: EsferaServidor; // esfera do vínculo (servidor federal/estadual/municipal)
   uf?: UF; // UF do vínculo (para servidores públicos estaduais/municipais)
+  municipio?: string; // município (quando esfera municipal) — apenas referência textual
   margemConsignavelOverridePct?: number; // sobrescreve o teto (0-70) — usado quando lei local difere
 }
 
