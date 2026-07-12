@@ -12,6 +12,7 @@ export type BillingModel =
   | "plan_ia"
   | "plan_gestao"
   | "plan_complete"
+  | "plan_enterprise"
   // legado — mantido apenas para compatibilidade de leitura
   | "plan_completo"
   | "plan_ia_monthly"
