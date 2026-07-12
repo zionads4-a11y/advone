@@ -125,6 +125,9 @@ export default function ProcessKanban() {
   const [columnDialogOpen, setColumnDialogOpen] = useState(false);
   const [cardDialogOpen, setCardDialogOpen] = useState(false);
   const [openedCard, setOpenedCard] = useState<ProcessCard | null>(null);
+  const [weekCounts, setWeekCounts] = useState<Record<string, number>>({});
+  const [cardActivities, setCardActivities] = useState<CardActivity[]>([]);
+  const [onlyStale, setOnlyStale] = useState(false);
 
   const [activeDrag, setActiveDrag] = useState<ProcessCard | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
