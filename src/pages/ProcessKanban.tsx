@@ -918,19 +918,33 @@ function CardCreateDialog({ open, onOpenChange, onCreate, members }: {
 }
 
 // ============ DRAWER ============
-function CardDrawer({ card, onClose, members, teamRows, memberById, onUpdate, onDelete, onAddMember, onRemoveMember }: {
+function CardDrawer({ card, onClose, members, teamRows, memberById, onUpdate, onDelete, onAddMember, onRemoveMember, activities, weekCount, onLogActivity }: {
   card: ProcessCard | null; onClose: () => void; members: Member[]; teamRows: TeamRow[];
   memberById: Record<string, Member>;
   onUpdate: (id: string, patch: Partial<ProcessCard>) => Promise<any>;
   onDelete: (id: string) => Promise<any>;
   onAddMember: (cardId: string, userId: string, role: string) => Promise<any>;
   onRemoveMember: (rowId: string) => Promise<any>;
+  activities: CardActivity[];
+  weekCount: number;
+  onLogActivity: (cardId: string, activityType: string, message: string) => Promise<any>;
 }) {
   const [addUserId, setAddUserId] = useState("");
   const [addRole, setAddRole] = useState("coautor");
+  const [logType, setLogType] = useState("daily_check");
+  const [logMessage, setLogMessage] = useState("");
+  const [logSaving, setLogSaving] = useState(false);
   if (!card) return null;
+  const health = getCardHealth(card, weekCount);
+  const hc = HEALTH_COLORS[health.level];
   const responsible = card.responsible_id ? memberById[card.responsible_id] : null;
   const availableToAdd = members.filter(m => !teamRows.some(t => t.user_id === m.user_id));
+  const submitLog = async () => {
+    setLogSaving(true);
+    await onLogActivity(card.id, logType, logMessage.trim());
+    setLogSaving(false);
+    setLogMessage("");
+  };
   return (
     <Sheet open={!!card} onOpenChange={(o) => !o && onClose()}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
