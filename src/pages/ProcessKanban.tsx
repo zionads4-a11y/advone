@@ -17,8 +17,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import {
   Scale, Plus, Loader2, Trash2, Pencil, Users, GripVertical, Briefcase,
-  Calendar, AlertTriangle, ChevronRight, UserPlus, X,
+  Calendar, AlertTriangle, ChevronRight, UserPlus, X, Activity, CheckCircle2, Clock, FileText, MessageSquare, Upload,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import {
   DndContext, DragOverlay, PointerSensor, useSensor, useSensors,
   closestCorners, useDroppable, type DragStartEvent, type DragEndEvent,
@@ -43,6 +44,43 @@ const AREA_PRESETS = [
   { name: "Empresarial", icon: "🏢", color: "#8b5cf6" },
 ];
 
+// -------- HEALTH (movimentação semanal) --------
+function getWeekStartBRT(): Date {
+  // Monday 00:00 in America/Sao_Paulo, expressed in UTC
+  const nowBrt = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
+  const day = nowBrt.getDay(); // 0=Sun..6=Sat
+  const diff = (day === 0 ? -6 : 1 - day);
+  const monday = new Date(nowBrt);
+  monday.setDate(monday.getDate() + diff);
+  monday.setHours(0, 0, 0, 0);
+  return monday;
+}
+function getCardHealth(card: ProcessCard, weekCount: number): {
+  level: "green" | "yellow" | "red"; label: string; days: number;
+} {
+  const last = card.last_activity_at ? new Date(card.last_activity_at) : null;
+  const days = last ? Math.floor((Date.now() - last.getTime()) / 86400000) : 99;
+  const target = card.weekly_target || 1;
+  if (weekCount >= target && days <= 4) return { level: "green", label: "Em dia", days };
+  if (days >= 7 || (weekCount < target && new Date().getDay() >= 5)) return { level: "red", label: "Parado", days };
+  return { level: "yellow", label: "Atenção", days };
+}
+const HEALTH_COLORS = {
+  green: { bg: "bg-emerald-500", ring: "border-l-emerald-500", text: "text-emerald-600", chip: "bg-emerald-500/10 text-emerald-700 border-emerald-500/30" },
+  yellow: { bg: "bg-amber-500", ring: "border-l-amber-500", text: "text-amber-600", chip: "bg-amber-500/10 text-amber-700 border-amber-500/30" },
+  red: { bg: "bg-red-500 animate-pulse", ring: "border-l-red-500", text: "text-red-600", chip: "bg-red-500/10 text-red-700 border-red-500/30" },
+};
+
+const ACTIVITY_TYPES = [
+  { value: "daily_check", label: "Consulta ao andamento", icon: "🔍" },
+  { value: "petition_filed", label: "Petição protocolada", icon: "📝" },
+  { value: "client_contact", label: "Contato com cliente", icon: "📞" },
+  { value: "internal_meeting", label: "Reunião interna", icon: "👥" },
+  { value: "waiting_deadline", label: "Aguardando prazo", icon: "⏳" },
+  { value: "other", label: "Outro", icon: "✏️" },
+];
+
+
 interface LegalArea { id: string; name: string; color: string; icon: string | null; position: number; is_active: boolean; }
 interface Board { id: string; legal_area_id: string; name: string; description: string | null; color: string; position: number; is_default: boolean; }
 interface Column { id: string; board_id: string; name: string; color: string; position: number; stage_type: string; }
@@ -51,7 +89,13 @@ interface ProcessCard {
   client_name: string | null; court: string | null; title: string | null; description: string | null;
   responsible_id: string | null; priority: string; next_deadline_at: string | null;
   next_deadline_label: string | null; last_movement_at: string | null; last_movement_text: string | null;
+  last_activity_at: string | null; last_activity_type: string | null; weekly_target: number;
   position: number;
+}
+interface CardActivity {
+  id: string; card_id: string; actor_id: string | null; activity_type: string;
+  message: string | null; metadata: any; created_at: string;
+  from_column_id?: string | null; to_column_id?: string | null;
 }
 interface Member { user_id: string; full_name: string | null; email: string | null; }
 interface TeamRow { id: string; card_id: string; user_id: string; role_on_card: string; }
@@ -81,6 +125,9 @@ export default function ProcessKanban() {
   const [columnDialogOpen, setColumnDialogOpen] = useState(false);
   const [cardDialogOpen, setCardDialogOpen] = useState(false);
   const [openedCard, setOpenedCard] = useState<ProcessCard | null>(null);
+  const [weekCounts, setWeekCounts] = useState<Record<string, number>>({});
+  const [cardActivities, setCardActivities] = useState<CardActivity[]>([]);
+  const [onlyStale, setOnlyStale] = useState(false);
 
   const [activeDrag, setActiveDrag] = useState<ProcessCard | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
@@ -120,7 +167,34 @@ export default function ProcessKanban() {
       setMembers(m);
     }
     setLoading(false);
+
+    // load weekly activity counts (Mon-Sun BRT)
+    const weekStart = getWeekStartBRT().toISOString();
+    const { data: acts } = await supabase
+      .from("process_card_activity")
+      .select("card_id")
+      .eq("company_id", companyId)
+      .gte("created_at", weekStart);
+    if (acts) {
+      const counts: Record<string, number> = {};
+      (acts as any[]).forEach(a => { counts[a.card_id] = (counts[a.card_id] || 0) + 1; });
+      setWeekCounts(counts);
+    }
   }, [companyId]);
+
+  // Load activities for opened card
+  useEffect(() => {
+    if (!openedCard) { setCardActivities([]); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("process_card_activity")
+        .select("*")
+        .eq("card_id", openedCard.id)
+        .order("created_at", { ascending: false })
+        .limit(100);
+      setCardActivities((data || []) as CardActivity[]);
+    })();
+  }, [openedCard?.id]);
 
   useEffect(() => { loadAll(); }, [loadAll]);
 
@@ -136,7 +210,15 @@ export default function ProcessKanban() {
   }, [areaBoards, selectedBoardId]);
 
   const boardColumns = useMemo(() => columns.filter(c => c.board_id === selectedBoardId).sort((a,b) => a.position - b.position), [columns, selectedBoardId]);
-  const boardCards = useMemo(() => cards.filter(c => c.board_id === selectedBoardId), [cards, selectedBoardId]);
+  const boardCards = useMemo(() => {
+    const all = cards.filter(c => c.board_id === selectedBoardId);
+    if (!onlyStale) return all;
+    return all.filter(c => getCardHealth(c, weekCounts[c.id] || 0).level !== "green");
+  }, [cards, selectedBoardId, onlyStale, weekCounts]);
+  const staleCount = useMemo(
+    () => cards.filter(c => c.board_id === selectedBoardId && getCardHealth(c, weekCounts[c.id] || 0).level !== "green").length,
+    [cards, selectedBoardId, weekCounts]
+  );
 
   const memberById = useMemo(() => Object.fromEntries(members.map(m => [m.user_id, m])), [members]);
   const teamByCard = useMemo(() => {
@@ -269,6 +351,21 @@ export default function ProcessKanban() {
     setTeamRows(prev => prev.filter(t => t.id !== rowId));
   };
 
+  const logActivity = async (cardId: string, activityType: string, message: string) => {
+    if (!companyId || !user) return;
+    const { data, error } = await supabase.from("process_card_activity").insert({
+      card_id: cardId, company_id: companyId, actor_id: user.id,
+      activity_type: activityType, message: message || null,
+    }).select().single();
+    if (error) return toast.error("Erro ao registrar", { description: error.message });
+    const now = new Date().toISOString();
+    setCards(prev => prev.map(c => c.id === cardId ? { ...c, last_activity_at: now, last_activity_type: activityType } : c));
+    setWeekCounts(prev => ({ ...prev, [cardId]: (prev[cardId] || 0) + 1 }));
+    setCardActivities(prev => [data as CardActivity, ...prev]);
+    toast.success("Registro adicionado ao diário");
+  };
+
+
   // ------- DND -------
   const handleDragStart = (e: DragStartEvent) => {
     const c = cards.find(x => x.id === e.active.id);
@@ -363,7 +460,14 @@ export default function ProcessKanban() {
                   Gestão de processos • {areaBoards.length} quadro(s) • {boardCards.length} processo(s) no quadro atual
                 </p>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                {selectedBoard && (
+                  <label className={`flex items-center gap-2 rounded-md border px-2 py-1 text-xs cursor-pointer transition ${onlyStale ? "border-red-500/40 bg-red-500/5 text-red-700" : "hover:bg-muted"}`}>
+                    <Switch checked={onlyStale} onCheckedChange={setOnlyStale} />
+                    <AlertTriangle className="h-3.5 w-3.5" />
+                    Só parados {staleCount > 0 && <Badge variant="secondary" className="h-4 px-1.5 text-[10px]">{staleCount}</Badge>}
+                  </label>
+                )}
                 {areaBoards.length === 0 && (
                   <Button size="sm" variant="outline" onClick={() => setBoardDialogOpen(true)}>
                     <Plus className="mr-1 h-4 w-4" /> Criar funil desta área
@@ -421,12 +525,13 @@ export default function ProcessKanban() {
                           onOpenCard={setOpenedCard}
                           memberById={memberById}
                           teamByCard={teamByCard}
+                          weekCounts={weekCounts}
                         />
                       );
                     })}
                   </div>
                   <DragOverlay>
-                    {activeDrag && <ProcessCardView card={activeDrag} memberById={memberById} teamByCard={teamByCard} isDragOverlay />}
+                    {activeDrag && <ProcessCardView card={activeDrag} memberById={memberById} teamByCard={teamByCard} weekCount={weekCounts[activeDrag.id] || 0} isDragOverlay />}
                   </DragOverlay>
                 </DndContext>
               )
@@ -447,16 +552,20 @@ export default function ProcessKanban() {
         memberById={memberById}
         onUpdate={updateCard} onDelete={deleteCard}
         onAddMember={addTeamMember} onRemoveMember={removeTeamMember}
+        activities={cardActivities}
+        weekCount={openedCard ? (weekCounts[openedCard.id] || 0) : 0}
+        onLogActivity={logActivity}
       />
     </div>
   );
 }
 
 // ============ KANBAN COLUMN ============
-function KanbanColumn({ column, cards, onRemoveColumn, onOpenCard, memberById, teamByCard }: {
+function KanbanColumn({ column, cards, onRemoveColumn, onOpenCard, memberById, teamByCard, weekCounts }: {
   column: Column; cards: ProcessCard[]; onRemoveColumn: () => void;
   onOpenCard: (c: ProcessCard) => void;
   memberById: Record<string, Member>; teamByCard: Record<string, TeamRow[]>;
+  weekCounts: Record<string, number>;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: `col-${column.id}`, data: { type: "column", columnId: column.id } });
   return (
@@ -470,7 +579,7 @@ function KanbanColumn({ column, cards, onRemoveColumn, onOpenCard, memberById, t
       <SortableContext items={cards.map(c => c.id)} strategy={verticalListSortingStrategy}>
         <div ref={setNodeRef} className={`flex min-h-[120px] flex-1 flex-col gap-2 rounded-md p-1 transition-colors ${isOver ? "bg-primary/10 ring-2 ring-primary/30" : ""}`}>
           {cards.map(c => (
-            <SortableCard key={c.id} card={c} onOpenCard={() => onOpenCard(c)} memberById={memberById} teamByCard={teamByCard} />
+            <SortableCard key={c.id} card={c} onOpenCard={() => onOpenCard(c)} memberById={memberById} teamByCard={teamByCard} weekCount={weekCounts[c.id] || 0} />
           ))}
           {cards.length === 0 && (
             <div className="flex h-20 items-center justify-center rounded border border-dashed text-xs text-muted-foreground">
@@ -483,28 +592,32 @@ function KanbanColumn({ column, cards, onRemoveColumn, onOpenCard, memberById, t
   );
 }
 
-function SortableCard({ card, onOpenCard, memberById, teamByCard }: {
+function SortableCard({ card, onOpenCard, memberById, teamByCard, weekCount }: {
   card: ProcessCard; onOpenCard: () => void;
   memberById: Record<string, Member>; teamByCard: Record<string, TeamRow[]>;
+  weekCount: number;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: card.id, data: { type: "card" } });
   const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.4 : 1 };
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners} onClick={onOpenCard}>
-      <ProcessCardView card={card} memberById={memberById} teamByCard={teamByCard} />
+      <ProcessCardView card={card} memberById={memberById} teamByCard={teamByCard} weekCount={weekCount} />
     </div>
   );
 }
 
-function ProcessCardView({ card, memberById, teamByCard, isDragOverlay }: {
-  card: ProcessCard; memberById: Record<string, Member>; teamByCard: Record<string, TeamRow[]>; isDragOverlay?: boolean;
+function ProcessCardView({ card, memberById, teamByCard, weekCount = 0, isDragOverlay }: {
+  card: ProcessCard; memberById: Record<string, Member>; teamByCard: Record<string, TeamRow[]>;
+  weekCount?: number; isDragOverlay?: boolean;
 }) {
   const responsible = card.responsible_id ? memberById[card.responsible_id] : null;
   const team = teamByCard[card.id] ?? [];
   const others = team.filter(t => t.user_id !== card.responsible_id).slice(0, 3);
   const priorityColor = card.priority === "urgente" ? "bg-red-500" : card.priority === "alta" ? "bg-orange-500" : card.priority === "baixa" ? "bg-slate-400" : "bg-blue-500";
+  const health = getCardHealth(card, weekCount);
+  const hc = HEALTH_COLORS[health.level];
   return (
-    <Card className={`cursor-pointer border-l-4 transition hover:shadow-md ${isDragOverlay ? "shadow-lg" : ""}`} style={{ borderLeftColor: "var(--primary)" }}>
+    <Card className={`cursor-pointer border-l-4 transition hover:shadow-md ${hc.ring} ${isDragOverlay ? "shadow-lg" : ""}`}>
       <CardContent className="space-y-2 p-3">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
@@ -512,6 +625,14 @@ function ProcessCardView({ card, memberById, teamByCard, isDragOverlay }: {
             {card.cnj_number && <div className="mt-0.5 font-mono text-[10px] text-muted-foreground">{card.cnj_number}</div>}
           </div>
           <span className={`h-2 w-2 shrink-0 rounded-full ${priorityColor}`} title={`Prioridade: ${card.priority}`} />
+        </div>
+        <div className={`flex items-center gap-1.5 rounded-md border px-1.5 py-1 text-[10px] ${hc.chip}`}>
+          <span className={`h-1.5 w-1.5 rounded-full ${hc.bg}`} />
+          <Activity className="h-3 w-3" />
+          <span className="font-medium">{health.label}</span>
+          <span className="opacity-70">
+            • {card.last_activity_at ? `${health.days}d sem mexer` : "sem histórico"} • {weekCount}/{card.weekly_target || 1} semana
+          </span>
         </div>
         {card.client_name && card.title && (
           <div className="truncate text-xs text-muted-foreground">👤 {card.client_name}</div>
@@ -797,19 +918,33 @@ function CardCreateDialog({ open, onOpenChange, onCreate, members }: {
 }
 
 // ============ DRAWER ============
-function CardDrawer({ card, onClose, members, teamRows, memberById, onUpdate, onDelete, onAddMember, onRemoveMember }: {
+function CardDrawer({ card, onClose, members, teamRows, memberById, onUpdate, onDelete, onAddMember, onRemoveMember, activities, weekCount, onLogActivity }: {
   card: ProcessCard | null; onClose: () => void; members: Member[]; teamRows: TeamRow[];
   memberById: Record<string, Member>;
   onUpdate: (id: string, patch: Partial<ProcessCard>) => Promise<any>;
   onDelete: (id: string) => Promise<any>;
   onAddMember: (cardId: string, userId: string, role: string) => Promise<any>;
   onRemoveMember: (rowId: string) => Promise<any>;
+  activities: CardActivity[];
+  weekCount: number;
+  onLogActivity: (cardId: string, activityType: string, message: string) => Promise<any>;
 }) {
   const [addUserId, setAddUserId] = useState("");
   const [addRole, setAddRole] = useState("coautor");
+  const [logType, setLogType] = useState("daily_check");
+  const [logMessage, setLogMessage] = useState("");
+  const [logSaving, setLogSaving] = useState(false);
   if (!card) return null;
+  const health = getCardHealth(card, weekCount);
+  const hc = HEALTH_COLORS[health.level];
   const responsible = card.responsible_id ? memberById[card.responsible_id] : null;
   const availableToAdd = members.filter(m => !teamRows.some(t => t.user_id === m.user_id));
+  const submitLog = async () => {
+    setLogSaving(true);
+    await onLogActivity(card.id, logType, logMessage.trim());
+    setLogSaving(false);
+    setLogMessage("");
+  };
   return (
     <Sheet open={!!card} onOpenChange={(o) => !o && onClose()}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
@@ -819,12 +954,81 @@ function CardDrawer({ card, onClose, members, teamRows, memberById, onUpdate, on
             {card.title || card.client_name || "Processo"}
           </SheetTitle>
         </SheetHeader>
-        <Tabs defaultValue="resumo" className="mt-4">
+
+        <div className={`mt-3 flex items-center gap-2 rounded-md border p-2 text-xs ${hc.chip}`}>
+          <span className={`h-2 w-2 rounded-full ${hc.bg}`} />
+          <Activity className="h-3.5 w-3.5" />
+          <span className="font-semibold">{health.label}</span>
+          <span className="opacity-80">
+            • {card.last_activity_at ? `${health.days}d sem movimento` : "sem histórico"} • {weekCount}/{card.weekly_target || 1} esta semana
+          </span>
+        </div>
+
+        <Tabs defaultValue="diario" className="mt-4">
           <TabsList className="w-full">
+            <TabsTrigger value="diario" className="flex-1">Diário</TabsTrigger>
             <TabsTrigger value="resumo" className="flex-1">Resumo</TabsTrigger>
             <TabsTrigger value="equipe" className="flex-1">Equipe</TabsTrigger>
-            <TabsTrigger value="movimentacoes" className="flex-1">Movimentações</TabsTrigger>
+            <TabsTrigger value="movimentacoes" className="flex-1">Tribunal</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="diario" className="space-y-3">
+            <div className="space-y-2 rounded-md border bg-primary/5 p-3">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-primary">
+                <CheckCircle2 className="h-3.5 w-3.5" /> Registrar conferência de hoje
+              </div>
+              <Select value={logType} onValueChange={setLogType}>
+                <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {ACTIVITY_TYPES.map(t => (
+                    <SelectItem key={t.value} value={t.value}>{t.icon} {t.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Textarea
+                placeholder="O que você conferiu / fez hoje? (opcional)"
+                value={logMessage}
+                onChange={e => setLogMessage(e.target.value)}
+                rows={2}
+                className="text-xs"
+              />
+              <Button size="sm" className="w-full" disabled={logSaving} onClick={submitLog}>
+                {logSaving && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}
+                <Plus className="mr-1 h-3.5 w-3.5" /> Adicionar ao diário
+              </Button>
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="text-[10px] font-semibold uppercase text-muted-foreground">Histórico do processo</div>
+              {activities.length === 0 && (
+                <div className="rounded border border-dashed p-4 text-center text-xs text-muted-foreground">
+                  Nenhum registro ainda. Adicione a primeira conferência acima.
+                </div>
+              )}
+              {activities.map(a => {
+                const preset = ACTIVITY_TYPES.find(t => t.value === a.activity_type);
+                const actor = a.actor_id ? memberById[a.actor_id] : null;
+                const isMove = a.activity_type === "moved";
+                return (
+                  <div key={a.id} className="flex gap-2 rounded-md border p-2">
+                    <div className="text-base">{isMove ? "↔️" : (preset?.icon || "•")}</div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="truncate text-xs font-medium">
+                          {isMove ? "Movido de coluna" : (preset?.label || a.activity_type)}
+                        </div>
+                        <div className="shrink-0 text-[10px] text-muted-foreground">
+                          {format(new Date(a.created_at), "dd/MM HH:mm", { locale: ptBR })}
+                        </div>
+                      </div>
+                      {a.message && <div className="mt-0.5 whitespace-pre-wrap text-xs text-muted-foreground">{a.message}</div>}
+                      {actor && <div className="mt-1 text-[10px] text-muted-foreground">por {actor.full_name || actor.email}</div>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </TabsContent>
 
           <TabsContent value="resumo" className="space-y-3">
             <div>

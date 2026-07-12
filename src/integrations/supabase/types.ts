@@ -3443,6 +3443,8 @@ export type Database = {
           created_by: string | null
           description: string | null
           id: string
+          last_activity_at: string | null
+          last_activity_type: string | null
           last_movement_at: string | null
           last_movement_text: string | null
           lead_id: string | null
@@ -3454,6 +3456,7 @@ export type Database = {
           responsible_id: string | null
           title: string | null
           updated_at: string
+          weekly_target: number
         }
         Insert: {
           board_id: string
@@ -3466,6 +3469,8 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          last_activity_at?: string | null
+          last_activity_type?: string | null
           last_movement_at?: string | null
           last_movement_text?: string | null
           lead_id?: string | null
@@ -3477,6 +3482,7 @@ export type Database = {
           responsible_id?: string | null
           title?: string | null
           updated_at?: string
+          weekly_target?: number
         }
         Update: {
           board_id?: string
@@ -3489,6 +3495,8 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          last_activity_at?: string | null
+          last_activity_type?: string | null
           last_movement_at?: string | null
           last_movement_text?: string | null
           lead_id?: string | null
@@ -3500,6 +3508,7 @@ export type Database = {
           responsible_id?: string | null
           title?: string | null
           updated_at?: string
+          weekly_target?: number
         }
         Relationships: [
           {
@@ -4598,6 +4607,10 @@ export type Database = {
           _user_id: string
         }
         Returns: undefined
+      }
+      process_card_weekly_activity_count: {
+        Args: { _card_id: string }
+        Returns: number
       }
       unaccent: { Args: { "": string }; Returns: string }
       user_belongs_to_company: {
