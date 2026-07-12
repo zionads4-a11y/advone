@@ -83,6 +83,7 @@ export const BILLING_MODELS: BillingModelOption[] = [
       "IA jurídica, jurisprudência e calculadoras",
       "Suporte prioritário",
     ],
+  },
   {
     key: "plan_enterprise",
     emoji: "🏛️",
