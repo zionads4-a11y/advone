@@ -109,6 +109,7 @@ const operadorItems = [
   { title: "Clientes", url: "/clientes", icon: UserCheck },
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
+  { title: "Conversas de Clientes", url: "/conversas-clientes", icon: Headphones, premium: true },
   { title: "Monitoramento", url: "/monitoramento", icon: Radar },
   { title: "Processos (Kanban)", url: "/processos-kanban", icon: Briefcase },
   { title: "IA Jurídica", url: "/ia-juridica", icon: Scale, premium: true },
