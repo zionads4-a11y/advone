@@ -635,7 +635,8 @@ function ProcessCardView({ card, memberById, teamByCard, weekCount = 0, isDragOv
           <Activity className="h-3 w-3" />
           <span className="font-medium">{health.label}</span>
           <span className="opacity-70">
-            • {card.last_activity_at ? `${health.days}d sem mexer` : "sem histórico"} • {weekCount}/{card.weekly_target || 1} semana
+            • {weekCount}/{card.weekly_target || 1} semana
+            {health.level !== "green" && (health.daysLeft > 0 ? ` • ${health.daysLeft}d p/ vencer` : " • vencido")}
           </span>
         </div>
         {card.client_name && card.title && (
