@@ -117,8 +117,14 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
                       <span>{m.label}</span>
                     </div>
                     <div className="mt-2 flex items-baseline gap-1">
-                      <span className="text-2xl font-bold">{brl(m.monthly_value)}</span>
-                      <span className="text-xs text-muted-foreground">/mês</span>
+                      {m.key === "plan_enterprise" ? (
+                        <span className="text-2xl font-bold">Sob medida</span>
+                      ) : (
+                        <>
+                          <span className="text-2xl font-bold">{brl(m.monthly_value)}</span>
+                          <span className="text-xs text-muted-foreground">/mês</span>
+                        </>
+                      )}
                     </div>
                     <p className="mt-2 text-[11px] text-muted-foreground">{m.description}</p>
                     <ul className="mt-3 space-y-1 flex-1">
