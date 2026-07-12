@@ -4699,6 +4699,10 @@ export type Database = {
         Args: { _card_id: string }
         Returns: number
       }
+      reminder_visible_to_advogado: {
+        Args: { _reminder_id: string; _user_id: string }
+        Returns: boolean
+      }
       unaccent: { Args: { "": string }; Returns: string }
       user_belongs_to_company: {
         Args: { _company_id: string; _user_id: string }
