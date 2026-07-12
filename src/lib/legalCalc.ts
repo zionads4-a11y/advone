@@ -743,6 +743,9 @@ function labelCategoria(c: CategoriaDevedor) {
     autonomo: "Autônomo / Profissional Liberal",
   } as const)[c];
 }
+function labelEsfera(e: EsferaServidor) {
+  return ({ federal: "Federal (União)", estadual: "Estadual", municipal: "Municipal" } as const)[e];
+}
 function labelTipo(t: TipoContrato) {
   return ({
     consignado: "Consignado",
