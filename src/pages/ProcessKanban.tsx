@@ -561,10 +561,11 @@ export default function ProcessKanban() {
 }
 
 // ============ KANBAN COLUMN ============
-function KanbanColumn({ column, cards, onRemoveColumn, onOpenCard, memberById, teamByCard }: {
+function KanbanColumn({ column, cards, onRemoveColumn, onOpenCard, memberById, teamByCard, weekCounts }: {
   column: Column; cards: ProcessCard[]; onRemoveColumn: () => void;
   onOpenCard: (c: ProcessCard) => void;
   memberById: Record<string, Member>; teamByCard: Record<string, TeamRow[]>;
+  weekCounts: Record<string, number>;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: `col-${column.id}`, data: { type: "column", columnId: column.id } });
   return (
@@ -578,7 +579,7 @@ function KanbanColumn({ column, cards, onRemoveColumn, onOpenCard, memberById, t
       <SortableContext items={cards.map(c => c.id)} strategy={verticalListSortingStrategy}>
         <div ref={setNodeRef} className={`flex min-h-[120px] flex-1 flex-col gap-2 rounded-md p-1 transition-colors ${isOver ? "bg-primary/10 ring-2 ring-primary/30" : ""}`}>
           {cards.map(c => (
-            <SortableCard key={c.id} card={c} onOpenCard={() => onOpenCard(c)} memberById={memberById} teamByCard={teamByCard} />
+            <SortableCard key={c.id} card={c} onOpenCard={() => onOpenCard(c)} memberById={memberById} teamByCard={teamByCard} weekCount={weekCounts[c.id] || 0} />
           ))}
           {cards.length === 0 && (
             <div className="flex h-20 items-center justify-center rounded border border-dashed text-xs text-muted-foreground">
@@ -591,21 +592,23 @@ function KanbanColumn({ column, cards, onRemoveColumn, onOpenCard, memberById, t
   );
 }
 
-function SortableCard({ card, onOpenCard, memberById, teamByCard }: {
+function SortableCard({ card, onOpenCard, memberById, teamByCard, weekCount }: {
   card: ProcessCard; onOpenCard: () => void;
   memberById: Record<string, Member>; teamByCard: Record<string, TeamRow[]>;
+  weekCount: number;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: card.id, data: { type: "card" } });
   const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.4 : 1 };
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners} onClick={onOpenCard}>
-      <ProcessCardView card={card} memberById={memberById} teamByCard={teamByCard} />
+      <ProcessCardView card={card} memberById={memberById} teamByCard={teamByCard} weekCount={weekCount} />
     </div>
   );
 }
 
-function ProcessCardView({ card, memberById, teamByCard, isDragOverlay }: {
-  card: ProcessCard; memberById: Record<string, Member>; teamByCard: Record<string, TeamRow[]>; isDragOverlay?: boolean;
+function ProcessCardView({ card, memberById, teamByCard, weekCount = 0, isDragOverlay }: {
+  card: ProcessCard; memberById: Record<string, Member>; teamByCard: Record<string, TeamRow[]>;
+  weekCount?: number; isDragOverlay?: boolean;
 }) {
   const responsible = card.responsible_id ? memberById[card.responsible_id] : null;
   const team = teamByCard[card.id] ?? [];
