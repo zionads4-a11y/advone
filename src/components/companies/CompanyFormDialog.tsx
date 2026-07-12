@@ -42,10 +42,13 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
   const [discountValidUntil, setDiscountValidUntil] = useState("");
   const [approverEmail, setApproverEmail] = useState("");
   const [approverPassword, setApproverPassword] = useState("");
+  const [customBaseValue, setCustomBaseValue] = useState("");
   const isFree = false;
 
   const currentModel = BILLING_MODELS.find((m) => m.key === selectedModel) ?? BILLING_MODELS[0];
-  const basePrice = currentModel.monthly_value;
+  const isEnterprise = currentModel.key === "plan_enterprise";
+  const customNum = parseFloat(customBaseValue) || 0;
+  const basePrice = isEnterprise ? customNum : currentModel.monthly_value;
   const dValNum = parseFloat(discountValue) || 0;
   const discountAmount =
     discountType === "percent" ? +((basePrice * dValNum) / 100).toFixed(2) : dValNum;
@@ -81,6 +84,7 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
             fd.set("discount_valid_until", discountValidUntil);
             fd.set("approver_email", approverEmail);
             fd.set("approver_password", approverPassword);
+            fd.set("custom_base_value", isEnterprise ? String(customNum) : "");
             onSubmit(fd);
           }}
           className="space-y-4"
@@ -113,8 +117,14 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
                       <span>{m.label}</span>
                     </div>
                     <div className="mt-2 flex items-baseline gap-1">
-                      <span className="text-2xl font-bold">{brl(m.monthly_value)}</span>
-                      <span className="text-xs text-muted-foreground">/mês</span>
+                      {m.key === "plan_enterprise" ? (
+                        <span className="text-2xl font-bold">Sob medida</span>
+                      ) : (
+                        <>
+                          <span className="text-2xl font-bold">{brl(m.monthly_value)}</span>
+                          <span className="text-xs text-muted-foreground">/mês</span>
+                        </>
+                      )}
                     </div>
                     <p className="mt-2 text-[11px] text-muted-foreground">{m.description}</p>
                     <ul className="mt-3 space-y-1 flex-1">
@@ -139,6 +149,23 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
             </p>
           </div>
 
+          {isEnterprise && (
+            <div className="space-y-2 rounded-lg border border-primary/30 bg-primary/5 p-3">
+              <Label>Valor mensal Enterprise (R$) *</Label>
+              <Input
+                type="number"
+                step="0.01"
+                min="1"
+                required
+                placeholder="Ex: 2500.00"
+                value={customBaseValue}
+                onChange={(e) => setCustomBaseValue(e.target.value)}
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Plano sob medida — defina aqui o valor mensal negociado com o cliente.
+              </p>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label>Nome da Empresa *</Label>

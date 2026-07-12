@@ -272,31 +272,6 @@ export function CompanyEditDialog({
             </p>
           </div>
 
-          <div className="space-y-2">
-            <Label>
-              Valor mensal (R$){" "}
-              {billingModel === "plan_enterprise" ? (
-                <span className="text-xs text-accent">— definido pela equipe comercial</span>
-              ) : (
-                <span className="text-xs text-muted-foreground">
-                  — deixe em branco para usar o valor padrão do plano (R$ {getBillingModel(billingModel).monthly_value})
-                </span>
-              )}
-            </Label>
-            <Input
-              type="number"
-              step="0.01"
-              min="0"
-              placeholder={
-                billingModel === "plan_enterprise"
-                  ? "Ex: 2500.00"
-                  : String(getBillingModel(billingModel).monthly_value)
-              }
-              value={customBaseValue}
-              onChange={(e) => setCustomBaseValue(e.target.value)}
-            />
-          </div>
-
           <BusinessHoursConfig value={businessHours} onChange={setBusinessHours} />
 
           <Separator className="my-2" />
