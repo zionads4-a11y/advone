@@ -17,9 +17,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { BILLING_MODELS, type BillingModel } from "@/lib/billingModels";
-import { CheckCircle2, Plus } from "lucide-react";
+import { CheckCircle2, Lock, Plus } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface CompanyFormDialogProps {
   open: boolean;
