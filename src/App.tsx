@@ -110,6 +110,7 @@ const App = () => (
               <Route path="/clientes/:id" element={<ClientDetail />} />
               <Route path="/kanban" element={<Kanban />} />
               <Route path="/conversations" element={<Conversations />} />
+              <Route path="/conversas-clientes" element={<ClientConversations />} />
               <Route path="/campaigns" element={<Campaigns />} />
               <Route 
                 path="/companies" 
