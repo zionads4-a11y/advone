@@ -608,24 +608,65 @@ export default function Calculadoras() {
                       <Input type="number" max="60" value={sup.prazoRepactuacaoMeses}
                         onChange={(e) => setSup({ ...sup, prazoRepactuacaoMeses: +e.target.value })} />
                     </div>
+                    {sup.categoria === "servidor_publico" && (
+                      <div>
+                        <Label>Esfera do servidor</Label>
+                        <Select
+                          value={sup.esferaServidor}
+                          onValueChange={(v: EsferaServidor) =>
+                            setSup({
+                              ...sup,
+                              esferaServidor: v,
+                              margemConsignavelOverridePct: 0,
+                              uf: v === "federal" ? "FEDERAL" : (sup.uf === "FEDERAL" ? "SP" : sup.uf),
+                            })
+                          }
+                        >
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="federal">Federal / União (45% — Dec. 11.150/2022)</SelectItem>
+                            <SelectItem value="estadual">Estadual (usa teto da UF)</SelectItem>
+                            <SelectItem value="municipal">Municipal (45% padrão — confirmar lei orgânica)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="mt-1 text-[10px] leading-tight text-muted-foreground">
+                          Escolha a esfera do vínculo para aplicar a legislação consignável correta (União, Estado ou Município).
+                        </p>
+                      </div>
+                    )}
                     <div>
-                      <Label>UF do vínculo {sup.categoria === "servidor_publico" ? "(servidor)" : "(referência)"}</Label>
+                      <Label>UF do vínculo {sup.categoria === "servidor_publico" ? `(servidor ${sup.esferaServidor})` : "(referência)"}</Label>
                       <Select value={sup.uf} onValueChange={(v: UF) => setSup({ ...sup, uf: v, margemConsignavelOverridePct: 0 })}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent className="max-h-64">
                           {(Object.keys(MARGEM_CONSIGNAVEL_UF_SERVIDOR) as UF[]).map((uf) => (
                             <SelectItem key={uf} value={uf}>
-                              {uf} — teto {MARGEM_CONSIGNAVEL_UF_SERVIDOR[uf].total}%
+                              {uf === "FEDERAL" ? "FEDERAL — União 45%" : `${uf} — estadual ${MARGEM_CONSIGNAVEL_UF_SERVIDOR[uf].total}%`}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                      {sup.categoria === "servidor_publico" && (
+                      {sup.categoria === "servidor_publico" && sup.esferaServidor === "estadual" && sup.uf !== "FEDERAL" && (
                         <p className="mt-1 text-[10px] leading-tight text-muted-foreground">
                           {MARGEM_CONSIGNAVEL_UF_SERVIDOR[sup.uf].nota}
                         </p>
                       )}
+                      {sup.categoria === "servidor_publico" && sup.esferaServidor === "municipal" && (
+                        <p className="mt-1 text-[10px] leading-tight text-muted-foreground">
+                          Municípios seguem, em regra, 45% (Lei federal 14.131/2021 aplicável subsidiariamente). Se a lei orgânica municipal fixar outro teto, informe em “Margem personalizada”.
+                        </p>
+                      )}
                     </div>
+                    {sup.categoria === "servidor_publico" && sup.esferaServidor === "municipal" && (
+                      <div className="col-span-2">
+                        <Label>Município do vínculo</Label>
+                        <Input
+                          placeholder="Ex.: Prefeitura de São Paulo, Câmara Municipal de Salvador..."
+                          value={sup.municipio}
+                          onChange={(e) => setSup({ ...sup, municipio: e.target.value })}
+                        />
+                      </div>
+                    )}
                     <div>
                       <Label>Margem consignável personalizada (%)</Label>
                       <Input
