@@ -31,6 +31,7 @@ import {
   type TipoContrato,
   type DividaItem,
   type UF,
+  type EsferaServidor,
   MARGEM_CONSIGNAVEL_UF_SERVIDOR,
 } from "@/lib/legalCalc";
 
