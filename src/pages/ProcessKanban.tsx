@@ -552,6 +552,9 @@ export default function ProcessKanban() {
         memberById={memberById}
         onUpdate={updateCard} onDelete={deleteCard}
         onAddMember={addTeamMember} onRemoveMember={removeTeamMember}
+        activities={cardActivities}
+        weekCount={openedCard ? (weekCounts[openedCard.id] || 0) : 0}
+        onLogActivity={logActivity}
       />
     </div>
   );
