@@ -563,6 +563,228 @@ export type Database = {
           },
         ]
       }
+      client_conversation_messages: {
+        Row: {
+          company_id: string
+          content: string | null
+          conversation_id: string
+          created_at: string
+          direction: string
+          id: string
+          media_type: string | null
+          media_url: string | null
+          metadata: Json | null
+          sender_type: string
+          sender_user_id: string | null
+        }
+        Insert: {
+          company_id: string
+          content?: string | null
+          conversation_id: string
+          created_at?: string
+          direction: string
+          id?: string
+          media_type?: string | null
+          media_url?: string | null
+          metadata?: Json | null
+          sender_type: string
+          sender_user_id?: string | null
+        }
+        Update: {
+          company_id?: string
+          content?: string | null
+          conversation_id?: string
+          created_at?: string
+          direction?: string
+          id?: string
+          media_type?: string | null
+          media_url?: string | null
+          metadata?: Json | null
+          sender_type?: string
+          sender_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_conversation_messages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_conversation_messages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_conversation_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "client_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_conversation_transfers: {
+        Row: {
+          company_id: string
+          conversation_id: string
+          created_at: string
+          from_area_id: string | null
+          from_lawyer_id: string | null
+          id: string
+          reason: string | null
+          to_area_id: string | null
+          to_lawyer_id: string | null
+          transferred_by: string | null
+        }
+        Insert: {
+          company_id: string
+          conversation_id: string
+          created_at?: string
+          from_area_id?: string | null
+          from_lawyer_id?: string | null
+          id?: string
+          reason?: string | null
+          to_area_id?: string | null
+          to_lawyer_id?: string | null
+          transferred_by?: string | null
+        }
+        Update: {
+          company_id?: string
+          conversation_id?: string
+          created_at?: string
+          from_area_id?: string | null
+          from_lawyer_id?: string | null
+          id?: string
+          reason?: string | null
+          to_area_id?: string | null
+          to_lawyer_id?: string | null
+          transferred_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_conversation_transfers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_conversation_transfers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_conversation_transfers_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "client_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_conversation_transfers_from_area_id_fkey"
+            columns: ["from_area_id"]
+            isOneToOne: false
+            referencedRelation: "legal_areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_conversation_transfers_to_area_id_fkey"
+            columns: ["to_area_id"]
+            isOneToOne: false
+            referencedRelation: "legal_areas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_conversations: {
+        Row: {
+          assigned_lawyer_id: string | null
+          client_lead_id: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          last_message_at: string | null
+          last_message_preview: string | null
+          legal_area_id: string | null
+          source: string
+          status: string
+          subject: string | null
+          unread_count: number
+          updated_at: string
+          whatsapp_thread_key: string | null
+        }
+        Insert: {
+          assigned_lawyer_id?: string | null
+          client_lead_id: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          last_message_at?: string | null
+          last_message_preview?: string | null
+          legal_area_id?: string | null
+          source?: string
+          status?: string
+          subject?: string | null
+          unread_count?: number
+          updated_at?: string
+          whatsapp_thread_key?: string | null
+        }
+        Update: {
+          assigned_lawyer_id?: string | null
+          client_lead_id?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          last_message_at?: string | null
+          last_message_preview?: string | null
+          legal_area_id?: string | null
+          source?: string
+          status?: string
+          subject?: string | null
+          unread_count?: number
+          updated_at?: string
+          whatsapp_thread_key?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_conversations_client_lead_id_fkey"
+            columns: ["client_lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_conversations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_conversations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_conversations_legal_area_id_fkey"
+            columns: ["legal_area_id"]
+            isOneToOne: false
+            referencedRelation: "legal_areas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       closed_contracts: {
         Row: {
           client_cpf: string
@@ -4706,6 +4928,10 @@ export type Database = {
       unaccent: { Args: { "": string }; Returns: string }
       user_belongs_to_company: {
         Args: { _company_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_can_see_client_conversation: {
+        Args: { _conv_id: string; _user_id: string }
         Returns: boolean
       }
       user_can_see_process_board: {

@@ -16,6 +16,7 @@ import Clients from "./pages/Clients";
 import ClientDetail from "./pages/ClientDetail";
 import Kanban from "./pages/Kanban";
 import Conversations from "./pages/Conversations";
+import ClientConversations from "./pages/ClientConversations";
 import Campaigns from "./pages/Campaigns";
 import Companies from "./pages/Companies";
 import CompanyDetail from "./pages/CompanyDetail";
@@ -109,6 +110,7 @@ const App = () => (
               <Route path="/clientes/:id" element={<ClientDetail />} />
               <Route path="/kanban" element={<Kanban />} />
               <Route path="/conversations" element={<Conversations />} />
+              <Route path="/conversas-clientes" element={<ClientConversations />} />
               <Route path="/campaigns" element={<Campaigns />} />
               <Route 
                 path="/companies" 

@@ -846,11 +846,11 @@ export default function LandingPage() {
               ESCOLHA O PLANO IDEAL PARA SEU ESCRITÓRIO
             </h2>
             <p className="text-[hsl(220,10%,60%)] max-w-2xl mx-auto">
-              Comece pela IA, evolua para Gestão e chegue no Complete quando fizer sentido. Você cresce, o AdvOne cresce com você.
+              Comece pela IA, evolua para Gestão, chegue no Complete e escale com o Enterprise. Você cresce, o AdvOne cresce com você.
             </p>
           </Reveal>
 
-          <div className="grid gap-8 md:grid-cols-3 max-w-6xl mx-auto">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4 max-w-7xl mx-auto">
             {/* AdvOne IA */}
             <Reveal delay={0}>
               <div className="rounded-2xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col h-full transition-all duration-500 hover:border-[hsl(153,60%,45%)]/30 hover:-translate-y-1">
@@ -964,6 +964,56 @@ export default function LandingPage() {
                   className="w-full bg-transparent border border-[hsl(220,20%,16%)] hover:bg-[hsl(220,20%,16%)] text-[hsl(220,10%,92%)] font-bold py-6"
                 >
                   FALAR COM ESPECIALISTA
+                </Button>
+              </div>
+            </Reveal>
+
+            {/* AdvOne Enterprise */}
+            <Reveal delay={300}>
+              <div className="relative rounded-2xl border border-[hsl(45,80%,55%)]/40 bg-gradient-to-br from-[hsl(220,25%,9%)] to-[hsl(220,25%,7%)] p-8 flex flex-col h-full transition-all duration-500 hover:border-[hsl(45,80%,55%)] hover:-translate-y-1 shadow-lg shadow-[hsl(45,80%,55%)]/5">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-[hsl(45,80%,55%)] to-[hsl(38,90%,60%)] px-4 py-1 text-xs font-bold text-[hsl(220,25%,6%)]">
+                  SOB MEDIDA
+                </div>
+                <div className="mb-6 flex items-center justify-between">
+                  <span className="inline-block rounded-full bg-[hsl(45,80%,55%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(45,80%,60%)]">ADVONE ENTERPRISE</span>
+                </div>
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold mb-2 text-[hsl(45,80%,60%)]">Central de relacionamento com clientes</h3>
+                  <div className="mt-4 flex items-baseline gap-1">
+                    <span className="text-3xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Sob consulta</span>
+                  </div>
+                  <p className="mt-2 text-sm text-[hsl(220,10%,60%)]">
+                    Para escritórios que atendem centenas de clientes ativos e precisam de um <strong className="text-[hsl(220,10%,80%)]">único WhatsApp</strong> inteligente que separa leads novos de clientes atuais e roteia cada conversa para o setor certo — automaticamente.
+                  </p>
+                </div>
+
+                <ul className="mb-8 flex-1 space-y-3">
+                  {[
+                    "Tudo do plano Complete incluso",
+                    "Atendimento a clientes atuais no mesmo número da captação",
+                    "Identificação automática do cliente (nome + CPF)",
+                    "Roteamento inteligente por área (Trabalhista, Cível, Previdenciário…)",
+                    "Sala de conversa exclusiva por departamento",
+                    "Transferência manual entre setores e advogados",
+                    "Histórico auditável — nenhuma conversa pode ser apagada",
+                    "Download completo de conversas (LGPD/compliance)",
+                    "Consulta de status de processo direto no WhatsApp",
+                    "SLA dedicado e onboarding assistido pela nossa equipe",
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-sm text-[hsl(220,10%,75%)]">
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(45,80%,55%)]" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  onClick={() => {
+                    const msg = encodeURIComponent("Olá! Quero conversar sobre o plano AdvOne Enterprise para o meu escritório.");
+                    window.open(`https://wa.me/5511999999999?text=${msg}`, "_blank");
+                  }}
+                  className="w-full bg-gradient-to-r from-[hsl(45,80%,55%)] to-[hsl(38,90%,60%)] hover:opacity-90 text-[hsl(220,25%,6%)] font-bold py-6 shadow-lg shadow-[hsl(45,80%,55%)]/20"
+                >
+                  FALAR COM NOSSA EQUIPE
                 </Button>
               </div>
             </Reveal>
