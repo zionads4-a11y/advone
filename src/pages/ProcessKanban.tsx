@@ -954,12 +954,81 @@ function CardDrawer({ card, onClose, members, teamRows, memberById, onUpdate, on
             {card.title || card.client_name || "Processo"}
           </SheetTitle>
         </SheetHeader>
-        <Tabs defaultValue="resumo" className="mt-4">
+
+        <div className={`mt-3 flex items-center gap-2 rounded-md border p-2 text-xs ${hc.chip}`}>
+          <span className={`h-2 w-2 rounded-full ${hc.bg}`} />
+          <Activity className="h-3.5 w-3.5" />
+          <span className="font-semibold">{health.label}</span>
+          <span className="opacity-80">
+            • {card.last_activity_at ? `${health.days}d sem movimento` : "sem histórico"} • {weekCount}/{card.weekly_target || 1} esta semana
+          </span>
+        </div>
+
+        <Tabs defaultValue="diario" className="mt-4">
           <TabsList className="w-full">
+            <TabsTrigger value="diario" className="flex-1">Diário</TabsTrigger>
             <TabsTrigger value="resumo" className="flex-1">Resumo</TabsTrigger>
             <TabsTrigger value="equipe" className="flex-1">Equipe</TabsTrigger>
-            <TabsTrigger value="movimentacoes" className="flex-1">Movimentações</TabsTrigger>
+            <TabsTrigger value="movimentacoes" className="flex-1">Tribunal</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="diario" className="space-y-3">
+            <div className="space-y-2 rounded-md border bg-primary/5 p-3">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-primary">
+                <CheckCircle2 className="h-3.5 w-3.5" /> Registrar conferência de hoje
+              </div>
+              <Select value={logType} onValueChange={setLogType}>
+                <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {ACTIVITY_TYPES.map(t => (
+                    <SelectItem key={t.value} value={t.value}>{t.icon} {t.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Textarea
+                placeholder="O que você conferiu / fez hoje? (opcional)"
+                value={logMessage}
+                onChange={e => setLogMessage(e.target.value)}
+                rows={2}
+                className="text-xs"
+              />
+              <Button size="sm" className="w-full" disabled={logSaving} onClick={submitLog}>
+                {logSaving && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}
+                <Plus className="mr-1 h-3.5 w-3.5" /> Adicionar ao diário
+              </Button>
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="text-[10px] font-semibold uppercase text-muted-foreground">Histórico do processo</div>
+              {activities.length === 0 && (
+                <div className="rounded border border-dashed p-4 text-center text-xs text-muted-foreground">
+                  Nenhum registro ainda. Adicione a primeira conferência acima.
+                </div>
+              )}
+              {activities.map(a => {
+                const preset = ACTIVITY_TYPES.find(t => t.value === a.activity_type);
+                const actor = a.actor_id ? memberById[a.actor_id] : null;
+                const isMove = a.activity_type === "moved";
+                return (
+                  <div key={a.id} className="flex gap-2 rounded-md border p-2">
+                    <div className="text-base">{isMove ? "↔️" : (preset?.icon || "•")}</div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="truncate text-xs font-medium">
+                          {isMove ? "Movido de coluna" : (preset?.label || a.activity_type)}
+                        </div>
+                        <div className="shrink-0 text-[10px] text-muted-foreground">
+                          {format(new Date(a.created_at), "dd/MM HH:mm", { locale: ptBR })}
+                        </div>
+                      </div>
+                      {a.message && <div className="mt-0.5 whitespace-pre-wrap text-xs text-muted-foreground">{a.message}</div>}
+                      {actor && <div className="mt-1 text-[10px] text-muted-foreground">por {actor.full_name || actor.email}</div>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </TabsContent>
 
           <TabsContent value="resumo" className="space-y-3">
             <div>
