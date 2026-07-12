@@ -21,6 +21,7 @@ import Campaigns from "./pages/Campaigns";
 import Companies from "./pages/Companies";
 import CompanyDetail from "./pages/CompanyDetail";
 import ClientUsers from "./pages/ClientUsers";
+import InternalStaff from "./pages/InternalStaff";
 import AccessManagement from "./pages/AccessManagement";
 import TrackingLinks from "./pages/TrackingLinks";
 import ConnectWhatsApp from "@/pages/ConnectWhatsApp";
@@ -125,6 +126,7 @@ const App = () => (
               <Route path="/tracking" element={<TrackingLinks />} />
               <Route path="/agenda" element={<Agenda />} />
               <Route path="/client-users" element={<ClientUsers />} />
+              <Route path="/time-interno" element={<InternalStaff />} />
               <Route 
                 path="/access-management" 
                 element={

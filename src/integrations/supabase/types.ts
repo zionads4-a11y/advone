@@ -2004,6 +2004,36 @@ export type Database = {
         }
         Relationships: []
       }
+      internal_staff_permissions: {
+        Row: {
+          created_at: string
+          granted: boolean
+          granted_by: string | null
+          id: string
+          module: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted?: boolean
+          granted_by?: string | null
+          id?: string
+          module: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted?: boolean
+          granted_by?: string | null
+          id?: string
+          module?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       kanban_boards: {
         Row: {
           color: string
@@ -3911,6 +3941,8 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          internal_job_title: string | null
+          is_internal_staff: boolean
           job_title: string | null
           last_login: string | null
           lawyer_cpf: string | null
@@ -3932,6 +3964,8 @@ export type Database = {
           email: string
           full_name?: string
           id?: string
+          internal_job_title?: string | null
+          is_internal_staff?: boolean
           job_title?: string | null
           last_login?: string | null
           lawyer_cpf?: string | null
@@ -3953,6 +3987,8 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
+          internal_job_title?: string | null
+          is_internal_staff?: boolean
           job_title?: string | null
           last_login?: string | null
           lawyer_cpf?: string | null
@@ -4944,6 +4980,10 @@ export type Database = {
       }
       user_has_area_access: {
         Args: { _area_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_has_internal_module: {
+        Args: { _module: string; _user_id: string }
         Returns: boolean
       }
       user_has_module: {

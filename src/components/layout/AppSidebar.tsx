@@ -24,6 +24,7 @@ import {
   Layers,
   Activity,
   Calculator,
+  UserCog,
 } from "lucide-react";
 import logoAdvOne from "@/assets/logo-advone-light.png";
 import { NavLink } from "@/components/NavLink";
@@ -74,6 +75,7 @@ const adminItems = [
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Monitoramento", url: "/monitoramento", icon: Radar },
   { title: "Usuários", url: "/client-users", icon: Users },
+  { title: "Time Interno", url: "/time-interno", icon: UserCog },
   { title: "Acessos", url: "/access-management", icon: KeyRound },
   { title: "Assinaturas", url: "/assinatura", icon: CreditCard },
   
