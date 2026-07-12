@@ -61,10 +61,10 @@ export const BILLING_MODELS: BillingModelOption[] = [
     monitoring_quota: 10,
     features: [
       "CRM jurídico completo",
+      "Até 3 áreas de atuação",
+      "Até 3 advogados por área",
       "Pipeline (Kanban de leads e casos)",
-      "Automações e cadências",
-      "Gestão da equipe (papéis e permissões)",
-      "Relatórios e indicadores",
+      "Automações, cadências e relatórios",
     ],
   },
   {
