@@ -8,7 +8,7 @@ import { ArrowDownCircle, ArrowUpCircle, DollarSign, PiggyBank, Wallet, FileSign
 const brl = (v: number) => `R$ ${Number(v || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 export function FinanceiroDashboard() {
-  const { filterByCompany, loading } = useUserCompanies();
+  const { filterByCompany, companyIds, loading } = useUserCompanies();
   const [recebidoMes, setRecebidoMes] = useState(0);
   const [fechadoMes, setFechadoMes] = useState(0);
   const [aReceber, setAReceber] = useState(0);
@@ -47,11 +47,22 @@ export function FinanceiroDashboard() {
     try {
       const { data: session } = await supabase.auth.getSession();
       const token = session?.session?.access_token;
-      const { data: bal, error: fnErr } = await supabase.functions.invoke("asaas-balance", {
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-      });
-      if (fnErr) throw fnErr;
-      setCaixaAsaas(Number((bal as any)?.balance ?? 0));
+      const cid = companyIds[0];
+      const { data: bal, error: fnErr } = await supabase.functions.invoke(
+        `asaas-balance${cid ? `?company_id=${cid}` : ""}`,
+        { headers: token ? { Authorization: `Bearer ${token}` } : undefined },
+      );
+      if (fnErr) {
+        const ctx: any = (fnErr as any)?.context;
+        const txt = ctx && typeof ctx.text === "function" ? await ctx.text() : null;
+        if (txt && /no_asaas_config/.test(txt)) {
+          setCaixaErr("Este escritório ainda não configurou o Asaas.");
+        } else {
+          setCaixaErr(txt ?? (fnErr as any)?.message ?? "Erro ao buscar saldo");
+        }
+      } else {
+        setCaixaAsaas(Number((bal as any)?.balance ?? 0));
+      }
     } catch (e: any) {
       setCaixaErr(e?.message ?? "Erro ao buscar saldo");
     } finally {
