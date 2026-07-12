@@ -95,6 +95,8 @@ interface ProcessCard {
   next_deadline_label: string | null; last_movement_at: string | null; last_movement_text: string | null;
   last_activity_at: string | null; last_activity_type: string | null; weekly_target: number;
   position: number;
+  has_unread_movements?: boolean; unread_movements_count?: number;
+  last_court_movement_at?: string | null; last_court_movement_text?: string | null;
 }
 interface CardActivity {
   id: string; card_id: string; actor_id: string | null; activity_type: string;
