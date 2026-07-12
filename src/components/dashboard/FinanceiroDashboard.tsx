@@ -53,22 +53,28 @@ export function FinanceiroDashboard() {
         { headers: token ? { Authorization: `Bearer ${token}` } : undefined },
       );
       if (fnErr) {
-        const ctx: any = (fnErr as any)?.context;
-        const txt = ctx && typeof ctx.text === "function" ? await ctx.text() : null;
+        let txt: string | null = null;
+        try {
+          const ctx: any = (fnErr as any)?.context;
+          if (ctx && typeof ctx.text === "function") txt = await ctx.text();
+        } catch {
+          txt = null;
+        }
         if (txt && /no_asaas_config/.test(txt)) {
           setCaixaErr("Este escritório ainda não configurou o Asaas.");
         } else {
-          setCaixaErr(txt ?? (fnErr as any)?.message ?? "Erro ao buscar saldo");
+          setCaixaErr("Asaas indisponível no momento.");
         }
       } else {
         setCaixaAsaas(Number((bal as any)?.balance ?? 0));
       }
-    } catch (e: any) {
-      setCaixaErr(e?.message ?? "Erro ao buscar saldo");
+    } catch {
+      setCaixaErr("Este escritório ainda não configurou o Asaas.");
     } finally {
       setCaixaLoading(false);
     }
   };
+
 
   return (
     <div className="space-y-6">
