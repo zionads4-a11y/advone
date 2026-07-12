@@ -965,7 +965,9 @@ function CardDrawer({ card, onClose, members, teamRows, memberById, onUpdate, on
           <Activity className="h-3.5 w-3.5" />
           <span className="font-semibold">{health.label}</span>
           <span className="opacity-80">
-            • {card.last_activity_at ? `${health.days}d sem movimento` : "sem histórico"} • {weekCount}/{card.weekly_target || 1} esta semana
+            • {weekCount}/{card.weekly_target || 1} esta semana
+            {health.level !== "green" && (health.daysLeft > 0 ? ` • faltam ${health.daysLeft}d` : " • prazo vencido")}
+            {card.last_activity_at && ` • último: ${health.days}d atrás`}
           </span>
         </div>
 
