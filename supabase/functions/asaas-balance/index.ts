@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({
         error: 'no_asaas_config',
         message: 'Este escritório ainda não configurou o Asaas.',
-      }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     const resp = await fetch(`${url(env)}/finance/balance`, {

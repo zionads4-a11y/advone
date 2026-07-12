@@ -53,18 +53,9 @@ export function FinanceiroDashboard() {
         { headers: token ? { Authorization: `Bearer ${token}` } : undefined },
       );
       if (fnErr) {
-        let txt: string | null = null;
-        try {
-          const ctx: any = (fnErr as any)?.context;
-          if (ctx && typeof ctx.text === "function") txt = await ctx.text();
-        } catch {
-          txt = null;
-        }
-        if (txt && /no_asaas_config/.test(txt)) {
-          setCaixaErr("Este escritório ainda não configurou o Asaas.");
-        } else {
-          setCaixaErr("Asaas indisponível no momento.");
-        }
+        setCaixaErr("Asaas indisponível no momento.");
+      } else if ((bal as any)?.error === "no_asaas_config") {
+        setCaixaErr("Este escritório ainda não configurou o Asaas.");
       } else {
         setCaixaAsaas(Number((bal as any)?.balance ?? 0));
       }
