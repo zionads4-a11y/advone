@@ -430,6 +430,21 @@ export function WhatsAppConfigDialog({
 
                 {aiEnabled && (
                   <>
+                    {/* Toggle: Bot só fora do horário comercial */}
+                    <div className="flex items-center justify-between p-3 border rounded-lg bg-amber-50/40 dark:bg-amber-950/10">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl leading-none">🌙</span>
+                        <div>
+                          <p className="font-medium text-sm">Bot só fora do horário comercial</p>
+                          <p className="text-xs text-muted-foreground">
+                            Dentro do expediente (definido em Configurações da Empresa → Horários), a equipe atende manualmente.
+                            Fora do horário e nos finais de semana, a Laura assume automaticamente.
+                          </p>
+                        </div>
+                      </div>
+                      <Switch checked={botOnlyAfterHours} onCheckedChange={setBotOnlyAfterHours} />
+                    </div>
+
                     {/* Objetivo da IA */}
                     <div className="space-y-2">
                       <Label className="font-medium">Objetivo da IA</Label>
