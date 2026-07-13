@@ -61,20 +61,11 @@ export default function Auth() {
 }
 
 function LoginForm({ mode }: { mode: string | null }) {
-  const { signInWithGoogle, signIn } = useAuth();
-  const [googleLoading, setGoogleLoading] = useState(false);
+  const { signIn } = useAuth();
   const [emailLoading, setEmailLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleGoogleSignIn = async () => {
-    setGoogleLoading(true);
-    const { error } = await signInWithGoogle();
-    if (error) {
-      toast.error("Erro ao entrar com Google: " + error.message);
-      setGoogleLoading(false);
-    }
-  };
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
