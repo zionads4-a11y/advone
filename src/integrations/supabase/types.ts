@@ -4508,6 +4508,7 @@ export type Database = {
           ai_objective: string | null
           ai_prompt: string | null
           alert_whatsapp: string | null
+          bot_only_after_hours: boolean
           check_client_status: boolean | null
           communication_tone: string | null
           company_id: string
@@ -4534,6 +4535,7 @@ export type Database = {
           ai_objective?: string | null
           ai_prompt?: string | null
           alert_whatsapp?: string | null
+          bot_only_after_hours?: boolean
           check_client_status?: boolean | null
           communication_tone?: string | null
           company_id: string
@@ -4560,6 +4562,7 @@ export type Database = {
           ai_objective?: string | null
           ai_prompt?: string | null
           alert_whatsapp?: string | null
+          bot_only_after_hours?: boolean
           check_client_status?: boolean | null
           communication_tone?: string | null
           company_id?: string

@@ -256,6 +256,44 @@ function getTodayBrasilia(timeZone: string = "America/Sao_Paulo"): string {
   return `${b.getFullYear()}-${String(b.getMonth() + 1).padStart(2, "0")}-${String(b.getDate()).padStart(2, "0")}`;
 }
 
+/**
+ * Verifica se AGORA está dentro do horário de expediente configurado em companies.business_hours.
+ * - Formato aceito: { monday: [{open:"08:00", close:"18:00"}, ...], ... } ou { monday: {shifts:[...]}}
+ * - Se o dia não tiver turnos configurados (array vazio) → fora do expediente (bot pode responder).
+ * - Feriado nacional brasileiro → fora do expediente (bot pode responder).
+ * - Se business_hours estiver totalmente vazio → assumimos "sem expediente definido" = fora do expediente.
+ */
+function isWithinBusinessHoursNow(businessHours: any, timezone: string = "America/Sao_Paulo"): boolean {
+  if (!businessHours || typeof businessHours !== "object" || Object.keys(businessHours).length === 0) {
+    return false;
+  }
+  const now = getNowBrasilia(timezone);
+  const dayKeys = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+  const dayKey = dayKeys[now.getDay()];
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  if (isBrazilianHolidayStr(todayStr)) return false;
+
+  const dayCfg = businessHours[dayKey];
+  let shifts: any[] = [];
+  if (Array.isArray(dayCfg)) shifts = dayCfg;
+  else if (dayCfg && typeof dayCfg === "object" && dayCfg.enabled !== false) shifts = dayCfg.shifts || [];
+
+  if (!shifts.length) return false;
+
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  for (const shift of shifts) {
+    const start = shift.open || shift.start;
+    const end = shift.close || shift.end;
+    if (!start || !end) continue;
+    const [sh, sm] = String(start).split(":").map(Number);
+    const [eh, em] = String(end).split(":").map(Number);
+    const s = sh * 60 + (sm || 0);
+    const e = eh * 60 + (em || 0);
+    if (nowMin >= s && nowMin < e) return true;
+  }
+  return false;
+}
+
 async function getAvailableSlots(supabase: any, companyId: string, dateStr: string, timezone: string = "America/Sao_Paulo"): Promise<{ date: string; dayName: string; slots: string[] }> {
   const dayNames = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
   const dayKeys = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
@@ -1698,8 +1736,8 @@ serve(async (req) => {
       .select(`
         id, company_id, zapi_instance_id, zapi_token, ai_enabled, ai_prompt, ai_auto_reply, 
         office_name, practice_area, communication_tone, scheduling_link, consultation_duration, 
-        target_audience, alert_whatsapp, triage_options, debug_mode,
-        companies (name, bot_name, bot_role_description, timezone, decision_rules, billing_model, shared_whatsapp_number)
+        target_audience, alert_whatsapp, triage_options, debug_mode, bot_only_after_hours,
+        companies (name, bot_name, bot_role_description, timezone, decision_rules, billing_model, shared_whatsapp_number, business_hours)
       `)
       .eq("company_id", companyId)
       .maybeSingle();
@@ -2559,6 +2597,20 @@ Responda:
     // AI Auto-Reply with multi-agent support
     const bm = config.companies?.billing_model;
     const isPlanCompleto = bm === 'plan_completo' || bm === 'crm_full' || bm === 'ia_only' || bm === 'plan_free' || bm === 'plan_zionads' || bm === 'plan_ia' || (bm?.startsWith?.('plan_ia_') ?? false);
+
+    // ⏰ "Bot só fora do horário comercial": se ligado, pula IA quando estamos DENTRO do expediente
+    const afterHoursOnly = !!(config as any).bot_only_after_hours;
+    const tz = config.companies?.timezone || "America/Sao_Paulo";
+    const bh = (config.companies as any)?.business_hours || {};
+    const withinBH = isWithinBusinessHoursNow(bh, tz);
+    if (afterHoursOnly && withinBH) {
+      console.log(`[after-hours] Dentro do expediente (${tz}) e bot_only_after_hours=true → equipe humana atende, IA silenciada.`);
+      return new Response(
+        JSON.stringify({ ok: true, lead_id: leadId, skipped: "within_business_hours" }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     if (config.ai_enabled && config.ai_auto_reply && leadId && !existingLead?.bot_disabled && !existingLead?.ocr_pending_review && isPlanCompleto) {
 
       try {

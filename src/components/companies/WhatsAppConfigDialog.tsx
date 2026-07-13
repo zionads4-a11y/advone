@@ -78,6 +78,7 @@ export function WhatsAppConfigDialog({
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiObjective, setAiObjective] = useState("Entrar em contato com os Leads e agendar uma reunião");
   const [alertWhatsapp, setAlertWhatsapp] = useState("");
+  const [botOnlyAfterHours, setBotOnlyAfterHours] = useState(false);
   const [aiLoading, setAiLoading] = useState(true);
 
   const webhookUrl = getWebhookUrl(companyId);
@@ -103,7 +104,7 @@ export function WhatsAppConfigDialog({
       setAiLoading(true);
       const { data } = await supabase
         .from("whatsapp_configs")
-        .select("ai_enabled, ai_auto_reply, ai_prompt, ai_objective, alert_whatsapp")
+        .select("ai_enabled, ai_auto_reply, ai_prompt, ai_objective, alert_whatsapp, bot_only_after_hours")
         .eq("company_id", companyId)
         .maybeSingle();
 
@@ -116,6 +117,7 @@ export function WhatsAppConfigDialog({
         );
         setAiObjective(data.ai_objective || "Entrar em contato com os Leads e agendar uma reunião");
         setAlertWhatsapp(data.alert_whatsapp || "");
+        setBotOnlyAfterHours((data as any).bot_only_after_hours || false);
       }
       setAiLoading(false);
     };
@@ -231,6 +233,7 @@ export function WhatsAppConfigDialog({
       ai_prompt: "", // Removido da UI: prompt agora é montado dinamicamente pelo Bot Flows Editor
       ai_objective: aiObjective,
       alert_whatsapp: alertWhatsapp || null,
+      bot_only_after_hours: botOnlyAfterHours,
     };
 
     const { error } = await supabase
@@ -427,6 +430,21 @@ export function WhatsAppConfigDialog({
 
                 {aiEnabled && (
                   <>
+                    {/* Toggle: Bot só fora do horário comercial */}
+                    <div className="flex items-center justify-between p-3 border rounded-lg bg-amber-50/40 dark:bg-amber-950/10">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl leading-none">🌙</span>
+                        <div>
+                          <p className="font-medium text-sm">Bot só fora do horário comercial</p>
+                          <p className="text-xs text-muted-foreground">
+                            Dentro do expediente (definido em Configurações da Empresa → Horários), a equipe atende manualmente.
+                            Fora do horário e nos finais de semana, a Laura assume automaticamente.
+                          </p>
+                        </div>
+                      </div>
+                      <Switch checked={botOnlyAfterHours} onCheckedChange={setBotOnlyAfterHours} />
+                    </div>
+
                     {/* Objetivo da IA */}
                     <div className="space-y-2">
                       <Label className="font-medium">Objetivo da IA</Label>

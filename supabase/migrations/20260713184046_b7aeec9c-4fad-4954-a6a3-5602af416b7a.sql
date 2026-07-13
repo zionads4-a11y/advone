@@ -1,0 +1,1 @@
+ALTER TABLE public.whatsapp_configs ADD COLUMN IF NOT EXISTS bot_only_after_hours boolean NOT NULL DEFAULT false;
