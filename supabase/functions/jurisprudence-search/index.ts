@@ -59,20 +59,36 @@ async function handler(req: Request): Promise<Response> {
     const ok = await checkRateLimit(admin, userId, "jurisprudence-search", 30);
     if (!ok) return json(req, { error: "Limite de uso atingido. Aguarde alguns minutos." }, 429);
 
-    // Monta filtros de domínio conforme tribunal
+    // Fontes com jurisprudência bem indexada no Google (evita retornar notícias)
     const domainMap: Record<string, string[]> = {
-      stf: ["portal.stf.jus.br", "jurisprudencia.stf.jus.br"],
-      stj: ["scon.stj.jus.br", "processo.stj.jus.br", "stj.jus.br"],
-      tst: ["jurisprudencia.tst.jus.br", "tst.jus.br"],
-      trf: ["trf1.jus.br", "trf2.jus.br", "trf3.jus.br", "trf4.jus.br", "trf5.jus.br", "trf6.jus.br"],
-      tj: ["tjsp.jus.br", "tjrj.jus.br", "tjmg.jus.br", "tjrs.jus.br", "tjpr.jus.br", "tjba.jus.br"],
+      stf: ["jurisprudencia.stf.jus.br", "portal.stf.jus.br", "jusbrasil.com.br/jurisprudencia/stf"],
+      stj: ["scon.stj.jus.br", "processo.stj.jus.br", "jusbrasil.com.br/jurisprudencia/stj"],
+      tst: ["jurisprudencia.tst.jus.br", "jusbrasil.com.br/jurisprudencia/tst"],
+      trf: [
+        "jusbrasil.com.br/jurisprudencia/trf-1",
+        "jusbrasil.com.br/jurisprudencia/trf-2",
+        "jusbrasil.com.br/jurisprudencia/trf-3",
+        "jusbrasil.com.br/jurisprudencia/trf-4",
+        "jusbrasil.com.br/jurisprudencia/trf-5",
+      ],
+      tj: [
+        "jusbrasil.com.br/jurisprudencia/tj-sp",
+        "jusbrasil.com.br/jurisprudencia/tj-rj",
+        "jusbrasil.com.br/jurisprudencia/tj-mg",
+        "jusbrasil.com.br/jurisprudencia/tj-rs",
+        "esaj.tjsp.jus.br",
+      ],
     };
     const sources = domainMap[tribunal] ?? [
-      ...domainMap.stf, ...domainMap.stj, ...domainMap.tst,
+      "jurisprudencia.stf.jus.br",
+      "scon.stj.jus.br",
+      "jurisprudencia.tst.jus.br",
+      "jusbrasil.com.br/jurisprudencia",
     ];
 
     const siteFilter = sources.map((d) => `site:${d}`).join(" OR ");
-    const searchQuery = `(${siteFilter}) ${query} (acórdão OR "recurso especial" OR "apelação" OR "agravo" OR ementa) "processo"`;
+    // Força termos de decisão judicial e exclui seções de notícias
+    const searchQuery = `(${siteFilter}) "${query}" (ementa OR acórdão OR "relator" OR "recurso especial" OR "apelação" OR "agravo de instrumento") -noticias -imprensa -blog`;
 
     const tbs =
       period === "year" ? "qdr:y" :
