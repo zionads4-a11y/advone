@@ -1698,8 +1698,8 @@ serve(async (req) => {
       .select(`
         id, company_id, zapi_instance_id, zapi_token, ai_enabled, ai_prompt, ai_auto_reply, 
         office_name, practice_area, communication_tone, scheduling_link, consultation_duration, 
-        target_audience, alert_whatsapp, triage_options, debug_mode,
-        companies (name, bot_name, bot_role_description, timezone, decision_rules, billing_model, shared_whatsapp_number)
+        target_audience, alert_whatsapp, triage_options, debug_mode, bot_only_after_hours,
+        companies (name, bot_name, bot_role_description, timezone, decision_rules, billing_model, shared_whatsapp_number, business_hours)
       `)
       .eq("company_id", companyId)
       .maybeSingle();
