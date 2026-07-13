@@ -2559,6 +2559,20 @@ Responda:
     // AI Auto-Reply with multi-agent support
     const bm = config.companies?.billing_model;
     const isPlanCompleto = bm === 'plan_completo' || bm === 'crm_full' || bm === 'ia_only' || bm === 'plan_free' || bm === 'plan_zionads' || bm === 'plan_ia' || (bm?.startsWith?.('plan_ia_') ?? false);
+
+    // ⏰ "Bot só fora do horário comercial": se ligado, pula IA quando estamos DENTRO do expediente
+    const afterHoursOnly = !!(config as any).bot_only_after_hours;
+    const tz = config.companies?.timezone || "America/Sao_Paulo";
+    const bh = (config.companies as any)?.business_hours || {};
+    const withinBH = isWithinBusinessHoursNow(bh, tz);
+    if (afterHoursOnly && withinBH) {
+      console.log(`[after-hours] Dentro do expediente (${tz}) e bot_only_after_hours=true → equipe humana atende, IA silenciada.`);
+      return new Response(
+        JSON.stringify({ ok: true, lead_id: leadId, skipped: "within_business_hours" }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     if (config.ai_enabled && config.ai_auto_reply && leadId && !existingLead?.bot_disabled && !existingLead?.ocr_pending_review && isPlanCompleto) {
 
       try {
