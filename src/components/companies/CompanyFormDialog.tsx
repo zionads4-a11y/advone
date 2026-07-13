@@ -46,21 +46,26 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
   const [approverPassword, setApproverPassword] = useState("");
   const [customBaseValue, setCustomBaseValue] = useState("");
   const [enterpriseUnlocked, setEnterpriseUnlocked] = useState(false);
-  const [showEnterprisePwd, setShowEnterprisePwd] = useState(false);
+  const [zionadsUnlocked, setZionadsUnlocked] = useState(false);
+  const [pendingLockedPlan, setPendingLockedPlan] = useState<BillingModel | null>(null);
   const [enterprisePwd, setEnterprisePwd] = useState("");
   const [verifyingPwd, setVerifyingPwd] = useState(false);
   const isFree = false;
 
+  const isPlanLocked = (key: BillingModel) =>
+    (key === "plan_enterprise" && !enterpriseUnlocked) ||
+    (key === "plan_ia_zionads" && !zionadsUnlocked);
+
   const handleSelectPlan = async (key: BillingModel) => {
-    if (key === "plan_enterprise" && !enterpriseUnlocked) {
-      setShowEnterprisePwd(true);
+    if (isPlanLocked(key)) {
+      setPendingLockedPlan(key);
       return;
     }
     setSelectedModel(key);
   };
 
   const verifyEnterprisePassword = async () => {
-    if (!enterprisePwd) return;
+    if (!enterprisePwd || !pendingLockedPlan) return;
     setVerifyingPwd(true);
     try {
       const { data: userData } = await supabase.auth.getUser();
@@ -74,15 +79,17 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
         toast.error("Senha do gerente incorreta");
         return;
       }
-      setEnterpriseUnlocked(true);
-      setSelectedModel("plan_enterprise");
-      setShowEnterprisePwd(false);
+      if (pendingLockedPlan === "plan_enterprise") setEnterpriseUnlocked(true);
+      if (pendingLockedPlan === "plan_ia_zionads") setZionadsUnlocked(true);
+      setSelectedModel(pendingLockedPlan);
+      setPendingLockedPlan(null);
       setEnterprisePwd("");
-      toast.success("Plano Enterprise liberado");
+      toast.success("Plano liberado");
     } finally {
       setVerifyingPwd(false);
     }
   };
+
 
   const currentModel = BILLING_MODELS.find((m) => m.key === selectedModel) ?? BILLING_MODELS[0];
   const isEnterprise = currentModel.key === "plan_enterprise";
