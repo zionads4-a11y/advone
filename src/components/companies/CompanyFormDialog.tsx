@@ -410,16 +410,16 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
         </form>
       </DialogContent>
 
-      <Dialog open={showEnterprisePwd} onOpenChange={(o) => { if (!o) { setShowEnterprisePwd(false); setEnterprisePwd(""); } }}>
+      <Dialog open={!!pendingLockedPlan} onOpenChange={(o) => { if (!o) { setPendingLockedPlan(null); setEnterprisePwd(""); } }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 font-display">
-              <Lock className="h-4 w-4 text-amber-500" /> Liberar plano Enterprise
+              <Lock className="h-4 w-4 text-amber-500" /> Liberar plano {pendingLockedPlan === "plan_ia_zionads" ? "AdvOne IA · ZionAds" : "Enterprise"}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">
-              O plano Enterprise só pode ser ativado com a senha do gerente responsável. Digite sua senha para continuar.
+              Este plano só pode ser ativado com a senha do gerente responsável. Digite sua senha para continuar.
             </p>
             <div className="space-y-1">
               <Label>Senha do gerente</Label>
@@ -433,16 +433,17 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
               />
             </div>
             <div className="flex justify-end gap-2 pt-2">
-              <Button type="button" variant="ghost" onClick={() => { setShowEnterprisePwd(false); setEnterprisePwd(""); }}>
+              <Button type="button" variant="ghost" onClick={() => { setPendingLockedPlan(null); setEnterprisePwd(""); }}>
                 Cancelar
               </Button>
               <Button type="button" onClick={verifyEnterprisePassword} disabled={verifyingPwd || !enterprisePwd}>
-                {verifyingPwd ? "Verificando..." : "Liberar Enterprise"}
+                {verifyingPwd ? "Verificando..." : "Liberar plano"}
               </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
+
     </Dialog>
   );
 }
