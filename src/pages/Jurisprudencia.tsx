@@ -92,7 +92,7 @@ export default function Jurisprudencia() {
               <Badge className="bg-accent/15 text-accent border-accent/30 text-[10px] uppercase">IA + Busca ao vivo</Badge>
             </h1>
             <p className="text-xs text-muted-foreground">
-              Consulta em tempo real em STF, STJ, TST, TRFs e TJs com síntese e súmulas
+              Busca ações judiciais reais em STF, STJ, TST, TRFs e TJs com número CNJ para inclusão no monitoramento
             </p>
           </div>
         </div>
