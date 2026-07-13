@@ -72,7 +72,7 @@ async function handler(req: Request): Promise<Response> {
     ];
 
     const siteFilter = sources.map((d) => `site:${d}`).join(" OR ");
-    const searchQuery = `(${siteFilter}) ${query} jurisprudência ementa`;
+    const searchQuery = `(${siteFilter}) ${query} (acórdão OR "recurso especial" OR "apelação" OR "agravo" OR ementa) "processo"`;
 
     const tbs =
       period === "year" ? "qdr:y" :
