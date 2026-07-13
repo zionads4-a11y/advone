@@ -50,7 +50,7 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
   const [pendingLockedPlan, setPendingLockedPlan] = useState<BillingModel | null>(null);
   const [enterprisePwd, setEnterprisePwd] = useState("");
   const [verifyingPwd, setVerifyingPwd] = useState(false);
-  const isFree = false;
+  const isFree = selectedModel === "plan_ia_zionads";
 
   const isPlanLocked = (key: BillingModel) =>
     (key === "plan_enterprise" && !enterpriseUnlocked) ||
