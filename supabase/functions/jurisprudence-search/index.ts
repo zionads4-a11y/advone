@@ -87,43 +87,52 @@ async function handler(req: Request): Promise<Response> {
     ];
 
     const siteFilter = sources.map((d) => `site:${d}`).join(" OR ");
-    // Força termos de decisão judicial e exclui seções de notícias
-    const searchQuery = `(${siteFilter}) "${query}" (ementa OR acórdão OR "relator" OR "recurso especial" OR "apelação" OR "agravo de instrumento") -noticias -imprensa -blog`;
+    // 1ª tentativa: consulta focada em decisões judiciais nas fontes filtradas
+    const strictQuery = `(${siteFilter}) ${query} (ementa OR acórdão OR "recurso especial" OR "apelação" OR "agravo") -noticias -imprensa -blog`;
+    // 2ª tentativa (fallback): web aberta priorizando jusbrasil, com termos de decisão
+    const relaxedQuery = `${query} jurisprudência (ementa OR acórdão OR "processo nº") site:jusbrasil.com.br OR site:stf.jus.br OR site:stj.jus.br OR site:tst.jus.br`;
 
     const tbs =
       period === "year" ? "qdr:y" :
       period === "month" ? "qdr:m" :
       undefined;
 
-    // Firecrawl search
-    const fcRes = await fetch("https://api.firecrawl.dev/v2/search", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        query: searchQuery,
-        limit: 8,
-        lang: "pt",
-        country: "br",
-        ...(tbs ? { tbs } : {}),
-      }),
-    });
-
-    if (!fcRes.ok) {
-      const t = await fcRes.text().catch(() => "");
-      console.error("Firecrawl error:", fcRes.status, t);
-      return json(req, { error: "Falha na busca web", detail: t }, 502);
+    async function runFirecrawl(q: string) {
+      const res = await fetch("https://api.firecrawl.dev/v2/search", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: q,
+          limit: 10,
+          lang: "pt",
+          country: "br",
+          ...(tbs ? { tbs } : {}),
+        }),
+      });
+      if (!res.ok) {
+        const t = await res.text().catch(() => "");
+        console.error("Firecrawl error:", res.status, t, "query=", q);
+        return [] as any[];
+      }
+      const j = await res.json();
+      const raw: any[] =
+        (Array.isArray(j?.data) ? j.data : null) ??
+        (Array.isArray(j?.web) ? j.web : null) ??
+        (Array.isArray(j?.data?.web) ? j.data.web : null) ??
+        (Array.isArray(j?.results) ? j.results : null) ??
+        [];
+      console.log("Firecrawl returned", raw.length, "for:", q.slice(0, 100));
+      return raw;
     }
 
-    const fcJson = await fcRes.json();
-    // Firecrawl v2 pode retornar { data: [...] } ou { web: [...] }
-    const rawResults: any[] =
-      (Array.isArray(fcJson?.data) ? fcJson.data : null) ??
-      (Array.isArray(fcJson?.web) ? fcJson.web : null) ??
-      (Array.isArray(fcJson?.data?.web) ? fcJson.data.web : []) ??
-      [];
+    let rawResults = await runFirecrawl(strictQuery);
+    if (rawResults.length === 0) {
+      console.log("Strict query empty, retrying relaxed…");
+      rawResults = await runFirecrawl(relaxedQuery);
+    }
 
     const results = rawResults
       .map((r: any) => ({
