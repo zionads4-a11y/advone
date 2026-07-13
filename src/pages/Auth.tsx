@@ -120,7 +120,7 @@ function LoginForm({ mode }: { mode: string | null }) {
           <Button 
             type="submit" 
             className="w-full h-12 gradient-primary text-white font-bold" 
-            disabled={emailLoading || googleLoading}
+            disabled={emailLoading}
           >
             {emailLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             Entrar no Painel
