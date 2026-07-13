@@ -256,6 +256,44 @@ function getTodayBrasilia(timeZone: string = "America/Sao_Paulo"): string {
   return `${b.getFullYear()}-${String(b.getMonth() + 1).padStart(2, "0")}-${String(b.getDate()).padStart(2, "0")}`;
 }
 
+/**
+ * Verifica se AGORA está dentro do horário de expediente configurado em companies.business_hours.
+ * - Formato aceito: { monday: [{open:"08:00", close:"18:00"}, ...], ... } ou { monday: {shifts:[...]}}
+ * - Se o dia não tiver turnos configurados (array vazio) → fora do expediente (bot pode responder).
+ * - Feriado nacional brasileiro → fora do expediente (bot pode responder).
+ * - Se business_hours estiver totalmente vazio → assumimos "sem expediente definido" = fora do expediente.
+ */
+function isWithinBusinessHoursNow(businessHours: any, timezone: string = "America/Sao_Paulo"): boolean {
+  if (!businessHours || typeof businessHours !== "object" || Object.keys(businessHours).length === 0) {
+    return false;
+  }
+  const now = getNowBrasilia(timezone);
+  const dayKeys = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+  const dayKey = dayKeys[now.getDay()];
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  if (isBrazilianHolidayStr(todayStr)) return false;
+
+  const dayCfg = businessHours[dayKey];
+  let shifts: any[] = [];
+  if (Array.isArray(dayCfg)) shifts = dayCfg;
+  else if (dayCfg && typeof dayCfg === "object" && dayCfg.enabled !== false) shifts = dayCfg.shifts || [];
+
+  if (!shifts.length) return false;
+
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  for (const shift of shifts) {
+    const start = shift.open || shift.start;
+    const end = shift.close || shift.end;
+    if (!start || !end) continue;
+    const [sh, sm] = String(start).split(":").map(Number);
+    const [eh, em] = String(end).split(":").map(Number);
+    const s = sh * 60 + (sm || 0);
+    const e = eh * 60 + (em || 0);
+    if (nowMin >= s && nowMin < e) return true;
+  }
+  return false;
+}
+
 async function getAvailableSlots(supabase: any, companyId: string, dateStr: string, timezone: string = "America/Sao_Paulo"): Promise<{ date: string; dayName: string; slots: string[] }> {
   const dayNames = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
   const dayKeys = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
