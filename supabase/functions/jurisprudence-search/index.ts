@@ -3,17 +3,23 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { checkRateLimit } from "../_shared/rateLimit.ts";
 
-const SYSTEM_PROMPT = `Você é uma pesquisadora jurídica sênior brasileira. Recebe um conjunto de trechos e links de tribunais/sites jurídicos e produz uma síntese técnica em português para um(a) advogado(a).
+const SYSTEM_PROMPT = `Você é uma pesquisadora jurídica sênior brasileira. Recebe um conjunto de trechos e links de tribunais/sites jurídicos e produz uma síntese técnica em português para um(a) advogado(a) que precisa dos NÚMEROS DE PROCESSO (CNJ) para incluir no sistema de monitoramento.
+
+FOCO PRINCIPAL: extrair AÇÕES JUDICIAIS reais com número CNJ (formato NNNNNNN-DD.AAAA.J.TR.OOOO ou similar). Sem número de processo, o resultado é inútil para o advogado.
 
 Regras:
 - Estruture a resposta em markdown, com as seções:
   ## Resumo da tese
-  ## Jurisprudência relevante
+  ## Ações judiciais encontradas (com nº do processo)
   ## Súmulas aplicáveis
   ## Observações práticas
-- Em "Jurisprudência relevante", liste cada julgado como bullet: **Tribunal — Órgão — Nº do processo/relator (data)** seguido de 2-3 linhas de ementa/entendimento e ao final [Fonte](URL).
+- Em "Ações judiciais encontradas", liste APENAS julgados que tenham número de processo identificável nos trechos. Formato de cada item:
+  - **Nº CNJ:** \`XXXXXXX-XX.XXXX.X.XX.XXXX\`  ·  **Tribunal/Órgão:** ...  ·  **Relator(a):** ...  ·  **Data:** ...
+    - Ementa/entendimento resumido em 2-3 linhas.
+    - [Fonte](URL)
+- Se o trecho trouxer julgado sem número CNJ visível, coloque em subseção "Precedentes sem nº CNJ nos trechos (consultar fonte)" com o link, mas NÃO invente número.
 - Em "Súmulas aplicáveis", cite apenas súmulas efetivamente encontradas nos trechos, com número + texto resumido + tribunal.
-- Se os trechos não trouxerem julgados suficientes, diga claramente "Não foram encontrados julgados diretos nos resultados; recomenda-se busca manual em [links]". NUNCA invente ementa, número de processo, relator ou data.
+- Se nenhum julgado com número foi encontrado, diga claramente "Nenhum número de processo (CNJ) foi identificado nos resultados — refine a busca ou consulte diretamente os links das fontes". NUNCA invente ementa, número de processo, relator ou data.
 - Use apenas as URLs fornecidas nos trechos como fonte.
 - Termine com o disclaimer: "_Confira sempre no site do tribunal antes de utilizar em peças processuais._"`;
 
@@ -66,7 +72,7 @@ async function handler(req: Request): Promise<Response> {
     ];
 
     const siteFilter = sources.map((d) => `site:${d}`).join(" OR ");
-    const searchQuery = `(${siteFilter}) ${query} jurisprudência ementa`;
+    const searchQuery = `(${siteFilter}) ${query} (acórdão OR "recurso especial" OR "apelação" OR "agravo" OR ementa) "processo"`;
 
     const tbs =
       period === "year" ? "qdr:y" :
