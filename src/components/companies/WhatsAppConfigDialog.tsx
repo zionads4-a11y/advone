@@ -104,7 +104,7 @@ export function WhatsAppConfigDialog({
       setAiLoading(true);
       const { data } = await supabase
         .from("whatsapp_configs")
-        .select("ai_enabled, ai_auto_reply, ai_prompt, ai_objective, alert_whatsapp")
+        .select("ai_enabled, ai_auto_reply, ai_prompt, ai_objective, alert_whatsapp, bot_only_after_hours")
         .eq("company_id", companyId)
         .maybeSingle();
 
@@ -117,6 +117,7 @@ export function WhatsAppConfigDialog({
         );
         setAiObjective(data.ai_objective || "Entrar em contato com os Leads e agendar uma reunião");
         setAlertWhatsapp(data.alert_whatsapp || "");
+        setBotOnlyAfterHours((data as any).bot_only_after_hours || false);
       }
       setAiLoading(false);
     };
