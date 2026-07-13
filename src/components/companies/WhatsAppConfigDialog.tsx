@@ -233,6 +233,7 @@ export function WhatsAppConfigDialog({
       ai_prompt: "", // Removido da UI: prompt agora é montado dinamicamente pelo Bot Flows Editor
       ai_objective: aiObjective,
       alert_whatsapp: alertWhatsapp || null,
+      bot_only_after_hours: botOnlyAfterHours,
     };
 
     const { error } = await supabase
