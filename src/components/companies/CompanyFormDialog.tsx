@@ -50,7 +50,7 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
   const [pendingLockedPlan, setPendingLockedPlan] = useState<BillingModel | null>(null);
   const [enterprisePwd, setEnterprisePwd] = useState("");
   const [verifyingPwd, setVerifyingPwd] = useState(false);
-  const isFree = false;
+  const isFree = selectedModel === "plan_ia_zionads";
 
   const isPlanLocked = (key: BillingModel) =>
     (key === "plan_enterprise" && !enterpriseUnlocked) ||
@@ -309,6 +309,7 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
             )}
           </div>
 
+          {!isFree && (
           <div className="space-y-3 rounded-lg border border-dashed border-primary/40 bg-primary/5 p-3">
             <div className="flex items-baseline justify-between">
               <Label className="text-sm font-semibold">Aplicar desconto (opcional)</Label>
@@ -403,6 +404,14 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
               </>
             )}
           </div>
+          )}
+
+          {isFree && (
+            <div className="rounded-lg border border-emerald-500/40 bg-emerald-500/5 p-3 text-xs text-emerald-700 dark:text-emerald-400">
+              🎁 Plano cortesia ZionAds — pagamento é feito por fora, não é necessário cadastrar dados de cobrança do cliente. Basta o nome do escritório para provisionar o acesso ao AdvOne IA.
+            </div>
+          )}
+
 
           <Button type="submit" className="w-full gradient-primary text-primary-foreground">
             Adicionar Empresa
