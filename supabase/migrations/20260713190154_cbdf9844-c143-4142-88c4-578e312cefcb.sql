@@ -1,0 +1,1 @@
+ALTER TYPE public.billing_model ADD VALUE IF NOT EXISTS 'plan_ia_zionads';

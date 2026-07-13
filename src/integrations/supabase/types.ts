@@ -5010,6 +5010,7 @@ export type Database = {
         | "plan_gestao"
         | "plan_complete"
         | "plan_enterprise"
+        | "plan_ia_zionads"
       bot_agent_type:
         | "document_collector"
         | "viability_analyzer"
@@ -5176,6 +5177,7 @@ export const Constants = {
         "plan_gestao",
         "plan_complete",
         "plan_enterprise",
+        "plan_ia_zionads",
       ],
       bot_agent_type: [
         "document_collector",
