@@ -117,6 +117,7 @@ const operadorItems = [
   { title: "Processos (Kanban)", url: "/processos-kanban", icon: Briefcase },
   { title: "IA Jurídica", url: "/ia-juridica", icon: Scale, premium: true },
   { title: "Jurisprudência", url: "/jurisprudencia", icon: Search },
+  { title: "Busca de Processos", url: "/busca-processos", icon: Scale },
   { title: "AdvCalc", url: "/calculadoras", icon: Calculator },
 ];
 
