@@ -158,7 +158,7 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
                         Popular
                       </span>
                     )}
-                    {m.key === "plan_enterprise" && !enterpriseUnlocked && (
+                    {isPlanLocked(m.key) && (
                       <span className="absolute -top-2 right-3 flex items-center gap-1 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
                         <Lock className="h-2.5 w-2.5" /> Gerente
                       </span>
