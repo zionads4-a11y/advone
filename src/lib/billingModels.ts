@@ -10,6 +10,7 @@
 
 export type BillingModel =
   | "plan_ia"
+  | "plan_ia_zionads"
   | "plan_gestao"
   | "plan_complete"
   | "plan_enterprise"
