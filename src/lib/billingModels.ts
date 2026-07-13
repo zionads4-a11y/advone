@@ -52,6 +52,22 @@ export const BILLING_MODELS: BillingModelOption[] = [
     ],
   },
   {
+    key: "plan_ia_zionads",
+    emoji: "⚡",
+    label: "AdvOne IA · ZionAds (cortesia)",
+    monthly_value: 0,
+    description: "Mesmo pacote do AdvOne IA, com cobrança tratada fora da plataforma pela ZionAds. Sem gerar assinatura no Asaas.",
+    partnership_type: "mensalidade_zionads",
+    service_mode: "ai_only",
+    monitoring_quota: 10,
+    features: [
+      "Todos os recursos do AdvOne IA",
+      "Cobrança gerenciada fora da plataforma (ZionAds)",
+      "Sem cobrança automática no Asaas",
+      "Só o time ZionAds pode cadastrar",
+    ],
+  },
+  {
     key: "plan_gestao",
     emoji: "📊",
     label: "AdvOne Gestão",
