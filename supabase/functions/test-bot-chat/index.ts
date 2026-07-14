@@ -136,7 +136,13 @@ Turno 1: Cumprimente com calor humano + pergunte o nome do lead.
 Turno 2: Após o nome, se a intenção não for clara, pergunte obrigatoriamente: "Você já é nosso cliente ou precisa de ajuda com um caso novo? 😊" Se for sobre processo, peça o nome completo para busca.
 Turno 3: Se for cliente novo, pergunte "Me conta, o que tá acontecendo?" e siga o script de qualificação.
 Turno 4+: Siga o script de qualificação — UMA pergunta por turno.
-Último: Conduza para agendamento. APÓS o lead aceitar o horário sugerido, peça o NOME COMPLETO.
+Último: Conduza para agendamento. APÓS o lead aceitar o horário sugerido, peça o NOME COMPLETO se ainda faltar.
+
+🚫 CORREÇÃO GERAL DE CONVERSA:
+- NUNCA diga "perdão", "desculpa" ou "me desculpa" sem erro real. Se o lead demorou, continue do ponto em que parou.
+- Se a última pergunta foi confirmar um horário e o lead respondeu "pode sim", "sim", "ok", "confirmo", "fechado" ou equivalente, isso É ACEITE DO HORÁRIO. Não reconfirme assunto; avance para nome/agendamento.
+- Aceite nome com nome + sobrenome. NÃO exija 3 palavras. Ex.: "Daniel Manaces" é suficiente.
+- Não peça para o lead contar mais depois que ele já aceitou agendar.
 
 🚫 REGRA ABSOLUTA: NUNCA peça o CPF ou RG. Peça apenas o NOME COMPLETO no final, após o agendamento ser aceito. Se o cliente perguntar se precisa de CPF, diga que não é necessário agora.
 
@@ -149,7 +155,7 @@ Turno 4+: Siga o script de qualificação — UMA pergunta por turno.
 - Se já for depois das 17:00, NÃO ofereça horários para hoje — ofereça para o próximo dia útil
 
 🔒 CAPTURA OBRIGATÓRIA DE NOME COMPLETO (SOMENTE APÓS ACEITE DO HORÁRIO):
-- APÓS o lead aceitar o horário sugerido, peça o NOME COMPLETO (mín. 3 palavras).
+- APÓS o lead aceitar o horário sugerido, peça o NOME COMPLETO (nome + sobrenome; não exija 3 palavras).
 - Use tom cordial: "Perfeito! 🙂 Pra já deixar tudo certinho no nosso sistema antes de finalizar, você poderia gentilmente me informar seu *nome completo*, por favor?"
 - Quando receber, chame register_client_name passando full_name e agradeça.
 - 🚫 NUNCA PEÇA CPF.
@@ -311,7 +317,7 @@ function formatDateDMY(dateStr: string): string {
 function isValidFullName(raw: string): boolean {
   if (!raw) return false;
   const parts = String(raw).trim().split(/\s+/).filter(p => p.length >= 2 && /^[A-Za-zÀ-ÿ'-]+$/.test(p));
-  return parts.length >= 3;
+  return parts.length >= 2;
 }
 
 function isValidCPF(cpf: string): boolean {
@@ -461,7 +467,7 @@ serve(async (req) => {
           parameters: {
             type: "object",
             properties: {
-              full_name: { type: "string", description: "Nome COMPLETO (mínimo 3 palavras: nome + sobrenomes)" }
+              full_name: { type: "string", description: "Nome completo (nome + sobrenome; não exija 3 palavras)" }
             },
             required: ["full_name"],
             additionalProperties: false
@@ -582,7 +588,7 @@ serve(async (req) => {
           const fullName = String(args.full_name || "").trim();
           const nameOk = isValidFullName(fullName);
           if (!nameOk) {
-            toolResult = { success: false, error: "Nome incompleto. Peça nome COMPLETO com sobrenomes (≥3 palavras)." };
+            toolResult = { success: false, error: "Nome incompleto. Peça nome e sobrenome. Não peça desculpas e não exija 3 palavras." };
           } else {
             cpfRegistered = "NAME_REGISTERED"; // Reusing the variable to track name instead of CPF
             toolResult = { success: true, full_name: fullName, message: "[TESTE] Nome completo registrado. Já pode agendar." };

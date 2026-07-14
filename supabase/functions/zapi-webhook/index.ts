@@ -17,7 +17,10 @@ function buildSDRPrompt(
 ): string {
   const company = config.companies;
   const officeName = config.office_name || company?.name || "o escritório";
-  const customPrompt = (config.ai_prompt || "").trim();
+  const customPrompt = (config.ai_prompt || "").trim()
+    .replace(/^\s*\d+\.\s*⚠️\s*CONFIRMAR O ASSUNTO:.*$/gmi, "7. ⚠️ IDENTIFICAÇÃO INTERNA DO CASO: identifique o assunto pelo histórico. NÃO confirme o assunto e NÃO peça para contar mais se já houver contexto.")
+    .replace(/mín(?:imo|\.)?\s*3\s+palavras/gi, "nome + sobrenome")
+    .replace(/mín\.\s*3\s+palavras/gi, "nome + sobrenome");
   const botName = company?.bot_name || "Laura";
   const botRole = company?.bot_role_description || "atendente virtual";
 
@@ -37,7 +40,17 @@ Lead silencioso (não respondeu) TAMBÉM não é desistência — a cadência au
   const timeHeader = `\n[HORÁRIO ATUAL — Brasília]\nHoje é ${_todayStr}, agora são ${_nowTimeStr}. Estamos no período da ${_periodoStr}. SEMPRE cumprimente e se despeça de acordo com o período do dia. NUNCA diga "bom dia" à tarde/noite, nem "boa tarde" de manhã/noite, nem "tenha um bom dia" à noite.`;
 
   if (customPrompt.startsWith("Você é")) {
-    return customPrompt + timeHeader + lostBlock + (flowsBlock ? `\n[FLUXOS]\n${flowsBlock}` : "") + (triageBlock ? `\n[TRIAGEM]\n${triageBlock}` : "");
+    const globalConversationFixes = `
+
+[CORREÇÃO GERAL ADVONE — PRIORIDADE MÁXIMA]
+1. NUNCA diga "perdão", "desculpa" ou "me desculpa" sem erro real. Se o lead demorou para responder, continue normalmente do ponto em que parou.
+2. Se sua última pergunta foi confirmar um horário oferecido e o lead respondeu "pode sim", "sim", "confirmo", "ok", "fechado", "pode ser" ou equivalente, isso É ACEITE DO HORÁRIO. Avance para registrar/agendar; NÃO volte a confirmar assunto, modalidade ou intenção.
+3. Se o lead já aceitou conversar/agendar, NÃO faça mais perguntas de qualificação e NÃO peça para "contar mais". Vá direto para o próximo passo do agendamento.
+4. Aceite nome com nome + sobrenome. NÃO exija 3 palavras. Ex.: "Daniel Manaces" é nome suficiente para agendar.
+5. Ao pedir nome no final, peça UMA vez, sem pedir CPF/RG/senha/processo, e sem repetir se o lead já informou nome + sobrenome.
+6. É proibido usar frases como "Você quer falar sobre X, certo?" ou "Pode me contar um pouco mais?" quando o assunto já foi identificado.
+7. Fluxo de agendamento correto: turno → check_availability → oferecer horário → se o lead aceitar, pedir/registrar nome completo se ainda faltar → schedule_appointment.`;
+    return customPrompt + globalConversationFixes + timeHeader + lostBlock + (flowsBlock ? `\n[FLUXOS]\n${flowsBlock}` : "") + (triageBlock ? `\n[TRIAGEM]\n${triageBlock}` : "");
   }
 
 
@@ -95,6 +108,9 @@ Lead silencioso (não respondeu) TAMBÉM não é desistência — a cadência au
 8. Data de hoje: ${today}. Agora são ${nowTime} (horário de Brasília) — período da ${periodo}. SEMPRE use a saudação correta ao período; NUNCA diga "bom dia" à tarde/noite nem "tenha um bom dia" à noite. Horários só via check_availability.
 9. UMA pergunta por vez. Máximo 3 linhas por mensagem.
 10. Se o cliente confirmou ("Isso", "Sim", "Exato"), você deve avançar para o próximo passo.
+11. NUNCA diga "perdão", "desculpa" ou "me desculpa" só porque o lead demorou para responder. Silêncio/pausa não é erro: continue exatamente de onde parou.
+12. Se sua última pergunta foi "Podemos agendar para esse horário?" e o lead respondeu afirmativamente, considere o horário aceito. Não reconfirme assunto/modalidade; peça/registre o nome se faltar e conclua o agendamento.
+13. Aceite nome com nome + sobrenome. Não exija 3 palavras para agendar.
 [FLUXO CONVERSACIONAL]
 1. Cumprimente e descubra o nome naturalmente (não como formulário).
 2. Se já é cliente → lookup_existing_client. Se caso novo → passo 3.
@@ -104,7 +120,7 @@ Lead silencioso (não respondeu) TAMBÉM não é desistência — a cadência au
     - Se o cliente já trouxe o problema na primeira mensagem, você deve IMEDIATAMENTE validar emocionalmente ("Poxa, entendi, 6 meses sem resposta é muito tempo...") e avançar para a próxima pergunta de qualificação ou agendamento.
     - Se o cliente falar que tem um processo, use lookup_existing_client para tentar localizar.
 4. SINAIS QUENTES: "urgente", "prazo", "amanhã", "socorro", "preciso resolver", "negado", "corte" → pule perguntas genéricas e foque na validação emocional seguida de agendamento ou coleta de dados críticos.
-5. AGENDAMENTO: Pergunte turno preferido → check_availability → ofereça 2 opções → peça NOME COMPLETO → register_client_name + schedule_appointment.
+ 5. AGENDAMENTO: Pergunte turno preferido → check_availability → ofereça horário → se o lead aceitar, peça NOME COMPLETO apenas se ainda faltar → register_client_name + schedule_appointment.
 6. OBJEÇÕES (seja leve mas persistente):
    - "Vou pensar" → "Claro! A conversa com o doutor é sem compromisso. Quer que reserve e se mudar de ideia me avisa?"
    - "Depois eu vejo" → "Tranquilo! Só fica ligado que [prazo legal se aplicável]. Me chama quando quiser 😊"
@@ -446,7 +462,7 @@ function sanitizeDate(rawDate: string | undefined | null, timezone: string = "Am
 function isValidFullName(raw: string): boolean {
   if (!raw) return false;
   const parts = String(raw).trim().split(/\s+/).filter(p => p.length >= 2 && /^[A-Za-zÀ-ÿ'-]+$/.test(p));
-  return parts.length >= 3;
+  return parts.length >= 2;
 }
 
 // ====== SDR TOOLS ======
@@ -525,7 +541,7 @@ const sdrTools = [
       parameters: {
         type: "object",
         properties: {
-          full_name: { type: "string", description: "Nome completo do lead (mínimo 3 palavras)" }
+          full_name: { type: "string", description: "Nome completo do lead (nome + sobrenome; não exija 3 palavras)" }
         },
         required: ["full_name"],
         additionalProperties: false
@@ -723,6 +739,7 @@ function sanitizeReply(text: string | null | undefined): string | null {
     /\bFLUXO\s+(OBRIGAT[ÓO]RIO|DISPON[ÍI]VEIS?)/i,
     /MODALIDADE\s+—/i,
     /Em\s+schedule_appointment/i,
+    /^\s*(perd[ãa]o|desculpa|me desculpa)[,!\.\s]*/i,
   ];
   const cleanedLines = text
     .split(/\r?\n/)
@@ -880,7 +897,7 @@ Antes de responder:
           const nameOk = isValidFullName(fullName);
 
           if (!nameOk) {
-            toolResult = { success: false, error: "Nome incompleto. Peça o nome COMPLETO com sobrenomes (mínimo 3 palavras, ex: 'João da Silva Santos')." };
+            toolResult = { success: false, error: "Nome incompleto. Peça nome e sobrenome (ex: 'João Silva'). Não peça desculpas e não exija 3 palavras." };
           } else if (leadId) {
             await supabase.from("leads").update({
               name: fullName,
@@ -1048,7 +1065,7 @@ Antes de responder:
             toolResult = {
               success: false,
               error: "NOME_COMPLETO_OBRIGATORIO",
-              instruction: "Antes de agendar, peça o NOME COMPLETO do lead (nome + sobrenome, mínimo 3 palavras). Use exatamente: \"Perfeito 🙂 Pra já deixar tudo organizado aqui pra equipe, me passa o seu *nome completo*, por favor?\". Quando receber, chame register_client_name e SÓ DEPOIS chame schedule_appointment de novo."
+              instruction: "Antes de agendar, peça o NOME COMPLETO do lead (nome + sobrenome). Use exatamente: \"Perfeito 🙂 Pra já deixar tudo organizado aqui pra equipe, me passa o seu *nome completo*, por favor?\". Não diga perdão/desculpa. Quando receber nome + sobrenome, chame register_client_name e SÓ DEPOIS chame schedule_appointment de novo."
             };
             // não seta shouldSchedule, não cria reminder — deixa o loop seguir e o modelo gerar a pergunta do nome
           } else {
