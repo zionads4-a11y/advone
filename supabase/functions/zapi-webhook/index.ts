@@ -17,7 +17,10 @@ function buildSDRPrompt(
 ): string {
   const company = config.companies;
   const officeName = config.office_name || company?.name || "o escritório";
-  const customPrompt = (config.ai_prompt || "").trim();
+  const customPrompt = (config.ai_prompt || "").trim()
+    .replace(/^\s*\d+\.\s*⚠️\s*CONFIRMAR O ASSUNTO:.*$/gmi, "7. ⚠️ IDENTIFICAÇÃO INTERNA DO CASO: identifique o assunto pelo histórico. NÃO confirme o assunto e NÃO peça para contar mais se já houver contexto.")
+    .replace(/mín(?:imo|\.)?\s*3\s+palavras/gi, "nome + sobrenome")
+    .replace(/mín\.\s*3\s+palavras/gi, "nome + sobrenome");
   const botName = company?.bot_name || "Laura";
   const botRole = company?.bot_role_description || "atendente virtual";
 
