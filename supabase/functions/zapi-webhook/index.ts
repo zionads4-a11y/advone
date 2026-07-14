@@ -459,7 +459,7 @@ function sanitizeDate(rawDate: string | undefined | null, timezone: string = "Am
 function isValidFullName(raw: string): boolean {
   if (!raw) return false;
   const parts = String(raw).trim().split(/\s+/).filter(p => p.length >= 2 && /^[A-Za-zÀ-ÿ'-]+$/.test(p));
-  return parts.length >= 3;
+  return parts.length >= 2;
 }
 
 // ====== SDR TOOLS ======
@@ -893,7 +893,7 @@ Antes de responder:
           const nameOk = isValidFullName(fullName);
 
           if (!nameOk) {
-            toolResult = { success: false, error: "Nome incompleto. Peça o nome COMPLETO com sobrenomes (mínimo 3 palavras, ex: 'João da Silva Santos')." };
+            toolResult = { success: false, error: "Nome incompleto. Peça nome e sobrenome (ex: 'João Silva'). Não peça desculpas e não exija 3 palavras." };
           } else if (leadId) {
             await supabase.from("leads").update({
               name: fullName,
@@ -1061,7 +1061,7 @@ Antes de responder:
             toolResult = {
               success: false,
               error: "NOME_COMPLETO_OBRIGATORIO",
-              instruction: "Antes de agendar, peça o NOME COMPLETO do lead (nome + sobrenome, mínimo 3 palavras). Use exatamente: \"Perfeito 🙂 Pra já deixar tudo organizado aqui pra equipe, me passa o seu *nome completo*, por favor?\". Quando receber, chame register_client_name e SÓ DEPOIS chame schedule_appointment de novo."
+              instruction: "Antes de agendar, peça o NOME COMPLETO do lead (nome + sobrenome). Use exatamente: \"Perfeito 🙂 Pra já deixar tudo organizado aqui pra equipe, me passa o seu *nome completo*, por favor?\". Não diga perdão/desculpa. Quando receber nome + sobrenome, chame register_client_name e SÓ DEPOIS chame schedule_appointment de novo."
             };
             // não seta shouldSchedule, não cria reminder — deixa o loop seguir e o modelo gerar a pergunta do nome
           } else {
