@@ -538,7 +538,7 @@ const sdrTools = [
       parameters: {
         type: "object",
         properties: {
-          full_name: { type: "string", description: "Nome completo do lead (mínimo 3 palavras)" }
+          full_name: { type: "string", description: "Nome completo do lead (nome + sobrenome; não exija 3 palavras)" }
         },
         required: ["full_name"],
         additionalProperties: false
