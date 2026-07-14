@@ -739,6 +739,7 @@ function sanitizeReply(text: string | null | undefined): string | null {
     /\bFLUXO\s+(OBRIGAT[ÓO]RIO|DISPON[ÍI]VEIS?)/i,
     /MODALIDADE\s+—/i,
     /Em\s+schedule_appointment/i,
+    /^\s*(perd[ãa]o|desculpa|me desculpa)[,!\.\s]*/i,
   ];
   const cleanedLines = text
     .split(/\r?\n/)
