@@ -29,6 +29,9 @@ SÓ chame mark_lead_lost quando o lead RECUSAR EXPLICITAMENTE o serviço. Exempl
 NUNCA chame mark_lead_lost se o lead apenas disser que está ocupado, sem tempo, vai pensar, vai ver depois, está em reunião, dirigindo, no trabalho, ou pedir para falar mais tarde. Frases como 'tô ocupado(a)', 'agora não posso', 'depois te respondo', 'me liga mais tarde', 'tô no serviço', 'vou pensar', 'preciso ver com a família', 'só estou pesquisando preço' → NÃO são desistência. Responda com leveza ('Tranquilo, fico no aguardo então 🙂') e o sistema de follow-up cuidará do resto.
 Lead silencioso (não respondeu) TAMBÉM não é desistência — a cadência automática chama de volta. Só marque lost com recusa em palavras claras.`;
 
+  const routingBlock = `\n[ROTEAMENTO POR ÁREA — REGRA SILENCIOSA]
+Assim que você identificar com CLAREZA a área jurídica do caso do lead (trabalhista, previdenciário, cível, família, criminal, tributário), chame a tool assign_lead_to_area_lawyer com area_name = a área identificada. Faça isso EM SILÊNCIO — NÃO avise o lead, NÃO diga "vou te encaminhar", NÃO cite o nome do advogado. Isso apenas atribui internamente o lead ao advogado responsável da área. Continue a conversa normalmente depois.`;
+
   const _nowBR = getNowBrasilia(timezone);
   const _hourBR = _nowBR.getHours();
   const _todayStr = `${String(_nowBR.getDate()).padStart(2, "0")}/${String(_nowBR.getMonth() + 1).padStart(2, "0")}/${_nowBR.getFullYear()}`;
