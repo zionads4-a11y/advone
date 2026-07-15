@@ -4,6 +4,7 @@ import { getErrorMessage } from "../_shared/errors.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { checkRateLimit } from "../_shared/rateLimit.ts";
 import { log } from "../_shared/logger.ts";
+import { sendText, sendMedia } from "../_shared/whatsappProvider.ts";
 
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
