@@ -87,15 +87,15 @@ serve(async (req) => {
     }
 
 
-    // Get Z-API config for this company
+    // Get WhatsApp config for this company (supports UaZapi + Meta Cloud)
     const { data: config } = await adminClient
       .from("whatsapp_configs")
-      .select("zapi_instance_id, zapi_token, ai_enabled, ai_prompt, ai_auto_reply")
+      .select("provider, zapi_instance_id, zapi_token, meta_phone_number_id, meta_access_token, ai_enabled, ai_prompt, ai_auto_reply")
       .eq("company_id", company_id)
       .maybeSingle();
 
     if (!config) {
-      return new Response(JSON.stringify({ error: "Z-API não configurada para esta empresa" }), {
+      return new Response(JSON.stringify({ error: "WhatsApp não configurado para esta empresa" }), {
         status: 404,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
