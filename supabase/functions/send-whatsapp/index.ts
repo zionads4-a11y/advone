@@ -187,66 +187,31 @@ serve(async (req) => {
       });
     }
 
-    const SERVER_URL = "https://ziondigital.uazapi.com";
-    const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
-
-    const instanceParam = encodeURIComponent(config.zapi_instance_id);
-    const tokenParam = encodeURIComponent(config.zapi_token || config.zapi_instance_id);
-    const baseQueryString = `instance=${instanceParam}&token=${tokenParam}`;
-
-    const buildHeaders = () => {
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (ADMIN_TOKEN) headers["admintoken"] = ADMIN_TOKEN;
-      return headers;
-    };
-
-    let zapiResult: any;
+    let zapiResult: any = {};
+    let messageIdExternal: string | null = null;
 
     if (media_url) {
-      // Send file/video/image via UaZapi
-      const mediaBody: any = {
-        number: phone,
-        mediaUrl: media_url,
-      };
-      if (message) mediaBody.caption = message;
-
-      const zapiResponse = await fetch(`${SERVER_URL}/send/media?${baseQueryString}`, {
-        method: "POST",
-        headers: buildHeaders(),
-        body: JSON.stringify(mediaBody),
-      });
-
-      if (!zapiResponse.ok) {
-        const errorText = await zapiResponse.text();
-        console.error("UaZapi send-media error:", zapiResponse.status, errorText);
-        return new Response(JSON.stringify({ error: "Erro ao enviar mídia via WhatsApp", details: errorText }), {
+      const result = await sendMedia(config as any, phone, media_url, message || undefined, media_type);
+      if (!result.ok) {
+        console.error("WhatsApp send-media error:", result.status, result.error);
+        return new Response(JSON.stringify({ error: "Erro ao enviar mídia via WhatsApp", details: result.error }), {
           status: 502,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-
-      zapiResult = await zapiResponse.json();
+      zapiResult = result.raw || {};
+      messageIdExternal = result.message_id ?? null;
     } else {
-      // Send text via UaZapi
-      const zapiResponse = await fetch(`${SERVER_URL}/send/text?${baseQueryString}`, {
-        method: "POST",
-        headers: buildHeaders(),
-        body: JSON.stringify({
-          number: phone,
-          text: message,
-        }),
-      });
-
-      if (!zapiResponse.ok) {
-        const errorText = await zapiResponse.text();
-        console.error("UaZapi send-text error:", zapiResponse.status, errorText);
-        return new Response(JSON.stringify({ error: "Erro ao enviar mensagem via WhatsApp", details: errorText }), {
+      const result = await sendText(config as any, phone, message);
+      if (!result.ok) {
+        console.error("WhatsApp send-text error:", result.status, result.error);
+        return new Response(JSON.stringify({ error: "Erro ao enviar mensagem via WhatsApp", details: result.error }), {
           status: 502,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-
-      zapiResult = await zapiResponse.json();
+      zapiResult = result.raw || {};
+      messageIdExternal = result.message_id ?? null;
     }
 
     // Store outgoing message in database and update lead status
