@@ -64,8 +64,22 @@ export function WhatsAppConfigDialog({
   const [activeTab, setActiveTab] = useState("whatsapp");
   const [saving, setSaving] = useState(false);
 
+  // Provider (uazapi | meta_cloud)
+  const [provider, setProvider] = useState<"uazapi" | "meta_cloud">("uazapi");
+
   // WhatsApp form
   const [formInstanceId, setFormInstanceId] = useState("");
+
+  // Meta Cloud form
+  const [metaPhoneNumberId, setMetaPhoneNumberId] = useState("");
+  const [metaWabaId, setMetaWabaId] = useState("");
+  const [metaAccessToken, setMetaAccessToken] = useState("");
+  const [metaAppId, setMetaAppId] = useState("");
+  const [metaAppSecret, setMetaAppSecret] = useState("");
+  const [metaVerifyToken, setMetaVerifyToken] = useState("");
+  const [metaBusinessId, setMetaBusinessId] = useState("");
+  const [metaTesting, setMetaTesting] = useState(false);
+  const [metaTestInfo, setMetaTestInfo] = useState<any>(null);
 
   // QR Code state
   const [qrCode, setQrCode] = useState<string | null>(null);
@@ -81,10 +95,32 @@ export function WhatsAppConfigDialog({
   const [botOnlyAfterHours, setBotOnlyAfterHours] = useState(false);
   const [aiLoading, setAiLoading] = useState(true);
 
-  const webhookUrl = getWebhookUrl(companyId);
+  const zapiWebhookUrl = getWebhookUrl(companyId);
+  const metaWebhookUrl = companyId
+    ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/meta-webhook?company_id=${companyId}`
+    : "";
 
   // Populate form when config changes
   useEffect(() => {
+    if (!open || !companyId) return;
+    const load = async () => {
+      const { data } = await supabase
+        .from("whatsapp_configs")
+        .select("provider, meta_phone_number_id, meta_waba_id, meta_access_token, meta_app_id, meta_app_secret, meta_verify_token, meta_business_id")
+        .eq("company_id", companyId)
+        .maybeSingle();
+      const p = (data as any)?.provider === "meta_cloud" ? "meta_cloud" : "uazapi";
+      setProvider(p);
+      setMetaPhoneNumberId((data as any)?.meta_phone_number_id || "");
+      setMetaWabaId((data as any)?.meta_waba_id || "");
+      setMetaAccessToken((data as any)?.meta_access_token || "");
+      setMetaAppId((data as any)?.meta_app_id || "");
+      setMetaAppSecret((data as any)?.meta_app_secret || "");
+      setMetaVerifyToken((data as any)?.meta_verify_token || "");
+      setMetaBusinessId((data as any)?.meta_business_id || "");
+    };
+    load();
+
     if (config) {
       setFormInstanceId(config.zapi_instance_id || "");
       setQrStatus("disconnected");
@@ -95,7 +131,7 @@ export function WhatsAppConfigDialog({
       setQrCode(null);
       setQrStatus("disconnected");
     }
-  }, [config, open]);
+  }, [config, open, companyId]);
 
   // Load AI config
   useEffect(() => {
