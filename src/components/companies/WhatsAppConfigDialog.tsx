@@ -627,6 +627,7 @@ export function WhatsAppConfigDialog({
                 </div>
               )}
             </div>
+            )}
           </TabsContent>
 
           <TabsContent value="ai" className="space-y-4 pt-2">
