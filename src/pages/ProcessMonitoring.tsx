@@ -236,10 +236,10 @@ export default function ProcessMonitoring() {
                 <div className="bg-primary/5 border border-primary/20 rounded-md p-3 mt-2">
                   <p className="text-xs text-primary font-medium flex items-center gap-2">
                     <AlertCircle className="h-3.5 w-3.5" />
-                    Atenção: Cobrança de R$ 2,50/mês
+                    Cobrança de R$ 1,50/mês por processo
                   </p>
                   <p className="text-[10px] text-muted-foreground mt-1">
-                    Cada processo ativo gera uma cobrança mensal de R$ 2,50 que será incluída na fatura do seu contrato ZionAds.
+                    Cada processo ativo gera uma cobrança mensal de R$ 1,50 que será incluída na sua fatura.
                   </p>
                 </div>
               </DialogHeader>
