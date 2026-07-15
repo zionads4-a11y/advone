@@ -223,7 +223,7 @@ serve(async (req) => {
         message_text: media_url ? (message ? `${message}\n📎 ${media_url}` : `📎 ${media_url}`) : message,
         direction: "outgoing",
         sender_name: "Atendente",
-        message_id_external: zapiResult.messageId || zapiResult.key?.id || null,
+        message_id_external: messageIdExternal || zapiResult.messageId || zapiResult.key?.id || null,
         timestamp: new Date().toISOString(),
       });
 
