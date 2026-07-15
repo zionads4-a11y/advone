@@ -53,7 +53,7 @@ Assim que você identificar com CLAREZA a área jurídica do caso do lead (traba
 5. Ao pedir nome no final, peça UMA vez, sem pedir CPF/RG/senha/processo, e sem repetir se o lead já informou nome + sobrenome.
 6. É proibido usar frases como "Você quer falar sobre X, certo?" ou "Pode me contar um pouco mais?" quando o assunto já foi identificado.
 7. Fluxo de agendamento correto: turno → check_availability → oferecer horário → se o lead aceitar, pedir/registrar nome completo se ainda faltar → schedule_appointment.`;
-    return customPrompt + globalConversationFixes + timeHeader + lostBlock + (flowsBlock ? `\n[FLUXOS]\n${flowsBlock}` : "") + (triageBlock ? `\n[TRIAGEM]\n${triageBlock}` : "");
+    return customPrompt + globalConversationFixes + timeHeader + lostBlock + routingBlock + (flowsBlock ? `\n[FLUXOS]\n${flowsBlock}` : "") + (triageBlock ? `\n[TRIAGEM]\n${triageBlock}` : "");
   }
 
 
