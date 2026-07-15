@@ -106,7 +106,11 @@ Deno.serve(async (req) => {
       password: new_password,
     });
     if (updErr) {
-      return new Response(JSON.stringify({ error: updErr.message }), {
+      let msg = updErr.message;
+      if (/weak|pwned|known to be|easy to guess/i.test(msg)) {
+        msg = "Essa senha é muito fraca ou já foi vazada em outros sites. Escolha uma senha mais forte (combine letras maiúsculas, minúsculas, números e símbolos, e evite sequências óbvias).";
+      }
+      return new Response(JSON.stringify({ error: msg }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
