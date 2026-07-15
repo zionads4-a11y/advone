@@ -246,7 +246,7 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ success: true, message_id: zapiResult.messageId }),
+      JSON.stringify({ success: true, message_id: messageIdExternal || zapiResult.messageId }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {
