@@ -1318,6 +1318,83 @@ Antes de responder:
         }
 
 
+        if (fnName === "assign_lead_to_area_lawyer") {
+          const areaName = String(args.area_name || "").trim();
+          const reason = String(args.reason || "");
+          let assignedUserId: string | null = null;
+          let matchedAreaName: string | null = null;
+          try {
+            // 1) Match legal_area (accent/case insensitive)
+            const { data: areas } = await supabase
+              .from("legal_areas")
+              .select("id, name")
+              .eq("company_id", companyId)
+              .eq("is_active", true);
+            const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            const target = norm(areaName);
+            const area = (areas || []).find((a: any) => {
+              const n = norm(a.name);
+              return n.includes(target) || target.includes(n);
+            });
+
+            if (area) {
+              matchedAreaName = area.name;
+              // 2) Candidates: users with access to this area
+              const { data: userAreas } = await supabase
+                .from("user_legal_areas")
+                .select("user_id")
+                .eq("area_id", area.id);
+              const candidateIds = (userAreas || []).map((u: any) => u.user_id);
+
+              if (candidateIds.length > 0) {
+                // Filter to operator_profile advogado_responsavel/gerente + belongs to company
+                const { data: profs } = await supabase
+                  .from("profiles")
+                  .select("user_id, operator_profile")
+                  .in("user_id", candidateIds)
+                  .in("operator_profile", ["advogado_responsavel", "gerente"]);
+                const { data: memberships } = await supabase
+                  .from("client_companies")
+                  .select("user_id")
+                  .eq("company_id", companyId)
+                  .in("user_id", (profs || []).map((p: any) => p.user_id));
+                const eligibleIds = (memberships || []).map((m: any) => m.user_id);
+
+                if (eligibleIds.length > 0) {
+                  // 3) Round-robin: pick the one with fewest open leads
+                  const counts: Record<string, number> = {};
+                  for (const uid of eligibleIds) counts[uid] = 0;
+                  const { data: openLeads } = await supabase
+                    .from("leads")
+                    .select("assigned_to, kanban_column_id, kanban_columns!inner(is_won, is_lost)")
+                    .eq("company_id", companyId)
+                    .in("assigned_to", eligibleIds);
+                  (openLeads || []).forEach((l: any) => {
+                    if (l.kanban_columns?.is_won || l.kanban_columns?.is_lost) return;
+                    counts[l.assigned_to] = (counts[l.assigned_to] || 0) + 1;
+                  });
+                  assignedUserId = eligibleIds.sort((a, b) => counts[a] - counts[b])[0];
+                }
+              }
+
+              // 4) Apply on lead
+              if (leadId) {
+                const patch: any = { area_direito: area.name };
+                if (assignedUserId) patch.assigned_to = assignedUserId;
+                await supabase.from("leads").update(patch).eq("id", leadId);
+              }
+            }
+          } catch (e) {
+            console.error("assign_lead_to_area_lawyer error:", e);
+          }
+          toolResult = {
+            success: !!assignedUserId,
+            area_matched: matchedAreaName,
+            assigned_user_id: assignedUserId,
+            reason,
+          };
+        }
+
         if (fnName === "lookup_existing_client") {
           const { client_full_name, client_cpf, subject, message_summary } = args;
           
