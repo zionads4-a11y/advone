@@ -204,7 +204,7 @@ export default function ProcessMonitoring() {
             Monitoramento de Processos
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Acompanhe movimentações processuais diariamente via DataJud (CNJ) • <span className="font-medium text-foreground">R$ 1,50/mês por processo ativo</span>
+            Acompanhe movimentações processuais diariamente via DataJud (CNJ)
           </p>
         </div>
         <div className="flex items-center gap-3">
