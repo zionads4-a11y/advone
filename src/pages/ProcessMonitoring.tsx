@@ -224,6 +224,10 @@ export default function ProcessMonitoring() {
           <Badge variant="outline" className="text-xs">
             {processes.length} processo{processes.length !== 1 ? "s" : ""} ativo{processes.length !== 1 ? "s" : ""}
           </Badge>
+          <Badge className="text-xs bg-primary/10 text-primary border-primary/20 hover:bg-primary/15">
+            R$ {(processes.length * 1.5).toFixed(2).replace(".", ",")}/mês
+            <span className="ml-1 opacity-70">(R$ 1,50 × processo)</span>
+          </Badge>
           <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
             <DialogTrigger asChild>
               <Button size="sm">
