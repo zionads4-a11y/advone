@@ -238,12 +238,53 @@ export function WhatsAppConfigDialog({
   };
 
   const handleSaveWhatsApp = async () => {
+    // Meta Cloud
+    if (provider === "meta_cloud") {
+      if (!metaPhoneNumberId.trim() || !metaAccessToken.trim()) {
+        toast.error("Phone Number ID e Access Token são obrigatórios.");
+        return;
+      }
+      setSaving(true);
+      try {
+        const verifyToken = metaVerifyToken || crypto.randomUUID();
+        const payload = {
+          company_id: companyId,
+          provider: "meta_cloud" as const,
+          meta_phone_number_id: metaPhoneNumberId.trim(),
+          meta_waba_id: metaWabaId.trim() || null,
+          meta_access_token: metaAccessToken.trim(),
+          meta_app_id: metaAppId.trim() || null,
+          meta_app_secret: metaAppSecret.trim() || null,
+          meta_verify_token: verifyToken,
+          meta_business_id: metaBusinessId.trim() || null,
+          // preencher campos legados NOT NULL da UaZapi com placeholders quando novo
+          zapi_instance_id: config?.zapi_instance_id || `meta-${companyId}`,
+          zapi_token: (config as any)?.zapi_token || "meta_cloud",
+        };
+        const { error } = await supabase
+          .from("whatsapp_configs")
+          .upsert(payload, { onConflict: "company_id" });
+        if (error) throw error;
+        setMetaVerifyToken(verifyToken);
+        toast.success("Configuração Meta salva! Configure o webhook no painel Meta.");
+        onSubmit();
+      } catch (err: any) {
+        toast.error("Erro ao salvar: " + err.message);
+      } finally {
+        setSaving(false);
+      }
+      return;
+    }
+
+    // UaZapi (padrão)
     if (!formInstanceId) {
       toast.error("Nome da instância é obrigatório.");
       return;
     }
     setSaving(true);
     try {
+      // garante provider=uazapi persistido
+      await supabase.from("whatsapp_configs").update({ provider: "uazapi" }).eq("company_id", companyId);
       const { data, error } = await supabase.functions.invoke("zapi-qrcode", {
         body: { company_id: companyId, action: "save_instance", instance_id: formInstanceId.trim() },
       });
@@ -258,6 +299,27 @@ export function WhatsAppConfigDialog({
       toast.error("Erro ao salvar: " + err.message);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleTestMeta = async () => {
+    setMetaTesting(true);
+    setMetaTestInfo(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("meta-test-connection", {
+        body: { company_id: companyId },
+      });
+      if (error) throw error;
+      setMetaTestInfo(data);
+      if (data?.ok) {
+        toast.success(`Conectado: ${data.info?.display_phone_number || "OK"}`);
+      } else {
+        toast.error(data?.error || "Falha ao validar credenciais");
+      }
+    } catch (err: any) {
+      toast.error("Erro no teste: " + err.message);
+    } finally {
+      setMetaTesting(false);
     }
   };
 
