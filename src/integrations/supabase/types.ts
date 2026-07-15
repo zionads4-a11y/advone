@@ -2386,6 +2386,58 @@ export type Database = {
           },
         ]
       }
+      lead_internal_messages: {
+        Row: {
+          company_id: string
+          content: string
+          created_at: string
+          id: string
+          lead_id: string
+          mentions: string[] | null
+          sender_id: string
+        }
+        Insert: {
+          company_id: string
+          content: string
+          created_at?: string
+          id?: string
+          lead_id: string
+          mentions?: string[] | null
+          sender_id: string
+        }
+        Update: {
+          company_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          lead_id?: string
+          mentions?: string[] | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_internal_messages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_internal_messages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_internal_messages_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lead_kanban_history: {
         Row: {
           company_id: string
@@ -4995,6 +5047,10 @@ export type Database = {
       }
       user_can_see_client_conversation: {
         Args: { _conv_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_can_see_lead: {
+        Args: { _lead_id: string; _user_id: string }
         Returns: boolean
       }
       user_can_see_process_board: {

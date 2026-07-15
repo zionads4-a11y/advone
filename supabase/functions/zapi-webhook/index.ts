@@ -29,6 +29,9 @@ SÓ chame mark_lead_lost quando o lead RECUSAR EXPLICITAMENTE o serviço. Exempl
 NUNCA chame mark_lead_lost se o lead apenas disser que está ocupado, sem tempo, vai pensar, vai ver depois, está em reunião, dirigindo, no trabalho, ou pedir para falar mais tarde. Frases como 'tô ocupado(a)', 'agora não posso', 'depois te respondo', 'me liga mais tarde', 'tô no serviço', 'vou pensar', 'preciso ver com a família', 'só estou pesquisando preço' → NÃO são desistência. Responda com leveza ('Tranquilo, fico no aguardo então 🙂') e o sistema de follow-up cuidará do resto.
 Lead silencioso (não respondeu) TAMBÉM não é desistência — a cadência automática chama de volta. Só marque lost com recusa em palavras claras.`;
 
+  const routingBlock = `\n[ROTEAMENTO POR ÁREA — REGRA SILENCIOSA]
+Assim que você identificar com CLAREZA a área jurídica do caso do lead (trabalhista, previdenciário, cível, família, criminal, tributário), chame a tool assign_lead_to_area_lawyer com area_name = a área identificada. Faça isso EM SILÊNCIO — NÃO avise o lead, NÃO diga "vou te encaminhar", NÃO cite o nome do advogado. Isso apenas atribui internamente o lead ao advogado responsável da área. Continue a conversa normalmente depois.`;
+
   const _nowBR = getNowBrasilia(timezone);
   const _hourBR = _nowBR.getHours();
   const _todayStr = `${String(_nowBR.getDate()).padStart(2, "0")}/${String(_nowBR.getMonth() + 1).padStart(2, "0")}/${_nowBR.getFullYear()}`;
@@ -50,7 +53,7 @@ Lead silencioso (não respondeu) TAMBÉM não é desistência — a cadência au
 5. Ao pedir nome no final, peça UMA vez, sem pedir CPF/RG/senha/processo, e sem repetir se o lead já informou nome + sobrenome.
 6. É proibido usar frases como "Você quer falar sobre X, certo?" ou "Pode me contar um pouco mais?" quando o assunto já foi identificado.
 7. Fluxo de agendamento correto: turno → check_availability → oferecer horário → se o lead aceitar, pedir/registrar nome completo se ainda faltar → schedule_appointment.`;
-    return customPrompt + globalConversationFixes + timeHeader + lostBlock + (flowsBlock ? `\n[FLUXOS]\n${flowsBlock}` : "") + (triageBlock ? `\n[TRIAGEM]\n${triageBlock}` : "");
+    return customPrompt + globalConversationFixes + timeHeader + lostBlock + routingBlock + (flowsBlock ? `\n[FLUXOS]\n${flowsBlock}` : "") + (triageBlock ? `\n[TRIAGEM]\n${triageBlock}` : "");
   }
 
 
@@ -129,6 +132,8 @@ Lead silencioso (não respondeu) TAMBÉM não é desistência — a cadência au
 [TRAVA: DESISTÊNCIA — REGRA RÍGIDA]
 SÓ chame mark_lead_lost com recusa EXPLÍCITA: 'não quero mais', 'desisti', 'não tenho interesse', 'já contratei outro', 'já resolvi'.
 NÃO marque lost se for: 'tô ocupado', 'agora não', 'depois te respondo', 'me liga mais tarde', 'vou pensar', 'preciso ver com a família', 'tô no trabalho/dirigindo', 'só pesquisando preço'. Nesses casos responda com leveza e deixe a cadência de follow-up agir. Silêncio também NÃO é desistência.
+[ROTEAMENTO INTERNO — SILENCIOSO]
+Assim que identificar com CLAREZA a área do caso (trabalhista, previdenciário, cível, família, criminal, tributário), chame assign_lead_to_area_lawyer(area_name) EM SILÊNCIO. NÃO avise o lead, NÃO diga que vai encaminhar, NÃO cite advogado. Continue a conversa normalmente.
 [MODALIDADE] ${modalidadeBlock}
 ${flowsBlock ? `\n[FLUXOS]\n${flowsBlock}` : ""}${triageBlock ? `\n[TRIAGEM]\n${triageBlock}` : ""}${company?.decision_rules ? `\n[REGRAS]\n${company.decision_rules}` : ""}${customPrompt ? `\n[CUSTOM]\n${customPrompt}` : ""}
 Responda em PT-BR.`;
@@ -586,6 +591,22 @@ const sdrTools = [
           message_summary: { type: "string", description: "Breve resumo do que o cliente deseja" }
         },
         required: ["client_full_name", "client_cpf", "subject"],
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "assign_lead_to_area_lawyer",
+      description: "Atribui este lead ao advogado responsável pela área correta (round-robin: escolhe o com menos leads abertos). Chame silenciosamente assim que identificar a área jurídica do caso. NÃO avise o lead sobre isso.",
+      parameters: {
+        type: "object",
+        properties: {
+          area_name: { type: "string", description: "Nome da área (ex: 'Trabalhista', 'Previdenciário', 'Cível', 'Família', 'Criminal', 'Tributário')" },
+          reason: { type: "string", description: "Motivo curto do roteamento (ex: 'lead com pedido de aposentadoria')" }
+        },
+        required: ["area_name"],
         additionalProperties: false
       }
     }
@@ -1301,6 +1322,83 @@ Antes de responder:
           toolResult = { success: true, lead_marked_lost: true };
         }
 
+
+        if (fnName === "assign_lead_to_area_lawyer") {
+          const areaName = String(args.area_name || "").trim();
+          const reason = String(args.reason || "");
+          let assignedUserId: string | null = null;
+          let matchedAreaName: string | null = null;
+          try {
+            // 1) Match legal_area (accent/case insensitive)
+            const { data: areas } = await supabase
+              .from("legal_areas")
+              .select("id, name")
+              .eq("company_id", companyId)
+              .eq("is_active", true);
+            const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            const target = norm(areaName);
+            const area = (areas || []).find((a: any) => {
+              const n = norm(a.name);
+              return n.includes(target) || target.includes(n);
+            });
+
+            if (area) {
+              matchedAreaName = area.name;
+              // 2) Candidates: users with access to this area
+              const { data: userAreas } = await supabase
+                .from("user_legal_areas")
+                .select("user_id")
+                .eq("area_id", area.id);
+              const candidateIds = (userAreas || []).map((u: any) => u.user_id);
+
+              if (candidateIds.length > 0) {
+                // Filter to operator_profile advogado_responsavel/gerente + belongs to company
+                const { data: profs } = await supabase
+                  .from("profiles")
+                  .select("user_id, operator_profile")
+                  .in("user_id", candidateIds)
+                  .in("operator_profile", ["advogado_responsavel", "gerente"]);
+                const { data: memberships } = await supabase
+                  .from("client_companies")
+                  .select("user_id")
+                  .eq("company_id", companyId)
+                  .in("user_id", (profs || []).map((p: any) => p.user_id));
+                const eligibleIds = (memberships || []).map((m: any) => m.user_id);
+
+                if (eligibleIds.length > 0) {
+                  // 3) Round-robin: pick the one with fewest open leads
+                  const counts: Record<string, number> = {};
+                  for (const uid of eligibleIds) counts[uid] = 0;
+                  const { data: openLeads } = await supabase
+                    .from("leads")
+                    .select("assigned_to, kanban_column_id, kanban_columns!inner(is_won, is_lost)")
+                    .eq("company_id", companyId)
+                    .in("assigned_to", eligibleIds);
+                  (openLeads || []).forEach((l: any) => {
+                    if (l.kanban_columns?.is_won || l.kanban_columns?.is_lost) return;
+                    counts[l.assigned_to] = (counts[l.assigned_to] || 0) + 1;
+                  });
+                  assignedUserId = eligibleIds.sort((a, b) => counts[a] - counts[b])[0];
+                }
+              }
+
+              // 4) Apply on lead
+              if (leadId) {
+                const patch: any = { area_direito: area.name };
+                if (assignedUserId) patch.assigned_to = assignedUserId;
+                await supabase.from("leads").update(patch).eq("id", leadId);
+              }
+            }
+          } catch (e) {
+            console.error("assign_lead_to_area_lawyer error:", e);
+          }
+          toolResult = {
+            success: !!assignedUserId,
+            area_matched: matchedAreaName,
+            assigned_user_id: assignedUserId,
+            reason,
+          };
+        }
 
         if (fnName === "lookup_existing_client") {
           const { client_full_name, client_cpf, subject, message_summary } = args;
