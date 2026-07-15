@@ -4516,9 +4516,17 @@ export type Database = {
           created_at: string
           debug_mode: boolean | null
           id: string
+          meta_access_token: string | null
+          meta_app_id: string | null
+          meta_app_secret: string | null
+          meta_business_id: string | null
+          meta_phone_number_id: string | null
+          meta_verify_token: string | null
+          meta_waba_id: string | null
           office_name: string | null
           phone_number: string | null
           practice_area: string | null
+          provider: string
           scheduling_link: string | null
           status: string
           target_audience: string | null
@@ -4543,9 +4551,17 @@ export type Database = {
           created_at?: string
           debug_mode?: boolean | null
           id?: string
+          meta_access_token?: string | null
+          meta_app_id?: string | null
+          meta_app_secret?: string | null
+          meta_business_id?: string | null
+          meta_phone_number_id?: string | null
+          meta_verify_token?: string | null
+          meta_waba_id?: string | null
           office_name?: string | null
           phone_number?: string | null
           practice_area?: string | null
+          provider?: string
           scheduling_link?: string | null
           status?: string
           target_audience?: string | null
@@ -4570,9 +4586,17 @@ export type Database = {
           created_at?: string
           debug_mode?: boolean | null
           id?: string
+          meta_access_token?: string | null
+          meta_app_id?: string | null
+          meta_app_secret?: string | null
+          meta_business_id?: string | null
+          meta_phone_number_id?: string | null
+          meta_verify_token?: string | null
+          meta_waba_id?: string | null
           office_name?: string | null
           phone_number?: string | null
           practice_area?: string | null
+          provider?: string
           scheduling_link?: string | null
           status?: string
           target_audience?: string | null
