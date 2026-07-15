@@ -20,17 +20,26 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const asaasApiKey = Deno.env.get("ASAAS_ADVONE_API_KEY");
     if (!asaasApiKey) return json({ error: "Asaas não configurado" }, 500);
 
     const admin = createClient(supabaseUrl, serviceKey);
 
     const auth = req.headers.get("Authorization");
-    if (!auth) return json({ error: "Não autorizado" }, 401);
-    const token = auth.replace("Bearer ", "");
-    const { data: claims, error: cErr } = await admin.auth.getClaims(token);
-    if (cErr || !claims?.sub) return json({ error: "Token inválido" }, 401);
-    const requesterId = claims.sub as string;
+    if (!auth?.startsWith("Bearer ")) return json({ error: "Não autorizado" }, 401);
+    const token = auth.replace("Bearer ", "").trim();
+
+    // Verifica o token com um client anon (usa JWKS via signing keys)
+    const caller = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: auth } },
+    });
+    const { data: claimsData, error: cErr } = await caller.auth.getClaims(token);
+    const requesterId = claimsData?.claims?.sub;
+    if (cErr || !requesterId || typeof requesterId !== "string") {
+      console.error("getClaims failed:", cErr?.message);
+      return json({ error: "Token inválido" }, 401);
+    }
 
     const { data: isAdmin } = await admin.rpc("has_role", {
       _user_id: requesterId,
