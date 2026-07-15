@@ -117,7 +117,7 @@ Deno.serve(async (req) => {
         return jsonResponse(data);
       }
 
-      // Add process to monitoring (cobrança R$3,50/mês por processo ativo, sem limite)
+      // Add process to monitoring (cobrança R$1,50/mês por processo ativo, sem limite)
       case "add_process": {
         const { company_id, numero_cnj, client_name, client_cpf, tribunal } = body;
         if (!company_id || !numero_cnj || !client_name) {
