@@ -384,38 +384,159 @@ export function WhatsAppConfigDialog({
 
           {/* Tab: Conexão WhatsApp */}
           <TabsContent value="whatsapp" className="space-y-4 pt-2">
-            {/* Server URL - read-only */}
-            <div className="space-y-2 p-3 bg-muted/50 rounded-lg">
-              <Label className="text-xs font-medium text-muted-foreground">Server URL (salvo nos padrões)</Label>
-              <Input readOnly value={SERVER_URL} className="text-xs font-mono bg-background text-muted-foreground" />
-              <p className="text-xs text-muted-foreground">Configurado em Padrões da Clínica. O Admin Token está salvo nos secrets.</p>
-            </div>
-
-            {/* Instance Name */}
+            {/* Provider selector */}
             <div className="space-y-2">
-              <Label>Nome da Instância (UaZapi) *</Label>
-              <Input
-                value={formInstanceId}
-                onChange={(e) => setFormInstanceId(e.target.value)}
-                placeholder="Ex: f2749759-f67f-477a-b5d6-cfe75984f029"
-              />
-              <p className="text-xs text-muted-foreground">UUID da instância criada no painel do UaZapi. O token será buscado automaticamente.</p>
-            </div>
-
-            {/* Webhook URL */}
-            <div className="space-y-2 p-3 bg-muted rounded-lg">
-              <Label className="text-xs font-medium">Webhook URL</Label>
-              <div className="flex items-center gap-2">
-                <Input readOnly value={webhookUrl} className="text-xs font-mono bg-background" />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => copyToClipboard(webhookUrl, "URL do webhook")}
+              <Label className="font-medium text-sm">Provedor de WhatsApp</Label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setProvider("uazapi")}
+                  className={`p-3 rounded-lg border text-left transition-colors ${
+                    provider === "uazapi"
+                      ? "border-primary bg-primary/5 ring-1 ring-primary"
+                      : "border-border hover:border-primary/40"
+                  }`}
                 >
-                  <Copy className="w-4 h-4" />
-                </Button>
+                  <p className="font-medium text-sm">UaZapi</p>
+                  <p className="text-[11px] text-muted-foreground">Padrão. Rápido. Para receptivo.</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setProvider("meta_cloud")}
+                  className={`p-3 rounded-lg border text-left transition-colors ${
+                    provider === "meta_cloud"
+                      ? "border-primary bg-primary/5 ring-1 ring-primary"
+                      : "border-border hover:border-primary/40"
+                  }`}
+                >
+                  <p className="font-medium text-sm">Meta Cloud API (Oficial)</p>
+                  <p className="text-[11px] text-muted-foreground">Selo verde. Zero risco de ban.</p>
+                </button>
               </div>
             </div>
+
+            {provider === "uazapi" && (
+              <>
+                {/* Server URL - read-only */}
+                <div className="space-y-2 p-3 bg-muted/50 rounded-lg">
+                  <Label className="text-xs font-medium text-muted-foreground">Server URL (salvo nos padrões)</Label>
+                  <Input readOnly value={SERVER_URL} className="text-xs font-mono bg-background text-muted-foreground" />
+                  <p className="text-xs text-muted-foreground">Configurado em Padrões da Clínica. O Admin Token está salvo nos secrets.</p>
+                </div>
+
+                {/* Instance Name */}
+                <div className="space-y-2">
+                  <Label>Nome da Instância (UaZapi) *</Label>
+                  <Input
+                    value={formInstanceId}
+                    onChange={(e) => setFormInstanceId(e.target.value)}
+                    placeholder="Ex: f2749759-f67f-477a-b5d6-cfe75984f029"
+                  />
+                  <p className="text-xs text-muted-foreground">UUID da instância criada no painel do UaZapi. O token será buscado automaticamente.</p>
+                </div>
+
+                {/* Webhook URL */}
+                <div className="space-y-2 p-3 bg-muted rounded-lg">
+                  <Label className="text-xs font-medium">Webhook URL</Label>
+                  <div className="flex items-center gap-2">
+                    <Input readOnly value={zapiWebhookUrl} className="text-xs font-mono bg-background" />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => copyToClipboard(zapiWebhookUrl, "URL do webhook")}
+                    >
+                      <Copy className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {provider === "meta_cloud" && (
+              <div className="space-y-3">
+                <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 text-xs text-blue-900 dark:text-blue-200 space-y-1">
+                  <p className="font-medium">Como obter as credenciais:</p>
+                  <ol className="list-decimal pl-4 space-y-0.5">
+                    <li>Acesse business.facebook.com → WhatsApp Manager</li>
+                    <li>Adicione um número e conclua a verificação da empresa (CNPJ)</li>
+                    <li>Em "Configurações da API" copie <strong>Phone Number ID</strong> e <strong>WABA ID</strong></li>
+                    <li>Gere um <strong>Access Token permanente</strong> em Configurações → System Users</li>
+                    <li>Cole abaixo, salve, e configure o webhook usando a URL/Verify Token gerados</li>
+                  </ol>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Phone Number ID *</Label>
+                  <Input value={metaPhoneNumberId} onChange={(e) => setMetaPhoneNumberId(e.target.value)} placeholder="Ex: 106540392307050" />
+                </div>
+                <div className="space-y-2">
+                  <Label>WhatsApp Business Account ID (WABA)</Label>
+                  <Input value={metaWabaId} onChange={(e) => setMetaWabaId(e.target.value)} placeholder="Ex: 102290129340398" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Access Token Permanente *</Label>
+                  <Input type="password" value={metaAccessToken} onChange={(e) => setMetaAccessToken(e.target.value)} placeholder="EAAG..." />
+                  <p className="text-[11px] text-muted-foreground">Armazenado com segurança. Só o backend lê.</p>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-2">
+                    <Label>App ID</Label>
+                    <Input value={metaAppId} onChange={(e) => setMetaAppId(e.target.value)} placeholder="Opcional" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>App Secret</Label>
+                    <Input type="password" value={metaAppSecret} onChange={(e) => setMetaAppSecret(e.target.value)} placeholder="Opcional (validação HMAC)" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Business Manager ID</Label>
+                  <Input value={metaBusinessId} onChange={(e) => setMetaBusinessId(e.target.value)} placeholder="Opcional" />
+                </div>
+
+                {/* Webhook + Verify token (readonly) */}
+                <div className="space-y-2 p-3 bg-muted rounded-lg">
+                  <Label className="text-xs font-medium">Webhook URL (colar no painel Meta)</Label>
+                  <div className="flex items-center gap-2">
+                    <Input readOnly value={metaWebhookUrl} className="text-xs font-mono bg-background" />
+                    <Button variant="ghost" size="icon" onClick={() => copyToClipboard(metaWebhookUrl, "URL")}>
+                      <Copy className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <Label className="text-xs font-medium pt-2">Verify Token</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      readOnly
+                      value={metaVerifyToken || "(gerado ao salvar)"}
+                      className="text-xs font-mono bg-background"
+                    />
+                    {metaVerifyToken && (
+                      <Button variant="ghost" size="icon" onClick={() => copyToClipboard(metaVerifyToken, "Verify token")}>
+                        <Copy className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">Assine o campo <strong>messages</strong> no webhook.</p>
+                </div>
+
+                <Button
+                  variant="outline"
+                  className="w-full gap-2"
+                  onClick={handleTestMeta}
+                  disabled={metaTesting || !metaPhoneNumberId || !metaAccessToken}
+                >
+                  {metaTesting ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                  Testar conexão Meta
+                </Button>
+
+                {metaTestInfo && (
+                  <div className={`text-xs p-2 rounded ${metaTestInfo.ok ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-200" : "bg-red-50 text-red-800 dark:bg-red-950/30 dark:text-red-200"}`}>
+                    {metaTestInfo.ok
+                      ? `✅ ${metaTestInfo.info?.verified_name || ""} — ${metaTestInfo.info?.display_phone_number || ""} — Qualidade: ${metaTestInfo.info?.quality_rating || "n/d"}`
+                      : `❌ ${metaTestInfo.error || "Falha"}`}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* QR Code Section */}
             <div className="space-y-3 pt-2 border-t">
