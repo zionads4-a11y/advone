@@ -171,6 +171,11 @@ export function LeadDetailDrawer({ lead, open, onOpenChange, onLeadUpdate }: Lea
 
             <Separator />
 
+            {/* Internal team chat */}
+            <LeadInternalChat leadId={lead.id} companyId={lead.company_id} />
+
+            <Separator />
+
             {/* Case Insights (IA) */}
             <LeadCaseInsights leadId={lead.id} companyId={lead.company_id} />
 
