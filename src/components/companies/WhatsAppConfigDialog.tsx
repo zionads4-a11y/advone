@@ -538,7 +538,8 @@ export function WhatsAppConfigDialog({
               </div>
             )}
 
-            {/* QR Code Section */}
+            {/* QR Code Section (UaZapi only) */}
+            {provider === "uazapi" && (
             <div className="space-y-3 pt-2 border-t">
               <div className="flex items-center justify-between">
                 <div>
