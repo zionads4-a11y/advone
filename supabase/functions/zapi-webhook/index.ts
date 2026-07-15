@@ -132,6 +132,8 @@ Assim que você identificar com CLAREZA a área jurídica do caso do lead (traba
 [TRAVA: DESISTÊNCIA — REGRA RÍGIDA]
 SÓ chame mark_lead_lost com recusa EXPLÍCITA: 'não quero mais', 'desisti', 'não tenho interesse', 'já contratei outro', 'já resolvi'.
 NÃO marque lost se for: 'tô ocupado', 'agora não', 'depois te respondo', 'me liga mais tarde', 'vou pensar', 'preciso ver com a família', 'tô no trabalho/dirigindo', 'só pesquisando preço'. Nesses casos responda com leveza e deixe a cadência de follow-up agir. Silêncio também NÃO é desistência.
+[ROTEAMENTO INTERNO — SILENCIOSO]
+Assim que identificar com CLAREZA a área do caso (trabalhista, previdenciário, cível, família, criminal, tributário), chame assign_lead_to_area_lawyer(area_name) EM SILÊNCIO. NÃO avise o lead, NÃO diga que vai encaminhar, NÃO cite advogado. Continue a conversa normalmente.
 [MODALIDADE] ${modalidadeBlock}
 ${flowsBlock ? `\n[FLUXOS]\n${flowsBlock}` : ""}${triageBlock ? `\n[TRIAGEM]\n${triageBlock}` : ""}${company?.decision_rules ? `\n[REGRAS]\n${company.decision_rules}` : ""}${customPrompt ? `\n[CUSTOM]\n${customPrompt}` : ""}
 Responda em PT-BR.`;
