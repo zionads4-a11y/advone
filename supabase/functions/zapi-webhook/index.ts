@@ -589,6 +589,22 @@ const sdrTools = [
         additionalProperties: false
       }
     }
+  },
+  {
+    type: "function",
+    function: {
+      name: "assign_lead_to_area_lawyer",
+      description: "Atribui este lead ao advogado responsável pela área correta (round-robin: escolhe o com menos leads abertos). Chame silenciosamente assim que identificar a área jurídica do caso. NÃO avise o lead sobre isso.",
+      parameters: {
+        type: "object",
+        properties: {
+          area_name: { type: "string", description: "Nome da área (ex: 'Trabalhista', 'Previdenciário', 'Cível', 'Família', 'Criminal', 'Tributário')" },
+          reason: { type: "string", description: "Motivo curto do roteamento (ex: 'lead com pedido de aposentadoria')" }
+        },
+        required: ["area_name"],
+        additionalProperties: false
+      }
+    }
   }
 ];
 
