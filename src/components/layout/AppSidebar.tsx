@@ -104,6 +104,7 @@ const gerenteItems = [
   { title: "Processos (Kanban)", url: "/processos-kanban", icon: Briefcase, premium: true },
   { title: "Modelos de Documentos", url: "/modelos-documentos", icon: FileText },
   { title: "Equipe", url: "/client-users", icon: Users },
+  { title: "Conectar WhatsApp", url: "/conectar-whatsapp", icon: Smartphone },
   { title: "Configurações", url: "/company-settings", icon: Settings },
 ];
 
