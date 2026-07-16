@@ -396,19 +396,48 @@ serve(async (req) => {
 
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Check if user is admin or member
+    // Verifica papel do usuário
     const { data: roleData } = await adminClient
       .from("user_roles")
       .select("role")
       .eq("user_id", userId)
-      .in("role", ["admin", "member"])
       .maybeSingle();
 
-    if (!roleData) {
+    const role = roleData?.role || null;
+    const isStaff = role === "admin" || role === "member";
+    const isCompanyUser = role === "gerente" || role === "operador" || role === "client";
+
+    if (!isStaff && !isCompanyUser) {
       return new Response(
         JSON.stringify({ error: "Sem permissão" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    // Ações permitidas para usuários da empresa (só leitura de QR/status)
+    const readOnlyActions = ["get_qrcode", "get-status"];
+    if (!isStaff && !readOnlyActions.includes(action)) {
+      return new Response(
+        JSON.stringify({ error: "Sem permissão para esta ação" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Usuários da empresa só podem acessar suas próprias empresas
+    if (!isStaff) {
+      const { data: link } = await adminClient
+        .from("client_companies")
+        .select("company_id")
+        .eq("user_id", userId)
+        .eq("company_id", company_id)
+        .maybeSingle();
+
+      if (!link) {
+        return new Response(
+          JSON.stringify({ error: "Empresa não vinculada a este usuário" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
     }
 
     // Action: save instance (auto-fetch token from UaZapi)
