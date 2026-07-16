@@ -40,11 +40,19 @@ export default function ConectarWhatsapp() {
     if (!companyId) return;
     setLoading(true);
     setError(null);
+    setNotConfigured(false);
     try {
-      const { data: statusRes, error: sErr } = await supabase.functions.invoke("zapi-qrcode", {
+      const { data: statusRes } = await supabase.functions.invoke("zapi-qrcode", {
         body: { company_id: companyId, action: "get-status" },
       });
-      if (sErr) throw sErr;
+      const notCfgMsg = /não configurad|nome da instância/i;
+      if (statusRes?.error && notCfgMsg.test(statusRes.error)) {
+        setNotConfigured(true);
+        setConnected(false);
+        setQrcode(null);
+        setLoading(false);
+        return;
+      }
       if (statusRes?.connected) {
         setConnected(true);
         setQrcode(null);
@@ -52,11 +60,12 @@ export default function ConectarWhatsapp() {
         return;
       }
       setConnected(false);
-      const { data: qrRes, error: qErr } = await supabase.functions.invoke("zapi-qrcode", {
+      const { data: qrRes } = await supabase.functions.invoke("zapi-qrcode", {
         body: { company_id: companyId, action: "get_qrcode" },
       });
-      if (qErr) throw qErr;
-      if (qrRes?.connected) {
+      if (qrRes?.error && notCfgMsg.test(qrRes.error)) {
+        setNotConfigured(true);
+      } else if (qrRes?.connected) {
         setConnected(true);
         setQrcode(null);
       } else if (qrRes?.qrcode) {
