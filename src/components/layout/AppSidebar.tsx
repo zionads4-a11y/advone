@@ -127,6 +127,7 @@ const clientItems = [
   { title: "Kanban", url: "/kanban", icon: Kanban },
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
+  { title: "Conectar WhatsApp", url: "/conectar-whatsapp", icon: Smartphone },
 ];
 
 function getMenuItems(role: string | null) {
