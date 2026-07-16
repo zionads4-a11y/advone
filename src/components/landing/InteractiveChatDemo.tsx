@@ -153,6 +153,7 @@ export function InteractiveChatDemo() {
           <button
             onClick={playDemo}
             disabled={isPlaying}
+            aria-label="Enviar mensagem de demonstração"
             className="flex h-9 w-9 items-center justify-center rounded-full bg-[hsl(153,60%,45%)] text-[hsl(0,0%,100%)] transition-transform hover:scale-110 disabled:opacity-50"
           >
             <Send className="h-4 w-4" />

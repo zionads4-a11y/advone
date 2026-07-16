@@ -43,7 +43,7 @@ export default function Blog() {
 
       <header className="border-b border-border bg-card">
         <div className="container mx-auto flex items-center justify-between px-4 py-4">
-          <Link to="/"><img src={logoAdvOne} alt="AdvOne" className="h-10 w-auto" /></Link>
+          <Link to="/"><img src={logoAdvOne} alt="Logo AdvOne Blog Jurídico" className="h-10 w-auto" /></Link>
           <Link to="/auth"><Button>Testar grátis</Button></Link>
         </div>
       </header>

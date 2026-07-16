@@ -17,10 +17,10 @@ export default function CrmAdvogados() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Helmet>
-        <title>CRM para Advogados — Software Jurídico Completo | AdvOne</title>
+        <title>CRM para Advogados — Software Jurídico | AdvOne</title>
         <meta name="description" content="O CRM para advogados nº 1 do Brasil: IA no WhatsApp, kanban de leads, agenda integrada e gestão de processos. Teste o software jurídico AdvOne grátis." />
         <link rel="canonical" href="https://advone.online/crm-advogados" />
-        <meta property="og:title" content="CRM para Advogados — Software Jurídico Completo | AdvOne" />
+        <meta property="og:title" content="CRM para Advogados — Software Jurídico | AdvOne" />
         <meta property="og:description" content="IA SDR no WhatsApp, kanban de leads, agenda e processos. Teste o CRM AdvOne grátis." />
         <meta property="og:url" content="https://advone.online/crm-advogados" />
         <meta property="og:type" content="website" />

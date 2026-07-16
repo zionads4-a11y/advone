@@ -125,7 +125,7 @@ export default function LandingPage() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <img
             src={logoAdvOne}
-            alt="AdvOne"
+            alt="Logo AdvOne CRM Jurídico"
             className="h-16 w-auto md:h-20 drop-shadow-[0_0_24px_hsl(153,60%,45%/0.55)] transition-transform hover:scale-105"
           />
           <div className="hidden items-center gap-8 md:flex">
@@ -1058,7 +1058,7 @@ export default function LandingPage() {
             <div className="space-y-3">
               <img
                 src={logoAdvOne}
-                alt="AdvOne"
+                alt="Logo AdvOne CRM Jurídico"
                 className="h-14 w-auto drop-shadow-[0_0_20px_hsl(153,60%,45%/0.5)]"
               />
               <p className="text-xs text-[hsl(220,10%,55%)] leading-relaxed">

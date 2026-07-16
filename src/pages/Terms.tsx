@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import logoAdvOne from "@/assets/logo-advone.png";
@@ -6,6 +7,15 @@ import logoAdvOne from "@/assets/logo-advone.png";
 export default function Terms() {
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <Helmet>
+        <title>Termos de Uso — AdvOne</title>
+        <meta name="description" content="Termos de Uso da plataforma AdvOne: condições de contratação, uso do CRM jurídico e responsabilidades entre escritório e AdvOne." />
+        <link rel="canonical" href="https://advone.online/terms" />
+        <meta property="og:title" content="Termos de Uso — AdvOne" />
+        <meta property="og:description" content="Condições de uso da plataforma AdvOne para escritórios de advocacia." />
+        <meta property="og:url" content="https://advone.online/terms" />
+        <meta property="og:type" content="article" />
+      </Helmet>
       <header className="border-b border-border bg-card">
         <div className="container mx-auto flex items-center justify-between px-4 py-4">
           <Link to="/" className="flex items-center gap-2">
