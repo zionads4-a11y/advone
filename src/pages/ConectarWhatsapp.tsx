@@ -20,6 +20,7 @@ export default function ConectarWhatsapp() {
   const [connected, setConnected] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notConfigured, setNotConfigured] = useState(false);
 
   useEffect(() => {
     const fetchCompanies = async () => {
