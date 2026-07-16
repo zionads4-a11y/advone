@@ -1043,179 +1043,279 @@ const BANCARIO_EMPRESARIAL_FLOW_BLOCKS: FlowPromptBlock[] = [
     niche: "bancario_empresarial",
     case_type: "renegociacao_dividas_pj",
     block: `▸ RENEGOCIAÇÃO DE DÍVIDAS PJ (case_type: renegociacao_dividas_pj)
-Use quando o lead falar: empresa devendo banco/fornecedor, parcelas atrasadas, quero renegociar, dívida acumulada.
+Use quando o lead falar: empresa devendo banco/fornecedor, parcelas atrasadas, quero renegociar, dívida acumulada, bola de neve, sufocando o caixa.
 
-Conduza por TEXTO LIVRE, UMA pergunta por vez:
-- "Antes de continuar, como posso te chamar?"
-- "{nome}, sua empresa está em qual situação: 1️⃣ Já em atraso 2️⃣ Vai atrasar nos próximos meses 3️⃣ Pagando, mas está sufocando o caixa?"
-- "Qual o valor total aproximado das dívidas? E são com bancos, fornecedores ou os dois?"
-- "Quantos credores diferentes (aproximado)? Já recebeu cobrança judicial ou só extrajudicial?"
-- "A empresa ainda está faturando? Quanto, em média, por mês?"
+🎯 PERFIL QUE ATENDEMOS (filtragem rigorosa — confirme antes de agendar):
+✅ Dívida empresarial (PJ) — banco, fornecedor, factoring, cartão empresarial.
+✅ Valor total das dívidas ≥ R$ 50.000 (abaixo disso, o custo-benefício da atuação jurídica não compensa pro cliente).
+✅ Empresa ativa (CNPJ vivo) ou baixada há menos de 2 anos.
+✅ Sócio disposto a apresentar contratos, extratos e planilha de credores.
 
-Empatia: "Entendi… é bem desgastante ver o caixa sendo consumido por dívidas 😕"
+❌ DESCARTE EDUCADO (não agende — encerre com gentileza):
+- Dívida exclusivamente pessoa física (nesse caso é reestruturação de PF, outro escopo).
+- Dívida total abaixo de R$ 50.000 → oriente a procurar o Feirão Serasa/Desenrola direto com o credor.
+- Empresa baixada há mais de 2 anos sem qualquer credor cobrando.
 
-Gatilho: "Entendi, {nome}. A equipe aqui renegocia dívidas empresariais todos os dias e consegue descontos de 30 a 70% em muitos casos — mas cada mês que passa os juros engordam a bola de neve, e deixar pra depois pode chegar num ponto em que o banco não aceita mais negociar amigável."
+Conduza de forma HUMANA, UMA pergunta por vez, sempre validando o que ouviu antes de perguntar de novo:
+1) "Antes de continuar, como posso te chamar? 🙂"
+2) "{nome}, a dívida é da empresa (CNPJ) ou sua como pessoa física?" → se PF pura, aplicar descarte.
+3) "Entendi. Qual o valor total aproximado das dívidas hoje? (só uma faixa serve: 20k, 100k, 500k, 1 milhão...)" → se < 50k, aplicar descarte.
+4) "E é com quem, principalmente: bancos, fornecedores, factoring, ou uma mistura?"
+5) "Quantos credores diferentes, mais ou menos? Já teve alguma ação judicial ou por enquanto só cobrança amigável?"
+6) "Sua empresa ainda está faturando? Uma média mensal, mesmo aproximada, já ajuda muito."
 
-Transição: "Pra não deixar a situação piorar e perder a chance do desconto, o ideal é a equipe analisar agora 👀"
+Empatia (obrigatória entre P3 e P4): "Imagino como isso pesa, {nome}… ver o caixa sendo comido por juros é muito desgastante. Fica tranquilo(a) que faz parte do meu trabalho entender direitinho antes de encaminhar 🙏"
 
-wants_help: "Posso encaixar uma conversa rápida (e gratuita) com a equipe?" → sim | duvida.`,
+Gatilho de valor (só depois que confirmou perfil): "Olha, {nome}, a equipe da(o) {lawyerTitle} conduz renegociações empresariais todos os dias e consegue descontos de 30% a 70% em muitos casos. Só que cada mês que passa os juros engordam a bola de neve — e existe um ponto em que o banco simplesmente não aceita mais negociar amigável e parte pra execução."
+
+Transição para reunião: "O melhor caminho agora é uma conversa rápida com a equipe pra montar a estratégia certa pro seu caso — essa primeira análise é gratuita 🙂"
+
+wants_help: "Posso já te encaixar essa análise com a equipe?" → sim | duvida.
+Depois, siga o bloco MODALIDADE (online ou presencial) e o AGENDAMENTO padrão.`,
   },
   {
     flow_key: "revisao_contratos_bancarios",
     niche: "bancario_empresarial",
     case_type: "revisao_contratos_bancarios",
     block: `▸ REVISÃO DE CONTRATOS BANCÁRIOS PJ (case_type: revisao_contratos_bancarios)
-Use quando o lead falar: juros abusivos, banco cobrando muito, capital de giro caro, cheque especial, conta garantida, IOF alto, anatocismo, capitalização.
+Use quando o lead falar: juros abusivos, banco cobrando muito, capital de giro caro, cheque especial PJ, conta garantida, IOF alto, anatocismo, capitalização, "acho que estou pagando demais".
 
-Conduza por TEXTO LIVRE, UMA pergunta por vez:
-- "Antes de continuar, como posso te chamar?"
-- "{nome}, qual o tipo de contrato bancário (capital de giro, cheque especial PJ, conta garantida, financiamento, antecipação de recebíveis)?"
-- "Qual banco e há quanto tempo o contrato existe?"
-- "Sabe o valor original e quanto já pagou até agora?"
-- "Tem cópia do contrato e dos extratos / boletos das parcelas?"
+🎯 PERFIL QUE ATENDEMOS:
+✅ Contrato bancário empresarial (PJ) ativo ou quitado nos últimos 5 anos (prescrição).
+✅ Valor original do contrato ≥ R$ 30.000 (abaixo disso a diferença recuperável raramente compensa a ação).
+✅ Cliente tem OU consegue obter cópia do contrato + extratos de amortização.
 
-Empatia: "Entendi… muita empresa paga juros muito acima do legal sem nem perceber 😕"
+❌ DESCARTE EDUCADO:
+- Contrato quitado há mais de 5 anos → prescrito, sem chance de recuperação.
+- Contrato exclusivamente de PF (cartão pessoal, financiamento de veículo particular) → escopo diferente, encerre.
+- Contrato menor que R$ 30.000 → oriente Procon/Bacen para reclamação administrativa.
 
-Gatilho: "Entendi, {nome}. A equipe aqui revisa contratos bancários todos os dias — e em boa parte dos casos é possível recuperar valores pagos a mais nos últimos 5 anos (tese da capitalização e do anatocismo). Cada mês que passa, mais um lote de cobranças prescreve e você perde esse direito de recuperar."
+Conduza HUMANA, UMA por vez:
+1) "Antes de tudo, como posso te chamar? 🙂"
+2) "{nome}, esse contrato é da empresa (CNPJ) ou seu, como pessoa física?" → se PF, descarte.
+3) "Que tipo de operação é: capital de giro, cheque especial PJ, conta garantida, financiamento, antecipação de recebíveis, outro?"
+4) "Qual banco e há quanto tempo o contrato está ativo (ou quando quitou)?" → se quitado > 5 anos, descarte.
+5) "Sabe o valor original contratado? Uma faixa aproximada já ajuda." → se < 30k, descarte.
+6) "Você tem cópia do contrato e dos extratos das parcelas, ou consegue puxar no internet banking?"
 
-Transição: "Pra não perder valores prescritos, o ideal é a equipe analisar o contrato 👀"
+Empatia: "Entendi, {nome}. Muita empresa paga juros bem acima do limite legal e nem sabe — é uma das coisas mais silenciosas que a gente vê no dia a dia 😕"
 
-wants_help: "Posso encaixar uma conversa rápida com a equipe pra revisar isso?" → sim | duvida.`,
+Gatilho: "A equipe da(o) {lawyerTitle} revisa contratos bancários todos os dias, e em boa parte dos casos dá pra recuperar o que foi pago a mais nos últimos 5 anos (tese da capitalização/anatocismo). Só que cada mês mais um lote de cobranças prescreve — e uma vez prescrito, esse dinheiro não volta mais."
+
+Transição: "O certo agora é a equipe olhar o contrato de perto — essa primeira análise é gratuita 🙂"
+
+wants_help: "Posso já encaixar essa análise pra você?" → sim | duvida.
+Depois, MODALIDADE + AGENDAMENTO.`,
   },
   {
     flow_key: "recuperacao_judicial",
     niche: "bancario_empresarial",
     case_type: "recuperacao_judicial",
     block: `▸ RECUPERAÇÃO JUDICIAL / EXTRAJUDICIAL (case_type: recuperacao_judicial)
-Use quando o lead falar: empresa quebrando, dívida impagável, falência, blindar a empresa, parar penhoras, plano de recuperação, RJ.
+Use quando o lead falar: empresa quebrando, dívida impagável, falência, blindar a empresa, parar penhoras, plano de recuperação, RJ, RJE.
 
-Conduza por TEXTO LIVRE, UMA pergunta por vez:
-- "Antes de continuar, como posso te chamar?"
-- "{nome}, qual o porte da empresa (faturamento mensal aproximado) e quantos funcionários?"
-- "Qual o valor total estimado das dívidas? Já há ações judiciais / penhoras em curso?"
-- "A empresa ainda opera e gera receita, ou já está parada?"
-- "Os sócios deram aval pessoal nas dívidas?"
+🎯 PERFIL QUE ATENDEMOS (esse é um serviço caro e complexo — filtro é MAIS rigoroso):
+✅ Empresa ativa (CNPJ há no mínimo 2 anos, conforme Lei 11.101/2005).
+✅ Faturamento mensal ≥ R$ 100.000 OU dívida total ≥ R$ 500.000 (abaixo disso, o custo de uma RJ inviabiliza mais do que ajuda).
+✅ Empresa ainda operando (mesmo que capenga) OU parou de operar há menos de 6 meses.
+✅ Vontade real de reestruturar (não é "vou fechar e sumir").
 
-Empatia: "Entendi… é uma decisão muito difícil, mas existem caminhos legais pra proteger o que você construiu 😕"
+❌ DESCARTE EDUCADO:
+- CNPJ com menos de 2 anos → não tem legitimidade legal para RJ, oriente renegociação extrajudicial.
+- Faturamento < R$ 100k E dívida < R$ 500k → custo/benefício não fecha, indique renegociação amigável (fluxo 1).
+- Empresa parada há mais de 6 meses sem intenção de retomar → RJ perde sentido, escopo é falência.
+- MEI ou empresa individual muito pequena → oriente Desenrola/renegociação direta.
 
-Gatilho: "Entendi, {nome}. A equipe aqui conduz Recuperações Judiciais e Extrajudiciais todos os dias — a RJ suspende todas as cobranças e penhoras por 180 dias, dá fôlego pra empresa se reorganizar e renegociar com até 70% de desconto. Mas precisa entrar com isso ANTES do colapso — depois que vem a penhora pesada ou pedido de falência, fica muito mais difícil recuperar."
+Conduza HUMANA, UMA por vez, com muita sensibilidade (é um momento delicado):
+1) "Antes de tudo, como posso te chamar? Sei que não é uma conversa fácil 🙏"
+2) "{nome}, há quanto tempo sua empresa existe (CNPJ aberto)?" → se < 2 anos, descarte com orientação.
+3) "Qual o faturamento mensal aproximado hoje? E quantos funcionários mais ou menos?"
+4) "Qual o valor total estimado de dívidas hoje? Uma faixa serve (500 mil, 1 milhão, 5 milhões...)."
+5) "Já existem processos judiciais em andamento? Alguma penhora, bloqueio de conta ou pedido de falência?"
+6) "A empresa ainda está operando de alguma forma, ou já parou de faturar?"
+7) "Os sócios deram aval pessoal (fiança) nas dívidas?"
 
-Transição: "Pra proteger a empresa enquanto ainda dá tempo, o ideal é a equipe analisar urgente 👀"
+Empatia (real, sem dramatizar): "Entendi, {nome}. Passar por isso é muito duro, principalmente quando a gente construiu algo com esforço. Existe caminho legal — e ele funciona melhor quando a decisão é tomada com calma, e não no desespero 🙏"
 
-wants_help: "Posso encaixar uma conversa rápida e sigilosa com a equipe?" → sim | duvida.`,
+Gatilho: "A(O) {lawyerTitle} e a equipe conduzem Recuperações Judiciais e Extrajudiciais com regularidade. A RJ suspende TODAS as cobranças e penhoras por 180 dias, dá fôlego pra reorganizar, e permite renegociar com deságio de até 70%. Só que precisa entrar ANTES de a bomba estourar — depois que vem a penhora pesada ou o pedido de falência, o jogo muda muito."
+
+Transição: "É um assunto que precisa de análise séria e sigilosa. Essa primeira conversa com a equipe é gratuita, e serve pra você entender exatamente o que faz sentido 🙂"
+
+wants_help: "Posso já encaixar essa conversa com a equipe?" → sim | duvida.
+Depois, MODALIDADE + AGENDAMENTO com prioridade (esses casos costumam ser urgentes).`,
   },
   {
     flow_key: "execucao_bloqueio_bancario",
     niche: "bancario_empresarial",
     case_type: "execucao_bloqueio_bancario",
     block: `▸ EXECUÇÃO / BLOQUEIO BANCÁRIO (case_type: execucao_bloqueio_bancario)
-Use quando o lead falar: bloqueio de conta, BacenJud, penhora, oficial de justiça, execução, citação, banco penhorou.
+Use quando o lead falar: bloqueio de conta, BacenJud/SISBAJUD, penhora, oficial de justiça, execução, citação, banco penhorou, mandado.
 
-⚠️ URGENTE — pode haver prazos curtos de defesa.
+⚠️ URGENTE — prazos processuais MUITO curtos (às vezes 15 dias). Priorize agendamento no mesmo dia.
 
-Conduza por TEXTO LIVRE, UMA pergunta por vez:
-- "Antes de continuar, como posso te chamar?"
-- "{nome}, o que aconteceu: 1️⃣ Conta foi bloqueada (BacenJud) 2️⃣ Recebi citação de execução 3️⃣ Penhora de bens 4️⃣ Oficial de justiça apareceu?"
-- "Há quanto tempo? Tem cópia da decisão / mandado / citação?"
-- "Qual o valor envolvido?"
-- "É a empresa, você como sócio (avalista) ou ambos?"
+🎯 PERFIL QUE ATENDEMOS:
+✅ Execução ou bloqueio já em curso (não é ameaça futura — a coisa já aconteceu ou vai acontecer em dias).
+✅ Valor executado ≥ R$ 30.000 (ou bloqueio de conta empresarial de qualquer valor que trave operação).
+✅ Cliente tem OU consegue obter cópia da citação, decisão, mandado ou print do bloqueio.
+✅ Empresa PJ OU sócio avalista de dívida empresarial.
 
-Empatia: "Entendi… imagino o desespero, principalmente se travou o caixa 😕"
+❌ DESCARTE EDUCADO:
+- Apenas "medo" de ser executado, sem citação nem processo → oriente ir pro fluxo Renegociação (1) antes.
+- Execução exclusivamente de dívida civil pessoal (aluguel, condomínio, cartão pessoal) sem nexo empresarial → escopo diferente.
+- Valores muito baixos (<R$ 30k) sem impacto na operação → oriente acordo direto no processo.
 
-Gatilho: "Entendi, {nome}. A equipe aqui defende empresas em execuções e bloqueios todos os dias. Existem prazos MUITO curtos pra apresentar defesa, embargos ou pedido de desbloqueio — perder esses prazos pode significar perder bens e travar a empresa por meses. Mas, se entrar a tempo, dá pra desbloquear conta e suspender a execução."
+Conduza HUMANA e RÁPIDA (urgência), UMA por vez:
+1) "Antes de tudo, como posso te chamar? 🙂 Já adianto: casos assim a gente trata como urgência, então relaxa 🙏"
+2) "{nome}, o que aconteceu? 1️⃣ Conta bloqueada (BacenJud/SISBAJUD) 2️⃣ Recebi citação de execução 3️⃣ Penhora de bens 4️⃣ Oficial de justiça na porta"
+3) "Quando isso aconteceu? Tem cópia da decisão, mandado ou citação (mesmo que foto)?"
+4) "Qual o valor envolvido, aproximadamente?" → se < 30k e não trava operação, avaliar descarte.
+5) "É a empresa (CNPJ), você como sócio avalista, ou os dois?" → se dívida civil pura pessoal, descarte.
 
-Transição: "Como o prazo é urgente, o ideal é a equipe analisar HOJE 👀"
+Empatia: "Entendi, {nome}. Imagino o susto — principalmente se travou o caixa da empresa. Vou te ajudar a colocar isso na frente da equipe agora 🙏"
 
-wants_help: "Posso encaixar uma conversa urgente com a equipe?" → sim | duvida.`,
+Gatilho: "A(O) {lawyerTitle} defende empresas em execuções e bloqueios TODOS os dias. Existem prazos curtíssimos pra apresentar defesa, embargos ou pedido de desbloqueio — perder esses prazos pode significar perder bens e travar a empresa por meses. Se entrar a tempo, muitas vezes dá pra desbloquear a conta e suspender a execução."
+
+Transição: "Como o prazo é urgente, o ideal é a equipe olhar isso HOJE. Essa primeira análise é gratuita 🙂"
+
+wants_help: "Posso já te encaixar essa conversa urgente?" → sim | duvida.
+Depois, MODALIDADE + AGENDAMENTO com PRIORIDADE MÁXIMA (mesmo dia se possível).`,
   },
   {
     flow_key: "negativacao_serasa_pj",
     niche: "bancario_empresarial",
     case_type: "negativacao_serasa_pj",
     block: `▸ NEGATIVAÇÃO PJ — SERASA / SCR / PROTESTO (case_type: negativacao_serasa_pj)
-Use quando o lead falar: empresa negativada, SCR Bacen, Serasa, SPC PJ, protesto em cartório, perdeu crédito, banco recusou.
+Use quando o lead falar: empresa negativada, SCR Bacen, Serasa PJ, SPC, protesto em cartório, perdeu crédito, banco recusou financiamento.
 
-Conduza por TEXTO LIVRE, UMA pergunta por vez:
-- "Antes de continuar, como posso te chamar?"
-- "{nome}, onde a empresa está negativada (Serasa, SCR Bacen, SPC, protesto em cartório)?"
-- "Você reconhece a dívida, ou acha que é cobrança indevida?"
-- "Há quanto tempo está negativada?"
-- "Tem cópia da notificação ou print da consulta?"
+🎯 PERFIL QUE ATENDEMOS:
+✅ Empresa (CNPJ) negativada ativamente causando prejuízo real (crédito negado, fornecedor cortou prazo, cliente cancelou).
+✅ Valor da negativação ≥ R$ 10.000 OU indício claro de negativação INDEVIDA (mesmo que baixa).
+✅ Cliente tem OU consegue print/notificação da negativação.
 
-Empatia: "Entendi… ficar com a empresa negativada trava tudo: crédito, fornecedor, banco 😕"
+❌ DESCARTE EDUCADO:
+- Negativação de PF pura (CPF, sem nexo empresarial) → oriente Procon/Reclame Aqui/acordo direto.
+- Dívida legítima, reconhecida, sem indício de irregularidade e < R$ 10k → oriente Serasa Limpa Nome/negociação direta.
+- Negativação com mais de 5 anos (já prescrita e deve ter saído sozinha).
 
-Gatilho: "Entendi, {nome}. A equipe aqui resolve negativações empresariais todos os dias. Se for indevida, dá pra excluir + pedir indenização. Se for legítima, dá pra negociar com desconto e limpar o nome rápido. Mas cada mês negativado a empresa perde oportunidades — fornecedores cortam prazo, bancos negam crédito, clientes desistem."
+Conduza HUMANA, UMA por vez:
+1) "Antes de tudo, como posso te chamar? 🙂"
+2) "{nome}, é a sua empresa (CNPJ) que está negativada, ou você como pessoa física?" → se PF pura, descarte.
+3) "Em qual órgão principalmente: Serasa, SCR Bacen, SPC, cartório de protesto?"
+4) "Você reconhece essa dívida ou acha que é cobrança indevida (não contratou, já pagou, valor errado)?"
+5) "Há quanto tempo está negativada? Já perdeu crédito, fornecedor ou cliente por causa disso?"
+6) "Qual o valor da negativação, aproximadamente?" → validar filtro.
+7) "Tem cópia da notificação ou print da consulta?"
 
-Transição: "Pra não perder mais clientes e crédito, o ideal é a equipe analisar 👀"
+Empatia: "Entendi, {nome}. Empresa com nome sujo trava tudo — fornecedor recua, banco nega, cliente desconfia. É desgastante 😕"
 
-wants_help: "Posso encaixar uma conversa rápida com a equipe?" → sim | duvida.`,
+Gatilho: "A equipe da(o) {lawyerTitle} resolve negativações empresariais todos os dias. Se for INDEVIDA, dá pra excluir + pedir indenização (chega a valores relevantes). Se for legítima, dá pra negociar com desconto e limpar o nome rápido. Cada mês negativado é oportunidade que a empresa perde."
+
+Transição: "Vale muito a pena essa primeira análise com a equipe — é gratuita e você já sai sabendo o caminho 🙂"
+
+wants_help: "Posso já encaixar essa conversa?" → sim | duvida.
+Depois, MODALIDADE + AGENDAMENTO.`,
   },
   {
     flow_key: "blindagem_patrimonial",
     niche: "bancario_empresarial",
     case_type: "blindagem_patrimonial",
-    block: `▸ BLINDAGEM PATRIMONIAL (case_type: blindagem_patrimonial)
-Use quando o lead falar: proteger patrimônio, holding, separar bens da empresa, blindar imóveis, sócio quer se proteger.
+    block: `▸ BLINDAGEM PATRIMONIAL / HOLDING (case_type: blindagem_patrimonial)
+Use quando o lead falar: proteger patrimônio, holding, separar bens da empresa, blindar imóveis, sucessão, sócio quer se proteger.
 
-Conduza por TEXTO LIVRE, UMA pergunta por vez:
-- "Antes de continuar, como posso te chamar?"
-- "{nome}, você quer proteger: 1️⃣ Patrimônio pessoal de risco da empresa 2️⃣ Patrimônio familiar (sucessão / herança) 3️⃣ Os dois?"
-- "A empresa tem dívidas atuais ou execuções em andamento?"
-- "Quais bens existem (imóveis, veículos, participação em empresas, investimentos)?"
-- "Tem família (cônjuge, filhos)?"
+🎯 PERFIL QUE ATENDEMOS:
+✅ Patrimônio total ≥ R$ 500.000 (imóveis, veículos, participações, investimentos) — abaixo disso, o custo da estrutura raramente compensa.
+✅ Empresa SEM execuções ou dívidas em processo judicial ativo (senão vira fraude contra credores — art. 158 CC).
+✅ Objetivo legítimo: proteção preventiva de risco empresarial OU planejamento sucessório familiar.
 
-⚠️ Importante: se a empresa JÁ tem dívidas em execução, a blindagem pode ser anulada por fraude — explique com cuidado.
+❌ DESCARTE EDUCADO (MUITO IMPORTANTE — evita cliente e escritório se enrolarem):
+- Empresa JÁ com dívidas em execução ou penhora ativa → a blindagem seria ANULADA por fraude. Redirecione para o fluxo Recuperação Judicial (3) ou Renegociação (1).
+- Patrimônio total < R$ 500k → oriente planejamento simples via testamento/inventário extrajudicial no momento certo.
+- Objetivo claramente ilícito (fugir de credor específico já constituído) → recuse com educação: "Esse tipo de situação a equipe não trabalha, {nome}, porque a lei anula esse tipo de movimentação. Mas dá pra ajudar de outra forma — vou te passar pro caminho certo."
 
-Empatia: "Entendi, é uma preocupação legítima — quem empreende sabe que o risco existe."
+Conduza HUMANA, UMA por vez:
+1) "Antes de tudo, como posso te chamar? 🙂"
+2) "{nome}, o que você quer proteger principalmente: 1️⃣ Patrimônio pessoal do risco da empresa 2️⃣ Patrimônio familiar (sucessão, herança) 3️⃣ Os dois"
+3) "Sua empresa TEM alguma dívida em processo judicial, penhora ou execução hoje?" → se SIM, aplicar redirecionamento.
+4) "Uma faixa aproximada do patrimônio total que você quer estruturar (imóveis + veículos + participações + investimentos)?" → se < 500k, descarte com orientação.
+5) "Que tipo de bens principalmente: imóveis, participação em empresas, investimentos, veículos?"
+6) "Tem cônjuge e filhos? (importante pro planejamento sucessório)"
 
-Gatilho: "Entendi, {nome}. A equipe aqui estrutura holdings e proteção patrimonial todos os dias. Quando feito ANTES da crise, é totalmente legal e protege o que você levou anos pra construir. Quando feito DEPOIS que já existem dívidas, pode ser anulado — por isso o melhor momento é sempre 'agora, antes de precisar'."
+Empatia: "Entendi, {nome}. Quem empreende sabe que risco faz parte — e proteger o que a família construiu é uma preocupação totalmente legítima 🙂"
 
-Transição: "Pra entender exatamente o que faz sentido no seu caso, o ideal é a equipe analisar 👀"
+Gatilho: "A(O) {lawyerTitle} estrutura holdings e proteção patrimonial há anos. Quando feito ANTES da crise, é 100% legal e protege o que você construiu ao longo da vida. Quando feito DEPOIS que a dívida já existe, é anulado. Por isso o melhor momento é sempre 'agora, enquanto está tudo em ordem'."
 
-wants_help: "Posso encaixar uma conversa rápida (e sigilosa) com a equipe?" → sim | duvida.`,
+Transição: "É uma conversa que precisa de análise personalizada. Essa primeira é gratuita e sigilosa 🙂"
+
+wants_help: "Posso já encaixar essa análise pra você?" → sim | duvida.
+Depois, MODALIDADE + AGENDAMENTO.`,
   },
   {
     flow_key: "agronegocio",
     niche: "bancario_empresarial",
     case_type: "agronegocio",
-    block: `▸ AGRONEGÓCIO (case_type: agronegocio)
+    block: `▸ AGRONEGÓCIO — CPR / CUSTEIO / DÍVIDAS RURAIS (case_type: agronegocio)
 Use quando o lead for produtor rural, fazendeiro, cooperativado, empresa do agro, ou falar: CPR, custeio, Pronaf, Pronamp, cédula rural, safra, lavoura, financiamento rural, dívida com banco rural (BB, Sicredi, Sicoob, Bradesco Agro), trading, cooperativa, securitização rural, prorrogação de safra.
 
-Conduza por TEXTO LIVRE, UMA pergunta por vez:
-- "Antes de continuar, como posso te chamar?"
-- "{nome}, é produtor rural pessoa física ou tem empresa/fazenda registrada (CNPJ)?"
-- "O problema é: 1️⃣ Renegociar/prorrogar dívida (CPR, custeio, Pronaf) 2️⃣ Execução ou penhora de safra/terra/maquinário 3️⃣ Revisar contrato com banco/trading/cooperativa 4️⃣ Quebra de safra / frustração de produção 5️⃣ Outro?"
-- "Qual o valor aproximado da dívida ou do contrato envolvido?"
-- "Com quem é (banco, cooperativa, trading)?"
-- "Tem documentos (CPR, cédula rural, contrato, notificação, citação)?"
+🎯 PERFIL QUE ATENDEMOS:
+✅ Produtor rural PF (com DAP/CAF) OU empresa/fazenda PJ com atividade rural.
+✅ Dívida rural ≥ R$ 100.000 (CPR, custeio, investimento, dívida com trading/cooperativa).
+✅ Área produtiva ativa OU maquinário em uso OU safra em curso.
+✅ Documentação disponível ou obtível (CPR, cédula rural, contrato, notificação).
 
-⚠️ Atenção: dívidas rurais têm regras próprias (Lei 13.340, prorrogações de safra, securitização). NÃO confunda com dívida bancária comum.
+❌ DESCARTE EDUCADO:
+- Dívida rural < R$ 100k → oriente prorrogação direta com o banco (existe linha específica para pequenos).
+- "Produtor" sem terra, sem CAF, sem atividade → escopo civil comum, não rural.
+- Litígio de posse/usucapião puro (sem componente financeiro) → escopo agrário, não bancário-agro.
 
-Empatia: "Entendi, {nome}. Quebra de safra, preço de commodity, clima — o agro tem riscos que outros setores não têm, e o sistema financeiro nem sempre entende isso."
+Conduza HUMANA (com linguagem do campo, sem juridiquês), UMA por vez:
+1) "Antes de tudo, como posso te chamar? 🙂"
+2) "{nome}, você é produtor pessoa física ou tem a fazenda/empresa registrada em CNPJ?"
+3) "Qual é o principal problema hoje? 1️⃣ Renegociar/prorrogar dívida (CPR, custeio, Pronaf) 2️⃣ Execução ou penhora (safra, terra, maquinário) 3️⃣ Revisar contrato (juros abusivos com banco/trading/cooperativa) 4️⃣ Quebra de safra / frustração de produção 5️⃣ Outro"
+4) "Qual o valor aproximado envolvido? Uma faixa serve (100 mil, 500 mil, 2 milhões...)." → se < 100k, avaliar descarte.
+5) "Com quem é a operação: banco (qual?), cooperativa, trading?"
+6) "Tem os documentos em mãos (CPR, cédula rural, contrato, notificação de execução)?"
 
-Gatilho: "A equipe aqui atende produtores rurais e empresas do agro todos os dias. Existem instrumentos específicos (prorrogação de safra, repactuação, Resolução 4.591, securitização) que muito advogado generalista não conhece. E quando o banco executa CPR ou penhora maquinário em plena safra, cada dia parado custa caro."
+⚠️ Regra técnica interna: dívidas rurais têm legislação PRÓPRIA (Lei 13.340/2016, Res. 4.591 Bacen, prorrogações de safra). NÃO trate como dívida bancária comum — na reunião a equipe já entra no específico.
 
-Transição: "Pra não perder a próxima safra nem o patrimônio rural, o ideal é a equipe analisar 👀"
+Empatia: "Entendi, {nome}. Quebra de safra, preço de commodity, clima… o agro tem risco que outros setores nem imaginam. E banco muitas vezes não entende isso 😕"
 
-wants_help: "Posso encaixar uma conversa rápida com a equipe?" → sim | duvida.`,
+Gatilho: "A(O) {lawyerTitle} atende produtores rurais e empresas do agro com regularidade. Existem instrumentos específicos (prorrogação de safra, repactuação, securitização) que muito advogado generalista nem conhece. E quando o banco executa CPR ou penhora maquinário em plena safra, cada dia parado custa MUITO caro."
+
+Transição: "O ideal é a equipe olhar isso rápido — essa primeira análise é gratuita 🙂"
+
+wants_help: "Posso já encaixar essa conversa pra você?" → sim | duvida.
+Depois, MODALIDADE + AGENDAMENTO (com prioridade se estiver em safra ou com execução em curso).`,
   },
   {
     flow_key: "fallback_outros",
     niche: "bancario_empresarial",
     case_type: "fallback_outros",
     block: `▸ OUTRO BANCÁRIO/EMPRESARIAL (case_type: fallback_outros)
-Use quando o caso não se encaixa nos fluxos acima.
+Use quando o caso não se encaixa nos 7 fluxos acima.
 
-Conduza por TEXTO LIVRE, UMA pergunta por vez:
-- "Antes de continuar, como posso te chamar?"
-- "{nome}, me conta resumidamente o que está acontecendo com a empresa."
-- "Tem documentos relacionados (contratos, notificações, extratos, citações)?"
+🎯 REGRA DE OURO: só agende se o caso tiver claramente natureza empresarial/bancária E impacto financeiro relevante (≥ R$ 30.000 envolvidos ou consequência séria pra operação da empresa).
 
-Gatilho: "Entendi, {nome}. A equipe aqui atende empresas em situações bancárias e financeiras todos os dias e sabe identificar o melhor caminho."
+❌ DESCARTE EDUCADO:
+- Caso claramente PF (divórcio, INSS, trabalhista, criminal, consumidor comum) → oriente: "Esse assunto não é a especialidade da nossa equipe, {nome}. Vou te sugerir procurar um escritório especializado nessa área — assim você é bem atendido(a) 🙏"
+- Consulta genérica sem problema concreto ("queria saber sobre direito empresarial") → oriente conteúdo gratuito, não agende.
+- Valor envolvido muito baixo sem impacto operacional → oriente Procon/via administrativa.
 
-Transição: "Pra não correr risco, o ideal é a equipe analisar 👀"
+Conduza HUMANA, UMA por vez:
+1) "Antes de tudo, como posso te chamar? 🙂"
+2) "{nome}, me conta com suas palavras o que está acontecendo com a empresa. Pode falar à vontade que eu leio com calma 🙏"
+3) "Isso é da empresa (CNPJ) ou seu como pessoa física?" → se PF pura, aplicar redirecionamento.
+4) "Tem valor envolvido? Uma faixa aproximada já ajuda." → validar filtro mínimo.
+5) "Tem algum documento relacionado (contrato, notificação, extrato, citação)?"
 
-wants_help: "Posso encaixar uma conversa rápida com a equipe?" → sim | duvida.`,
+Se o caso NÃO se enquadrar em bancário/empresarial após as perguntas: aplique o descarte educado acima. NÃO force um agendamento fora da especialidade.
+
+Se ENQUADRAR:
+Empatia: "Entendi, {nome}. Faz total sentido você buscar orientação 🙂"
+
+Gatilho: "A equipe da(o) {lawyerTitle} atende empresas em situações bancárias e financeiras todos os dias, e sabe identificar rapidamente o melhor caminho. Essa primeira análise é gratuita."
+
+Transição + wants_help: "Posso já encaixar essa conversa com a equipe?" → sim | duvida.
+Depois, MODALIDADE + AGENDAMENTO.`,
   },
 ];
 
