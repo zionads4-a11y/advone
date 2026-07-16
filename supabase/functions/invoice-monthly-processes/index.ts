@@ -19,7 +19,8 @@ const corsHeaders = {
 
 const ASAAS_API_KEY = Deno.env.get("ASAAS_ADVONE_API_KEY")!;
 const ASAAS_BASE = "https://api.asaas.com/v3";
-const PRICE_PER_PROCESS = 1.50;
+const PRICE_PER_PROCESS = 1.00;
+const FREE_QUOTA = 100;
 
 interface AsaasCustomer { id: string; name: string; }
 interface AsaasPayment { id: string; invoiceUrl: string; }
@@ -139,17 +140,11 @@ Deno.serve(async (req) => {
           continue;
         }
 
-        // Quota mensal incluída por plano (acima disso é cobrado por processo)
+        // 100 processos grátis para todos os planos; excedente = R$1,00/processo
         const quotaByPlan: Record<string, number> = {
-          plan_ia: 10,
-          plan_completo: 10,
-          // legado
-          plan_ia_monthly: 10,
-          plan_ia_6m: 10,
-          plan_ia_12m: 10,
-          plan_zionads: 0,
+          plan_zionads: 0, // Zionads paga base + processos desde o 1º
         };
-        const quota = quotaByPlan[company.billing_model as string] ?? 0;
+        const quota = quotaByPlan[company.billing_model as string] ?? FREE_QUOTA;
         const excess = Math.max(0, count - quota);
         const customBase = Number(company.custom_base_value || 0);
         const total = +(excess * PRICE_PER_PROCESS + customBase).toFixed(2);
@@ -190,7 +185,7 @@ Deno.serve(async (req) => {
             dueDate: dueDate(month),
             description: company.billing_model === 'plan_zionads' 
               ? `Fatura Mensal AdvOne — ${month} (Monitoramento: ${count} proc., Base/Tráfego: R$ ${customBase.toFixed(2).replace(".", ",")})`
-              : `Monitoramento de processos AdvOne — ${count} processo(s) ativo(s) em ${month} (R$ ${PRICE_PER_PROCESS.toFixed(2).replace(".", ",")} cada)`,
+              : `Monitoramento de processos AdvOne — ${count} processo(s) ativo(s) em ${month} (${excess} excedente(s) × R$ ${PRICE_PER_PROCESS.toFixed(2).replace(".", ",")} — 100 primeiros grátis)`,
             externalReference: `processes:${companyId}:${month}`,
           }),
         });

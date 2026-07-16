@@ -360,7 +360,7 @@ export function ClientProcesses({ leadId, leadName, companyId, onChanged }: Prop
           </div>
           <p className="text-[11px] text-muted-foreground mt-2">
             Basta colar o número — o sistema avisa automaticamente sobre cada nova movimentação.
-            <span className="block mt-1 font-medium text-primary">Cobrança: R$ 1,50/mês por processo monitorado.</span>
+            <span className="block mt-1 font-medium text-primary">Monitoramento: 100 processos grátis · R$ 1,00/mês por excedente.</span>
           </p>
         </CardContent>
       </Card>

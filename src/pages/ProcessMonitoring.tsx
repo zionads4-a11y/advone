@@ -225,8 +225,14 @@ export default function ProcessMonitoring() {
             {processes.length} processo{processes.length !== 1 ? "s" : ""} ativo{processes.length !== 1 ? "s" : ""}
           </Badge>
           <Badge className="text-xs bg-primary/10 text-primary border-primary/20 hover:bg-primary/15">
-            R$ {(processes.length * 1.5).toFixed(2).replace(".", ",")}/mês
-            <span className="ml-1 opacity-70">(R$ 1,50 × processo)</span>
+            {processes.length <= 100
+              ? "Grátis (até 100)"
+              : `R$ ${((processes.length - 100) * 1).toFixed(2).replace(".", ",")}/mês`}
+            <span className="ml-1 opacity-70">
+              {processes.length <= 100
+                ? `(${100 - processes.length} restantes)`
+                : `(${processes.length - 100} excedente × R$ 1,00)`}
+            </span>
           </Badge>
           <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
             <DialogTrigger asChild>
@@ -240,10 +246,10 @@ export default function ProcessMonitoring() {
                 <div className="bg-primary/5 border border-primary/20 rounded-md p-3 mt-2">
                   <p className="text-xs text-primary font-medium flex items-center gap-2">
                     <AlertCircle className="h-3.5 w-3.5" />
-                    Cobrança de R$ 1,50/mês por processo
+                    100 processos grátis · R$ 1,00 por excedente
                   </p>
                   <p className="text-[10px] text-muted-foreground mt-1">
-                    Cada processo ativo gera uma cobrança mensal de R$ 1,50 que será incluída na sua fatura.
+                    Você monitora até 100 processos sem custo. A partir do 101º, cada processo ativo adiciona R$ 1,00/mês à sua fatura.
                   </p>
                 </div>
               </DialogHeader>
