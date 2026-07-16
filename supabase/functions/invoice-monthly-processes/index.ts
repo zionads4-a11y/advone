@@ -19,7 +19,8 @@ const corsHeaders = {
 
 const ASAAS_API_KEY = Deno.env.get("ASAAS_ADVONE_API_KEY")!;
 const ASAAS_BASE = "https://api.asaas.com/v3";
-const PRICE_PER_PROCESS = 1.50;
+const PRICE_PER_PROCESS = 1.00;
+const FREE_QUOTA = 100;
 
 interface AsaasCustomer { id: string; name: string; }
 interface AsaasPayment { id: string; invoiceUrl: string; }
