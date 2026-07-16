@@ -20,6 +20,7 @@ export default function ConectarWhatsapp() {
   const [connected, setConnected] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notConfigured, setNotConfigured] = useState(false);
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -39,11 +40,19 @@ export default function ConectarWhatsapp() {
     if (!companyId) return;
     setLoading(true);
     setError(null);
+    setNotConfigured(false);
     try {
-      const { data: statusRes, error: sErr } = await supabase.functions.invoke("zapi-qrcode", {
+      const { data: statusRes } = await supabase.functions.invoke("zapi-qrcode", {
         body: { company_id: companyId, action: "get-status" },
       });
-      if (sErr) throw sErr;
+      const notCfgMsg = /não configurad|nome da instância/i;
+      if (statusRes?.error && notCfgMsg.test(statusRes.error)) {
+        setNotConfigured(true);
+        setConnected(false);
+        setQrcode(null);
+        setLoading(false);
+        return;
+      }
       if (statusRes?.connected) {
         setConnected(true);
         setQrcode(null);
@@ -51,11 +60,12 @@ export default function ConectarWhatsapp() {
         return;
       }
       setConnected(false);
-      const { data: qrRes, error: qErr } = await supabase.functions.invoke("zapi-qrcode", {
+      const { data: qrRes } = await supabase.functions.invoke("zapi-qrcode", {
         body: { company_id: companyId, action: "get_qrcode" },
       });
-      if (qErr) throw qErr;
-      if (qrRes?.connected) {
+      if (qrRes?.error && notCfgMsg.test(qrRes.error)) {
+        setNotConfigured(true);
+      } else if (qrRes?.connected) {
         setConnected(true);
         setQrcode(null);
       } else if (qrRes?.qrcode) {
@@ -137,6 +147,19 @@ export default function ConectarWhatsapp() {
               </Badge>
               <p className="text-sm text-muted-foreground max-w-sm">
                 Seu WhatsApp está ativo e pronto para receber e enviar mensagens.
+              </p>
+              <Button variant="outline" onClick={() => fetchStatusAndQr(selected)} className="gap-2 mt-2">
+                <RefreshCw className="h-4 w-4" /> Verificar novamente
+              </Button>
+            </div>
+          ) : notConfigured ? (
+            <div className="flex flex-col items-center gap-3 py-10 text-center">
+              <AlertCircle className="h-10 w-10 text-amber-500" />
+              <p className="text-sm font-medium text-foreground">
+                Aguardando configuração do administrador
+              </p>
+              <p className="text-xs text-muted-foreground max-w-sm">
+                A instância UaZapi ainda não foi cadastrada para esta empresa. Assim que o administrador finalizar a configuração, o QR Code aparecerá aqui automaticamente.
               </p>
               <Button variant="outline" onClick={() => fetchStatusAndQr(selected)} className="gap-2 mt-2">
                 <RefreshCw className="h-4 w-4" /> Verificar novamente
