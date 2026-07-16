@@ -25,6 +25,7 @@ import InternalStaff from "./pages/InternalStaff";
 import AccessManagement from "./pages/AccessManagement";
 import TrackingLinks from "./pages/TrackingLinks";
 import ConnectWhatsApp from "@/pages/ConnectWhatsApp";
+import ConectarWhatsapp from "@/pages/ConectarWhatsapp";
 import Agenda from "./pages/Agenda";
 import Profile from "./pages/Profile";
 import BotConfig from "./pages/BotConfig";
