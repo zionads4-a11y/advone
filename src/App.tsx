@@ -25,6 +25,7 @@ import InternalStaff from "./pages/InternalStaff";
 import AccessManagement from "./pages/AccessManagement";
 import TrackingLinks from "./pages/TrackingLinks";
 import ConnectWhatsApp from "@/pages/ConnectWhatsApp";
+import ConectarWhatsapp from "@/pages/ConectarWhatsapp";
 import Agenda from "./pages/Agenda";
 import Profile from "./pages/Profile";
 import BotConfig from "./pages/BotConfig";
@@ -125,6 +126,7 @@ const App = () => (
               <Route path="/companies/:id" element={<CompanyDetail />} />
               <Route path="/tracking" element={<TrackingLinks />} />
               <Route path="/agenda" element={<Agenda />} />
+              <Route path="/conectar-whatsapp" element={<ConectarWhatsapp />} />
               <Route path="/client-users" element={<ClientUsers />} />
               <Route path="/time-interno" element={<InternalStaff />} />
               <Route 

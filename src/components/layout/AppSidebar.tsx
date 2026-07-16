@@ -25,6 +25,7 @@ import {
   Activity,
   Calculator,
   UserCog,
+  Smartphone,
 } from "lucide-react";
 import logoAdvOne from "@/assets/logo-advone-light.png";
 import { NavLink } from "@/components/NavLink";
@@ -103,6 +104,7 @@ const gerenteItems = [
   { title: "Processos (Kanban)", url: "/processos-kanban", icon: Briefcase, premium: true },
   { title: "Modelos de Documentos", url: "/modelos-documentos", icon: FileText },
   { title: "Equipe", url: "/client-users", icon: Users },
+  { title: "Conectar WhatsApp", url: "/conectar-whatsapp", icon: Smartphone },
   { title: "Configurações", url: "/company-settings", icon: Settings },
 ];
 
@@ -126,6 +128,7 @@ const clientItems = [
   { title: "Kanban", url: "/kanban", icon: Kanban },
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
+  { title: "Conectar WhatsApp", url: "/conectar-whatsapp", icon: Smartphone },
 ];
 
 function getMenuItems(role: string | null) {
