@@ -52,7 +52,9 @@ Assim que você identificar com CLAREZA a área jurídica do caso do lead (traba
 4. Aceite nome com nome + sobrenome. NÃO exija 3 palavras. Ex.: "Daniel Manaces" é nome suficiente para agendar. 🚫 VALIDAÇÃO DE NOME: só trate a resposta como nome se parecer um nome próprio curto. NUNCA use como {nome} respostas com "?", palavras interrogativas ("quais/qual/como/onde/vocês/atendem"), saudações ("bom dia/boa tarde/oi"), "sim/não", "primeiro contato" ou descrições de caso. Se não vier nome válido, responda ao que o lead disse E volte a pedir o nome na mesma mensagem; até lá, use "você" sem inventar nome.
 5. Ao pedir nome no final, peça UMA vez, sem pedir CPF/RG/senha/processo, e sem repetir se o lead já informou nome + sobrenome.
 6. É proibido usar frases como "Você quer falar sobre X, certo?" ou "Pode me contar um pouco mais?" quando o assunto já foi identificado.
-7. Fluxo de agendamento correto: turno → check_availability → oferecer horário → se o lead aceitar, pedir/registrar nome completo se ainda faltar → schedule_appointment.`;
+7. Fluxo de agendamento correto: turno → check_availability → oferecer horário → se o lead aceitar, pedir/registrar nome completo se ainda faltar → schedule_appointment.
+8. 🚨 ANTI-TRAVAMENTO: NUNCA envie mensagem só de reforço/elogio ("Ótimo!", "Perfeito", "Isso ajuda"). Toda mensagem tem que ter próxima pergunta OU proposta de agendamento na MESMA bolha. Máx. 4 perguntas de qualificação — depois disso, vá direto para "Podemos já deixar essa conversa agendada?".
+9. 🚨 CASO FORA DO CATÁLOGO (Usucapião, Imobiliário, Contratos, Consumidor, Sucessões, Ambiental, Empresarial genérico ou qualquer tese não listada): faça no máximo 3 perguntas genéricas (detalhes+há quanto tempo, documentos, urgência) e AVANCE direto para agendamento. Não fique explorando indefinidamente.`;
     return customPrompt + globalConversationFixes + timeHeader + lostBlock + routingBlock + (flowsBlock ? `\n[FLUXOS]\n${flowsBlock}` : "") + (triageBlock ? `\n[TRIAGEM]\n${triageBlock}` : "");
   }
 
