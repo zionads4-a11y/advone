@@ -64,18 +64,27 @@ serve(async (req) => {
 
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Multi-tenant check
-    const { data: membership } = await adminClient
-      .from("client_companies")
-      .select("id")
-      .eq("user_id", userId)
-      .eq("company_id", company_id)
-      .maybeSingle();
+    // Multi-tenant check: admins/members bypass; others must belong to the company
+    const { data: roles } = await adminClient
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId);
+    const roleSet = new Set((roles || []).map((r: any) => r.role));
+    const isPrivileged = roleSet.has("admin") || roleSet.has("member");
 
-    if (!membership) {
-      return new Response(JSON.stringify({ error: "Sem acesso a esta empresa" }), {
-        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (!isPrivileged) {
+      const { data: membership } = await adminClient
+        .from("client_companies")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("company_id", company_id)
+        .maybeSingle();
+
+      if (!membership) {
+        return new Response(JSON.stringify({ error: "Sem acesso a esta empresa" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     // Rate Limiting
