@@ -1102,7 +1102,7 @@ Antes de responder:
           const _confirmDate = sanitizeDate(args.date, timezone);
           const _confirmTime = args.time || "10:00";
           const _confirmDateBR = formatDateDMY(_confirmDate);
-          replyText = `Perfeito, ${leadCurrentName.split(" ")[0]} 🙂\n\nAgendamento confirmado:\n📅 ${_confirmDateBR}\n⏰ ${_confirmTime}\n👤 ${leadCurrentName}\n\nA equipe já entra em contato com você no horário marcado. Qualquer coisa, é só me chamar por aqui 💙`;
+          replyText = `Perfeito, ${leadCurrentName.split(" ")[0]} 🙂\n\n✅ *Agendamento confirmado*\n📅 ${_confirmDateBR}\n⏰ ${_confirmTime}\n👤 ${leadCurrentName}\n\nNo dia e horário marcados, o(a) Dr(a). vai entrar em contato com você para *analisar todo o seu caso com calma*, tirar todas as suas dúvidas e te orientar sobre os melhores caminhos.\n\nSe puder, deixe em mãos os documentos que você já mencionou — isso agiliza bastante a análise. Qualquer coisa antes disso, é só me chamar por aqui 💙`;
 
           if (leadId) {
             const appointmentDate = sanitizeDate(args.date, timezone);
