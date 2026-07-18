@@ -5,6 +5,7 @@ import logoAdvOne from "@/assets/logo-advone-light.png";
 import heroBg from "@/assets/hero-bg-lp.jpg";
 import dashboardMockup from "@/assets/dashboard-mockup.jpg";
 import { InteractiveChatDemo } from "@/components/landing/InteractiveChatDemo";
+import { DemoRequestDialog } from "@/components/landing/DemoRequestDialog";
 import { Reveal } from "@/components/landing/useScrollReveal";
 import { AnimatedCounter } from "@/components/landing/AnimatedCounter";
 import {
@@ -143,9 +144,14 @@ export default function LandingPage() {
             <Button variant="ghost" onClick={() => navigate("/auth?mode=login")} className="text-[hsl(220,10%,70%)] hover:text-[hsl(153,60%,45%)]">
               Login
             </Button>
-            <Button onClick={() => navigate("/signup?plan=admin")} className="gradient-primary text-[hsl(0,0%,100%)] font-semibold">
-              Solicitar apresentação
-            </Button>
+            <DemoRequestDialog
+              source="landing-nav"
+              trigger={
+                <Button className="gradient-primary text-[hsl(0,0%,100%)] font-semibold">
+                  Solicitar apresentação
+                </Button>
+              }
+            />
 
           </div>
         </div>
@@ -178,14 +184,18 @@ export default function LandingPage() {
                 O AdvOne integra <strong className="text-[hsl(220,10%,80%)]">CRM jurídico, agenda, financeiro, gestão de processos e atendimento via WhatsApp</strong> em um único ambiente seguro e auditável. Uma solução desenvolvida para escritórios que buscam eficiência operacional, previsibilidade de receita e conformidade com a LGPD.
               </p>
               <div className="flex flex-col items-center gap-4 sm:flex-row lg:justify-start animate-slide-up" style={{ animationDelay: "0.2s" }}>
-                <Button
-                  size="lg"
-                  onClick={() => navigate("/signup?plan=admin")}
-                  className="gradient-primary glow-primary px-8 py-6 text-lg font-semibold text-[hsl(0,0%,100%)] group"
-                >
-                  Solicitar apresentação
-                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-                </Button>
+                <DemoRequestDialog
+                  source="landing-hero"
+                  trigger={
+                    <Button
+                      size="lg"
+                      className="gradient-primary glow-primary px-8 py-6 text-lg font-semibold text-[hsl(0,0%,100%)] group"
+                    >
+                      Solicitar apresentação
+                      <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                    </Button>
+                  }
+                />
                 <a
                   href="#demo"
                   className="flex items-center gap-2 text-sm text-[hsl(220,10%,70%)] transition-colors hover:text-[hsl(153,60%,45%)]"
