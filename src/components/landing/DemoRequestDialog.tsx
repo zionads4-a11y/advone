@@ -11,7 +11,7 @@ const schema = z.object({
   full_name: z.string().trim().min(3, "Informe seu nome completo").max(120),
   phone: z.string().trim().min(10, "Telefone inválido").max(20),
   city: z.string().trim().min(2, "Informe sua cidade").max(80),
-  email: z.string().trim().email("E-mail inválido").max(160).optional().or(z.literal("")),
+  email: z.string().trim().email("E-mail inválido").max(160),
 });
 
 interface Props {
@@ -36,7 +36,7 @@ export function DemoRequestDialog({ trigger, source = "landing" }: Props) {
     const { error } = await supabase.from("landing_ia_leads").insert({
       name: parsed.data.full_name,
       whatsapp: parsed.data.phone,
-      email: parsed.data.email || null,
+      email: parsed.data.email,
       message: `Cidade: ${parsed.data.city} | Origem: ${source}`,
       utm_source: params.get("utm_source"),
       utm_medium: params.get("utm_medium"),
@@ -76,8 +76,8 @@ export function DemoRequestDialog({ trigger, source = "landing" }: Props) {
             <Input id="dr-city" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} required maxLength={80} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="dr-email">E-mail (opcional)</Label>
-            <Input id="dr-email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} maxLength={160} />
+            <Label htmlFor="dr-email">E-mail *</Label>
+            <Input id="dr-email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required maxLength={160} />
           </div>
           <Button type="submit" disabled={loading} className="w-full gradient-primary text-[hsl(0,0%,100%)] font-semibold">
             {loading ? "Enviando..." : "Enviar solicitação"}
