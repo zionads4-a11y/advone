@@ -1057,14 +1057,18 @@ export default function LandingPage() {
             <p className="mx-auto mb-10 max-w-2xl text-lg text-[hsl(220,10%,55%)]">
               CRM Jurídico, gestão de clientes e processos, agenda, financeiro, atendimento oficial via WhatsApp e módulo de inteligência artificial — integrados em um único ambiente seguro, auditável e em conformidade com a LGPD.
             </p>
-            <Button
-              size="lg"
-              onClick={() => navigate("/signup?plan=mensal")}
-              className="gradient-primary glow-primary px-10 py-6 text-lg font-semibold text-[hsl(0,0%,100%)] group"
-            >
-              Solicitar apresentação
-              <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-            </Button>
+            <DemoRequestDialog
+              source="landing-cta-final"
+              trigger={
+                <Button
+                  size="lg"
+                  className="gradient-primary glow-primary px-10 py-6 text-lg font-semibold text-[hsl(0,0%,100%)] group"
+                >
+                  Solicitar apresentação
+                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                </Button>
+              }
+            />
 
           </div>
         </Reveal>
