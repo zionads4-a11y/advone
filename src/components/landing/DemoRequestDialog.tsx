@@ -33,12 +33,11 @@ export function DemoRequestDialog({ trigger, source = "landing" }: Props) {
     }
     setLoading(true);
     const params = new URLSearchParams(window.location.search);
-    const { error } = await supabase.from("demo_requests").insert({
-      full_name: parsed.data.full_name,
-      phone: parsed.data.phone,
-      city: parsed.data.city,
+    const { error } = await supabase.from("landing_ia_leads").insert({
+      name: parsed.data.full_name,
+      whatsapp: parsed.data.phone,
       email: parsed.data.email || null,
-      source,
+      message: `Cidade: ${parsed.data.city} | Origem: ${source}`,
       utm_source: params.get("utm_source"),
       utm_medium: params.get("utm_medium"),
       utm_campaign: params.get("utm_campaign"),
