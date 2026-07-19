@@ -588,14 +588,14 @@ export default function LandingIA() {
                     ))}
                   </ul>
 
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}
-                    className="w-full"
-                  >
-                    COMEÇAR COM IA
-                  </Button>
+                  <DemoRequestDialog
+                    source="landing-ia-plan-ia"
+                    trigger={
+                      <Button size="lg" variant="outline" className="w-full">
+                        COMEÇAR COM IA
+                      </Button>
+                    }
+                  />
                 </CardContent>
               </Card>
             </Reveal>
