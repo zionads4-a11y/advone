@@ -4,6 +4,18 @@ import { getErrorMessage } from "../_shared/errors.ts";
 import { isBrazilianHolidayStr } from "../_shared/holidays.ts";
 import { webhookCorsHeaders as corsHeaders } from "../_shared/cors.ts";
 import { log } from "../_shared/logger.ts";
+import { getFlowBlock, type FlowNiche } from "../_shared/botFlowBlocks.ts";
+
+// Remove blocos legados de fluxos (▸ NOME (case_type: xxx)) do ai_prompt salvo
+// para evitar carregar em dobro os textos que agora vêm do banco dinâmico.
+function stripLegacyFlowBlocks(prompt: string): string {
+  if (!prompt) return prompt;
+  // Corta a seção "FLUXOS ESPECÍFICOS" até o próximo bloco/agendamento
+  return prompt
+    .replace(/═+\s*🔥\s*FLUXOS ESPECÍFICOS[\s\S]*?(?=═+\s*📅|═+\s*BLOCO DE AGENDAMENTO|$)/i, "")
+    .replace(/▸\s+[A-ZÇÃÕÁÉÍÓÚÂÊÔÜ0-9 \/()\-]+\(case_type:[\s\S]*?(?=(▸\s+[A-ZÇÃÕÁÉÍÓÚÂÊÔÜ]|═+|\[FLUXOS\]|\[TRIAGEM\]|\[REGRAS\]|$))/g, "")
+    .trim();
+}
 
 
 // ====== PROMPT BUILDERS ======
@@ -1903,14 +1915,28 @@ serve(async (req) => {
     // FIX 1: buscar fluxos ativos uma única vez por request
     const { data: flows, error: flowsError } = await supabase
       .from("company_bot_flows")
-      .select("flow_key, label, custom_prompt_block, position")
+      .select("flow_key, label, niche, custom_prompt_block, position")
       .eq("company_id", companyId)
       .eq("enabled", true)
       .order("position", { ascending: true });
     if (flowsError) console.error("[flows] Erro ao buscar fluxos:", flowsError.message);
+
+    // 🎯 MODO ENXUTO: monta bloco apenas com fluxos ATIVOS.
+    // Prioridade: custom_prompt_block (editado pela empresa) > banco padrão (getFlowBlock por niche+flow_key)
     const flowsBlock = flows?.length
-      ? flows.map((f: any) => (f.custom_prompt_block?.trim() || "").trim()).filter(Boolean).join("\n\n")
+      ? flows.map((f: any) => {
+          const custom = (f.custom_prompt_block || "").trim();
+          if (custom) return custom;
+          const fallback = getFlowBlock((f.niche || "full_service") as FlowNiche, f.flow_key);
+          return fallback?.block?.trim() || "";
+        }).filter(Boolean).join("\n\n")
       : "";
+
+    // 🧹 Remove blocos legados do ai_prompt salvo — evita carregar em dobro os
+    // 50 fluxos que ficaram gravados na coluna ai_prompt de empresas antigas.
+    if (config?.ai_prompt) {
+      config.ai_prompt = stripLegacyFlowBlocks(config.ai_prompt);
+    }
 
     // FIX 2: montar bloco de triage_options uma única vez por request
     const triageOptions = (config as any).triage_options || [];
