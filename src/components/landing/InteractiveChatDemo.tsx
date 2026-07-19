@@ -59,7 +59,8 @@ export function InteractiveChatDemo() {
         setTypingBot(false);
         setMessages((prev) => [...prev, msg]);
         if (i === demoScript.length - 1) {
-          setTimeout(() => setIsPlaying(false), 1000);
+          const tLoop = setTimeout(() => playDemo(), 3500);
+          timeoutsRef.current.push(tLoop);
         }
       }, msg.delay);
       timeoutsRef.current.push(t2);
@@ -167,13 +168,12 @@ export function InteractiveChatDemo() {
       </div>
 
       {/* Replay button */}
-      <p
-        onClick={() => !isPlaying && playDemo()}
-        className={`mt-4 text-center text-sm cursor-pointer transition-colors ${
-          isPlaying ? "text-[hsl(220,10%,30%)]" : "text-[hsl(153,60%,45%)] hover:text-[hsl(153,60%,55%)]"
-        }`}
-      >
-        {isPlaying ? "Simulando conversa..." : "▶ Replay da demonstração"}
+      {/* Loop indicator */}
+      <p className="mt-4 text-center text-sm text-[hsl(153,60%,45%)]">
+        <span className="inline-flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-[hsl(153,60%,45%)] animate-pulse" />
+          Demonstração em tempo real
+        </span>
       </p>
     </div>
   );
