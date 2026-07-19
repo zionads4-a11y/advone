@@ -358,7 +358,7 @@ export default function LandingIA() {
               </div>
               <div className="inline-flex items-center gap-2 rounded-full border border-[hsl(153,85%,50%)]/40 bg-[hsl(153,85%,50%)]/[0.08] px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-[hsl(153,85%,60%)]">
                 <span className="neon-dot h-2 w-2 rounded-full" />
-                Lançamento — Plano exclusivo para advogados
+                Plano exclusivo para advogados
               </div>
               <h1 className="font-display text-4xl font-bold leading-tight text-white md:text-5xl lg:text-6xl">
                 Enquanto você advoga, o <span className="italic text-[hsl(153,85%,55%)]">AdvOne</span> fecha o próximo cliente no WhatsApp.
