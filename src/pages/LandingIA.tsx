@@ -342,18 +342,25 @@ export default function LandingIA() {
         <div className="container mx-auto grid gap-12 px-4 py-20 lg:grid-cols-2 lg:py-28">
           <Reveal>
             <div className="space-y-6">
+              <div className="flex justify-center lg:justify-start">
+                <div className="relative">
+                  <div className="absolute inset-0 -z-10 rounded-full bg-gradient-to-br from-primary/40 to-[hsl(280,80%,60%)]/40 blur-3xl" />
+                  <img
+                    src={logoAdvOneHero}
+                    alt="AdvOne — IA jurídica no WhatsApp"
+                    className="h-24 w-auto drop-shadow-[0_8px_32px_rgba(120,90,255,0.45)] md:h-32 lg:h-36"
+                  />
+                </div>
+              </div>
               <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-primary">
                 <Sparkles className="h-3.5 w-3.5" />
                 Lançamento — Plano exclusivo para advogados
               </div>
               <h1 className="font-display text-4xl font-bold leading-tight md:text-5xl lg:text-6xl">
-                Sua <span className="text-primary">secretária virtual com IA</span> que atende,
-                qualifica e agenda clientes 24h por dia.
+                Enquanto você advoga, o <span className="text-primary">AdvOne</span> fecha o próximo cliente no WhatsApp.
               </h1>
               <p className="text-lg text-muted-foreground md:text-xl">
-                A Laura é uma SDR treinada para escritórios de advocacia. Ela atende seus leads pelo
-                WhatsApp em segundos, identifica o tipo de caso, avalia viabilidade e marca a reunião
-                direto na sua agenda — enquanto você foca em fechar contratos.
+                Seu concorrente responde em segundos. Com a <strong className="text-foreground">Laura, sua SDR com IA</strong>, cada lead é atendido na hora, qualificado por nicho jurídico e agendado direto na sua agenda — 24h por dia, todo dia. Você entra em cena só pra fechar.
               </p>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <DemoRequestDialog
