@@ -331,42 +331,46 @@ export default function LandingIA() {
       </header>
 
       {/* Hero */}
-      <section
-        className="relative overflow-hidden border-b border-border/40"
-        style={{
-          backgroundImage: `linear-gradient(180deg, hsl(var(--background) / 0.85), hsl(var(--background) / 0.95)), url(${heroBg})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="container mx-auto grid gap-12 px-4 py-20 lg:grid-cols-2 lg:py-28">
+      <section className="relative overflow-hidden border-b border-[hsl(153,85%,50%)]/10 hero-grid-bg">
+        {/* Watermark logo */}
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden">
+          <img
+            src={logoAdvOneHero}
+            alt=""
+            aria-hidden="true"
+            className="w-[110%] max-w-none opacity-[0.035] blur-[2px] select-none"
+          />
+        </div>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,#050608_78%)]" />
+
+        <div className="container relative mx-auto grid gap-12 px-4 py-20 lg:grid-cols-2 lg:py-28">
           <Reveal>
             <div className="space-y-6">
               <div className="flex justify-center lg:justify-start">
                 <div className="relative">
-                  <div className="absolute inset-0 -z-10 rounded-full bg-gradient-to-br from-primary/40 to-[hsl(280,80%,60%)]/40 blur-3xl" />
+                  <div className="absolute inset-0 -z-10 rounded-full bg-[hsl(153,85%,50%)]/25 blur-3xl" />
                   <img
                     src={logoAdvOneHero}
                     alt="AdvOne — IA jurídica no WhatsApp"
-                    className="h-24 w-auto drop-shadow-[0_8px_32px_rgba(120,90,255,0.45)] md:h-32 lg:h-36"
+                    className="h-24 w-auto drop-shadow-[0_8px_32px_rgba(52,211,153,0.55)] md:h-32 lg:h-36"
                   />
                 </div>
               </div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-primary">
-                <Sparkles className="h-3.5 w-3.5" />
+              <div className="inline-flex items-center gap-2 rounded-full border border-[hsl(153,85%,50%)]/40 bg-[hsl(153,85%,50%)]/[0.08] px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-[hsl(153,85%,60%)]">
+                <span className="neon-dot h-2 w-2 rounded-full" />
                 Lançamento — Plano exclusivo para advogados
               </div>
-              <h1 className="font-display text-4xl font-bold leading-tight md:text-5xl lg:text-6xl">
-                Enquanto você advoga, o <span className="text-primary">AdvOne</span> fecha o próximo cliente no WhatsApp.
+              <h1 className="font-display text-4xl font-bold leading-tight text-white md:text-5xl lg:text-6xl">
+                Enquanto você advoga, o <span className="italic text-[hsl(153,85%,55%)]">AdvOne</span> fecha o próximo cliente no WhatsApp.
               </h1>
-              <p className="text-lg text-muted-foreground md:text-xl">
-                Seu concorrente responde em segundos. Com a <strong className="text-foreground">Laura, sua SDR com IA</strong>, cada lead é atendido na hora, qualificado por nicho jurídico e agendado direto na sua agenda — 24h por dia, todo dia. Você entra em cena só pra fechar.
+              <p className="text-lg text-[hsl(220,10%,65%)] md:text-xl">
+                Seu concorrente responde em segundos. Com a <strong className="text-white">Laura, sua SDR com IA</strong>, cada lead é atendido na hora, qualificado por nicho jurídico e agendado direto na sua agenda — 24h por dia, todo dia. Você entra em cena só pra fechar.
               </p>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <DemoRequestDialog
                   source="landing-ia-hero"
                   trigger={
-                    <Button size="lg" className="gradient-primary text-primary-foreground">
+                    <Button size="lg" className="hero-neon-glow bg-[hsl(153,85%,45%)] hover:bg-[hsl(153,85%,50%)] text-[#04120a] font-semibold">
                       Agendar demonstração grátis
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>

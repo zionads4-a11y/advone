@@ -159,11 +159,18 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0">
-          <img src={heroBg} alt="" className="h-full w-full object-cover opacity-30" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[hsl(220,25%,6%)]/70 via-transparent to-[hsl(220,25%,6%)]" />
+      <section className="relative overflow-hidden hero-grid-bg">
+        {/* Watermark logo */}
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden">
+          <img
+            src={logoAdvOneHero}
+            alt=""
+            aria-hidden="true"
+            className="w-[120%] max-w-none opacity-[0.035] blur-[2px] select-none"
+          />
         </div>
+        {/* Radial fade to pure black at edges */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,#050608_75%)]" />
         <HeroParticles />
         <div className="relative mx-auto max-w-7xl px-6 pb-20 pt-16 md:pb-28 md:pt-24">
           <div className="grid items-center gap-12 lg:grid-cols-2">
@@ -171,18 +178,18 @@ export default function LandingPage() {
             <div className="text-center lg:text-left">
               <div className="mb-8 flex justify-center lg:justify-start animate-fade-in">
                 <div className="relative">
-                  <div className="absolute inset-0 -z-10 rounded-full bg-gradient-to-br from-[hsl(217,91%,60%)]/40 to-[hsl(280,80%,60%)]/40 blur-3xl" />
+                  <div className="absolute inset-0 -z-10 rounded-full bg-[hsl(153,85%,50%)]/25 blur-3xl" />
                   <img
                     src={logoAdvOneHero}
                     alt="AdvOne — plataforma jurídica com IA"
-                    className="h-28 w-auto drop-shadow-[0_8px_32px_rgba(120,90,255,0.45)] md:h-36 lg:h-40"
+                    className="h-28 w-auto drop-shadow-[0_8px_32px_rgba(52,211,153,0.55)] md:h-36 lg:h-40"
                   />
                 </div>
               </div>
               <div
-                className="mb-6 inline-flex items-center gap-2 rounded-full border border-[hsl(153,60%,45%)]/30 bg-[hsl(153,60%,45%)]/10 px-4 py-1.5 text-sm text-[hsl(153,60%,45%)] animate-fade-in"
+                className="mb-6 inline-flex items-center gap-2 rounded-full border border-[hsl(153,85%,50%)]/40 bg-[hsl(153,85%,50%)]/[0.08] px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-[hsl(153,85%,60%)] animate-fade-in"
               >
-                <Scale className="h-4 w-4" />
+                <span className="neon-dot h-2 w-2 rounded-full" />
                 A plataforma que atende, capta e gerencia por você
               </div>
               <h1
@@ -200,7 +207,7 @@ export default function LandingPage() {
                   trigger={
                     <Button
                       size="lg"
-                      className="gradient-primary glow-primary px-8 py-6 text-lg font-semibold text-[hsl(0,0%,100%)] group"
+                      className="hero-neon-glow bg-[hsl(153,85%,45%)] hover:bg-[hsl(153,85%,50%)] px-8 py-6 text-lg font-semibold text-[#04120a] group"
                     >
                       Quero parar de perder lead
                       <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
