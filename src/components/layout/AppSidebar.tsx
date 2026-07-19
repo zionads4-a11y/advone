@@ -23,6 +23,7 @@ import {
   CheckSquare,
   Layers,
   Activity,
+  Gauge,
   Calculator,
   UserCog,
   Smartphone,
