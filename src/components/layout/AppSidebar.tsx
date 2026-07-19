@@ -80,6 +80,7 @@ const adminItems = [
   { title: "Acessos", url: "/access-management", icon: KeyRound },
   { title: "Assinaturas", url: "/assinatura", icon: CreditCard },
   
+  { title: "Uso da IA", url: "/uso-ia", icon: Gauge },
   { title: "Leads Landing IA", url: "/leads-landing-ia", icon: History },
   { title: "Alertas de Fraude", url: "/fraudes", icon: ShieldAlert, premium: true },
   { title: "Logs de Webhook", url: "/webhook-logs", icon: Activity },
