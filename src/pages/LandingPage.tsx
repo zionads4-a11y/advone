@@ -172,16 +172,16 @@ export default function LandingPage() {
                 className="mb-6 inline-flex items-center gap-2 rounded-full border border-[hsl(153,60%,45%)]/30 bg-[hsl(153,60%,45%)]/10 px-4 py-1.5 text-sm text-[hsl(153,60%,45%)] animate-fade-in"
               >
                 <Scale className="h-4 w-4" />
-                Plataforma de gestão para escritórios de advocacia
+                A plataforma que atende, capta e gerencia por você
               </div>
               <h1
                 className="mb-6 text-2xl font-bold leading-tight tracking-tight sm:text-3xl md:text-5xl lg:text-6xl animate-slide-up"
                 style={{ fontFamily: "'Space Grotesk', sans-serif" }}
               >
-                A gestão completa do seu <span className="gradient-text">escritório</span>,<br />em uma única plataforma.
+                Enquanto você advoga, o <span className="gradient-text">AdvOne</span> fecha o próximo cliente no WhatsApp.
               </h1>
               <p className="mx-auto mb-8 max-w-xl text-lg text-[hsl(220,10%,55%)] lg:mx-0 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-                O AdvOne integra <strong className="text-[hsl(220,10%,80%)]">CRM jurídico, agenda, financeiro, gestão de processos e atendimento via WhatsApp</strong> em um único ambiente seguro e auditável. Uma solução desenvolvida para escritórios que buscam eficiência operacional, previsibilidade de receita e conformidade com a LGPD.
+                Seu concorrente responde em segundos. Com o AdvOne, sua <strong className="text-[hsl(220,10%,80%)]">IA jurídica atende no WhatsApp, qualifica o caso, marca a reunião na sua agenda</strong> e ainda gerencia processos, financeiro e cálculos — tudo em um lugar. Você entra em cena só pra fechar.
               </p>
               <div className="flex flex-col items-center gap-4 sm:flex-row lg:justify-start animate-slide-up" style={{ animationDelay: "0.2s" }}>
                 <DemoRequestDialog
@@ -191,7 +191,7 @@ export default function LandingPage() {
                       size="lg"
                       className="gradient-primary glow-primary px-8 py-6 text-lg font-semibold text-[hsl(0,0%,100%)] group"
                     >
-                      Solicitar apresentação
+                      Quero parar de perder lead
                       <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                     </Button>
                   }
@@ -201,11 +201,11 @@ export default function LandingPage() {
                   className="flex items-center gap-2 text-sm text-[hsl(220,10%,70%)] transition-colors hover:text-[hsl(153,60%,45%)]"
                 >
                   <Play className="h-4 w-4" />
-                  Conhecer a plataforma
+                  Ver a IA em ação
                 </a>
               </div>
               <p className="mt-4 text-sm text-[hsl(220,10%,45%)]">
-                Implantação assistida em até 72h · Suporte especializado · Dados sob padrão LGPD
+                ✓ Ativo em minutos · ✓ Sem cartão de crédito · ✓ Suporte humano em português
               </p>
 
             </div>
