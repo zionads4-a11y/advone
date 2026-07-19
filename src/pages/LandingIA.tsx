@@ -683,7 +683,7 @@ export default function LandingIA() {
                   <Button
                     size="lg"
                     variant="outline"
-                    onClick={() => openWhatsApp("AdvOne Complete - Falar com especialista")}
+                    onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}
                     className="w-full"
                   >
                     FALAR COM ESPECIALISTA
