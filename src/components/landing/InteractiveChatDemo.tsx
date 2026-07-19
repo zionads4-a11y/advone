@@ -59,7 +59,8 @@ export function InteractiveChatDemo() {
         setTypingBot(false);
         setMessages((prev) => [...prev, msg]);
         if (i === demoScript.length - 1) {
-          setTimeout(() => setIsPlaying(false), 1000);
+          const tLoop = setTimeout(() => playDemo(), 3500);
+          timeoutsRef.current.push(tLoop);
         }
       }, msg.delay);
       timeoutsRef.current.push(t2);
