@@ -958,14 +958,15 @@ export default function LandingIA() {
               <p className="mx-auto max-w-2xl text-muted-foreground">
                 A Laura está pronta para começar a atender no seu WhatsApp em 24h. Planos a partir de R$ 597/mês.
               </p>
-              <Button
-                size="lg"
-                onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}
-                className="gradient-primary text-primary-foreground"
-              >
-                Quero a Laura no meu WhatsApp
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              <DemoRequestDialog
+                source="landing-ia-final-cta"
+                trigger={
+                  <Button size="lg" className="gradient-primary text-primary-foreground">
+                    Quero a Laura no meu WhatsApp
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                }
+              />
             </CardContent>
           </Card>
         </Reveal>
