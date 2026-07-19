@@ -635,7 +635,7 @@ export default function LandingIA() {
 
                   <Button
                     size="lg"
-                    onClick={() => openWhatsApp("AdvOne Gestão - Quero organizar")}
+                    onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}
                     className="w-full gradient-primary text-primary-foreground font-bold"
                   >
                     QUERO ORGANIZAR
