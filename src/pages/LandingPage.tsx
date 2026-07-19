@@ -458,21 +458,21 @@ export default function LandingPage() {
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <Reveal direction="left">
             <div>
-              <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Atendimento no WhatsApp</p>
+              <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">IA no WhatsApp</p>
               <h2 className="text-3xl font-bold md:text-4xl mb-6" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                Atendimento profissional, <span className="gradient-text">disponível o tempo todo</span>.
+                Do "oi" à reunião marcada — <span className="gradient-text">sem você tocar em nada</span>.
               </h2>
               <p className="text-[hsl(220,10%,55%)] leading-relaxed mb-6">
-                Módulo de atendimento inteligente integrado ao WhatsApp oficial do escritório. Faz a triagem inicial do caso, coleta as informações essenciais, propõe horários disponíveis na agenda do advogado responsável e mantém todo o histórico registrado no CRM — com supervisão humana a qualquer momento.
+                Sua IA cumprimenta, entende o caso, pergunta só o que importa, identifica se o contato já é cliente pelo CPF, propõe horário na agenda do advogado responsável e confirma a reunião. Você recebe o lead com histórico completo — é só entrar e advogar.
               </p>
               <ul className="space-y-4">
                 {[
-                  "Resposta imediata a novos contatos, inclusive fora do horário comercial",
-                  "Transcrição automática de áudios e reconhecimento de terminologia jurídica",
-                  "Identificação do contato como lead ou cliente ativo por CPF/CNPJ",
-                  "Agendamento diretamente no Google Calendar do advogado responsável",
-                  "Cadência estruturada de follow-up com textos e tempos configuráveis",
-                  "Notificação imediata ao escritório a cada nova reunião confirmada",
+                  "Responde na hora, inclusive fora do horário — sem robotizar",
+                  "Transcreve áudio e entende juridiquês do lead",
+                  "Diferencia lead novo de cliente antigo pelo CPF/CNPJ",
+                  "Agenda direto no Google Calendar do advogado certo",
+                  "Cadência de 5 follow-ups automáticos para lead que sumiu",
+                  "Alerta o escritório no momento em que a reunião é confirmada",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3 text-[hsl(220,10%,75%)]">
                     <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[hsl(153,60%,45%)]" />
