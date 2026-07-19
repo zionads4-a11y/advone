@@ -671,12 +671,12 @@ export default function LandingPage() {
               source="landing-planos"
               trigger={
                 <Button size="lg" className="gradient-primary text-[hsl(0,0%,100%)] font-semibold shadow-[0_10px_40px_-10px_hsl(153,60%,45%/0.5)]">
-                  Solicitar uma apresentação
+                  Quero ver a IA rodando no meu escritório
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               }
             />
-            <p className="mt-3 text-xs text-[hsl(220,10%,55%)]">Implantação assistida em 72h · Suporte especializado</p>
+            <p className="mt-3 text-xs text-[hsl(220,10%,55%)]">Ativo em minutos · Sem cartão de crédito · Suporte humano BR</p>
           </Reveal>
 
         </div>
