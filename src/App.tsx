@@ -39,6 +39,7 @@ import ProcessKanban from "./pages/ProcessKanban";
 import ProcessSearch from "./pages/ProcessSearch";
 import Subscription from "./pages/Subscription";
 import FraudAlerts from "./pages/FraudAlerts";
+import AiUsageMonitor from "./pages/AiUsageMonitor";
 
 import LegalAI from "./pages/LegalAI";
 import Jurisprudencia from "./pages/Jurisprudencia";
@@ -172,6 +173,7 @@ const App = () => (
                 } 
               />
               <Route path="/fraudes" element={<FraudAlerts />} />
+              <Route path="/uso-ia" element={<RoleProtectedRoute allowedRoles={["admin", "member"]}><AiUsageMonitor /></RoleProtectedRoute>} />
               
               <Route path="/leads-landing-ia" element={<LandingIALeads />} />
               <Route path="/ia-juridica" element={<LegalAI />} />
