@@ -354,14 +354,15 @@ export default function LandingIA() {
                 direto na sua agenda — enquanto você foca em fechar contratos.
               </p>
               <div className="flex flex-col gap-3 sm:flex-row">
-                <Button
-                  size="lg"
-                  onClick={() => openWhatsApp("Hero - Agendar demonstração")}
-                  className="gradient-primary text-primary-foreground"
-                >
-                  Agendar demonstração grátis
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+                <DemoRequestDialog
+                  source="landing-ia-hero"
+                  trigger={
+                    <Button size="lg" className="gradient-primary text-primary-foreground">
+                      Agendar demonstração grátis
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  }
+                />
                 <Button
                   size="lg"
                   variant="outline"
