@@ -2,6 +2,7 @@ import { forwardRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import logoAdvOne from "@/assets/logo-advone-light.png";
+import logoAdvOneHero from "@/assets/logo-advone-hero.png";
 import heroBg from "@/assets/hero-bg-lp.jpg";
 import dashboardMockup from "@/assets/dashboard-mockup.jpg";
 import { InteractiveChatDemo } from "@/components/landing/InteractiveChatDemo";
@@ -168,6 +169,16 @@ export default function LandingPage() {
           <div className="grid items-center gap-12 lg:grid-cols-2">
             {/* Left: Text */}
             <div className="text-center lg:text-left">
+              <div className="mb-8 flex justify-center lg:justify-start animate-fade-in">
+                <div className="relative">
+                  <div className="absolute inset-0 -z-10 rounded-full bg-gradient-to-br from-[hsl(217,91%,60%)]/40 to-[hsl(280,80%,60%)]/40 blur-3xl" />
+                  <img
+                    src={logoAdvOneHero}
+                    alt="AdvOne — plataforma jurídica com IA"
+                    className="h-28 w-auto drop-shadow-[0_8px_32px_rgba(120,90,255,0.45)] md:h-36 lg:h-40"
+                  />
+                </div>
+              </div>
               <div
                 className="mb-6 inline-flex items-center gap-2 rounded-full border border-[hsl(153,60%,45%)]/30 bg-[hsl(153,60%,45%)]/10 px-4 py-1.5 text-sm text-[hsl(153,60%,45%)] animate-fade-in"
               >
