@@ -545,9 +545,9 @@ export default function LandingPage() {
       <section className="border-y border-[hsl(220,20%,16%)] bg-[hsl(220,25%,8%)]">
         <div className="mx-auto max-w-5xl px-6 py-24">
           <Reveal className="mb-16 text-center">
-            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Fluxo operacional</p>
+            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Como funciona</p>
             <h2 className="text-3xl font-bold md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Do primeiro contato ao contrato assinado — com processo estruturado.
+              5 passos automáticos. Você só entra em cena pra <span className="gradient-text">fechar</span>.
             </h2>
           </Reveal>
           <div className="grid gap-6 md:grid-cols-5">
