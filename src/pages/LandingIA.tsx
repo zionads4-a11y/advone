@@ -21,6 +21,7 @@ import { InteractiveChatDemo } from "@/components/landing/InteractiveChatDemo";
 import { FloatingWhatsAppButton } from "@/components/landing/FloatingWhatsAppButton";
 import { DemoRequestDialog } from "@/components/landing/DemoRequestDialog";
 import logoAdvOne from "@/assets/logo-advone-light.png";
+import logoAdvOneHero from "@/assets/logo-advone-hero.png";
 import heroBg from "@/assets/hero-bg-lp.jpg";
 import {
   ArrowRight,
