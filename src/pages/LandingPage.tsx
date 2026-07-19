@@ -495,7 +495,7 @@ export default function LandingPage() {
           <Reveal className="mb-16 text-center">
             <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Por que o AdvOne</p>
             <h2 className="text-3xl font-bold md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              A plataforma pensada para <span className="gradient-text">escritórios que buscam maturidade de gestão</span>.
+              Enquanto o concorrente demora, <span className="gradient-text">você já fechou</span>.
             </h2>
           </Reveal>
 
