@@ -4,6 +4,18 @@ import { getErrorMessage } from "../_shared/errors.ts";
 import { isBrazilianHolidayStr } from "../_shared/holidays.ts";
 import { webhookCorsHeaders as corsHeaders } from "../_shared/cors.ts";
 import { log } from "../_shared/logger.ts";
+import { getFlowBlock, type FlowNiche } from "../_shared/botFlowBlocks.ts";
+
+// Remove blocos legados de fluxos (▸ NOME (case_type: xxx)) do ai_prompt salvo
+// para evitar carregar em dobro os textos que agora vêm do banco dinâmico.
+function stripLegacyFlowBlocks(prompt: string): string {
+  if (!prompt) return prompt;
+  // Corta a seção "FLUXOS ESPECÍFICOS" até o próximo bloco/agendamento
+  return prompt
+    .replace(/═+\s*🔥\s*FLUXOS ESPECÍFICOS[\s\S]*?(?=═+\s*📅|═+\s*BLOCO DE AGENDAMENTO|$)/i, "")
+    .replace(/▸\s+[A-ZÇÃÕÁÉÍÓÚÂÊÔÜ0-9 \/()\-]+\(case_type:[\s\S]*?(?=(▸\s+[A-ZÇÃÕÁÉÍÓÚÂÊÔÜ]|═+|\[FLUXOS\]|\[TRIAGEM\]|\[REGRAS\]|$))/g, "")
+    .trim();
+}
 
 
 // ====== PROMPT BUILDERS ======
