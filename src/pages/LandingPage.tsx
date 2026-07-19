@@ -230,12 +230,12 @@ export default function LandingPage() {
       {/* Dashboard Mockup */}
       <section className="mx-auto max-w-6xl px-6 py-20">
         <Reveal className="text-center mb-12">
-          <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Painel de gestão</p>
+          <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Painel do sócio-gestor</p>
           <h2 className="text-3xl font-bold md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            Visão consolidada da operação do escritório.
+            O escritório inteiro em uma tela. Sem achismo, sem planilha.
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-[hsl(220,10%,55%)]">
-            Indicadores de captação, conversão, produtividade e resultado financeiro reunidos em um único painel — com recortes por advogado, unidade, área de atuação e origem de mídia.
+            Quanto entrou, quanto converteu, quem produziu mais e de onde vieram os leads que fecharam — em tempo real, com recorte por advogado, unidade, área e origem de mídia. O tipo de dado que faz o sócio decidir com segurança.
           </p>
         </Reveal>
 
