@@ -954,7 +954,7 @@ export default function LandingIA() {
               </p>
               <Button
                 size="lg"
-                onClick={() => openWhatsApp("CTA Final - Quero a Laura")}
+                onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}
                 className="gradient-primary text-primary-foreground"
               >
                 Quero a Laura no meu WhatsApp
