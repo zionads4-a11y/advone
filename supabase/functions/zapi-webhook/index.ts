@@ -841,6 +841,10 @@ async function handleAgentPhase(
     // SDR phase (default)
     systemPrompt = buildSDRPrompt(config, leadName, companyOffices || [], flowsBlock || "", triageBlock || "", timezone);
     tools = sdrTools;
+    // Log SEMPRE o tamanho do prompt para monitorar economia de tokens
+    const promptChars = systemPrompt.length;
+    const estimatedTokens = Math.round(promptChars / 4);
+    console.log(`[PROMPT_SIZE] company=${companyId} chars=${promptChars} tokens~${estimatedTokens} flows=${flowsBlock ? flowsBlock.split("\n\n").length : 0}`);
     if (config?.debug_mode) {
       console.log("[SDR PROMPT DEBUG]", JSON.stringify({
         companyId,

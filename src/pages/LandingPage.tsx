@@ -962,6 +962,8 @@ export default function LandingPage() {
                     <span className="text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 997</span>
                     <span className="text-sm text-[hsl(220,10%,60%)]">/mês</span>
                   </div>
+                  <p className="mt-1 text-xs text-[hsl(153,60%,55%)] font-semibold">no plano anual</p>
+                  <p className="mt-1 text-sm text-[hsl(220,10%,60%)]">ou R$ 1.297/mês no mensal</p>
                   <p className="mt-2 text-sm text-[hsl(220,10%,60%)]">Para escritórios que querem escalar sem limite.</p>
                 </div>
 
