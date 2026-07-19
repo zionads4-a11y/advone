@@ -35,54 +35,54 @@ import {
 } from "lucide-react";
 
 const stats = [
-  { value: "9", label: "Módulos integrados na plataforma" },
-  { value: "24/7", label: "Operação ininterrupta" },
-  { value: "100%", label: "Compatível com LGPD" },
-  { value: "72h", label: "Implantação assistida" },
+  { value: "5min", label: "Para sua IA estar no ar captando" },
+  { value: "24/7", label: "Atendendo enquanto você advoga" },
+  { value: "9", label: "Módulos que substituem 6 sistemas" },
+  { value: "72h", label: "Implantação com time dedicado" },
 ];
 
 const features = [
-  { icon: Kanban, title: "CRM Jurídico com pipeline de 9 etapas", desc: "Funil desenhado para a advocacia: Novo, Atendimento, Qualificação, Agendamento, Reunião, Contrato, Ganho e Perdido. Governança total do primeiro contato ao encerramento." },
-  { icon: Briefcase, title: "Gestão de clientes e processos (CNJ)", desc: "Cadastro 360° do cliente com contratos, procurações, documentos e vínculo direto aos processos judiciais monitorados diariamente." },
-  { icon: CalendarDays, title: "Agenda com Google Calendar", desc: "Integração OAuth por advogado. Audiências, prazos e reuniões sincronizados em tempo real, com lembretes automatizados ao cliente." },
-  { icon: Wallet, title: "Financeiro nativo com Asaas", desc: "Emissão e conciliação de honorários em PIX, boleto e cartão. Contas a pagar/receber, DRE gerencial e receita líquida em tempo real." },
-  { icon: MessageSquare, title: "Atendimento centralizado no WhatsApp", desc: "Um único canal oficial para leads e clientes. Transcrição de áudios, histórico completo por contato e distribuição por advogado responsável." },
-  { icon: FileText, title: "Elaboração assistida de peças", desc: "Módulo de IA jurídica para petições, contestações, recursos, mandados de segurança e contratos em .docx (padrão ABNT), com fundamentação citada." },
-  { icon: Shield, title: "Monitoramento diário de processos", desc: "Integração com Escavador: consulta diária por CNJ e semanal por CPF. Alertas de novas movimentações no painel e via WhatsApp." },
-  { icon: Users, title: "Multiusuário com 5 níveis de acesso", desc: "Administrador, Gerente, Membro, Operador e Cliente. Segregação de funções, RLS no banco de dados e trilha de auditoria." },
+  { icon: MessageSquare, title: "Sua IA responde em segundos — sempre", desc: "3h da manhã, feriado, audiência: enquanto o concorrente demora, sua IA já cumprimentou, entendeu o caso e disse que você retorna. Nenhum lead cai no esquecimento." },
+  { icon: Zap, title: "Só chega até você quem quer contratar", desc: "A IA conversa, qualifica por área e urgência, e classifica o lead. Você só entra em cena quando o caso vale seu tempo — e já com histórico na mão." },
+  { icon: CalendarDays, title: "Agenda cheia no piloto automático", desc: "A IA consulta o Google Calendar do advogado responsável, propõe horários e confirma a reunião direto no chat. Lembretes automáticos eliminam faltas." },
+  { icon: Kanban, title: "CRM que trabalha enquanto você advoga", desc: "Pipeline de 9 etapas próprio da advocacia. Cadência de follow-up automatizada em 5 tentativas. Nenhum contato esquecido, nenhuma oportunidade perdida." },
+  { icon: Shield, title: "Monitoramento CNJ direto no WhatsApp", desc: "Sentença publicada, prazo abrindo, andamento crítico — o cliente é avisado no WhatsApp e você recebe alerta no painel. Cobertura de todos os tribunais do país." },
+  { icon: FileText, title: "Cálculos jurídicos integrados de verdade", desc: "Calculadora previdenciária, trabalhista e de dívida com margem de servidor federal, estadual e municipal. O que era planilha e retrabalho vira 3 cliques." },
+  { icon: Wallet, title: "Financeiro que fecha o mês sozinho", desc: "Cobrança recorrente via PIX, boleto e cartão pelo Asaas. Conciliação automática, DRE gerencial e receita líquida em tempo real — sem contador extra." },
+  { icon: Users, title: "Time inteiro dentro, sem cobrar por usuário", desc: "Advogados, secretárias, estagiários — todos com acesso segregado por perfil, sem taxa por licença. Escale o escritório sem inflar a fatura." },
 ];
 
 const valueProps = [
   {
-    icon: Briefcase,
-    title: "Uma única plataforma para toda a operação",
-    desc: "Substitua planilhas, agendas paralelas, grupos de WhatsApp e sistemas financeiros avulsos. Do primeiro contato do lead ao recebimento do honorário, tudo em ambiente unificado, auditável e seguro.",
+    icon: Zap,
+    title: "CHEGA DE PERDER LEAD NO VÁCUO",
+    desc: "83% dos clientes fecham com quem responde primeiro. Enquanto você está em audiência, sua IA já cumprimentou, qualificou e marcou a reunião — no seu WhatsApp, com sua voz, sem parecer robô.",
   },
   {
-    icon: BarChart3,
-    title: "Decisões baseadas em indicadores confiáveis",
-    desc: "Dashboards de conversão por etapa, produtividade por advogado, retorno por origem de mídia e evolução financeira. Informação estruturada para o sócio-gestor tomar decisão com segurança.",
+    icon: Briefcase,
+    title: "CHEGA DE PLANILHA, GRUPO E CRM CARO",
+    desc: "Substitua 6 ferramentas por uma. CRM, agenda, financeiro, WhatsApp, processos e cálculos jurídicos no mesmo ambiente — auditável, seguro e sem cobrar por usuário adicional.",
   },
   {
     icon: Shield,
-    title: "Segurança, sigilo e conformidade",
-    desc: "Arquitetura multiusuário com Row-Level Security, criptografia em trânsito e em repouso, controle de acessos por perfil e aderência às diretrizes da LGPD e da OAB para tratamento de dados sensíveis.",
+    title: "CHEGA DE PERDER PRAZO DE PROCESSO",
+    desc: "Monitoramento CNJ de todos os tribunais do Brasil. Andamento novo, sentença ou prazo crítico dispara alerta no painel e mensagem automática pro cliente no WhatsApp — antes de virar problema.",
   },
 ];
 
 const testimonials = [
   {
-    text: "Após a implantação do AdvOne, unificamos atendimento, pipeline comercial, agenda e financeiro em um único ambiente. A gestão passou a ser guiada por indicadores objetivos e a produtividade da equipe aumentou significativamente.",
+    text: "Antes o WhatsApp virava um caos no fim de semana. Hoje a IA responde na hora, marca a reunião e eu chego na segunda com a agenda cheia. Parei de perder cliente para escritório maior só porque respondia mais rápido.",
     name: "Dr. Rafael Andrade",
     role: "Sócio-titular · Andrade Advocacia Previdenciária · São Paulo/SP",
   },
   {
-    text: "A padronização do funil em nove etapas e a integração com a agenda dos advogados eliminaram retrabalho e perdas de prazo. A ferramenta trouxe disciplina operacional ao escritório sem burocratizar o atendimento.",
+    text: "Tirei três sistemas do ar e enfiei tudo no AdvOne: CRM, financeiro, agenda e processos. O que a equipe perdia enroscando em planilha virou tempo de audiência. Pagou o investimento no primeiro mês.",
     name: "Dra. Camila Peixoto",
     role: "Sócia-gestora · Peixoto & Associados · Belo Horizonte/MG",
   },
   {
-    text: "O monitoramento diário dos processos e o histórico consolidado por cliente reduziram nosso tempo de resposta e elevaram a percepção de qualidade do serviço prestado. É uma plataforma pensada para escritórios que buscam maturidade de gestão.",
+    text: "O que me convenceu não foi a IA — foi o monitoramento dos processos avisando o cliente antes de mim. A percepção de qualidade subiu, o volume de ligação de cliente ansioso caiu e o meu whatsapp voltou a ser meu.",
     name: "Dr. Eduardo Ramalho",
     role: "Sócio-fundador · Ramalho Sociedade de Advogados · Curitiba/PR",
   },
@@ -172,16 +172,16 @@ export default function LandingPage() {
                 className="mb-6 inline-flex items-center gap-2 rounded-full border border-[hsl(153,60%,45%)]/30 bg-[hsl(153,60%,45%)]/10 px-4 py-1.5 text-sm text-[hsl(153,60%,45%)] animate-fade-in"
               >
                 <Scale className="h-4 w-4" />
-                Plataforma de gestão para escritórios de advocacia
+                A plataforma que atende, capta e gerencia por você
               </div>
               <h1
                 className="mb-6 text-2xl font-bold leading-tight tracking-tight sm:text-3xl md:text-5xl lg:text-6xl animate-slide-up"
                 style={{ fontFamily: "'Space Grotesk', sans-serif" }}
               >
-                A gestão completa do seu <span className="gradient-text">escritório</span>,<br />em uma única plataforma.
+                Enquanto você advoga, o <span className="gradient-text">AdvOne</span> fecha o próximo cliente no WhatsApp.
               </h1>
               <p className="mx-auto mb-8 max-w-xl text-lg text-[hsl(220,10%,55%)] lg:mx-0 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-                O AdvOne integra <strong className="text-[hsl(220,10%,80%)]">CRM jurídico, agenda, financeiro, gestão de processos e atendimento via WhatsApp</strong> em um único ambiente seguro e auditável. Uma solução desenvolvida para escritórios que buscam eficiência operacional, previsibilidade de receita e conformidade com a LGPD.
+                Seu concorrente responde em segundos. Com o AdvOne, sua <strong className="text-[hsl(220,10%,80%)]">IA jurídica atende no WhatsApp, qualifica o caso, marca a reunião na sua agenda</strong> e ainda gerencia processos, financeiro e cálculos — tudo em um lugar. Você entra em cena só pra fechar.
               </p>
               <div className="flex flex-col items-center gap-4 sm:flex-row lg:justify-start animate-slide-up" style={{ animationDelay: "0.2s" }}>
                 <DemoRequestDialog
@@ -191,7 +191,7 @@ export default function LandingPage() {
                       size="lg"
                       className="gradient-primary glow-primary px-8 py-6 text-lg font-semibold text-[hsl(0,0%,100%)] group"
                     >
-                      Solicitar apresentação
+                      Quero parar de perder lead
                       <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                     </Button>
                   }
@@ -201,11 +201,11 @@ export default function LandingPage() {
                   className="flex items-center gap-2 text-sm text-[hsl(220,10%,70%)] transition-colors hover:text-[hsl(153,60%,45%)]"
                 >
                   <Play className="h-4 w-4" />
-                  Conhecer a plataforma
+                  Ver a IA em ação
                 </a>
               </div>
               <p className="mt-4 text-sm text-[hsl(220,10%,45%)]">
-                Implantação assistida em até 72h · Suporte especializado · Dados sob padrão LGPD
+                ✓ Ativo em minutos · ✓ Sem cartão de crédito · ✓ Suporte humano em português
               </p>
 
             </div>
@@ -230,12 +230,12 @@ export default function LandingPage() {
       {/* Dashboard Mockup */}
       <section className="mx-auto max-w-6xl px-6 py-20">
         <Reveal className="text-center mb-12">
-          <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Painel de gestão</p>
+          <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Painel do sócio-gestor</p>
           <h2 className="text-3xl font-bold md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            Visão consolidada da operação do escritório.
+            O escritório inteiro em uma tela. Sem achismo, sem planilha.
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-[hsl(220,10%,55%)]">
-            Indicadores de captação, conversão, produtividade e resultado financeiro reunidos em um único painel — com recortes por advogado, unidade, área de atuação e origem de mídia.
+            Quanto entrou, quanto converteu, quem produziu mais e de onde vieram os leads que fecharam — em tempo real, com recorte por advogado, unidade, área e origem de mídia. O tipo de dado que faz o sócio decidir com segurança.
           </p>
         </Reveal>
 
@@ -458,21 +458,21 @@ export default function LandingPage() {
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <Reveal direction="left">
             <div>
-              <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Atendimento no WhatsApp</p>
+              <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">IA no WhatsApp</p>
               <h2 className="text-3xl font-bold md:text-4xl mb-6" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                Atendimento profissional, <span className="gradient-text">disponível o tempo todo</span>.
+                Do "oi" à reunião marcada — <span className="gradient-text">sem você tocar em nada</span>.
               </h2>
               <p className="text-[hsl(220,10%,55%)] leading-relaxed mb-6">
-                Módulo de atendimento inteligente integrado ao WhatsApp oficial do escritório. Faz a triagem inicial do caso, coleta as informações essenciais, propõe horários disponíveis na agenda do advogado responsável e mantém todo o histórico registrado no CRM — com supervisão humana a qualquer momento.
+                Sua IA cumprimenta, entende o caso, pergunta só o que importa, identifica se o contato já é cliente pelo CPF, propõe horário na agenda do advogado responsável e confirma a reunião. Você recebe o lead com histórico completo — é só entrar e advogar.
               </p>
               <ul className="space-y-4">
                 {[
-                  "Resposta imediata a novos contatos, inclusive fora do horário comercial",
-                  "Transcrição automática de áudios e reconhecimento de terminologia jurídica",
-                  "Identificação do contato como lead ou cliente ativo por CPF/CNPJ",
-                  "Agendamento diretamente no Google Calendar do advogado responsável",
-                  "Cadência estruturada de follow-up com textos e tempos configuráveis",
-                  "Notificação imediata ao escritório a cada nova reunião confirmada",
+                  "Responde na hora, inclusive fora do horário — sem robotizar",
+                  "Transcreve áudio e entende juridiquês do lead",
+                  "Diferencia lead novo de cliente antigo pelo CPF/CNPJ",
+                  "Agenda direto no Google Calendar do advogado certo",
+                  "Cadência de 5 follow-ups automáticos para lead que sumiu",
+                  "Alerta o escritório no momento em que a reunião é confirmada",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3 text-[hsl(220,10%,75%)]">
                     <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[hsl(153,60%,45%)]" />
@@ -495,7 +495,7 @@ export default function LandingPage() {
           <Reveal className="mb-16 text-center">
             <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Por que o AdvOne</p>
             <h2 className="text-3xl font-bold md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              A plataforma pensada para <span className="gradient-text">escritórios que buscam maturidade de gestão</span>.
+              Enquanto o concorrente demora, <span className="gradient-text">você já fechou</span>.
             </h2>
           </Reveal>
 
@@ -521,9 +521,9 @@ export default function LandingPage() {
       <section id="funcionalidades">
         <div className="mx-auto max-w-6xl px-6 py-24">
           <Reveal className="mb-16 text-center">
-            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Módulos da plataforma</p>
+            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">O que você ganha</p>
             <h2 className="text-3xl font-bold md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Toda a operação do escritório em um só sistema.
+              Tudo que seu escritório precisa pra crescer — sem contratar ninguém.
             </h2>
           </Reveal>
 
@@ -545,9 +545,9 @@ export default function LandingPage() {
       <section className="border-y border-[hsl(220,20%,16%)] bg-[hsl(220,25%,8%)]">
         <div className="mx-auto max-w-5xl px-6 py-24">
           <Reveal className="mb-16 text-center">
-            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Fluxo operacional</p>
+            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Como funciona</p>
             <h2 className="text-3xl font-bold md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Do primeiro contato ao contrato assinado — com processo estruturado.
+              5 passos automáticos. Você só entra em cena pra <span className="gradient-text">fechar</span>.
             </h2>
           </Reveal>
           <div className="grid gap-6 md:grid-cols-5">
@@ -671,12 +671,12 @@ export default function LandingPage() {
               source="landing-planos"
               trigger={
                 <Button size="lg" className="gradient-primary text-[hsl(0,0%,100%)] font-semibold shadow-[0_10px_40px_-10px_hsl(153,60%,45%/0.5)]">
-                  Solicitar uma apresentação
+                  Quero ver a IA rodando no meu escritório
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               }
             />
-            <p className="mt-3 text-xs text-[hsl(220,10%,55%)]">Implantação assistida em 72h · Suporte especializado</p>
+            <p className="mt-3 text-xs text-[hsl(220,10%,55%)]">Ativo em minutos · Sem cartão de crédito · Suporte humano BR</p>
           </Reveal>
 
         </div>
