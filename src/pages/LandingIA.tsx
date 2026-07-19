@@ -323,9 +323,14 @@ export default function LandingIA() {
             <Button variant="ghost" onClick={() => navigate("/auth?mode=login")} className="hidden md:flex">
               Login
             </Button>
-            <Button onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })} className="gradient-primary text-primary-foreground">
-              Quero a Laura
-            </Button>
+            <DemoRequestDialog
+              source="landing-ia-header"
+              trigger={
+                <Button className="gradient-primary text-primary-foreground">
+                  Quero a Laura
+                </Button>
+              }
+            />
           </div>
         </div>
       </header>
@@ -583,14 +588,14 @@ export default function LandingIA() {
                     ))}
                   </ul>
 
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}
-                    className="w-full"
-                  >
-                    COMEÇAR COM IA
-                  </Button>
+                  <DemoRequestDialog
+                    source="landing-ia-plan-ia"
+                    trigger={
+                      <Button size="lg" variant="outline" className="w-full">
+                        COMEÇAR COM IA
+                      </Button>
+                    }
+                  />
                 </CardContent>
               </Card>
             </Reveal>
@@ -633,14 +638,15 @@ export default function LandingIA() {
                     ))}
                   </ul>
 
-                  <Button
-                    size="lg"
-                    onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}
-                    className="w-full gradient-primary text-primary-foreground font-bold"
-                  >
-                    QUERO ORGANIZAR
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
+                  <DemoRequestDialog
+                    source="landing-ia-plan-gestao"
+                    trigger={
+                      <Button size="lg" className="w-full gradient-primary text-primary-foreground font-bold">
+                        QUERO ORGANIZAR
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    }
+                  />
                 </CardContent>
               </Card>
             </Reveal>
@@ -680,14 +686,14 @@ export default function LandingIA() {
                     ))}
                   </ul>
 
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}
-                    className="w-full"
-                  >
-                    FALAR COM ESPECIALISTA
-                  </Button>
+                  <DemoRequestDialog
+                    source="landing-ia-plan-complete"
+                    trigger={
+                      <Button size="lg" variant="outline" className="w-full">
+                        FALAR COM ESPECIALISTA
+                      </Button>
+                    }
+                  />
                 </CardContent>
               </Card>
             </Reveal>
@@ -952,14 +958,15 @@ export default function LandingIA() {
               <p className="mx-auto max-w-2xl text-muted-foreground">
                 A Laura está pronta para começar a atender no seu WhatsApp em 24h. Planos a partir de R$ 597/mês.
               </p>
-              <Button
-                size="lg"
-                onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}
-                className="gradient-primary text-primary-foreground"
-              >
-                Quero a Laura no meu WhatsApp
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              <DemoRequestDialog
+                source="landing-ia-final-cta"
+                trigger={
+                  <Button size="lg" className="gradient-primary text-primary-foreground">
+                    Quero a Laura no meu WhatsApp
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                }
+              />
             </CardContent>
           </Card>
         </Reveal>
