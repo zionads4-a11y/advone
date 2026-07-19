@@ -323,7 +323,7 @@ export default function LandingIA() {
             <Button variant="ghost" onClick={() => navigate("/auth?mode=login")} className="hidden md:flex">
               Login
             </Button>
-            <Button onClick={() => openWhatsApp("Header - Quero a Laura")} className="gradient-primary text-primary-foreground">
+            <Button onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })} className="gradient-primary text-primary-foreground">
               Quero a Laura
             </Button>
           </div>
@@ -586,7 +586,7 @@ export default function LandingIA() {
                   <Button
                     size="lg"
                     variant="outline"
-                    onClick={() => openWhatsApp("AdvOne IA - Começar")}
+                    onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}
                     className="w-full"
                   >
                     COMEÇAR COM IA
@@ -635,7 +635,7 @@ export default function LandingIA() {
 
                   <Button
                     size="lg"
-                    onClick={() => openWhatsApp("AdvOne Gestão - Quero organizar")}
+                    onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}
                     className="w-full gradient-primary text-primary-foreground font-bold"
                   >
                     QUERO ORGANIZAR
@@ -683,7 +683,7 @@ export default function LandingIA() {
                   <Button
                     size="lg"
                     variant="outline"
-                    onClick={() => openWhatsApp("AdvOne Complete - Falar com especialista")}
+                    onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}
                     className="w-full"
                   >
                     FALAR COM ESPECIALISTA
@@ -954,7 +954,7 @@ export default function LandingIA() {
               </p>
               <Button
                 size="lg"
-                onClick={() => openWhatsApp("CTA Final - Quero a Laura")}
+                onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}
                 className="gradient-primary text-primary-foreground"
               >
                 Quero a Laura no meu WhatsApp
