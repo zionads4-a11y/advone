@@ -638,14 +638,15 @@ export default function LandingIA() {
                     ))}
                   </ul>
 
-                  <Button
-                    size="lg"
-                    onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}
-                    className="w-full gradient-primary text-primary-foreground font-bold"
-                  >
-                    QUERO ORGANIZAR
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
+                  <DemoRequestDialog
+                    source="landing-ia-plan-gestao"
+                    trigger={
+                      <Button size="lg" className="w-full gradient-primary text-primary-foreground font-bold">
+                        QUERO ORGANIZAR
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    }
+                  />
                 </CardContent>
               </Card>
             </Reveal>
