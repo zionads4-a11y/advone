@@ -39,6 +39,7 @@ import ProcessKanban from "./pages/ProcessKanban";
 import ProcessSearch from "./pages/ProcessSearch";
 import Subscription from "./pages/Subscription";
 import FraudAlerts from "./pages/FraudAlerts";
+import AiUsageMonitor from "./pages/AiUsageMonitor";
 
 import LegalAI from "./pages/LegalAI";
 import Jurisprudencia from "./pages/Jurisprudencia";
