@@ -19,6 +19,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Reveal } from "@/components/landing/useScrollReveal";
 import { InteractiveChatDemo } from "@/components/landing/InteractiveChatDemo";
 import { FloatingWhatsAppButton } from "@/components/landing/FloatingWhatsAppButton";
+import { DemoRequestDialog } from "@/components/landing/DemoRequestDialog";
 import logoAdvOne from "@/assets/logo-advone-light.png";
 import heroBg from "@/assets/hero-bg-lp.jpg";
 import {
@@ -354,14 +355,15 @@ export default function LandingIA() {
                 direto na sua agenda — enquanto você foca em fechar contratos.
               </p>
               <div className="flex flex-col gap-3 sm:flex-row">
-                <Button
-                  size="lg"
-                  onClick={() => openWhatsApp("Hero - Agendar demonstração")}
-                  className="gradient-primary text-primary-foreground"
-                >
-                  Agendar demonstração grátis
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+                <DemoRequestDialog
+                  source="landing-ia-hero"
+                  trigger={
+                    <Button size="lg" className="gradient-primary text-primary-foreground">
+                      Agendar demonstração grátis
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  }
+                />
                 <Button
                   size="lg"
                   variant="outline"
