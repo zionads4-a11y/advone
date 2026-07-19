@@ -35,54 +35,54 @@ import {
 } from "lucide-react";
 
 const stats = [
-  { value: "9", label: "Módulos integrados na plataforma" },
-  { value: "24/7", label: "Operação ininterrupta" },
-  { value: "100%", label: "Compatível com LGPD" },
-  { value: "72h", label: "Implantação assistida" },
+  { value: "5min", label: "Para sua IA estar no ar captando" },
+  { value: "24/7", label: "Atendendo enquanto você advoga" },
+  { value: "9", label: "Módulos que substituem 6 sistemas" },
+  { value: "72h", label: "Implantação com time dedicado" },
 ];
 
 const features = [
-  { icon: Kanban, title: "CRM Jurídico com pipeline de 9 etapas", desc: "Funil desenhado para a advocacia: Novo, Atendimento, Qualificação, Agendamento, Reunião, Contrato, Ganho e Perdido. Governança total do primeiro contato ao encerramento." },
-  { icon: Briefcase, title: "Gestão de clientes e processos (CNJ)", desc: "Cadastro 360° do cliente com contratos, procurações, documentos e vínculo direto aos processos judiciais monitorados diariamente." },
-  { icon: CalendarDays, title: "Agenda com Google Calendar", desc: "Integração OAuth por advogado. Audiências, prazos e reuniões sincronizados em tempo real, com lembretes automatizados ao cliente." },
-  { icon: Wallet, title: "Financeiro nativo com Asaas", desc: "Emissão e conciliação de honorários em PIX, boleto e cartão. Contas a pagar/receber, DRE gerencial e receita líquida em tempo real." },
-  { icon: MessageSquare, title: "Atendimento centralizado no WhatsApp", desc: "Um único canal oficial para leads e clientes. Transcrição de áudios, histórico completo por contato e distribuição por advogado responsável." },
-  { icon: FileText, title: "Elaboração assistida de peças", desc: "Módulo de IA jurídica para petições, contestações, recursos, mandados de segurança e contratos em .docx (padrão ABNT), com fundamentação citada." },
-  { icon: Shield, title: "Monitoramento diário de processos", desc: "Integração com Escavador: consulta diária por CNJ e semanal por CPF. Alertas de novas movimentações no painel e via WhatsApp." },
-  { icon: Users, title: "Multiusuário com 5 níveis de acesso", desc: "Administrador, Gerente, Membro, Operador e Cliente. Segregação de funções, RLS no banco de dados e trilha de auditoria." },
+  { icon: MessageSquare, title: "Sua IA responde em segundos — sempre", desc: "3h da manhã, feriado, audiência: enquanto o concorrente demora, sua IA já cumprimentou, entendeu o caso e disse que você retorna. Nenhum lead cai no esquecimento." },
+  { icon: Zap, title: "Só chega até você quem quer contratar", desc: "A IA conversa, qualifica por área e urgência, e classifica o lead. Você só entra em cena quando o caso vale seu tempo — e já com histórico na mão." },
+  { icon: CalendarDays, title: "Agenda cheia no piloto automático", desc: "A IA consulta o Google Calendar do advogado responsável, propõe horários e confirma a reunião direto no chat. Lembretes automáticos eliminam faltas." },
+  { icon: Kanban, title: "CRM que trabalha enquanto você advoga", desc: "Pipeline de 9 etapas próprio da advocacia. Cadência de follow-up automatizada em 5 tentativas. Nenhum contato esquecido, nenhuma oportunidade perdida." },
+  { icon: Shield, title: "Monitoramento CNJ direto no WhatsApp", desc: "Sentença publicada, prazo abrindo, andamento crítico — o cliente é avisado no WhatsApp e você recebe alerta no painel. Cobertura de todos os tribunais do país." },
+  { icon: FileText, title: "Cálculos jurídicos integrados de verdade", desc: "Calculadora previdenciária, trabalhista e de dívida com margem de servidor federal, estadual e municipal. O que era planilha e retrabalho vira 3 cliques." },
+  { icon: Wallet, title: "Financeiro que fecha o mês sozinho", desc: "Cobrança recorrente via PIX, boleto e cartão pelo Asaas. Conciliação automática, DRE gerencial e receita líquida em tempo real — sem contador extra." },
+  { icon: Users, title: "Time inteiro dentro, sem cobrar por usuário", desc: "Advogados, secretárias, estagiários — todos com acesso segregado por perfil, sem taxa por licença. Escale o escritório sem inflar a fatura." },
 ];
 
 const valueProps = [
   {
-    icon: Briefcase,
-    title: "Uma única plataforma para toda a operação",
-    desc: "Substitua planilhas, agendas paralelas, grupos de WhatsApp e sistemas financeiros avulsos. Do primeiro contato do lead ao recebimento do honorário, tudo em ambiente unificado, auditável e seguro.",
+    icon: Zap,
+    title: "CHEGA DE PERDER LEAD NO VÁCUO",
+    desc: "83% dos clientes fecham com quem responde primeiro. Enquanto você está em audiência, sua IA já cumprimentou, qualificou e marcou a reunião — no seu WhatsApp, com sua voz, sem parecer robô.",
   },
   {
-    icon: BarChart3,
-    title: "Decisões baseadas em indicadores confiáveis",
-    desc: "Dashboards de conversão por etapa, produtividade por advogado, retorno por origem de mídia e evolução financeira. Informação estruturada para o sócio-gestor tomar decisão com segurança.",
+    icon: Briefcase,
+    title: "CHEGA DE PLANILHA, GRUPO E CRM CARO",
+    desc: "Substitua 6 ferramentas por uma. CRM, agenda, financeiro, WhatsApp, processos e cálculos jurídicos no mesmo ambiente — auditável, seguro e sem cobrar por usuário adicional.",
   },
   {
     icon: Shield,
-    title: "Segurança, sigilo e conformidade",
-    desc: "Arquitetura multiusuário com Row-Level Security, criptografia em trânsito e em repouso, controle de acessos por perfil e aderência às diretrizes da LGPD e da OAB para tratamento de dados sensíveis.",
+    title: "CHEGA DE PERDER PRAZO DE PROCESSO",
+    desc: "Monitoramento CNJ de todos os tribunais do Brasil. Andamento novo, sentença ou prazo crítico dispara alerta no painel e mensagem automática pro cliente no WhatsApp — antes de virar problema.",
   },
 ];
 
 const testimonials = [
   {
-    text: "Após a implantação do AdvOne, unificamos atendimento, pipeline comercial, agenda e financeiro em um único ambiente. A gestão passou a ser guiada por indicadores objetivos e a produtividade da equipe aumentou significativamente.",
+    text: "Antes o WhatsApp virava um caos no fim de semana. Hoje a IA responde na hora, marca a reunião e eu chego na segunda com a agenda cheia. Parei de perder cliente para escritório maior só porque respondia mais rápido.",
     name: "Dr. Rafael Andrade",
     role: "Sócio-titular · Andrade Advocacia Previdenciária · São Paulo/SP",
   },
   {
-    text: "A padronização do funil em nove etapas e a integração com a agenda dos advogados eliminaram retrabalho e perdas de prazo. A ferramenta trouxe disciplina operacional ao escritório sem burocratizar o atendimento.",
+    text: "Tirei três sistemas do ar e enfiei tudo no AdvOne: CRM, financeiro, agenda e processos. O que a equipe perdia enroscando em planilha virou tempo de audiência. Pagou o investimento no primeiro mês.",
     name: "Dra. Camila Peixoto",
     role: "Sócia-gestora · Peixoto & Associados · Belo Horizonte/MG",
   },
   {
-    text: "O monitoramento diário dos processos e o histórico consolidado por cliente reduziram nosso tempo de resposta e elevaram a percepção de qualidade do serviço prestado. É uma plataforma pensada para escritórios que buscam maturidade de gestão.",
+    text: "O que me convenceu não foi a IA — foi o monitoramento dos processos avisando o cliente antes de mim. A percepção de qualidade subiu, o volume de ligação de cliente ansioso caiu e o meu whatsapp voltou a ser meu.",
     name: "Dr. Eduardo Ramalho",
     role: "Sócio-fundador · Ramalho Sociedade de Advogados · Curitiba/PR",
   },
