@@ -207,7 +207,7 @@ export default function LandingPage() {
                   trigger={
                     <Button
                       size="lg"
-                      className="gradient-primary glow-primary px-8 py-6 text-lg font-semibold text-[hsl(0,0%,100%)] group"
+                      className="hero-neon-glow bg-[hsl(153,85%,45%)] hover:bg-[hsl(153,85%,50%)] px-8 py-6 text-lg font-semibold text-[#04120a] group"
                     >
                       Quero parar de perder lead
                       <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
