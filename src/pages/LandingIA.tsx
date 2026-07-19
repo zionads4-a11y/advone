@@ -586,7 +586,7 @@ export default function LandingIA() {
                   <Button
                     size="lg"
                     variant="outline"
-                    onClick={() => openWhatsApp("AdvOne IA - Começar")}
+                    onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}
                     className="w-full"
                   >
                     COMEÇAR COM IA
