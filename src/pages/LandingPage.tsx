@@ -879,10 +879,11 @@ export default function LandingPage() {
                 <div className="mb-6">
                   <h3 className="text-xl font-bold text-[hsl(220,10%,92%)] mb-2">Sua secretária virtual 24h</h3>
                   <div className="mt-4 flex items-baseline gap-1">
-                    <span className="text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 397</span>
+                    <span className="text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 597</span>
                     <span className="text-sm text-[hsl(220,10%,60%)]">/mês</span>
                   </div>
-                  <p className="mt-2 text-sm text-[hsl(220,10%,60%)]">Para quem quer parar de perder lead no WhatsApp.</p>
+                  <p className="mt-1 text-xs text-[hsl(153,60%,45%)] font-semibold">no plano anual (economize R$ 2.400/ano)</p>
+                  <p className="mt-2 text-sm text-[hsl(220,10%,60%)]">ou R$ 797/mês no plano mensal. Para quem quer parar de perder lead no WhatsApp.</p>
                 </div>
 
                 <ul className="mb-8 flex-1 space-y-3">
