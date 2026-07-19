@@ -521,9 +521,9 @@ export default function LandingPage() {
       <section id="funcionalidades">
         <div className="mx-auto max-w-6xl px-6 py-24">
           <Reveal className="mb-16 text-center">
-            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Módulos da plataforma</p>
+            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">O que você ganha</p>
             <h2 className="text-3xl font-bold md:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Toda a operação do escritório em um só sistema.
+              Tudo que seu escritório precisa pra crescer — sem contratar ninguém.
             </h2>
           </Reveal>
 
