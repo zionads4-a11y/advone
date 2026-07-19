@@ -70,7 +70,7 @@ const features = [
   },
   {
     icon: Zap,
-    title: "Setup em 24h",
+    title: "Setup em até 48h",
     desc: "Conectamos seu WhatsApp, treinamos a Laura com seus fluxos e ela já começa a atender.",
   },
 ];
@@ -387,7 +387,7 @@ export default function LandingIA() {
               <div className="flex flex-wrap items-center gap-6 pt-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-primary" />
-                  Setup em 24h
+                  Setup em até 48h
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-primary" />
