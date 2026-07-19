@@ -323,9 +323,14 @@ export default function LandingIA() {
             <Button variant="ghost" onClick={() => navigate("/auth?mode=login")} className="hidden md:flex">
               Login
             </Button>
-            <Button onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })} className="gradient-primary text-primary-foreground">
-              Quero a Laura
-            </Button>
+            <DemoRequestDialog
+              source="landing-ia-header"
+              trigger={
+                <Button className="gradient-primary text-primary-foreground">
+                  Quero a Laura
+                </Button>
+              }
+            />
           </div>
         </div>
       </header>
