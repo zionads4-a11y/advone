@@ -555,11 +555,11 @@ export default function LandingIA() {
                     </div>
                     <div className="mt-2 flex items-baseline justify-center gap-1">
                       <span className="text-3xl font-bold">R$</span>
-                      <span className="font-display text-5xl font-bold">397</span>
+                      <span className="font-display text-5xl font-bold">597</span>
                       <span className="text-muted-foreground">/mês</span>
                     </div>
                     <div className="mt-1 text-xs text-muted-foreground">
-                      Para parar de perder lead no WhatsApp
+                      no plano anual · ou R$ 797/mês no mensal
                     </div>
                   </div>
 
