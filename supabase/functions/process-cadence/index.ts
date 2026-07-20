@@ -935,7 +935,7 @@ REGRAS OBRIGATÓRIAS:
             }
           }
 
-          if (msg.day_number >= MAX_CADENCE_ATTEMPTS) {
+          if (msg.day_number >= maxAttempts) {
             const { data: lostColumn } = await supabase
               .from("kanban_columns")
               .select("id")
@@ -947,7 +947,7 @@ REGRAS OBRIGATÓRIAS:
               await supabase.from("leads").update({
                 kanban_column_id: lostColumn.id,
                 status: "lost",
-                notes: "[Cadência] Lead não respondeu após 5 tentativas de contato",
+                notes: `[Cadência] Lead não respondeu após ${maxAttempts} tentativas de contato`,
               }).eq("id", msg.lead_id);
             }
           }
