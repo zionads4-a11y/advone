@@ -54,6 +54,9 @@ export default function MetaCloudSetup() {
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
   const [testInfo, setTestInfo] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [testPhone, setTestPhone] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sendInfo, setSendInfo] = useState<{ ok: boolean; msg: string } | null>(null);
 
   useEffect(() => {
     (async () => {
