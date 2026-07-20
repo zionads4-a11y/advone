@@ -326,6 +326,36 @@ export default function MetaCloudSetup() {
             )}
           </StepCard>
 
+          {/* Passo 5 - Enviar hello_world */}
+          <StepCard
+            n={5}
+            done={sendInfo?.ok === true}
+            title="Enviar mensagem de teste (hello_world)"
+            icon={<Send className="h-5 w-5" />}
+          >
+            <p className="text-sm text-muted-foreground mb-3">
+              Dispara o template oficial <code>hello_world</code> aprovado pela Meta. No modo Sandbox, o número precisa estar na whitelist de destinatários de teste.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Input
+                placeholder="5531980510612 (DDI+DDD+número)"
+                value={testPhone}
+                onChange={(e) => setTestPhone(e.target.value)}
+                className="sm:max-w-[280px]"
+              />
+              <Button onClick={handleSendHello} disabled={sending || !cfg.meta_access_token} className="gap-2">
+                {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                Enviar hello_world
+              </Button>
+            </div>
+            {sendInfo && (
+              <div className={`mt-3 text-sm p-3 rounded-md ${sendInfo.ok ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-200 border border-emerald-200" : "bg-red-50 text-red-800 dark:bg-red-950/30 dark:text-red-200 border border-red-200"}`}>
+                {sendInfo.ok ? `✅ ${sendInfo.msg}` : `❌ ${sendInfo.msg}`}
+              </div>
+            )}
+          </StepCard>
+
+
           {stepDone.s4 && (
             <Card className="border-emerald-500/40 bg-emerald-50/50 dark:bg-emerald-950/20">
               <CardContent className="pt-6 flex items-center gap-3">
