@@ -153,14 +153,17 @@ serve(async (req) => {
     });
   }
 
-  // Se app_secret configurado, valida HMAC. Se não, aceita (BSPs podem não expor).
-  if (cfg.meta_app_secret) {
+  // Valida assinatura HMAC. Prioridade: app_secret por-empresa (raro) -> META_APP_SECRET global.
+  const appSecret = cfg.meta_app_secret || Deno.env.get("META_APP_SECRET") || "";
+  if (appSecret) {
     const sig = req.headers.get("x-hub-signature-256");
-    const ok = await verifySignature(cfg.meta_app_secret, rawBody, sig);
+    const ok = await verifySignature(appSecret, rawBody, sig);
     if (!ok) {
       console.warn("[meta-webhook] invalid signature for company", companyId);
       return new Response("invalid signature", { status: 401, headers: corsHeaders });
     }
+  } else {
+    console.warn("[meta-webhook] no app_secret configured — signature not verified");
   }
 
   let payload: any;
