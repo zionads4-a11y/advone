@@ -163,6 +163,55 @@ export default function MetaCloudSetup() {
     }
   };
 
+  const handleSendHello = async () => {
+    const to = testPhone.replace(/\D/g, "");
+    if (!to || to.length < 10) return toast.error("Informe um número válido com DDI+DDD");
+    if (!cfg.meta_phone_number_id || !cfg.meta_access_token) {
+      return toast.error("Salve as credenciais antes de enviar");
+    }
+    setSending(true);
+    setSendInfo(null);
+    try {
+      const res = await fetch(
+        `https://graph.facebook.com/v21.0/${cfg.meta_phone_number_id}/messages`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${cfg.meta_access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            messaging_product: "whatsapp",
+            to,
+            type: "template",
+            template: { name: "hello_world", language: { code: "en_US" } },
+          }),
+        },
+      );
+      const json = await res.json();
+      if (!res.ok) {
+        const code = json?.error?.code;
+        const msg = json?.error?.message || "Falha no envio";
+        const hint =
+          code === 131030
+            ? " — adicione o número na whitelist de destinatários de teste no painel Meta."
+            : code === 190
+            ? " — token expirado, gere um novo."
+            : "";
+        setSendInfo({ ok: false, msg: msg + hint });
+      } else {
+        setSendInfo({
+          ok: true,
+          msg: `Mensagem enviada — ID: ${json.messages?.[0]?.id || "n/d"}`,
+        });
+      }
+    } catch (e: any) {
+      setSendInfo({ ok: false, msg: e.message });
+    } finally {
+      setSending(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
