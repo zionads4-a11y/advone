@@ -1,0 +1,1 @@
+ALTER TABLE public.company_cadence_config DROP CONSTRAINT company_cadence_config_step_number_check; ALTER TABLE public.company_cadence_config ADD CONSTRAINT company_cadence_config_step_number_check CHECK (step_number >= 1 AND step_number <= 20);
