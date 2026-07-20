@@ -810,7 +810,7 @@ Na DÚVIDA, responda "continue".`
 ═══════════════════════════════════════
 🔄 CONTEXTO ESPECIAL: FOLLOW-UP DE CADÊNCIA
 ═══════════════════════════════════════
-O lead PAROU de responder. Esta é a tentativa ${msg.day_number} de ${MAX_CADENCE_ATTEMPTS}.
+O lead PAROU de responder. Esta é a tentativa ${msg.day_number} de ${maxAttempts}.
 
 REGRAS OBRIGATÓRIAS:
 1. Continue de ONDE PAROU — NÃO recomece, NÃO se reapresente, NÃO repita perguntas já feitas
