@@ -12,6 +12,7 @@ import {
   Copy,
   ExternalLink,
   Loader2,
+  Send,
   ShieldCheck,
   Sparkles,
   Webhook,
