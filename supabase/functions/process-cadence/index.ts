@@ -549,6 +549,27 @@ async function getNextCadenceDelay(
   return defaults[stepNumber] ?? null;
 }
 
+/**
+ * Retorna quantas tentativas de cadência estão configuradas (habilitadas)
+ * para a empresa. Se não houver config, usa o default MAX_CADENCE_ATTEMPTS.
+ * Assim, se o gerente cadastrar 6, 8 ou 10 etapas, a cadência dispara todas.
+ */
+async function getMaxCadenceAttempts(
+  supabase: any,
+  companyId: string,
+): Promise<number> {
+  const { data } = await supabase
+    .from("company_cadence_config")
+    .select("step_number, enabled")
+    .eq("company_id", companyId)
+    .eq("enabled", true)
+    .order("step_number", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const configured = data?.step_number ?? 0;
+  return Math.max(configured, MAX_CADENCE_ATTEMPTS);
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
