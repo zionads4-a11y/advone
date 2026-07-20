@@ -774,6 +774,7 @@ Na DÚVIDA, responda "continue".`
           .limit(1)
           .maybeSingle();
         const cadenceState = await loadConversationState(supabase, msg.lead_id, lastBotRow?.message_text || null);
+        const maxAttempts = await getMaxCadenceAttempts(supabase, msg.company_id);
 
         // Generate continuation message using AI based on full conversation
         let messageText = "";
