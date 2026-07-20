@@ -27,6 +27,7 @@ import {
   Calculator,
   UserCog,
   Smartphone,
+  ShieldCheck,
 } from "lucide-react";
 import logoAdvOne from "@/assets/logo-advone-light.png";
 import { NavLink } from "@/components/NavLink";
@@ -85,6 +86,7 @@ const adminItems = [
   { title: "Leads Landing IA", url: "/leads-landing-ia", icon: History },
   { title: "Alertas de Fraude", url: "/fraudes", icon: ShieldAlert, premium: true },
   { title: "Logs de Webhook", url: "/webhook-logs", icon: Activity },
+  { title: "Meta Cloud Setup", url: "/meta-cloud-setup", icon: ShieldCheck },
 ];
 
 const gerenteItems = [
