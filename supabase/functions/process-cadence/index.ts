@@ -918,7 +918,7 @@ REGRAS OBRIGATÓRIAS:
           // Enfileira a PRÓXIMA etapa da cadência (se houver) com base no
           // delay_minutes configurado. Regra: só dispara se o lead continuar
           // 30min (ou o tempo configurado) sem responder após esta mensagem.
-          if (msg.day_number < MAX_CADENCE_ATTEMPTS) {
+          if (msg.day_number < maxAttempts) {
             const nextStep = msg.day_number + 1;
             const nextDelayMin = await getNextCadenceDelay(supabase, msg.company_id, nextStep);
             if (nextDelayMin !== null) {
