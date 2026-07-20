@@ -549,6 +549,27 @@ async function getNextCadenceDelay(
   return defaults[stepNumber] ?? null;
 }
 
+/**
+ * Retorna quantas tentativas de cadência estão configuradas (habilitadas)
+ * para a empresa. Se não houver config, usa o default MAX_CADENCE_ATTEMPTS.
+ * Assim, se o gerente cadastrar 6, 8 ou 10 etapas, a cadência dispara todas.
+ */
+async function getMaxCadenceAttempts(
+  supabase: any,
+  companyId: string,
+): Promise<number> {
+  const { data } = await supabase
+    .from("company_cadence_config")
+    .select("step_number, enabled")
+    .eq("company_id", companyId)
+    .eq("enabled", true)
+    .order("step_number", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const configured = data?.step_number ?? 0;
+  return Math.max(configured, MAX_CADENCE_ATTEMPTS);
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -753,6 +774,7 @@ Na DÚVIDA, responda "continue".`
           .limit(1)
           .maybeSingle();
         const cadenceState = await loadConversationState(supabase, msg.lead_id, lastBotRow?.message_text || null);
+        const maxAttempts = await getMaxCadenceAttempts(supabase, msg.company_id);
 
         // Generate continuation message using AI based on full conversation
         let messageText = "";
@@ -789,7 +811,7 @@ Na DÚVIDA, responda "continue".`
 ═══════════════════════════════════════
 🔄 CONTEXTO ESPECIAL: FOLLOW-UP DE CADÊNCIA
 ═══════════════════════════════════════
-O lead PAROU de responder. Esta é a tentativa ${msg.day_number} de ${MAX_CADENCE_ATTEMPTS}.
+O lead PAROU de responder. Esta é a tentativa ${msg.day_number} de ${maxAttempts}.
 
 REGRAS OBRIGATÓRIAS:
 1. Continue de ONDE PAROU — NÃO recomece, NÃO se reapresente, NÃO repita perguntas já feitas
@@ -896,7 +918,7 @@ REGRAS OBRIGATÓRIAS:
           // Enfileira a PRÓXIMA etapa da cadência (se houver) com base no
           // delay_minutes configurado. Regra: só dispara se o lead continuar
           // 30min (ou o tempo configurado) sem responder após esta mensagem.
-          if (msg.day_number < MAX_CADENCE_ATTEMPTS) {
+          if (msg.day_number < maxAttempts) {
             const nextStep = msg.day_number + 1;
             const nextDelayMin = await getNextCadenceDelay(supabase, msg.company_id, nextStep);
             if (nextDelayMin !== null) {
@@ -913,7 +935,7 @@ REGRAS OBRIGATÓRIAS:
             }
           }
 
-          if (msg.day_number >= MAX_CADENCE_ATTEMPTS) {
+          if (msg.day_number >= maxAttempts) {
             const { data: lostColumn } = await supabase
               .from("kanban_columns")
               .select("id")
@@ -925,7 +947,7 @@ REGRAS OBRIGATÓRIAS:
               await supabase.from("leads").update({
                 kanban_column_id: lostColumn.id,
                 status: "lost",
-                notes: "[Cadência] Lead não respondeu após 5 tentativas de contato",
+                notes: `[Cadência] Lead não respondeu após ${maxAttempts} tentativas de contato`,
               }).eq("id", msg.lead_id);
             }
           }
