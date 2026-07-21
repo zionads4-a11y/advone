@@ -564,11 +564,11 @@ export default function LandingIA() {
                     </div>
                     <div className="mt-2 flex items-baseline justify-center gap-1">
                       <span className="text-3xl font-bold">R$</span>
-                      <span className="font-display text-5xl font-bold">597</span>
+                      <span className="font-display text-5xl font-bold">497</span>
                       <span className="text-muted-foreground">/mês</span>
                     </div>
                     <div className="mt-1 text-xs text-muted-foreground">
-                      no plano anual · ou R$ 797/mês no mensal
+                      no plano anual · R$ 647/mês no semestral · R$ 797/mês no mensal
                     </div>
                   </div>
 
