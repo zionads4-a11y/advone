@@ -113,7 +113,7 @@ export default function CompanyDetail() {
                   </span>
                 )}
                 {whatsappConfig ? (
-                  whatsappConfig.status === "connected" ? (
+                  ["connected", "active"].includes(whatsappConfig.status) ? (
                     <Badge variant="outline" className="border-success/30 text-success text-[10px]">
                       WhatsApp Conectado
                     </Badge>
