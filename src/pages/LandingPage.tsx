@@ -887,10 +887,10 @@ export default function LandingPage() {
             </p>
           </Reveal>
 
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4 max-w-7xl mx-auto">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4 max-w-7xl mx-auto items-start">
             {/* AdvOne IA */}
             <Reveal delay={0}>
-              <div className="rounded-2xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col h-full transition-all duration-500 hover:border-[hsl(153,60%,45%)]/30 hover:-translate-y-1">
+              <div className="rounded-2xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col transition-all duration-500 hover:border-[hsl(153,60%,45%)]/30 hover:-translate-y-1">
                 <div className="mb-6 flex items-center justify-between">
                   <span className="inline-block rounded-full bg-[hsl(220,20%,16%)] px-3 py-1 text-xs font-semibold text-[hsl(220,10%,75%)]">ADVONE IA</span>
                 </div>
@@ -915,7 +915,7 @@ export default function LandingPage() {
                   <p className="mt-3 text-sm text-[hsl(220,10%,60%)]">Para quem quer parar de perder lead no WhatsApp.</p>
                 </div>
 
-                <ul className="mb-8 flex-1 space-y-3">
+                <ul className="mb-6 space-y-3">
                   {[
                     "Atendimento no WhatsApp 24h",
                     "Qualificação inteligente de leads",
@@ -939,7 +939,7 @@ export default function LandingPage() {
 
             {/* AdvOne Gestão — destaque */}
             <Reveal delay={100}>
-              <div className="relative rounded-2xl border-2 border-[hsl(153,60%,45%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col h-full shadow-xl shadow-[hsl(153,60%,45%)]/10 transition-all duration-500 hover:-translate-y-2">
+              <div className="relative rounded-2xl border-2 border-[hsl(153,60%,45%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col shadow-xl shadow-[hsl(153,60%,45%)]/10 transition-all duration-500 hover:-translate-y-2">
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[hsl(153,60%,45%)] px-4 py-1 text-xs font-bold text-[hsl(220,25%,6%)]">
                   MAIS POPULAR
                 </div>
@@ -957,7 +957,7 @@ export default function LandingPage() {
                   <p className="mt-2 text-sm text-[hsl(220,10%,60%)]">Adicione CRM, pipeline e gestão de equipe em cima do seu plano IA.</p>
                 </div>
 
-                <ul className="mb-8 flex-1 space-y-3">
+                <ul className="mb-6 space-y-3">
                   {[
                     "CRM jurídico completo",
                     "Até 3 áreas de atuação",
@@ -983,7 +983,7 @@ export default function LandingPage() {
 
             {/* AdvOne Complete */}
             <Reveal delay={200}>
-              <div className="rounded-2xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col h-full transition-all duration-500 hover:border-[hsl(153,60%,45%)]/30 hover:-translate-y-1">
+              <div className="rounded-2xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col transition-all duration-500 hover:border-[hsl(153,60%,45%)]/30 hover:-translate-y-1">
                 <div className="mb-6 flex items-center justify-between">
                   <span className="inline-block rounded-full bg-[hsl(220,20%,16%)] px-3 py-1 text-xs font-semibold text-[hsl(220,10%,75%)]">ADVONE COMPLETE</span>
                 </div>
@@ -998,7 +998,7 @@ export default function LandingPage() {
                   <p className="mt-2 text-sm text-[hsl(220,10%,60%)]">Para escritórios que querem escalar sem limite.</p>
                 </div>
 
-                <ul className="mb-8 flex-1 space-y-3">
+                <ul className="mb-6 space-y-3">
                   {[
                     "Tudo do plano IA",
                     "Tudo do plano Gestão",
@@ -1023,7 +1023,7 @@ export default function LandingPage() {
 
             {/* AdvOne Enterprise */}
             <Reveal delay={300}>
-              <div className="relative rounded-2xl border border-[hsl(45,80%,55%)]/40 bg-gradient-to-br from-[hsl(220,25%,9%)] to-[hsl(220,25%,7%)] p-8 flex flex-col h-full transition-all duration-500 hover:border-[hsl(45,80%,55%)] hover:-translate-y-1 shadow-lg shadow-[hsl(45,80%,55%)]/5">
+              <div className="relative rounded-2xl border border-[hsl(45,80%,55%)]/40 bg-gradient-to-br from-[hsl(220,25%,9%)] to-[hsl(220,25%,7%)] p-8 flex flex-col transition-all duration-500 hover:border-[hsl(45,80%,55%)] hover:-translate-y-1 shadow-lg shadow-[hsl(45,80%,55%)]/5">
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-[hsl(45,80%,55%)] to-[hsl(38,90%,60%)] px-4 py-1 text-xs font-bold text-[hsl(220,25%,6%)]">
                   SOB MEDIDA
                 </div>
@@ -1040,7 +1040,7 @@ export default function LandingPage() {
                   </p>
                 </div>
 
-                <ul className="mb-8 flex-1 space-y-3">
+                <ul className="mb-6 space-y-3">
                   {[
                     "Tudo do plano Complete incluso",
                     "Áreas de atuação ilimitadas (a partir de 4)",
