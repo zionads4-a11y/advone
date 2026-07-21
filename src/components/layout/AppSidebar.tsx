@@ -73,7 +73,6 @@ const AI_ONLY_ROUTES = new Set([
 const adminItems = [
   { title: "Empresas", url: "/companies", icon: Building2 },
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
-  { title: "Monitoramento", url: "/monitoramento", icon: Radar },
   { title: "Usuários", url: "/client-users", icon: Users },
   { title: "Time Interno", url: "/time-interno", icon: UserCog },
   { title: "Acessos", url: "/access-management", icon: KeyRound },
