@@ -557,7 +557,7 @@ export default function LandingIA() {
             {/* AdvOne IA */}
             <Reveal delay={120}>
               <Card className="h-full border-border/60 bg-card/40 hover:border-primary/20 transition-all">
-                <CardContent className="space-y-6 p-8 flex flex-col h-full">
+                <CardContent className="space-y-6 p-8 flex flex-col">
                   <div>
                     <div className="text-center text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-4">
                       ADVONE IA
@@ -612,7 +612,7 @@ export default function LandingIA() {
                 <div className="absolute top-0 right-0 bg-primary px-3 py-1 text-[10px] font-bold text-primary-foreground uppercase tracking-widest rounded-bl-lg">
                   Mais Popular
                 </div>
-                <CardContent className="space-y-6 p-8 flex flex-col h-full">
+                <CardContent className="space-y-6 p-8 flex flex-col">
                   <div className="text-center">
                     <div className="text-sm font-semibold uppercase tracking-wide text-primary">
                       ADVONE GESTÃO
@@ -661,7 +661,7 @@ export default function LandingIA() {
             {/* AdvOne Complete */}
             <Reveal delay={240}>
               <Card className="h-full border-border/60 bg-card/40 hover:border-primary/20 transition-all">
-                <CardContent className="space-y-6 p-8 flex flex-col h-full">
+                <CardContent className="space-y-6 p-8 flex flex-col">
                   <div className="text-center">
                     <div className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                       ADVONE COMPLETE
