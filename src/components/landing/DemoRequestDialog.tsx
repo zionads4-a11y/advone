@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { ArrowLeft, ArrowRight, Briefcase, Users, UserCheck, GraduationCap, HelpCircle, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { trackMetaEvent } from "@/lib/metaPixel";
 
 // Ajuste aqui o link do Calendly do time comercial da AdvOne
 const CALENDLY_URL = "https://calendly.com/connectmktdigitalbr/30min";
