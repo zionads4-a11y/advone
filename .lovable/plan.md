@@ -1,61 +1,72 @@
-# Multi-setor + Advogado Responsável — 3 features
+# Plano: Embedded Signup Meta + Onboarding Escalável
 
-## 1. Round-robin por área (Laura distribui leads)
+## Objetivo
+Permitir que **o próprio cliente conecte o WhatsApp dele** ao AdvOne em 2 minutos, sem você precisar cadastrar Phone Number ID / Token manualmente. Fim do gargalo pra vender em escala.
 
-**Tool nova no `zapi-webhook`: `assign_lead_to_area_lawyer`**
-- Args: `area_name` (ex "trabalhista"), `reason` (opcional).
-- Busca `legal_areas` da empresa por nome (unaccent/ilike).
-- Busca advogados via `user_legal_areas` com `operator_profile IN ('advogado_responsavel','gerente')`.
-- Escolhe o com **menos leads abertos** no momento (`leads.assigned_to = X AND kanban_column.is_won=false AND is_lost=false`).
-- Seta `leads.assigned_to`, `leads.area_direito`, dispara notificação (item 2).
-- Laura chama automaticamente quando detecta assunto claro no fluxo de qualificação.
+Como a maioria dos números será **receptiva** (recebe mensagem antes de enviar), o risco de bloqueio cai muito e a estratégia oficial Meta é ideal.
 
-**Prompt Laura:** adiciona instrução "quando identificar a área do caso, chame `assign_lead_to_area_lawyer` em silêncio, sem avisar o lead."
+---
 
-## 2. Notificação WhatsApp pro advogado
+## O que vai ser entregue
 
-**Trigger novo em `leads`:** `notify_lawyer_on_assignment`
-- Dispara quando `assigned_to` muda (INSERT ou UPDATE).
-- Se novo responsável ≠ null e ≠ anterior, chama edge function `notify-lawyer-assigned` via `net.http_post`.
+### 1. Botão "Conectar WhatsApp Oficial (Meta)" no painel do cliente
+- Aparece em `/conectar-whatsapp` ao lado do QR Code atual (UaZapi vira "modo teste")
+- Abre popup oficial da Meta (Embedded Signup do Facebook SDK)
+- Cliente faz login com Facebook Business, escolhe/cria WABA, escolhe número, verifica por SMS/ligação
+- Meta devolve `phone_number_id` + `waba_id` + `access_token` automaticamente
+- Sistema salva em `whatsapp_configs` sem intervenção do admin
 
-**Edge function `notify-lawyer-assigned`:**
-- Busca telefone do advogado (`profiles.whatsapp` ou `profiles.phone`).
-- Envia via `send-whatsapp` usando a instância da empresa:
-  ```
-  🔔 Novo lead atribuído: {nome}
-  Área: {área}
-  Telefone: {phone}
-  Abra: {app_url}/leads/{lead_id}
-  ```
-- Log em `audit_logs`.
+### 2. Edge Function `meta-embedded-signup-exchange`
+- Recebe o `code` do popup Meta
+- Troca por `access_token` de longa duração usando `META_APP_ID` + `META_APP_SECRET`
+- Registra webhook automaticamente na WABA do cliente (`POST /{waba_id}/subscribed_apps`)
+- Grava `provider: "meta_cloud"`, phone_number_id, waba_id, token na `whatsapp_configs` da empresa
+- Marca `meta_onboarded_at`
 
-**Requisito:** adicionar coluna `profiles.whatsapp text` (se não existir) + campo no perfil pro advogado cadastrar.
+### 3. Página `/meta-cloud-setup` fica só como fallback manual
+- Mantida pra casos onde o cliente não consegue usar o popup
+- Adiciona banner: "Recomendado: peça pro cliente clicar em Conectar no painel dele"
 
-## 3. Chat interno no card do lead (SDR ↔ advogado)
+### 4. Health Monitor dos números Meta
+- Nova aba em `/ai-usage` (ou nova página `/whatsapp-health`)
+- Puxa da Meta a cada 6h via cron:
+  - `messaging_limit_tier` (250 / 1k / 10k / 100k / unlimited)
+  - `quality_rating` (GREEN / YELLOW / RED)
+  - `name_status` (APPROVED / PENDING)
+- Alerta vermelho quando algum número entra em YELLOW/RED
+- Nova tabela `meta_phone_health` (snapshots diários)
 
-**Tabela nova `lead_internal_messages`:**
-- `id`, `lead_id`, `company_id`, `sender_id` (user), `content text`, `mentions uuid[]` (usuários mencionados com @), `created_at`.
-- RLS: quem pode ver o lead pode ver as mensagens (reusa lógica existente — admin/gerente/assigned_to/área).
-- Grant padrão + realtime habilitado.
+---
 
-**UI nova em `LeadDetailDrawer.tsx`:**
-- Aba "Notas internas 💬" (separada de "Notas" que hoje é `lead_notes`).
-- Lista mensagens tipo chat, avatar + nome + hora.
-- Input com envio via Enter.
-- Realtime subscription na tabela.
-- Menção `@nome` autocompleta com usuários da empresa; menção dispara WhatsApp pro mencionado (reusa `notify-lawyer-assigned` genérico → renomeio pra `notify-user-mention`).
+## Detalhes técnicos
 
-## Ordem de implementação
+**Banco:**
+- Migration adiciona `meta_onboarded_at`, `meta_business_id`, `meta_quality_rating`, `meta_messaging_limit` em `whatsapp_configs`
+- Nova tabela `meta_phone_health` (company_id, phone_number_id, quality, tier, checked_at) com RLS por company + GRANT
+- Cron `pg_cron` roda edge `meta-health-check` de 6/6h
 
-1. Migration: coluna `profiles.whatsapp`, tabela `lead_internal_messages` + RLS + realtime, trigger `notify_lawyer_on_assignment`.
-2. Edge function `notify-lawyer-assigned` (também usada para menções).
-3. Tool `assign_lead_to_area_lawyer` no `zapi-webhook` + atualização do prompt Laura.
-4. UI: aba "Notas internas" no `LeadDetailDrawer` + campo WhatsApp em `Profile.tsx`.
+**Frontend:**
+- Botão dispara `FB.login({config_id: <EMBEDDED_SIGNUP_CONFIG_ID>, response_type: 'code', override_default_response_type: true})`
+- Precisa carregar SDK do Facebook (`https://connect.facebook.net/en_US/sdk.js`)
+- **Você vai precisar criar 1 configuração de Embedded Signup no Meta Business** (te explico o clique-a-clique no chat depois que aprovar o plano)
 
-## Fora de escopo (fase 2)
+**Edge Functions novas:**
+- `meta-embedded-signup-exchange` — troca code por token e faz subscribe
+- `meta-health-check` — cron 6/6h que roda pra todas empresas com meta ativo
 
-- Notificação push web (só WhatsApp por ora).
-- Reatribuição manual em massa.
-- Métricas de carga por advogado (dashboard).
+**Secrets:** já temos `META_APP_ID` e `META_APP_SECRET` ✅
 
-Confirma que posso executar assim?
+---
+
+## O que **você** precisa fazer (fora do código)
+
+1. **Business Verification** na Meta (CNPJ) — libera de 2 → 20 números
+2. Criar 1 **Embedded Signup configuration** no Meta Business (te guio passo a passo depois)
+3. Me passar o **Config ID** dessa configuração pra eu colar no frontend
+
+---
+
+## Fora de escopo desta rodada (fica pra depois)
+- Template Manager visual (criar/aprovar templates dentro do AdvOne)
+- Migração de conversas UaZapi → Meta (mantém os dois provedores rodando lado a lado)
+- Billing por volume de mensagens Meta

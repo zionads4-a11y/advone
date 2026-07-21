@@ -17,6 +17,7 @@ import {
   Webhook,
 } from "lucide-react";
 import { toast } from "sonner";
+import MetaEmbeddedSignupButton from "@/components/whatsapp/MetaEmbeddedSignupButton";
 
 interface Company {
   id: string;
@@ -199,6 +200,31 @@ export default function MetaCloudSetup() {
 
       {companyId && (
         <>
+          {/* Fast path: Embedded Signup */}
+          <Card className="border-primary/50 bg-primary/5">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                Modo rápido — Embedded Signup (recomendado)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                O próprio cliente faz login com Facebook Business e conecta o WhatsApp em ~2 minutos. Sem colar tokens, webhook configurado automaticamente.
+              </p>
+              <MetaEmbeddedSignupButton
+                companyId={companyId}
+                onConnected={() => {
+                  toast.success("Recarregando dados...");
+                  setTimeout(() => window.location.reload(), 800);
+                }}
+              />
+              <p className="text-xs text-muted-foreground">
+                Ou use o passo a passo manual abaixo (fallback).
+              </p>
+            </CardContent>
+          </Card>
+
           {/* Passo 1 - Meta panel */}
           <StepCard
             n={1}
