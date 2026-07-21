@@ -115,6 +115,29 @@ async function loadApplicableRules(
   return filtered;
 }
 
+async function getDefaultKanbanBoardId(supabase: any, companyId: string): Promise<string | null> {
+  const { data: defaultBoard } = await supabase
+    .from("kanban_boards")
+    .select("id")
+    .eq("company_id", companyId)
+    .eq("is_default", true)
+    .order("position", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (defaultBoard?.id) return defaultBoard.id;
+
+  const { data: firstBoard } = await supabase
+    .from("kanban_boards")
+    .select("id")
+    .eq("company_id", companyId)
+    .order("position", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  return firstBoard?.id || null;
+}
+
 function applyFinalGuards(input: any, decision: Rule["output"]): Rule["output"] {
   // Bloco de controle final: agendar exige classification=quente AND wants_help=sim
   if (decision.action === "agendar") {
@@ -141,7 +164,9 @@ async function applyKanbanMove(supabase: any, leadId: string, companyId: string,
   const target = targetMap[action];
   if (!target) return;
 
-  let query = supabase.from("kanban_columns").select("id").eq("company_id", companyId).limit(1);
+  const boardId = await getDefaultKanbanBoardId(supabase, companyId);
+  let query = supabase.from("kanban_columns").select("id").eq("company_id", companyId).order("position", { ascending: true }).limit(1);
+  if (boardId) query = query.eq("board_id", boardId);
   if (target.name) query = query.ilike("name", target.name);
   if (target.flag === "is_lost") query = query.eq("is_lost", true);
   if (target.flag === "is_won") query = query.eq("is_won", true);

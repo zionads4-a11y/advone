@@ -437,6 +437,52 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
   return { date: formatDateDMY(dateStr), dayName, slots: slots.filter(s => !bookedTimes.has(s)) };
 }
 
+async function getDefaultKanbanBoardId(supabase: any, companyId: string): Promise<string | null> {
+  const { data: defaultBoard } = await supabase
+    .from("kanban_boards")
+    .select("id")
+    .eq("company_id", companyId)
+    .eq("is_default", true)
+    .order("position", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (defaultBoard?.id) return defaultBoard.id;
+
+  const { data: firstBoard } = await supabase
+    .from("kanban_boards")
+    .select("id")
+    .eq("company_id", companyId)
+    .order("position", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  return firstBoard?.id || null;
+}
+
+async function getDefaultBoardColumn(
+  supabase: any,
+  companyId: string,
+  filters: { position?: number; name?: string; isWon?: boolean; isLost?: boolean } = {},
+): Promise<{ id: string } | null> {
+  const boardId = await getDefaultKanbanBoardId(supabase, companyId);
+  let query = supabase
+    .from("kanban_columns")
+    .select("id")
+    .eq("company_id", companyId)
+    .order("position", { ascending: true })
+    .limit(1);
+
+  if (boardId) query = query.eq("board_id", boardId);
+  if (typeof filters.position === "number") query = query.eq("position", filters.position);
+  if (filters.name) query = query.ilike("name", filters.name);
+  if (typeof filters.isWon === "boolean") query = query.eq("is_won", filters.isWon);
+  if (typeof filters.isLost === "boolean") query = query.eq("is_lost", filters.isLost);
+
+  const { data } = await query.maybeSingle();
+  return data || null;
+}
+
 function formatDateDMY(dateStr: string): string {
   const parts = dateStr.split("-");
   if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
@@ -1289,8 +1335,7 @@ Antes de responder:
             created_by: "00000000-0000-0000-0000-000000000000",
           });
 
-          const { data: wonCol } = await supabase.from("kanban_columns").select("id")
-            .eq("company_id", companyId).eq("is_won", true).order("position", { ascending: false }).limit(1).maybeSingle();
+          const wonCol = await getDefaultBoardColumn(supabase, companyId, { isWon: true });
           if (wonCol) {
             await supabase.from("leads").update({ kanban_column_id: wonCol.id, status: "won" }).eq("id", leadId);
           }
@@ -1640,11 +1685,10 @@ REGRAS: NÃO cite número de processo, tribunal, nem termos técnicos. NÃO inve
     // SDR post-processing (qualification + kanban moves)
     if (phase === "sdr") {
       if (shouldSchedule && leadId) {
-        const targetPosition = 6;
-        const { data: columns } = await supabase.from("kanban_columns").select("id")
-          .eq("company_id", companyId).order("position", { ascending: true }).limit(targetPosition + 1);
-        if (columns && columns.length > targetPosition) {
-          await supabase.from("leads").update({ kanban_column_id: columns[targetPosition].id, status: "qualified" }).eq("id", leadId);
+        const scheduledColumn = await getDefaultBoardColumn(supabase, companyId, { name: "Agendado" })
+          || await getDefaultBoardColumn(supabase, companyId, { position: 6 });
+        if (scheduledColumn?.id) {
+          await supabase.from("leads").update({ kanban_column_id: scheduledColumn.id, status: "qualified" }).eq("id", leadId);
         }
         if (!qualificationResult) {
           await supabase.from("lead_summaries").insert({
@@ -1674,15 +1718,13 @@ REGRAS: NÃO cite número de processo, tribunal, nem termos técnicos. NÃO inve
           });
 
           if (!shouldSchedule) {
-            const { data: emAtCol } = await supabase.from("kanban_columns").select("id")
-              .eq("company_id", companyId).eq("position", 0).maybeSingle();
+            const emAtCol = await getDefaultBoardColumn(supabase, companyId, { position: 0 });
             if (emAtCol) {
               await supabase.from("leads").update({ kanban_column_id: emAtCol.id }).eq("id", leadId);
             }
           }
         } else if (qualificationResult.status === "not_qualified") {
-          const { data: lostColumn } = await supabase.from("kanban_columns").select("id")
-            .eq("company_id", companyId).eq("is_lost", true).maybeSingle();
+          const lostColumn = await getDefaultBoardColumn(supabase, companyId, { isLost: true });
           await supabase.from("leads").update({
             status: "lost", notes: `[IA - Não qualificado] ${qualificationResult.reason}`,
             ...scoreUpdate, ...(lostColumn ? { kanban_column_id: lostColumn.id } : {}),
@@ -2599,8 +2641,7 @@ REGRAS:
     let currentPhase = existingLead?.bot_agent_phase || "sdr";
 
     if (!leadId) {
-      const { data: firstColumn } = await supabase.from("kanban_columns").select("id")
-        .eq("company_id", companyId).order("position", { ascending: true }).limit(1).maybeSingle();
+      const firstColumn = await getDefaultBoardColumn(supabase, companyId, { position: 0 });
 
       const { data: newLead, error: leadError } = await supabase.from("leads").insert({
         company_id: companyId, name: senderName || `Lead ${cleanPhone}`,
@@ -2621,8 +2662,7 @@ REGRAS:
         .eq("lead_id", leadId).eq("status", "pending");
 
       if (existingLead?.status === "new") {
-        const { data: emAtendimentoCol } = await supabase.from("kanban_columns").select("id")
-          .eq("company_id", companyId).eq("position", 0).maybeSingle();
+        const emAtendimentoCol = await getDefaultBoardColumn(supabase, companyId, { position: 0 });
         if (emAtendimentoCol) {
           await supabase.from("leads").update({ kanban_column_id: emAtendimentoCol.id, status: "contacted" }).eq("id", leadId);
         }
