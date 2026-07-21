@@ -1,0 +1,1 @@
+ALTER TABLE public.leads ADD COLUMN IF NOT EXISTS urgency_alerted_at TIMESTAMPTZ;

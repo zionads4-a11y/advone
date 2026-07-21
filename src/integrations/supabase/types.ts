@@ -2880,6 +2880,7 @@ export type Database = {
           status: Database["public"]["Enums"]["lead_status"]
           tipo_caso_detalhado: string | null
           updated_at: string
+          urgency_alerted_at: string | null
           utm_campaign: string | null
           utm_content: string | null
           utm_medium: string | null
@@ -2950,6 +2951,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["lead_status"]
           tipo_caso_detalhado?: string | null
           updated_at?: string
+          urgency_alerted_at?: string | null
           utm_campaign?: string | null
           utm_content?: string | null
           utm_medium?: string | null
@@ -3020,6 +3022,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["lead_status"]
           tipo_caso_detalhado?: string | null
           updated_at?: string
+          urgency_alerted_at?: string | null
           utm_campaign?: string | null
           utm_content?: string | null
           utm_medium?: string | null
