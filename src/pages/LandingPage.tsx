@@ -938,10 +938,12 @@ export default function LandingPage() {
                 <div className="mb-6">
                   <h3 className="text-xl font-bold mb-2 text-[hsl(153,60%,45%)]">Escritório organizado de verdade</h3>
                   <div className="mt-4 flex items-baseline gap-1">
-                    <span className="text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 597</span>
+                    <span className="text-2xl font-bold text-[hsl(220,10%,60%)]">+</span>
+                    <span className="text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 397</span>
                     <span className="text-sm text-[hsl(220,10%,60%)]">/mês</span>
                   </div>
-                  <p className="mt-2 text-sm text-[hsl(220,10%,60%)]">Para escritórios que precisam de processo e time alinhado.</p>
+                  <p className="mt-1 text-xs text-[hsl(153,60%,45%)] font-semibold">upgrade do AdvOne IA</p>
+                  <p className="mt-2 text-sm text-[hsl(220,10%,60%)]">Adicione CRM, pipeline e gestão de equipe em cima do seu plano IA.</p>
                 </div>
 
                 <ul className="mb-8 flex-1 space-y-3">
