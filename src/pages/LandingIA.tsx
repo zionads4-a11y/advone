@@ -568,7 +568,7 @@ export default function LandingIA() {
                       <span className="text-muted-foreground">/mês</span>
                     </div>
                     <div className="mt-1 text-xs text-muted-foreground">
-                      no plano anual · R$ 647/mês no semestral · R$ 797/mês no mensal
+                      no plano anual · R$ 697/mês no semestral · R$ 797/mês no mensal
                     </div>
                   </div>
 
