@@ -21,7 +21,7 @@ interface Fields {
   office_state: string;
   office_cep: string;
   // Advogado(a) responsável
-  lawyer_title: "Dra." | "Dr.";
+  lawyer_title: "Dra." | "Dr." | "Dr.(a)";
   lawyer_name: string;
   lawyer_oab: string;
   lawyer_oab_uf: string;
