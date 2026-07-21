@@ -2736,10 +2736,32 @@ REGRAS:
           // Dispara só uma vez por lead
           const alreadyAlerted = !!(leadRow as any)?.urgency_alerted_at;
           if (!alreadyAlerted) {
-            await supabase.from("leads").update({
+            // Descobre a coluna "Urgente" do board padrão da empresa
+            let urgentColumnId: string | null = null;
+            try {
+              const { data: defBoard } = await supabase
+                .from("kanban_boards")
+                .select("id")
+                .eq("company_id", companyId)
+                .eq("is_default", true)
+                .maybeSingle();
+              if (defBoard?.id) {
+                const { data: urgCol } = await supabase
+                  .from("kanban_columns")
+                  .select("id")
+                  .eq("board_id", defBoard.id)
+                  .eq("is_urgent", true)
+                  .maybeSingle();
+                urgentColumnId = urgCol?.id || null;
+              }
+            } catch (_) { /* ignore */ }
+
+            const urgentUpdate: Record<string, any> = {
               case_urgency: "alta",
               urgency_alerted_at: new Date().toISOString(),
-            }).eq("id", leadId);
+            };
+            if (urgentColumnId) urgentUpdate.kanban_column_id = urgentColumnId;
+            await supabase.from("leads").update(urgentUpdate).eq("id", leadId);
 
             const alertPhoneRaw = String(
               (config as any)?.client_support_responsible_phone || config.alert_whatsapp || ""
