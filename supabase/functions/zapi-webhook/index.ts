@@ -3058,9 +3058,32 @@ REGRAS INVIOLÁVEIS PARA ESTE CONTATO:
             const splitMessages = splitIntoNaturalMessages(aiReply);
             console.log(`[${effectivePhase}] Sending ${splitMessages.length} message(s) to:`, cleanPhone);
 
+            // 🛡️ ANTI-DUPLICATA (chunk-level): busca últimas 12 mensagens outgoing dos últimos 3min
+            // pra evitar mandar chunk idêntico quando 2 webhooks correm em paralelo.
+            const _threeMinAgo = new Date(Date.now() - 3 * 60 * 1000).toISOString();
+            const { data: _recentOut } = leadId
+              ? await supabase
+                  .from("whatsapp_messages")
+                  .select("message_text")
+                  .eq("lead_id", leadId)
+                  .eq("direction", "outgoing")
+                  .gte("timestamp", _threeMinAgo)
+                  .order("timestamp", { ascending: false })
+                  .limit(12)
+              : { data: [] as any[] };
+            const _normalize = (s: string) => (s || "").trim().toLowerCase().replace(/\s+/g, " ");
+            const _sentRecently = new Set<string>((_recentOut || []).map((m: any) => _normalize(m.message_text)));
+
             for (let i = 0; i < splitMessages.length; i++) {
               const chunk = splitMessages[i].trim();
               if (!chunk) continue;
+
+              const chunkKey = _normalize(chunk);
+              if (_sentRecently.has(chunkKey)) {
+                console.log(`[${effectivePhase}] Skipping duplicate chunk to ${cleanPhone}:`, chunk.slice(0, 60));
+                continue;
+              }
+              _sentRecently.add(chunkKey);
 
               const baseDelay = 2000;
               const perChar = 40; // ms por caractere (~25 WPM)
