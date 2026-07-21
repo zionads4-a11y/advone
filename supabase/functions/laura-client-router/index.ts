@@ -260,13 +260,25 @@ ${clientContext}`;
             const cid = args.client_lead_id || clientLeadId;
             const { data: procs } = await supabase
               .from("monitored_processes")
-              .select("numero_cnj, last_movement_text, last_movement_date, situacao")
+              .select("id, numero_cnj, classe, assunto, tribunal_sigla, data_ultima_movimentacao")
               .eq("company_id", body.company_id)
               .eq("lead_id", cid);
             if (!procs?.length) {
               toolResult = { ok: true, monitored: false };
             } else {
-              toolResult = { ok: true, monitored: true, processos: procs };
+              // Busca últimas 5 movimentações de cada processo para a IA resumir em linguagem simples
+              const enriched = await Promise.all(
+                procs.map(async (p: any) => {
+                  const { data: movs } = await supabase
+                    .from("process_movements")
+                    .select("movement_date, movement_type, content")
+                    .eq("monitored_process_id", p.id)
+                    .order("movement_date", { ascending: false })
+                    .limit(5);
+                  return { ...p, ultimas_movimentacoes: movs ?? [] };
+                }),
+              );
+              toolResult = { ok: true, monitored: true, processos: enriched };
             }
           } else if (name === "request_lawyer") {
             const cid = args.client_lead_id || clientLeadId;
