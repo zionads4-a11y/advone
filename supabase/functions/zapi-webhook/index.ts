@@ -2714,6 +2714,74 @@ REGRAS:
       await supabase.from("leads").update({ is_unread: true }).eq("id", leadId);
     }
 
+    // ===== DETECÇÃO DE CASOS URGENTES =====
+    // Assédio moral/sexual, prisão em flagrante, ameaça grave → alerta imediato ao responsável do escritório.
+    if (leadId && messageText && messageText.length > 3) {
+      try {
+        const normalized = messageText
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "");
+        const URGENT_PATTERNS: { key: string; label: string; regex: RegExp }[] = [
+          { key: "assedio_sexual", label: "Assédio sexual", regex: /\bassedi[oa]\s+sexual\b|\bimportunacao\s+sexual\b|\bestupr[oa]\b|\babus[oa]\s+sexual\b/ },
+          { key: "assedio_moral", label: "Assédio moral", regex: /\bassedi[oa]\s+moral\b|\bhumilha(cao|do|da)\b.*\b(trabalho|chefe|patrao)\b|\bperseguica[oa]\b.*\b(trabalho|chefe)\b/ },
+          { key: "preso_flagrante", label: "Prisão / flagrante", regex: /\b(preso|presa|prende(ram|u)|flagrante|delegacia|audiencia de custodia|cadeia|detid[oa])\b/ },
+          { key: "ameaca_grave", label: "Ameaça / violência", regex: /\bameaca(ndo|ram|r)?\b|\bameaca de morte\b|\bviolencia domestica\b|\bmedida protetiva\b|\bmaria da penha\b/ },
+        ];
+        const hit = URGENT_PATTERNS.find(p => p.regex.test(normalized));
+        if (hit) {
+          const { data: leadRow } = await supabase.from("leads")
+            .select("id, name, phone, whatsapp, case_urgency, urgency_alerted_at")
+            .eq("id", leadId).maybeSingle();
+          // Dispara só uma vez por lead
+          const alreadyAlerted = !!(leadRow as any)?.urgency_alerted_at;
+          if (!alreadyAlerted) {
+            await supabase.from("leads").update({
+              case_urgency: "alta",
+              urgency_alerted_at: new Date().toISOString(),
+            }).eq("id", leadId);
+
+            const alertPhoneRaw = String(
+              (config as any)?.client_support_responsible_phone || config.alert_whatsapp || ""
+            ).replace(/\D/g, "");
+            if (alertPhoneRaw) {
+              try {
+                const SERVER_URL = "https://ziondigital.uazapi.com";
+                const ADMIN_TOKEN = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+                const alertHeaders: Record<string, string> = { "Content-Type": "application/json" };
+                if (ADMIN_TOKEN) alertHeaders["admintoken"] = ADMIN_TOKEN;
+                const instanceParam = encodeURIComponent(config.zapi_instance_id || "");
+                const tokenParam = encodeURIComponent(config.zapi_token || config.zapi_instance_id || "");
+                const snippet = messageText.slice(0, 240);
+                const alertMessage =
+`🚨 *CASO URGENTE DETECTADO* 🚨
+
+⚠️ Categoria: *${hit.label}*
+👤 Nome: ${leadRow?.name || senderName || "Lead sem nome"}
+📱 WhatsApp: ${leadRow?.phone || leadRow?.whatsapp || cleanPhone}
+
+💬 Mensagem do lead:
+"${snippet}"
+
+⏰ Entre em contato *AGORA* — este tipo de caso exige atendimento imediato.`;
+                await fetch(`${SERVER_URL}/send/text?instance=${instanceParam}&token=${tokenParam}`, {
+                  method: "POST", headers: alertHeaders,
+                  body: JSON.stringify({ number: alertPhoneRaw, text: alertMessage }),
+                });
+                console.log(`[URGENT] Alerta enviado (${hit.key}) para ${alertPhoneRaw} sobre lead ${leadId}`);
+              } catch (sendErr) {
+                console.error("[URGENT] Falha ao enviar alerta:", sendErr);
+              }
+            } else {
+              console.warn("[URGENT] Nenhum alert_whatsapp configurado — caso urgente não notificado.");
+            }
+          }
+        }
+      } catch (uErr) {
+        console.error("[URGENT] Erro na detecção:", uErr);
+      }
+    }
+
     // ===== APLICA OCR ESTRUTURADO NO LEAD + ABRE REVISÃO PELO OPERADOR =====
     const RECOGNIZED_TYPES = ["rg", "cnh", "ctps", "holerite"];
     if (leadId && ocrStructured && RECOGNIZED_TYPES.includes(ocrStructured.doc_type) && ocrStructured.confidence >= 0.4) {
