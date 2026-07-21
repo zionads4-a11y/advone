@@ -38,7 +38,7 @@ export default function ProcessSearch() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [result, setResult] = useState<ProcessResult | null>(null);
-  const { profile } = useAuth();
+  const { user } = useAuth();
 
   async function callFn(save: boolean) {
     if (!cnj.trim()) {
@@ -51,7 +51,7 @@ export default function ProcessSearch() {
       let company_id: string | undefined;
       if (save) {
         const { data } = await supabase.from("client_companies")
-          .select("company_id").eq("user_id", profile?.user_id).maybeSingle();
+          .select("company_id").eq("user_id", user?.id ?? "").maybeSingle();
         company_id = data?.company_id;
         if (!company_id) {
           toast.error("Nenhum escritório vinculado ao seu usuário");
