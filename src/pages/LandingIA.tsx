@@ -134,7 +134,7 @@ const faq = [
   },
   {
     q: "Esse plano serve para escritório grande?",
-    a: "O AdvOne IA (R$ 497/mês no anual · R$ 647 no semestral · R$ 797 no mensal) é otimizado para advogados solo e escritórios pequenos (até 3 advogados). Para times maiores que precisam de CRM, pipeline e gestão de equipe completa, recomendamos o AdvOne Complete (R$ 997/mês no anual · R$ 1.297 no mensal).",
+    a: "O AdvOne IA (R$ 497/mês no anual · R$ 697 no semestral · R$ 797 no mensal) é otimizado para advogados solo e escritórios pequenos (até 3 advogados). Quer CRM, pipeline e gestão de equipe? Faça upgrade do módulo Gestão por apenas +R$ 397/mês. Para times maiores, temos o AdvOne Complete (R$ 997/mês no anual · R$ 1.297 no mensal).",
   },
 ];
 
