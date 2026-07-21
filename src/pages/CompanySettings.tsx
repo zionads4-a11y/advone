@@ -263,12 +263,6 @@ export default function CompanySettings() {
 
 
 
-      {!hasMonitoring && company && (
-        <MonitoringPackagePurchase
-          companyId={company.id}
-          onPurchaseComplete={() => fetchCompany(company.id)}
-        />
-      )}
     </div>
   );
 }
