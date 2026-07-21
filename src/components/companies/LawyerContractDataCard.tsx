@@ -21,7 +21,7 @@ interface Fields {
   office_state: string;
   office_cep: string;
   // Advogado(a) responsável
-  lawyer_title: "Dra." | "Dr.";
+  lawyer_title: "Dra." | "Dr." | "Dr.(a)";
   lawyer_name: string;
   lawyer_oab: string;
   lawyer_oab_uf: string;
@@ -39,7 +39,7 @@ const empty: Fields = {
   office_city: "",
   office_state: "",
   office_cep: "",
-  lawyer_title: "Dra.",
+  lawyer_title: "Dr.(a)",
   lawyer_name: "",
   lawyer_oab: "",
   lawyer_oab_uf: "",
@@ -74,7 +74,7 @@ export function LawyerContractDataCard({ companyId }: Props) {
           office_city: (data as any).office_city || "",
           office_state: (data as any).office_state || "",
           office_cep: (data as any).office_cep || "",
-          lawyer_title: ((data as any).lawyer_title === "Dr." ? "Dr." : "Dra.") as "Dra." | "Dr.",
+          lawyer_title: (["Dra.", "Dr.", "Dr.(a)"].includes((data as any).lawyer_title) ? (data as any).lawyer_title : "Dr.(a)") as "Dra." | "Dr." | "Dr.(a)",
           lawyer_name: (data as any).lawyer_name || "",
           lawyer_oab: (data as any).lawyer_oab || "",
           lawyer_oab_uf: (data as any).lawyer_oab_uf || "",
@@ -168,7 +168,15 @@ export function LawyerContractDataCard({ companyId }: Props) {
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1.5 sm:col-span-2">
                   <Label className="text-xs">Tratamento (usado nos prompts do bot)</Label>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={form.lawyer_title === "Dr.(a)" ? "default" : "outline"}
+                      onClick={() => set("lawyer_title", "Dr.(a)")}
+                    >
+                      Dr.(a) (neutro)
+                    </Button>
                     <Button
                       type="button"
                       size="sm"
