@@ -2642,8 +2642,7 @@ REGRAS:
     let currentPhase = existingLead?.bot_agent_phase || "sdr";
 
     if (!leadId) {
-      const { data: firstColumn } = await supabase.from("kanban_columns").select("id")
-        .eq("company_id", companyId).order("position", { ascending: true }).limit(1).maybeSingle();
+      const firstColumn = await getDefaultBoardColumn(supabase, companyId, { position: 0 });
 
       const { data: newLead, error: leadError } = await supabase.from("leads").insert({
         company_id: companyId, name: senderName || `Lead ${cleanPhone}`,
@@ -2664,8 +2663,7 @@ REGRAS:
         .eq("lead_id", leadId).eq("status", "pending");
 
       if (existingLead?.status === "new") {
-        const { data: emAtendimentoCol } = await supabase.from("kanban_columns").select("id")
-          .eq("company_id", companyId).eq("position", 0).maybeSingle();
+        const emAtendimentoCol = await getDefaultBoardColumn(supabase, companyId, { position: 0 });
         if (emAtendimentoCol) {
           await supabase.from("leads").update({ kanban_column_id: emAtendimentoCol.id, status: "contacted" }).eq("id", leadId);
         }
