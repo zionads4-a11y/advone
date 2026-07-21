@@ -558,17 +558,23 @@ export default function LandingIA() {
             <Reveal delay={120}>
               <Card className="h-full border-border/60 bg-card/40 hover:border-primary/20 transition-all">
                 <CardContent className="space-y-6 p-8 flex flex-col h-full">
-                  <div className="text-center">
-                    <div className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  <div>
+                    <div className="text-center text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-4">
                       ADVONE IA
                     </div>
-                    <div className="mt-2 flex items-baseline justify-center gap-1">
-                      <span className="text-3xl font-bold">R$</span>
-                      <span className="font-display text-5xl font-bold">497</span>
-                      <span className="text-muted-foreground">/mês</span>
-                    </div>
-                    <div className="mt-1 text-xs text-muted-foreground">
-                      no plano anual · R$ 697/mês no semestral · R$ 797/mês no mensal
+                    <div className="space-y-2">
+                      <div className="flex items-baseline justify-between rounded-lg border border-border bg-muted/30 px-3 py-2">
+                        <span className="text-xs uppercase tracking-wide text-muted-foreground">Mensal</span>
+                        <span className="text-lg font-bold">R$ 797<span className="text-xs text-muted-foreground font-normal">/mês</span></span>
+                      </div>
+                      <div className="flex items-baseline justify-between rounded-lg border border-border bg-muted/30 px-3 py-2">
+                        <span className="text-xs uppercase tracking-wide text-muted-foreground">Semestral</span>
+                        <span className="text-lg font-bold">R$ 697<span className="text-xs text-muted-foreground font-normal">/mês</span></span>
+                      </div>
+                      <div className="flex items-baseline justify-between rounded-lg border border-primary/40 bg-primary/10 px-3 py-2">
+                        <span className="text-xs uppercase tracking-wide text-primary font-semibold">Anual · melhor oferta</span>
+                        <span className="text-lg font-bold text-primary">R$ 497<span className="text-xs font-normal">/mês</span></span>
+                      </div>
                     </div>
                   </div>
 
