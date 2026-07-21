@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, User, FileText, Briefcase, CalendarClock, Wallet, MessageSquare, StickyNote, Phone, Mail, MapPin, Bell, Search } from "lucide-react";
 import { ClientPersonalDataForm, ClientData } from "@/components/clients/ClientPersonalDataForm";
-import { CpfProcessLookup } from "@/components/clients/CpfProcessLookup";
+
 import { ClientGeneratedDocuments } from "@/components/clients/ClientGeneratedDocuments";
 import { ClientUploadedDocuments } from "@/components/clients/ClientUploadedDocuments";
 import { ClientAgreements } from "@/components/clients/ClientAgreements";
