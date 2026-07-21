@@ -65,6 +65,7 @@ import Security from "./pages/Security";
 import Tasks from "./pages/Tasks";
 import Boards from "./pages/Boards";
 import WebhookLogs from "./pages/WebhookLogs";
+import Obrigado from "./pages/Obrigado";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
