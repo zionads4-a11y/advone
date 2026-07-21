@@ -168,8 +168,6 @@ const App = () => (
               <Route path="/modelos-documentos" element={<DocumentTemplates />} />
               <Route path="/processos" element={<Cases />} />
               <Route path="/processos-kanban" element={<ProcessKanban />} />
-              <Route path="/monitoramento" element={<ProcessMonitoring />} />
-              <Route path="/busca-processos" element={<ProcessSearch />} />
               <Route path="/assinatura" element={<Subscription />} />
               <Route 
                 path="/webhook-logs" 
