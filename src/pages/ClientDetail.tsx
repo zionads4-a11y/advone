@@ -147,7 +147,7 @@ export default function ClientDetail() {
           <TabsTrigger value="dados"><User className="h-4 w-4 mr-1" />Dados</TabsTrigger>
           <TabsTrigger value="documentos"><FileText className="h-4 w-4 mr-1" />Documentos</TabsTrigger>
           <TabsTrigger value="processos"><Briefcase className="h-4 w-4 mr-1" />Processos</TabsTrigger>
-          <TabsTrigger value="cpf-lookup"><Search className="h-4 w-4 mr-1" />Consulta CPF</TabsTrigger>
+          
           <TabsTrigger value="agenda"><CalendarClock className="h-4 w-4 mr-1" />Agenda</TabsTrigger>
           <TabsTrigger value="financeiro"><Wallet className="h-4 w-4 mr-1" />Financeiro</TabsTrigger>
           <TabsTrigger value="notas"><StickyNote className="h-4 w-4 mr-1" />Notas</TabsTrigger>
