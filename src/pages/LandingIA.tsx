@@ -612,12 +612,13 @@ export default function LandingIA() {
                       ADVONE GESTÃO
                     </div>
                     <div className="mt-2 flex items-baseline justify-center gap-1">
+                      <span className="text-2xl font-bold text-muted-foreground">+</span>
                       <span className="text-3xl font-bold">R$</span>
-                      <span className="font-display text-5xl font-bold">597</span>
+                      <span className="font-display text-5xl font-bold">397</span>
                       <span className="text-muted-foreground">/mês</span>
                     </div>
                     <div className="mt-1 text-xs text-primary font-bold">
-                      Escritório organizado de verdade
+                      upgrade do AdvOne IA
                     </div>
                   </div>
 
