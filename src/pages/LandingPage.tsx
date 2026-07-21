@@ -190,7 +190,7 @@ export default function LandingPage() {
                 className="mb-6 inline-flex items-center gap-2 rounded-full border border-[hsl(153,85%,50%)]/40 bg-[hsl(153,85%,50%)]/[0.08] px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-[hsl(153,85%,60%)] animate-fade-in"
               >
                 <span className="neon-dot h-2 w-2 rounded-full" />
-                A plataforma que atende, capta e gerencia por você
+                A plataforma que atende, recepciona leads e clientes e gerencia por você
               </div>
               <h1
                 className="mb-6 text-2xl font-bold leading-tight tracking-tight sm:text-3xl md:text-5xl lg:text-6xl animate-slide-up"
