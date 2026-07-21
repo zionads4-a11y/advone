@@ -65,6 +65,7 @@ import Security from "./pages/Security";
 import Tasks from "./pages/Tasks";
 import Boards from "./pages/Boards";
 import WebhookLogs from "./pages/WebhookLogs";
+import Obrigado from "./pages/Obrigado";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
@@ -99,6 +100,7 @@ const App = () => (
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/sobre" element={<About />} />
             <Route path="/contato" element={<Contact />} />
+            <Route path="/obrigado" element={<Obrigado />} />
             <Route path="/seguranca" element={<Security />} />
             <Route
               element={

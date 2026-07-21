@@ -53,26 +53,27 @@ export function DemoRequestDialog({ trigger, source = "landing" }: Props) {
     }
   }, [open]);
 
-  // Escuta eventos do Calendly e dispara "Lead" APENAS quando o agendamento for concluído
+  // Quando o Calendly confirma o agendamento (via postMessage no iframe), redireciona para /obrigado.
+  // A página /obrigado é quem dispara o Pixel "Lead" — evento otimizado por URL de destino.
   useEffect(() => {
     if (!open || step !== 2) return;
-    const isCalendlyEvent = (e: MessageEvent) =>
-      typeof e.data === "object" && e.data && String(e.data.event || "").indexOf("calendly") === 0;
     const handler = (e: MessageEvent) => {
-      if (!isCalendlyEvent(e)) return;
-      if (e.data.event === "calendly.event_scheduled") {
-        trackMetaEvent("Lead", {
-          email: form.email || undefined,
-          phone: form.phone,
-          contentName: "Calendly - Agendamento concluído",
-          customData: { source, profile: form.profile },
-        });
-        toast.success("Agendamento confirmado! Nosso time te espera. 🎉");
+      const data: any = e.data;
+      if (typeof data !== "object" || !data) return;
+      if (String(data.event || "").indexOf("calendly") !== 0) return;
+      if (data.event === "calendly.event_scheduled") {
+        const params = new URLSearchParams();
+        if (form.full_name) params.set("name", form.full_name);
+        if (form.email) params.set("email", form.email);
+        if (form.phone) params.set("phone", form.phone);
+        window.location.href = `/obrigado?${params.toString()}`;
       }
     };
     window.addEventListener("message", handler);
     return () => window.removeEventListener("message", handler);
-  }, [open, step, form, source]);
+  }, [open, step, form]);
+
+
 
   const goNext = () => {
     if (step === 0) {
