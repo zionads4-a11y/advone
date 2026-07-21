@@ -72,7 +72,10 @@ Assim que você identificar com CLAREZA a área jurídica do caso do lead (traba
 6. É proibido usar frases como "Você quer falar sobre X, certo?" ou "Pode me contar um pouco mais?" quando o assunto já foi identificado.
 7. Fluxo de agendamento correto: turno → check_availability → oferecer horário → se o lead aceitar, pedir/registrar nome completo se ainda faltar → schedule_appointment.
 8. 🚨 ANTI-TRAVAMENTO: NUNCA envie mensagem só de reforço/elogio ("Ótimo!", "Perfeito", "Isso ajuda"). Toda mensagem tem que ter próxima pergunta OU proposta de agendamento na MESMA bolha. Máx. 4 perguntas de qualificação — depois disso, vá direto para "Podemos já deixar essa conversa agendada?".
-9. 🚨 CASO FORA DO CATÁLOGO (Usucapião, Imobiliário, Contratos, Consumidor, Sucessões, Ambiental, Empresarial genérico ou qualquer tese não listada): faça no máximo 3 perguntas genéricas (detalhes+há quanto tempo, documentos, urgência) e AVANCE direto para agendamento. Não fique explorando indefinidamente.`;
+9. 🚨 CASO FORA DO CATÁLOGO (Usucapião, Imobiliário, Contratos, Consumidor, Sucessões, Ambiental, Empresarial genérico ou qualquer tese não listada): faça no máximo 3 perguntas genéricas (detalhes+há quanto tempo, documentos, urgência) e AVANCE direto para agendamento. Não fique explorando indefinidamente.
+10. 🚫 PROIBIDO MENUS NUMERADOS (1️⃣ 2️⃣ 3️⃣, "digite 1", "responda com o número"). Se algum bloco de FLUXOS abaixo trouxer opções numeradas, REESCREVA como pergunta conversacional aberta antes de enviar. Ex.: em vez de "1️⃣ Renegociar 2️⃣ Execução 3️⃣ Revisar juros", pergunte "O que está pegando mais no seu caso: renegociar a dívida, alguma execução em andamento, ou revisar os juros?". Laura é 100% conversacional, nunca URA.
+11. 🛑 AGENDAMENTO JÁ CONFIRMADO — Se já existe um "Agendamento confirmado" seu no histórico recente (últimas mensagens) para este lead: NÃO chame schedule_appointment de novo, NÃO reenvie o bloco de confirmação. Se o lead perguntar algo depois de confirmado ("tem como agendar mais cedo?", "posso mudar?", "qual endereço?", "deixa eu fazer uma pergunta"), RESPONDA a pergunta de forma direta. Só chame schedule_appointment novamente se o lead pedir EXPLICITAMENTE um horário/data DIFERENTE E você tiver verificado disponibilidade com check_availability primeiro.
+12. 🔍 ANALISE ANTES DE AGENDAR — Antes de propor horário, você precisa saber: (a) o problema concreto do lead, (b) há quanto tempo, (c) se tem algum documento/prova. Não pule pra "qual turno prefere?" na 3ª mensagem sem entender o caso — isso desumaniza. Se o lead trouxe pouco contexto ("descontos em folha", "problema com banco"), pergunte UMA coisa concreta pra aprofundar antes do turno.`;
     return customPrompt + globalConversationFixes + modalidadeBlockGlobal + timeHeader + lostBlock + routingBlock + (flowsBlock ? `\n[FLUXOS]\n${flowsBlock}` : "") + (triageBlock ? `\n[TRIAGEM]\n${triageBlock}` : "");
   }
 
@@ -138,8 +141,11 @@ Assim que você identificar com CLAREZA a área jurídica do caso do lead (traba
 15. 🚨 ANTI-TRAVAMENTO — Você NUNCA pode "morrer" no meio da conversa. TODA mensagem sua tem que empurrar o lead para a próxima etapa (pergunta OU gatilho OU agendamento). É PROIBIDO enviar mensagem só de reforço/elogio ("Ótimo começo!", "Isso ajuda muito", "Perfeito") sem já emendar a próxima pergunta ou proposta de agendamento na MESMA mensagem.
 16. 🚨 LIMITE DE QUALIFICAÇÃO — Máximo 4 perguntas de qualificação. Após a 4ª resposta do lead (ou 3ª, se o caso já estiver claro), PARE de perguntar e vá para: Gatilho de valor breve + "Podemos já deixar essa conversa agendada?" + agendamento.
 17. 🚨 CASO FORA DO CATÁLOGO (Usucapião, Imobiliário, Contratos, Consumidor, Sucessões, Ambiental, Empresarial genérico, ou qualquer tese não listada nos FLUXOS): use mini-fluxo genérico com no máx. 3 perguntas — (1) detalhes/há quanto tempo, (2) documentos que tem em mãos, (3) urgência/prazo — e AVANCE direto para agendamento. NÃO fique explorando indefinidamente.
-18. 🚨 PERGUNTA + AGENDAMENTO — Se o lead fez uma pergunta na ÚLTIMA mensagem (ex.: "quanto custa?", "preciso levar o quê?", "é presencial?", "vai demorar?"), você é OBRIGADA a responder essa pergunta de forma curta ANTES de qualquer confirmação de agendamento. Nunca ignore. Depois de responder, emende a proposta/confirmação de horário na MESMA mensagem.
+18. 🚨 PERGUNTA + AGENDAMENTO — Se o lead fez uma pergunta na ÚLTIMA mensagem (ex.: "quanto custa?", "preciso levar o quê?", "é presencial?", "vai demorar?", "deixa eu fazer uma pergunta"), você é OBRIGADA a responder essa pergunta de forma curta ANTES de qualquer confirmação de agendamento. Nunca ignore. Depois de responder, emende a proposta/confirmação de horário na MESMA mensagem.
 19. 🩺 REFORÇO DA REUNIÃO — Sempre que confirmar ou propor agendamento, deixe claro que na conversa com o(a) Dr(a). o caso será *analisado em detalhes*, todas as dúvidas serão tiradas e o cliente receberá orientação sobre os próximos passos. Use frases como "no dia, o(a) Dr(a). vai analisar todo o seu caso com calma".
+20. 🚫 PROIBIDO MENUS NUMERADOS (1️⃣ 2️⃣ 3️⃣ 4️⃣ 5️⃣, "digite 1", "responda com o número da opção"). Laura é 100% conversacional — se algum FLUXO abaixo trouxer opções numeradas, REESCREVA como pergunta aberta antes de enviar. Ex.: "O que está pegando mais: renegociar a dívida, uma execução em curso, ou revisar os juros do contrato?".
+21. 🛑 AGENDAMENTO JÁ CONFIRMADO — Se você já enviou um "Agendamento confirmado" para este lead no histórico recente: NÃO chame schedule_appointment de novo, NÃO reenvie o bloco. Se o lead perguntar algo depois ("tem como mais cedo?", "posso mudar?", "deixa eu fazer uma pergunta"), RESPONDA a pergunta primeiro. Só re-agende se o lead pedir EXPLICITAMENTE outro horário/data E após check_availability.
+22. 🔍 ANALISE O CASO ANTES DE AGENDAR — Não pule pra "qual turno prefere?" antes de ter pelo menos: o problema concreto, há quanto tempo, se tem algum documento. Se o lead trouxe pouco ("descontos em folha", "problema no banco"), pergunte UMA coisa concreta pra aprofundar antes de partir pro horário. Reunião marcada sem contexto é reunião perdida.
 [FLUXO CONVERSACIONAL]
 1. Cumprimente e descubra o nome naturalmente (não como formulário).
 2. Se já é cliente → lookup_existing_client. Se caso novo → passo 3.
@@ -1172,7 +1178,30 @@ Antes de responder:
           const _confirmDate = sanitizeDate(args.date, timezone);
           const _confirmTime = args.time || "10:00";
           const _confirmDateBR = formatDateDMY(_confirmDate);
-          replyText = `Perfeito, ${leadCurrentName.split(" ")[0]} 🙂\n\n✅ *Agendamento confirmado*\n📅 ${_confirmDateBR}\n⏰ ${_confirmTime}\n👤 ${leadCurrentName}\n\nNo dia e horário marcados, o(a) Dr(a). vai entrar em contato com você para *analisar todo o seu caso com calma*, tirar todas as suas dúvidas e te orientar sobre os melhores caminhos.\n\nSe puder, deixe em mãos os documentos que você já mencionou — isso agiliza bastante a análise. Qualquer coisa antes disso, é só me chamar por aqui 💙`;
+
+          // 🛡️ ANTI-DUPLICATA: se já enviamos "Agendamento confirmado" com MESMA data/hora nos últimos 20min,
+          // não reenvia o bloco — o modelo cai numa resposta curta ("já tá marcado, qualquer coisa me chama").
+          let _skipConfirmationBlock = false;
+          if (leadId) {
+            const _twentyMinAgo = new Date(Date.now() - 20 * 60 * 1000).toISOString();
+            const { data: _recentConfirms } = await supabase
+              .from("whatsapp_messages")
+              .select("message_text")
+              .eq("lead_id", leadId)
+              .eq("direction", "outgoing")
+              .gte("timestamp", _twentyMinAgo)
+              .ilike("message_text", "%Agendamento confirmado%")
+              .order("timestamp", { ascending: false })
+              .limit(3);
+            _skipConfirmationBlock = (_recentConfirms || []).some((m: any) => {
+              const t = (m.message_text || "");
+              return t.includes(_confirmDateBR) && t.includes(_confirmTime);
+            });
+          }
+
+          replyText = _skipConfirmationBlock
+            ? `Isso mesmo, ${leadCurrentName.split(" ")[0]} 🙂 Seu horário de ${_confirmDateBR} às ${_confirmTime} continua confirmado. Qualquer coisa antes disso, é só me chamar por aqui 💙`
+            : `Perfeito, ${leadCurrentName.split(" ")[0]} 🙂\n\n✅ *Agendamento confirmado*\n📅 ${_confirmDateBR}\n⏰ ${_confirmTime}\n👤 ${leadCurrentName}\n\nNo dia e horário marcados, o(a) Dr(a). vai entrar em contato com você para *analisar todo o seu caso com calma*, tirar todas as suas dúvidas e te orientar sobre os melhores caminhos.\n\nSe puder, deixe em mãos os documentos que você já mencionou — isso agiliza bastante a análise. Qualquer coisa antes disso, é só me chamar por aqui 💙`;
 
           if (leadId) {
             const appointmentDate = sanitizeDate(args.date, timezone);
@@ -3029,9 +3058,32 @@ REGRAS INVIOLÁVEIS PARA ESTE CONTATO:
             const splitMessages = splitIntoNaturalMessages(aiReply);
             console.log(`[${effectivePhase}] Sending ${splitMessages.length} message(s) to:`, cleanPhone);
 
+            // 🛡️ ANTI-DUPLICATA (chunk-level): busca últimas 12 mensagens outgoing dos últimos 3min
+            // pra evitar mandar chunk idêntico quando 2 webhooks correm em paralelo.
+            const _threeMinAgo = new Date(Date.now() - 3 * 60 * 1000).toISOString();
+            const { data: _recentOut } = leadId
+              ? await supabase
+                  .from("whatsapp_messages")
+                  .select("message_text")
+                  .eq("lead_id", leadId)
+                  .eq("direction", "outgoing")
+                  .gte("timestamp", _threeMinAgo)
+                  .order("timestamp", { ascending: false })
+                  .limit(12)
+              : { data: [] as any[] };
+            const _normalize = (s: string) => (s || "").trim().toLowerCase().replace(/\s+/g, " ");
+            const _sentRecently = new Set<string>((_recentOut || []).map((m: any) => _normalize(m.message_text)));
+
             for (let i = 0; i < splitMessages.length; i++) {
               const chunk = splitMessages[i].trim();
               if (!chunk) continue;
+
+              const chunkKey = _normalize(chunk);
+              if (_sentRecently.has(chunkKey)) {
+                console.log(`[${effectivePhase}] Skipping duplicate chunk to ${cleanPhone}:`, chunk.slice(0, 60));
+                continue;
+              }
+              _sentRecently.add(chunkKey);
 
               const baseDelay = 2000;
               const perChar = 40; // ms por caractere (~25 WPM)
