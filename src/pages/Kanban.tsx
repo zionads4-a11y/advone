@@ -99,6 +99,37 @@ export default function Kanban() {
     if (selectedCompanyId && selectedBoardId) fetchColumnsAndLeads();
   }, [selectedCompanyId, selectedBoardId]);
 
+  // Realtime: atualiza automaticamente quando leads/colunas mudam (ex: bot agenda)
+  useEffect(() => {
+    if (!selectedCompanyId || !selectedBoardId) return;
+    const channel = supabase
+      .channel(`kanban-${selectedCompanyId}-${selectedBoardId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "leads", filter: `company_id=eq.${selectedCompanyId}` },
+        (payload) => {
+          const newRow: any = (payload as any).new;
+          const oldRow: any = (payload as any).old;
+          if (payload.eventType === "INSERT" && newRow) {
+            setLeads((prev) => (prev.some((l) => l.id === newRow.id) ? prev : [newRow as Lead, ...prev]));
+          } else if (payload.eventType === "UPDATE" && newRow) {
+            setLeads((prev) => prev.map((l) => (l.id === newRow.id ? { ...l, ...newRow } as Lead : l)));
+          } else if (payload.eventType === "DELETE" && oldRow) {
+            setLeads((prev) => prev.filter((l) => l.id !== oldRow.id));
+          }
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "kanban_columns", filter: `board_id=eq.${selectedBoardId}` },
+        () => fetchColumnsAndLeads()
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [selectedCompanyId, selectedBoardId]);
+
   const fetchCompanies = async () => {
     const { data } = await supabase.from("companies").select("id, name").order("name");
     if (data && data.length > 0) {
