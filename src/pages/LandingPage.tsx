@@ -901,7 +901,7 @@ export default function LandingPage() {
                     <span className="text-sm text-[hsl(220,10%,60%)]">/mês</span>
                   </div>
                   <p className="mt-1 text-xs text-[hsl(153,60%,45%)] font-semibold">no plano anual (economize R$ 3.600/ano)</p>
-                  <p className="mt-2 text-sm text-[hsl(220,10%,60%)]">R$ 647/mês no semestral · R$ 797/mês no mensal. Para quem quer parar de perder lead no WhatsApp.</p>
+                  <p className="mt-2 text-sm text-[hsl(220,10%,60%)]">R$ 697/mês no semestral · R$ 797/mês no mensal. Para quem quer parar de perder lead no WhatsApp.</p>
                 </div>
 
                 <ul className="mb-8 flex-1 space-y-3">
