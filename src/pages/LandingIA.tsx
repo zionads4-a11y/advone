@@ -134,7 +134,7 @@ const faq = [
   },
   {
     q: "Esse plano serve para escritório grande?",
-    a: "O AdvOne IA (R$ 497/mês no anual · R$ 647 no semestral · R$ 797 no mensal) é otimizado para advogados solo e escritórios pequenos (até 3 advogados). Para times maiores que precisam de CRM, pipeline e gestão de equipe completa, recomendamos o AdvOne Complete (R$ 997/mês no anual · R$ 1.297 no mensal).",
+    a: "O AdvOne IA (R$ 497/mês no anual · R$ 697 no semestral · R$ 797 no mensal) é otimizado para advogados solo e escritórios pequenos (até 3 advogados). Quer CRM, pipeline e gestão de equipe? Faça upgrade do módulo Gestão por apenas +R$ 397/mês. Para times maiores, temos o AdvOne Complete (R$ 997/mês no anual · R$ 1.297 no mensal).",
   },
 ];
 
@@ -568,7 +568,7 @@ export default function LandingIA() {
                       <span className="text-muted-foreground">/mês</span>
                     </div>
                     <div className="mt-1 text-xs text-muted-foreground">
-                      no plano anual · R$ 647/mês no semestral · R$ 797/mês no mensal
+                      no plano anual · R$ 697/mês no semestral · R$ 797/mês no mensal
                     </div>
                   </div>
 
@@ -612,12 +612,13 @@ export default function LandingIA() {
                       ADVONE GESTÃO
                     </div>
                     <div className="mt-2 flex items-baseline justify-center gap-1">
+                      <span className="text-2xl font-bold text-muted-foreground">+</span>
                       <span className="text-3xl font-bold">R$</span>
-                      <span className="font-display text-5xl font-bold">597</span>
+                      <span className="font-display text-5xl font-bold">397</span>
                       <span className="text-muted-foreground">/mês</span>
                     </div>
                     <div className="mt-1 text-xs text-primary font-bold">
-                      Escritório organizado de verdade
+                      upgrade do AdvOne IA
                     </div>
                   </div>
 
