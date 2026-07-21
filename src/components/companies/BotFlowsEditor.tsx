@@ -101,7 +101,7 @@ export function BotFlowsEditor({ companyId, niche, officeName, disabled, onApply
       botName: (companyData as any)?.bot_name || undefined,
       botRoleDescription: (companyData as any)?.bot_role_description || undefined,
       sharedWhatsapp: !!(companyData as any)?.shared_whatsapp_number,
-      lawyerTitle: (companyData as any)?.lawyer_title === "Dr." ? "Dr." : "Dra.",
+      lawyerTitle: (["Dra.", "Dr.", "Dr.(a)"].includes((companyData as any)?.lawyer_title) ? (companyData as any).lawyer_title : "Dr.(a)"),
     });
 
     const { error } = await supabase
