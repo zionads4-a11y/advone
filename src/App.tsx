@@ -35,6 +35,7 @@ import Documents from "./pages/Documents";
 import DocumentTemplates from "./pages/DocumentTemplates";
 import Cases from "./pages/Cases";
 import ProcessKanban from "./pages/ProcessKanban";
+import ProcessSearch from "./pages/ProcessSearch";
 import Subscription from "./pages/Subscription";
 import FraudAlerts from "./pages/FraudAlerts";
 import AiUsageMonitor from "./pages/AiUsageMonitor";
@@ -168,6 +169,7 @@ const App = () => (
               <Route path="/modelos-documentos" element={<DocumentTemplates />} />
               <Route path="/processos" element={<Cases />} />
               <Route path="/processos-kanban" element={<ProcessKanban />} />
+              <Route path="/busca-processos" element={<ProcessSearch />} />
               <Route path="/assinatura" element={<Subscription />} />
               <Route 
                 path="/webhook-logs" 

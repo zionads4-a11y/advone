@@ -3362,6 +3362,8 @@ export type Database = {
           created_at: string
           data_inicio: string | null
           data_ultima_movimentacao: string | null
+          datajud_data: Json | null
+          datajud_tribunal_alias: string | null
           escavador_data: Json | null
           escavador_monitoring_id: number | null
           id: string
@@ -3387,6 +3389,8 @@ export type Database = {
           created_at?: string
           data_inicio?: string | null
           data_ultima_movimentacao?: string | null
+          datajud_data?: Json | null
+          datajud_tribunal_alias?: string | null
           escavador_data?: Json | null
           escavador_monitoring_id?: number | null
           id?: string
@@ -3412,6 +3416,8 @@ export type Database = {
           created_at?: string
           data_inicio?: string | null
           data_ultima_movimentacao?: string | null
+          datajud_data?: Json | null
+          datajud_tribunal_alias?: string | null
           escavador_data?: Json | null
           escavador_monitoring_id?: number | null
           id?: string
@@ -4032,6 +4038,7 @@ export type Database = {
           company_id: string
           content: string
           created_at: string
+          datajud_hash: string | null
           escavador_movement_id: number | null
           id: string
           is_new: boolean
@@ -4040,12 +4047,14 @@ export type Database = {
           movement_type: string | null
           source_grau: number | null
           source_name: string | null
+          source_provider: string
           source_sigla: string | null
         }
         Insert: {
           company_id: string
           content: string
           created_at?: string
+          datajud_hash?: string | null
           escavador_movement_id?: number | null
           id?: string
           is_new?: boolean
@@ -4054,12 +4063,14 @@ export type Database = {
           movement_type?: string | null
           source_grau?: number | null
           source_name?: string | null
+          source_provider?: string
           source_sigla?: string | null
         }
         Update: {
           company_id?: string
           content?: string
           created_at?: string
+          datajud_hash?: string | null
           escavador_movement_id?: number | null
           id?: string
           is_new?: boolean
@@ -4068,6 +4079,7 @@ export type Database = {
           movement_type?: string | null
           source_grau?: number | null
           source_name?: string | null
+          source_provider?: string
           source_sigla?: string | null
         }
         Relationships: [
