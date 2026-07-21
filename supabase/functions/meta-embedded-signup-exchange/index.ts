@@ -70,7 +70,7 @@ serve(async (req) => {
     const payload = {
       company_id,
       provider: "meta_cloud",
-      meta_phone_number_id: phone_number_id || existing?.meta_verify_token || null,
+      meta_phone_number_id: phone_number_id || null,
       meta_waba_id: waba_id || null,
       meta_access_token: accessToken,
       meta_verify_token: verifyToken,
