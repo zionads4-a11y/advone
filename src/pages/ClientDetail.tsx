@@ -187,13 +187,6 @@ export default function ClientDetail() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="cpf-lookup" className="mt-6">
-          <Card>
-            <CardContent className="pt-6">
-              <CpfProcessLookup leadId={client.id} companyId={companyId} cpf={client.cpf_cliente_final} />
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         <TabsContent value="agenda" className="mt-6">
           <Card>
