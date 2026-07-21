@@ -53,26 +53,9 @@ export function DemoRequestDialog({ trigger, source = "landing" }: Props) {
     }
   }, [open]);
 
-  // Escuta eventos do Calendly e dispara "Lead" APENAS quando o agendamento for concluído
-  useEffect(() => {
-    if (!open || step !== 2) return;
-    const isCalendlyEvent = (e: MessageEvent) =>
-      typeof e.data === "object" && e.data && String(e.data.event || "").indexOf("calendly") === 0;
-    const handler = (e: MessageEvent) => {
-      if (!isCalendlyEvent(e)) return;
-      if (e.data.event === "calendly.event_scheduled") {
-        trackMetaEvent("Lead", {
-          email: form.email || undefined,
-          phone: form.phone,
-          contentName: "Calendly - Agendamento concluído",
-          customData: { source, profile: form.profile },
-        });
-        toast.success("Agendamento confirmado! Nosso time te espera. 🎉");
-      }
-    };
-    window.addEventListener("message", handler);
-    return () => window.removeEventListener("message", handler);
-  }, [open, step, form, source]);
+  // O disparo do evento "Lead" agora acontece na página /obrigado (redirect do Calendly),
+  // que é acionada quando o agendamento é efetivamente concluído.
+
 
   const goNext = () => {
     if (step === 0) {
