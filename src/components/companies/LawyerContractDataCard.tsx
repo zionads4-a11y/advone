@@ -39,7 +39,7 @@ const empty: Fields = {
   office_city: "",
   office_state: "",
   office_cep: "",
-  lawyer_title: "Dra.",
+  lawyer_title: "Dr.(a)",
   lawyer_name: "",
   lawyer_oab: "",
   lawyer_oab_uf: "",
