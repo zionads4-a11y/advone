@@ -274,13 +274,11 @@ export default function LandingIA() {
       const { error } = await supabase.from("landing_ia_leads").insert(payload);
       if (error) throw error;
 
-      // Lead capturado — dispara Pixel + CAPI com email/telefone hasheados
-      trackMetaEvent("Lead", {
+      // Formulário enviado — evento auxiliar. "Lead" é disparado APENAS após o agendamento no Calendly.
+      trackMetaEvent("SubmitApplication", {
         email: parsed.data.email || undefined,
         phone: parsed.data.whatsapp,
         contentName: "Landing IA - Form Submit",
-        value: 497,
-        currency: "BRL",
         customData: {
           practice_area: parsed.data.practice_area || undefined,
           oab: parsed.data.oab || undefined,

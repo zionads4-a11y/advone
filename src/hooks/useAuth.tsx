@@ -138,7 +138,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!error) {
       const { trackMetaEvent } = await import("@/lib/metaPixel");
       trackMetaEvent("CompleteRegistration", { email, contentName: fullName });
-      trackMetaEvent("Lead", { email, contentName: "Signup" });
     }
     return { error: error as Error | null };
   };
