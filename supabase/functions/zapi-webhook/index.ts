@@ -1335,8 +1335,7 @@ Antes de responder:
             created_by: "00000000-0000-0000-0000-000000000000",
           });
 
-          const { data: wonCol } = await supabase.from("kanban_columns").select("id")
-            .eq("company_id", companyId).eq("is_won", true).order("position", { ascending: false }).limit(1).maybeSingle();
+          const wonCol = await getDefaultBoardColumn(supabase, companyId, { isWon: true });
           if (wonCol) {
             await supabase.from("leads").update({ kanban_column_id: wonCol.id, status: "won" }).eq("id", leadId);
           }
