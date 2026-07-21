@@ -1019,12 +1019,15 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <Button
-                  onClick={() => document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="w-full bg-transparent border border-[hsl(220,20%,16%)] hover:bg-[hsl(220,20%,16%)] text-[hsl(220,10%,92%)] font-bold py-6"
-                >
-                  FALAR COM ESPECIALISTA
-                </Button>
+                <DemoRequestDialog
+                  source="pricing-complete"
+                  trigger={
+                    <Button className="w-full bg-transparent border border-[hsl(220,20%,16%)] hover:bg-[hsl(220,20%,16%)] text-[hsl(220,10%,92%)] font-bold py-6">
+                      FALAR COM ESPECIALISTA
+                    </Button>
+                  }
+                />
+
               </div>
             </Reveal>
 
