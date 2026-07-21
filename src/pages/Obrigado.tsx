@@ -79,7 +79,7 @@ export default function Obrigado() {
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Button asChild size="lg" className="gradient-primary text-[hsl(0,0%,100%)] font-semibold">
             <a
-              href="https://wa.me/5511999999999?text=Ol%C3%A1%21%20Acabei%20de%20agendar%20uma%20demo%20da%20AdvOne."
+              href="https://wa.me/5531984796456?text=Ol%C3%A1%21%20Acabei%20de%20agendar%20uma%20demo%20da%20AdvOne."
               target="_blank"
               rel="noopener noreferrer"
             >
