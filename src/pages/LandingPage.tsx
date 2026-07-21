@@ -895,13 +895,24 @@ export default function LandingPage() {
                   <span className="inline-block rounded-full bg-[hsl(220,20%,16%)] px-3 py-1 text-xs font-semibold text-[hsl(220,10%,75%)]">ADVONE IA</span>
                 </div>
                 <div className="mb-6">
-                  <h3 className="text-xl font-bold text-[hsl(220,10%,92%)] mb-2">Sua secretária virtual 24h</h3>
-                  <div className="mt-4 flex items-baseline gap-1">
-                    <span className="text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 497</span>
-                    <span className="text-sm text-[hsl(220,10%,60%)]">/mês</span>
+                  <h3 className="text-xl font-bold text-[hsl(220,10%,92%)] mb-4">Sua secretária virtual 24h</h3>
+
+                  <div className="space-y-2">
+                    <div className="flex items-baseline justify-between rounded-lg border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,7%)] px-3 py-2">
+                      <span className="text-xs uppercase tracking-wide text-[hsl(220,10%,60%)]">Mensal</span>
+                      <span className="text-lg font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 797<span className="text-xs text-[hsl(220,10%,60%)] font-normal">/mês</span></span>
+                    </div>
+                    <div className="flex items-baseline justify-between rounded-lg border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,7%)] px-3 py-2">
+                      <span className="text-xs uppercase tracking-wide text-[hsl(220,10%,60%)]">Semestral</span>
+                      <span className="text-lg font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 697<span className="text-xs text-[hsl(220,10%,60%)] font-normal">/mês</span></span>
+                    </div>
+                    <div className="flex items-baseline justify-between rounded-lg border border-[hsl(153,60%,45%)]/40 bg-[hsl(153,60%,45%)]/10 px-3 py-2">
+                      <span className="text-xs uppercase tracking-wide text-[hsl(153,60%,45%)] font-semibold">Anual · melhor oferta</span>
+                      <span className="text-lg font-bold text-[hsl(153,60%,45%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 497<span className="text-xs font-normal">/mês</span></span>
+                    </div>
                   </div>
-                  <p className="mt-1 text-xs text-[hsl(153,60%,45%)] font-semibold">no plano anual (economize R$ 3.600/ano)</p>
-                  <p className="mt-2 text-sm text-[hsl(220,10%,60%)]">R$ 697/mês no semestral · R$ 797/mês no mensal. Para quem quer parar de perder lead no WhatsApp.</p>
+
+                  <p className="mt-3 text-sm text-[hsl(220,10%,60%)]">Para quem quer parar de perder lead no WhatsApp.</p>
                 </div>
 
                 <ul className="mb-8 flex-1 space-y-3">
