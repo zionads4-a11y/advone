@@ -3289,6 +3289,60 @@ export type Database = {
           },
         ]
       }
+      meta_phone_health: {
+        Row: {
+          checked_at: string
+          company_id: string
+          display_phone_number: string | null
+          id: string
+          messaging_limit: string | null
+          name_status: string | null
+          phone_number_id: string
+          quality_rating: string | null
+          raw: Json | null
+          verified_name: string | null
+        }
+        Insert: {
+          checked_at?: string
+          company_id: string
+          display_phone_number?: string | null
+          id?: string
+          messaging_limit?: string | null
+          name_status?: string | null
+          phone_number_id: string
+          quality_rating?: string | null
+          raw?: Json | null
+          verified_name?: string | null
+        }
+        Update: {
+          checked_at?: string
+          company_id?: string
+          display_phone_number?: string | null
+          id?: string
+          messaging_limit?: string | null
+          name_status?: string | null
+          phone_number_id?: string
+          quality_rating?: string | null
+          raw?: Json | null
+          verified_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meta_phone_health_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meta_phone_health_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       monitored_processes: {
         Row: {
           area: string | null
@@ -4620,7 +4674,11 @@ export type Database = {
           meta_app_id: string | null
           meta_app_secret: string | null
           meta_business_id: string | null
+          meta_health_checked_at: string | null
+          meta_messaging_limit: string | null
+          meta_onboarded_at: string | null
           meta_phone_number_id: string | null
+          meta_quality_rating: string | null
           meta_verify_token: string | null
           meta_waba_id: string | null
           office_name: string | null
@@ -4655,7 +4713,11 @@ export type Database = {
           meta_app_id?: string | null
           meta_app_secret?: string | null
           meta_business_id?: string | null
+          meta_health_checked_at?: string | null
+          meta_messaging_limit?: string | null
+          meta_onboarded_at?: string | null
           meta_phone_number_id?: string | null
+          meta_quality_rating?: string | null
           meta_verify_token?: string | null
           meta_waba_id?: string | null
           office_name?: string | null
@@ -4690,7 +4752,11 @@ export type Database = {
           meta_app_id?: string | null
           meta_app_secret?: string | null
           meta_business_id?: string | null
+          meta_health_checked_at?: string | null
+          meta_messaging_limit?: string | null
+          meta_onboarded_at?: string | null
           meta_phone_number_id?: string | null
+          meta_quality_rating?: string | null
           meta_verify_token?: string | null
           meta_waba_id?: string | null
           office_name?: string | null
