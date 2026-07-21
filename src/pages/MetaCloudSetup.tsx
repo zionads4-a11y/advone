@@ -17,6 +17,7 @@ import {
   Webhook,
 } from "lucide-react";
 import { toast } from "sonner";
+import MetaEmbeddedSignupButton from "@/components/whatsapp/MetaEmbeddedSignupButton";
 
 interface Company {
   id: string;
