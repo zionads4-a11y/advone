@@ -1401,8 +1401,8 @@ export function buildDynamicLauraPrompt(params: {
   botName?: string;
   botRoleDescription?: string;
   sharedWhatsapp?: boolean;
-  /** Tratamento do(a) advogado(a): "Dra." (feminino) ou "Dr." (masculino). Default: "Dra." */
-  lawyerTitle?: "Dra." | "Dr.";
+  /** Tratamento do(a) advogado(a): "Dra." (feminino), "Dr." (masculino) ou "Dr.(a)" (neutro). Default: "Dr.(a)" */
+  lawyerTitle?: "Dra." | "Dr." | "Dr.(a)";
 }): string {
   const {
     niche,
@@ -1413,7 +1413,7 @@ export function buildDynamicLauraPrompt(params: {
     botName,
     botRoleDescription,
     sharedWhatsapp = false,
-    lawyerTitle = "Dra.",
+    lawyerTitle = "Dr.(a)",
   } = params;
   const orderedFlows = [...enabledFlows].sort((a, b) => a.position - b.position);
   const activeOffices = offices.filter((o) => o.address);
