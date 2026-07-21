@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, RefreshCw, QrCode, CheckCircle2, AlertCircle, Smartphone } from "lucide-react";
 import { toast } from "sonner";
+import MetaEmbeddedSignupButton from "@/components/whatsapp/MetaEmbeddedSignupButton";
 
 interface Company { id: string; name: string; }
 
@@ -121,6 +122,23 @@ export default function ConectarWhatsapp() {
           </Select>
         )}
       </div>
+
+      {selected && (
+        <Card className="max-w-xl mx-auto border-primary/40 bg-primary/5">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Smartphone className="h-4 w-4 text-primary" />
+              Conectar via Meta Oficial (recomendado)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <p className="text-xs text-muted-foreground">
+              Conexão oficial WhatsApp Business API — sem risco de banimento. Faça login com Facebook Business em 2 minutos.
+            </p>
+            <MetaEmbeddedSignupButton companyId={selected} onConnected={() => fetchStatusAndQr(selected)} />
+          </CardContent>
+        </Card>
+      )}
 
       <Card className="max-w-xl mx-auto">
         <CardHeader className="text-center">
