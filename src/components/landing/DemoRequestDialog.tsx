@@ -10,7 +10,7 @@ import { ArrowLeft, ArrowRight, Briefcase, Users, UserCheck, GraduationCap, Help
 import { cn } from "@/lib/utils";
 
 // Ajuste aqui o link do Calendly do time comercial da AdvOne
-const CALENDLY_URL = "https://calendly.com/advone-comercial/30min";
+const CALENDLY_URL = "https://calendly.com/connectmktdigitalbr/30min";
 
 const PROFILES = [
   { id: "socio", label: "Sócio de escritório", icon: Briefcase },
