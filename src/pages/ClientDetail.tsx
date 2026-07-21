@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, User, FileText, Briefcase, CalendarClock, Wallet, MessageSquare, StickyNote, Phone, Mail, MapPin, Bell, Search } from "lucide-react";
 import { ClientPersonalDataForm, ClientData } from "@/components/clients/ClientPersonalDataForm";
-import { CpfProcessLookup } from "@/components/clients/CpfProcessLookup";
+
 import { ClientGeneratedDocuments } from "@/components/clients/ClientGeneratedDocuments";
 import { ClientUploadedDocuments } from "@/components/clients/ClientUploadedDocuments";
 import { ClientAgreements } from "@/components/clients/ClientAgreements";
@@ -147,7 +147,7 @@ export default function ClientDetail() {
           <TabsTrigger value="dados"><User className="h-4 w-4 mr-1" />Dados</TabsTrigger>
           <TabsTrigger value="documentos"><FileText className="h-4 w-4 mr-1" />Documentos</TabsTrigger>
           <TabsTrigger value="processos"><Briefcase className="h-4 w-4 mr-1" />Processos</TabsTrigger>
-          <TabsTrigger value="cpf-lookup"><Search className="h-4 w-4 mr-1" />Consulta CPF</TabsTrigger>
+          
           <TabsTrigger value="agenda"><CalendarClock className="h-4 w-4 mr-1" />Agenda</TabsTrigger>
           <TabsTrigger value="financeiro"><Wallet className="h-4 w-4 mr-1" />Financeiro</TabsTrigger>
           <TabsTrigger value="notas"><StickyNote className="h-4 w-4 mr-1" />Notas</TabsTrigger>
@@ -187,13 +187,6 @@ export default function ClientDetail() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="cpf-lookup" className="mt-6">
-          <Card>
-            <CardContent className="pt-6">
-              <CpfProcessLookup leadId={client.id} companyId={companyId} cpf={client.cpf_cliente_final} />
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         <TabsContent value="agenda" className="mt-6">
           <Card>

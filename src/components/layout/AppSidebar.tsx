@@ -65,9 +65,6 @@ const AI_ONLY_ROUTES = new Set([
   "/clientes",
   "/agenda",
   "/conversations",
-  "/monitoramento",
-  // Plano IA também pode gerenciar equipe e permissões de operadores,
-  // igual ao CRM Completo (gerente cadastra operadores e libera módulos).
   "/client-users",
   "/access-management",
   "/company-settings",
@@ -76,7 +73,6 @@ const AI_ONLY_ROUTES = new Set([
 const adminItems = [
   { title: "Empresas", url: "/companies", icon: Building2 },
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
-  { title: "Monitoramento", url: "/monitoramento", icon: Radar },
   { title: "Usuários", url: "/client-users", icon: Users },
   { title: "Time Interno", url: "/time-interno", icon: UserCog },
   { title: "Acessos", url: "/access-management", icon: KeyRound },
@@ -101,10 +97,8 @@ const gerenteItems = [
   { title: "Bot SDR", url: "/bot-config", icon: Bot, premium: true },
   { title: "IA Jurídica", url: "/ia-juridica", icon: Scale, premium: true },
   { title: "Jurisprudência", url: "/jurisprudencia", icon: Search },
-  { title: "Busca de Processos", url: "/busca-processos", icon: Scale },
   { title: "AdvCalc", url: "/calculadoras", icon: Calculator },
   { title: "Financeiro", url: "/financeiro", icon: Wallet },
-  { title: "Monitoramento", url: "/monitoramento", icon: Radar },
   { title: "Processos (Kanban)", url: "/processos-kanban", icon: Briefcase, premium: true },
   { title: "Modelos de Documentos", url: "/modelos-documentos", icon: FileText },
   { title: "Equipe", url: "/client-users", icon: Users },
@@ -119,11 +113,9 @@ const operadorItems = [
   { title: "Agenda", url: "/agenda", icon: CalendarDays },
   { title: "Conversas", url: "/conversations", icon: MessageSquare },
   { title: "Conversas de Clientes", url: "/conversas-clientes", icon: Headphones, premium: true },
-  { title: "Monitoramento", url: "/monitoramento", icon: Radar },
   { title: "Processos (Kanban)", url: "/processos-kanban", icon: Briefcase },
   { title: "IA Jurídica", url: "/ia-juridica", icon: Scale, premium: true },
   { title: "Jurisprudência", url: "/jurisprudencia", icon: Search },
-  { title: "Busca de Processos", url: "/busca-processos", icon: Scale },
   { title: "AdvCalc", url: "/calculadoras", icon: Calculator },
 ];
 

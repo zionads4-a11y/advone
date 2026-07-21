@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building2, Save } from "lucide-react";
 import { toast } from "sonner";
 import { BusinessHoursConfig, type BusinessHours, parseBusinessHours, getDefaultBusinessHours } from "@/components/companies/BusinessHoursConfig";
-import MonitoringPackagePurchase from "@/components/monitoring/MonitoringPackagePurchase";
+
 import { ZapSignConfigCard } from "@/components/companies/ZapSignConfigCard";
 import { CompanyOfficesEditor } from "@/components/companies/CompanyOfficesEditor";
 import { CompanyNicheAlertsCard } from "@/components/companies/CompanyNicheAlertsCard";
@@ -263,12 +263,6 @@ export default function CompanySettings() {
 
 
 
-      {!hasMonitoring && company && (
-        <MonitoringPackagePurchase
-          companyId={company.id}
-          onPurchaseComplete={() => fetchCompany(company.id)}
-        />
-      )}
     </div>
   );
 }
