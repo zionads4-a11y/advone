@@ -54,6 +54,12 @@ Assim que você identificar com CLAREZA a área jurídica do caso do lead (traba
     : "noite (use 'boa noite')";
   const timeHeader = `\n[HORÁRIO ATUAL — Brasília]\nHoje é ${_todayStr}, agora são ${_nowTimeStr}. Estamos no período da ${_periodoStr}. SEMPRE cumprimente e se despeça de acordo com o período do dia. NUNCA diga "bom dia" à tarde/noite, nem "boa tarde" de manhã/noite, nem "tenha um bom dia" à noite.`;
 
+  // 🏢 Bloco de modalidade (online/presencial) — SEMPRE injetado, inclusive quando há customPrompt.
+  const _activeOfficesForBlock = (offices || []).filter((o: any) => o && o.is_active !== false && (o.address || "").trim());
+  const modalidadeBlockGlobal = _activeOfficesForBlock.length === 0
+    ? `\n[MODALIDADE — REGRA RÍGIDA]\nEste escritório NÃO possui endereço físico cadastrado. O atendimento é 100% ONLINE (videochamada). NUNCA ofereça reunião presencial, NUNCA pergunte "online ou presencial" e NUNCA cite endereço. Se o lead pedir presencial, responda: "Nosso atendimento para o seu caso é 100% online por videochamada, tudo bem seguirmos assim?" e siga para o horário.`
+    : `\n[MODALIDADE — UNIDADES DISPONÍVEIS]\nO escritório tem endereço(s) cadastrado(s):\n${_activeOfficesForBlock.map((o: any) => `- ${o.name}: ${o.address}`).join("\n")}\nVocê pode oferecer ONLINE ou PRESENCIAL. Se presencial, use apenas os endereços acima — NUNCA invente endereço.`;
+
   if (customPrompt.startsWith("Você é")) {
     const globalConversationFixes = `
 
@@ -67,7 +73,7 @@ Assim que você identificar com CLAREZA a área jurídica do caso do lead (traba
 7. Fluxo de agendamento correto: turno → check_availability → oferecer horário → se o lead aceitar, pedir/registrar nome completo se ainda faltar → schedule_appointment.
 8. 🚨 ANTI-TRAVAMENTO: NUNCA envie mensagem só de reforço/elogio ("Ótimo!", "Perfeito", "Isso ajuda"). Toda mensagem tem que ter próxima pergunta OU proposta de agendamento na MESMA bolha. Máx. 4 perguntas de qualificação — depois disso, vá direto para "Podemos já deixar essa conversa agendada?".
 9. 🚨 CASO FORA DO CATÁLOGO (Usucapião, Imobiliário, Contratos, Consumidor, Sucessões, Ambiental, Empresarial genérico ou qualquer tese não listada): faça no máximo 3 perguntas genéricas (detalhes+há quanto tempo, documentos, urgência) e AVANCE direto para agendamento. Não fique explorando indefinidamente.`;
-    return customPrompt + globalConversationFixes + timeHeader + lostBlock + routingBlock + (flowsBlock ? `\n[FLUXOS]\n${flowsBlock}` : "") + (triageBlock ? `\n[TRIAGEM]\n${triageBlock}` : "");
+    return customPrompt + globalConversationFixes + modalidadeBlockGlobal + timeHeader + lostBlock + routingBlock + (flowsBlock ? `\n[FLUXOS]\n${flowsBlock}` : "") + (triageBlock ? `\n[TRIAGEM]\n${triageBlock}` : "");
   }
 
 
