@@ -943,10 +943,8 @@ export default function LandingPage() {
 
             {/* AdvOne Gestão — destaque */}
             <Reveal delay={100}>
-              <div className="relative rounded-2xl border-2 border-[hsl(153,60%,45%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col shadow-xl shadow-[hsl(153,60%,45%)]/10 transition-all duration-500 hover:-translate-y-2">
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[hsl(153,60%,45%)] px-4 py-1 text-xs font-bold text-[hsl(220,25%,6%)]">
-                  MAIS POPULAR
-                </div>
+              <div className="rounded-2xl border border-[hsl(153,60%,45%)]/40 bg-[hsl(220,25%,9%)] p-8 flex flex-col transition-all duration-500 hover:border-[hsl(153,60%,45%)] hover:-translate-y-1">
+
                 <div className="mb-6 flex items-center justify-between">
                   <span className="inline-block rounded-full bg-[hsl(153,60%,45%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(153,60%,45%)]">ADVONE GESTÃO</span>
                 </div>
