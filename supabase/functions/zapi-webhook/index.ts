@@ -1686,11 +1686,10 @@ REGRAS: NÃO cite número de processo, tribunal, nem termos técnicos. NÃO inve
     // SDR post-processing (qualification + kanban moves)
     if (phase === "sdr") {
       if (shouldSchedule && leadId) {
-        const targetPosition = 6;
-        const { data: columns } = await supabase.from("kanban_columns").select("id")
-          .eq("company_id", companyId).order("position", { ascending: true }).limit(targetPosition + 1);
-        if (columns && columns.length > targetPosition) {
-          await supabase.from("leads").update({ kanban_column_id: columns[targetPosition].id, status: "qualified" }).eq("id", leadId);
+        const scheduledColumn = await getDefaultBoardColumn(supabase, companyId, { name: "Agendado" })
+          || await getDefaultBoardColumn(supabase, companyId, { position: 6 });
+        if (scheduledColumn?.id) {
+          await supabase.from("leads").update({ kanban_column_id: scheduledColumn.id, status: "qualified" }).eq("id", leadId);
         }
         if (!qualificationResult) {
           await supabase.from("lead_summaries").insert({
@@ -1720,15 +1719,13 @@ REGRAS: NÃO cite número de processo, tribunal, nem termos técnicos. NÃO inve
           });
 
           if (!shouldSchedule) {
-            const { data: emAtCol } = await supabase.from("kanban_columns").select("id")
-              .eq("company_id", companyId).eq("position", 0).maybeSingle();
+            const emAtCol = await getDefaultBoardColumn(supabase, companyId, { position: 0 });
             if (emAtCol) {
               await supabase.from("leads").update({ kanban_column_id: emAtCol.id }).eq("id", leadId);
             }
           }
         } else if (qualificationResult.status === "not_qualified") {
-          const { data: lostColumn } = await supabase.from("kanban_columns").select("id")
-            .eq("company_id", companyId).eq("is_lost", true).maybeSingle();
+          const lostColumn = await getDefaultBoardColumn(supabase, companyId, { isLost: true });
           await supabase.from("leads").update({
             status: "lost", notes: `[IA - Não qualificado] ${qualificationResult.reason}`,
             ...scoreUpdate, ...(lostColumn ? { kanban_column_id: lostColumn.id } : {}),
