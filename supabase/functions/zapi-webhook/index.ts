@@ -437,6 +437,52 @@ async function getAvailableSlots(supabase: any, companyId: string, dateStr: stri
   return { date: formatDateDMY(dateStr), dayName, slots: slots.filter(s => !bookedTimes.has(s)) };
 }
 
+async function getDefaultKanbanBoardId(supabase: any, companyId: string): Promise<string | null> {
+  const { data: defaultBoard } = await supabase
+    .from("kanban_boards")
+    .select("id")
+    .eq("company_id", companyId)
+    .eq("is_default", true)
+    .order("position", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (defaultBoard?.id) return defaultBoard.id;
+
+  const { data: firstBoard } = await supabase
+    .from("kanban_boards")
+    .select("id")
+    .eq("company_id", companyId)
+    .order("position", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  return firstBoard?.id || null;
+}
+
+async function getDefaultBoardColumn(
+  supabase: any,
+  companyId: string,
+  filters: { position?: number; name?: string; isWon?: boolean; isLost?: boolean } = {},
+): Promise<{ id: string } | null> {
+  const boardId = await getDefaultKanbanBoardId(supabase, companyId);
+  let query = supabase
+    .from("kanban_columns")
+    .select("id")
+    .eq("company_id", companyId)
+    .order("position", { ascending: true })
+    .limit(1);
+
+  if (boardId) query = query.eq("board_id", boardId);
+  if (typeof filters.position === "number") query = query.eq("position", filters.position);
+  if (filters.name) query = query.ilike("name", filters.name);
+  if (typeof filters.isWon === "boolean") query = query.eq("is_won", filters.isWon);
+  if (typeof filters.isLost === "boolean") query = query.eq("is_lost", filters.isLost);
+
+  const { data } = await query.maybeSingle();
+  return data || null;
+}
+
 function formatDateDMY(dateStr: string): string {
   const parts = dateStr.split("-");
   if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
