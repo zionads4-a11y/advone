@@ -168,7 +168,15 @@ export function LawyerContractDataCard({ companyId }: Props) {
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1.5 sm:col-span-2">
                   <Label className="text-xs">Tratamento (usado nos prompts do bot)</Label>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={form.lawyer_title === "Dr.(a)" ? "default" : "outline"}
+                      onClick={() => set("lawyer_title", "Dr.(a)")}
+                    >
+                      Dr.(a) (neutro)
+                    </Button>
                     <Button
                       type="button"
                       size="sm"
