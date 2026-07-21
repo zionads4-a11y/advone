@@ -2133,6 +2133,7 @@ export type Database = {
           id: string
           is_lost: boolean
           is_meeting_held: boolean
+          is_urgent: boolean
           is_won: boolean
           name: string
           position: number
@@ -2145,6 +2146,7 @@ export type Database = {
           id?: string
           is_lost?: boolean
           is_meeting_held?: boolean
+          is_urgent?: boolean
           is_won?: boolean
           name: string
           position?: number
@@ -2157,6 +2159,7 @@ export type Database = {
           id?: string
           is_lost?: boolean
           is_meeting_held?: boolean
+          is_urgent?: boolean
           is_won?: boolean
           name?: string
           position?: number
