@@ -134,7 +134,7 @@ const faq = [
   },
   {
     q: "Esse plano serve para escritório grande?",
-    a: "O AdvOne IA (R$ 597/mês no anual · R$ 797 no mensal) é otimizado para advogados solo e escritórios pequenos (até 3 advogados). Para times maiores que precisam de CRM, pipeline e gestão de equipe completa, recomendamos o AdvOne Complete (R$ 997/mês no anual · R$ 1.297 no mensal).",
+    a: "O AdvOne IA (R$ 497/mês no anual · R$ 647 no semestral · R$ 797 no mensal) é otimizado para advogados solo e escritórios pequenos (até 3 advogados). Para times maiores que precisam de CRM, pipeline e gestão de equipe completa, recomendamos o AdvOne Complete (R$ 997/mês no anual · R$ 1.297 no mensal).",
   },
 ];
 
@@ -198,7 +198,7 @@ export default function LandingIA() {
     document.title = "Laura SDR — IA no WhatsApp para Advogados | AdvOne";
     const meta = document.querySelector('meta[name="description"]');
     const desc =
-      "AdvOne IA a partir de R$ 597/mês: SDR virtual Laura que atende, qualifica e agenda no WhatsApp 24h. Também disponível no plano Complete (R$ 997/mês).";
+      "AdvOne IA a partir de R$ 497/mês (anual): SDR virtual Laura que atende, qualifica e agenda no WhatsApp 24h. Também disponível no plano Complete (R$ 997/mês).";
     if (meta) {
       meta.setAttribute("content", desc);
     } else {
@@ -279,7 +279,7 @@ export default function LandingIA() {
         email: parsed.data.email || undefined,
         phone: parsed.data.whatsapp,
         contentName: "Landing IA - Form Submit",
-        value: 597,
+        value: 497,
         currency: "BRL",
         customData: {
           practice_area: parsed.data.practice_area || undefined,
@@ -524,7 +524,7 @@ export default function LandingIA() {
                   <li>✅ 5 follow-ups automáticos por lead</li>
                   <li>✅ Responde em até 30 segundos</li>
                   <li>✅ Qualifica e classifica viabilidade</li>
-                  <li>✅ Custo: a partir de R$ 597/mês — sem encargos</li>
+                  <li>✅ Custo: a partir de R$ 497/mês — sem encargos</li>
                 </ul>
               </CardContent>
             </Card>
@@ -564,11 +564,11 @@ export default function LandingIA() {
                     </div>
                     <div className="mt-2 flex items-baseline justify-center gap-1">
                       <span className="text-3xl font-bold">R$</span>
-                      <span className="font-display text-5xl font-bold">597</span>
+                      <span className="font-display text-5xl font-bold">497</span>
                       <span className="text-muted-foreground">/mês</span>
                     </div>
                     <div className="mt-1 text-xs text-muted-foreground">
-                      no plano anual · ou R$ 797/mês no mensal
+                      no plano anual · R$ 647/mês no semestral · R$ 797/mês no mensal
                     </div>
                   </div>
 
@@ -956,7 +956,7 @@ export default function LandingIA() {
                 Pare de perder leads enquanto você dorme.
               </h2>
               <p className="mx-auto max-w-2xl text-muted-foreground">
-                A Laura está pronta para começar a atender no seu WhatsApp em 24h. Planos a partir de R$ 597/mês.
+                A Laura está pronta para começar a atender no seu WhatsApp em 24h. Planos a partir de R$ 497/mês.
               </p>
               <DemoRequestDialog
                 source="landing-ia-final-cta"
