@@ -11,19 +11,21 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   const admin = createClient(SUPABASE_URL, SERVICE_KEY);
+  const fallbackToken = Deno.env.get("META_PERMANENT_ACCESS_TOKEN");
   const { data: configs } = await admin
     .from("whatsapp_configs")
     .select("company_id, meta_phone_number_id, meta_access_token")
     .eq("provider", "meta_cloud")
-    .not("meta_phone_number_id", "is", null)
-    .not("meta_access_token", "is", null);
+    .not("meta_phone_number_id", "is", null);
 
   const results: any[] = [];
   for (const c of configs || []) {
     try {
+      const token = c.meta_access_token || fallbackToken;
+      if (!token) { results.push({ company_id: c.company_id, error: "no token" }); continue; }
       const res = await fetch(
         `https://graph.facebook.com/${META_V}/${c.meta_phone_number_id}?fields=display_phone_number,verified_name,quality_rating,messaging_limit_tier,name_status,code_verification_status`,
-        { headers: { Authorization: `Bearer ${c.meta_access_token}` } },
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       const info = await res.json();
       if (!res.ok) {
