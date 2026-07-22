@@ -5,9 +5,9 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 // Config ID gerado no painel Meta (Embedded Signup configuration).
-// Substituir pelo ID real após criar a config no Business Manager.
-const META_APP_ID = "1268738996315614"; // ajuste se necessário
-const ES_CONFIG_ID = (import.meta.env.VITE_META_ES_CONFIG_ID as string) || "";
+// Valores públicos — expostos no client-side por design da Meta.
+const META_APP_ID = "1268738996315614";
+const ES_CONFIG_ID = "1598347715057707";
 
 declare global {
   interface Window {
