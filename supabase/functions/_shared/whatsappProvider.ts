@@ -65,7 +65,7 @@ async function sendUazapiMedia(
 
 async function sendMetaText(config: WhatsAppConfigRow, to: string, text: string): Promise<SendResult> {
   const phoneId = config.meta_phone_number_id;
-  const token = config.meta_access_token;
+  const token = config.meta_access_token || Deno.env.get("META_PERMANENT_ACCESS_TOKEN");
   if (!phoneId || !token) return { ok: false, error: "Credenciais Meta ausentes" };
   const res = await fetch(`https://graph.facebook.com/${META_API_VERSION}/${phoneId}/messages`, {
     method: "POST",
@@ -90,7 +90,7 @@ async function sendMetaMedia(
   mediaType?: string,
 ): Promise<SendResult> {
   const phoneId = config.meta_phone_number_id;
-  const token = config.meta_access_token;
+  const token = config.meta_access_token || Deno.env.get("META_PERMANENT_ACCESS_TOKEN");
   if (!phoneId || !token) return { ok: false, error: "Credenciais Meta ausentes" };
   // Detecta tipo pela extensão se não informado
   const t = (mediaType || "").toLowerCase();

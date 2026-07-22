@@ -54,7 +54,8 @@ serve(async (req) => {
       .select("meta_phone_number_id, meta_access_token")
       .eq("company_id", company_id).maybeSingle();
 
-    if (!cfg?.meta_phone_number_id || !cfg?.meta_access_token) {
+    const token = cfg?.meta_access_token || Deno.env.get("META_PERMANENT_ACCESS_TOKEN");
+    if (!cfg?.meta_phone_number_id || !token) {
       return new Response(JSON.stringify({ error: "credenciais Meta não configuradas" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -62,7 +63,7 @@ serve(async (req) => {
 
     const res = await fetch(
       `https://graph.facebook.com/v21.0/${cfg.meta_phone_number_id}?fields=id,display_phone_number,verified_name,quality_rating,code_verification_status`,
-      { headers: { Authorization: `Bearer ${cfg.meta_access_token}` } },
+      { headers: { Authorization: `Bearer ${token}` } },
     );
     const json = await res.json();
 
