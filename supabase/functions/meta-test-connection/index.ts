@@ -40,13 +40,23 @@ serve(async (req) => {
     }
 
     const admin = createClient(supabaseUrl, serviceKey);
-    const { data: membership } = await admin
-      .from("client_companies")
-      .select("id").eq("user_id", userId).eq("company_id", company_id).maybeSingle();
-    if (!membership) {
-      return new Response(JSON.stringify({ error: "forbidden" }), {
-        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+
+    // Admin/member bypass: precisam poder testar qualquer empresa
+    const { data: roles } = await admin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId);
+    const isAdmin = (roles || []).some((r: any) => r.role === "admin" || r.role === "member");
+
+    if (!isAdmin) {
+      const { data: membership } = await admin
+        .from("client_companies")
+        .select("id").eq("user_id", userId).eq("company_id", company_id).maybeSingle();
+      if (!membership) {
+        return new Response(JSON.stringify({ error: "forbidden" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     const { data: cfg } = await admin
