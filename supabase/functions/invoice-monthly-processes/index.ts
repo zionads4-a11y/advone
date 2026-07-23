@@ -134,18 +134,15 @@ Deno.serve(async (req) => {
           continue;
         }
 
-        // 100 processos grátis para todos os planos; excedente = R$1,00/processo
-        const quotaByPlan: Record<string, number> = {
-          plan_zionads: 0, // Zionads paga base + processos desde o 1º
-        };
-        const quota = quotaByPlan[company.billing_model as string] ?? FREE_QUOTA;
-        const excess = Math.max(0, count - quota);
+        // Sem cota gratuita: cobra R$ 2,50 por processo ativo desde o 1º.
+        const quota = FREE_QUOTA; // = 0
+        const billable = Math.max(0, count - quota);
         const customBase = Number(company.custom_base_value || 0);
-        const total = +(excess * PRICE_PER_PROCESS + customBase).toFixed(2);
+        const total = +(billable * PRICE_PER_PROCESS + customBase).toFixed(2);
 
         if (total <= 0) {
-          console.log(`[invoice-processes] skip company=${companyId} (total zero: excesso=${excess}, base=${customBase})`);
-          results.push({ company_id: companyId, ok: true, skipped: "quota não excedida" });
+          console.log(`[invoice-processes] skip company=${companyId} (total zero: billable=${billable}, base=${customBase})`);
+          results.push({ company_id: companyId, ok: true, skipped: "sem processos ativos" });
           continue;
         }
         const cleanPhone = (company.whatsapp || "").replace(/\D/g, "");
