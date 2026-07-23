@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Save, Scale } from "lucide-react";
+import { Loader2, Search, Save, Scale, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { useAuth } from "@/hooks/useAuth";
@@ -37,8 +37,27 @@ export default function ProcessSearch() {
   const [cnj, setCnj] = useState("");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [explaining, setExplaining] = useState(false);
+  const [summary, setSummary] = useState<string | null>(null);
   const [result, setResult] = useState<ProcessResult | null>(null);
   const { user } = useAuth();
+
+  async function explain() {
+    if (!result?.ok || !result.process) return;
+    setExplaining(true);
+    setSummary(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("explain-process-search", {
+        body: { process: result.process, movimentos: result.movimentos ?? [] },
+      });
+      if (error) throw error;
+      setSummary((data as { summary?: string })?.summary ?? "Sem resumo disponível.");
+    } catch (e) {
+      toast.error("Erro ao gerar resumo: " + (e instanceof Error ? e.message : String(e)));
+    } finally {
+      setExplaining(false);
+    }
+  }
 
   async function callFn(save: boolean) {
     if (!cnj.trim()) {
