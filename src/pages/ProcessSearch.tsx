@@ -145,7 +145,7 @@ export default function ProcessSearch() {
             <div className="pt-2">
               <Button size="sm" variant="default" onClick={explain} disabled={explaining}>
                 {explaining ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Sparkles className="h-4 w-4 mr-1" />}
-                Explicar em português simples
+                Explicar última movimentação
               </Button>
             </div>
           </CardContent>
@@ -157,7 +157,7 @@ export default function ProcessSearch() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Sparkles className="h-4 w-4 text-primary" />
-              O que está acontecendo neste processo
+              Explicação da última movimentação
             </CardTitle>
           </CardHeader>
           <CardContent>
