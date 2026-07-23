@@ -176,7 +176,7 @@ Deno.serve(async (req) => {
             dueDate: dueDate(month),
             description: company.billing_model === 'plan_zionads' 
               ? `Fatura Mensal AdvOne — ${month} (Monitoramento: ${count} proc., Base/Tráfego: R$ ${customBase.toFixed(2).replace(".", ",")})`
-              : `Monitoramento de processos AdvOne — ${count} processo(s) ativo(s) em ${month} (${excess} excedente(s) × R$ ${PRICE_PER_PROCESS.toFixed(2).replace(".", ",")} — 100 primeiros grátis)`,
+              : `Monitoramento de processos AdvOne — ${count} processo(s) ativo(s) em ${month} × R$ ${PRICE_PER_PROCESS.toFixed(2).replace(".", ",")}`,
             externalReference: `processes:${companyId}:${month}`,
           }),
         });
