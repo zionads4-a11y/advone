@@ -86,6 +86,7 @@ export default function ProcessSearch() {
       }
       const res = data as ProcessResult;
       setResult(res);
+      setSummary(null);
       if (!res.ok) toast.warning(res.message ?? "Processo não localizado");
       else if (save) toast.success("Processo salvo no monitoramento");
     } catch (e: unknown) {
