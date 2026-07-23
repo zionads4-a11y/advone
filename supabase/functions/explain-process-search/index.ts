@@ -69,7 +69,10 @@ Deno.serve(async (req) => {
         : proc.data_ajuizamento.substring(0, 10)
       : "—";
 
-    const prompt = `Você é assistente jurídico brasileiro. Explique este processo em português SIMPLES (sem juridiquês), para o advogado entender rapidamente o que está acontecendo hoje.
+    const ultima = movimentos[0] ?? {};
+    const dataUltima = ultima.data ? new Date(ultima.data).toLocaleDateString("pt-BR") : "—";
+
+    const prompt = `Você é assistente jurídico brasileiro. Sua tarefa é explicar em português SIMPLES o que significa a ÚLTIMA movimentação deste processo — o que aconteceu, o que isso implica na prática e qual o próximo passo esperado.
 
 DADOS DO PROCESSO
 CNJ: ${proc.numero_cnj}
@@ -77,33 +80,37 @@ Tribunal: ${proc.tribunal ?? "—"}
 Órgão julgador: ${proc.orgao ?? "—"}
 Classe: ${proc.classe ?? "—"}
 Assunto: ${proc.assunto ?? "—"}
-Grau: ${proc.grau ?? "—"}
 Data de ajuizamento: ${dataAju}
 
-MOVIMENTAÇÕES (mais recentes primeiro):
+ÚLTIMA MOVIMENTAÇÃO (a que você deve explicar):
+Data: ${dataUltima}
+Andamento: ${ultima.nome ?? "—"}
+Teor: ${ultima.texto ?? "—"}
+
+CONTEXTO (movimentações anteriores, só para você entender a história — NÃO explicar uma a uma):
 ${movList}
 
-FORMATO DA RESPOSTA (texto puro, sem markdown, sem emojis):
+FORMATO DA RESPOSTA (texto puro, sem markdown, sem emojis, sem asteriscos):
 
-Resumo do processo ${proc.numero_cnj}:
+Última movimentação (${dataUltima}): <título curto do que aconteceu>
 
-- Trata-se de: <classe/assunto em linguagem simples>
-- Onde tramita: <órgão / tribunal>
-- Ajuizado em: ${dataAju}
-- Fase atual: <em que ponto o processo está hoje, com base nas últimas movimentações>
-- Próximo passo esperado: <o que provavelmente acontece a seguir>
-- Pontos de atenção: <prazos, audiências, decisões — ou "nenhum evidente">
+O que significa:
+<2 a 4 linhas explicando em linguagem simples o que essa movimentação quer dizer na prática, como se estivesse explicando para o cliente>
 
-Últimas movimentações explicadas:
+Impacto no processo:
+<1 a 2 linhas: o que muda para as partes; se encerra o processo, abre prazo, marca audiência, etc.>
 
-1. Data: DD/MM/AAAA - <explicação em 1-2 linhas do que aconteceu>
-2. Data: DD/MM/AAAA - <explicação...>
-(liste as 5 a 8 mais recentes)
+Próximo passo esperado:
+<1 a 2 linhas: o que provavelmente vem a seguir, ou "aguardar" se o processo estiver arquivado/transitado em julgado>
+
+Ponto de atenção:
+<prazo, recurso cabível, ou "nenhum" se não houver>
 
 REGRAS:
-- NÃO invente fatos que não estejam nas movimentações.
-- NÃO use markdown (nada de **, ##, *).
-- Linguagem clara, como se explicasse para o cliente.`;
+- Foque APENAS na última movimentação.
+- NÃO invente fatos que não estejam no teor.
+- NÃO use markdown, asteriscos ou emojis.
+- Se o teor estiver vazio, use o nome do andamento para explicar o significado padrão daquele tipo de ato.`;
 
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
     if (!apiKey) throw new Error("LOVABLE_API_KEY não configurada");
