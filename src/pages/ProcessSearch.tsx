@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Save, Scale } from "lucide-react";
+import { Loader2, Search, Save, Scale, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { useAuth } from "@/hooks/useAuth";
@@ -37,8 +37,27 @@ export default function ProcessSearch() {
   const [cnj, setCnj] = useState("");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [explaining, setExplaining] = useState(false);
+  const [summary, setSummary] = useState<string | null>(null);
   const [result, setResult] = useState<ProcessResult | null>(null);
   const { user } = useAuth();
+
+  async function explain() {
+    if (!result?.ok || !result.process) return;
+    setExplaining(true);
+    setSummary(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("explain-process-search", {
+        body: { process: result.process, movimentos: result.movimentos ?? [] },
+      });
+      if (error) throw error;
+      setSummary((data as { summary?: string })?.summary ?? "Sem resumo disponível.");
+    } catch (e) {
+      toast.error("Erro ao gerar resumo: " + (e instanceof Error ? e.message : String(e)));
+    } finally {
+      setExplaining(false);
+    }
+  }
 
   async function callFn(save: boolean) {
     if (!cnj.trim()) {
@@ -67,6 +86,7 @@ export default function ProcessSearch() {
       }
       const res = data as ProcessResult;
       setResult(res);
+      setSummary(null);
       if (!res.ok) toast.warning(res.message ?? "Processo não localizado");
       else if (save) toast.success("Processo salvo no monitoramento");
     } catch (e: unknown) {
@@ -122,6 +142,26 @@ export default function ProcessSearch() {
             <div><b>Assunto:</b> {result.process.assunto ?? "—"}</div>
             <div><b>Órgão julgador:</b> {result.process.orgao ?? "—"}</div>
             <div><b>Data de ajuizamento:</b> {result.process.data_ajuizamento?.substring(0, 10) ?? "—"}</div>
+            <div className="pt-2">
+              <Button size="sm" variant="default" onClick={explain} disabled={explaining}>
+                {explaining ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Sparkles className="h-4 w-4 mr-1" />}
+                Explicar em português simples
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {summary && (
+        <Card className="border-primary/30">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Sparkles className="h-4 w-4 text-primary" />
+              O que está acontecendo neste processo
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <pre className="whitespace-pre-wrap text-sm font-sans leading-relaxed">{summary}</pre>
           </CardContent>
         </Card>
       )}
