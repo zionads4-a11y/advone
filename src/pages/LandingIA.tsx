@@ -20,8 +20,8 @@ import { Reveal } from "@/components/landing/useScrollReveal";
 import { InteractiveChatDemo } from "@/components/landing/InteractiveChatDemo";
 import { FloatingWhatsAppButton } from "@/components/landing/FloatingWhatsAppButton";
 import { DemoRequestDialog } from "@/components/landing/DemoRequestDialog";
-import logoAdvOne from "@/assets/logo-advone-light.png";
-import logoAdvOneHero from "@/assets/logo-advone-hero.png";
+import logoAdvOne from "@/assets/logo-advone-light.webp";
+import logoAdvOneHero from "@/assets/logo-advone-hero.webp";
 import heroBg from "@/assets/hero-bg-lp.jpg";
 import {
   ArrowRight,

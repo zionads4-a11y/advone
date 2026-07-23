@@ -29,7 +29,7 @@ import {
   Smartphone,
   ShieldCheck,
 } from "lucide-react";
-import logoAdvOne from "@/assets/logo-advone-light.png";
+import logoAdvOne from "@/assets/logo-advone-light.webp";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";

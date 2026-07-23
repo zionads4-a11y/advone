@@ -1,8 +1,8 @@
 import { forwardRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import logoAdvOne from "@/assets/logo-advone-light.png";
-import logoAdvOneHero from "@/assets/logo-advone-hero.png";
+import logoAdvOne from "@/assets/logo-advone-light.webp";
+import logoAdvOneHero from "@/assets/logo-advone-hero.webp";
 import heroBg from "@/assets/hero-bg-lp.jpg";
 import dashboardMockup from "@/assets/dashboard-mockup.jpg";
 import { InteractiveChatDemo } from "@/components/landing/InteractiveChatDemo";

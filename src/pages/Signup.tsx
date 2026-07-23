@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, CheckCircle2, ArrowLeft, ArrowRight, Building2, UserCircle2, Wallet2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import logoAdvOne from "@/assets/logo-advone.png";
+import logoAdvOne from "@/assets/logo-advone.webp";
 import { Progress } from "@/components/ui/progress";
 
 type PlanKey = "admin" | "completo" | "mensal" | "semestral" | "trimestral" | "anual";

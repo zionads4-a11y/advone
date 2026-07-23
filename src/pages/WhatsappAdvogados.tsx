@@ -2,7 +2,7 @@ import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Bot, Clock, Calendar, ArrowRight, CheckCircle2 } from "lucide-react";
-import logoAdvOne from "@/assets/logo-advone-light.png";
+import logoAdvOne from "@/assets/logo-advone-light.webp";
 
 const benefits = [
   "Atendimento automático 24/7 no WhatsApp do escritório",
