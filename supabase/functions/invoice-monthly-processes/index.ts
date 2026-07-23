@@ -1,14 +1,8 @@
-// Cobrança mensal de monitoramento de processos
+// Cobrança mensal de monitoramento de processos (Escavador)
 // R$ 2,50 × processos ativos por empresa, consolidado em 1 cobrança Asaas/mês.
+// Sem cota gratuita — cobra desde o primeiro processo.
 //
 // Body: { month?: string ('YYYY-MM', default = mês atual), company_id?: string }
-//
-// Para cada empresa com processos ativos:
-//   1. conta processos ativos
-//   2. calcula total = 2.50 × count
-//   3. cria/garante customer no Asaas
-//   4. cria 1 payment com vencimento dia 10 do mês seguinte
-//   5. registra em process_monitoring_charges (idempotente por company_id+month)
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
@@ -19,8 +13,8 @@ const corsHeaders = {
 
 const ASAAS_API_KEY = Deno.env.get("ASAAS_ADVONE_API_KEY")!;
 const ASAAS_BASE = "https://api.asaas.com/v3";
-const PRICE_PER_PROCESS = 1.00;
-const FREE_QUOTA = 100;
+const PRICE_PER_PROCESS = 2.50;
+const FREE_QUOTA = 0;
 
 interface AsaasCustomer { id: string; name: string; }
 interface AsaasPayment { id: string; invoiceUrl: string; }
