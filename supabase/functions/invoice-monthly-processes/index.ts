@@ -1,14 +1,8 @@
-// Cobrança mensal de monitoramento de processos
+// Cobrança mensal de monitoramento de processos (Escavador)
 // R$ 2,50 × processos ativos por empresa, consolidado em 1 cobrança Asaas/mês.
+// Sem cota gratuita — cobra desde o primeiro processo.
 //
 // Body: { month?: string ('YYYY-MM', default = mês atual), company_id?: string }
-//
-// Para cada empresa com processos ativos:
-//   1. conta processos ativos
-//   2. calcula total = 2.50 × count
-//   3. cria/garante customer no Asaas
-//   4. cria 1 payment com vencimento dia 10 do mês seguinte
-//   5. registra em process_monitoring_charges (idempotente por company_id+month)
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
@@ -19,8 +13,8 @@ const corsHeaders = {
 
 const ASAAS_API_KEY = Deno.env.get("ASAAS_ADVONE_API_KEY")!;
 const ASAAS_BASE = "https://api.asaas.com/v3";
-const PRICE_PER_PROCESS = 1.00;
-const FREE_QUOTA = 100;
+const PRICE_PER_PROCESS = 2.50;
+const FREE_QUOTA = 0;
 
 interface AsaasCustomer { id: string; name: string; }
 interface AsaasPayment { id: string; invoiceUrl: string; }
@@ -140,18 +134,15 @@ Deno.serve(async (req) => {
           continue;
         }
 
-        // 100 processos grátis para todos os planos; excedente = R$1,00/processo
-        const quotaByPlan: Record<string, number> = {
-          plan_zionads: 0, // Zionads paga base + processos desde o 1º
-        };
-        const quota = quotaByPlan[company.billing_model as string] ?? FREE_QUOTA;
-        const excess = Math.max(0, count - quota);
+        // Sem cota gratuita: cobra R$ 2,50 por processo ativo desde o 1º.
+        const quota = FREE_QUOTA; // = 0
+        const billable = Math.max(0, count - quota);
         const customBase = Number(company.custom_base_value || 0);
-        const total = +(excess * PRICE_PER_PROCESS + customBase).toFixed(2);
+        const total = +(billable * PRICE_PER_PROCESS + customBase).toFixed(2);
 
         if (total <= 0) {
-          console.log(`[invoice-processes] skip company=${companyId} (total zero: excesso=${excess}, base=${customBase})`);
-          results.push({ company_id: companyId, ok: true, skipped: "quota não excedida" });
+          console.log(`[invoice-processes] skip company=${companyId} (total zero: billable=${billable}, base=${customBase})`);
+          results.push({ company_id: companyId, ok: true, skipped: "sem processos ativos" });
           continue;
         }
         const cleanPhone = (company.whatsapp || "").replace(/\D/g, "");
@@ -185,7 +176,7 @@ Deno.serve(async (req) => {
             dueDate: dueDate(month),
             description: company.billing_model === 'plan_zionads' 
               ? `Fatura Mensal AdvOne — ${month} (Monitoramento: ${count} proc., Base/Tráfego: R$ ${customBase.toFixed(2).replace(".", ",")})`
-              : `Monitoramento de processos AdvOne — ${count} processo(s) ativo(s) em ${month} (${excess} excedente(s) × R$ ${PRICE_PER_PROCESS.toFixed(2).replace(".", ",")} — 100 primeiros grátis)`,
+              : `Monitoramento de processos AdvOne — ${count} processo(s) ativo(s) em ${month} × R$ ${PRICE_PER_PROCESS.toFixed(2).replace(".", ",")}`,
             externalReference: `processes:${companyId}:${month}`,
           }),
         });
