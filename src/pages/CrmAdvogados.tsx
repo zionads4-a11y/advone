@@ -2,7 +2,7 @@ import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, MessageSquare, Calendar, Kanban, FileText, Shield, ArrowRight } from "lucide-react";
-import logoAdvOne from "@/assets/logo-advone-light.png";
+import logoAdvOne from "@/assets/logo-advone-light.webp";
 
 const features = [
   { icon: MessageSquare, title: "WhatsApp integrado com IA", desc: "Laura SDR atende, qualifica e agenda reuniões 24h por dia direto no WhatsApp do escritório." },

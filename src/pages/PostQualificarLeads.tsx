@@ -2,7 +2,7 @@ import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Clock, User, Share2 } from "lucide-react";
-import logoAdvOne from "@/assets/logo-advone-light.png";
+import logoAdvOne from "@/assets/logo-advone-light.webp";
 
 export default function PostQualificarLeads() {
   const post = {

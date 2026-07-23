@@ -2,7 +2,7 @@ import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, TrendingDown, Users } from "lucide-react";
-import logoAdvOne from "@/assets/logo-advone-light.png";
+import logoAdvOne from "@/assets/logo-advone-light.webp";
 
 export default function SdrIaJuridico() {
   return (

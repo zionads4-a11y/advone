@@ -2,7 +2,7 @@ import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Building2, Target, Shield, Users } from "lucide-react";
-import logoAdvOne from "@/assets/logo-advone.png";
+import logoAdvOne from "@/assets/logo-advone.webp";
 
 export default function About() {
   return (
