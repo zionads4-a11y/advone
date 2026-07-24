@@ -552,13 +552,16 @@ export default function LandingIA() {
             </div>
           </Reveal>
 
-          <div className="mt-12 grid gap-8 md:grid-cols-3 max-w-6xl mx-auto">
+          <div className="mt-12 max-w-lg mx-auto">
             {/* AdvOne IA */}
             <Reveal delay={120}>
-              <Card className="h-full border-border/60 bg-card/40 hover:border-primary/20 transition-all">
+              <Card className="h-full border-primary/40 bg-card shadow-2xl shadow-primary/10 relative overflow-hidden">
+                <div className="absolute top-0 right-0 bg-primary px-3 py-1 text-[10px] font-bold text-primary-foreground uppercase tracking-widest rounded-bl-lg">
+                  Mais Popular
+                </div>
                 <CardContent className="space-y-6 p-8 flex flex-col">
                   <div>
-                    <div className="text-center text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-4">
+                    <div className="text-center text-sm font-semibold uppercase tracking-wide text-primary mb-4">
                       ADVONE IA
                     </div>
                     <div className="space-y-2">
@@ -596,59 +599,8 @@ export default function LandingIA() {
                   <DemoRequestDialog
                     source="landing-ia-plan-ia"
                     trigger={
-                      <Button size="lg" variant="outline" className="w-full">
-                        COMEÇAR COM IA
-                      </Button>
-                    }
-                  />
-                </CardContent>
-              </Card>
-            </Reveal>
-
-            {/* AdvOne Gestão */}
-            <Reveal delay={180}>
-              <Card className="h-full border-primary/40 bg-card shadow-2xl shadow-primary/10 relative overflow-hidden">
-                <div className="absolute top-0 right-0 bg-primary px-3 py-1 text-[10px] font-bold text-primary-foreground uppercase tracking-widest rounded-bl-lg">
-                  Mais Popular
-                </div>
-                <CardContent className="space-y-6 p-8 flex flex-col">
-                  <div className="text-center">
-                    <div className="text-sm font-semibold uppercase tracking-wide text-primary">
-                      ADVONE GESTÃO
-                    </div>
-                    <div className="mt-2 flex items-baseline justify-center gap-1">
-                      <span className="text-2xl font-bold text-muted-foreground">+</span>
-                      <span className="text-3xl font-bold">R$</span>
-                      <span className="font-display text-5xl font-bold">397</span>
-                      <span className="text-muted-foreground">/mês</span>
-                    </div>
-                    <div className="mt-1 text-xs text-primary font-bold">
-                      upgrade do AdvOne IA
-                    </div>
-                  </div>
-
-                  <div className="h-px bg-border" />
-
-                  <ul className="space-y-3 flex-1">
-                    {[
-                      "CRM jurídico completo",
-                      "Pipeline (Kanban de leads e casos)",
-                      "Automações e cadências",
-                      "Gestão da equipe (papéis e permissões)",
-                      "Relatórios e indicadores",
-                    ].map((item) => (
-                      <li key={item} className="flex items-start gap-3 text-sm">
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                        <span className="font-semibold">{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <DemoRequestDialog
-                    source="landing-ia-plan-gestao"
-                    trigger={
                       <Button size="lg" className="w-full gradient-primary text-primary-foreground font-bold">
-                        QUERO ORGANIZAR
+                        COMEÇAR COM IA
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     }
@@ -656,64 +608,8 @@ export default function LandingIA() {
                 </CardContent>
               </Card>
             </Reveal>
-
-            {/* AdvOne Complete */}
-            <Reveal delay={240}>
-              <Card className="h-full border-border/60 bg-card/40 hover:border-primary/20 transition-all">
-                <CardContent className="space-y-6 p-8 flex flex-col">
-                  <div className="text-center">
-                    <div className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                      ADVONE COMPLETE
-                    </div>
-                    <div className="mt-1 inline-block rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
-                      Atendimentos ilimitados
-                    </div>
-                    <div className="mt-3 space-y-2 text-left">
-                      <div className="flex items-baseline justify-between rounded-lg border border-border/60 bg-background/40 px-3 py-2">
-                        <span className="text-xs uppercase tracking-wide text-muted-foreground">Mensal</span>
-                        <span className="text-lg font-bold">R$ 897<span className="text-xs text-muted-foreground font-normal">/mês</span></span>
-                      </div>
-                      <div className="flex items-baseline justify-between rounded-lg border border-border/60 bg-background/40 px-3 py-2">
-                        <span className="text-xs uppercase tracking-wide text-muted-foreground">Semestral</span>
-                        <span className="text-lg font-bold">R$ 697<span className="text-xs text-muted-foreground font-normal">/mês</span></span>
-                      </div>
-                      <div className="flex items-baseline justify-between rounded-lg border border-primary/40 bg-primary/10 px-3 py-2">
-                        <span className="text-xs uppercase tracking-wide text-primary font-semibold">Anual · melhor oferta</span>
-                        <span className="text-lg font-bold text-primary">R$ 597<span className="text-xs font-normal">/mês</span></span>
-                      </div>
-                    </div>
-                  </div>
-
-
-                  <div className="h-px bg-border" />
-
-                  <ul className="space-y-3 flex-1">
-                    {[
-                      "Tudo do plano IA",
-                      "Tudo do plano Gestão",
-                      "Integrações avançadas (Google, Asaas, ZapSign)",
-                      "Recursos exclusivos (IA jurídica, jurisprudência, calculadoras)",
-                      "Suporte prioritário",
-                    ].map((item) => (
-                      <li key={item} className="flex items-start gap-3 text-sm">
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <DemoRequestDialog
-                    source="landing-ia-plan-complete"
-                    trigger={
-                      <Button size="lg" variant="outline" className="w-full">
-                        FALAR COM ESPECIALISTA
-                      </Button>
-                    }
-                  />
-                </CardContent>
-              </Card>
-            </Reveal>
           </div>
+
 
           <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
             {[
