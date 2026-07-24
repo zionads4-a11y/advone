@@ -10,6 +10,7 @@
 
 export type BillingModel =
   | "plan_ia"
+  | "plan_ia_pro"
   | "plan_ia_zionads"
   | "plan_gestao"
   | "plan_complete"
@@ -31,6 +32,9 @@ export interface BillingModelOption {
   partnership_type: "mensalidade_zionads";
   service_mode: "full" | "ai_only";
   monitoring_quota: number;
+  /** Cota padrão de mensagens/mês da IA aplicada ao criar a empresa. `null` = ilimitado. */
+  /** Cota padrão de mensagens/mês da IA aplicada ao criar a empresa. `null`/omitido = default do plano. */
+  message_quota_default?: number | null;
   features: string[];
 }
 
@@ -44,11 +48,30 @@ export const BILLING_MODELS: BillingModelOption[] = [
     partnership_type: "mensalidade_zionads",
     service_mode: "ai_only",
     monitoring_quota: 10,
+    message_quota_default: 10000,
     features: [
       "Atendimento no WhatsApp 24h",
       "Qualificação inteligente de leads",
       "Agendamento automático na agenda",
       "Atendimento a clientes atuais",
+      "10.000 mensagens/mês da IA",
+    ],
+  },
+  {
+    key: "plan_ia_pro",
+    emoji: "🚀",
+    label: "AdvOne IA Pro",
+    monthly_value: 797,
+    description: "Para escritórios com alto volume de leads: até 15.000 mensagens/mês da Laura.",
+    partnership_type: "mensalidade_zionads",
+    service_mode: "ai_only",
+    monitoring_quota: 20,
+    message_quota_default: 15000,
+    features: [
+      "Todos os recursos do AdvOne IA",
+      "15.000 mensagens/mês da IA (50% a mais)",
+      "Prioridade de fila em horários de pico",
+      "Ideal para escritórios com campanhas ativas",
     ],
   },
   {
@@ -60,6 +83,7 @@ export const BILLING_MODELS: BillingModelOption[] = [
     partnership_type: "mensalidade_zionads",
     service_mode: "ai_only",
     monitoring_quota: 10,
+    message_quota_default: 10000,
     features: [
       "Todos os recursos do AdvOne IA",
       "Cobrança gerenciada fora da plataforma (ZionAds)",
@@ -76,6 +100,7 @@ export const BILLING_MODELS: BillingModelOption[] = [
     partnership_type: "mensalidade_zionads",
     service_mode: "full",
     monitoring_quota: 10,
+    message_quota_default: 25000,
     features: [
       "CRM jurídico completo",
       "Até 3 áreas de atuação",
@@ -93,6 +118,7 @@ export const BILLING_MODELS: BillingModelOption[] = [
     partnership_type: "mensalidade_zionads",
     service_mode: "full",
     monitoring_quota: 10,
+    message_quota_default: 25000,
     features: [
       "Tudo do plano IA",
       "Tudo do plano Gestão",
@@ -110,6 +136,7 @@ export const BILLING_MODELS: BillingModelOption[] = [
     partnership_type: "mensalidade_zionads",
     service_mode: "full",
     monitoring_quota: 100,
+    message_quota_default: null,
     features: [
       "Tudo do plano Complete",
       "Áreas de atuação ilimitadas (4+)",
