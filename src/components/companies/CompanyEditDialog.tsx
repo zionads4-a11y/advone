@@ -137,6 +137,7 @@ export function CompanyEditDialog({
       setSharedWhats(!!company.shared_whatsapp_number);
       setSupportPhone(company.client_support_responsible_phone || "");
       setAiDisabled(!!company.ai_disabled);
+      setMessageQuota(company.message_quota_monthly?.toString() || "");
     }
 
   }, [company]);
