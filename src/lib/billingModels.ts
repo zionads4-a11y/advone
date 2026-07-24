@@ -48,13 +48,13 @@ export const BILLING_MODELS: BillingModelOption[] = [
     partnership_type: "mensalidade_zionads",
     service_mode: "ai_only",
     monitoring_quota: 10,
-    message_quota_default: 10000,
+    message_quota_default: 15000,
     features: [
       "Atendimento no WhatsApp 24h",
       "Qualificação inteligente de leads",
       "Agendamento automático na agenda",
       "Atendimento a clientes atuais",
-      "10.000 mensagens/mês da IA",
+      "15.000 mensagens/mês da IA",
     ],
   },
   {
@@ -83,7 +83,7 @@ export const BILLING_MODELS: BillingModelOption[] = [
     partnership_type: "mensalidade_zionads",
     service_mode: "ai_only",
     monitoring_quota: 10,
-    message_quota_default: 10000,
+    message_quota_default: 15000,
     features: [
       "Todos os recursos do AdvOne IA",
       "Cobrança gerenciada fora da plataforma (ZionAds)",
@@ -100,7 +100,7 @@ export const BILLING_MODELS: BillingModelOption[] = [
     partnership_type: "mensalidade_zionads",
     service_mode: "full",
     monitoring_quota: 10,
-    message_quota_default: 25000,
+    message_quota_default: 15000,
     features: [
       "CRM jurídico completo",
       "Até 3 áreas de atuação",
@@ -118,7 +118,7 @@ export const BILLING_MODELS: BillingModelOption[] = [
     partnership_type: "mensalidade_zionads",
     service_mode: "full",
     monitoring_quota: 10,
-    message_quota_default: null,
+    message_quota_default: 15000,
     features: [
       "Tudo do plano IA",
       "Tudo do plano Gestão",
