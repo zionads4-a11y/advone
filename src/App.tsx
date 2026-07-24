@@ -191,6 +191,7 @@ const App = () => (
                     />
                     <Route path="/fraudes" element={<FraudAlerts />} />
                     <Route path="/uso-ia" element={<RoleProtectedRoute allowedRoles={["admin", "member"]}><AiUsageMonitor /></RoleProtectedRoute>} />
+                    <Route path="/tabela-precos" element={<RoleProtectedRoute allowedRoles={["admin", "member"]}><PricingInternal /></RoleProtectedRoute>} />
                     <Route path="/leads-landing-ia" element={<LandingIALeads />} />
                     <Route path="/ia-juridica" element={<LegalAI />} />
                     <Route path="/jurisprudencia" element={<Jurisprudencia />} />
