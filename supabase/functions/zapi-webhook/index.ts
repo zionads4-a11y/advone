@@ -3144,6 +3144,29 @@ REGRAS INVIOLÁVEIS PARA ESTE CONTATO:
                   message_id_external: sendResult.messageId || sendResult.key?.id || null,
                   timestamp: new Date().toISOString(),
                 });
+                // 📊 incrementa cota mensal (retorna alert_needed=80 quando cruza 80%)
+                try {
+                  const { data: usage } = await supabase.rpc("increment_message_usage", { _company_id: companyId });
+                  if (usage && (usage as any).alert_needed === "80") {
+                    const { data: co80 } = await supabase
+                      .from("companies")
+                      .select("quota_alert_80_sent_at, message_quota_monthly, messages_used_current_period, alert_whatsapp")
+                      .eq("id", companyId).maybeSingle();
+                    if (co80 && !co80.quota_alert_80_sent_at && co80.alert_whatsapp) {
+                      const alertPhone80 = String(co80.alert_whatsapp).replace(/\D/g, "");
+                      const text80 = `📊 *Aviso — 80% da cota mensal usada*\n\nJá foram utilizadas *${co80.messages_used_current_period?.toLocaleString("pt-BR")}* de *${co80.message_quota_monthly?.toLocaleString("pt-BR")}* mensagens da IA neste mês.\n\n💡 Considere fazer upgrade do plano para não interromper o atendimento quando a cota zerar.`;
+                      await fetch(sendUrl, {
+                        method: "POST", headers: sendHeaders,
+                        body: JSON.stringify({ number: alertPhone80, text: text80 }),
+                      });
+                      await supabase.from("companies")
+                        .update({ quota_alert_80_sent_at: new Date().toISOString() })
+                        .eq("id", companyId);
+                    }
+                  }
+                } catch (qIncErr) {
+                  console.error("[quota-increment] error:", qIncErr);
+                }
               } else {
                 console.error("Failed to send AI reply:", sendResponse.status, await sendResponse.text());
               }
