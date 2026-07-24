@@ -304,16 +304,6 @@ export default function PricingInternal() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="objecoes" className="mt-6 space-y-3">
-          {OBJECTIONS.map((o) => (
-            <Card key={o.q}>
-              <CardContent className="pt-6">
-                <div className="text-sm font-semibold text-primary mb-2">❓ {o.q}</div>
-                <p className="text-sm text-muted-foreground">{o.a}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </TabsContent>
       </Tabs>
     </div>
   );
