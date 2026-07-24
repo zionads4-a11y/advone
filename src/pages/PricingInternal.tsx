@@ -196,7 +196,7 @@ export default function PricingInternal() {
         <TabsList>
           <TabsTrigger value="planos">Planos</TabsTrigger>
           <TabsTrigger value="upsell">Add-ons</TabsTrigger>
-          <TabsTrigger value="objecoes">Objeções</TabsTrigger>
+          
         </TabsList>
 
         <TabsContent value="planos" className="mt-6 space-y-8">
