@@ -996,14 +996,25 @@ export default function LandingPage() {
                 </div>
                 <div className="mb-6">
                   <h3 className="text-xl font-bold text-[hsl(220,10%,92%)] mb-2">Tudo em um só lugar</h3>
-                  <div className="mt-4 flex items-baseline gap-1">
-                    <span className="text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 997</span>
-                    <span className="text-sm text-[hsl(220,10%,60%)]">/mês</span>
+                  <span className="inline-block mt-1 mb-3 rounded-full bg-[hsl(153,60%,45%)]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[hsl(153,60%,45%)]">Atendimentos ilimitados</span>
+
+                  <div className="space-y-2">
+                    <div className="flex items-baseline justify-between rounded-lg border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,7%)] px-3 py-2">
+                      <span className="text-xs uppercase tracking-wide text-[hsl(220,10%,60%)]">Mensal</span>
+                      <span className="text-lg font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 897<span className="text-xs text-[hsl(220,10%,60%)] font-normal">/mês</span></span>
+                    </div>
+                    <div className="flex items-baseline justify-between rounded-lg border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,7%)] px-3 py-2">
+                      <span className="text-xs uppercase tracking-wide text-[hsl(220,10%,60%)]">Semestral</span>
+                      <span className="text-lg font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 697<span className="text-xs text-[hsl(220,10%,60%)] font-normal">/mês</span></span>
+                    </div>
+                    <div className="flex items-baseline justify-between rounded-lg border border-[hsl(153,60%,45%)]/40 bg-[hsl(153,60%,45%)]/10 px-3 py-2">
+                      <span className="text-xs uppercase tracking-wide text-[hsl(153,60%,45%)] font-semibold">Anual · melhor oferta</span>
+                      <span className="text-lg font-bold text-[hsl(153,60%,45%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 597<span className="text-xs font-normal">/mês</span></span>
+                    </div>
                   </div>
-                  <p className="mt-1 text-xs text-[hsl(153,60%,55%)] font-semibold">no plano anual</p>
-                  <p className="mt-1 text-sm text-[hsl(220,10%,60%)]">ou R$ 1.297/mês no mensal</p>
-                  <p className="mt-2 text-sm text-[hsl(220,10%,60%)]">Para escritórios que querem escalar sem limite.</p>
+                  <p className="mt-3 text-sm text-[hsl(220,10%,60%)]">Para escritórios que querem escalar sem limite.</p>
                 </div>
+
 
                 <ul className="mb-6 space-y-3">
                   {[
