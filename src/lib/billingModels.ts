@@ -100,7 +100,7 @@ export const BILLING_MODELS: BillingModelOption[] = [
     partnership_type: "mensalidade_zionads",
     service_mode: "full",
     monitoring_quota: 10,
-    message_quota_default: 25000,
+    message_quota_default: 15000,
     features: [
       "CRM jurídico completo",
       "Até 3 áreas de atuação",
