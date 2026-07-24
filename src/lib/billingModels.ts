@@ -33,7 +33,8 @@ export interface BillingModelOption {
   service_mode: "full" | "ai_only";
   monitoring_quota: number;
   /** Cota padrão de mensagens/mês da IA aplicada ao criar a empresa. `null` = ilimitado. */
-  message_quota_default: number | null;
+  /** Cota padrão de mensagens/mês da IA aplicada ao criar a empresa. `null`/omitido = default do plano. */
+  message_quota_default?: number | null;
   features: string[];
 }
 
