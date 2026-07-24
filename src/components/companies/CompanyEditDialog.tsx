@@ -85,6 +85,7 @@ interface CompanyEditDialogProps {
       shared_whatsapp_number: boolean;
       client_support_responsible_phone: string | null;
       ai_disabled: boolean;
+      message_quota_monthly: number | null;
     }
 
   ) => void;
