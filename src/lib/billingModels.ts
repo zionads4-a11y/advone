@@ -10,6 +10,7 @@
 
 export type BillingModel =
   | "plan_ia"
+  | "plan_ia_pro"
   | "plan_ia_zionads"
   | "plan_gestao"
   | "plan_complete"
@@ -31,6 +32,8 @@ export interface BillingModelOption {
   partnership_type: "mensalidade_zionads";
   service_mode: "full" | "ai_only";
   monitoring_quota: number;
+  /** Cota padrão de mensagens/mês da IA aplicada ao criar a empresa. `null` = ilimitado. */
+  message_quota_default: number | null;
   features: string[];
 }
 
