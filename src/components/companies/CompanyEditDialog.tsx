@@ -172,6 +172,7 @@ export function CompanyEditDialog({
               shared_whatsapp_number: sharedWhats,
               client_support_responsible_phone: sharedWhats ? (supportPhone || null) : null,
               ai_disabled: aiDisabled,
+              message_quota_monthly: messageQuota.trim() === "" ? null : parseInt(messageQuota, 10),
             });
 
           }}
