@@ -187,10 +187,6 @@ export default function PricingInternal() {
             </p>
           </div>
         </div>
-        <Badge variant="destructive" className="text-xs">
-          CONFIDENCIAL
-        </Badge>
-      </div>
 
       <Tabs defaultValue="planos" className="w-full">
         <TabsList>
