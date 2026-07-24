@@ -2929,6 +2929,46 @@ Responda:
       );
     }
 
+    // 🚦 GATE DE COTA MENSAL DE MENSAGENS DA IA
+    // Se a cota da empresa estourou, o bot para de responder até o dia 1 (reset automático).
+    // Avisa o gerente 1x via WhatsApp com pedido de upgrade.
+    if (config.ai_enabled && config.ai_auto_reply && leadId && !existingLead?.bot_disabled && !existingLead?.ocr_pending_review && isPlanCompleto) {
+      const { data: canUse } = await supabase.rpc("company_can_use_ai", { _company_id: companyId });
+      if (canUse === false) {
+        const { data: quotaCompany } = await supabase
+          .from("companies")
+          .select("quota_alert_100_sent_at, message_quota_monthly, alert_whatsapp, name, billing_model")
+          .eq("id", companyId)
+          .maybeSingle();
+        if (quotaCompany && !quotaCompany.quota_alert_100_sent_at && quotaCompany.alert_whatsapp) {
+          try {
+            const ADMIN_TOKEN_Q = Deno.env.get("UAZAPI_ADMIN_TOKEN");
+            const sendHeadersQ: Record<string, string> = { "Content-Type": "application/json" };
+            if (ADMIN_TOKEN_Q) sendHeadersQ["admintoken"] = ADMIN_TOKEN_Q;
+            const instParam = encodeURIComponent(config.zapi_instance_id);
+            const tokParam = encodeURIComponent(config.zapi_token || config.zapi_instance_id);
+            const sendUrlQ = `https://ziondigital.uazapi.com/send/text?instance=${instParam}&token=${tokParam}`;
+            const alertPhoneQ = String(quotaCompany.alert_whatsapp).replace(/\D/g, "");
+            const alertTextQ = `🚨 *Cota mensal de mensagens atingida*\n\nSeu plano permite ${quotaCompany.message_quota_monthly?.toLocaleString("pt-BR")} mensagens/mês da IA e essa cota foi atingida.\n\n⚠️ *A Laura foi pausada automaticamente* até o dia 1 do próximo mês, quando o saldo será renovado.\n\n💡 Para liberar imediatamente, faça upgrade do plano falando com nossa equipe.`;
+            await fetch(sendUrlQ, {
+              method: "POST", headers: sendHeadersQ,
+              body: JSON.stringify({ number: alertPhoneQ, text: alertTextQ }),
+            });
+            await supabase.from("companies")
+              .update({ quota_alert_100_sent_at: new Date().toISOString() })
+              .eq("id", companyId);
+          } catch (qErr) {
+            console.error("[quota-alert-100] send error:", qErr);
+          }
+        }
+        console.log(`[quota] Empresa ${companyId} atingiu cota mensal — IA pausada.`);
+        return new Response(
+          JSON.stringify({ ok: true, lead_id: leadId, quota_exceeded: true }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+    }
+
     if (config.ai_enabled && config.ai_auto_reply && leadId && !existingLead?.bot_disabled && !existingLead?.ocr_pending_review && isPlanCompleto) {
 
       try {
@@ -3104,6 +3144,29 @@ REGRAS INVIOLÁVEIS PARA ESTE CONTATO:
                   message_id_external: sendResult.messageId || sendResult.key?.id || null,
                   timestamp: new Date().toISOString(),
                 });
+                // 📊 incrementa cota mensal (retorna alert_needed=80 quando cruza 80%)
+                try {
+                  const { data: usage } = await supabase.rpc("increment_message_usage", { _company_id: companyId });
+                  if (usage && (usage as any).alert_needed === "80") {
+                    const { data: co80 } = await supabase
+                      .from("companies")
+                      .select("quota_alert_80_sent_at, message_quota_monthly, messages_used_current_period, alert_whatsapp")
+                      .eq("id", companyId).maybeSingle();
+                    if (co80 && !co80.quota_alert_80_sent_at && co80.alert_whatsapp) {
+                      const alertPhone80 = String(co80.alert_whatsapp).replace(/\D/g, "");
+                      const text80 = `📊 *Aviso — 80% da cota mensal usada*\n\nJá foram utilizadas *${co80.messages_used_current_period?.toLocaleString("pt-BR")}* de *${co80.message_quota_monthly?.toLocaleString("pt-BR")}* mensagens da IA neste mês.\n\n💡 Considere fazer upgrade do plano para não interromper o atendimento quando a cota zerar.`;
+                      await fetch(sendUrl, {
+                        method: "POST", headers: sendHeaders,
+                        body: JSON.stringify({ number: alertPhone80, text: text80 }),
+                      });
+                      await supabase.from("companies")
+                        .update({ quota_alert_80_sent_at: new Date().toISOString() })
+                        .eq("id", companyId);
+                    }
+                  }
+                } catch (qIncErr) {
+                  console.error("[quota-increment] error:", qIncErr);
+                }
               } else {
                 console.error("Failed to send AI reply:", sendResponse.status, await sendResponse.text());
               }

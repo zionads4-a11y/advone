@@ -56,6 +56,8 @@ interface Company {
   shared_whatsapp_number?: boolean | null;
   client_support_responsible_phone?: string | null;
   ai_disabled?: boolean | null;
+  message_quota_monthly?: number | null;
+  messages_used_current_period?: number | null;
 }
 
 
@@ -83,6 +85,7 @@ interface CompanyEditDialogProps {
       shared_whatsapp_number: boolean;
       client_support_responsible_phone: string | null;
       ai_disabled: boolean;
+      message_quota_monthly: number | null;
     }
 
   ) => void;
@@ -111,6 +114,7 @@ export function CompanyEditDialog({
   const [sharedWhats, setSharedWhats] = useState(false);
   const [supportPhone, setSupportPhone] = useState("");
   const [aiDisabled, setAiDisabled] = useState(false);
+  const [messageQuota, setMessageQuota] = useState<string>("");
 
 
   useEffect(() => {
@@ -133,6 +137,7 @@ export function CompanyEditDialog({
       setSharedWhats(!!company.shared_whatsapp_number);
       setSupportPhone(company.client_support_responsible_phone || "");
       setAiDisabled(!!company.ai_disabled);
+      setMessageQuota(company.message_quota_monthly?.toString() || "");
     }
 
   }, [company]);
@@ -167,6 +172,7 @@ export function CompanyEditDialog({
               shared_whatsapp_number: sharedWhats,
               client_support_responsible_phone: sharedWhats ? (supportPhone || null) : null,
               ai_disabled: aiDisabled,
+              message_quota_monthly: messageQuota.trim() === "" ? null : parseInt(messageQuota, 10),
             });
 
           }}
@@ -189,6 +195,27 @@ export function CompanyEditDialog({
               <Switch checked={aiDisabled} onCheckedChange={setAiDisabled} />
             </div>
           </div>
+
+          <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-3">
+            <Label>Cota mensal de mensagens da IA</Label>
+            <Input
+              type="number"
+              min={0}
+              value={messageQuota}
+              onChange={(e) => setMessageQuota(e.target.value)}
+              placeholder="Deixe vazio = ilimitado (Enterprise)"
+            />
+            <p className="text-[11px] text-muted-foreground">
+              Máximo de mensagens que a IA pode enviar por mês.
+              Padrão: IA 10.000 • Complete 25.000 • Enterprise ilimitado.
+              Ao atingir 100% a Laura pausa até o dia 1 do mês seguinte.
+              {company?.messages_used_current_period != null && (
+                <> Usadas este mês: <b>{company.messages_used_current_period.toLocaleString("pt-BR")}</b>.</>
+              )}
+            </p>
+          </div>
+
+
 
           <div className="space-y-2">
             <Label>Telefone / WhatsApp</Label>

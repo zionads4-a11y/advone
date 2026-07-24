@@ -11,11 +11,12 @@ import { Users, DollarSign, TrendingUp, Target, Activity, Sparkles } from "lucid
 import { ComercialDashboard } from "@/components/dashboard/ComercialDashboard";
 import { AreasDashboard } from "@/components/dashboard/AreasDashboard";
 import { FinanceiroDashboard } from "@/components/dashboard/FinanceiroDashboard";
+import { MessageQuotaCard } from "@/components/companies/MessageQuotaCard";
 
 interface LeadStats { total: number; new: number; won: number; lost: number; totalValue: number; }
 
 function OverviewMaster() {
-  const { filterByCompany, loading } = useUserCompanies();
+  const { filterByCompany, loading, companyIds } = useUserCompanies();
   const [stats, setStats] = useState<LeadStats>({ total: 0, new: 0, won: 0, lost: 0, totalValue: 0 });
 
   useEffect(() => {
@@ -54,6 +55,11 @@ function OverviewMaster() {
         <MetricCard title="Vendas Fechadas" value={stats.won} icon={TrendingUp} variant="success" />
         <MetricCard title="Faturamento" value={`R$ ${stats.totalValue.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`} icon={DollarSign} variant="success" />
       </div>
+      {companyIds.length > 0 && (
+        <div className="grid gap-4 lg:grid-cols-2">
+          <MessageQuotaCard companyId={companyIds[0]} />
+        </div>
+      )}
     </div>
   );
 }
