@@ -134,7 +134,11 @@ const faq = [
   },
   {
     q: "Esse plano serve para escritório grande?",
-    a: "O AdvOne IA (R$ 597/mês no anual · R$ 797 no semestral · R$ 897 no mensal) atende de advogados solo a escritórios de médio porte. Para operações maiores, com necessidades customizadas e volume acima do padrão, temos o plano Enterprise sob medida — fale com a nossa equipe.",
+    a: "O AdvOne IA atende de advogados solo a escritórios de médio porte. Para operações maiores, com necessidades customizadas e volume acima do padrão, temos o plano Enterprise sob medida — fale com a nossa equipe.",
+  },
+  {
+    q: "Quanto custa?",
+    a: "Trabalhamos com condições sob medida para cada escritório. Ao solicitar a apresentação, um consultor entra em contato e monta a melhor proposta para o seu momento — sem letra miúda.",
   },
 ];
 
