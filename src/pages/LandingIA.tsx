@@ -816,9 +816,6 @@ export default function LandingIA() {
             <button onClick={() => navigate("/")} className="hover:text-foreground">
               Voltar para AdvOne
             </button>
-            <a href="#planos" className="hover:text-foreground">
-              Plano
-            </a>
             <a href="#faq" className="hover:text-foreground">
               FAQ
             </a>
