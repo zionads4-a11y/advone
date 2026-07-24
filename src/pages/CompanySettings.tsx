@@ -260,7 +260,11 @@ export default function CompanySettings() {
       <CompanyNicheAlertsCard companyId={company.id} />
 
       {/* ZapSign Config */}
+      {/* ZapSign Config */}
       <ZapSignConfigCard companyId={company.id} />
+
+      {/* ADVBOX Integration */}
+      <AdvboxConfigCard companyId={company.id} />
 
 
 
