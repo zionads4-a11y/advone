@@ -248,6 +248,20 @@ export function WonHandoffDialog({
         return;
       }
 
+      // 7) Push automático pro ADVBOX (best effort — não bloqueia o fluxo)
+      try {
+        const { data: cfg } = await supabase
+          .from("advbox_configs" as any)
+          .select("enabled, auto_push_on_won")
+          .eq("company_id", companyId)
+          .maybeSingle();
+        if ((cfg as any)?.enabled && (cfg as any)?.auto_push_on_won) {
+          await supabase.functions.invoke("advbox-push-lead", { body: { lead_id: leadId } });
+        }
+      } catch (e) {
+        console.warn("ADVBOX push falhou (não crítico):", e);
+      }
+
       toast.success("Cliente encaminhado para o quadro da área!");
       onOpenChange(false);
       onCompleted();
