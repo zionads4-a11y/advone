@@ -202,7 +202,7 @@ export default function LandingIA() {
     document.title = "Laura SDR — IA no WhatsApp para Advogados | AdvOne";
     const meta = document.querySelector('meta[name="description"]');
     const desc =
-      "AdvOne IA a partir de R$ 597/mês (plano anual): SDR virtual Laura que atende, qualifica e agenda reuniões no WhatsApp 24h por dia. Mensal R$ 897 · Semestral R$ 797 · Anual R$ 597.";
+      "Laura, a SDR virtual do AdvOne, atende, qualifica e agenda reuniões no seu WhatsApp 24h por dia. Fale com nosso time e receba uma proposta sob medida.";
     if (meta) {
       meta.setAttribute("content", desc);
     } else {
