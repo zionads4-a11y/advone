@@ -16,7 +16,7 @@ import { MessageQuotaCard } from "@/components/companies/MessageQuotaCard";
 interface LeadStats { total: number; new: number; won: number; lost: number; totalValue: number; }
 
 function OverviewMaster() {
-  const { filterByCompany, loading } = useUserCompanies();
+  const { filterByCompany, loading, companyIds } = useUserCompanies();
   const [stats, setStats] = useState<LeadStats>({ total: 0, new: 0, won: 0, lost: 0, totalValue: 0 });
 
   useEffect(() => {
