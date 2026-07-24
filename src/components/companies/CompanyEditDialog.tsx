@@ -56,6 +56,8 @@ interface Company {
   shared_whatsapp_number?: boolean | null;
   client_support_responsible_phone?: string | null;
   ai_disabled?: boolean | null;
+  message_quota_monthly?: number | null;
+  messages_used_current_period?: number | null;
 }
 
 
