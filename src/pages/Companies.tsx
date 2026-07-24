@@ -68,7 +68,7 @@ export default function Companies() {
   const handleAdd = async (formData: FormData) => {
     if (!user) return;
 
-    const billingKey = (formData.get("billing_model") as BillingModel) || "plan_gestao";
+    const billingKey = (formData.get("billing_model") as BillingModel) || "plan_mensal";
     const model = getBillingModel(billingKey);
     const sharedWhats = formData.get("shared_whatsapp_number") === "true";
     const supportPhone = (formData.get("client_support_responsible_phone") as string) || "";
