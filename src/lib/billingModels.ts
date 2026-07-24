@@ -43,7 +43,7 @@ export const BILLING_MODELS: BillingModelOption[] = [
     key: "plan_ia",
     emoji: "🤖",
     label: "AdvOne IA",
-    monthly_value: 397,
+    monthly_value: 897,
     description: "Sua secretária virtual 24h no WhatsApp — para parar de perder lead.",
     partnership_type: "mensalidade_zionads",
     service_mode: "ai_only",
