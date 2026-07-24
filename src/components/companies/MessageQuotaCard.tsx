@@ -80,7 +80,9 @@ export function MessageQuotaCard({ companyId }: Props) {
                 </p>
               </div>
             </div>
-            <Progress value={pct} className="h-2" indicatorClassName={barColor} />
+            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+              <div className={`h-full transition-all ${barColor}`} style={{ width: `${pct}%` }} />
+            </div>
             {pct >= 100 && (
               <p className="text-xs text-destructive font-medium">
                 Cota atingida — a Laura está pausada até o dia 1. Faça upgrade para liberar agora.
