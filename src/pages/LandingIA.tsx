@@ -134,7 +134,7 @@ const faq = [
   },
   {
     q: "Esse plano serve para escritório grande?",
-    a: "O AdvOne IA (R$ 497/mês no anual · R$ 697 no semestral · R$ 797 no mensal) é otimizado para advogados solo e escritórios pequenos (até 3 advogados). Quer CRM, pipeline e gestão de equipe? Faça upgrade do módulo Gestão por apenas +R$ 397/mês. Para times maiores, temos o AdvOne Complete com atendimentos ilimitados (R$ 597/mês no anual · R$ 697 no semestral · R$ 897 no mensal).",
+    a: "O AdvOne IA (R$ 497/mês no anual · R$ 697 no semestral · R$ 797 no mensal) atende de advogados solo a escritórios de médio porte. Para operações maiores, com necessidades customizadas e volume acima do padrão, temos o plano Enterprise sob medida — fale com a nossa equipe.",
   },
 ];
 
@@ -198,7 +198,7 @@ export default function LandingIA() {
     document.title = "Laura SDR — IA no WhatsApp para Advogados | AdvOne";
     const meta = document.querySelector('meta[name="description"]');
     const desc =
-      "AdvOne IA a partir de R$ 497/mês (anual): SDR virtual Laura que atende, qualifica e agenda no WhatsApp 24h. Também disponível no plano Complete com atendimentos ilimitados (R$ 597/mês no anual).";
+      "AdvOne IA a partir de R$ 497/mês (plano anual): SDR virtual Laura que atende, qualifica e agenda reuniões no WhatsApp 24h por dia. Mensal R$ 797 · Semestral R$ 697 · Anual R$ 497.";
     if (meta) {
       meta.setAttribute("content", desc);
     } else {
