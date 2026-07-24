@@ -534,28 +534,25 @@ export default function LandingIA() {
         </div>
       </section>
 
-      {/* Seção de planos removida — proposta sob medida via consultor */}
-
-
-
-          <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
-            {[
-              "Secretária Virtual Jurídica com IA 24h",
-              "Atendimento automático no seu WhatsApp",
-              "Qualificação inteligente dos leads",
-              "Agendamento automático na sua agenda",
-              "Follow-up automático",
-              "CRM Jurídico completo com Kanban",
-              "Agenda + Financeiro integrados",
-              "Templates e documentos ilimitados",
-              "Monitoramento de Processos (R$ 2,50 por processo/mês)"
-            ].map((feature) => (
-              <div key={feature} className="flex items-center gap-3 p-4 rounded-xl border border-border/60 bg-card/40">
-                <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
-                <span className="text-sm font-medium">{feature}</span>
-              </div>
-            ))}
-          </div>
+      {/* Recursos inclusos */}
+      <section className="container mx-auto px-4 py-20">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
+          {[
+            "Secretária Virtual Jurídica com IA 24h",
+            "Atendimento automático no seu WhatsApp",
+            "Qualificação inteligente dos leads",
+            "Agendamento automático na sua agenda",
+            "Follow-up automático",
+            "CRM Jurídico completo com Kanban",
+            "Agenda + Financeiro integrados",
+            "Templates e documentos ilimitados",
+            "Monitoramento de Processos (R$ 2,50 por processo/mês)"
+          ].map((feature) => (
+            <div key={feature} className="flex items-center gap-3 p-4 rounded-xl border border-border/60 bg-card/40">
+              <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+              <span className="text-sm font-medium">{feature}</span>
+            </div>
+          ))}
         </div>
       </section>
 
