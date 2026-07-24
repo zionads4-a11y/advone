@@ -45,6 +45,7 @@ const Cases = lazy(() => import("./pages/Cases"));
 const ProcessKanban = lazy(() => import("./pages/ProcessKanban"));
 const ProcessSearch = lazy(() => import("./pages/ProcessSearch"));
 const Subscription = lazy(() => import("./pages/Subscription"));
+const PricingInternal = lazy(() => import("./pages/PricingInternal"));
 const FraudAlerts = lazy(() => import("./pages/FraudAlerts"));
 const AiUsageMonitor = lazy(() => import("./pages/AiUsageMonitor"));
 const MetaCloudSetup = lazy(() => import("./pages/MetaCloudSetup"));
