@@ -314,9 +314,6 @@ export default function LandingIA() {
             <a href="#features" className="text-sm text-muted-foreground hover:text-foreground">
               Recursos
             </a>
-            <a href="#planos" className="text-sm text-muted-foreground hover:text-foreground">
-              Plano
-            </a>
             <a href="#faq" className="text-sm text-muted-foreground hover:text-foreground">
               FAQ
             </a>
