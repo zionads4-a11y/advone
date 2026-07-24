@@ -1030,6 +1030,8 @@ export type Database = {
           lawyer_phone: string | null
           lawyer_title: string
           logo_url: string | null
+          message_quota_monthly: number | null
+          messages_used_current_period: number
           name: string
           office_address: string | null
           office_cep: string | null
@@ -1039,6 +1041,10 @@ export type Database = {
           office_state: string | null
           partnership_type: Database["public"]["Enums"]["partnership_type"]
           practice_specialty: string
+          quota_alert_100_sent_at: string | null
+          quota_alert_80_sent_at: string | null
+          quota_exceeded_at: string | null
+          quota_period_start: string
           service_mode: string
           shared_whatsapp_number: boolean
           timezone: string
@@ -1071,6 +1077,8 @@ export type Database = {
           lawyer_phone?: string | null
           lawyer_title?: string
           logo_url?: string | null
+          message_quota_monthly?: number | null
+          messages_used_current_period?: number
           name: string
           office_address?: string | null
           office_cep?: string | null
@@ -1080,6 +1088,10 @@ export type Database = {
           office_state?: string | null
           partnership_type?: Database["public"]["Enums"]["partnership_type"]
           practice_specialty?: string
+          quota_alert_100_sent_at?: string | null
+          quota_alert_80_sent_at?: string | null
+          quota_exceeded_at?: string | null
+          quota_period_start?: string
           service_mode?: string
           shared_whatsapp_number?: boolean
           timezone?: string
@@ -1112,6 +1124,8 @@ export type Database = {
           lawyer_phone?: string | null
           lawyer_title?: string
           logo_url?: string | null
+          message_quota_monthly?: number | null
+          messages_used_current_period?: number
           name?: string
           office_address?: string | null
           office_cep?: string | null
@@ -1121,6 +1135,10 @@ export type Database = {
           office_state?: string | null
           partnership_type?: Database["public"]["Enums"]["partnership_type"]
           practice_specialty?: string
+          quota_alert_100_sent_at?: string | null
+          quota_alert_80_sent_at?: string | null
+          quota_exceeded_at?: string | null
+          quota_period_start?: string
           service_mode?: string
           shared_whatsapp_number?: boolean
           timezone?: string
@@ -5126,6 +5144,7 @@ export type Database = {
     }
     Functions: {
       cleanup_webhook_logs: { Args: never; Returns: undefined }
+      company_can_use_ai: { Args: { _company_id: string }; Returns: boolean }
       company_has_legal_ai_access: {
         Args: { _company_id: string }
         Returns: boolean
@@ -5148,6 +5167,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_message_usage: { Args: { _company_id: string }; Returns: Json }
       insert_audit_log: {
         Args: {
           _action: string
@@ -5172,6 +5192,7 @@ export type Database = {
         Args: { _reminder_id: string; _user_id: string }
         Returns: boolean
       }
+      reset_all_message_quotas: { Args: never; Returns: number }
       unaccent: { Args: { "": string }; Returns: string }
       user_belongs_to_company: {
         Args: { _company_id: string; _user_id: string }
