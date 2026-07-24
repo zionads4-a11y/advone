@@ -139,7 +139,7 @@ export default function LandingPage() {
               IA Jurídica
             </a>
             <a href="#depoimentos" className="text-sm text-[hsl(220,10%,70%)] transition-colors hover:text-[hsl(153,60%,45%)]">Depoimentos</a>
-            <a href="#planos" className="text-sm text-[hsl(220,10%,70%)] transition-colors hover:text-[hsl(153,60%,45%)]">Planos</a>
+            
           </div>
           <div className="flex items-center gap-3">
             <Button variant="ghost" onClick={() => navigate("/auth?mode=login")} className="text-[hsl(220,10%,70%)] hover:text-[hsl(153,60%,45%)]">
@@ -874,125 +874,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing */}
-      <section id="planos" className="border-y border-[hsl(220,20%,16%)] bg-[hsl(220,25%,8%)]">
-        <div className="mx-auto max-w-6xl px-6 py-24">
-          <Reveal className="mb-16 text-center">
-            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-[hsl(153,60%,45%)]">Planos</p>
-            <h2 className="text-3xl font-bold md:text-4xl mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              ESCOLHA O PLANO IDEAL PARA SEU ESCRITÓRIO
-            </h2>
-            <p className="text-[hsl(220,10%,60%)] max-w-2xl mx-auto">
-              Comece com o AdvOne IA e escale com o Enterprise quando fizer sentido.
-            </p>
-          </Reveal>
+      {/* Seção de planos removida — proposta sob medida via consultor */}
 
-          <div className="grid gap-8 md:grid-cols-2 max-w-5xl mx-auto items-start">
-
-            {/* AdvOne IA */}
-            <Reveal delay={0}>
-              <div className="relative rounded-2xl border-2 border-[hsl(153,60%,45%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col shadow-xl shadow-[hsl(153,60%,45%)]/10 transition-all duration-500 hover:-translate-y-2">
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[hsl(153,60%,45%)] px-4 py-1 text-xs font-bold text-[hsl(220,25%,6%)]">
-                  MAIS POPULAR
-                </div>
-                <div className="mb-6 flex items-center justify-between">
-                  <span className="inline-block rounded-full bg-[hsl(153,60%,45%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(153,60%,45%)]">ADVONE IA</span>
-                </div>
-
-                <div className="mb-6">
-                  <h3 className="text-xl font-bold text-[hsl(220,10%,92%)] mb-4">Sua secretária virtual 24h</h3>
-
-                  <div className="rounded-lg border border-[hsl(153,60%,45%)]/40 bg-[hsl(153,60%,45%)]/10 px-4 py-6 text-center">
-                    <div className="text-3xl font-bold text-[hsl(153,60%,45%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Sob consulta</div>
-                    <p className="mt-2 text-xs text-[hsl(220,10%,60%)]">
-                      Condições sob medida por escritório. Fale com um consultor e receba a melhor proposta.
-                    </p>
-                  </div>
-
-                  <p className="mt-3 text-sm text-[hsl(220,10%,60%)]">Para quem quer parar de perder lead no WhatsApp.</p>
-                </div>
-
-                <ul className="mb-6 space-y-3">
-                  {[
-                    "Atendimento no WhatsApp 24h",
-                    "Qualificação inteligente de leads",
-                    "Agendamento automático na sua agenda",
-                    "Atendimento a clientes atuais",
-                  ].map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-sm text-[hsl(220,10%,75%)]">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(153,60%,45%)]" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <DemoRequestDialog
-                  source="pricing-ia"
-                  trigger={
-                    <Button className="w-full bg-gradient-to-r from-[hsl(153,60%,45%)] to-[hsl(153,70%,55%)] hover:opacity-90 text-[hsl(220,25%,6%)] font-bold py-6 shadow-lg shadow-[hsl(153,60%,45%)]/20">
-                      COMEÇAR COM IA
-                    </Button>
-                  }
-                />
-
-              </div>
-            </Reveal>
-
-
-
-            {/* AdvOne Enterprise */}
-            <Reveal delay={300}>
-              <div className="relative rounded-2xl border border-[hsl(45,80%,55%)]/40 bg-gradient-to-br from-[hsl(220,25%,9%)] to-[hsl(220,25%,7%)] p-8 flex flex-col transition-all duration-500 hover:border-[hsl(45,80%,55%)] hover:-translate-y-1 shadow-lg shadow-[hsl(45,80%,55%)]/5">
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-[hsl(45,80%,55%)] to-[hsl(38,90%,60%)] px-4 py-1 text-xs font-bold text-[hsl(220,25%,6%)]">
-                  SOB MEDIDA
-                </div>
-                <div className="mb-6 flex items-center justify-between">
-                  <span className="inline-block rounded-full bg-[hsl(45,80%,55%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(45,80%,60%)]">ADVONE ENTERPRISE</span>
-                </div>
-                <div className="mb-6">
-                  <h3 className="text-xl font-bold mb-2 text-[hsl(45,80%,60%)]">Central de relacionamento com clientes</h3>
-                  <div className="mt-4 flex items-baseline gap-1">
-                    <span className="text-3xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Sob consulta</span>
-                  </div>
-                  <p className="mt-2 text-sm text-[hsl(220,10%,60%)]">
-                    Para escritórios que atendem centenas de clientes ativos e precisam de um <strong className="text-[hsl(220,10%,80%)]">único WhatsApp</strong> inteligente que separa leads novos de clientes atuais e roteia cada conversa para o setor certo — automaticamente.
-                  </p>
-                </div>
-
-                <ul className="mb-6 space-y-3">
-                  {[
-                    "Tudo do plano Complete incluso",
-                    "Áreas de atuação ilimitadas (a partir de 4)",
-                    "Equipe ilimitada por área de atuação",
-                    "Atendimento a clientes atuais no mesmo número da captação",
-                    "Identificação automática do cliente (nome + CPF)",
-                    "Roteamento inteligente por área (Trabalhista, Cível, Previdenciário…)",
-                    "Sala de conversa exclusiva por departamento",
-                    "Transferência manual entre setores e advogados",
-                    "Histórico auditável — nenhuma conversa pode ser apagada",
-                    "Download completo de conversas (LGPD/compliance)",
-                    "Consulta de status de processo direto no WhatsApp",
-                    "SLA dedicado e onboarding assistido pela nossa equipe",
-                  ].map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-sm text-[hsl(220,10%,75%)]">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(45,80%,55%)]" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <Button
-                  onClick={() => {
-                    const msg = encodeURIComponent("Olá! Quero conversar sobre o plano AdvOne Enterprise para o meu escritório.");
-                    window.open(`https://wa.me/5511999999999?text=${msg}`, "_blank");
-                  }}
-                  className="w-full bg-gradient-to-r from-[hsl(45,80%,55%)] to-[hsl(38,90%,60%)] hover:opacity-90 text-[hsl(220,25%,6%)] font-bold py-6 shadow-lg shadow-[hsl(45,80%,55%)]/20"
-                >
-                  FALAR COM NOSSA EQUIPE
-                </Button>
-              </div>
-            </Reveal>
-          </div>
-        </div>
-      </section>
 
       {/* CTA Final */}
       <section className="relative overflow-hidden">
