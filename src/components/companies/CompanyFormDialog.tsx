@@ -140,7 +140,7 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
             <div className="grid gap-3 md:grid-cols-3">
               {BILLING_MODELS.map((m) => {
                 const active = selectedModel === m.key;
-                const highlight = m.key === "plan_gestao";
+                const highlight = m.key === "plan_anual";
                 return (
                   <button
                     key={m.key}
