@@ -546,8 +546,9 @@ export default function LandingIA() {
                 ESCOLHA O PLANO IDEAL PARA SEU ESCRITÓRIO
               </h2>
               <p className="mt-4 text-muted-foreground">
-                Comece pela IA, evolua para Gestão e chegue no Complete quando fizer sentido.
+                A SDR virtual Laura atendendo seu WhatsApp 24h — escolha o ciclo que faz mais sentido pro seu escritório.
               </p>
+
             </div>
           </Reveal>
 
