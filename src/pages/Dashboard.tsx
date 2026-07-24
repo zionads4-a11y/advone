@@ -55,6 +55,11 @@ function OverviewMaster() {
         <MetricCard title="Vendas Fechadas" value={stats.won} icon={TrendingUp} variant="success" />
         <MetricCard title="Faturamento" value={`R$ ${stats.totalValue.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`} icon={DollarSign} variant="success" />
       </div>
+      {companyIds.length > 0 && (
+        <div className="grid gap-4 lg:grid-cols-2">
+          <MessageQuotaCard companyId={companyIds[0]} />
+        </div>
+      )}
     </div>
   );
 }
