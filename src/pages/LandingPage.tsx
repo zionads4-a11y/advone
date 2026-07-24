@@ -139,7 +139,7 @@ export default function LandingPage() {
               IA Jurídica
             </a>
             <a href="#depoimentos" className="text-sm text-[hsl(220,10%,70%)] transition-colors hover:text-[hsl(153,60%,45%)]">Depoimentos</a>
-            <a href="#planos" className="text-sm text-[hsl(220,10%,70%)] transition-colors hover:text-[hsl(153,60%,45%)]">Planos</a>
+            
           </div>
           <div className="flex items-center gap-3">
             <Button variant="ghost" onClick={() => navigate("/auth?mode=login")} className="text-[hsl(220,10%,70%)] hover:text-[hsl(153,60%,45%)]">
