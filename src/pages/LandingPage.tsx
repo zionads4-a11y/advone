@@ -883,11 +883,12 @@ export default function LandingPage() {
               ESCOLHA O PLANO IDEAL PARA SEU ESCRITÓRIO
             </h2>
             <p className="text-[hsl(220,10%,60%)] max-w-2xl mx-auto">
-              Comece pela IA, evolua para Gestão, chegue no Complete e escale com o Enterprise. Você cresce, o AdvOne cresce com você.
+              Comece com o AdvOne IA e escale com o Enterprise quando fizer sentido.
             </p>
           </Reveal>
 
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4 max-w-7xl mx-auto items-start">
+          <div className="grid gap-8 md:grid-cols-2 max-w-5xl mx-auto items-start">
+
             {/* AdvOne IA */}
             <Reveal delay={0}>
               <div className="relative rounded-2xl border-2 border-[hsl(153,60%,45%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col shadow-xl shadow-[hsl(153,60%,45%)]/10 transition-all duration-500 hover:-translate-y-2">
