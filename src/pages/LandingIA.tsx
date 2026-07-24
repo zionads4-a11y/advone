@@ -568,19 +568,11 @@ export default function LandingIA() {
                     <div className="text-center text-sm font-semibold uppercase tracking-wide text-primary mb-4">
                       ADVONE IA
                     </div>
-                    <div className="space-y-2">
-                      <div className="flex items-baseline justify-between rounded-lg border border-border bg-muted/30 px-3 py-2">
-                        <span className="text-xs uppercase tracking-wide text-muted-foreground">Mensal</span>
-                        <span className="text-lg font-bold">R$ 897<span className="text-xs text-muted-foreground font-normal">/mês</span></span>
-                      </div>
-                      <div className="flex items-baseline justify-between rounded-lg border border-border bg-muted/30 px-3 py-2">
-                        <span className="text-xs uppercase tracking-wide text-muted-foreground">Semestral</span>
-                        <span className="text-lg font-bold">R$ 797<span className="text-xs text-muted-foreground font-normal">/mês</span></span>
-                      </div>
-                      <div className="flex items-baseline justify-between rounded-lg border border-primary/40 bg-primary/10 px-3 py-2">
-                        <span className="text-xs uppercase tracking-wide text-primary font-semibold">Anual · melhor oferta</span>
-                        <span className="text-lg font-bold text-primary">R$ 597<span className="text-xs font-normal">/mês</span></span>
-                      </div>
+                    <div className="rounded-lg border border-primary/40 bg-primary/10 px-4 py-5 text-center">
+                      <div className="text-3xl font-bold text-primary">Sob consulta</div>
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Condições sob medida por escritório. Fale com um consultor e receba a melhor proposta.
+                      </p>
                     </div>
                   </div>
 
