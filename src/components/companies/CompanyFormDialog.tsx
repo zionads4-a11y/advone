@@ -33,7 +33,7 @@ const brl = (n: number) =>
   n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 
 export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormDialogProps) {
-  const [selectedModel, setSelectedModel] = useState<BillingModel>("plan_gestao");
+  const [selectedModel, setSelectedModel] = useState<BillingModel>("plan_mensal");
   const [sharedWhats, setSharedWhats] = useState(false);
   const [supportPhone, setSupportPhone] = useState("");
   const [dueDay, setDueDay] = useState("10");
