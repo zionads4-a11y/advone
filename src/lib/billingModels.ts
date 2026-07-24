@@ -253,5 +253,5 @@ export function inferBillingModel(
   _partnership_type?: string | null,
   service_mode?: string | null,
 ): BillingModel {
-  return service_mode === "ai_only" ? "plan_ia" : "plan_complete";
+  return service_mode === "ai_only" ? "plan_mensal" : "plan_mensal";
 }
