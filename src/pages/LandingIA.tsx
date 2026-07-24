@@ -134,7 +134,7 @@ const faq = [
   },
   {
     q: "Esse plano serve para escritório grande?",
-    a: "O AdvOne IA (R$ 497/mês no anual · R$ 697 no semestral · R$ 797 no mensal) atende de advogados solo a escritórios de médio porte. Para operações maiores, com necessidades customizadas e volume acima do padrão, temos o plano Enterprise sob medida — fale com a nossa equipe.",
+    a: "O AdvOne IA (R$ 597/mês no anual · R$ 797 no semestral · R$ 897 no mensal) atende de advogados solo a escritórios de médio porte. Para operações maiores, com necessidades customizadas e volume acima do padrão, temos o plano Enterprise sob medida — fale com a nossa equipe.",
   },
 ];
 
@@ -198,7 +198,7 @@ export default function LandingIA() {
     document.title = "Laura SDR — IA no WhatsApp para Advogados | AdvOne";
     const meta = document.querySelector('meta[name="description"]');
     const desc =
-      "AdvOne IA a partir de R$ 497/mês (plano anual): SDR virtual Laura que atende, qualifica e agenda reuniões no WhatsApp 24h por dia. Mensal R$ 797 · Semestral R$ 697 · Anual R$ 497.";
+      "AdvOne IA a partir de R$ 597/mês (plano anual): SDR virtual Laura que atende, qualifica e agenda reuniões no WhatsApp 24h por dia. Mensal R$ 897 · Semestral R$ 797 · Anual R$ 597.";
     if (meta) {
       meta.setAttribute("content", desc);
     } else {
@@ -522,7 +522,7 @@ export default function LandingIA() {
                   <li>✅ 5 follow-ups automáticos por lead</li>
                   <li>✅ Responde em até 30 segundos</li>
                   <li>✅ Qualifica e classifica viabilidade</li>
-                  <li>✅ Custo: a partir de R$ 497/mês — sem encargos</li>
+                  <li>✅ Custo: a partir de R$ 597/mês — sem encargos</li>
                 </ul>
               </CardContent>
             </Card>
@@ -567,15 +567,15 @@ export default function LandingIA() {
                     <div className="space-y-2">
                       <div className="flex items-baseline justify-between rounded-lg border border-border bg-muted/30 px-3 py-2">
                         <span className="text-xs uppercase tracking-wide text-muted-foreground">Mensal</span>
-                        <span className="text-lg font-bold">R$ 797<span className="text-xs text-muted-foreground font-normal">/mês</span></span>
+                        <span className="text-lg font-bold">R$ 897<span className="text-xs text-muted-foreground font-normal">/mês</span></span>
                       </div>
                       <div className="flex items-baseline justify-between rounded-lg border border-border bg-muted/30 px-3 py-2">
                         <span className="text-xs uppercase tracking-wide text-muted-foreground">Semestral</span>
-                        <span className="text-lg font-bold">R$ 697<span className="text-xs text-muted-foreground font-normal">/mês</span></span>
+                        <span className="text-lg font-bold">R$ 797<span className="text-xs text-muted-foreground font-normal">/mês</span></span>
                       </div>
                       <div className="flex items-baseline justify-between rounded-lg border border-primary/40 bg-primary/10 px-3 py-2">
                         <span className="text-xs uppercase tracking-wide text-primary font-semibold">Anual · melhor oferta</span>
-                        <span className="text-lg font-bold text-primary">R$ 497<span className="text-xs font-normal">/mês</span></span>
+                        <span className="text-lg font-bold text-primary">R$ 597<span className="text-xs font-normal">/mês</span></span>
                       </div>
                     </div>
                   </div>
@@ -868,7 +868,7 @@ export default function LandingIA() {
                 Pare de perder leads enquanto você dorme.
               </h2>
               <p className="mx-auto max-w-2xl text-muted-foreground">
-                A Laura está pronta para começar a atender no seu WhatsApp em 24h. Planos a partir de R$ 497/mês.
+                A Laura está pronta para começar a atender no seu WhatsApp em 24h. Planos a partir de R$ 597/mês.
               </p>
               <DemoRequestDialog
                 source="landing-ia-final-cta"
