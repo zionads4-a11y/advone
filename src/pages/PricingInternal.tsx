@@ -45,7 +45,6 @@ const IA_PLAN: Plan = {
     "Advogados solo e escritórios de pequeno/médio porte que perdem lead no WhatsApp.",
   cycles: [
     { label: "Mensal", monthly: 897, total: 897, totalLabel: "Total mensal" },
-    { label: "Trimestral", monthly: 847, total: 2541, totalLabel: "Total trimestral", note: "Economia de R$ 150" },
     { label: "Semestral", monthly: 797, total: 4782, totalLabel: "Total semestral", note: "Economia de R$ 600" },
     {
       label: "Anual",
