@@ -113,6 +113,7 @@ export default function Companies() {
         custom_base_value: finalBillingValue,
         shared_whatsapp_number: sharedWhats,
         client_support_responsible_phone: sharedWhats && supportPhone ? supportPhone : null,
+        message_quota_monthly: model.message_quota_default ?? null,
         created_by: user.id,
       } as any)
       .select("id")
