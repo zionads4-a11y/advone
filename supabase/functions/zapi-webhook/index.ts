@@ -1659,10 +1659,10 @@ Antes de responder:
               || "responsável";
           }
 
-          // Só desativa o bot se REALMENTE precisa de handoff humano
-          // (assunto ≠ andamento, OU processo foi encontrado). Se subject=andamento e
-          // não encontrou nada, o bot deve responder a mensagem de "fase inicial".
-          const shouldHandoffHuman = subject !== "andamento_processo" || foundInSystem;
+          // Pacote 2: se o cliente perguntou sobre andamento, o bot responde DIRETO
+          // com os dados do processo — não transfere pro humano. Só desativa quando
+          // subject="outro" (dúvida genérica que precisa de atendente humano).
+          const shouldHandoffHuman = subject !== "andamento_processo";
           if (leadId && shouldHandoffHuman) {
             await supabase.from("leads").update({ bot_disabled: true, is_unread: true }).eq("id", leadId);
           }

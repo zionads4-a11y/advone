@@ -14,6 +14,121 @@ export type Database = {
   }
   public: {
     Tables: {
+      advbox_configs: {
+        Row: {
+          api_token: string
+          auto_push_on_won: boolean
+          base_url: string
+          company_id: string
+          created_at: string
+          enabled: boolean
+          id: string
+          last_sync_at: string | null
+          last_sync_error: string | null
+          last_sync_status: string | null
+          updated_at: string
+        }
+        Insert: {
+          api_token: string
+          auto_push_on_won?: boolean
+          base_url?: string
+          company_id: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          last_sync_at?: string | null
+          last_sync_error?: string | null
+          last_sync_status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          api_token?: string
+          auto_push_on_won?: boolean
+          base_url?: string
+          company_id?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          last_sync_at?: string | null
+          last_sync_error?: string | null
+          last_sync_status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "advbox_configs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "advbox_configs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      advbox_push_log: {
+        Row: {
+          advbox_id: string | null
+          company_id: string
+          created_at: string
+          entity_type: string
+          error_message: string | null
+          id: string
+          lead_id: string | null
+          payload: Json | null
+          status: string
+        }
+        Insert: {
+          advbox_id?: string | null
+          company_id: string
+          created_at?: string
+          entity_type: string
+          error_message?: string | null
+          id?: string
+          lead_id?: string | null
+          payload?: Json | null
+          status?: string
+        }
+        Update: {
+          advbox_id?: string | null
+          company_id?: string
+          created_at?: string
+          entity_type?: string
+          error_message?: string | null
+          id?: string
+          lead_id?: string | null
+          payload?: Json | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "advbox_push_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "advbox_push_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "advbox_push_log_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agreement_installments: {
         Row: {
           agreement_id: string
