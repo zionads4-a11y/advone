@@ -883,11 +883,12 @@ export default function LandingPage() {
               ESCOLHA O PLANO IDEAL PARA SEU ESCRITÓRIO
             </h2>
             <p className="text-[hsl(220,10%,60%)] max-w-2xl mx-auto">
-              Comece pela IA, evolua para Gestão, chegue no Complete e escale com o Enterprise. Você cresce, o AdvOne cresce com você.
+              Comece com o AdvOne IA e escale com o Enterprise quando fizer sentido.
             </p>
           </Reveal>
 
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4 max-w-7xl mx-auto items-start">
+          <div className="grid gap-8 md:grid-cols-2 max-w-5xl mx-auto items-start">
+
             {/* AdvOne IA */}
             <Reveal delay={0}>
               <div className="relative rounded-2xl border-2 border-[hsl(153,60%,45%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col shadow-xl shadow-[hsl(153,60%,45%)]/10 transition-all duration-500 hover:-translate-y-2">
@@ -944,103 +945,7 @@ export default function LandingPage() {
               </div>
             </Reveal>
 
-            {/* AdvOne Gestão — destaque */}
-            <Reveal delay={100}>
-              <div className="rounded-2xl border border-[hsl(153,60%,45%)]/40 bg-[hsl(220,25%,9%)] p-8 flex flex-col transition-all duration-500 hover:border-[hsl(153,60%,45%)] hover:-translate-y-1">
 
-                <div className="mb-6 flex items-center justify-between">
-                  <span className="inline-block rounded-full bg-[hsl(153,60%,45%)]/15 px-3 py-1 text-xs font-semibold text-[hsl(153,60%,45%)]">ADVONE GESTÃO</span>
-                </div>
-                <div className="mb-6">
-                  <h3 className="text-xl font-bold mb-2 text-[hsl(153,60%,45%)]">Escritório organizado de verdade</h3>
-                  <div className="mt-4 flex items-baseline gap-1">
-                    <span className="text-2xl font-bold text-[hsl(220,10%,60%)]">+</span>
-                    <span className="text-4xl font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 397</span>
-                    <span className="text-sm text-[hsl(220,10%,60%)]">/mês</span>
-                  </div>
-                  <p className="mt-1 text-xs text-[hsl(153,60%,45%)] font-semibold">upgrade do AdvOne IA</p>
-                  <p className="mt-2 text-sm text-[hsl(220,10%,60%)]">Adicione CRM, pipeline e gestão de equipe em cima do seu plano IA.</p>
-                </div>
-
-                <ul className="mb-6 space-y-3">
-                  {[
-                    "CRM jurídico completo",
-                    "Até 3 áreas de atuação",
-                    "Até 3 advogados por área",
-                    "Pipeline (Kanban de leads e casos)",
-                    "Automações, cadências e relatórios",
-                  ].map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-sm text-[hsl(220,10%,75%)]">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(153,60%,45%)]" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <DemoRequestDialog
-                  source="pricing-gestao"
-                  trigger={
-                    <Button size="lg" className="w-full bg-transparent border border-[hsl(153,60%,45%)]/60 hover:bg-[hsl(153,60%,45%)]/10 text-[hsl(153,60%,45%)] font-bold text-lg py-6">
-                      QUERO ORGANIZAR
-                    </Button>
-                  }
-                />
-
-              </div>
-            </Reveal>
-
-            {/* AdvOne Complete */}
-            <Reveal delay={200}>
-              <div className="rounded-2xl border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,9%)] p-8 flex flex-col transition-all duration-500 hover:border-[hsl(153,60%,45%)]/30 hover:-translate-y-1">
-                <div className="mb-6 flex items-center justify-between">
-                  <span className="inline-block rounded-full bg-[hsl(220,20%,16%)] px-3 py-1 text-xs font-semibold text-[hsl(220,10%,75%)]">ADVONE COMPLETE</span>
-                </div>
-                <div className="mb-6">
-                  <h3 className="text-xl font-bold text-[hsl(220,10%,92%)] mb-2">Tudo em um só lugar</h3>
-                  <span className="inline-block mt-1 mb-3 rounded-full bg-[hsl(153,60%,45%)]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[hsl(153,60%,45%)]">Atendimentos ilimitados</span>
-
-                  <div className="space-y-2">
-                    <div className="flex items-baseline justify-between rounded-lg border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,7%)] px-3 py-2">
-                      <span className="text-xs uppercase tracking-wide text-[hsl(220,10%,60%)]">Mensal</span>
-                      <span className="text-lg font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 897<span className="text-xs text-[hsl(220,10%,60%)] font-normal">/mês</span></span>
-                    </div>
-                    <div className="flex items-baseline justify-between rounded-lg border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,7%)] px-3 py-2">
-                      <span className="text-xs uppercase tracking-wide text-[hsl(220,10%,60%)]">Semestral</span>
-                      <span className="text-lg font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 697<span className="text-xs text-[hsl(220,10%,60%)] font-normal">/mês</span></span>
-                    </div>
-                    <div className="flex items-baseline justify-between rounded-lg border border-[hsl(153,60%,45%)]/40 bg-[hsl(153,60%,45%)]/10 px-3 py-2">
-                      <span className="text-xs uppercase tracking-wide text-[hsl(153,60%,45%)] font-semibold">Anual · melhor oferta</span>
-                      <span className="text-lg font-bold text-[hsl(153,60%,45%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 597<span className="text-xs font-normal">/mês</span></span>
-                    </div>
-                  </div>
-                  <p className="mt-3 text-sm text-[hsl(220,10%,60%)]">Para escritórios que querem escalar sem limite.</p>
-                </div>
-
-
-                <ul className="mb-6 space-y-3">
-                  {[
-                    "Tudo do plano IA",
-                    "Tudo do plano Gestão",
-                    "Integrações avançadas (Google, Asaas, ZapSign)",
-                    "Recursos exclusivos (IA jurídica, jurisprudência, calculadoras)",
-                    "Suporte prioritário",
-                  ].map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-sm text-[hsl(220,10%,75%)]">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(153,60%,45%)]" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <DemoRequestDialog
-                  source="pricing-complete"
-                  trigger={
-                    <Button className="w-full bg-transparent border border-[hsl(220,20%,16%)] hover:bg-[hsl(220,20%,16%)] text-[hsl(220,10%,92%)] font-bold py-6">
-                      FALAR COM ESPECIALISTA
-                    </Button>
-                  }
-                />
-
-              </div>
-            </Reveal>
 
             {/* AdvOne Enterprise */}
             <Reveal delay={300}>
