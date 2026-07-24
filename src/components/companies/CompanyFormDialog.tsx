@@ -33,7 +33,7 @@ const brl = (n: number) =>
   n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 
 export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormDialogProps) {
-  const [selectedModel, setSelectedModel] = useState<BillingModel>("plan_gestao");
+  const [selectedModel, setSelectedModel] = useState<BillingModel>("plan_mensal");
   const [sharedWhats, setSharedWhats] = useState(false);
   const [supportPhone, setSupportPhone] = useState("");
   const [dueDay, setDueDay] = useState("10");
@@ -140,7 +140,7 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
             <div className="grid gap-3 md:grid-cols-3">
               {BILLING_MODELS.map((m) => {
                 const active = selectedModel === m.key;
-                const highlight = m.key === "plan_gestao";
+                const highlight = m.key === "plan_anual";
                 return (
                   <button
                     key={m.key}
@@ -170,6 +170,8 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
                     <div className="mt-2 flex items-baseline gap-1">
                       {m.key === "plan_enterprise" ? (
                         <span className="text-2xl font-bold">Sob medida</span>
+                      ) : m.key === "plan_ia_zionads" ? (
+                        <span className="text-2xl font-bold">Cortesia</span>
                       ) : (
                         <>
                           <span className="text-2xl font-bold">{brl(m.monthly_value)}</span>
