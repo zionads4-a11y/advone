@@ -864,7 +864,7 @@ export default function LandingIA() {
                 Pare de perder leads enquanto você dorme.
               </h2>
               <p className="mx-auto max-w-2xl text-muted-foreground">
-                A Laura está pronta para começar a atender no seu WhatsApp em 24h. Planos a partir de R$ 597/mês.
+                A Laura está pronta para começar a atender no seu WhatsApp em 24h. Solicite uma apresentação e receba uma proposta sob medida.
               </p>
               <DemoRequestDialog
                 source="landing-ia-final-cta"
