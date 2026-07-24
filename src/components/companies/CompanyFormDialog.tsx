@@ -170,6 +170,8 @@ export function CompanyFormDialog({ open, onOpenChange, onSubmit }: CompanyFormD
                     <div className="mt-2 flex items-baseline gap-1">
                       {m.key === "plan_enterprise" ? (
                         <span className="text-2xl font-bold">Sob medida</span>
+                      ) : m.key === "plan_ia_zionads" ? (
+                        <span className="text-2xl font-bold">Cortesia</span>
                       ) : (
                         <>
                           <span className="text-2xl font-bold">{brl(m.monthly_value)}</span>
