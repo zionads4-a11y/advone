@@ -187,6 +187,9 @@ export default function PricingInternal() {
             </p>
           </div>
         </div>
+      </div>
+
+
 
       <Tabs defaultValue="planos" className="w-full">
         <TabsList>
