@@ -1,21 +1,27 @@
 // Modelos de cobrança disponíveis ao cadastrar uma empresa.
-// Estrutura em 3 planos (a mesma escada exibida nas landing pages):
-//   - plan_ia       → AdvOne IA        · R$ 897/mês (mensal) · menu enxuto (Dashboard, Kanban, Clientes, Agenda, Conversas, Monitoramento)
-//   - plan_gestao   → AdvOne Gestão    · R$ 597/mês (equivalente anual) · CRM completo sem os recursos exclusivos (IA jurídica, jurisprudência etc.)
-//   - plan_complete → AdvOne Complete  · R$ 897/mês · tudo incluso
+// Estrutura enxuta em 5 planos:
+//   - plan_mensal      → AdvOne · Mensal    · R$ 897/mês
+//   - plan_semestral   → AdvOne · Semestral · R$ 797/mês
+//   - plan_anual       → AdvOne · Anual     · R$ 597/mês
+//   - plan_ia_zionads  → ZionAds (cortesia, cobrado fora da plataforma)
+//   - plan_enterprise  → Sob medida (valor manual definido pelo gerente)
 //
-// Chaves legadas (plan_completo, plan_ia_monthly, plan_ia_6m, plan_ia_12m, plan_zionads, plan_free)
-// continuam válidas em tempo de execução para não quebrar empresas existentes,
-// mas não aparecem mais na UI de cadastro/edição.
+// Todos os planos comerciais entregam o mesmo pacote — a diferença é
+// apenas o compromisso de tempo (quanto mais longo, menor a mensalidade).
+// Chaves legadas continuam válidas em tempo de execução para não quebrar
+// empresas existentes, mas não aparecem mais na UI de cadastro/edição.
 
 export type BillingModel =
-  | "plan_ia"
-  | "plan_ia_pro"
+  | "plan_mensal"
+  | "plan_semestral"
+  | "plan_anual"
   | "plan_ia_zionads"
-  | "plan_gestao"
-  | "plan_complete"
   | "plan_enterprise"
   // legado — mantido apenas para compatibilidade de leitura
+  | "plan_ia"
+  | "plan_ia_pro"
+  | "plan_gestao"
+  | "plan_complete"
   | "plan_completo"
   | "plan_ia_monthly"
   | "plan_ia_6m"
@@ -33,98 +39,70 @@ export interface BillingModelOption {
   service_mode: "full" | "ai_only";
   monitoring_quota: number;
   /** Cota padrão de mensagens/mês da IA aplicada ao criar a empresa. `null` = ilimitado. */
-  /** Cota padrão de mensagens/mês da IA aplicada ao criar a empresa. `null`/omitido = default do plano. */
   message_quota_default?: number | null;
   features: string[];
 }
 
+const COMMERCIAL_FEATURES = [
+  "CRM jurídico completo (Kanban, Agenda, Financeiro)",
+  "Laura — SDR com IA no WhatsApp 24h",
+  "15.000 mensagens/mês da IA",
+  "Monitoramento de processos (Escavador)",
+  "Integrações: Google, Asaas, ZapSign",
+];
+
 export const BILLING_MODELS: BillingModelOption[] = [
   {
-    key: "plan_ia",
-    emoji: "🤖",
-    label: "AdvOne IA",
+    key: "plan_mensal",
+    emoji: "📅",
+    label: "AdvOne · Mensal",
     monthly_value: 897,
-    description: "Sua secretária virtual 24h no WhatsApp — para parar de perder lead.",
+    description: "Compromisso mês a mês, sem fidelidade. Cancele quando quiser.",
     partnership_type: "mensalidade_zionads",
-    service_mode: "ai_only",
+    service_mode: "full",
     monitoring_quota: 10,
     message_quota_default: 15000,
-    features: [
-      "Atendimento no WhatsApp 24h",
-      "Qualificação inteligente de leads",
-      "Agendamento automático na agenda",
-      "Atendimento a clientes atuais",
-      "15.000 mensagens/mês da IA",
-    ],
+    features: COMMERCIAL_FEATURES,
   },
   {
-    key: "plan_ia_pro",
-    emoji: "🚀",
-    label: "AdvOne IA Pro",
+    key: "plan_semestral",
+    emoji: "📈",
+    label: "AdvOne · Semestral",
     monthly_value: 797,
-    description: "Para escritórios com alto volume de leads: até 15.000 mensagens/mês da Laura.",
+    description: "Compromisso de 6 meses — economia de R$ 100/mês frente ao mensal.",
     partnership_type: "mensalidade_zionads",
-    service_mode: "ai_only",
-    monitoring_quota: 20,
+    service_mode: "full",
+    monitoring_quota: 10,
     message_quota_default: 15000,
-    features: [
-      "Todos os recursos do AdvOne IA",
-      "15.000 mensagens/mês da IA (50% a mais)",
-      "Prioridade de fila em horários de pico",
-      "Ideal para escritórios com campanhas ativas",
-    ],
+    features: COMMERCIAL_FEATURES,
+  },
+  {
+    key: "plan_anual",
+    emoji: "🏆",
+    label: "AdvOne · Anual",
+    monthly_value: 597,
+    description: "Melhor custo-benefício. Compromisso de 12 meses — economia de R$ 300/mês.",
+    partnership_type: "mensalidade_zionads",
+    service_mode: "full",
+    monitoring_quota: 10,
+    message_quota_default: 15000,
+    features: COMMERCIAL_FEATURES,
   },
   {
     key: "plan_ia_zionads",
     emoji: "⚡",
-    label: "AdvOne IA · ZionAds (cortesia)",
+    label: "ZionAds (cortesia)",
     monthly_value: 0,
-    description: "Mesmo pacote do AdvOne IA, com cobrança tratada fora da plataforma pela ZionAds. Sem gerar assinatura no Asaas.",
+    description: "Cliente da agência ZionAds — cobrança tratada fora da plataforma. Não gera assinatura no Asaas.",
     partnership_type: "mensalidade_zionads",
-    service_mode: "ai_only",
+    service_mode: "full",
     monitoring_quota: 10,
     message_quota_default: 15000,
     features: [
-      "Todos os recursos do AdvOne IA",
-      "Cobrança gerenciada fora da plataforma (ZionAds)",
+      ...COMMERCIAL_FEATURES,
+      "Cobrança gerenciada pela agência ZionAds",
       "Sem cobrança automática no Asaas",
       "Só o time ZionAds pode cadastrar",
-    ],
-  },
-  {
-    key: "plan_gestao",
-    emoji: "📊",
-    label: "AdvOne Gestão",
-    monthly_value: 597,
-    description: "CRM jurídico completo para organizar escritório e time.",
-    partnership_type: "mensalidade_zionads",
-    service_mode: "full",
-    monitoring_quota: 10,
-    message_quota_default: 15000,
-    features: [
-      "CRM jurídico completo",
-      "Até 3 áreas de atuação",
-      "Até 3 advogados por área",
-      "Pipeline (Kanban de leads e casos)",
-      "Automações, cadências e relatórios",
-    ],
-  },
-  {
-    key: "plan_complete",
-    emoji: "🚀",
-    label: "AdvOne Complete",
-    monthly_value: 897,
-    description: "Tudo do IA + tudo do Gestão + integrações e recursos exclusivos.",
-    partnership_type: "mensalidade_zionads",
-    service_mode: "full",
-    monitoring_quota: 10,
-    message_quota_default: 15000,
-    features: [
-      "Tudo do plano IA",
-      "Tudo do plano Gestão",
-      "Integrações avançadas (Google, Asaas, ZapSign)",
-      "IA jurídica, jurisprudência e calculadoras",
-      "Suporte prioritário",
     ],
   },
   {
@@ -132,14 +110,14 @@ export const BILLING_MODELS: BillingModelOption[] = [
     emoji: "🏛️",
     label: "AdvOne Enterprise",
     monthly_value: 0,
-    description: "Sob medida — atendimento humano a clientes ativos, separado do funil, com auditoria completa.",
+    description: "Sob medida — valor definido manualmente pelo gerente. Áreas e equipe ilimitadas, SLA e onboarding dedicados.",
     partnership_type: "mensalidade_zionads",
     service_mode: "full",
     monitoring_quota: 100,
     message_quota_default: null,
     features: [
-      "Tudo do plano Complete",
-      "Áreas de atuação ilimitadas (4+)",
+      "Tudo dos planos comerciais",
+      "Áreas de atuação ilimitadas",
       "Equipe ilimitada por área",
       "Módulo Conversas de Clientes (atendimento humano)",
       "Transferência entre áreas e advogados com log auditável",
