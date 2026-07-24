@@ -70,12 +70,19 @@ export function useCompanyServiceMode() {
     isAiOnly: serviceMode === "ai_only",
     billingModel,
     // Só o Plano Completo (e legados full/plan_free) liberam módulos "Pro".
+    // Todos os planos comerciais atuais (mensal/semestral/anual/zionads/enterprise) liberam módulos "Pro".
     isPlanCompleto:
+      billingModel === "plan_mensal" ||
+      billingModel === "plan_semestral" ||
+      billingModel === "plan_anual" ||
+      billingModel === "plan_ia_zionads" ||
+      billingModel === "plan_enterprise" ||
+      // legados full
       billingModel === "plan_completo" ||
       billingModel === "plan_complete" ||
-      billingModel === "plan_enterprise" ||
+      billingModel === "plan_gestao" ||
       billingModel === "plan_free" ||
-      (billingModel?.startsWith("plan_ia_") ?? false),
+      (billingModel?.startsWith("plan_ia") ?? false),
     isEnterprise: billingModel === "plan_enterprise",
     loading,
   };
