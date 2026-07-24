@@ -664,15 +664,25 @@ export default function LandingIA() {
                     <div className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                       ADVONE COMPLETE
                     </div>
-                    <div className="mt-2 flex items-baseline justify-center gap-1">
-                      <span className="text-3xl font-bold">R$</span>
-                      <span className="font-display text-5xl font-bold">997</span>
-                      <span className="text-muted-foreground">/mês</span>
+                    <div className="mt-1 inline-block rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
+                      Atendimentos ilimitados
                     </div>
-                    <div className="mt-1 text-xs text-muted-foreground">
-                      no plano anual · ou R$ 1.297/mês no mensal
+                    <div className="mt-3 space-y-2 text-left">
+                      <div className="flex items-baseline justify-between rounded-lg border border-border/60 bg-background/40 px-3 py-2">
+                        <span className="text-xs uppercase tracking-wide text-muted-foreground">Mensal</span>
+                        <span className="text-lg font-bold">R$ 897<span className="text-xs text-muted-foreground font-normal">/mês</span></span>
+                      </div>
+                      <div className="flex items-baseline justify-between rounded-lg border border-border/60 bg-background/40 px-3 py-2">
+                        <span className="text-xs uppercase tracking-wide text-muted-foreground">Semestral</span>
+                        <span className="text-lg font-bold">R$ 697<span className="text-xs text-muted-foreground font-normal">/mês</span></span>
+                      </div>
+                      <div className="flex items-baseline justify-between rounded-lg border border-primary/40 bg-primary/10 px-3 py-2">
+                        <span className="text-xs uppercase tracking-wide text-primary font-semibold">Anual · melhor oferta</span>
+                        <span className="text-lg font-bold text-primary">R$ 597<span className="text-xs font-normal">/mês</span></span>
+                      </div>
                     </div>
                   </div>
+
 
                   <div className="h-px bg-border" />
 
