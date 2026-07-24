@@ -118,6 +118,7 @@ export const BILLING_MODELS: BillingModelOption[] = [
     partnership_type: "mensalidade_zionads",
     service_mode: "full",
     monitoring_quota: 10,
+    message_quota_default: 25000,
     features: [
       "Tudo do plano IA",
       "Tudo do plano Gestão",
