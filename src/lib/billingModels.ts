@@ -83,6 +83,7 @@ export const BILLING_MODELS: BillingModelOption[] = [
     partnership_type: "mensalidade_zionads",
     service_mode: "ai_only",
     monitoring_quota: 10,
+    message_quota_default: 10000,
     features: [
       "Todos os recursos do AdvOne IA",
       "Cobrança gerenciada fora da plataforma (ZionAds)",
