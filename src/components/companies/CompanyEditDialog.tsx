@@ -196,6 +196,27 @@ export function CompanyEditDialog({
             </div>
           </div>
 
+          <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-3">
+            <Label>Cota mensal de mensagens da IA</Label>
+            <Input
+              type="number"
+              min={0}
+              value={messageQuota}
+              onChange={(e) => setMessageQuota(e.target.value)}
+              placeholder="Deixe vazio = ilimitado (Enterprise)"
+            />
+            <p className="text-[11px] text-muted-foreground">
+              Máximo de mensagens que a IA pode enviar por mês.
+              Padrão: IA 10.000 • Complete 25.000 • Enterprise ilimitado.
+              Ao atingir 100% a Laura pausa até o dia 1 do mês seguinte.
+              {company?.messages_used_current_period != null && (
+                <> Usadas este mês: <b>{company.messages_used_current_period.toLocaleString("pt-BR")}</b>.</>
+              )}
+            </p>
+          </div>
+
+
+
           <div className="space-y-2">
             <Label>Telefone / WhatsApp</Label>
             <Input
