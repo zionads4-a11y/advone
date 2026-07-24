@@ -1,7 +1,7 @@
 // Modelos de cobrança disponíveis ao cadastrar uma empresa.
 // Estrutura em 3 planos (a mesma escada exibida nas landing pages):
-//   - plan_ia       → AdvOne IA        · R$ 397/mês · menu enxuto (Dashboard, Kanban, Clientes, Agenda, Conversas, Monitoramento)
-//   - plan_gestao   → AdvOne Gestão    · R$ 597/mês · CRM completo sem os recursos exclusivos (IA jurídica, jurisprudência etc.)
+//   - plan_ia       → AdvOne IA        · R$ 897/mês (mensal) · menu enxuto (Dashboard, Kanban, Clientes, Agenda, Conversas, Monitoramento)
+//   - plan_gestao   → AdvOne Gestão    · R$ 597/mês (equivalente anual) · CRM completo sem os recursos exclusivos (IA jurídica, jurisprudência etc.)
 //   - plan_complete → AdvOne Complete  · R$ 897/mês · tudo incluso
 //
 // Chaves legadas (plan_completo, plan_ia_monthly, plan_ia_6m, plan_ia_12m, plan_zionads, plan_free)
