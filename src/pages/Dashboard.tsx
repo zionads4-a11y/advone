@@ -11,6 +11,7 @@ import { Users, DollarSign, TrendingUp, Target, Activity, Sparkles } from "lucid
 import { ComercialDashboard } from "@/components/dashboard/ComercialDashboard";
 import { AreasDashboard } from "@/components/dashboard/AreasDashboard";
 import { FinanceiroDashboard } from "@/components/dashboard/FinanceiroDashboard";
+import { MessageQuotaCard } from "@/components/companies/MessageQuotaCard";
 
 interface LeadStats { total: number; new: number; won: number; lost: number; totalValue: number; }
 
