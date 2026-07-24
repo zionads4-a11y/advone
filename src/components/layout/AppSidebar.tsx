@@ -79,6 +79,7 @@ const adminItems = [
   { title: "Assinaturas", url: "/assinatura", icon: CreditCard },
   
   { title: "Uso da IA", url: "/uso-ia", icon: Gauge },
+  { title: "Tabela de Preços", url: "/tabela-precos", icon: CreditCard },
   { title: "Leads Landing IA", url: "/leads-landing-ia", icon: History },
   { title: "Alertas de Fraude", url: "/fraudes", icon: ShieldAlert, premium: true },
   { title: "Logs de Webhook", url: "/webhook-logs", icon: Activity },

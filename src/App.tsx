@@ -45,6 +45,7 @@ const Cases = lazy(() => import("./pages/Cases"));
 const ProcessKanban = lazy(() => import("./pages/ProcessKanban"));
 const ProcessSearch = lazy(() => import("./pages/ProcessSearch"));
 const Subscription = lazy(() => import("./pages/Subscription"));
+const PricingInternal = lazy(() => import("./pages/PricingInternal"));
 const FraudAlerts = lazy(() => import("./pages/FraudAlerts"));
 const AiUsageMonitor = lazy(() => import("./pages/AiUsageMonitor"));
 const MetaCloudSetup = lazy(() => import("./pages/MetaCloudSetup"));
@@ -190,6 +191,7 @@ const App = () => (
                     />
                     <Route path="/fraudes" element={<FraudAlerts />} />
                     <Route path="/uso-ia" element={<RoleProtectedRoute allowedRoles={["admin", "member"]}><AiUsageMonitor /></RoleProtectedRoute>} />
+                    <Route path="/tabela-precos" element={<RoleProtectedRoute allowedRoles={["admin", "member"]}><PricingInternal /></RoleProtectedRoute>} />
                     <Route path="/leads-landing-ia" element={<LandingIALeads />} />
                     <Route path="/ia-juridica" element={<LegalAI />} />
                     <Route path="/jurisprudencia" element={<Jurisprudencia />} />

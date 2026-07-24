@@ -902,19 +902,11 @@ export default function LandingPage() {
                 <div className="mb-6">
                   <h3 className="text-xl font-bold text-[hsl(220,10%,92%)] mb-4">Sua secretária virtual 24h</h3>
 
-                  <div className="space-y-2">
-                    <div className="flex items-baseline justify-between rounded-lg border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,7%)] px-3 py-2">
-                      <span className="text-xs uppercase tracking-wide text-[hsl(220,10%,60%)]">Mensal</span>
-                      <span className="text-lg font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 897<span className="text-xs text-[hsl(220,10%,60%)] font-normal">/mês</span></span>
-                    </div>
-                    <div className="flex items-baseline justify-between rounded-lg border border-[hsl(220,20%,16%)] bg-[hsl(220,25%,7%)] px-3 py-2">
-                      <span className="text-xs uppercase tracking-wide text-[hsl(220,10%,60%)]">Semestral</span>
-                      <span className="text-lg font-bold text-[hsl(220,10%,92%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 797<span className="text-xs text-[hsl(220,10%,60%)] font-normal">/mês</span></span>
-                    </div>
-                    <div className="flex items-baseline justify-between rounded-lg border border-[hsl(153,60%,45%)]/40 bg-[hsl(153,60%,45%)]/10 px-3 py-2">
-                      <span className="text-xs uppercase tracking-wide text-[hsl(153,60%,45%)] font-semibold">Anual · melhor oferta</span>
-                      <span className="text-lg font-bold text-[hsl(153,60%,45%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>R$ 597<span className="text-xs font-normal">/mês</span></span>
-                    </div>
+                  <div className="rounded-lg border border-[hsl(153,60%,45%)]/40 bg-[hsl(153,60%,45%)]/10 px-4 py-6 text-center">
+                    <div className="text-3xl font-bold text-[hsl(153,60%,45%)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Sob consulta</div>
+                    <p className="mt-2 text-xs text-[hsl(220,10%,60%)]">
+                      Condições sob medida por escritório. Fale com um consultor e receba a melhor proposta.
+                    </p>
                   </div>
 
                   <p className="mt-3 text-sm text-[hsl(220,10%,60%)]">Para quem quer parar de perder lead no WhatsApp.</p>
