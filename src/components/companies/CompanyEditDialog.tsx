@@ -114,6 +114,7 @@ export function CompanyEditDialog({
   const [sharedWhats, setSharedWhats] = useState(false);
   const [supportPhone, setSupportPhone] = useState("");
   const [aiDisabled, setAiDisabled] = useState(false);
+  const [messageQuota, setMessageQuota] = useState<string>("");
 
 
   useEffect(() => {
