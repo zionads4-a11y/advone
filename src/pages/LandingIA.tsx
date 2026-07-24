@@ -534,77 +534,8 @@ export default function LandingIA() {
         </div>
       </section>
 
-      {/* Plano */}
-      <section
-        id="planos"
-        className="border-y border-border/40 bg-gradient-to-b from-card/30 to-background"
-      >
-        <div className="container mx-auto px-4 py-20">
-          <Reveal>
-            <div className="mx-auto max-w-2xl text-center">
-              <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-primary">
-                <Star className="h-3.5 w-3.5" />
-                Oferta exclusiva desta página
-              </div>
-              <h2 className="mt-4 font-display text-3xl font-bold md:text-4xl">
-                ESCOLHA O PLANO IDEAL PARA SEU ESCRITÓRIO
-              </h2>
-              <p className="mt-4 text-muted-foreground">
-                A SDR virtual Laura atendendo seu WhatsApp 24h — escolha o ciclo que faz mais sentido pro seu escritório.
-              </p>
+      {/* Seção de planos removida — proposta sob medida via consultor */}
 
-            </div>
-          </Reveal>
-
-          <div className="mt-12 max-w-lg mx-auto">
-            {/* AdvOne IA */}
-            <Reveal delay={120}>
-              <Card className="h-full border-primary/40 bg-card shadow-2xl shadow-primary/10 relative overflow-hidden">
-                <div className="absolute top-0 right-0 bg-primary px-3 py-1 text-[10px] font-bold text-primary-foreground uppercase tracking-widest rounded-bl-lg">
-                  Mais Popular
-                </div>
-                <CardContent className="space-y-6 p-8 flex flex-col">
-                  <div>
-                    <div className="text-center text-sm font-semibold uppercase tracking-wide text-primary mb-4">
-                      ADVONE IA
-                    </div>
-                    <div className="rounded-lg border border-primary/40 bg-primary/10 px-4 py-5 text-center">
-                      <div className="text-3xl font-bold text-primary">Sob consulta</div>
-                      <p className="mt-2 text-xs text-muted-foreground">
-                        Condições sob medida por escritório. Fale com um consultor e receba a melhor proposta.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="h-px bg-border" />
-
-                  <ul className="space-y-3 flex-1">
-                    {[
-                      "Atendimento no WhatsApp 24h",
-                      "Qualificação inteligente de leads",
-                      "Agendamento automático na sua agenda",
-                      "Atendimento a clientes atuais",
-                    ].map((item) => (
-                      <li key={item} className="flex items-start gap-3 text-sm">
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <DemoRequestDialog
-                    source="landing-ia-plan-ia"
-                    trigger={
-                      <Button size="lg" className="w-full gradient-primary text-primary-foreground font-bold">
-                        COMEÇAR COM IA
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    }
-                  />
-                </CardContent>
-              </Card>
-            </Reveal>
-          </div>
 
 
           <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
