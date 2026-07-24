@@ -81,28 +81,6 @@ const ENTERPRISE_PLAN: Plan = {
   ],
 };
 
-const OBJECTIONS: { q: string; a: string }[] = [
-  {
-    q: "Por que R$ 897 mensal se anual é R$ 597?",
-    a: "Anual paga adiantado (R$ 7.164 de uma vez). Mensal tem flexibilidade de cancelar quando quiser. Trimestral e Semestral são o meio-termo. Cada ciclo tem seu público — vender pelo cash flow do cliente.",
-  },
-  {
-    q: "Cliente pergunta se tem plano mais barato",
-    a: "NÃO temos plano abaixo de R$ 597/mês. Se o cliente resistir, ofereça o anual (menor mensalidade) ou entenda a real dor — normalmente não é preço, é medo de não funcionar. Ofereça garantia de 7 dias.",
-  },
-  {
-    q: "Cliente quer descontar mais do anual",
-    a: "Nunca desça de R$ 497/mês no anual sem autorização. Prefira agregar valor: onboarding VIP, setup de fluxos personalizados, migração de dados.",
-  },
-  {
-    q: "Escritório com mais de 3 advogados",
-    a: "AdvOne IA aguenta até 3 advogados/área. Acima disso, obrigatório subir para Enterprise (sob medida).",
-  },
-  {
-    q: "Cliente pede prazo de teste grátis",
-    a: "Oferecemos garantia de 7 dias após ativação. Não temos trial antes do pagamento — configuração personalizada demora 24h e envolve custo de setup.",
-  },
-];
 
 const UPSELLS = [
   {
