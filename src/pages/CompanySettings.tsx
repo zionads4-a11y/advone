@@ -17,6 +17,7 @@ import { CadenceConfigCard } from "@/components/companies/CadenceConfigCard";
 import { MeetingRemindersConfigCard } from "@/components/companies/MeetingRemindersConfigCard";
 import { BotConfigCard } from "@/components/companies/BotConfigCard";
 import { LawyerContractDataCard } from "@/components/companies/LawyerContractDataCard";
+import { AdvboxConfigCard } from "@/components/companies/AdvboxConfigCard";
 
 
 interface Company {
