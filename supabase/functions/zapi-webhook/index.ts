@@ -2687,6 +2687,7 @@ REGRAS:
 
     let leadId = existingLead?.id;
     let currentPhase = existingLead?.bot_agent_phase || "sdr";
+    let leadStatusForAi = existingLead?.status;
 
     if (!leadId) {
       const firstColumn = await getDefaultBoardColumn(supabase, companyId, { position: 0 });
@@ -2709,10 +2710,26 @@ REGRAS:
       await supabase.from("cadence_messages").update({ status: "cancelled" })
         .eq("lead_id", leadId).eq("status", "pending");
 
+      // Se um lead marcado como perdido voltou a chamar, reabre o atendimento.
+      // Antes isso fazia a Laura ficar silenciosa porque "lost" era tratado como finalizado.
+      if (existingLead?.status === "lost" && !existingLead?.bot_disabled && !existingLead?.is_client) {
+        const reopenColumn = await getDefaultBoardColumn(supabase, companyId, { position: 0 });
+        const reopenPatch: Record<string, unknown> = {
+          status: "contacted",
+          bot_agent_phase: "sdr",
+        };
+        if (reopenColumn?.id) reopenPatch.kanban_column_id = reopenColumn.id;
+        await supabase.from("leads").update(reopenPatch).eq("id", leadId);
+        leadStatusForAi = "contacted";
+        currentPhase = "sdr";
+        console.log(`[lead-reopen] Lead ${leadId} reativado após nova mensagem recebida.`);
+      }
+
       if (existingLead?.status === "new") {
         const emAtendimentoCol = await getDefaultBoardColumn(supabase, companyId, { position: 0 });
         if (emAtendimentoCol) {
           await supabase.from("leads").update({ kanban_column_id: emAtendimentoCol.id, status: "contacted" }).eq("id", leadId);
+          leadStatusForAi = "contacted";
         }
       }
 
@@ -2985,7 +3002,7 @@ Responda:
     if (config.ai_enabled && config.ai_auto_reply && leadId && !existingLead?.bot_disabled && !existingLead?.ocr_pending_review && isPlanCompleto) {
 
       try {
-        const leadStatus = existingLead?.status;
+        const leadStatus = leadStatusForAi;
         const isCompleted = currentPhase === "completed";
         const isAlreadyHandled = leadStatus && !["new", "contacted", "qualified", "negotiating"].includes(leadStatus);
 
