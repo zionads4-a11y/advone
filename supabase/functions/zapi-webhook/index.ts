@@ -2710,8 +2710,8 @@ REGRAS:
       await supabase.from("cadence_messages").update({ status: "cancelled" })
         .eq("lead_id", leadId).eq("status", "pending");
 
-      // Se um lead marcado como perdido voltou a chamar, reabre o atendimento.
-      // Antes isso fazia a Laura ficar silenciosa porque "lost" era tratado como finalizado.
+      // Se um lead marcado como perdido voltou a chamar, a Laura NUNCA deve ficar em silêncio.
+      // Reabre quando possível e, mesmo se a atualização falhar, libera a IA nesta interação.
       if (existingLead?.status === "lost" && !existingLead?.bot_disabled && !existingLead?.is_client) {
         const reopenColumn = await getDefaultBoardColumn(supabase, companyId, { position: 0 });
         const reopenPatch: Record<string, unknown> = {
@@ -2719,10 +2719,11 @@ REGRAS:
           bot_agent_phase: "sdr",
         };
         if (reopenColumn?.id) reopenPatch.kanban_column_id = reopenColumn.id;
-        await supabase.from("leads").update(reopenPatch).eq("id", leadId);
+        const { error: reopenError } = await supabase.from("leads").update(reopenPatch).eq("id", leadId);
+        if (reopenError) console.error("[lead-reopen] Falha ao reativar lead perdido:", reopenError);
         leadStatusForAi = "contacted";
         currentPhase = "sdr";
-        console.log(`[lead-reopen] Lead ${leadId} reativado após nova mensagem recebida.`);
+        console.log(`[lead-reopen] Lead ${leadId} liberado para resposta após nova mensagem recebida.`);
       }
 
       if (existingLead?.status === "new") {
@@ -3004,7 +3005,7 @@ Responda:
       try {
         const leadStatus = leadStatusForAi;
         const isCompleted = currentPhase === "completed";
-        const isAlreadyHandled = leadStatus && !["new", "contacted", "qualified", "negotiating"].includes(leadStatus);
+        const isAlreadyHandled = leadStatus && !["new", "contacted", "qualified", "negotiating", "lost"].includes(leadStatus);
 
         if (!isCompleted && !isAlreadyHandled) {
           let effectivePhase = currentPhase;
