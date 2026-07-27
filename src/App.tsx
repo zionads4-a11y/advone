@@ -9,12 +9,12 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { RoleProtectedRoute } from "@/components/auth/RoleProtectedRoute";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { ExternalRedirect } from "./components/ExternalRedirect";
 import { Loader2 } from "lucide-react";
 
 // Eager: tiny entry redirect + primary landing pages (first paint targets)
 import Index from "./pages/Index";
 import LandingPage from "./pages/LandingPage";
-import LandingIA from "./pages/LandingIA";
 
 // Lazy: everything else — keeps LP bundle lean
 const Auth = lazy(() => import("./pages/Auth"));
@@ -96,8 +96,8 @@ const App = () => (
                   <Route path="/home" element={<LandingPage />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/signup" element={<Navigate to="/auth" replace />} />
-                  <Route path="/IA" element={<LandingIA />} />
-                  <Route path="/ia" element={<LandingIA />} />
+                  <Route path="/IA" element={<ExternalRedirect url="https://zionadscp.lovable.app/" />} />
+                  <Route path="/ia" element={<ExternalRedirect url="https://zionadscp.lovable.app/" />} />
                   <Route path="/crm-advogados" element={<CrmAdvogados />} />
                   <Route path="/whatsapp-advogados" element={<WhatsappAdvogados />} />
                   <Route path="/sdr-ia-juridico" element={<SdrIaJuridico />} />
