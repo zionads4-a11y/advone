@@ -2056,6 +2056,19 @@ serve(async (req) => {
     const isUaZapiSentMessage = body.EventType === "messages" && body.message && fromMeFlag;
     const isLegacyMessage = body.type === "ReceivedCallback";
 
+    console.log("[ROUTE-DEBUG]", JSON.stringify({
+      keys: Object.keys(body || {}),
+      EventType: body.EventType,
+      type: body.type,
+      hasMessage: !!body.message,
+      messageKeys: body.message ? Object.keys(body.message) : null,
+      fromMeFlag,
+      isUaZapiMessage,
+      isUaZapiSentMessage,
+      isLegacyMessage,
+    }));
+
+
     // Handle human intervention from phone (fromMe = true)
     if (isUaZapiSentMessage) {
       const sentPhone = (
