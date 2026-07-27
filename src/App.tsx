@@ -96,8 +96,8 @@ const App = () => (
                   <Route path="/home" element={<LandingPage />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/signup" element={<Navigate to="/auth" replace />} />
-                  <Route path="/IA" element={<LandingIA />} />
-                  <Route path="/ia" element={<LandingIA />} />
+                  <Route path="/IA" element={<ExternalRedirect url="https://zionadscp.lovable.app/" />} />
+                  <Route path="/ia" element={<ExternalRedirect url="https://zionadscp.lovable.app/" />} />
                   <Route path="/crm-advogados" element={<CrmAdvogados />} />
                   <Route path="/whatsapp-advogados" element={<WhatsappAdvogados />} />
                   <Route path="/sdr-ia-juridico" element={<SdrIaJuridico />} />
