@@ -3162,10 +3162,30 @@ REGRAS INVIOLÁVEIS PARA ESTE CONTATO:
             }
           }
 
+
+          // 🎯 Full service: seleciona só os fluxos relevantes para esta conversa
+          let dynamicFlowsBlock = flowsBlock;
+          if ((flows?.length || 0) > 6) {
+            const convText = history.map((h: any) => h.content).join(" \n ");
+            const { selected, index } = selectRelevantFlows(flows || [], convText, 6);
+            const blocks = selected.map((f: any) => {
+              const custom = (f.custom_prompt_block || "").trim();
+              if (custom) return custom;
+              return getFlowBlock((f.niche || "full_service") as FlowNiche, f.flow_key)?.block?.trim() || "";
+            }).filter(Boolean);
+            dynamicFlowsBlock =
+              (blocks.length ? blocks.join("\n\n") + "\n\n" : "") +
+              (index.length
+                ? `OUTRAS ÁREAS QUE O ESCRITÓRIO ATENDE (use só para identificar o tema e seguir a qualificação padrão; não invente detalhes técnicos): ${index.join(" · ")}.`
+                : "");
+            console.log(`[FLOWS-DYNAMIC] company=${companyId} total=${flows?.length} usados=${blocks.length} indice=${index.length}`);
+          }
+
           const aiReply = await handleAgentPhase(
             effectivePhase, config, agentConfigs, history,
             companyId, leadId, supabase, currentLeadName, cleanPhone,
-            flowsBlock, triageBlock,
+            dynamicFlowsBlock, triageBlock,
+
             (config.companies as any)?.timezone || "America/Sao_Paulo",
             clientContextBlock
           );
