@@ -17,6 +17,60 @@ function stripLegacyFlowBlocks(prompt: string): string {
     .trim();
 }
 
+// ====== SELEÇÃO DINÂMICA DE FLUXOS (escritórios full service) ======
+// Em vez de injetar TODOS os fluxos ativos no prompt (o que estoura o contexto
+// em escritórios com muitas áreas), escolhe apenas os mais relevantes para a
+// conversa atual + um índice enxuto com os rótulos dos demais.
+const FLOW_STOPWORDS = new Set([
+  "de","da","do","das","dos","e","ou","a","o","as","os","em","no","na","para","por","com",
+  "que","um","uma","ao","aos","à","às","sem","sobre","the","of",
+]);
+
+function normalizeFlowText(s: string): string {
+  return (s || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function flowTokens(f: any): string[] {
+  return normalizeFlowText(`${f.label || ""} ${String(f.flow_key || "").replace(/[_-]/g, " ")} ${f.niche || ""}`)
+    .split(" ")
+    .filter((t) => t.length > 3 && !FLOW_STOPWORDS.has(t));
+}
+
+export function selectRelevantFlows(
+  flows: any[],
+  conversationText: string,
+  maxBlocks = 6,
+): { selected: any[]; index: string[] } {
+  const list = flows || [];
+  if (list.length <= maxBlocks) return { selected: list, index: [] };
+
+  const text = normalizeFlowText(conversationText);
+  const scored = list.map((f) => {
+    const tokens = flowTokens(f);
+    let score = 0;
+    for (const t of tokens) if (text.includes(t)) score += t.length >= 6 ? 2 : 1;
+    return { f, score };
+  });
+
+  const matched = scored.filter((s) => s.score > 0).sort((a, b) => b.score - a.score);
+  const selected = matched.slice(0, maxBlocks).map((s) => s.f);
+
+  // Sem match: não injeta bloco nenhum — só o índice, para a Laura descobrir o tema.
+  const chosenKeys = new Set(selected.map((f) => `${f.niche}:${f.flow_key}`));
+  const index = list
+    .filter((f) => !chosenKeys.has(`${f.niche}:${f.flow_key}`))
+    .map((f) => String(f.label || f.flow_key))
+    .filter(Boolean);
+
+  return { selected, index };
+}
+
 
 // ====== PROMPT BUILDERS ======
 function buildSDRPrompt(
