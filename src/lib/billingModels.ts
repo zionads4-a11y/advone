@@ -46,7 +46,7 @@ export interface BillingModelOption {
 const COMMERCIAL_FEATURES = [
   "CRM jurídico completo (Kanban, Agenda, Financeiro)",
   "Laura — SDR com IA no WhatsApp 24h",
-  "15.000 mensagens/mês da IA",
+  "5.000 mensagens/mês da IA",
   "Monitoramento de processos (Escavador)",
   "Integrações: Google, Asaas, ZapSign",
 ];
@@ -61,7 +61,7 @@ export const BILLING_MODELS: BillingModelOption[] = [
     partnership_type: "mensalidade_zionads",
     service_mode: "full",
     monitoring_quota: 10,
-    message_quota_default: 15000,
+    message_quota_default: 5000,
     features: COMMERCIAL_FEATURES,
   },
   {
@@ -73,7 +73,7 @@ export const BILLING_MODELS: BillingModelOption[] = [
     partnership_type: "mensalidade_zionads",
     service_mode: "full",
     monitoring_quota: 10,
-    message_quota_default: 15000,
+    message_quota_default: 5000,
     features: COMMERCIAL_FEATURES,
   },
   {
@@ -85,7 +85,7 @@ export const BILLING_MODELS: BillingModelOption[] = [
     partnership_type: "mensalidade_zionads",
     service_mode: "full",
     monitoring_quota: 10,
-    message_quota_default: 15000,
+    message_quota_default: 5000,
     features: COMMERCIAL_FEATURES,
   },
   {
@@ -97,7 +97,7 @@ export const BILLING_MODELS: BillingModelOption[] = [
     partnership_type: "mensalidade_zionads",
     service_mode: "full",
     monitoring_quota: 10,
-    message_quota_default: 15000,
+    message_quota_default: 5000,
     features: [
       ...COMMERCIAL_FEATURES,
       "Cobrança gerenciada pela agência ZionAds",
