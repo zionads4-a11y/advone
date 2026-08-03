@@ -7,6 +7,8 @@ import { toast } from "sonner";
 import { KanbanColumnSettings, type KanbanColumn } from "@/components/kanban/KanbanColumnSettings";
 import { DraggableLeadCard } from "@/components/kanban/DraggableLeadCard";
 import { DroppableColumn } from "@/components/kanban/DroppableColumn";
+import { LeadDetailDrawer } from "@/components/leads/LeadDetailDrawer";
+import { WonHandoffDialog } from "@/components/kanban/WonHandoffDialog";
 import {
   DndContext,
   DragOverlay,
@@ -30,6 +32,15 @@ interface Lead {
   company_id: string;
   kanban_column_id: string | null;
   created_at: string;
+  whatsapp: string | null;
+  status: "new" | "contacted" | "qualified" | "negotiating" | "won" | "lost";
+  assigned_to: string | null;
+  lead_score: string | null;
+  pending_data_warning: string | null;
+  bot_disabled: boolean;
+  processo_numero: string | null;
+  cpf: string | null;
+  processo_valor: number | null;
 }
 
 const DEFAULT_COLUMNS = [
@@ -64,6 +75,9 @@ export function CompanyKanban({ companyId, companyName }: CompanyKanbanProps) {
   const [filterSource, setFilterSource] = useState<string>("all");
   const [activeDragLead, setActiveDragLead] = useState<Lead | null>(null);
   const [overColumnId, setOverColumnId] = useState<string | null>(null);
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [wonHandoff, setWonHandoff] = useState<{ lead: Lead; columnId: string } | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -118,7 +132,7 @@ export function CompanyKanban({ companyId, companyName }: CompanyKanbanProps) {
       currentBoardId
         ? supabase.from("kanban_columns").select("*").eq("company_id", companyId).eq("board_id", currentBoardId).order("position")
         : Promise.resolve({ data: [], error: null }),
-      supabase.from("leads").select("id, name, email, phone, value, source, company_id, kanban_column_id, created_at, lead_score").eq("company_id", companyId).order("created_at", { ascending: false }),
+      supabase.from("leads").select("*").eq("company_id", companyId).order("created_at", { ascending: false }),
     ]);
     if (columnsRes.data) setKanbanColumns(columnsRes.data as KanbanColumn[]);
     if (leadsRes.data) setLeads(leadsRes.data as Lead[]);
@@ -140,6 +154,13 @@ export function CompanyKanban({ companyId, companyName }: CompanyKanbanProps) {
   };
 
   const moveLeadToColumn = useCallback(async (leadId: string, columnId: string) => {
+    const targetColumn = kanbanColumns.find((column) => column.id === columnId);
+    if (targetColumn?.is_won) {
+      const lead = leads.find((item) => item.id === leadId);
+      if (lead) setWonHandoff({ lead, columnId });
+      return;
+    }
+
     setLeads((prev) => prev.map((l) => (l.id === leadId ? { ...l, kanban_column_id: columnId } : l)));
     const { error } = await supabase.from("leads").update({ kanban_column_id: columnId }).eq("id", leadId);
     if (error) {
@@ -153,7 +174,7 @@ export function CompanyKanban({ companyId, companyName }: CompanyKanbanProps) {
       }
       fetchColumnsAndLeads();
     }
-  }, []);
+  }, [kanbanColumns, leads]);
 
   const sortedColumns = useMemo(() => [...kanbanColumns].sort((a, b) => a.position - b.position), [kanbanColumns]);
   const filteredLeads = useMemo(() => filterSource === "all" ? leads : leads.filter((l) => l.source === filterSource), [leads, filterSource]);
@@ -259,7 +280,18 @@ export function CompanyKanban({ companyId, companyName }: CompanyKanbanProps) {
             return (
               <DroppableColumn key={col.id} column={col} leadIds={colLeads.map((l) => l.id)} isOver={overColumnId === col.id}>
                 {colLeads.map((lead) => (
-                  <DraggableLeadCard key={lead.id} lead={lead} isInMeetingHeld={(col as any).is_meeting_held === true} />
+                  <DraggableLeadCard
+                    key={lead.id}
+                    lead={lead}
+                    isInMeetingHeld={(col as any).is_meeting_held === true}
+                    onClick={() => {
+                      setSelectedLead(lead);
+                      setDrawerOpen(true);
+                    }}
+                    onValueUpdate={(leadId, newValue) => {
+                      setLeads((prev) => prev.map((item) => item.id === leadId ? { ...item, value: newValue } : item));
+                    }}
+                  />
                 ))}
               </DroppableColumn>
             );
@@ -269,6 +301,28 @@ export function CompanyKanban({ companyId, companyName }: CompanyKanbanProps) {
           {activeDragLead ? <DraggableLeadCard lead={activeDragLead} isDragOverlay /> : null}
         </DragOverlay>
       </DndContext>
+
+      <LeadDetailDrawer
+        lead={selectedLead}
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        onLeadUpdate={fetchColumnsAndLeads}
+      />
+
+      {wonHandoff && (
+        <WonHandoffDialog
+          open={!!wonHandoff}
+          onOpenChange={(open) => !open && setWonHandoff(null)}
+          leadId={wonHandoff.lead.id}
+          leadName={wonHandoff.lead.name}
+          companyId={wonHandoff.lead.company_id}
+          targetColumnId={wonHandoff.columnId}
+          onCompleted={() => {
+            setWonHandoff(null);
+            fetchColumnsAndLeads();
+          }}
+        />
+      )}
     </div>
   );
 }
