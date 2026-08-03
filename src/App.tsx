@@ -53,6 +53,7 @@ const LegalAI = lazy(() => import("./pages/LegalAI"));
 const Jurisprudencia = lazy(() => import("./pages/Jurisprudencia"));
 const Calculadoras = lazy(() => import("./pages/Calculadoras"));
 const LandingIALeads = lazy(() => import("./pages/LandingIALeads"));
+const LandingIA = lazy(() => import("./pages/LandingIA"));
 const CrmAdvogados = lazy(() => import("./pages/CrmAdvogados"));
 const WhatsappAdvogados = lazy(() => import("./pages/WhatsappAdvogados"));
 const SdrIaJuridico = lazy(() => import("./pages/SdrIaJuridico"));
@@ -96,8 +97,8 @@ const App = () => (
                   <Route path="/home" element={<LandingPage />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/signup" element={<Navigate to="/auth" replace />} />
-                  <Route path="/IA" element={<ExternalRedirect url="https://zionadscp.lovable.app/" />} />
-                  <Route path="/ia" element={<ExternalRedirect url="https://zionadscp.lovable.app/" />} />
+                  <Route path="/IA" element={<LandingIA />} />
+                  <Route path="/ia" element={<LandingIA />} />
                   <Route path="/crm-advogados" element={<CrmAdvogados />} />
                   <Route path="/whatsapp-advogados" element={<WhatsappAdvogados />} />
                   <Route path="/sdr-ia-juridico" element={<SdrIaJuridico />} />
