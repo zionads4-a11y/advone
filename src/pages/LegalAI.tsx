@@ -76,7 +76,29 @@ const TEMPLATES = [
     prompt:
       "Preciso redigir uma peça recursal ou contestação. Vou descrever a decisão a ser combatida ou a inicial a ser contestada. Estruture com preliminares, mérito, pedidos. Pergunte o que faltar.",
   },
+  {
+    key: "impugnacao",
+    label: "Impugnação",
+    icon: FileText,
+    prompt:
+      "Preciso de uma impugnação (ao cálculo / à contestação / ao valor da causa / à assistência judiciária). Informe o número do processo no campo CNJ e/ou anexe a peça a ser impugnada. Analise os dados do processo, aponte os pontos impugnáveis e redija a peça completa.",
+  },
+  {
+    key: "agravo",
+    label: "Agravo de Instrumento",
+    icon: Gavel,
+    prompt:
+      "Preciso de um Agravo de Instrumento. Use o número do processo (CNJ) e/ou o documento anexado com a decisão interlocutória agravada. Estruture com cabeçalho, tempestividade, cabimento (art. 1.015 CPC), síntese da controvérsia, razões do agravo, pedido de efeito suspensivo/antecipação de tutela recursal e pedidos finais.",
+  },
+  {
+    key: "embargos",
+    label: "Embargos",
+    icon: ScrollText,
+    prompt:
+      "Preciso de embargos (de declaração ou à execução). Informe o número do processo (CNJ) e/ou anexe a decisão/sentença. Aponte com precisão a omissão, contradição, obscuridade ou erro material e redija a peça com fundamentação (arts. 1.022 e ss. do CPC).",
+  },
 ];
+
 
 export default function LegalAI() {
   const { user } = useAuth();
