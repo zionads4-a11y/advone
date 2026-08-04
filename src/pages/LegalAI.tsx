@@ -597,6 +597,63 @@ export default function LegalAI() {
 
           {/* Input */}
           <div className="border-t bg-card p-3">
+            {/* CNJ + anexos */}
+            <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center">
+              <Input
+                value={processNumber}
+                onChange={(e) => setProcessNumber(e.target.value)}
+                placeholder="Nº do processo (CNJ) — ex: 5064239-47.2022.8.13.0024"
+                className="h-9 text-xs sm:max-w-[340px]"
+                disabled={streaming}
+              />
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="application/pdf,image/*"
+                className="hidden"
+                onChange={(e) => {
+                  handlePickFiles(e.target.files);
+                  e.target.value = "";
+                }}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-9"
+                disabled={streaming}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Paperclip className="mr-2 h-4 w-4" /> Anexar PDF/imagem
+              </Button>
+              {processNumber.trim() && (
+                <span className="text-[11px] text-muted-foreground">
+                  A IA vai consultar as movimentações oficiais no DataJud/CNJ.
+                </span>
+              )}
+            </div>
+
+            {files.length > 0 && (
+              <div className="mb-2 flex flex-wrap gap-2">
+                {files.map((f, i) => (
+                  <Badge key={`${f.name}-${i}`} variant="secondary" className="gap-1 text-[11px]">
+                    <FileText className="h-3 w-3" />
+                    {f.name}
+                    <button
+                      type="button"
+                      onClick={() => setFiles((prev) => prev.filter((_, idx) => idx !== i))}
+                      className="ml-1 rounded hover:text-destructive"
+                      aria-label={`Remover ${f.name}`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            )}
+
+
             <div className="flex gap-2">
               <Textarea
                 value={input}
