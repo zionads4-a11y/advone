@@ -67,12 +67,15 @@ async function handler(req: Request): Promise<Response> {
     const userId = claims.claims.sub as string;
 
     const body = await req.json();
-    const { conversationId, companyId, messages, documentType } = body as {
+    const { conversationId, companyId, messages, documentType, attachments, processNumber } = body as {
       conversationId?: string;
       companyId: string;
       messages: Array<{ role: "user" | "assistant"; content: string }>;
       documentType?: string;
+      attachments?: Array<{ name: string; mimeType: string; dataUrl: string }>;
+      processNumber?: string;
     };
+
 
     if (!companyId || !Array.isArray(messages) || messages.length === 0) {
       return jsonResponse(req, { error: "Parâmetros inválidos" }, 400);
