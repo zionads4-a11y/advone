@@ -283,7 +283,10 @@ export default function LegalAI() {
           companyId: activeCompanyId,
           messages: newMessages.map((m) => ({ role: m.role, content: m.content })),
           documentType: pendingDocType,
+          attachments,
+          processNumber: cnj || undefined,
         }),
+
       });
 
       console.log("[LegalAI] Response status:", resp.status);
