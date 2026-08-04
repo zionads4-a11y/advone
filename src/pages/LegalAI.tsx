@@ -13,7 +13,10 @@ import {
   FileSignature,
   Gavel,
   ShieldAlert,
+  Paperclip,
+  X,
 } from "lucide-react";
+
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { saveAs } from "file-saver";
@@ -25,6 +28,8 @@ import { useUserCompanies } from "@/hooks/useUserCompanies";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -76,7 +81,29 @@ const TEMPLATES = [
     prompt:
       "Preciso redigir uma peça recursal ou contestação. Vou descrever a decisão a ser combatida ou a inicial a ser contestada. Estruture com preliminares, mérito, pedidos. Pergunte o que faltar.",
   },
+  {
+    key: "impugnacao",
+    label: "Impugnação",
+    icon: FileText,
+    prompt:
+      "Preciso de uma impugnação (ao cálculo / à contestação / ao valor da causa / à assistência judiciária). Informe o número do processo no campo CNJ e/ou anexe a peça a ser impugnada. Analise os dados do processo, aponte os pontos impugnáveis e redija a peça completa.",
+  },
+  {
+    key: "agravo",
+    label: "Agravo de Instrumento",
+    icon: Gavel,
+    prompt:
+      "Preciso de um Agravo de Instrumento. Use o número do processo (CNJ) e/ou o documento anexado com a decisão interlocutória agravada. Estruture com cabeçalho, tempestividade, cabimento (art. 1.015 CPC), síntese da controvérsia, razões do agravo, pedido de efeito suspensivo/antecipação de tutela recursal e pedidos finais.",
+  },
+  {
+    key: "embargos",
+    label: "Embargos",
+    icon: ScrollText,
+    prompt:
+      "Preciso de embargos (de declaração ou à execução). Informe o número do processo (CNJ) e/ou anexe a decisão/sentença. Aponte com precisão a omissão, contradição, obscuridade ou erro material e redija a peça com fundamentação (arts. 1.022 e ss. do CPC).",
+  },
 ];
+
 
 export default function LegalAI() {
   const { user } = useAuth();
@@ -91,8 +118,32 @@ export default function LegalAI() {
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [pendingDocType, setPendingDocType] = useState<string | null>(null);
+  const [processNumber, setProcessNumber] = useState("");
+  const [files, setFiles] = useState<Array<{ name: string; mimeType: string; dataUrl: string }>>([]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePickFiles = async (list: FileList | null) => {
+    if (!list || list.length === 0) return;
+    const picked = Array.from(list).slice(0, 5);
+    const converted: Array<{ name: string; mimeType: string; dataUrl: string }> = [];
+    for (const f of picked) {
+      if (f.size > 12 * 1024 * 1024) {
+        toast({ variant: "destructive", title: "Arquivo muito grande", description: `${f.name} passa de 12 MB.` });
+        continue;
+      }
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = reject;
+        reader.readAsDataURL(f);
+      });
+      converted.push({ name: f.name, mimeType: f.type || "application/pdf", dataUrl });
+    }
+    setFiles((prev) => [...prev, ...converted].slice(0, 5));
+  };
+
 
   // Carrega empresas pagas (mensalidade_zionads) acessíveis
   useEffect(() => {
@@ -179,7 +230,10 @@ export default function LegalAI() {
     setActiveConvId(null);
     setMessages([]);
     setPendingDocType(null);
+    setProcessNumber("");
+    setFiles([]);
   };
+
 
   const handleTemplate = (tpl: (typeof TEMPLATES)[number]) => {
     setInput(tpl.prompt);
@@ -195,11 +249,18 @@ export default function LegalAI() {
 
   const handleSend = async () => {
     if (!input.trim() || !activeCompanyId || streaming) return;
-    const userMsg: Message = { role: "user", content: input.trim() };
+    const attachments = files;
+    const cnj = processNumber.trim();
+    const suffix =
+      (cnj ? `\n\n[Processo: ${cnj}]` : "") +
+      (attachments.length ? `\n\n[Anexos: ${attachments.map((f) => f.name).join(", ")}]` : "");
+    const userMsg: Message = { role: "user", content: input.trim() + suffix };
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
     setInput("");
+    setFiles([]);
     setStreaming(true);
+
 
     // Coloca placeholder de assistant
     setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
@@ -227,7 +288,10 @@ export default function LegalAI() {
           companyId: activeCompanyId,
           messages: newMessages.map((m) => ({ role: m.role, content: m.content })),
           documentType: pendingDocType,
+          attachments,
+          processNumber: cnj || undefined,
         }),
+
       });
 
       console.log("[LegalAI] Response status:", resp.status);
@@ -533,6 +597,63 @@ export default function LegalAI() {
 
           {/* Input */}
           <div className="border-t bg-card p-3">
+            {/* CNJ + anexos */}
+            <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center">
+              <Input
+                value={processNumber}
+                onChange={(e) => setProcessNumber(e.target.value)}
+                placeholder="Nº do processo (CNJ) — ex: 5064239-47.2022.8.13.0024"
+                className="h-9 text-xs sm:max-w-[340px]"
+                disabled={streaming}
+              />
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="application/pdf,image/*"
+                className="hidden"
+                onChange={(e) => {
+                  handlePickFiles(e.target.files);
+                  e.target.value = "";
+                }}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-9"
+                disabled={streaming}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Paperclip className="mr-2 h-4 w-4" /> Anexar PDF/imagem
+              </Button>
+              {processNumber.trim() && (
+                <span className="text-[11px] text-muted-foreground">
+                  A IA vai consultar as movimentações oficiais no DataJud/CNJ.
+                </span>
+              )}
+            </div>
+
+            {files.length > 0 && (
+              <div className="mb-2 flex flex-wrap gap-2">
+                {files.map((f, i) => (
+                  <Badge key={`${f.name}-${i}`} variant="secondary" className="gap-1 text-[11px]">
+                    <FileText className="h-3 w-3" />
+                    {f.name}
+                    <button
+                      type="button"
+                      onClick={() => setFiles((prev) => prev.filter((_, idx) => idx !== i))}
+                      className="ml-1 rounded hover:text-destructive"
+                      aria-label={`Remover ${f.name}`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            )}
+
+
             <div className="flex gap-2">
               <Textarea
                 value={input}
