@@ -13,7 +13,10 @@ import {
   FileSignature,
   Gavel,
   ShieldAlert,
+  Paperclip,
+  X,
 } from "lucide-react";
+
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { saveAs } from "file-saver";
