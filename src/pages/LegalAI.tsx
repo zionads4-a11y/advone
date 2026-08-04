@@ -113,8 +113,32 @@ export default function LegalAI() {
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [pendingDocType, setPendingDocType] = useState<string | null>(null);
+  const [processNumber, setProcessNumber] = useState("");
+  const [files, setFiles] = useState<Array<{ name: string; mimeType: string; dataUrl: string }>>([]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePickFiles = async (list: FileList | null) => {
+    if (!list || list.length === 0) return;
+    const picked = Array.from(list).slice(0, 5);
+    const converted: Array<{ name: string; mimeType: string; dataUrl: string }> = [];
+    for (const f of picked) {
+      if (f.size > 12 * 1024 * 1024) {
+        toast({ variant: "destructive", title: "Arquivo muito grande", description: `${f.name} passa de 12 MB.` });
+        continue;
+      }
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = reject;
+        reader.readAsDataURL(f);
+      });
+      converted.push({ name: f.name, mimeType: f.type || "application/pdf", dataUrl });
+    }
+    setFiles((prev) => [...prev, ...converted].slice(0, 5));
+  };
+
 
   // Carrega empresas pagas (mensalidade_zionads) acessíveis
   useEffect(() => {
