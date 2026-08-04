@@ -159,13 +159,75 @@ async function handler(req: Request): Promise<Response> {
       await admin.from("legal_ai_conversations").update({ updated_at: new Date().toISOString() }).eq("id", convId);
     }
 
+    const files = Array.isArray(attachments) ? attachments.slice(0, 5) : [];
+
+    // Consulta o processo no DataJud (CNJ) quando o advogado informa o número
+    let processContext = "";
+    if (processNumber && normalizeCnj(processNumber).length === 20) {
+      const datajudKey = Deno.env.get("DATAJUD_API_KEY");
+      if (datajudKey) {
+        try {
+          const { hit } = await fetchProcessFromDatajud(processNumber, datajudKey);
+          if (hit) {
+            const movs = (hit.movimentos ?? [])
+              .slice()
+              .sort((a, b) => String(b.dataHora ?? "").localeCompare(String(a.dataHora ?? "")))
+              .slice(0, 40)
+              .map((m) => `- ${String(m.dataHora ?? "").slice(0, 10)}: ${movimentoTexto(m)}`)
+              .join("\n");
+            processContext = [
+              `\n\n[DADOS OFICIAIS DO PROCESSO ${processNumber} — API Pública DataJud/CNJ]`,
+              `Tribunal: ${hit.tribunal ?? "—"} | Grau: ${hit.grau ?? "—"} | Órgão julgador: ${hit.orgaoJulgador?.nome ?? "—"}`,
+              `Classe: ${hit.classe?.nome ?? "—"} | Assuntos: ${(hit.assuntos ?? []).map((a) => a.nome).filter(Boolean).join(", ") || "—"}`,
+              `Ajuizamento: ${String(hit.dataAjuizamento ?? "").slice(0, 10) || "—"}`,
+              `Movimentações (mais recentes primeiro):\n${movs || "nenhuma movimentação retornada"}`,
+              `Use estes dados reais para fundamentar a peça (impugnação, agravo, embargos, etc.). Não invente movimentações que não estejam acima; se faltar dado essencial, pergunte ao advogado.`,
+            ].join("\n");
+          } else {
+            processContext = `\n\n[Consulta DataJud do processo ${processNumber}: nenhum registro encontrado. Peça ao advogado os dados da decisão a ser combatida.]`;
+          }
+        } catch (err) {
+          console.error("datajud lookup failed:", err);
+          processContext = `\n\n[Consulta DataJud do processo ${processNumber} indisponível neste momento. Peça ao advogado os dados essenciais da decisão.]`;
+        }
+      }
+    }
+
     // Salva a mensagem do usuário
     await admin.from("legal_ai_messages").insert({
       conversation_id: convId,
       role: "user",
-      content: lastUser.content,
+      content:
+        lastUser.content +
+        (processNumber ? `\n\n[Processo informado: ${processNumber}]` : "") +
+        (files.length ? `\n\n[Anexos: ${files.map((f) => f.name).join(", ")}]` : ""),
       document_type: documentType ?? null,
     });
+
+    // Monta a última mensagem do usuário (multimodal quando há anexos)
+    const historyMessages = messages.slice(0, -1);
+    const lastParts: any[] = [
+      { type: "text", text: lastUser.content + processContext },
+    ];
+    for (const f of files) {
+      if (!f?.dataUrl) continue;
+      if (f.mimeType?.startsWith("image/")) {
+        lastParts.push({ type: "image_url", image_url: { url: f.dataUrl } });
+      } else {
+        lastParts.push({ type: "file", file: { filename: f.name, file_data: f.dataUrl } });
+      }
+    }
+
+    const finalMessages = [
+      { role: "system", content: SYSTEM_PROMPT },
+      ...historyMessages,
+      files.length > 0
+        ? { role: "user", content: lastParts }
+        : { role: "user", content: lastUser.content + processContext },
+    ];
+
+    // Anexos (PDF/imagem) exigem modelo multimodal
+    const model = files.length > 0 ? "google/gemini-3.1-pro-preview" : "openai/gpt-5";
 
     // Chama Lovable AI com streaming
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -175,11 +237,12 @@ async function handler(req: Request): Promise<Response> {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "openai/gpt-5",
+        model,
         stream: true,
-        messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
+        messages: finalMessages,
       }),
     });
+
 
     if (!aiResp.ok) {
       const errText = await aiResp.text().catch(() => "");
