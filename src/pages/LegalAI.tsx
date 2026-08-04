@@ -225,7 +225,10 @@ export default function LegalAI() {
     setActiveConvId(null);
     setMessages([]);
     setPendingDocType(null);
+    setProcessNumber("");
+    setFiles([]);
   };
+
 
   const handleTemplate = (tpl: (typeof TEMPLATES)[number]) => {
     setInput(tpl.prompt);
