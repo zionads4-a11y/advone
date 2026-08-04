@@ -244,11 +244,18 @@ export default function LegalAI() {
 
   const handleSend = async () => {
     if (!input.trim() || !activeCompanyId || streaming) return;
-    const userMsg: Message = { role: "user", content: input.trim() };
+    const attachments = files;
+    const cnj = processNumber.trim();
+    const suffix =
+      (cnj ? `\n\n[Processo: ${cnj}]` : "") +
+      (attachments.length ? `\n\n[Anexos: ${attachments.map((f) => f.name).join(", ")}]` : "");
+    const userMsg: Message = { role: "user", content: input.trim() + suffix };
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
     setInput("");
+    setFiles([]);
     setStreaming(true);
+
 
     // Coloca placeholder de assistant
     setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
