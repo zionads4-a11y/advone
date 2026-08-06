@@ -646,13 +646,30 @@ export default function LegalAI() {
           <div className="border-t bg-card p-3">
             {/* CNJ + anexos */}
             <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center">
-              <Input
-                value={processNumber}
-                onChange={(e) => setProcessNumber(e.target.value)}
-                placeholder="Nº do processo (CNJ) — ex: 5064239-47.2022.8.13.0024"
-                className="h-9 text-xs sm:max-w-[340px]"
-                disabled={streaming}
-              />
+              <div className="sm:max-w-[340px] sm:flex-1">
+                <Input
+                  value={processNumber}
+                  onChange={(e) => setProcessNumber(maskCnj(e.target.value))}
+                  inputMode="numeric"
+                  aria-invalid={cnjInvalid}
+                  aria-label="Número do processo (CNJ)"
+                  placeholder="0000000-00.0000.0.00.0000"
+                  className={cn(
+                    "h-9 text-xs",
+                    cnjInvalid && "border-destructive focus-visible:ring-destructive",
+                  )}
+                  disabled={streaming}
+                />
+                {cnjInvalid && (
+                  <p className="mt-1 text-[11px] text-destructive">{cnjCheck.error}</p>
+                )}
+                {cnjTouched && cnjCheck.valid && (
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    CNJ válido · {cnjCheck.tribunal} — a IA vai consultar as movimentações
+                    oficiais no DataJud/CNJ.
+                  </p>
+                )}
+              </div>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -674,11 +691,6 @@ export default function LegalAI() {
               >
                 <Paperclip className="mr-2 h-4 w-4" /> Anexar PDF/imagem
               </Button>
-              {processNumber.trim() && (
-                <span className="text-[11px] text-muted-foreground">
-                  A IA vai consultar as movimentações oficiais no DataJud/CNJ.
-                </span>
-              )}
             </div>
 
             {files.length > 0 && (
