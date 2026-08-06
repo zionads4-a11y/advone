@@ -239,6 +239,13 @@ export default function LegalAI() {
     setPendingDocType(null);
     setProcessNumber("");
     setFiles([]);
+    setInput("");
+    toast({
+      title: "Nova conversa",
+      description: "Descreva o caso ou escolha um modelo rápido para começar.",
+    });
+    // dá foco no campo de mensagem para ficar claro que iniciou
+    setTimeout(() => textareaRef.current?.focus(), 50);
   };
 
 
