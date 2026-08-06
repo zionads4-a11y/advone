@@ -264,7 +264,40 @@ export default function LegalAI() {
   const handleSend = async () => {
     if (!input.trim() || !activeCompanyId || streaming) return;
     const attachments = files;
-    const cnj = processNumber.trim();
+
+    // Valida CNJ (quando informado) antes de gastar chamada de IA
+    let cnj = "";
+    if (processNumber.trim()) {
+      const check = validateCnj(processNumber);
+      if (!check.valid) {
+        toast({
+          variant: "destructive",
+          title: "Número do processo inválido",
+          description: check.error,
+        });
+        return;
+      }
+      cnj = check.formatted;
+      setProcessNumber(check.formatted);
+
+      // Confere se o processo existe na base pública antes de seguir
+      try {
+        const { data, error } = await supabase.functions.invoke("datajud-search", {
+          body: { cnj: check.digits, save: false },
+        });
+        if (!error && data && (data as { ok?: boolean }).ok === false) {
+          toast({
+            variant: "destructive",
+            title: "Processo não encontrado",
+            description: `Nenhum registro para ${check.formatted} no ${check.tribunal ?? "tribunal informado"} (base pública DataJud/CNJ). Confira o número ou envie a decisão em anexo.`,
+          });
+          return;
+        }
+      } catch {
+        // Se a consulta falhar, segue o fluxo — a IA avisa que não obteve os dados oficiais
+      }
+    }
+
     const suffix =
       (cnj ? `\n\n[Processo: ${cnj}]` : "") +
       (attachments.length ? `\n\n[Anexos: ${attachments.map((f) => f.name).join(", ")}]` : "");
