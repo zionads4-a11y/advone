@@ -124,6 +124,12 @@ export default function LegalAI() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Validação do CNJ (máscara + dígito verificador + tribunal)
+  const cnjCheck = useMemo(() => validateCnj(processNumber), [processNumber]);
+  const cnjTouched = processNumber.trim().length > 0;
+  const cnjInvalid = cnjTouched && !cnjCheck.valid;
 
   const handlePickFiles = async (list: FileList | null) => {
     if (!list || list.length === 0) return;
