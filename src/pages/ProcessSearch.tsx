@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Save, Scale, Sparkles } from "lucide-react";
+import { Loader2, Search, Save, Scale, Sparkles, Gavel } from "lucide-react";
 import { toast } from "sonner";
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { useAuth } from "@/hooks/useAuth";
@@ -14,6 +14,9 @@ interface Movement {
   codigo?: number;
   nome?: string;
   texto?: string;
+  grau?: string;
+  orgao?: string;
+  is_decision?: boolean;
 }
 
 interface ProcessResult {
@@ -29,7 +32,9 @@ interface ProcessResult {
     data_ajuizamento?: string;
     grau?: string;
   };
+  graus?: Array<{ grau?: string; orgao?: string; movimentos?: number }>;
   movimentos?: Movement[];
+  decisoes?: Movement[];
   monitored_id?: string | null;
 }
 
@@ -37,25 +42,32 @@ export default function ProcessSearch() {
   const [cnj, setCnj] = useState("");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [explaining, setExplaining] = useState(false);
+  const [explaining, setExplaining] = useState<"last" | "decisions" | null>(null);
   const [summary, setSummary] = useState<string | null>(null);
+  const [summaryTitle, setSummaryTitle] = useState("Explicação");
   const [result, setResult] = useState<ProcessResult | null>(null);
   const { user } = useAuth();
 
-  async function explain() {
+  async function explain(mode: "last" | "decisions") {
     if (!result?.ok || !result.process) return;
-    setExplaining(true);
+    setExplaining(mode);
     setSummary(null);
+    setSummaryTitle(mode === "decisions" ? "Todas as decisões em linguagem simples" : "Explicação da última movimentação");
     try {
       const { data, error } = await supabase.functions.invoke("explain-process-search", {
-        body: { process: result.process, movimentos: result.movimentos ?? [] },
+        body: {
+          process: result.process,
+          movimentos: result.movimentos ?? [],
+          decisoes: result.decisoes ?? [],
+          mode,
+        },
       });
       if (error) throw error;
       setSummary((data as { summary?: string })?.summary ?? "Sem resumo disponível.");
     } catch (e) {
       toast.error("Erro ao gerar resumo: " + (e instanceof Error ? e.message : String(e)));
     } finally {
-      setExplaining(false);
+      setExplaining(null);
     }
   }
 
@@ -96,6 +108,8 @@ export default function ProcessSearch() {
     }
   }
 
+  const decisoes = result?.decisoes ?? [];
+
   return (
     <div className="container mx-auto py-6 space-y-6 max-w-4xl">
       <div className="flex items-center gap-2">
@@ -103,7 +117,7 @@ export default function ProcessSearch() {
         <h1 className="text-2xl font-bold">Busca de Processos (DataJud CNJ)</h1>
       </div>
       <p className="text-sm text-muted-foreground">
-        Consulte processos diretamente na base pública do Conselho Nacional de Justiça. Cobre TJs (estaduais), TRFs (federais), TRTs (trabalho), TST e STJ.
+        Consulte processos diretamente na base pública do Conselho Nacional de Justiça, em todas as instâncias (1º grau, 2º grau e recursos). Cobre TJs (estaduais), TRFs (federais), TRTs (trabalho), TST e STJ.
       </p>
 
       <Card>
@@ -131,10 +145,12 @@ export default function ProcessSearch() {
       {result?.ok && result.process && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 flex-wrap">
               Processo {result.process.numero_cnj}
               {result.alias && <Badge variant="outline">{result.alias.toUpperCase()}</Badge>}
-              {result.process.grau && <Badge variant="secondary">{result.process.grau}</Badge>}
+              {result.graus?.map((g, i) => (
+                <Badge key={i} variant="secondary">{g.grau ?? "—"} · {g.movimentos ?? 0} andamentos</Badge>
+              ))}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
@@ -142,9 +158,13 @@ export default function ProcessSearch() {
             <div><b>Assunto:</b> {result.process.assunto ?? "—"}</div>
             <div><b>Órgão julgador:</b> {result.process.orgao ?? "—"}</div>
             <div><b>Data de ajuizamento:</b> {result.process.data_ajuizamento?.substring(0, 10) ?? "—"}</div>
-            <div className="pt-2">
-              <Button size="sm" variant="default" onClick={explain} disabled={explaining}>
-                {explaining ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Sparkles className="h-4 w-4 mr-1" />}
+            <div className="pt-2 flex flex-wrap gap-2">
+              <Button size="sm" onClick={() => explain("decisions")} disabled={explaining !== null}>
+                {explaining === "decisions" ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Gavel className="h-4 w-4 mr-1" />}
+                Resumir todas as decisões ({decisoes.length})
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => explain("last")} disabled={explaining !== null}>
+                {explaining === "last" ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Sparkles className="h-4 w-4 mr-1" />}
                 Explicar última movimentação
               </Button>
             </div>
@@ -157,7 +177,7 @@ export default function ProcessSearch() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Sparkles className="h-4 w-4 text-primary" />
-              Explicação da última movimentação
+              {summaryTitle}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -166,17 +186,42 @@ export default function ProcessSearch() {
         </Card>
       )}
 
+      {decisoes.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Gavel className="h-4 w-4 text-primary" />
+              Decisões, sentenças e acórdãos ({decisoes.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-3">
+              {decisoes.map((m, i) => (
+                <li key={i} className="border-l-2 border-primary pl-3">
+                  <div className="text-xs text-muted-foreground flex gap-2">
+                    <span>{m.data ? new Date(m.data).toLocaleString("pt-BR") : "—"}</span>
+                    {m.grau && <Badge variant="outline" className="text-[10px] py-0">{m.grau}</Badge>}
+                  </div>
+                  <div className="text-sm">{m.texto || m.nome}</div>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+
       {result?.movimentos && result.movimentos.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Movimentações ({result.movimentos.length})</CardTitle>
+            <CardTitle>Todos os andamentos ({result.movimentos.length})</CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="space-y-3">
               {result.movimentos.map((m, i) => (
-                <li key={i} className="border-l-2 border-primary/40 pl-3">
-                  <div className="text-xs text-muted-foreground">
-                    {m.data ? new Date(m.data).toLocaleString("pt-BR") : "—"}
+                <li key={i} className={`border-l-2 pl-3 ${m.is_decision ? "border-primary" : "border-primary/30"}`}>
+                  <div className="text-xs text-muted-foreground flex gap-2">
+                    <span>{m.data ? new Date(m.data).toLocaleString("pt-BR") : "—"}</span>
+                    {m.grau && <Badge variant="outline" className="text-[10px] py-0">{m.grau}</Badge>}
                   </div>
                   <div className="text-sm">{m.texto || m.nome}</div>
                 </li>
