@@ -715,6 +715,7 @@ export default function LegalAI() {
 
             <div className="flex gap-2">
               <Textarea
+                ref={textareaRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -729,7 +730,7 @@ export default function LegalAI() {
               />
               <Button
                 onClick={handleSend}
-                disabled={!input.trim() || streaming}
+                disabled={!input.trim() || streaming || cnjInvalid}
                 className="h-auto"
               >
                 {streaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
