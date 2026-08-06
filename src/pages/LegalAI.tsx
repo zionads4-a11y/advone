@@ -35,6 +35,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { maskCnj, validateCnj } from "@/lib/cnj";
 
 interface Conversation {
   id: string;
@@ -123,6 +124,12 @@ export default function LegalAI() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Validação do CNJ (máscara + dígito verificador + tribunal)
+  const cnjCheck = useMemo(() => validateCnj(processNumber), [processNumber]);
+  const cnjTouched = processNumber.trim().length > 0;
+  const cnjInvalid = cnjTouched && !cnjCheck.valid;
 
   const handlePickFiles = async (list: FileList | null) => {
     if (!list || list.length === 0) return;
@@ -232,6 +239,13 @@ export default function LegalAI() {
     setPendingDocType(null);
     setProcessNumber("");
     setFiles([]);
+    setInput("");
+    toast({
+      title: "Nova conversa",
+      description: "Descreva o caso ou escolha um modelo rápido para começar.",
+    });
+    // dá foco no campo de mensagem para ficar claro que iniciou
+    setTimeout(() => textareaRef.current?.focus(), 50);
   };
 
 
@@ -250,7 +264,40 @@ export default function LegalAI() {
   const handleSend = async () => {
     if (!input.trim() || !activeCompanyId || streaming) return;
     const attachments = files;
-    const cnj = processNumber.trim();
+
+    // Valida CNJ (quando informado) antes de gastar chamada de IA
+    let cnj = "";
+    if (processNumber.trim()) {
+      const check = validateCnj(processNumber);
+      if (!check.valid) {
+        toast({
+          variant: "destructive",
+          title: "Número do processo inválido",
+          description: check.error,
+        });
+        return;
+      }
+      cnj = check.formatted;
+      setProcessNumber(check.formatted);
+
+      // Confere se o processo existe na base pública antes de seguir
+      try {
+        const { data, error } = await supabase.functions.invoke("datajud-search", {
+          body: { cnj: check.digits, save: false },
+        });
+        if (!error && data && (data as { ok?: boolean }).ok === false) {
+          toast({
+            variant: "destructive",
+            title: "Processo não encontrado",
+            description: `Nenhum registro para ${check.formatted} no ${check.tribunal ?? "tribunal informado"} (base pública DataJud/CNJ). Confira o número ou envie a decisão em anexo.`,
+          });
+          return;
+        }
+      } catch {
+        // Se a consulta falhar, segue o fluxo — a IA avisa que não obteve os dados oficiais
+      }
+    }
+
     const suffix =
       (cnj ? `\n\n[Processo: ${cnj}]` : "") +
       (attachments.length ? `\n\n[Anexos: ${attachments.map((f) => f.name).join(", ")}]` : "");
@@ -599,13 +646,30 @@ export default function LegalAI() {
           <div className="border-t bg-card p-3">
             {/* CNJ + anexos */}
             <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center">
-              <Input
-                value={processNumber}
-                onChange={(e) => setProcessNumber(e.target.value)}
-                placeholder="Nº do processo (CNJ) — ex: 5064239-47.2022.8.13.0024"
-                className="h-9 text-xs sm:max-w-[340px]"
-                disabled={streaming}
-              />
+              <div className="sm:max-w-[340px] sm:flex-1">
+                <Input
+                  value={processNumber}
+                  onChange={(e) => setProcessNumber(maskCnj(e.target.value))}
+                  inputMode="numeric"
+                  aria-invalid={cnjInvalid}
+                  aria-label="Número do processo (CNJ)"
+                  placeholder="0000000-00.0000.0.00.0000"
+                  className={cn(
+                    "h-9 text-xs",
+                    cnjInvalid && "border-destructive focus-visible:ring-destructive",
+                  )}
+                  disabled={streaming}
+                />
+                {cnjInvalid && (
+                  <p className="mt-1 text-[11px] text-destructive">{cnjCheck.error}</p>
+                )}
+                {cnjTouched && cnjCheck.valid && (
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    CNJ válido · {cnjCheck.tribunal} — a IA vai consultar as movimentações
+                    oficiais no DataJud/CNJ.
+                  </p>
+                )}
+              </div>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -627,11 +691,6 @@ export default function LegalAI() {
               >
                 <Paperclip className="mr-2 h-4 w-4" /> Anexar PDF/imagem
               </Button>
-              {processNumber.trim() && (
-                <span className="text-[11px] text-muted-foreground">
-                  A IA vai consultar as movimentações oficiais no DataJud/CNJ.
-                </span>
-              )}
             </div>
 
             {files.length > 0 && (
@@ -656,6 +715,7 @@ export default function LegalAI() {
 
             <div className="flex gap-2">
               <Textarea
+                ref={textareaRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -670,7 +730,7 @@ export default function LegalAI() {
               />
               <Button
                 onClick={handleSend}
-                disabled={!input.trim() || streaming}
+                disabled={!input.trim() || streaming || cnjInvalid}
                 className="h-auto"
               >
                 {streaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
