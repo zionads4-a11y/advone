@@ -35,6 +35,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { maskCnj, validateCnj } from "@/lib/cnj";
 
 interface Conversation {
   id: string;
