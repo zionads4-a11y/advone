@@ -16,27 +16,52 @@ declare global {
   }
 }
 
-function loadFbSdk(): Promise<void> {
+function loadFbSdk(): Promise<boolean> {
   return new Promise((resolve) => {
-    if (window.FB) return resolve();
-    window.fbAsyncInit = () => {
-      window.FB.init({
-        appId: META_APP_ID,
-        cookie: true,
-        xfbml: false,
-        version: "v21.0",
-      });
-      resolve();
+    if (window.FB) return resolve(true);
+
+    const init = () => {
+      try {
+        window.FB.init({
+          appId: META_APP_ID,
+          cookie: true,
+          xfbml: false,
+          version: "v21.0",
+        });
+        resolve(true);
+      } catch {
+        resolve(false);
+      }
     };
-    if (document.getElementById("facebook-jssdk")) return;
-    const s = document.createElement("script");
-    s.id = "facebook-jssdk";
-    s.src = "https://connect.facebook.net/en_US/sdk.js";
-    s.async = true;
-    s.defer = true;
-    document.body.appendChild(s);
+
+    window.fbAsyncInit = init;
+
+    if (!document.getElementById("facebook-jssdk")) {
+      const s = document.createElement("script");
+      s.id = "facebook-jssdk";
+      s.src = "https://connect.facebook.net/en_US/sdk.js";
+      s.async = true;
+      s.defer = true;
+      s.crossOrigin = "anonymous";
+      s.onerror = () => resolve(false);
+      document.body.appendChild(s);
+    }
+
+    // Fallback: o script pode já ter carregado antes deste componente montar
+    let tries = 0;
+    const poll = window.setInterval(() => {
+      tries += 1;
+      if (window.FB) {
+        window.clearInterval(poll);
+        init();
+      } else if (tries > 40) {
+        window.clearInterval(poll);
+        resolve(false);
+      }
+    }, 250);
   });
 }
+
 
 interface Props {
   companyId: string;
