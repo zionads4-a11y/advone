@@ -70,43 +70,65 @@ interface Props {
 
 export default function MetaEmbeddedSignupButton({ companyId, onConnected }: Props) {
   const [ready, setReady] = useState(false);
+  const [sdkFailed, setSdkFailed] = useState(false);
   const [running, setRunning] = useState(false);
 
+  const inIframe = typeof window !== "undefined" && window.self !== window.top;
+
   useEffect(() => {
-    loadFbSdk().then(() => setReady(true));
+    let mounted = true;
+    loadFbSdk().then((ok) => {
+      if (!mounted) return;
+      setReady(ok);
+      setSdkFailed(!ok);
+    });
 
     // Listener das mensagens do popup Meta (retorna WABA/phone selecionados)
     const onMessage = (event: MessageEvent) => {
-      if (event.origin !== "https://www.facebook.com" && event.origin !== "https://web.facebook.com") return;
+      if (!/(^|\.)facebook\.com$/.test(new URL(event.origin || "https://x.invalid").hostname)) return;
       try {
-        const data = JSON.parse(typeof event.data === "string" ? event.data : "{}");
-        if (data?.type !== "WA_EMBEDDED_SIGNUP") return;
-        if (data?.event === "FINISH" && data?.data) {
-          (window as any).__metaEsPayload = data.data;
-        }
+        const raw = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+        if (raw?.type !== "WA_EMBEDDED_SIGNUP") return;
+        if (raw?.data) (window as any).__metaEsPayload = raw.data;
       } catch { /* ignore */ }
     };
     window.addEventListener("message", onMessage);
-    return () => window.removeEventListener("message", onMessage);
+    return () => {
+      mounted = false;
+      window.removeEventListener("message", onMessage);
+    };
   }, []);
 
   const start = async () => {
     if (!companyId) return toast.error("Selecione uma empresa primeiro");
-    if (!ES_CONFIG_ID) {
-      return toast.error(
-        "Config ID do Embedded Signup não configurado. Defina VITE_META_ES_CONFIG_ID.",
-      );
+    if (inIframe) {
+      toast.error("Abra esta página em uma nova aba", {
+        description: "O login do Facebook não funciona dentro do preview. Vamos abrir em nova aba.",
+      });
+      window.open(window.location.href, "_blank", "noopener");
+      return;
     }
-    if (!window.FB) return toast.error("SDK do Facebook não carregou");
+    if (!window.FB) {
+      return toast.error("SDK do Facebook não carregou", {
+        description: "Desative bloqueadores de anúncio/rastreamento e recarregue a página.",
+      });
+    }
 
     setRunning(true);
+    (window as any).__metaEsPayload = null;
+
+    // Se o popup for bloqueado, o callback nunca é chamado — liberamos o botão
+    const safety = window.setTimeout(() => setRunning(false), 120000);
+
     window.FB.login(
       async (response: any) => {
+        window.clearTimeout(safety);
         try {
           const code = response?.authResponse?.code;
           if (!code) {
-            setRunning(false);
-            return toast.error("Cancelado — nenhum code retornado");
+            return toast.error("Login não concluído", {
+              description: "A janela do Facebook foi fechada ou bloqueada pelo navegador.",
+            });
           }
           const es = (window as any).__metaEsPayload || {};
           const { data, error } = await supabase.functions.invoke(
@@ -143,14 +165,42 @@ export default function MetaEmbeddedSignupButton({ companyId, onConnected }: Pro
   };
 
   return (
-    <Button
-      onClick={start}
-      disabled={!ready || running}
-      className="gap-2 bg-[#1877F2] hover:bg-[#0F65D9] text-white"
-      size="lg"
-    >
-      {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
-      Conectar WhatsApp Oficial (Meta)
-    </Button>
+    <div className="space-y-3">
+      <Button
+        onClick={start}
+        disabled={running}
+        className="gap-2 bg-[#1877F2] hover:bg-[#0F65D9] text-white"
+        size="lg"
+      >
+        {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
+        Conectar WhatsApp Oficial (Meta)
+      </Button>
+
+      {inIframe && (
+        <p className="text-xs text-amber-600">
+          Você está no preview. O login do Facebook exige uma janela própria — clique no botão e
+          continue na nova aba.
+        </p>
+      )}
+      {sdkFailed && !inIframe && (
+        <p className="text-xs text-destructive">
+          Não conseguimos carregar o SDK do Facebook. Desative bloqueadores (AdBlock/uBlock) ou tente
+          em outro navegador.
+        </p>
+      )}
+      {!ready && !sdkFailed && (
+        <p className="text-xs text-muted-foreground">Carregando o login do Facebook...</p>
+      )}
+
+      <div className="rounded-lg border bg-muted/40 p-3 text-xs text-muted-foreground space-y-1">
+        <p className="font-medium text-foreground">Como conectar (passo a passo):</p>
+        <p>1. Clique no botão azul — abre a janela oficial da Meta.</p>
+        <p>2. Faça login com o Facebook do dono do WhatsApp Business.</p>
+        <p>3. Escolha (ou crie) o Portfólio Empresarial e a conta do WhatsApp Business.</p>
+        <p>4. Selecione o número, confirme o país e valide o código por SMS/ligação.</p>
+        <p>5. Ao finalizar, a janela fecha sozinha e o número aparece conectado aqui.</p>
+      </div>
+    </div>
   );
 }
+
