@@ -48,10 +48,10 @@ export default defineTool({
         ? supabase.from("kanban_columns").select("id, name, position").eq("id", lead.kanban_column_id).maybeSingle()
         : Promise.resolve({ data: null }),
       supabase
-        .from("agenda_events")
-        .select("id, title, start_at, end_at, meeting_link, status")
+        .from("lead_reminders")
+        .select("id, title, description, due_at, end_at, reminder_type, completed, meeting_held")
         .eq("lead_id", lead.id)
-        .order("start_at", { ascending: false })
+        .order("due_at", { ascending: false })
         .limit(10),
       supabase
         .from("whatsapp_messages")
