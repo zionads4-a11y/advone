@@ -22,7 +22,7 @@ serve(async (req) => {
   if (req.method !== "POST") return j(405, { error: "method not allowed" });
 
   try {
-    const { code, company_id, phone_number_id, waba_id } = await req.json();
+    const { code, company_id, phone_number_id, waba_id, redirect_uri } = await req.json();
     if (!code || !company_id) return j(400, { error: "code and company_id required" });
 
     const authz = req.headers.get("Authorization");
@@ -35,27 +35,56 @@ serve(async (req) => {
     if (!uid) return j(401, { error: "invalid auth" });
 
     // 1) Troca code -> access_token
-    const tokenRes = await fetch(
-      `https://graph.facebook.com/${META_V}/oauth/access_token?client_id=${META_APP_ID}&client_secret=${META_APP_SECRET}&code=${encodeURIComponent(code)}`,
-    );
+    const tokenUrl = new URL(`https://graph.facebook.com/${META_V}/oauth/access_token`);
+    tokenUrl.searchParams.set("client_id", META_APP_ID);
+    tokenUrl.searchParams.set("client_secret", META_APP_SECRET);
+    tokenUrl.searchParams.set("code", code);
+    if (redirect_uri) tokenUrl.searchParams.set("redirect_uri", redirect_uri);
+    const tokenRes = await fetch(tokenUrl.toString());
     const tokenJson = await tokenRes.json();
     if (!tokenRes.ok || !tokenJson.access_token) {
       return j(400, { error: "token exchange failed", raw: tokenJson });
     }
     const accessToken = tokenJson.access_token as string;
 
-    // 2) Se WABA veio no payload, faz subscribe do App na WABA -> webhook automático
+    // 2) Descobre WABA e número quando não vieram do frontend
+    let wabaId: string | null = waba_id ?? null;
+    let phoneId: string | null = phone_number_id ?? null;
+
+    if (!wabaId) {
+      const dbg = await fetch(
+        `https://graph.facebook.com/${META_V}/debug_token?input_token=${accessToken}&access_token=${META_APP_ID}|${META_APP_SECRET}`,
+      )
+        .then((r) => r.json())
+        .catch(() => null);
+      const scopes = dbg?.data?.granular_scopes as
+        | Array<{ scope: string; target_ids?: string[] }>
+        | undefined;
+      wabaId =
+        scopes?.find((s) => s.scope === "whatsapp_business_management")?.target_ids?.[0] ??
+        scopes?.find((s) => s.scope === "whatsapp_business_messaging")?.target_ids?.[0] ??
+        null;
+    }
+
+    if (wabaId && !phoneId) {
+      const phones = await fetch(
+        `https://graph.facebook.com/${META_V}/${wabaId}/phone_numbers?access_token=${accessToken}`,
+      )
+        .then((r) => r.json())
+        .catch(() => null);
+      phoneId = phones?.data?.[0]?.id ?? null;
+    }
+
+    // 3) Assina o app na WABA -> webhook automático
     let subscribeResult: any = null;
-    if (waba_id) {
-      const subRes = await fetch(
-        `https://graph.facebook.com/${META_V}/${waba_id}/subscribed_apps`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${accessToken}` },
-        },
-      );
+    if (wabaId) {
+      const subRes = await fetch(`https://graph.facebook.com/${META_V}/${wabaId}/subscribed_apps`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
       subscribeResult = await subRes.json().catch(() => ({}));
     }
+
 
     // 3) Gera verify_token se não existir e persiste config
     const admin = createClient(SUPABASE_URL, SERVICE_KEY);
@@ -70,8 +99,8 @@ serve(async (req) => {
     const payload = {
       company_id,
       provider: "meta_cloud",
-      meta_phone_number_id: phone_number_id || null,
-      meta_waba_id: waba_id || null,
+      meta_phone_number_id: phoneId || null,
+      meta_waba_id: wabaId || null,
       meta_access_token: accessToken,
       meta_verify_token: verifyToken,
       meta_onboarded_at: new Date().toISOString(),
@@ -86,6 +115,8 @@ serve(async (req) => {
     return j(200, {
       ok: true,
       verify_token: verifyToken,
+      waba_id: wabaId,
+      phone_number_id: phoneId,
       subscribe: subscribeResult,
       webhook_url: `${SUPABASE_URL}/functions/v1/meta-webhook?company_id=${company_id}`,
     });
