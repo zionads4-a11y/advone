@@ -42,9 +42,9 @@ export default defineTool({
 
     const { data: movimentacoes } = await supabase
       .from("process_movements")
-      .select("*")
-      .eq("process_id", processo.id)
-      .order("data_movimentacao", { ascending: false })
+      .select("movement_date, movement_type, content, source_name, source_grau, source_provider")
+      .eq("monitored_process_id", processo.id)
+      .order("movement_date", { ascending: false })
       .limit(input.movements_limit);
 
     return jsonResult({
