@@ -14,7 +14,7 @@ export default defineTool({
     const supabase = supabaseForUser(ctx);
     const { data, error } = await supabase
       .from("companies")
-      .select("id, name, plan, service_mode, is_active")
+      .select("id, name, billing_model, service_mode, practice_specialty, message_quota_monthly, messages_used_current_period")
       .order("name", { ascending: true });
     if (error) return errorResult(error.message);
     return jsonResult({ total: data?.length ?? 0, companies: data ?? [] }, { companies: data ?? [] });
