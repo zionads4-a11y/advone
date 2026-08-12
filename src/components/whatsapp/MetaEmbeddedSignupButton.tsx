@@ -1,13 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-
-// Config ID gerado no painel Meta (Embedded Signup configuration).
-// Valores públicos — expostos no client-side por design da Meta.
-const META_APP_ID = "1268738996315614";
-const ES_CONFIG_ID = "1598347715057707";
 
 declare global {
   interface Window {
@@ -16,30 +11,32 @@ declare global {
   }
 }
 
-function loadFbSdk(): Promise<boolean> {
-  return new Promise((resolve) => {
-    if (window.FB) return resolve(true);
+interface MetaPublicConfig {
+  app_id: string | null;
+  config_id: string | null;
+  graph_version: string;
+  configured: boolean;
+}
 
+function loadFbSdk(appId: string, version: string): Promise<boolean> {
+  return new Promise((resolve) => {
     const init = () => {
       try {
-        window.FB.init({
-          appId: META_APP_ID,
-          cookie: true,
-          xfbml: false,
-          version: "v21.0",
-        });
+        window.FB.init({ appId, cookie: true, xfbml: false, version });
         resolve(true);
       } catch {
         resolve(false);
       }
     };
 
+    if (window.FB) return init();
+
     window.fbAsyncInit = init;
 
     if (!document.getElementById("facebook-jssdk")) {
       const s = document.createElement("script");
       s.id = "facebook-jssdk";
-      s.src = "https://connect.facebook.net/en_US/sdk.js";
+      s.src = "https://connect.facebook.net/pt_BR/sdk.js";
       s.async = true;
       s.defer = true;
       s.crossOrigin = "anonymous";
@@ -47,7 +44,6 @@ function loadFbSdk(): Promise<boolean> {
       document.body.appendChild(s);
     }
 
-    // Fallback: o script pode já ter carregado antes deste componente montar
     let tries = 0;
     const poll = window.setInterval(() => {
       tries += 1;
@@ -62,51 +58,105 @@ function loadFbSdk(): Promise<boolean> {
   });
 }
 
-
 interface Props {
   companyId: string;
   onConnected?: () => void;
 }
 
 export default function MetaEmbeddedSignupButton({ companyId, onConnected }: Props) {
+  const [config, setConfig] = useState<MetaPublicConfig | null>(null);
+  const [configError, setConfigError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [sdkFailed, setSdkFailed] = useState(false);
   const [running, setRunning] = useState(false);
+  const esPayload = useRef<{ phone_number_id?: string; waba_id?: string } | null>(null);
+  const safetyRef = useRef<number | null>(null);
 
   const inIframe = typeof window !== "undefined" && window.self !== window.top;
 
+  // 1) Busca App ID + Config ID atuais no backend (evita IDs defasados no frontend)
   useEffect(() => {
     let mounted = true;
-    loadFbSdk().then((ok) => {
+    (async () => {
+      const { data, error } = await supabase.functions.invoke<MetaPublicConfig>("meta-public-config", {
+        method: "GET",
+      });
+      if (!mounted) return;
+      if (error || !data) {
+        setConfigError("Não foi possível carregar as credenciais da Meta.");
+        return;
+      }
+      if (!data.configured) {
+        setConfigError("O app da Meta ainda não está configurado (App ID / Configuration ID ausentes).");
+        return;
+      }
+      setConfig(data);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // 2) Carrega o SDK apenas quando já temos o App ID correto
+  useEffect(() => {
+    if (!config?.app_id) return;
+    let mounted = true;
+    loadFbSdk(config.app_id, config.graph_version).then((ok) => {
       if (!mounted) return;
       setReady(ok);
       setSdkFailed(!ok);
     });
+    return () => {
+      mounted = false;
+    };
+  }, [config?.app_id, config?.graph_version]);
 
-    // Listener das mensagens do popup Meta (retorna WABA/phone selecionados)
+  // 3) Escuta as mensagens do popup da Meta (WABA / número escolhidos)
+  useEffect(() => {
     const onMessage = (event: MessageEvent) => {
-      if (!/(^|\.)facebook\.com$/.test(new URL(event.origin || "https://x.invalid").hostname)) return;
+      let host = "";
+      try {
+        host = new URL(event.origin).hostname;
+      } catch {
+        return;
+      }
+      if (!/(^|\.)facebook\.com$/.test(host)) return;
       try {
         const raw = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
         if (raw?.type !== "WA_EMBEDDED_SIGNUP") return;
-        if (raw?.data) (window as any).__metaEsPayload = raw.data;
-      } catch { /* ignore */ }
+        if (raw?.data?.phone_number_id || raw?.data?.waba_id) {
+          esPayload.current = {
+            phone_number_id: raw.data.phone_number_id,
+            waba_id: raw.data.waba_id,
+          };
+        }
+        // Usuário cancelou / fechou o fluxo: libera o botão imediatamente
+        if (raw?.event === "CANCEL" || raw?.data?.event === "CANCEL") {
+          if (safetyRef.current) window.clearTimeout(safetyRef.current);
+          setRunning(false);
+          toast.error("Conexão cancelada na janela da Meta.");
+        }
+      } catch {
+        /* ignore */
+      }
     };
     window.addEventListener("message", onMessage);
-    return () => {
-      mounted = false;
-      window.removeEventListener("message", onMessage);
-    };
+    return () => window.removeEventListener("message", onMessage);
   }, []);
 
-  const start = async () => {
+  const start = () => {
     if (!companyId) return toast.error("Selecione uma empresa primeiro");
     if (inIframe) {
-      toast.error("Abra esta página em uma nova aba", {
-        description: "O login do Facebook não funciona dentro do preview. Vamos abrir em nova aba.",
+      toast.info("Abrindo em uma nova aba", {
+        description: "O login do Facebook não funciona dentro do preview.",
       });
       window.open(window.location.href, "_blank", "noopener");
       return;
+    }
+    if (configError || !config?.config_id) {
+      return toast.error("Credenciais da Meta indisponíveis", {
+        description: configError ?? "Tente recarregar a página.",
+      });
     }
     if (!window.FB) {
       return toast.error("SDK do Facebook não carregou", {
@@ -115,14 +165,20 @@ export default function MetaEmbeddedSignupButton({ companyId, onConnected }: Pro
     }
 
     setRunning(true);
-    (window as any).__metaEsPayload = null;
+    esPayload.current = null;
 
-    // Se o popup for bloqueado, o callback nunca é chamado — liberamos o botão
-    const safety = window.setTimeout(() => setRunning(false), 120000);
+    // Se o popup for bloqueado, o callback nunca é chamado — libera o botão em 45s
+    if (safetyRef.current) window.clearTimeout(safetyRef.current);
+    safetyRef.current = window.setTimeout(() => {
+      setRunning(false);
+      toast.error("A janela da Meta não respondeu", {
+        description: "Verifique se o navegador bloqueou o pop-up e tente novamente.",
+      });
+    }, 45000);
 
     window.FB.login(
       async (response: any) => {
-        window.clearTimeout(safety);
+        if (safetyRef.current) window.clearTimeout(safetyRef.current);
         try {
           const code = response?.authResponse?.code;
           if (!code) {
@@ -130,7 +186,7 @@ export default function MetaEmbeddedSignupButton({ companyId, onConnected }: Pro
               description: "A janela do Facebook foi fechada ou bloqueada pelo navegador.",
             });
           }
-          const es = (window as any).__metaEsPayload || {};
+          const es = esPayload.current || {};
           const { data, error } = await supabase.functions.invoke(
             "meta-embedded-signup-exchange",
             {
@@ -152,11 +208,11 @@ export default function MetaEmbeddedSignupButton({ companyId, onConnected }: Pro
           }
         } finally {
           setRunning(false);
-          (window as any).__metaEsPayload = null;
+          esPayload.current = null;
         }
       },
       {
-        config_id: ES_CONFIG_ID,
+        config_id: config.config_id,
         response_type: "code",
         override_default_response_type: true,
         extras: { setup: {}, featureType: "whatsapp_business_app_onboarding", sessionInfoVersion: 3 },
@@ -173,7 +229,7 @@ export default function MetaEmbeddedSignupButton({ companyId, onConnected }: Pro
         size="lg"
       >
         {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
-        Conectar WhatsApp Oficial (Meta)
+        {running ? "Aguardando a janela da Meta..." : "Conectar WhatsApp Oficial (Meta)"}
       </Button>
 
       {inIframe && (
@@ -182,13 +238,14 @@ export default function MetaEmbeddedSignupButton({ companyId, onConnected }: Pro
           continue na nova aba.
         </p>
       )}
+      {configError && <p className="text-xs text-destructive">{configError}</p>}
       {sdkFailed && !inIframe && (
         <p className="text-xs text-destructive">
           Não conseguimos carregar o SDK do Facebook. Desative bloqueadores (AdBlock/uBlock) ou tente
           em outro navegador.
         </p>
       )}
-      {!ready && !sdkFailed && (
+      {!ready && !sdkFailed && !configError && (
         <p className="text-xs text-muted-foreground">Carregando o login do Facebook...</p>
       )}
 
@@ -203,4 +260,3 @@ export default function MetaEmbeddedSignupButton({ companyId, onConnected }: Pro
     </div>
   );
 }
-
