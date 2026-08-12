@@ -33,6 +33,7 @@ const InternalStaff = lazy(() => import("./pages/InternalStaff"));
 const AccessManagement = lazy(() => import("./pages/AccessManagement"));
 const TrackingLinks = lazy(() => import("./pages/TrackingLinks"));
 const ConnectWhatsApp = lazy(() => import("@/pages/ConnectWhatsApp"));
+const OAuthConsent = lazy(() => import("@/pages/OAuthConsent"));
 const ConectarWhatsapp = lazy(() => import("@/pages/ConectarWhatsapp"));
 const Agenda = lazy(() => import("./pages/Agenda"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -107,6 +108,7 @@ const App = () => (
                   <Route path="/blog/sdr-humano-vs-ia-escritorio-advocacia" element={<PostSdrHumanoVsIa />} />
                   <Route path="/blog/lgpd-escritorios-advocacia-atendimento" element={<PostLgpdEscritorios />} />
                   <Route path="/connect/:token" element={<ConnectWhatsApp />} />
+                  <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="/sobre" element={<About />} />
