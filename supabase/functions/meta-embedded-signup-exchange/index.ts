@@ -22,7 +22,7 @@ serve(async (req) => {
   if (req.method !== "POST") return j(405, { error: "method not allowed" });
 
   try {
-    const { code, company_id, phone_number_id, waba_id } = await req.json();
+    const { code, company_id, phone_number_id, waba_id, redirect_uri } = await req.json();
     if (!code || !company_id) return j(400, { error: "code and company_id required" });
 
     const authz = req.headers.get("Authorization");

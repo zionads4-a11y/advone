@@ -50,6 +50,7 @@ const PricingInternal = lazy(() => import("./pages/PricingInternal"));
 const FraudAlerts = lazy(() => import("./pages/FraudAlerts"));
 const AiUsageMonitor = lazy(() => import("./pages/AiUsageMonitor"));
 const MetaCloudSetup = lazy(() => import("./pages/MetaCloudSetup"));
+const MetaOAuthCallback = lazy(() => import("./pages/MetaOAuthCallback"));
 const LegalAI = lazy(() => import("./pages/LegalAI"));
 const Jurisprudencia = lazy(() => import("./pages/Jurisprudencia"));
 const Calculadoras = lazy(() => import("./pages/Calculadoras"));
@@ -108,6 +109,7 @@ const App = () => (
                   <Route path="/blog/sdr-humano-vs-ia-escritorio-advocacia" element={<PostSdrHumanoVsIa />} />
                   <Route path="/blog/lgpd-escritorios-advocacia-atendimento" element={<PostLgpdEscritorios />} />
                   <Route path="/connect/:token" element={<ConnectWhatsApp />} />
+                  <Route path="/meta-oauth-callback" element={<MetaOAuthCallback />} />
                   <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/privacy" element={<Privacy />} />
