@@ -8,7 +8,7 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const META_APP_ID = Deno.env.get("META_APP_ID")!;
 const META_APP_SECRET = Deno.env.get("META_APP_SECRET")!;
-const META_V = "v21.0";
+const META_V = "v23.0";
 
 function j(status: number, body: unknown) {
   return new Response(JSON.stringify(body), {
