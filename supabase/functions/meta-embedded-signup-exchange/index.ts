@@ -115,6 +115,8 @@ serve(async (req) => {
     return j(200, {
       ok: true,
       verify_token: verifyToken,
+      waba_id: wabaId,
+      phone_number_id: phoneId,
       subscribe: subscribeResult,
       webhook_url: `${SUPABASE_URL}/functions/v1/meta-webhook?company_id=${company_id}`,
     });
