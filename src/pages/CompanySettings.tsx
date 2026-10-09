@@ -18,6 +18,7 @@ import { MeetingRemindersConfigCard } from "@/components/companies/MeetingRemind
 import { BotConfigCard } from "@/components/companies/BotConfigCard";
 import { LawyerContractDataCard } from "@/components/companies/LawyerContractDataCard";
 import { AdvboxConfigCard } from "@/components/companies/AdvboxConfigCard";
+import { CompanyMonitoringCard } from "@/components/companies/CompanyMonitoringCard";
 
 
 interface Company {
@@ -265,7 +266,8 @@ export default function CompanySettings() {
       {/* ADVBOX Integration */}
       <AdvboxConfigCard companyId={company.id} />
 
-
+      {/* Monitoramento do Projeto */}
+      <CompanyMonitoringCard companyId={company.id} />
 
     </div>
   );
