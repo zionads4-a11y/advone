@@ -98,10 +98,11 @@ async function handler(req: Request): Promise<Response> {
       undefined;
 
     async function runFirecrawl(q: string) {
-      const res = await fetch("https://api.firecrawl.dev/v2/search", {
+      const res = await fetch("https://connector-gateway.lovable.dev/firecrawl/v2/search", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "X-Connection-Api-Key": `${FIRECRAWL_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
